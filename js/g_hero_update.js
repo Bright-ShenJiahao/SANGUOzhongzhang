@@ -15,6 +15,7 @@ function heroUpdate(dt) {
   let ix = (key.KeyD || key.ArrowRight ? 1 : 0) - (key.KeyA || key.ArrowLeft ? 1 : 0), iy = (key.KeyS || key.ArrowDown ? 1 : 0) - (key.KeyW || key.ArrowUp ? 1 : 0);
   if (joy) { ix = Math.abs(joy.dx) > .2 ? joy.dx : 0; iy = Math.abs(joy.dy) > .2 ? joy.dy : 0; }
   const l = Math.hypot(ix, iy); if (l > 1) { ix /= l; iy /= l; }
+  if (window.SURV && SURV.rooted() && !pressRoll) { ix = 0; iy = 0; }   // 三国终章：出招后摇站定
   h.ix = ix; h.iy = iy;   // 记下方向输入：跑动中扔石子会偏
   if (h.st === 'hurt') { if (h.t > .3) set(h, 'idle'); moveEnt(h, h.vx * dt, 0); h.vx *= .85; pressAtk = pressRoll = false; return; }
   // 按住攻击键 0.4 秒 → 进入蓄力（连招暂停接续）
@@ -27,6 +28,7 @@ function heroUpdate(dt) {
     set(h, 'roll'); h.inv = IS_TOUCH ? .45 : .4; h.rollCd = .75; h.atk = null; h.q = 0; h.rollId = (h.rollId || 0) + 1;
     if (!(charging && window.ROGUE && ROGUE.has('藏势'))) cancelCharge();   // 藏势：蓄力中翻滚，进度保留
     if (window.ROGUE && ROGUE.onRoll) ROGUE.onRoll(h.x, h.y);
+    if (window.SURV) SURV.onRoll();
     const d = Math.hypot(ix, iy) > 0.1 ? [ix, iy] : [h.f, 0]; const dl = Math.hypot(...d); h.rx = d[0] / dl; h.ry = d[1] / dl;
     if (Math.abs(h.rx) > .1) h.f = Math.sign(h.rx);
   }

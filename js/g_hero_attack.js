@@ -2,6 +2,7 @@
 // 依赖 game.js 的全局变量，只在运行时调用；本文件加载时不访问 game.js 的变量。
 function atkPress() {
   if (over) return;   // 结算界面由 resultKey 处理（J 确定当前选中的按钮）
+  if (window.SURV) return;   // 三国终章：没有普攻
   if (atkHeldSince) return;
   atkHeldSince = performance.now(); charging = false; chargeTier = 0; chargeTierFlash = 0;
 }

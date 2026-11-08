@@ -224,7 +224,6 @@ function reset() {
   ui();
   if (window.ROGUE) ROGUE.reset();
   if (window.ARTIFACT) ARTIFACT.startRun();
-  if (window.AUTOSKILL) AUTOSKILL.startRun();   // 自动招式 DEMO（&auto）
   if (window.SUPPLY) SUPPLY.reset();
   if (window.MERIDIAN) MERIDIAN.startRun();   // 经脉：不屈每局一次
   if (window.GOODS) GOODS.reset();   // 商店带进来的消耗品：开打第一帧才扣
@@ -251,6 +250,7 @@ function reset() {
     { text: '蓄力：按住攻击 0.4 秒开始，最多 2 秒 | 受击会打断，松开释放', time: 4 },
   ];   // 提示对所有人显示（简单模式只降低玩家受伤，不影响提示）
   say('这……是我刚才玩的那个游戏？村子被黄巾贼烧了！ | 往右走 →', 4);
+  if (window.SURV) { tutorialQueue = []; SURV.startRun(); }   // 三国终章：自动出招 + 20 波（要在主角、道具都建好之后）
 }
 function say(s, t = 3) { msg = s; msgT = t; }
 function noviceMode() { if (window.XIAOCHANG && XIAOCHANG.active()) return false; return !(window.TITLE && TITLE.noviceMode) || TITLE.noviceMode(); }   // 默认（简单）= 玩家受伤减半，击倒判定仍按减半前伤害
@@ -556,6 +556,7 @@ function drawVillager(v) {
   drawChar(v.ch, frame, v.x, v.y, v.f < 0, 1, v.flash > 0, v.sc);
 }
 function waves(dt = 0) {
+  if (window.SURV && !chapter2Run && !(window.XIAOCHANG && XIAOCHANG.active())) { SURV.waveFlow(dt); return; }   // 三国终章：限时波次代替原来的区域推进
   if (window.XIAOCHANG && XIAOCHANG.active()) { XIAOCHANG.update(dt); return; }
   if (chapter2Run) { chapter2Waves(); return; }
   const vw = viewW();
@@ -649,7 +650,7 @@ function update(dt) {
   if (window.ROGUE && ROGUE.blocks()) { ROGUE.update(dt); return; }   // 选锦囊时冻结战斗
   if (window.ROGUE && ROGUE.tick && !over && !won) ROGUE.tick(dt);
   if (window.ARTIFACT && !over && !won) ARTIFACT.tick(dt);
-  if (window.AUTOSKILL && !over && !won && !(freeze > 0)) AUTOSKILL.tick(dt);
+  if (window.SURV && !over && !won && !(freeze > 0)) SURV.tick(dt);
   if (window.SUPPLY && !over && !won) SUPPLY.tick(dt);
   if (window.MERIDIAN && !over && !won) MERIDIAN.tick();   // 经脉·回气
   if (window.GOODS && !over && !won) GOODS.tick();
@@ -766,6 +767,7 @@ function drawChar(name, f, x, y, flip, alpha = 1, white = false, sc = 1, dark = 
   ctx.restore();
 }
 function heroFrame(h) {
+  if (window.SURV) { const p = SURV.pose(h); if (p) return p; }
   const frameWeapon = weapon === 'halberd' ? 'halberd' : weapon;
   if (h.st === 'atk') { const C = h.atk && WEAP[weapon].combo[h.atk.c]; if (C && C.f[h.atk.fi]) return C.f[h.atk.fi]; }   // 出招数据对不上（如中途换武器）时不再报错
   if (h.st === 'roll') return Math.floor(h.t * 15) % 2 ? 'roll2' : 'roll1';
@@ -1008,7 +1010,7 @@ function draw() {
   if (window.CH2B && ch2Troops()) CH2B.draw();
   if (window.ROGUE && ROGUE.drawWorld) ROGUE.drawWorld();
   if (window.ARTIFACT) ARTIFACT.drawWorld();
-  if (window.AUTOSKILL) AUTOSKILL.drawWorld();
+  if (window.SURV) SURV.drawWorld();
   if (window.SUPPLY) SUPPLY.drawWorld();
   if (window.BOWAMMO) BOWAMMO.draw();
   // 按 y 排序绘制
@@ -1086,7 +1088,7 @@ function draw() {
     ctx.fillText(tstr, HW / 2, by2 + 14);
     ctx.restore();
   }
-  if (lockR < Infinity) { const n = zs.filter(z => !z.dead).length; ctx.fillStyle = 'rgba(200,40,30,.85)'; ctx.fillRect(14, 110, 200, 22); ctx.fillStyle = '#fff'; ctx.fillText(`本区域剩余敌人：${n}`, 20, 126); }
+  if (lockR < Infinity && !window.SURV) { const n = zs.filter(z => !z.dead).length; ctx.fillStyle = 'rgba(200,40,30,.85)'; ctx.fillRect(14, 110, 200, 22); ctx.fillStyle = '#fff'; ctx.fillText(`本区域剩余敌人：${n}`, 20, 126); }
   if (!over && lockR === Infinity && gateI > 0 && gateI < M.gates.length && Math.floor(performance.now() / 500) % 2 === 0) {
     ctx.save(); ctx.font = 'bold 46px sans-serif'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round'; ctx.lineWidth = 6; ctx.strokeStyle = '#34231b'; ctx.fillStyle = '#ffd23f';
     ctx.strokeText('GO →', HW - 28, HH / 2); ctx.fillText('GO →', HW - 28, HH / 2); ctx.restore();
@@ -1099,7 +1101,7 @@ function draw() {
   }
   if (window.SUPPLY && !result) SUPPLY.hud(14, 140);   // 补给效果倒计时
   drawCombo(HW);
-  if (window.AUTOSKILL && !result) AUTOSKILL.hud(HW);
+  if (window.SURV && !result) SURV.hud(HW);
   if (msgT > 0) {
     const lines = String(msg).split('|'); ctx.font = 'bold 18px sans-serif'; ctx.textAlign = 'center';
     const tw = Math.max(...lines.map(line => ctx.measureText(line).width)), bh = lines.length * 23 + 10, by = 108 - (bh - 32) / 2;
