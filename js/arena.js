@@ -6,7 +6,7 @@
   const Z = /[?&]bg=arena2(?:&|$)/.test(location.search) ? 1.25 : 1;   // arena2：场地比屏幕大 25%，镜头跟着人物轻微移动（像群侠传）
   let camTop = 0;
   const AX = 1000;                                   // 场地中心的世界 x
-  const FL = { x0: .115, x1: .885, y0: .19, y1: .86 };   // 地面（围墙里面）占图的比例范围
+  const FL = { x0: .105, x1: .885, y0: .18, y1: .86 };   // 地面（围墙里面）占图的比例范围
   let active = false;
   const img = () => (typeof IMG !== 'undefined' ? IMG.arena : null);
   const ready = () => { const i = img(); return !!(i && i.complete && i.width); };
