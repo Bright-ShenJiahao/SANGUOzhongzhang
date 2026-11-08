@@ -63,7 +63,7 @@ body.szz-pro #help{display:none}
 .x-back{min-height:34px!important}
 }
 #rot small{display:block;margin-top:10px;font-size:14px;font-weight:600;color:#c9b691;line-height:1.6}
-</style><link rel="preload" href="pack/fonts/result.woff2?v=e8bf4c5d05" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=e8bf4c5d05)format("woff2");font-display:swap}</style></head><body>
+</style><link rel="preload" href="pack/fonts/result.woff2?v=5b9fd2c1d0" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=5b9fd2c1d0)format("woff2");font-display:swap}</style></head><body>
 <div id="bootSplash" style="position:fixed;inset:0;z-index:99999;background:#1a1020;color:#f1d59a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;font:18px system-ui,sans-serif;text-align:center;padding:24px">
 <strong id="bootText">正在加载…</strong><button id="bootRefresh" hidden onclick="location.reload()" style="font:16px system-ui,sans-serif;padding:12px;color:#ffe0a0;background:#583b28;border:1px solid #ba9158;border-radius:6px">网络较慢，点此刷新</button><small id="bootError" style="overflow-wrap:anywhere;max-width:90vw"></small></div>
 <script>
@@ -77,7 +77,7 @@ if(location.protocol==='https:'&&!/[?&]debug(?:=|&|$)/.test(location.search)&&'s
 })();
 // 自动更新：打开游戏、或从后台切回来时，查一下线上有没有新版本；有就在标题/整备页自动刷新（战斗中不打扰）
 (function(){
-var BUILD='9eec8ffaa17f',busy=false;
+var BUILD='8f5a3867f313',busy=false;
 if(location.protocol!=='https:'||/[?&]debug(?:=|&|$)/.test(location.search))return;
 function check(){
   if(busy)return;
@@ -208,7 +208,9 @@ document.addEventListener('visibilitychange',function(){if(!document.hidden)chec
 // 一张固定的俯视场地图，镜头不动，人物和敌人只能在围墙里面那块地面上走；敌人从四周（左右 + 上方城门 + 下方台阶）涌进来。
 // 场地图在世界里放在 AX 附近，地面范围用图内比例 FL 量出来；改图后只需要改 FL。
 (() => {
-  const ON_URL = /[?&]bg=arena(?:&|$)/.test(location.search);
+  const ON_URL = /[?&]bg=arena2?(?:&|$)/.test(location.search);
+  const Z = /[?&]bg=arena2(?:&|$)/.test(location.search) ? 1.25 : 1;   // arena2：场地比屏幕大 25%，镜头跟着人物轻微移动（像群侠传）
+  let camTop = 0;
   const AX = 1000;                                   // 场地中心的世界 x
   const FL = { x0: .115, x1: .885, y0: .19, y1: .86 };   // 地面（围墙里面）占图的比例范围
   let active = false;
@@ -216,14 +218,14 @@ document.addEventListener('visibilitychange',function(){if(!document.hidden)chec
   const ready = () => { const i = img(); return !!(i && i.complete && i.width); };
   function geo() {
     const vw = viewW(), i = img();
-    const s = Math.max(vw / i.width, M.viewH / i.height), w = i.width * s, h = i.height * s;
-    const ox = AX - w / 2, oy = (M.viewH - h) / 2;
+    const s = Math.max(vw / i.width, M.viewH / i.height) * Z, w = i.width * s, h = i.height * s;
+    const ox = AX - w / 2, oy = M.viewH / 2 - h / 2;
     return { vw, s, w, h, ox, oy, L: ox + FL.x0 * w, R: ox + FL.x1 * w, T: oy + FL.y0 * h, B: oy + FL.y1 * h };
   }
   function apply() {
     if (!ready()) return null;
     const g = geo();
-    M.top = Math.max(0, g.T); M.bot = Math.min(M.viewH, g.B);
+    if (Z === 1) { M.top = Math.max(0, g.T); M.bot = Math.min(M.viewH, g.B); } else { M.top = g.T; M.bot = g.B; }
     arenaL = g.L - 12; lockR = g.R + 12;
     return g;
   }
@@ -235,11 +237,22 @@ document.addEventListener('visibilitychange',function(){if(!document.hidden)chec
       active = true;
       const g = apply(); if (!g) return;
       props.length = 0;                               // 场地里不放草垛推车，地面保持干净
-      hero.x = AX; hero.y = (M.top + M.bot) / 2; cam.x = AX - g.vw / 2;
+      hero.x = AX; hero.y = (M.top + M.bot) / 2; this.cam(true);
     },
     stop() { active = false; },
     tick() { if (!this.on()) return; apply(); this.clamp(hero); for (const z of zs) this.clamp(z); },
-    cam() { if (this.on()) cam.x = AX - viewW() / 2; },
+    camY: () => camTop,
+    cam(snap) {   // 镜头：Z=1 固定居中；Z>1 跟随人物，被限制在场地图范围内
+      if (!this.on()) return;
+      const g = geo(), vw = g.vw;
+      let tx = AX - vw / 2, ty = 0;
+      if (Z > 1) {
+        tx = Math.max(g.ox, Math.min(g.ox + g.w - vw, hero.x - vw / 2));
+        ty = Math.max(g.oy, Math.min(g.oy + g.h - M.viewH, hero.y - M.viewH / 2));
+      }
+      const k = snap ? 1 : .1;
+      cam.x += (tx - cam.x) * k; camTop += (ty - camTop) * k;
+    },
     clamp(e) {   // 所有人物都只能待在围墙里面
       if (!this.on()) return;
       const g = geo(), m = e === hero ? 10 : 8;
@@ -2103,7 +2116,7 @@ const Boss = (() => {
   function fxImg(name, x, y, ang, sx, sy, alpha, anchor) {
     const fr = typeof CH !== 'undefined' && CH.zhang_bao && CH.zhang_bao[name]; if (!fr || !fr.img.complete) return;
     const sp = Math.max(.5, SC * PX), w = fr.w * sp, hh = fr.h * sp;
-    ctx.save(); ctx.setTransform(1, 0, 0, 1, Math.round(x * SC + OXs), Math.round(y * SC)); ctx.rotate(ang); ctx.scale(sx, sy); ctx.globalAlpha = alpha;
+    ctx.save(); ctx.setTransform(1, 0, 0, 1, Math.round(x * SC + OXs), Math.round(y * SC + OYs)); ctx.rotate(ang); ctx.scale(sx, sy); ctx.globalAlpha = alpha;
     ctx.drawImage(fr.img, anchor === 'left' ? 0 : anchor === 'center' ? -w / 2 : -w, anchor === 'bottom' ? -hh : -hh / 2, w, hh); ctx.restore();
   }
   function tickFx(dt) {
@@ -12876,7 +12889,7 @@ load('far', BG.far); load('mid', BG.mid); load('gnd', BG.gnd);
 // 第一章水墨背景（远景 1 + 近景 1，和第二章同一套两层画法）；网址带 ?bg=old 可切回旧背景对比
 window.INK_BG = !!(BG.inkFar && BG.inkNear) && !/[?&]bg=old(?:&|$)/.test(location.search);
 if (BG.inkFar && BG.inkNear) { load('inkfar', BG.inkFar); load('inknear', BG.inkNear); }
-if (BG.arena && /[?&]bg=arena(?:&|$)/.test(location.search)) load('arena', BG.arena);   // 俯视竞技场（js/arena.js，试玩对比）
+if (BG.arena && /[?&]bg=arena2?(?:&|$)/.test(location.search)) load('arena', BG.arena);   // 俯视竞技场（js/arena.js，试玩对比）
 Object.entries(ASSETS.props).forEach(([k, v]) => load('p_' + k, v[0]));
 Object.entries(ASSETS.food || {}).forEach(([k, v]) => load('food_' + k, v[0]));
 
@@ -13569,7 +13582,7 @@ function update(dt) {
 }
 
 // ---------- 绘制 ----------
-let SC = 3, OXs = 0;
+let SC = 3, OXs = 0, OYs = 0;
 function tileLayer(img, s, par, y) {
   if (!img.complete || !img.width) return;
   const tw = img.width * s, th = img.height * s, vw = viewW(), ox = cam.x * (1 - par);
@@ -13601,7 +13614,7 @@ function drawChar(name, f, x, y, flip, alpha = 1, white = false, sc = 1, dark = 
   if (fr.img.complete && !fr.img.naturalWidth) { retryImg(fr.img); if (name !== 'hero') return; const alt = Object.values(CH.hero).find(o => o.img.complete && o.img.naturalWidth); if (!alt) return; fr = alt; }
   if (!fr.img.complete) return;
   const sp = Math.max(.5, SC * PX) * sc;
-  const sx = Math.round(x * SC + OXs), sy = Math.round(y * SC);
+  const sx = Math.round(x * SC + OXs), sy = Math.round(y * SC + OYs);
   ctx.save(); ctx.setTransform(1, 0, 0, 1, sx, sy); if (flip) ctx.scale(-1, 1);
   ctx.globalAlpha = alpha;
   const im = white && fr.white ? fr.white : (dark && fr.dark ? fr.dark : fr.img);
@@ -13667,7 +13680,8 @@ function draw() {
   const W = cv.width, H = cv.height; SC = H / M.viewH;
   const sk = shake > 0 ? rnd(-2, 2) : 0;
   OXs = Math.round(-cam.x * SC + sk);
-  ctx.setTransform(SC, 0, 0, SC, OXs, 0); ctx.imageSmoothingEnabled = true;
+  OYs = window.ARENA ? Math.round(-ARENA.camY() * SC) : 0;
+  ctx.setTransform(SC, 0, 0, SC, OXs, OYs); ctx.imageSmoothingEnabled = true;
   const vw = viewW(), ms = .24 / .61, my = 165 - 619 * .24;
   if (window.XIAOCHANG && XIAOCHANG.active()) {
     XIAOCHANG.drawBackground();
@@ -14000,7 +14014,7 @@ function toast(m) { toastMsg = m; toastT = 2.4; }
 function drawCombo(HW) {   // 屏幕坐标绘制（在 HUD 里调用）
   const scale = SC / DPR;
   const x = (hero.x - cam.x) * scale;
-  const headY = (hero.y - 37) * scale;
+  const headY = (hero.y - 37 - (window.ARENA ? ARENA.camY() : 0)) * scale;
   const visible = comboNotices.filter(n => gameT - n.born < .72);
   comboNotices = visible;
   if (!visible.length) return;

@@ -2,7 +2,9 @@
 // 一张固定的俯视场地图，镜头不动，人物和敌人只能在围墙里面那块地面上走；敌人从四周（左右 + 上方城门 + 下方台阶）涌进来。
 // 场地图在世界里放在 AX 附近，地面范围用图内比例 FL 量出来；改图后只需要改 FL。
 (() => {
-  const ON_URL = /[?&]bg=arena(?:&|$)/.test(location.search);
+  const ON_URL = /[?&]bg=arena2?(?:&|$)/.test(location.search);
+  const Z = /[?&]bg=arena2(?:&|$)/.test(location.search) ? 1.25 : 1;   // arena2：场地比屏幕大 25%，镜头跟着人物轻微移动（像群侠传）
+  let camTop = 0;
   const AX = 1000;                                   // 场地中心的世界 x
   const FL = { x0: .115, x1: .885, y0: .19, y1: .86 };   // 地面（围墙里面）占图的比例范围
   let active = false;
@@ -10,14 +12,14 @@
   const ready = () => { const i = img(); return !!(i && i.complete && i.width); };
   function geo() {
     const vw = viewW(), i = img();
-    const s = Math.max(vw / i.width, M.viewH / i.height), w = i.width * s, h = i.height * s;
-    const ox = AX - w / 2, oy = (M.viewH - h) / 2;
+    const s = Math.max(vw / i.width, M.viewH / i.height) * Z, w = i.width * s, h = i.height * s;
+    const ox = AX - w / 2, oy = M.viewH / 2 - h / 2;
     return { vw, s, w, h, ox, oy, L: ox + FL.x0 * w, R: ox + FL.x1 * w, T: oy + FL.y0 * h, B: oy + FL.y1 * h };
   }
   function apply() {
     if (!ready()) return null;
     const g = geo();
-    M.top = Math.max(0, g.T); M.bot = Math.min(M.viewH, g.B);
+    if (Z === 1) { M.top = Math.max(0, g.T); M.bot = Math.min(M.viewH, g.B); } else { M.top = g.T; M.bot = g.B; }
     arenaL = g.L - 12; lockR = g.R + 12;
     return g;
   }
@@ -29,11 +31,22 @@
       active = true;
       const g = apply(); if (!g) return;
       props.length = 0;                               // 场地里不放草垛推车，地面保持干净
-      hero.x = AX; hero.y = (M.top + M.bot) / 2; cam.x = AX - g.vw / 2;
+      hero.x = AX; hero.y = (M.top + M.bot) / 2; this.cam(true);
     },
     stop() { active = false; },
     tick() { if (!this.on()) return; apply(); this.clamp(hero); for (const z of zs) this.clamp(z); },
-    cam() { if (this.on()) cam.x = AX - viewW() / 2; },
+    camY: () => camTop,
+    cam(snap) {   // 镜头：Z=1 固定居中；Z>1 跟随人物，被限制在场地图范围内
+      if (!this.on()) return;
+      const g = geo(), vw = g.vw;
+      let tx = AX - vw / 2, ty = 0;
+      if (Z > 1) {
+        tx = Math.max(g.ox, Math.min(g.ox + g.w - vw, hero.x - vw / 2));
+        ty = Math.max(g.oy, Math.min(g.oy + g.h - M.viewH, hero.y - M.viewH / 2));
+      }
+      const k = snap ? 1 : .1;
+      cam.x += (tx - cam.x) * k; camTop += (ty - camTop) * k;
+    },
     clamp(e) {   // 所有人物都只能待在围墙里面
       if (!this.on()) return;
       const g = geo(), m = e === hero ? 10 : 8;

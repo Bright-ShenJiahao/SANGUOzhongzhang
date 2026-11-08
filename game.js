@@ -37,7 +37,7 @@ load('far', BG.far); load('mid', BG.mid); load('gnd', BG.gnd);
 // 第一章水墨背景（远景 1 + 近景 1，和第二章同一套两层画法）；网址带 ?bg=old 可切回旧背景对比
 window.INK_BG = !!(BG.inkFar && BG.inkNear) && !/[?&]bg=old(?:&|$)/.test(location.search);
 if (BG.inkFar && BG.inkNear) { load('inkfar', BG.inkFar); load('inknear', BG.inkNear); }
-if (BG.arena && /[?&]bg=arena(?:&|$)/.test(location.search)) load('arena', BG.arena);   // 俯视竞技场（js/arena.js，试玩对比）
+if (BG.arena && /[?&]bg=arena2?(?:&|$)/.test(location.search)) load('arena', BG.arena);   // 俯视竞技场（js/arena.js，试玩对比）
 Object.entries(ASSETS.props).forEach(([k, v]) => load('p_' + k, v[0]));
 Object.entries(ASSETS.food || {}).forEach(([k, v]) => load('food_' + k, v[0]));
 
@@ -730,7 +730,7 @@ function update(dt) {
 }
 
 // ---------- 绘制 ----------
-let SC = 3, OXs = 0;
+let SC = 3, OXs = 0, OYs = 0;
 function tileLayer(img, s, par, y) {
   if (!img.complete || !img.width) return;
   const tw = img.width * s, th = img.height * s, vw = viewW(), ox = cam.x * (1 - par);
@@ -762,7 +762,7 @@ function drawChar(name, f, x, y, flip, alpha = 1, white = false, sc = 1, dark = 
   if (fr.img.complete && !fr.img.naturalWidth) { retryImg(fr.img); if (name !== 'hero') return; const alt = Object.values(CH.hero).find(o => o.img.complete && o.img.naturalWidth); if (!alt) return; fr = alt; }
   if (!fr.img.complete) return;
   const sp = Math.max(.5, SC * PX) * sc;
-  const sx = Math.round(x * SC + OXs), sy = Math.round(y * SC);
+  const sx = Math.round(x * SC + OXs), sy = Math.round(y * SC + OYs);
   ctx.save(); ctx.setTransform(1, 0, 0, 1, sx, sy); if (flip) ctx.scale(-1, 1);
   ctx.globalAlpha = alpha;
   const im = white && fr.white ? fr.white : (dark && fr.dark ? fr.dark : fr.img);
@@ -828,7 +828,8 @@ function draw() {
   const W = cv.width, H = cv.height; SC = H / M.viewH;
   const sk = shake > 0 ? rnd(-2, 2) : 0;
   OXs = Math.round(-cam.x * SC + sk);
-  ctx.setTransform(SC, 0, 0, SC, OXs, 0); ctx.imageSmoothingEnabled = true;
+  OYs = window.ARENA ? Math.round(-ARENA.camY() * SC) : 0;
+  ctx.setTransform(SC, 0, 0, SC, OXs, OYs); ctx.imageSmoothingEnabled = true;
   const vw = viewW(), ms = .24 / .61, my = 165 - 619 * .24;
   if (window.XIAOCHANG && XIAOCHANG.active()) {
     XIAOCHANG.drawBackground();
@@ -1161,7 +1162,7 @@ function toast(m) { toastMsg = m; toastT = 2.4; }
 function drawCombo(HW) {   // 屏幕坐标绘制（在 HUD 里调用）
   const scale = SC / DPR;
   const x = (hero.x - cam.x) * scale;
-  const headY = (hero.y - 37) * scale;
+  const headY = (hero.y - 37 - (window.ARENA ? ARENA.camY() : 0)) * scale;
   const visible = comboNotices.filter(n => gameT - n.born < .72);
   comboNotices = visible;
   if (!visible.length) return;

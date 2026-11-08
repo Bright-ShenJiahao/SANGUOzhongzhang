@@ -201,7 +201,7 @@
   function fxImg(name, x, y, ang, sx, sy, alpha, anchor) {
     const fr = typeof CH !== 'undefined' && CH.zhang_bao && CH.zhang_bao[name]; if (!fr || !fr.img.complete) return;
     const sp = Math.max(.5, SC * PX), w = fr.w * sp, hh = fr.h * sp;
-    ctx.save(); ctx.setTransform(1, 0, 0, 1, Math.round(x * SC + OXs), Math.round(y * SC)); ctx.rotate(ang); ctx.scale(sx, sy); ctx.globalAlpha = alpha;
+    ctx.save(); ctx.setTransform(1, 0, 0, 1, Math.round(x * SC + OXs), Math.round(y * SC + OYs)); ctx.rotate(ang); ctx.scale(sx, sy); ctx.globalAlpha = alpha;
     ctx.drawImage(fr.img, anchor === 'left' ? 0 : anchor === 'center' ? -w / 2 : -w, anchor === 'bottom' ? -hh : -hh / 2, w, hh); ctx.restore();
   }
   function tickFx(dt) {
