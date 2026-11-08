@@ -5,6 +5,9 @@
   const ON_URL = /[?&]bg=arena2?(?:&|$)/.test(location.search);
   const Z = /[?&]bg=arena2(?:&|$)/.test(location.search) ? 1.25 : 1;   // arena2：场地比屏幕大 25%，镜头跟着人物轻微移动（像群侠传）
   let camTop = 0;
+  const HAZE = /[?&]look=haze(?:&|$)/.test(location.search);   // 群侠传式氛围：薄雾 + 降饱和 + 暗角 + 飘尘 + 软阴影
+  const DUST = Array.from({ length: 46 }, () => ({ x: Math.random(), y: Math.random(), r: .6 + Math.random() * 1.8, vx: .004 + Math.random() * .012, vy: (Math.random() - .5) * .004, a: .08 + Math.random() * .16 }));
+  let dustT = 0;
   const AX = 1000;                                   // 场地中心的世界 x
   const FL = { x0: .105, x1: .885, y0: .18, y1: .86 };   // 地面（围墙里面）占图的比例范围
   let active = false;
@@ -58,6 +61,28 @@
       if (r < .6) return { x: g.R - 8, y: g.T + 6 + Math.random() * (g.B - g.T - 12) };
       if (r < .8) return { x: AX + (Math.random() - .5) * g.w * .08, y: g.T + 4 };
       return { x: AX + (Math.random() - .5) * g.w * .08, y: g.B - 4 };
+    },
+    soft: HAZE ? (x, y, r) => {   // 更大更软的脚下阴影
+      ctx.save(); ctx.translate(x, y); ctx.scale(1, .34);
+      const gr = ctx.createRadialGradient(0, 0, 0, 0, 0, r * 1.7); gr.addColorStop(0, 'rgba(25,20,22,.42)'); gr.addColorStop(.55, 'rgba(25,20,22,.2)'); gr.addColorStop(1, 'rgba(25,20,22,0)');
+      ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(0, 0, r * 1.7, 0, 7); ctx.fill(); ctx.restore();
+    } : null,
+    post(W, H) {   // 在人物之后、界面之前，整屏叠一层氛围（屏幕坐标）
+      if (!HAZE || !this.on()) return;
+      ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.globalCompositeOperation = 'saturation'; ctx.globalAlpha = .22; ctx.fillStyle = '#808080'; ctx.fillRect(0, 0, W, H);   // 降饱和
+      ctx.globalCompositeOperation = 'multiply'; ctx.globalAlpha = .38; ctx.fillStyle = '#e6dccd'; ctx.fillRect(0, 0, W, H);       // 暖褐色调
+      ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = .1; ctx.fillStyle = '#9fb0c2'; ctx.fillRect(0, 0, W, H);      // 灰蓝薄雾
+      const v = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * .35, W / 2, H / 2, Math.max(W, H) * .75);
+      v.addColorStop(0, 'rgba(10,8,10,0)'); v.addColorStop(1, 'rgba(10,8,10,.5)'); ctx.globalAlpha = 1; ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);   // 暗角
+      dustT += 1 / 60;
+      ctx.fillStyle = '#d9c7a6';
+      for (const d of DUST) {   // 缓慢飘动的灰尘
+        d.x = (d.x + d.vx / 60 + 1) % 1; d.y = (d.y + d.vy / 60 + 1) % 1;
+        ctx.globalAlpha = d.a * (.6 + .4 * Math.sin(dustT * 1.3 + d.x * 9));
+        ctx.beginPath(); ctx.arc(d.x * W, d.y * H, d.r * H / 300 * .5, 0, 7); ctx.fill();
+      }
+      ctx.restore();
     },
     drawBg() {
       if (!ready()) return;

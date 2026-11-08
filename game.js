@@ -740,7 +740,7 @@ function tileLayer(img, s, par, y) {
     ctx.drawImage(img, 0, 0, tw + .5, th); ctx.restore();
   }
 }
-function shadow(x, y, r) { ctx.fillStyle = 'rgba(40,30,30,.3)'; ctx.beginPath(); ctx.ellipse(x, y, r, r * .3, 0, 0, 7); ctx.fill(); }
+function shadow(x, y, r) { if (window.ARENA && ARENA.soft) { ARENA.soft(x, y, r); return; } ctx.fillStyle = 'rgba(40,30,30,.3)'; ctx.beginPath(); ctx.ellipse(x, y, r, r * .3, 0, 0, 7); ctx.fill(); }
 // 像素角色在屏幕坐标里按整数倍放大绘制，保证像素清晰
 let _saEl = null, _saT = 0, _sa = { l: 0, r: 0 };
 function safeArea() {   // 读 CSS 的 env(safe-area-inset-*)，每秒更新一次（转屏后会变）
@@ -1068,6 +1068,7 @@ function draw() {
   if (window.XIAOCHANG) XIAOCHANG.drawMagicFx();
   drawPropFx();   // 道具碎屑画在人物上面，打击感更清楚
   drawFloaters();
+  if (window.ARENA) ARENA.post(cv.width, cv.height);   // 竞技场氛围（?look=haze：薄雾、降饱和、暗角、尘土）
   if (window.Boss && Boss.wxDraw) Boss.wxDraw(cv.width / DPR, cv.height / DPR);   // Boss 战天气
   if (window.ROGUE && ROGUE.draw()) return;   // 锦囊面板打开时作为模态层，不绘制 HUD
   // HUD
