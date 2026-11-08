@@ -15,7 +15,8 @@ SANGUOzhongzhang：从《无名之辈》（仓库 wumingzhibei）复制出来的
   - **本地测试要用网页服务器打开**（在仓库目录运行 `python -m http.server 8000`，再访问 http://localhost:8000/ ），直接双击打开 index.html 时，第二章祭台抠图等功能会因浏览器安全限制失效。
 - 按需加载（game.js 的 `ensureAssets`）：第二章的背景、开场图、立绘和第二章兵种（`LAZY_CHARS`）只在进第二章时下载；校场地图在打开整备页时后台预取；农房内景在新档开场时才下载。
   新增只在某一章用到的大图，照这个方式加进对应的组，不要放进首次加载。
-- `art/title/home.png`：**登录页背景图**（一对情侣在电视前打游戏，电视屏幕是绿幕）。
+- `art/title/ink_*.webp`：**三国终章的水墨标题页**（`ink_pc` 横屏背景、`ink_phone` 竖屏背景、`ink_title_v` 竖排毛笔标题、`ink_title_h` 竖屏用的横排标题，标题为透明底）。`js/title.js` 的 `drawInk()/layoutInk()` 负责绘制和排版，`ASSETS.ink` 存在时启用，旧的电视页保留作回退。灯笼位置在 `INK_LANTERN`（图内比例）。
+- `art/title/home.png`：（旧）**登录页背景图**（一对情侣在电视前打游戏，电视屏幕是绿幕）。
   - 屏幕是**绿幕遮罩**显示：`tv_mask.png`（同尺寸、绿幕处不透明）决定游戏画面只出现在屏幕形状内。
     这样电视机自带的透视、以及**垂在屏幕上的布偶猫爪子**都会自然保留在游戏画面之上（矩形贴图做不到这点）。
   换图后先跑 `python tools/make_tv_mask.py`（生成绿幕遮罩 + 去绿背景 + 打印外接矩形比例），再跑 `python tools/build.py`。

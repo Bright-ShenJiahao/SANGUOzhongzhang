@@ -132,6 +132,8 @@ assets['props'] = {k: [uri(P('art', 'props', k + '.png'))] + v for k, v in pm.it
 assets['title'] = uri(P('art', 'title', 'home.webp'))
 assets['room'] = uri(P('art', 'room', 'wake_outside.webp'))   # 农房内景
 assets['tvMask'] = uri(P('art', 'title', 'tv_mask.png'))
+# 水墨标题页：横屏/竖屏背景 + 竖排/横排毛笔标题（透明底）
+assets['ink'] = {k: uri(P('art', 'title', 'ink_' + k + '.webp')) for k in ('pc', 'phone', 'title_v', 'title_h')}
 # UI（卷轴/木牌按钮/印章）与回血食物
 assets['ui'] = {k: uri(P('art', 'ui', k + '.webp')) for k in ('scroll', 'btn', 'btn_red', 'seal_square', 'seal_round', 'w_staff', 'w_hammer', 'w_stone', 'w_bow', 'arrow', 'fire0', 'fire1', 'fire2', 'fire3', 'rogue_card', 'charge_hit_staff', 'charge_hit_stone', 'stone_shot', 'stone_shot_final', 'stone_shot_charge', 'stone_hit', 'staff_sweep', 'hit_blunt', 'hit_finisher', 'halberd_rip', 'bleed_splash', 'bleed_drip', 'hammer_spin', 'hammer_slam', 'blade_slash', 'blade_crescent', 'bow_sky', 'bow_impact', 'bow_volley', 'enemy_slash', 'enemy_wave', 'tip_water1', 'tip_water2', 'tip_water3', 'tip_wave1', 'tip_wave2', 'tip_scare', 'tip_scare_hit', 'tip_scare_break1', 'tip_scare_break2', 'tip_wind1', 'tip_wind2', 'tip_wind3', 'tip_shield', 'tip_shield_break1', 'tip_shield_break2', 'tip_arrow', 'fj_ride', 'fj_stuck', 'fj_icon', 'sup_jinchuang', 'sup_jiu', 'sup_huoyou', 'mer_body', 'banner_meridian', 'banner_artifact', 'banner_outfit', 'lot_machine', 'lot_lever_up', 'lot_lever_down', 'lot_burst', 'lot_coin', 'lot_fu', 'lot_fruit', 'lot_stone', 'lot_w0', 'lot_w2', 'lot_w3', 'lot_w4') + tuple('gd_' + k for k in ('ration','jinchuang','dukang','reroll','amulet','fu_po','fu_ji','fu_shen','fu_gang','fu_hui','fu_ju','stone','bag','lottery')) + tuple(f'mer_{r}{c}' for r in range(7) for c in range(3))}
 assets['dialogPortraits'] = {
@@ -225,6 +227,6 @@ print('index.html', len(h.encode('utf-8')) // 1024, 'KB；pack/', len(_emitted),
 # 每次打包使用首页内容指纹；首页必需素材在此维护。
 _sw_template = open(P('tools', 'sw.template.js'), encoding='utf-8-sig').read()
 _sw_hash = __import__('hashlib').sha256(h.encode('utf-8')).hexdigest()[:16]
-_pre_cache = ['/index.html', '/' + assets['title'], '/' + assets['tvMask']]
+_pre_cache = ['/index.html', '/' + assets['title'], '/' + assets['tvMask']] + ['/' + assets['ink'][k] for k in ('pc', 'phone', 'title_v', 'title_h')]
 if FONT_FACE: _pre_cache.append('/' + _font_url)
 open(P('sw.js'), 'w', encoding='utf-8').write(_sw_template.replace('__CACHE__', 'szz-' + _sw_hash).replace('__PRECACHE__', json.dumps(_pre_cache)))

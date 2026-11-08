@@ -29,6 +29,13 @@
   const L = {};                 // 布局（CSS 像素）
   let tvMask = null, maskCv = null, layerCv = null, layerX = null, bgHome = null, bgFar = null, bgMid = null, bgGnd = null, demoCv = null, dctx = null, dom = {}, built = false, helpOpen = false;
   let hardMode = false;
+  // ---------- 水墨标题页（三国终章）：横屏用 pc 图 + 竖排毛笔标题，竖屏用 phone 图 + 横排毛笔标题 ----------
+  const INK = { pc: null, phone: null, tv: null, th: null };
+  const INK_PAPER = '#ecd9c0';
+  const INK_LANTERN = { pc: [.1452, .7603], phone: [.7487, .5082] };   // 灯笼在图里的位置（比例）
+  const inkOn = () => typeof ASSETS !== 'undefined' && !!ASSETS.ink;
+  const inkReady = im => !!(im && im.complete && im.naturalWidth);
+  const MOTES = [];
   let selectedChapter = 1, prepView = 'campaign', pointerDrag = null, suppressItemClick = false;
   let previewAnimation = null, previewRaf = 0, previewWeapon = 'staff';
   const debugLoadouts = Object.create(null); // 开发者试用装备不写入正式仓库。
@@ -593,6 +600,7 @@
     dom.panel.addEventListener('click', () => { helpOpen = false; dom.panel.style.display = 'none'; });
     // 首次进入：把白闪淡出
     requestAnimationFrame(() => { dom.flash.style.opacity = 0; });
+    if (inkOn()) buildInk();
     layout();
   }
 
@@ -666,6 +674,125 @@
       }
     }
     if (dom.tip) dom.tip.style.left = (w / 2) + 'px', dom.tip.style.top = (L.inY - 26) + 'px';
+    if (inkOn() && dom.inkTitle) layoutInk();
+  }
+
+  // ---------- 水墨标题页 ----------
+  function inkPortrait() { return L.w / L.h < .9; }
+
+  function buildInk() {
+    const st = document.createElement('style'); st.id = 'tInkStyle';
+    st.textContent = `
+      body.szz-title #tName { background: rgba(247,237,216,.8); border: 1.5px solid #8b6a35; color: #2c2014; letter-spacing: .08em;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.55), 0 2px 8px rgba(60,40,20,.22); }
+      body.szz-title #tName::placeholder { color: rgba(60,44,28,.45); }
+      body.szz-title #tName:focus { border-color: #b8862b; box-shadow: 0 0 0 2px rgba(201,151,31,.32), 0 2px 8px rgba(60,40,20,.22); }
+      #tStart { background: linear-gradient(180deg,#523b26 0%,#33241a 55%,#241810 100%); border: 2px solid #c9a24a; border-radius: 6px;
+        color: #f3dc9a; text-shadow: 0 1px 2px rgba(0,0,0,.8); letter-spacing: .34em; text-indent: .34em;
+        box-shadow: inset 0 0 0 1px rgba(107,79,29,.9), inset 0 1px 0 rgba(255,235,170,.28), 0 4px 0 #1a110a, 0 9px 16px rgba(40,25,10,.38); }
+      #tStart:active { transform: translateY(4px); box-shadow: inset 0 0 0 1px rgba(107,79,29,.9), 0 0 0 #1a110a, 0 3px 8px rgba(40,25,10,.4); }
+      #tStart:disabled { filter: grayscale(.5) brightness(.85); }
+      #tNovice, #tHintOff { color: #3b2e1d; text-shadow: none; justify-content: center; }
+      #tNovice input { accent-color: #8b6a35; } #tHintOff input { accent-color: #8b6a35; }
+      #tHelp { background: rgba(40,28,18,.72); border-color: #c9a24a; color: #f3dc9a; text-shadow: none; }
+      #tBoard { background: rgba(40,28,18,.78); border-color: #c9a24a; color: #f3dc9a; text-shadow: none; padding: 0 10px; letter-spacing: .16em; }
+      #tInkTitle { position: fixed; z-index: 6; pointer-events: none; opacity: 0; user-select: none; -webkit-user-drag: none;
+        filter: drop-shadow(0 2px 5px rgba(60,40,20,.18)); animation: tInkIn 1.5s .7s cubic-bezier(.2,.7,.2,1) forwards; }
+      @keyframes tInkIn { from { opacity: 0; transform: translateY(-16px) scale(1.05); filter: blur(7px); } to { opacity: 1; transform: none; filter: drop-shadow(0 2px 5px rgba(60,40,20,.18)); } }
+      #tStart, #tNovice, #tHintOff, #tBoard { animation: tInkUp .9s 1.5s ease-out both; }
+      @keyframes tInkUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+    `;
+    document.head.appendChild(st);
+    dom.inkTitle = document.createElement('img'); dom.inkTitle.id = 'tInkTitle'; dom.inkTitle.alt = '三国终章：幸存者'; dom.inkTitle.draggable = false;
+    document.body.appendChild(dom.inkTitle);
+    dom.start.textContent = '新的旅途';
+    for (let i = 0; i < 46; i++) MOTES.push({ x: Math.random(), y: Math.random(), v: .004 + Math.random() * .012, r: .6 + Math.random() * 1.8, a: .12 + Math.random() * .25, p: Math.random() * 6.28, ember: false });
+    for (let i = 0; i < 10; i++) MOTES.push({ x: 0, y: 0, v: .02 + Math.random() * .03, r: .8 + Math.random() * 1.4, a: .5 + Math.random() * .4, p: Math.random() * 6.28, life: Math.random(), ember: true });
+  }
+
+  function layoutInk() {
+    const w = L.w, h = L.h, portrait = inkPortrait();
+    const inH = Math.max(34, Math.min(46, h * .07)), btnH = Math.max(40, Math.min(54, h * .085));
+    const rowH = 26, g1 = 12, g2 = 10;
+    let cx, titleW, titleH, top;
+    if (portrait) {
+      titleW = Math.min(w * .9, 520); titleH = titleW * 465 / 1089;
+      cx = w / 2;
+      const below = inH + g2 + btnH + g2 + rowH;
+      top = Math.max(h * .5, h - 14 - below - g1 - titleH);
+      if (dom.inkTitle.dataset.k !== 'h') { dom.inkTitle.src = ASSETS.ink.title_h; dom.inkTitle.dataset.k = 'h'; }
+    } else {
+      titleH = Math.min(h * .56, 640); titleW = titleH * 364 / 995;
+      cx = w * .755;
+      const total = titleH + g1 + inH + g2 + btnH + g2 + rowH;
+      top = Math.max(6, (h - total) / 2);
+      if (dom.inkTitle.dataset.k !== 'v') { dom.inkTitle.src = ASSETS.ink.title_v; dom.inkTitle.dataset.k = 'v'; }
+    }
+    const ts = dom.inkTitle.style;
+    ts.left = (cx - titleW / 2) + 'px'; ts.top = top + 'px'; ts.width = titleW + 'px'; ts.height = titleH + 'px';
+    const colW = Math.max(180, Math.min(portrait ? w * .72 : w * .3, 300));
+    const nameTop = top + titleH + g1, startTop = nameTop + inH + g2, rowTop = startTop + btnH + g2;
+    L.inY = nameTop;
+    let s = dom.name.style;
+    s.left = (cx - colW / 2) + 'px'; s.top = nameTop + 'px'; s.width = colW + 'px'; s.height = inH + 'px';
+    s = dom.start.style;
+    s.left = (cx - colW / 2) + 'px'; s.top = startTop + 'px'; s.width = colW + 'px'; s.height = btnH + 'px';
+    s.fontSize = Math.round(Math.max(16, Math.min(24, h * .045))) + 'px';
+    s = dom.novice.style;
+    s.left = (cx - 112) + 'px'; s.right = ''; s.top = rowTop + 'px'; s.width = '104px'; s.height = rowH + 'px'; s.justifyContent = 'center';
+    s = dom.hintOff.style;
+    s.left = (cx + 8) + 'px'; s.top = rowTop + 'px'; s.width = '104px'; s.height = rowH + 'px';
+    const sz = Math.max(26, Math.min(34, h * .07));
+    s = dom.board.style;
+    s.left = ''; s.width = 'auto'; s.padding = '0 10px';
+    s.right = (10 + sz + 8 + sz + 8 + 18) + 'px'; s.top = '8px'; s.height = sz + 'px';
+    s.fontSize = Math.max(12, Math.min(14, h * .03)) + 'px';
+    if (dom.tip) { dom.tip.style.left = cx + 'px'; dom.tip.style.top = (nameTop - 24) + 'px'; }
+  }
+
+  function drawInk(c, W, H) {
+    const portrait = inkPortrait(), img = portrait ? INK.phone : INK.pc;
+    c.fillStyle = INK_PAPER; c.fillRect(0, 0, W, H);
+    if (!inkReady(img)) return;
+    const t = S.t, fade = Math.min(1, t / 1.3), e = 1 - Math.pow(1 - fade, 3);
+    const iw = img.naturalWidth, ih = img.naturalHeight;
+    const breathe = 1 + .02 * (.5 - .5 * Math.cos(t * .32));        // 缓慢呼吸式推近
+    const s = Math.max(W / iw, H / ih) * breathe * (1.04 - .04 * e);
+    const dw = iw * s, dh = ih * s;
+    const ax = portrait ? .72 : .28, ay = portrait ? 0 : .5;        // 竖屏贴顶，横屏偏左（人物在左）
+    const dx = (W - dw) * ax, dy = (H - dh) * ay;
+    c.save();
+    c.globalAlpha = e;
+    c.drawImage(img, dx, dy, dw, dh);
+    c.globalAlpha = 1;
+    // 灯笼暖光：叠加发光 + 不规则闪烁
+    const lp = portrait ? INK_LANTERN.phone : INK_LANTERN.pc;
+    const lx = dx + lp[0] * dw, ly = dy + lp[1] * dh, lr = Math.max(40, dw * .06);
+    const fl = .72 + .18 * Math.sin(t * 6.1) + .1 * Math.sin(t * 13.7 + 1.3) + .06 * Math.sin(t * 23.1);
+    c.globalCompositeOperation = 'lighter';
+    const g = c.createRadialGradient(lx, ly, 0, lx, ly, lr * (1.2 + .1 * fl));
+    g.addColorStop(0, `rgba(255,170,70,${(.5 * fl * e).toFixed(3)})`); g.addColorStop(.35, `rgba(255,120,30,${(.2 * fl * e).toFixed(3)})`); g.addColorStop(1, 'rgba(255,90,10,0)');
+    c.fillStyle = g; c.fillRect(lx - lr * 1.6, ly - lr * 1.6, lr * 3.2, lr * 3.2);
+    c.globalCompositeOperation = 'source-over';
+    // 飘墨：淡墨点缓缓飘过；灯笼处有几点火星往上飘
+    for (const m of MOTES) {
+      if (m.ember) {
+        m.life += .016 * m.v * 18; if (m.life > 1) { m.life = 0; m.p = Math.random() * 6.28; }
+        const px = lx + Math.sin(m.p + m.life * 5) * lr * .35 + m.life * lr * .3, py = ly - m.life * lr * 2.4;
+        c.fillStyle = `rgba(255,${150 + (m.life * 60) | 0},70,${(m.a * (1 - m.life) * e).toFixed(3)})`;
+        c.beginPath(); c.arc(px, py, m.r, 0, 6.2832); c.fill();
+      } else {
+        m.x += m.v * .016 * .6; m.y -= m.v * .016 * .25; m.p += .016 * .7;
+        if (m.x > 1.02) m.x = -.02; if (m.y < -.02) m.y = 1.02;
+        c.fillStyle = `rgba(52,40,30,${(m.a * e).toFixed(3)})`;
+        c.beginPath(); c.arc(m.x * W + Math.sin(m.p) * 10, m.y * H, m.r, 0, 6.2832); c.fill();
+      }
+    }
+    // 四周轻微压暗，像旧纸卷边
+    const vg = c.createRadialGradient(W / 2, H / 2, Math.min(W, H) * .45, W / 2, H / 2, Math.max(W, H) * .8);
+    vg.addColorStop(0, 'rgba(70,45,20,0)'); vg.addColorStop(1, 'rgba(70,45,20,.2)');
+    c.fillStyle = vg; c.fillRect(0, 0, W, H);
+    c.restore();
   }
 
   // ---------- 整屏绘制 ----------
@@ -770,6 +897,7 @@
     if (S.mode === 'game') return false;
     const W = cv.width / DPR, H = cv.height / DPR;
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    if (inkOn() && S.mode !== 'intro') { drawInk(ctx, W, H); return true; }
     // 转场：向电视推近
     let zoom = 1;
     if (S.mode === 'intro') {
@@ -798,7 +926,7 @@
   // ---------- 状态切换 ----------
   function setDomVisible(v) {
     const d = v ? '' : 'none';
-    for (const k of ['name', 'start', 'help', 'novice', 'board', 'hintOff']) if (dom[k]) dom[k].style.display = d;
+    for (const k of ['name', 'start', 'help', 'novice', 'board', 'hintOff', 'inkTitle']) if (dom[k]) dom[k].style.display = d;
     if (!v && dom.modeTip) { dom.modeTip.style.opacity = '0'; }
     if (!v && dom.panel) { dom.panel.style.display = 'none'; helpOpen = false; }
   }
@@ -1157,7 +1285,7 @@
   }
 
   function show() {
-    S.mode = 'title'; S.intro = 0;
+    S.mode = 'title'; S.intro = 0; S.t = 0;
     if (window.WALLET) WALLET.flush();
     if (dom.chapter) dom.chapter.classList.remove('open');
     if (typeof reset === 'function') reset();   // 回首页时把这一局清掉（背景音乐也会回到村庄曲）
@@ -1229,6 +1357,11 @@
     build();
     setNoviceClass();
     document.body.classList.add('szz-title');
+    if (inkOn()) {
+      const ld = u => { const im = new Image(); im.src = u; return im; };
+      INK.pc = ld(ASSETS.ink.pc); INK.phone = ld(ASSETS.ink.phone);
+      INK.tv = ld(ASSETS.ink.title_v); INK.th = ld(ASSETS.ink.title_h);
+    }
     bgHome = new Image(); bgHome.src = (typeof ASSETS !== 'undefined' && ASSETS.title) || BG.far;
     // 绿幕遮罩：整张图尺寸，绿幕处不透明
     tvMask = new Image();
