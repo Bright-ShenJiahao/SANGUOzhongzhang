@@ -827,6 +827,7 @@
         if(!finished){const notice=document.createElement('div');notice.textContent='网络较慢，已先用本机存档进入，稍后自动同步';notice.style.cssText='position:fixed;bottom:12px;left:10%;right:10%;z-index:80;padding:12px;background:#302017ee;color:#ffe0a0;text-align:center;font:14px sans-serif';document.body.append(notice);setTimeout(()=>notice.remove(),6500);}
       } finally {clearTimeout(deadline);clearTimeout(stuck);refresh.remove();startPending=false;dom.start.disabled=false;dom.name.disabled=false;dom.start.textContent=savedLabel;}
     }
+    if (window.KAIJU) { openChapterSelect(); return; }   // 三国终章：不放开场动画，直接进开局配置
     if (hasCleared(n, 1) || (window.ARMORY && ARMORY.played())) { openChapterSelect(); return; }
     if (window.ARMORY) ARMORY.markPlayed();
     S.mode = 'intro'; S.intro = 0;
@@ -837,6 +838,10 @@
   }
 
   function openChapterSelect(target = 1) {
+    if (window.KAIJU) {   // 三国终章：整军备战不要了，换成「开局配置」
+      S.mode = 'chapter'; document.body.classList.add('szz-intro'); setDomVisible(false);
+      KAIJU.open(S.name || '无名'); return;
+    }
     if (window.WALLET) WALLET.flush();
     S.mode = 'chapter'; S.chapterReturn = true;
     if (window.ensureAssets) { ensureAssets('xiaochang', { silent: true }); if (window.CHAPTER2 && CHAPTER2.canEnter()) ensureAssets('chapter2', { silent: true }); }
@@ -1196,6 +1201,7 @@
       return saveLoadout(S.name, p);
     },
     openPreparation: target => openChapterSelect(target),
+    beginRun: () => finish({ skipWake: true }),   // 开局配置点「出发」
     previewStart: (name, open = true) => { if (!S.name) { S.name = name; writeName(name); } if (open) openChapterSelect(1); },   // 试玩网址：设好玩家名（可选直接进整军备战）
     xiaochangProgress: chapter => Number(readCampaign()[playerKey(S.name)]?.xiaochang?.[chapter]) || 0,
     markXiaochang: (chapter,floor) => {

@@ -52,6 +52,7 @@
   }
   function waveFlow(dt) {
     if (!W.started) return;
+    if (W.pick) return;   // 正在选招式
     if (W.between > 0) { W.between -= dt; if (W.between <= 0) startWave(W.n + 1); return; }
     if (W.retreat > 0) {
       W.retreat -= dt;
@@ -60,7 +61,7 @@
         if (W.n >= WAVES) { won = true; return; }
         hero.hp = Math.min(window.GEAR ? GEAR.maxHp() : 10, hero.hp + 2);   // 波间调息：回一点血
         W.between = .8;
-        if (window.ROGUE) ROGUE.offer();   // 波间三选一（先用现有锦囊）
+        if (!offerSkill() && window.ROGUE) ROGUE.offer();   // 波间：还有没学会的招式就先选招式，否则选锦囊
       }
       return;
     }
@@ -92,28 +93,54 @@
   function nearest(r) { let best = null, bd = r; for (const z of hittable()) { const d = dist(z, hero); if (d < bd) { bd = d; best = z; } } return best; }
   // 用户定 11/09：招式没有各自冷却，1→5 依次放（放完一招才轮到下一招）；前摇/后摇照三国幸存者
   const SK = {
-    hengsao: { name: '横扫', icon: '扫', color: '#ffb45a', wu: .6, rc: .3, need: 70, pose: ['blade_4a', 'blade_2b'], range: 58, half: 2.356,
+    hengsao: { desc: '身前 270° 大横扫，击退', name: '横扫', icon: '扫', color: '#ffb45a', wu: .6, rc: .3, need: 70, pose: ['blade_4a', 'blade_2b'], range: 58, half: 2.356,
       cast() { const a = aim(); sweep(a, 2.356, 58, 2.4, 60, ['rgba(255,170,90,', 'rgba(255,230,160,']); sfx('swing_knife', hero.x); shake = Math.max(shake, .12); } },
-    lianzhan: { name: '连斩', icon: '连', color: '#8fd0ff', wu: .5, rc: .4, need: 64, pose: ['blade_1a', 'blade_1b'], range: 50, half: 1.571,
+    lianzhan: { desc: '180° 连砍两刀', name: '连斩', icon: '连', color: '#8fd0ff', wu: .5, rc: .4, need: 64, pose: ['blade_1a', 'blade_1b'], range: 50, half: 1.571,
       cast() {
         const a = aim(); sweep(a, 1.571, 50, 1.6, 30, ['rgba(120,200,255,', 'rgba(210,240,255,']); sfx('swing_knife', hero.x);
         S.later.push({ t: .25, f() { const b = aim(); S.poseOverride = { f: 'blade_2b', t: .25 }; sweep(b, 1.571, 50, 1.6, 45, ['rgba(255,120,120,', 'rgba(255,220,220,'], { rev: true }); sfx('swing_knife', hero.x); } });
       } },
   };
-  SK.daobo = { name: '刀波', icon: '波', color: '#c8f0ff', wu: .5, rc: .3, need: 160, pose: ['blade_1a', 'blade_2b'], range: 0, half: 0, beam: true,
+  SK.daobo = { desc: '向前劈出穿透刀波', name: '刀波', icon: '波', color: '#c8f0ff', wu: .5, rc: .3, need: 160, pose: ['blade_1a', 'blade_2b'], range: 0, half: 0, beam: true,
     cast() {   // 朝最近的敌人劈出一道月牙刀波，一路穿透
       const a = aim(), vx = Math.cos(a), vy = Math.sin(a) / 2;
       bolts.push({ x: hero.x + vx * 14, y: hero.y + vy * 14, vx: vx * 270, vy: vy * 270, a, t: 0, T: .85, hitSet: [] });
       sfx('swing_knife', hero.x); shake = Math.max(shake, .08);
     } };
-  SK.zhendi = { name: '震地', icon: '震', color: '#ffd27a', wu: .7, rc: .35, need: 62, pose: ['blade_4a', 'blade_4b'], range: 66, half: Math.PI, ring: true,
+  SK.zhendi = { desc: '砸地，脚下一圈震飞', name: '震地', icon: '震', color: '#ffd27a', wu: .7, rc: .35, need: 62, pose: ['blade_4a', 'blade_4b'], range: 66, half: Math.PI, ring: true,
     cast() {   // 一刀砸地，脚下一圈冲击波，把周围的人震飞
       fx.push({ k: 'ring', x: hero.x, y: hero.y, t: 0, T: .45, r: 66 });
       for (const z of hittable()) if (dist(z, hero) < 66) { const f0 = freeze; hit(z, 2.0, 50, Math.sign(z.x - hero.x) || hero.f, true, 0, .4, false, false, { secondary: true, survSkill: true }); freeze = Math.min(freeze, Math.max(f0, .05)); }
       sfx('crack', hero.x); shake = Math.max(shake, .3);
     } };
   const bolts = [];
-  const S = { slots: ['hengsao', 'lianzhan', 'daobo', 'zhendi', ''], qi: 0, qt: 0, hold: 0, wind: null, recov: null, skip: [0, 0, 0, 0, 0], later: [], poseOverride: null, cycles: 0, flash: [0, 0, 0, 0, 0] };
+  // ---------- 出身（开局配置里选；起手只有 1 个招式） ----------
+  const ORIGINS = {
+    nongfu: { name: '农夫', tag: '短兵器', skill: 'hengsao', desc: '庄稼汉，挨得住打。受到伤害 -20%', take: .8 },
+    xiaozu: { name: '小卒', tag: '长兵器', skill: 'lianzhan', desc: '行伍出身，出手利落。招式前摇 -20%', wu: .8 },
+    liehu: { name: '猎户', tag: '远程', skill: 'daobo', desc: '山里跑惯了。移动速度 +12%', move: 1.12 },
+    mafu: { name: '马夫', tag: '骑乘', skill: 'zhendi', desc: '身手灵活。翻滚冷却 -30%', roll: .7 },
+    shusheng: { name: '书生', tag: '法术', skill: '', desc: '法术招式还没做，暂未开放', locked: true },
+  };
+  let origin = 'nongfu';
+  const OG = () => ORIGINS[origin] || ORIGINS.nongfu;
+  // 波间习得招式：从还没学会的招式里随机给最多 3 个，选一个放进空格
+  function offerSkill() {
+    const owned = S.slots.filter(Boolean), free = S.slots.indexOf('');
+    const pool = Object.keys(SK).filter(k => !owned.includes(k));
+    if (free < 0 || !pool.length) return false;
+    const pick = pool.sort(() => Math.random() - .5).slice(0, 3);
+    W.pick = true;
+    const box = document.createElement('div'); box.id = 'survPick';
+    box.innerHTML = `<div class="p"><h3>习得招式 · 三选一</h3><div class="row">${pick.map(k => `<button data-k="${k}"><b style="color:${SK[k].color}">${SK[k].icon}</b><span>${SK[k].name}</span><small>${SK[k].desc}</small></button>`).join('')}</div><p>新招式放进第 ${free + 1} 格，按 1→5 顺序轮流放</p></div>`;
+    box.querySelectorAll('button').forEach(b => b.onclick = () => {
+      const i = S.slots.indexOf(''); if (i >= 0) S.slots[i] = b.dataset.k;
+      box.remove(); W.pick = false; if (window.ROGUE) ROGUE.offer();
+    });
+    document.body.appendChild(box);
+    return true;
+  }
+  const S = { slots: ['hengsao', '', '', '', ''], qi: 0, qt: 0, hold: 0, wind: null, recov: null, skip: [0, 0, 0, 0, 0], later: [], poseOverride: null, cycles: 0, flash: [0, 0, 0, 0, 0] };
   const busy = () => hero.st === 'roll' || hero.air || ['down', 'bounce', 'getup', 'hurt'].includes(hero.st) || hero.dazeT > 0;
   function skillTick(dt) {
     for (let i = 0; i < 5; i++) { S.skip[i] = Math.max(0, S.skip[i] - dt); S.flash[i] = Math.max(0, S.flash[i] - dt); }
@@ -137,11 +164,12 @@
     for (let n = 0; n < 5 && !SK[S.slots[S.qi]]; n++) { S.qi = (S.qi + 1) % 5; if (S.qi === 0) S.cycles++; }
     if ((S.qt += dt) < .05) return;
     const k = SK[S.slots[S.qi]];
-    if (k && nearest(k.need)) { S.wind = { i: S.qi, k, t: 0, dur: k.wu * 1.2 }; S.hold = 0; return; }
+    if (k && nearest(k.need)) { S.wind = { i: S.qi, k, t: 0, dur: k.wu * 1.2 * (OG().wu || 1) }; S.hold = 0; return; }
     if (k && S.hold < 1.2) { S.hold += .05; S.qt = 0; return; }   // 这一招够不着人：等 1.2 秒，还不行就跳下一招
     S.skip[S.qi] = .2; S.qt = -.05; S.qi = (S.qi + 1) % 5; if (S.qi === 0) S.cycles++; S.hold = 0;
   }
-  function onRoll() {   // 翻滚：前摇中 = 这一招作废、跳到下一招；后摇中 = 直接取消后摇
+  function onRoll() {
+    if (OG().roll) hero.rollCd *= OG().roll;   // 翻滚：前摇中 = 这一招作废、跳到下一招；后摇中 = 直接取消后摇
     if (S.wind) { S.skip[S.wind.i] = .35; S.wind = null; S.qi = (S.qi + 1) % 5; if (S.qi === 0) S.cycles++; S.qt = 0; floaters.push({ x: hero.x, y: hero.y - 50, t: 0, txt: '打断', color: '#9aa' }); }
     S.recov = null;
   }
@@ -149,6 +177,7 @@
   // ---------- 对外接口 ----------
   function forceBlade() { weapon = 'blade'; pendingWeapon = null; try { if (window.GEAR && GEAR.switch) GEAR.switch(); } catch (e) {} if (typeof ui === 'function') ui(); }
   function startRun() {
+    S.slots = [OG().skill || 'hengsao', '', '', '', '']; W.pick = false; const old = document.getElementById('survPick'); if (old) old.remove();
     W.started = true; W.between = 0; S.wind = null; S.recov = null; S.later = []; S.qi = 0; bolts.length = 0; S.cycles = 0; fx.length = 0;
     forceBlade();
     const vw = viewW(); arenaL = M.gates[0] + 10; lockR = arenaL + vw * 1.5; gateI = 0;
@@ -239,6 +268,11 @@
   }
   const rooted = () => !!S.recov;
   // 隐藏普攻和换武器按钮
-  const st = document.createElement('style'); st.textContent = '#bA,#bWeapon,#wp button[data-w]{display:none!important}'; document.head.appendChild(st);
-  window.SURV = { tick, drawWorld, hud, startRun, waveFlow, pose, rooted, onRoll, skipWave() { if (W.retreat <= 0 && W.between <= 0 && W.started) endWave(); }, state: () => ({ wave: W.n, t: W.t, slots: S.slots.slice() }) };
+  const st = document.createElement('style'); st.textContent = '#bA,#bWeapon,#wp button[data-w]{display:none!important}'
+    + '#survPick{position:fixed;inset:0;z-index:10005;display:flex;align-items:center;justify-content:center;background:rgba(10,6,4,.6);font-family:"PingFang SC","Noto Sans CJK SC",sans-serif}'
+    + '#survPick .p{background:linear-gradient(180deg,#2a1d13,#1a120c);border:2px solid #b08a4a;border-radius:10px;padding:14px 16px;color:#f2e4c8;text-align:center;max-width:94vw}'
+    + '#survPick h3{margin:0 0 10px;color:#ffd86e;letter-spacing:4px}#survPick .row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}'
+    + '#survPick button{width:140px;padding:12px 8px;background:#2e2118;border:1px solid #8a6a3a;border-radius:8px;color:#f2e4c8;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px}'
+    + '#survPick button:hover{border-color:#ffd86e;background:#3a2a1c}#survPick b{font-size:30px}#survPick span{font-size:16px;font-weight:700}#survPick small{color:#cdb98e;font-size:12px}#survPick p{margin:10px 0 0;color:#a08d70;font-size:12px}'; document.head.appendChild(st);
+  window.SURV = { ORIGINS, setOrigin(k) { if (ORIGINS[k] && !ORIGINS[k].locked) origin = k; }, origin: () => origin, takeMul: () => OG().take || 1, moveMul: () => OG().move || 1, SK, tick, drawWorld, hud, startRun, waveFlow, pose, rooted, onRoll, skipWave() { if (W.retreat <= 0 && W.between <= 0 && W.started) endWave(); }, state: () => ({ wave: W.n, t: W.t, slots: S.slots.slice() }) };
 })();

@@ -350,6 +350,7 @@ function strike() {
 // 主角能不能被打中；翻滚无敌中被「本来会打中」的攻击擦过 → 算躲过（回锋、避实用）
 function heroOpen() { if (hero.inv <= 0) return true; if (hero.st === 'roll' && window.ROGUE && ROGUE.onDodge) ROGUE.onDodge(); return false; }
 function dmgHero(n, from, kind = 'basic') {
+  if (window.SURV) n *= SURV.takeMul();   // 三国终章：出身·农夫减伤
   if (hero.decoy) { hero.hp -= n; hero.hitT = .2; return; }   // 打中的是稻草人
   const h = hero; if (h.inv > 0 && h.st === 'roll' && window.ROGUE && ROGUE.onDodge) ROGUE.onDodge(from, n, kind);
   if (h.inv > 0 || h.air || h.st === 'down' || h.st === 'bounce' || h.st === 'getup' || over) return;
