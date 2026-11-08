@@ -72,19 +72,6 @@ for (const [name, frames] of Object.entries(ASSETS.chars)) {
     CH[name][f] = fr;
   }
 }
-// 主角写实新画风对比（?hero=new）：新图是 3 倍清晰度，w/h 仍按精灵像素；没有持武器的新画面时，站立/行走暂代大刀的 idle/walk
-if (/[?&]hero=new(?:&|$)/.test(location.search) && ASSETS.heroNew) {
-  const MAP = { blade0: 'idle', bladew1: 'walk1', bladew2: 'walk2', bladew3: 'walk3', idle: 'idle', walk1: 'walk1', walk2: 'walk2', walk3: 'walk3', roll1: 'roll1', roll2: 'roll2', hurt: 'hurt', down: 'down', getup: 'getup', bounce: 'bounce', fly1: 'fly1', fly2: 'fly2' };
-  for (const [to, from] of Object.entries(MAP)) {
-    const [src, w, h, ax, ay] = ASSETS.heroNew[from];
-    const fr = { img: load('hn_' + from + '_' + to, src), w, h, ax, ay, white: null, dark: null };
-    fr.img.onload = () => {
-      const c = document.createElement('canvas'); c.width = Math.ceil(w * 3); c.height = Math.ceil(h * 3); const g = c.getContext('2d');
-      g.drawImage(fr.img, 0, 0, c.width, c.height); g.globalCompositeOperation = 'source-atop'; g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); fr.white = c;
-    };
-    CH.hero[to] = fr;
-  }
-}
 if (window.OUTFIT) OUTFIT.init(CH);
 const PX = 0.4;   // 1 个精灵像素 = 0.4 世界单位
 const PROP_POOL = ['hay', 'hay', 'cart'];   // 水井已移除（只保留草垛、推车）   // 道具尺寸直接写在 art/props/meta.json（已按 1.6 倍放大）
