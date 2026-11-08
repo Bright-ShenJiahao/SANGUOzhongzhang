@@ -31,7 +31,7 @@
       active = true;
       const g = apply(); if (!g) return;
       props.length = 0;                               // 场地里不放草垛推车，地面保持干净
-      hero.x = AX; hero.y = (M.top + M.bot) / 2; this.cam(true);
+      hero.x = AX; hero.y = M.top + (M.bot - M.top) * .2; this.cam(true);   // 出生在城门前方（上中），不在正中间
     },
     stop() { active = false; },
     tick() { if (!this.on()) return; apply(); this.clamp(hero); for (const z of zs) this.clamp(z); },
