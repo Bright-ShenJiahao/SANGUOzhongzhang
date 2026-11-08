@@ -1142,7 +1142,8 @@
     S.mode = 'game';
     document.body.classList.remove('szz-title');   // 这时候才把游戏 UI（摇杆/攻击/血条）露出来
     document.body.classList.remove('szz-intro');
-    if (options.skipWake) { if (window.ROOM) ROOM.skip(); if (typeof reset === 'function') reset(); }
+    if (options.skipWake || window.SURV) {   // 三国终章：不要开头醒来捡东西，直接开打
+     if (window.ROOM) ROOM.skip(); if (typeof reset === 'function') reset(); }
     else if (window.ROOM) ROOM.begin(); else if (typeof reset === 'function') reset();
     if (dom.flash) {
       dom.flash.style.transition = 'none'; dom.flash.style.opacity = 1;

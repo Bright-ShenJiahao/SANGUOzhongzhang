@@ -63,7 +63,7 @@ body.szz-pro #help{display:none}
 .x-back{min-height:34px!important}
 }
 #rot small{display:block;margin-top:10px;font-size:14px;font-weight:600;color:#c9b691;line-height:1.6}
-</style><link rel="preload" href="pack/fonts/result.woff2?v=12d74cc689" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=12d74cc689)format("woff2");font-display:swap}</style></head><body>
+</style><link rel="preload" href="pack/fonts/result.woff2?v=c839e30acc" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=c839e30acc)format("woff2");font-display:swap}</style></head><body>
 <div id="bootSplash" style="position:fixed;inset:0;z-index:99999;background:#1a1020;color:#f1d59a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;font:18px system-ui,sans-serif;text-align:center;padding:24px">
 <strong id="bootText">正在加载…</strong><button id="bootRefresh" hidden onclick="location.reload()" style="font:16px system-ui,sans-serif;padding:12px;color:#ffe0a0;background:#583b28;border:1px solid #ba9158;border-radius:6px">网络较慢，点此刷新</button><small id="bootError" style="overflow-wrap:anywhere;max-width:90vw"></small></div>
 <script>
@@ -77,7 +77,7 @@ if(location.protocol==='https:'&&!/[?&]debug(?:=|&|$)/.test(location.search)&&'s
 })();
 // 自动更新：打开游戏、或从后台切回来时，查一下线上有没有新版本；有就在标题/整备页自动刷新（战斗中不打扰）
 (function(){
-var BUILD='536e24c065a1',busy=false;
+var BUILD='a0513be8c334',busy=false;
 if(location.protocol!=='https:'||/[?&]debug(?:=|&|$)/.test(location.search))return;
 function check(){
   if(busy)return;
@@ -10365,7 +10365,8 @@ function resultKey(e) {
     S.mode = 'game';
     document.body.classList.remove('szz-title');   // 这时候才把游戏 UI（摇杆/攻击/血条）露出来
     document.body.classList.remove('szz-intro');
-    if (options.skipWake) { if (window.ROOM) ROOM.skip(); if (typeof reset === 'function') reset(); }
+    if (options.skipWake || window.SURV) {   // 三国终章：不要开头醒来捡东西，直接开打
+     if (window.ROOM) ROOM.skip(); if (typeof reset === 'function') reset(); }
     else if (window.ROOM) ROOM.begin(); else if (typeof reset === 'function') reset();
     if (dom.flash) {
       dom.flash.style.transition = 'none'; dom.flash.style.opacity = 1;
