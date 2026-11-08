@@ -90,20 +90,33 @@
   }
   const aim = () => { const t = nearest(200); if (!t) return Math.atan2(0, hero.f); return Math.atan2((t.y - hero.y) * 2, t.x - hero.x); };
   function nearest(r) { let best = null, bd = r; for (const z of hittable()) { const d = dist(z, hero); if (d < bd) { bd = d; best = z; } } return best; }
-  // 数值先照三国幸存者的比例：横扫 cd3.0 前摇0.6 后摇0.3；连斩 cd2.2 前摇0.5 后摇0.4
+  // 用户定 11/09：招式没有各自冷却，1→5 依次放（放完一招才轮到下一招）；前摇/后摇照三国幸存者
   const SK = {
-    hengsao: { name: '横扫', icon: '扫', color: '#ffb45a', cd: 3.0, wu: .6, rc: .3, need: 70, pose: ['blade_4a', 'blade_2b'], range: 58, half: 2.356,
+    hengsao: { name: '横扫', icon: '扫', color: '#ffb45a', wu: .6, rc: .3, need: 70, pose: ['blade_4a', 'blade_2b'], range: 58, half: 2.356,
       cast() { const a = aim(); sweep(a, 2.356, 58, 2.4, 60, ['rgba(255,170,90,', 'rgba(255,230,160,']); sfx('swing_knife', hero.x); shake = Math.max(shake, .12); } },
-    lianzhan: { name: '连斩', icon: '连', color: '#8fd0ff', cd: 2.2, wu: .5, rc: .4, need: 64, pose: ['blade_1a', 'blade_1b'], range: 50, half: 1.571,
+    lianzhan: { name: '连斩', icon: '连', color: '#8fd0ff', wu: .5, rc: .4, need: 64, pose: ['blade_1a', 'blade_1b'], range: 50, half: 1.571,
       cast() {
         const a = aim(); sweep(a, 1.571, 50, 1.6, 30, ['rgba(120,200,255,', 'rgba(210,240,255,']); sfx('swing_knife', hero.x);
         S.later.push({ t: .25, f() { const b = aim(); S.poseOverride = { f: 'blade_2b', t: .25 }; sweep(b, 1.571, 50, 1.6, 45, ['rgba(255,120,120,', 'rgba(255,220,220,'], { rev: true }); sfx('swing_knife', hero.x); } });
       } },
   };
-  const S = { slots: ['hengsao', 'lianzhan', '', '', ''], cds: [0, .4, 0, 0, 0], qi: 0, qt: 0, hold: 0, wind: null, recov: null, skip: [0, 0, 0, 0, 0], later: [], poseOverride: null, cycles: 0, flash: [0, 0, 0, 0, 0] };
+  SK.daobo = { name: '刀波', icon: '波', color: '#c8f0ff', wu: .5, rc: .3, need: 160, pose: ['blade_1a', 'blade_2b'], range: 0, half: 0, beam: true,
+    cast() {   // 朝最近的敌人劈出一道月牙刀波，一路穿透
+      const a = aim(), vx = Math.cos(a), vy = Math.sin(a) / 2;
+      bolts.push({ x: hero.x + vx * 14, y: hero.y + vy * 14, vx: vx * 270, vy: vy * 270, a, t: 0, T: .85, hitSet: [] });
+      sfx('swing_knife', hero.x); shake = Math.max(shake, .08);
+    } };
+  SK.zhendi = { name: '震地', icon: '震', color: '#ffd27a', wu: .7, rc: .35, need: 62, pose: ['blade_4a', 'blade_4b'], range: 66, half: Math.PI, ring: true,
+    cast() {   // 一刀砸地，脚下一圈冲击波，把周围的人震飞
+      fx.push({ k: 'ring', x: hero.x, y: hero.y, t: 0, T: .45, r: 66 });
+      for (const z of hittable()) if (dist(z, hero) < 66) { const f0 = freeze; hit(z, 2.0, 50, Math.sign(z.x - hero.x) || hero.f, true, 0, .4, false, false, { secondary: true, survSkill: true }); freeze = Math.min(freeze, Math.max(f0, .05)); }
+      sfx('crack', hero.x); shake = Math.max(shake, .3);
+    } };
+  const bolts = [];
+  const S = { slots: ['hengsao', 'lianzhan', 'daobo', 'zhendi', ''], qi: 0, qt: 0, hold: 0, wind: null, recov: null, skip: [0, 0, 0, 0, 0], later: [], poseOverride: null, cycles: 0, flash: [0, 0, 0, 0, 0] };
   const busy = () => hero.st === 'roll' || hero.air || ['down', 'bounce', 'getup', 'hurt'].includes(hero.st) || hero.dazeT > 0;
   function skillTick(dt) {
-    for (let i = 0; i < 5; i++) { S.cds[i] -= dt; S.skip[i] = Math.max(0, S.skip[i] - dt); S.flash[i] = Math.max(0, S.flash[i] - dt); }
+    for (let i = 0; i < 5; i++) { S.skip[i] = Math.max(0, S.skip[i] - dt); S.flash[i] = Math.max(0, S.flash[i] - dt); }
     for (let i = S.later.length - 1; i >= 0; i--) { const q = S.later[i]; if ((q.t -= dt) <= 0) { S.later.splice(i, 1); if (!busy()) q.f(); } }
     if (S.poseOverride && (S.poseOverride.t -= dt) <= 0) S.poseOverride = null;
     if (W.retreat > 0 || W.between > 0) { S.wind = null; S.recov = null; return; }   // 鸣金后不再出手
@@ -112,20 +125,20 @@
       S.wind.t += dt;
       if (!(Math.abs(hero.ix) > .1 || Math.abs(hero.iy) > .1)) { const t = nearest(200); if (t) hero.f = Math.sign(t.x - hero.x) || hero.f; }
       if (S.wind.t >= S.wind.dur) {
-        const k = S.wind.k, i = S.wind.i; S.cds[i] = k.cd; S.flash[i] = .3;
+        const k = S.wind.k, i = S.wind.i; S.flash[i] = .3;
         const t = nearest(200); if (t) hero.f = Math.sign(t.x - hero.x) || hero.f;
         k.cast(); S.recov = { t: 0, dur: k.rc, pose: k.pose[1] }; S.wind = null;
         S.qi = (S.qi + 1) % 5; if (S.qi === 0) S.cycles++;
       }
       return;
     }
-    if (S.recov) { if ((S.recov.t += dt) >= S.recov.dur) { S.recov = null; S.qt = -.5; } return; }
+    if (S.recov) { if ((S.recov.t += dt) >= S.recov.dur) { S.recov = null; S.qt = -.2; } return; }   // 放完一招，隔 0.25 秒轮到下一招（没有各自冷却）
     if (!nearest(160)) { S.qt = 0; return; }
     for (let n = 0; n < 5 && !SK[S.slots[S.qi]]; n++) { S.qi = (S.qi + 1) % 5; if (S.qi === 0) S.cycles++; }
     if ((S.qt += dt) < .05) return;
     const k = SK[S.slots[S.qi]];
-    if (k && S.cds[S.qi] <= 0 && nearest(k.need)) { S.wind = { i: S.qi, k, t: 0, dur: k.wu * 1.2 }; S.hold = 0; return; }
-    if (k && ((S.cds[S.qi] > 0 && S.cds[S.qi] <= .8) || (S.cds[S.qi] <= 0 && S.hold < 1.2))) { S.hold += .05; S.qt = 0; return; }
+    if (k && nearest(k.need)) { S.wind = { i: S.qi, k, t: 0, dur: k.wu * 1.2 }; S.hold = 0; return; }
+    if (k && S.hold < 1.2) { S.hold += .05; S.qt = 0; return; }   // 这一招够不着人：等 1.2 秒，还不行就跳下一招
     S.skip[S.qi] = .2; S.qt = -.05; S.qi = (S.qi + 1) % 5; if (S.qi === 0) S.cycles++; S.hold = 0;
   }
   function onRoll() {   // 翻滚：前摇中 = 这一招作废、跳到下一招；后摇中 = 直接取消后摇
@@ -136,7 +149,7 @@
   // ---------- 对外接口 ----------
   function forceBlade() { weapon = 'blade'; pendingWeapon = null; try { if (window.GEAR && GEAR.switch) GEAR.switch(); } catch (e) {} if (typeof ui === 'function') ui(); }
   function startRun() {
-    W.started = true; W.between = 0; S.wind = null; S.recov = null; S.later = []; S.qi = 0; S.cds = [0, .4, 0, 0, 0]; S.cycles = 0; fx.length = 0;
+    W.started = true; W.between = 0; S.wind = null; S.recov = null; S.later = []; S.qi = 0; bolts.length = 0; S.cycles = 0; fx.length = 0;
     forceBlade();
     const vw = viewW(); arenaL = M.gates[0] + 10; lockR = arenaL + vw * 1.5; gateI = 0;
     hero.x = arenaL + vw * .5; cam.x = arenaL;
@@ -147,6 +160,12 @@
     if (charging || atkHeldSince) cancelCharge();
     skillTick(dt);
     for (const e of fx) e.t += dt;
+    for (const b of bolts) {
+      b.t += dt; b.x += b.vx * dt; b.y += b.vy * dt;
+      if (b.y < M.top - 4 || b.y > M.bot + 4) b.t = b.T;
+      for (const z of hittable()) if (!b.hitSet.includes(z) && Math.abs(z.x - b.x) < 16 && Math.abs(z.y - b.y) < 16) { b.hitSet.push(z); const f0 = freeze; hit(z, 1.8, 40, Math.sign(b.vx) || hero.f, false, 0, .3, false, false, { secondary: true, survSkill: true }); freeze = Math.min(freeze, Math.max(f0, .03)); }
+    }
+    for (let i = bolts.length - 1; i >= 0; i--) if (bolts[i].t >= bolts[i].T) bolts.splice(i, 1);
     for (let i = fx.length - 1; i >= 0; i--) if (fx[i].t > fx[i].T) fx.splice(i, 1);
   }
   function drawWorld() {
@@ -155,10 +174,29 @@
       const k = S.wind.k, p = S.wind.t / S.wind.dur, a = aim();
       ctx.save(); ctx.translate(hero.x, hero.y); ctx.scale(1, .5);
       ctx.fillStyle = `rgba(255,200,120,${.08 + .18 * p})`; ctx.strokeStyle = `rgba(255,220,150,${.3 + .5 * p})`; ctx.lineWidth = 1.5;
-      ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, k.range * (.4 + .6 * p), a - k.half, a + k.half); ctx.closePath(); ctx.fill(); ctx.stroke();
+      if (k.beam) { ctx.rotate(a); ctx.fillRect(8, -14, 180 * p, 28); ctx.strokeRect(8, -14, 180 * p, 28); }   // 刀波：前方一条直线
+      else if (k.ring) { ctx.beginPath(); ctx.arc(0, 0, k.range * (.4 + .6 * p), 0, Math.PI * 2); ctx.fill(); ctx.stroke(); }   // 震地：脚下一整圈
+      else { ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, k.range * (.4 + .6 * p), a - k.half, a + k.half); ctx.closePath(); ctx.fill(); ctx.stroke(); }
+      ctx.restore();
+    }
+    for (const b of bolts) {   // 月牙刀波
+      const p = b.t / b.T, al = 1 - p * p;
+      ctx.save(); ctx.translate(b.x, b.y - 14); ctx.scale(1, .5); ctx.rotate(b.a);
+      ctx.strokeStyle = `rgba(160,225,255,${.5 * al})`; ctx.lineWidth = 9; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.arc(-10, 0, 26, -1.1, 1.1); ctx.stroke();
+      ctx.strokeStyle = `rgba(240,252,255,${.95 * al})`; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(-8, 0, 26, -1.0, 1.0); ctx.stroke();
       ctx.restore();
     }
     for (const e of fx) {
+      if (e.k === 'ring') {   // 震地：地上一圈冲击波 + 裂纹
+        const p = e.t / e.T, r = e.r * (.3 + .7 * Math.min(1, p * 2));
+        ctx.save(); ctx.translate(e.x, e.y); ctx.scale(1, .5);
+        ctx.fillStyle = `rgba(255,210,120,${.25 * (1 - p)})`; ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = `rgba(255,230,160,${.9 * (1 - p)})`; ctx.lineWidth = 6 * (1 - p) + 2; ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.stroke();
+        ctx.strokeStyle = `rgba(70,40,20,${.7 * (1 - p)})`; ctx.lineWidth = 2;
+        for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4 + .3; ctx.beginPath(); ctx.moveTo(Math.cos(a) * 8, Math.sin(a) * 8); ctx.lineTo(Math.cos(a + .15) * r * .55, Math.sin(a + .15) * r * .55); ctx.lineTo(Math.cos(a - .1) * r * .9, Math.sin(a - .1) * r * .9); ctx.stroke(); }
+        ctx.restore(); continue;
+      }
       const p = e.t / e.T, sp = Math.min(1, p * 2.4);
       ctx.save(); ctx.translate(e.x, e.y - 14); ctx.scale(1, .5); ctx.lineCap = 'round';
       const s0 = e.rev ? e.a0 + e.half : e.a0 - e.half, s1 = e.rev ? e.a0 + e.half - 2 * e.half * sp : e.a0 - e.half + 2 * e.half * sp;
@@ -180,7 +218,7 @@
         ctx.fillStyle = k.color; ctx.globalAlpha = .22 + (S.flash[i] > 0 ? .5 : 0); ctx.fillRect(x, y0, sz, sz); ctx.globalAlpha = 1;
         if (S.wind && S.wind.i === i) { ctx.fillStyle = 'rgba(255,230,140,.45)'; ctx.fillRect(x, y0 + sz * (1 - S.wind.t / S.wind.dur), sz, sz * S.wind.t / S.wind.dur); }   // 前摇进度
         ctx.font = 'bold 20px "PingFang SC",sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = k.color; ctx.fillText(k.icon, x + sz / 2, y0 + sz / 2 + 1);
-        const c = Math.max(0, S.cds[i]) / k.cd; if (c > 0) { ctx.fillStyle = 'rgba(0,0,0,.6)'; ctx.fillRect(x, y0, sz, sz * c); }
+        if (!cur) { ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fillRect(x, y0, sz, sz); }   // 没轮到的格子压暗
         ctx.font = '10px "PingFang SC",sans-serif'; ctx.fillStyle = '#e8d6b0'; ctx.fillText(k.name, x + sz / 2, y0 + sz + 9);
       } else { ctx.font = '10px sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#6b5a44'; ctx.fillText('空', x + sz / 2, y0 + sz / 2 + 3); }
       if (S.skip[i] > 0) { ctx.fillStyle = 'rgba(160,160,170,.5)'; ctx.fillRect(x, y0, sz, sz); }
