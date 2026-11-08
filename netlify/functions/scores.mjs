@@ -1,0 +1,150 @@
+// 英雄榜接口：GET /api/scores 取榜，POST /api/scores 提交一局成绩
+// 存储：Netlify Blobs（每局一个 run:xxx，避免并发写入互相覆盖）
+import { getStore } from '@netlify/blobs';
+
+export const config = { path: '/api/scores' };
+
+const STORE = 'wumingzhibei-board';
+const SEASON = 's2';   // 用户定 2026-10-31：旧纪录（含第二章被误记成第一章的）不要了，从 s2 重新计        // 换赛季只改这里（旧数据自动被忽略）
+const NAME_MAX = 8;
+const MIN_TIME = 90;        // 用时低于 90 秒视为异常（正常通关要几分钟）
+const MAX_KILLS = 200;
+const MAX_ZONE = 6;         // 一共 6 个区域
+const RATE_WINDOW = 60;     // 同一 IP 60 秒内最多 3 次提交
+const RATE_MAX = 3;
+const TOP_N = 20;
+// 清理口令：只有知道这一句的人能删记录 / 列出内部 key（普通玩家拿不到）
+const ADMIN = 'wzb-qingli-2026';
+
+const json = (obj, status = 200) =>
+  new Response(JSON.stringify(obj), {
+    status,
+    headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' },
+  });
+
+function cleanName(raw) {
+  let s = String(raw == null ? '' : raw).replace(/[\u0000-\u001f<>\\"'`]/g, '').trim();
+  if (!s) s = '无名氏';
+  return Array.from(s).slice(0, NAME_MAX).join('');
+}
+
+// 读取全部成绩（只读当前赛季）
+async function readAll(store) {
+  const list = await store.list({ prefix: 'run:' });
+  const items = await Promise.all(
+    (list.blobs || []).map(async b => {
+      try {
+        const raw = await store.get(b.key);
+        if (!raw) return null;
+        const rec = JSON.parse(raw);
+        rec.key = b.key;                     // 内部 key（只在管理员接口返回）
+        return rec;
+      } catch (e) { return null; }
+    })
+  );
+  // 用户定 11/01：恢复旧赛季的成绩，一律按第一章算（旧版本没记章节）；新赛季照常按 ch 分章
+  return items.filter(x => x && Number.isFinite(x.kills) && Number.isFinite(x.t)).map(x => x.season === SEASON ? x : { ...x, ch: 1 });
+}
+
+// 评分 = 击杀 x10 + 通关数 x100 + 通关时间分（最多 +240）+ 无伤分（最多 +200）
+//   通关时间分：只有通关才算，(900 - 用时秒) x 0.4，不封顶、每秒都在变
+//   无伤分：每被打 1 下扣 20 分，200 分封顶
+// 死掉也能上榜：没通关就没有时间分
+function scoreOf(kills, t, cleared, win, hits, bonus) {
+  const progress = Math.max(0, Math.min(MAX_ZONE, cleared)) * 100;
+  const speed = win ? Math.max(0, Math.round((900 - t) * .4)) : 0;
+  const safe = Math.max(0, 200 - Math.max(0, Math.min(99, hits || 0)) * 20);
+  return kills * 10 + progress + speed + safe + Math.max(0, Math.min(200, bonus || 0));   // 满血吃补血道具的额外分，最多 200
+}
+function pub(x) {
+  const zone = Number.isFinite(x.zone) ? x.zone : (x.win ? MAX_ZONE : 0);
+  const win = !!x.win;
+  const hits = Number.isFinite(x.hits) ? x.hits : 0;
+  const cleared = win ? MAX_ZONE : Math.max(0, zone - 1);   // 两章都按 6 个区域算   // 通过的区域数：死在 3 关 = 过了 2 关
+  const diff = x.diff === 'easy' ? 'easy' : 'hard';     // 只用于显示：老记录当年的难度就是现在的困难
+  const base = scoreOf(x.kills, x.t, cleared, win, hits, x.bonus);
+  // 困难（旧普通）= 原分 ×1；简单模式 = 原分 ×0.8（困难 ≈ 简单的 1.25 倍）；老记录没有 diff → 按困难算，分数不动
+  const rv = Number.isFinite(x.revives) ? x.revives : 0;
+  return { ch: x.ch === 2 ? 2 : 1, name: x.name, kills: x.kills, t: x.t, zone, win, cleared, hits, at: x.at, diff, revives: rv,
+    score: Math.round(base * (x.diff === 'easy' ? .8 : 1) * (rv >= 2 ? .5 : 1)) };   // 第 2 次复活起评分减半
+}
+
+export default async function handler(req, context) {
+  const store = getStore({ name: STORE, consistency: 'strong' });
+
+  if (req.method === 'GET') {
+    try {
+      const all = await readAll(store);
+      const u = new URL(req.url);
+      // 管理员视角：?admin=口令 → 附带内部 key，方便精确删除
+      if (u.searchParams.get('admin') === ADMIN) {
+        return json({ ok: true, rows: all.map(x => ({ key: x.key, name: x.name, kills: x.kills, t: x.t, zone: x.zone, win: !!x.win, hits: x.hits, at: x.at, ip: x.ip, cheat: x.cheat })) });
+      }
+      const clean = all.filter(x => !x.cheat).map(pub);
+      // 用户定：英雄榜只排「总积分」= 每一章各取自己最高的一局，再加起来（同一章刷多次不叠加）
+      const best = new Map();   // name -> { ch1, ch2, ... }
+      for (const r of clean) {
+        const p = best.get(r.name) || { name: r.name, chs: {}, at: 0 };
+        const cur = p.chs[r.ch];
+        if (!cur || r.score > cur.score) p.chs[r.ch] = r;
+        p.at = Math.max(p.at, r.at); best.set(r.name, p);
+      }
+      const list = [...best.values()].map(p => {
+        const c1 = p.chs[1], c2 = p.chs[2];
+        return { name: p.name, at: p.at, score: (c1 ? c1.score : 0) + (c2 ? c2.score : 0), s1: c1 ? c1.score : null, s2: c2 ? c2.score : null,
+          kills: (c1 ? c1.kills : 0) + (c2 ? c2.kills : 0) };
+      }).sort((a, b) => b.score - a.score || b.kills - a.kills).slice(0, TOP_N);
+      return json({ ok: true, season: SEASON, total: best.size, list });
+    } catch (e) {
+      return json({ ok: false, error: 'read failed' }, 500);
+    }
+  }
+
+  if (req.method !== 'POST') return json({ ok: false, error: 'method not allowed' }, 405);
+
+  let body;
+  try { body = await req.json(); } catch (e) { return json({ ok: false, error: 'bad json' }, 400); }
+
+  // 维护用：删单条 / 清空（口令写在代码里，只有维护者知道）
+  if (body && (body.op === 'del' || body.op === 'purge')) {
+    if (body.token !== ADMIN) return json({ ok: false, error: 'forbidden' }, 403);
+    try {
+      if (body.op === 'del') { await store.delete(String(body.key)); return json({ ok: true, deleted: 1 }); }
+      const list = await store.list({ prefix: 'run:' });
+      for (const b of list.blobs || []) await store.delete(b.key);
+      return json({ ok: true, deleted: (list.blobs || []).length });
+    } catch (e) { return json({ ok: false, error: 'del failed' }, 500); }
+  }
+
+  const name = cleanName(body.name);
+  const kills = Math.round(Number(body.kills));
+  const t = Math.round(Number(body.t));
+  const win = !!body.win;
+  const zone = Math.round(Number(body.zone)) || 0;
+  const hits = Math.max(0, Math.min(99, Math.round(Number(body.hits)) || 0));
+  const bonus = Math.max(0, Math.min(200, Math.round(Number(body.bonus)) || 0));
+  const diff = body.diff === 'hard' ? 'hard' : 'easy';
+  const revives = Math.max(0, Math.min(20, Math.round(Number(body.revives)) || 0));
+  const ch = Number(body.ch) === 2 ? 2 : 1;
+  if (!Number.isFinite(kills) || !Number.isFinite(t)) return json({ ok: false, error: 'bad numbers' }, 400);
+  if (win && t < MIN_TIME) return json({ ok: false, error: 'too fast' }, 400);      // 通关不可能这么快
+  if (!win && t < 10) return json({ ok: false, error: 'too fast' }, 400);
+  if (kills < 0 || kills > MAX_KILLS) return json({ ok: false, error: 'bad kills' }, 400);
+  if (zone < 0 || zone > MAX_ZONE) return json({ ok: false, error: 'bad zone' }, 400);
+
+  const ip = (context && context.ip) || req.headers.get('x-nf-client-connection-ip') || 'unknown';
+  const now = Date.now();
+
+  try {
+    // 简单限流：同一 IP 最近 60 秒的提交数
+    const recent = (await readAll(store)).filter(x => x.ip === ip && now - x.at < RATE_WINDOW * 1000);
+    if (recent.length >= RATE_MAX) return json({ ok: false, error: 'too many' }, 429);
+
+    const rec = { ch, name, kills, t, zone, win, hits, bonus, diff, revives, at: now, season: SEASON, ip, cheat: 0 };
+    const key = 'run:' + now.toString(36) + Math.random().toString(36).slice(2, 8);
+    await store.set(key, JSON.stringify(rec));
+    return json({ ok: true, key });
+  } catch (e) {
+    return json({ ok: false, error: 'write failed' }, 500);
+  }
+}

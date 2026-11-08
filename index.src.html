@@ -1,0 +1,102 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#1a1020">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png"><meta name="apple-mobile-web-app-title" content="无名之辈">
+<title>无名之辈·序章 幻想三国录</title><style>
+html,body{margin:0;position:fixed;inset:0;overflow:hidden;overscroll-behavior:none;background:#1a1020;font-family:system-ui,"PingFang SC","Noto Sans CJK SC",sans-serif;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+canvas{display:block;position:fixed;left:0;top:0;width:100vw;height:100vh;height:100dvh}
+#top{position:fixed;left:0;right:0;top:0;display:flex;gap:6px;padding:8px calc(10px + env(safe-area-inset-left));align-items:center;flex-wrap:wrap;z-index:2;pointer-events:none}
+button{font:inherit;font-size:13px;font-weight:700;border:1.5px solid rgba(255,255,255,.55);background:rgba(20,14,30,.35);color:#fff;text-shadow:0 1px 2px #000;border-radius:7px;padding:4px 8px;touch-action:none}
+button.on{background:rgba(255,216,110,.85);color:#2a2234;text-shadow:none;border-color:#ffd86e}
+#wp{position:fixed;right:calc(8px + env(safe-area-inset-right));top:calc(6px + env(safe-area-inset-top));display:flex;gap:5px;z-index:3;align-items:center}
+#wp button[data-w]{width:48px;height:48px;padding:4px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+#wp button[data-w] img{width:36px;height:36px;object-fit:contain;image-rendering:pixelated;pointer-events:none}
+#wp button[data-w] img[data-weapon-icon="w_bow"]{width:32px;height:34px;object-fit:contain}
+#wp button[data-w] img[data-weapon-icon="w_halberd"]{width:38px;height:32px;object-fit:contain}
+#bWeapon{width:42px;height:42px;padding:0;border-radius:50%;font-size:22px;line-height:1;color:#f3d37b;border-color:rgba(224,184,99,.8);background:rgba(54,38,24,.76)}
+#bWeapon:active{background:rgba(130,91,43,.92);transform:rotate(30deg)}
+#bMute{min-width:40px;height:42px;padding:0 7px}
+#joy{position:fixed;left:0;bottom:0;width:50%;height:70%;z-index:1;touch-action:none}
+#base{position:absolute;left:calc(14px + env(safe-area-inset-left));bottom:calc(14px + env(safe-area-inset-bottom));width:92px;height:92px;border-radius:50%;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.35)}
+#knob{position:absolute;left:25px;top:25px;width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.4)}
+.big{position:fixed;z-index:3;border-radius:50%;font-size:16px;display:flex;align-items:center;justify-content:center;padding:0;background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.5);color:#fff;text-shadow:0 1px 3px #000}
+.big:active{background:rgba(255,255,255,.3)}
+/* 透明按钮，贴近右下角 */
+#bA{right:calc(14px + env(safe-area-inset-right));bottom:calc(18px + env(safe-area-inset-bottom));width:72px;height:72px;background:rgba(210,60,48,.28);border-color:rgba(255,160,150,.7)}
+#bA:active{background:rgba(210,60,48,.5)}
+#bA::after{content:"";position:absolute;inset:-6px;border-radius:50%;pointer-events:none;opacity:0;background:conic-gradient(from -90deg,var(--charge-color,#ffe08a) 0deg var(--charge-angle,0deg),rgba(255,224,138,.12) var(--charge-angle,0deg) 360deg);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 3px));mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 3px))}
+#bA.charging::after{opacity:1;filter:drop-shadow(0 0 4px rgba(255,210,100,.8))}
+#bA.charged::after{animation:charge-pulse .65s ease-in-out infinite alternate}
+@keyframes charge-pulse{to{filter:drop-shadow(0 0 9px #8de5ff)}}
+#bR{right:calc(96px + env(safe-area-inset-right));bottom:calc(12px + env(safe-area-inset-bottom));width:54px;height:54px;font-size:13px}
+#bSkill{display:none;right:calc(18px + env(safe-area-inset-right));bottom:calc(98px + env(safe-area-inset-bottom));width:96px;height:44px;border-radius:18px;font-size:12px;background:rgba(174,126,45,.82);border-color:rgba(255,226,151,.85)}
+body.szz-summon #bSkill{display:flex}
+#bCatapult{display:none;position:fixed;right:calc(18px + env(safe-area-inset-right));bottom:calc(146px + env(safe-area-inset-bottom));width:96px;height:42px;border-radius:16px;z-index:6;
+  background:rgba(96,60,26,.92);border:2px solid #c9971f;color:#f3d37b;font:700 14px "PingFang SC",sans-serif}
+body.szz-catapult #bCatapult{display:block}
+body.szz-summon #bSkill:disabled{filter:saturate(.6)}
+#help{position:fixed;left:10px;bottom:8px;font-size:12px;color:#ddd;text-shadow:0 1px 2px #000;z-index:2;pointer-events:none}
+body.szz-rogue #top,body.szz-rogue #wp,body.szz-rogue #joy,body.szz-rogue .big,body.szz-rogue #help{display:none}
+body.szz-rogue #bSkill,body.szz-rogue #bCatapult{display:none!important}
+@media (max-width:600px){#wp{gap:3px}#wp button[data-w]{width:42px;height:44px}#wp button[data-w] img{width:36px;height:36px}#bWeapon{width:38px;height:38px}#bMute{min-width:36px;height:38px}}
+@media (pointer:coarse){
+  #wp{gap:6px} #wp button[data-w]{width:52px;height:52px;min-width:52px;padding:6px}
+  #bWeapon{position:fixed;right:calc(23px + env(safe-area-inset-right));bottom:calc(100px + env(safe-area-inset-bottom));width:54px;height:54px;z-index:7;font-size:14px;background:radial-gradient(circle at 30% 25%,#79613bcc,#352719e8);box-shadow:0 2px 5px #21160d88}
+  #bSkill{right:calc(2px + env(safe-area-inset-right));bottom:calc(164px + env(safe-area-inset-bottom))}
+  #bCatapult{right:calc(2px + env(safe-area-inset-right));bottom:calc(216px + env(safe-area-inset-bottom))}
+  body.szz-catapult:not(.szz-summon) #bCatapult{bottom:calc(164px + env(safe-area-inset-bottom))}
+  #bWeapon:active{transform:translateY(1px);background:#8a653b}
+  #wp button.weapon-pending{outline:2px dashed #e4c779;outline-offset:1px}
+  #bA,#bR,#bSkill,#bCatapult,#bWeapon{touch-action:none;-webkit-user-select:none}
+}
+body.szz-pro #help{display:none}
+#rot{display:none;position:fixed;inset:0;z-index:2147483000;background:#1a1020;color:#ffd86e;font-size:20px;font-weight:800;flex-direction:column;align-items:center;justify-content:center;text-align:center;line-height:1.8;padding:0 24px}
+@media (pointer:coarse){#help{display:none}}
+@media (pointer:coarse) and (orientation:portrait){#rot{display:flex}}
+@media (pointer:coarse){
+#cloudRetry,#cloudPin{min-width:34px!important;min-height:32px!important}
+#tHelp{min-width:34px!important;min-height:34px!important}
+.shopBuy{min-height:34px!important;padding:0 10px!important}.shopPrice{white-space:nowrap}
+.outfitChip{min-width:40px!important;min-height:34px!important;font-size:11px!important;white-space:nowrap}
+.outfitConfirm,.outfitCancel{min-height:36px!important;padding:0 14px!important}
+#masteryPanel .mx{min-height:34px!important;padding:2px 14px!important}
+.x-back{min-height:34px!important}
+}
+#rot small{display:block;margin-top:10px;font-size:14px;font-weight:600;color:#c9b691;line-height:1.6}
+</style>__FONT_FACE__</head><body>
+<div id="bootSplash" style="position:fixed;inset:0;z-index:99999;background:#1a1020;color:#f1d59a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;font:18px system-ui,sans-serif;text-align:center;padding:24px">
+<strong id="bootText">正在加载…</strong><button id="bootRefresh" hidden onclick="location.reload()" style="font:16px system-ui,sans-serif;padding:12px;color:#ffe0a0;background:#583b28;border:1px solid #ba9158;border-radius:6px">网络较慢，点此刷新</button><small id="bootError" style="overflow-wrap:anywhere;max-width:90vw"></small></div>
+<script>
+(function(){
+var ready=false,failed=false,timer=setTimeout(function(){if(!ready)document.getElementById('bootRefresh').hidden=false;},8000);
+function error(message){if(ready)return;failed=true;document.getElementById('bootText').textContent='加载出错';document.getElementById('bootRefresh').hidden=false;document.getElementById('bootError').textContent=String(message||'未知错误');}
+window.addEventListener('error',function(e){if(e.message)error(e.message);});
+window.addEventListener('unhandledrejection',function(e){error(e.reason&&e.reason.message||e.reason);});
+window.finishBoot=function(){if(failed)return;ready=true;clearTimeout(timer);var el=document.getElementById('bootSplash');if(el)el.remove();};
+if(location.protocol==='https:'&&!/[?&]debug(?:=|&|$)/.test(location.search)&&'serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(function(){});}
+})();
+// 自动更新：打开游戏、或从后台切回来时，查一下线上有没有新版本；有就在标题/整备页自动刷新（战斗中不打扰）
+(function(){
+var BUILD='__BUILD__',busy=false;
+if(location.protocol!=='https:'||/[?&]debug(?:=|&|$)/.test(location.search))return;
+function check(){
+  if(busy)return;
+  if(window.TITLE&&TITLE.blocks&&!TITLE.blocks())return;   // 正在战斗：不刷新
+  busy=true;
+  fetch('/version.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(d){
+    if(d&&d.v&&d.v!==BUILD)return fetch('/index.html',{cache:'reload'}).then(function(){location.reload();});
+  }).catch(function(){}).then(function(){busy=false;});
+}
+window.addEventListener('load',function(){setTimeout(check,1500);});
+document.addEventListener('visibilitychange',function(){if(!document.hidden)check();});
+})();
+</script>
+<canvas id="c"></canvas>
+<div id="rot">📱↻<br>请把手机横过来玩
+  <small>并关闭「竖屏锁定」，打开自动旋转</small></div>
+<div id="top"><b style="font-size:13px;color:#fff;text-shadow:0 1px 3px #000">无名之辈·序章 幻想三国录 · 黄巾流寇</b></div>
+<div id="wp"><button data-w="staff" type="button" aria-label="棍" title="棍"><img data-weapon-icon="w_staff" alt="棍"></button><button data-w="hammer" type="button" aria-label="锤子" title="锤子"><img data-weapon-icon="w_hammer" alt="锤子"></button><button data-w="stone" type="button" aria-label="石子" title="石子"><img data-weapon-icon="w_stone" alt="石子"></button><button id="bWeapon" type="button" aria-label="切换武器" title="切换到下一把已装备武器">换武</button><button id="bMute" type="button" aria-label="静音" title="静音">🔊</button></div>
+<div id="joy"><div id="base"><div id="knob"></div></div></div>
+<button class="big" id="bR">翻滚</button><button class="big" id="bCatapult" type="button">投石车</button><button class="big" id="bA">攻击</button><button class="big" id="bSkill" type="button">万箭齐发</button>
+<div id="help">电脑：WASD/方向键移动 · J 攻击/长按蓄力 · K/空格 翻滚 · U 召唤 · I 法器（待开放） · 1/2/3 换武器 · R 重来</div>
+<script>const ASSETS=__ASSETS__;</script><script>const BG=__BG__;</script><script>__GAME__</script></body></html>
