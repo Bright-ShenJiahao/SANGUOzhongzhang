@@ -34,6 +34,9 @@ function ensureAssets(group, { silent = false, label = '' } = {}) {
 }
 window.ensureAssets = ensureAssets;
 load('far', BG.far); load('mid', BG.mid); load('gnd', BG.gnd);
+// 第一章水墨背景（远景 1 + 近景 1，和第二章同一套两层画法）；网址带 ?bg=old 可切回旧背景对比
+window.INK_BG = !!(BG.inkFar && BG.inkNear) && !/[?&]bg=old(?:&|$)/.test(location.search);
+if (BG.inkFar && BG.inkNear) { load('inkfar', BG.inkFar); load('inknear', BG.inkNear); }
 Object.entries(ASSETS.props).forEach(([k, v]) => load('p_' + k, v[0]));
 Object.entries(ASSETS.food || {}).forEach(([k, v]) => load('food_' + k, v[0]));
 
@@ -841,6 +844,10 @@ function draw() {
       if (field) tileLayer(field, M.viewH / field.height, 1, 0);
       ctx.imageSmoothingEnabled = false;
     }
+  } else if (window.INK_BG && IMG.inkfar && IMG.inkfar.width && IMG.inknear && IMG.inknear.width) {
+    ctx.imageSmoothingEnabled = true;
+    tileLayer(IMG.inkfar, M.viewH / IMG.inkfar.height, .3, -85);   // 远山下移到房顶上方，不被墙挡住
+    tileLayer(IMG.inknear, M.viewH / IMG.inknear.height, 1, 0);    // 墙根在 y≈171，正好接上 M.top=168
   } else {
     tileLayer(IMG.far, .577, .3, 0);
     tileLayer(IMG.gnd, .62, 1, my + 560 * ms);

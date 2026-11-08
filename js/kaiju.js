@@ -52,7 +52,7 @@
   @media (max-width:700px) and (orientation:portrait){#kaiju .cols{grid-template-columns:1fr;overflow:auto}#kaiju .pan{overflow:visible}#kaiju .pic{min-height:140px}}`;
   function render() {
     const O = window.SURV ? SURV.ORIGINS : {}, cur = SURV.origin(), o = O[cur], st = STAT[cur] || [], SK = SURV.SK, sk = SK[o.skill];
-    const F = FIELDS[field], bg = typeof BG !== 'undefined' ? `url('${BG.mid}'),url('${BG.far}')` : 'none';
+    const F = FIELDS[field], bg = typeof BG !== 'undefined' ? (window.INK_BG ? `url('${BG.inkNear}'),url('${BG.inkFar}')` : `url('${BG.mid}'),url('${BG.far}')`) : 'none';
     el.innerHTML = `
       <div class="top"><div class="seal">卒</div><div><h1>开局配置</h1><small>选择你的出身</small></div></div>
       <div class="cols">
