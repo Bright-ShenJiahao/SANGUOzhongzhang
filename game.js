@@ -37,6 +37,7 @@ load('far', BG.far); load('mid', BG.mid); load('gnd', BG.gnd);
 // 第一章水墨背景（远景 1 + 近景 1，和第二章同一套两层画法）；网址带 ?bg=old 可切回旧背景对比
 window.INK_BG = !!(BG.inkFar && BG.inkNear) && !/[?&]bg=old(?:&|$)/.test(location.search);
 if (BG.inkFar && BG.inkNear) { load('inkfar', BG.inkFar); load('inknear', BG.inkNear); }
+if (BG.arena && /[?&]bg=arena(?:&|$)/.test(location.search)) load('arena', BG.arena);   // 俯视竞技场（js/arena.js，试玩对比）
 Object.entries(ASSETS.props).forEach(([k, v]) => load('p_' + k, v[0]));
 Object.entries(ASSETS.food || {}).forEach(([k, v]) => load('food_' + k, v[0]));
 
@@ -234,7 +235,7 @@ function reset() {
   if (window.SFX && SFX.preloadVoices) setTimeout(() => { if (!(window.TITLE && TITLE.blocks && TITLE.blocks())) { flushLoads(); SFX.preloadVoices(['intro', 'guanhai_']); } }, 300);   // 第一章语音开局后慢慢下   // 神器：每局重新踩上飞剑、打落次数清零
   atkHeldSince = 0; charging = false; chargeTier = 0; chargeTierFlash = 0; chargeFx = []; chargeHitFx = []; deathLandedAt = null; enemiesCelebrating = false;
   comboCount = 0; comboExpireAt = 0; comboNotices = [];
-  arenaL = null; boardSent = false; runBonus = 0;
+  arenaL = null; boardSent = false; runBonus = 0; if (window.ARENA) ARENA.stop();
   hero = { x: 60, y: (M.top + M.bot) / 2, f: 1, hp: 10, st: 'idle', t: 0, inv: 0, rollCd: 0, atk: null, q: 0, combo: 0, comboWin: 0, lastHit: -9, lastHitC: -1, lastShotC: 0, vx: 0, ix: 0, iy: 0 };
   if (window.GEAR) { GEAR.reset(); hero.hp = maxHeroHp(); }
   if (window.BOWAMMO) BOWAMMO.reset();
@@ -435,6 +436,7 @@ function moveEnt(e, dx, dy) {
     e.x = Math.max(lo, Math.min(e.x, Math.max(lo, hi)));   // 敌人也不许被打出场外（否则打不到、卡关）
   }
   if (e === hero && arenaL != null) e.x = Math.max(arenaL + 12, e.x);   // Boss 战场地左边界
+  if (window.ARENA) ARENA.clamp(e);
 }
 
 // ---------- 刷怪 ----------
@@ -686,6 +688,7 @@ function update(dt) {
   if (arenaL != null) tx = Math.max(tx, arenaL);   // 用户定：左边走不过去的地方，镜头也不往那边移，免得以为还能走
   if (chapter2Run && chapter2Run.battle === 6 && !(window.XIAOCHANG && XIAOCHANG.active())) tx = (M.W - vw) / 2;   // 祭台战：镜头固定在正中
   cam.x += (Math.max(0, Math.min(M.W - vw, tx)) - cam.x) * Math.min(1, dt * 6);
+  if (window.ARENA) { ARENA.tick(); ARENA.cam(); }   // 竞技场：镜头固定，边界随窗口大小重算
   shake = Math.max(0, shake - dt); msgT -= dt;
   if (msgT <= 0 && tutorialQueue.length) { const tip = tutorialQueue.shift(); say(tip.text, tip.time); }
   if (toastT > 0) toastT -= dt;
@@ -844,6 +847,8 @@ function draw() {
       if (field) tileLayer(field, M.viewH / field.height, 1, 0);
       ctx.imageSmoothingEnabled = false;
     }
+  } else if (window.ARENA && ARENA.on()) {
+    ARENA.drawBg();
   } else if (window.INK_BG && IMG.inkfar && IMG.inkfar.width && IMG.inknear && IMG.inknear.width) {
     ctx.imageSmoothingEnabled = true;
     tileLayer(IMG.inkfar, M.viewH / IMG.inkfar.height, .3, -85);   // 远山下移到房顶上方，不被墙挡住

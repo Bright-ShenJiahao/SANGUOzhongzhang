@@ -184,7 +184,8 @@ assets['voice'] = {os.path.splitext(os.path.basename(f))[0]: file_uri(f)
                    for f in sorted(__import__('glob').glob(P('art', 'voice', '*.mp3')))}
 bg = {'mid': uri(P('art', 'bg', 'village_mid.webp')), 'far': uri(P('art', 'bg', 'village_far.jpg')),
       'gnd': uri(P('art', 'bg', 'village_ground.jpg')),
-      'inkFar': uri(P('art', 'bg', 'village_ink_far.webp')), 'inkNear': uri(P('art', 'bg', 'village_ink_near.webp'))}
+      'inkFar': uri(P('art', 'bg', 'village_ink_far.webp')), 'inkNear': uri(P('art', 'bg', 'village_ink_near.webp')),
+      'arena': uri(P('art', 'bg', 'arena.webp'))}
 assets['chapter2'] = {
     'far': uri(P('art', 'bg', 'chapter2_far.webp')),
     'battlefield': uri(P('art', 'bg', 'chapter2_battlefield.webp')),

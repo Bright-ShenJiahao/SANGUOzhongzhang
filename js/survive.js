@@ -33,9 +33,10 @@
     return 'grunt';
   }
   function edgeSpawn(type, boss) {
-    const vw = viewW(), side = Math.random() < .5 ? -1 : 1;
-    let x = side < 0 ? cam.x + 6 : cam.x + vw - 6; x = Math.max(arenaL + 14, Math.min(lockR - 14, x));
-    spawn(type, x, R(M.top + 6, M.bot - 6));
+    const vw = viewW(); let side = Math.random() < .5 ? -1 : 1, x, y;
+    if (window.ARENA && ARENA.on()) { const p = ARENA.edge(); x = p.x; y = p.y; side = x < hero.x ? -1 : 1; }   // 俯视竞技场：四周都刷
+    else { x = side < 0 ? cam.x + 6 : cam.x + vw - 6; x = Math.max(arenaL + 14, Math.min(lockR - 14, x)); y = R(M.top + 6, M.bot - 6); }
+    spawn(type, x, y);
     const z = zs[zs.length - 1]; z.f = -side; z.survMul = 1 + HP_SCALE * (W.n - 1);
     z.hp *= z.survMul;
     if (boss) { z.hp *= 4; z.sc = (z.sc || 1) * 1.25; z.survBoss = true; floaters.push({ x: z.x, y: z.y - 60, t: 0, txt: '敌将出阵！', color: '#ff6a4a' }); }
@@ -182,6 +183,7 @@
     forceBlade();
     const vw = viewW(); arenaL = M.gates[0] + 10; lockR = arenaL + vw * 1.5; gateI = 0;
     hero.x = arenaL + vw * .5; cam.x = arenaL;
+    if (window.ARENA) ARENA.start();   // 竞技场试玩：重设边界、镜头和出生点
     startWave(1);
   }
   function tick(dt) {
