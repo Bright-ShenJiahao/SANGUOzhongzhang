@@ -300,7 +300,7 @@
     edge();
   }
 
-  if (ON) setInterval(() => { if (pending && (!window.TITLE || TITLE.mode() === 'game')) { pending = false; open(); } }, 150);   // 真正进游戏（不是在标题页）才打开长卷
+  if (ON) { const poll = () => { if (pending && (!window.TITLE || TITLE.mode() === 'game')) { pending = false; open(); } requestAnimationFrame(poll); }; requestAnimationFrame(poll); }   // 真正进游戏（不是在标题页）才打开长卷
   const MAP_OF = l => l <= 3 ? 'field' : l <= 6 ? 'town' : l <= 11 ? 'yz' : 'altar';   // 第 1~3 层打谷场，4~6 县城，7~11 黄巾营寨，12 张角祭坛
   window.ROUTE = {
     mapOf: n => MAP_OF(n.layer),

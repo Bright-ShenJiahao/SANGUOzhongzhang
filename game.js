@@ -831,6 +831,7 @@ function draw() {
   if (window.PAUSE) PAUSE.syncButton();
   if (window.TITLE && TITLE.draw()) return;   // 标题界面自己接管整屏
   if (window.ROOM && ROOM.draw()) return;     // 开场农房
+  if (window.ROUTE && ROUTE.shown()) { ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = '#eadcc0'; ctx.fillRect(0, 0, cv.width, cv.height); return; }   // 路线长卷（或正等着打开）时不画战斗场景，免得进游戏时先闪一下
   const W = cv.width, H = cv.height; SC = H / M.viewH;
   const sk = shake > 0 ? rnd(-2, 2) : 0;
   OXs = Math.round(-cam.x * SC + sk);

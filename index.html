@@ -63,7 +63,7 @@ body.szz-pro #help{display:none}
 .x-back{min-height:34px!important}
 }
 #rot small{display:block;margin-top:10px;font-size:14px;font-weight:600;color:#c9b691;line-height:1.6}
-</style><link rel="preload" href="pack/fonts/result.woff2?v=b784c01050" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=b784c01050)format("woff2");font-display:swap}</style></head><body>
+</style><link rel="preload" href="pack/fonts/result.woff2?v=878f956c30" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=878f956c30)format("woff2");font-display:swap}</style></head><body>
 <div id="bootSplash" style="position:fixed;inset:0;z-index:99999;background:#1a1020;color:#f1d59a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;font:18px system-ui,sans-serif;text-align:center;padding:24px">
 <strong id="bootText">正在加载…</strong><button id="bootRefresh" hidden onclick="location.reload()" style="font:16px system-ui,sans-serif;padding:12px;color:#ffe0a0;background:#583b28;border:1px solid #ba9158;border-radius:6px">网络较慢，点此刷新</button><small id="bootError" style="overflow-wrap:anywhere;max-width:90vw"></small></div>
 <script>
@@ -77,7 +77,7 @@ if(location.protocol==='https:'&&!/[?&]debug(?:=|&|$)/.test(location.search)&&'s
 })();
 // 自动更新：打开游戏、或从后台切回来时，查一下线上有没有新版本；有就在标题/整备页自动刷新（战斗中不打扰）
 (function(){
-var BUILD='bbc2bb65edfb',busy=false;
+var BUILD='03a1cba36b34',busy=false;
 if(location.protocol!=='https:'||/[?&]debug(?:=|&|$)/.test(location.search))return;
 function check(){
   if(busy)return;
@@ -5721,7 +5721,7 @@ function resultKey(e) {
     edge();
   }
 
-  if (ON) setInterval(() => { if (pending && (!window.TITLE || TITLE.mode() === 'game')) { pending = false; open(); } }, 150);   // 真正进游戏（不是在标题页）才打开长卷
+  if (ON) { const poll = () => { if (pending && (!window.TITLE || TITLE.mode() === 'game')) { pending = false; open(); } requestAnimationFrame(poll); }; requestAnimationFrame(poll); }   // 真正进游戏（不是在标题页）才打开长卷
   const MAP_OF = l => l <= 3 ? 'field' : l <= 6 ? 'town' : l <= 11 ? 'yz' : 'altar';   // 第 1~3 层打谷场，4~6 县城，7~11 黄巾营寨，12 张角祭坛
   window.ROUTE = {
     mapOf: n => MAP_OF(n.layer),
@@ -9963,6 +9963,7 @@ function draw() {
   if (window.PAUSE) PAUSE.syncButton();
   if (window.TITLE && TITLE.draw()) return;   // 标题界面自己接管整屏
   if (window.ROOM && ROOM.draw()) return;     // 开场农房
+  if (window.ROUTE && ROUTE.shown()) { ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = '#eadcc0'; ctx.fillRect(0, 0, cv.width, cv.height); return; }   // 路线长卷（或正等着打开）时不画战斗场景，免得进游戏时先闪一下
   const W = cv.width, H = cv.height; SC = H / M.viewH;
   const sk = shake > 0 ? rnd(-2, 2) : 0;
   OXs = Math.round(-cam.x * SC + sk);
