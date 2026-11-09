@@ -626,7 +626,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   function pose() {
     if (S.poseOverride) return S.poseOverride.f;
     if (S.recov) return S.recov.late && S.recov.t > S.recov.dur * .55 ? S.recov.late : S.recov.pose;
-    if (S.wind && hero.st !== 'walk') return S.wind.k.pose[0];
+    if (S.wind && (hero.st !== 'walk' || S.wind.dur - S.wind.t < .16)) return S.wind.k.pose[0];   // 边走边打时，出手前 0.16 秒也露一下起手帧
     return null;
   }
   const rooted = () => !!S.recov;
