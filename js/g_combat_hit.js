@@ -1,6 +1,7 @@
 // 受击结算：hit/rawHit、击飞、落地、敌人欢呼（2026-10-31 从 game.js 原样拆出，逻辑不变）
 // 依赖 game.js 的全局变量，只在运行时调用；本文件加载时不访问 game.js 的变量。
 function hit(z, dmg, kb, dir, knock, daze = 0, stun = .35, interrupt = false, ranged = false, traits = {}) {
+  if (window.SURV && SURV.stunGate && z) { const g = SURV.stunGate(z, stun, knock); if (g) { stun = g.stun; knock = g.knock; } }   // 三国终章：眩晕有冷却
   // 盾兵举盾（第二章）：穿云箭、投石车这类从天上砸下的攻击，盾兵周围 45 内的黄巾兵：50% 完全挡住，否则只吃 40% 且不硬直（用户定）
   if (chapter2Run && z && !z.dead && (traits.skyArrow || traits.siegeShot)) {
     const sh = zs.find(s => s.type === 'yellow-shield' && !s.dead && Math.hypot(s.x - z.x, (s.y - z.y) * 2) < (s.T.ch2Elite ? 65 : 45));
