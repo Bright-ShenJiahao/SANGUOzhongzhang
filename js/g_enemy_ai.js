@@ -343,7 +343,7 @@ function zUpdate(z, dt) {
   const mx = tx - z.x, my = ty - z.y, l = Math.hypot(mx, my);
   z.moving = l > 4;
   if (z.moving) {
-    const sp = T.spd * (!window.GEAR && z.moveSlowT > 0 ? .85 : 1) * (Math.abs(dx) > 150 ? 2.2 : 1) * (T.elite || T.chapterBoss ? 1 : 1.25);   // 离得远时快步冲过来
+    const sp = T.spd * (!window.GEAR && z.moveSlowT > 0 ? .85 : 1) * (Math.abs(dx) > 150 ? 2.2 : 1) * (T.elite || T.chapterBoss ? 1 : 1.25) * (z.survSlow > 0 ? .7 : 1);   // 离得远时快步冲过来；草上飞风痕减速
     moveEnt(z, mx / l * sp * dt, my / l * sp * .7 * dt);
     if (z.bx && z.avoidDir == null) moveEnt(z, 0, (z.slot % 2 ? 1 : -1) * T.spd * dt);   // 被草垛等挡住时上下绕开（已在绕行时不再额外推）
   }

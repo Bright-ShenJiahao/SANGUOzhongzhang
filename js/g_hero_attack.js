@@ -364,6 +364,7 @@ function dmgHero(n, from, kind = 'basic') {
   if (noviceMode()) n *= .5;
   if (IS_TOUCH) n *= .8;
   if (n <= 0) return;
+  if (window.SURV && SURV.absorb) { n = SURV.absorb(n); if (n <= 0) { h.inv = .5; shake = Math.max(shake, .08); sfx('hurt', h.x); return; } }   // 三国终章：真气先吃伤害
   n = Math.max(.01, n);
   const steadyHold = h.hp > n && charging && R_('steady', 0) > 0 && Math.random() < R_('steady', 0);
   hitsTaken++;   // 结算评价用：被打了多少下

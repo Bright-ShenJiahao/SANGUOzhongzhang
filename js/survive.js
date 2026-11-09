@@ -23,7 +23,7 @@
   ];
   const RT = { on: false, node: null, dmg: 1, cd: 1, move: 1, take: 1 };   // 路线模式（?route）：当前节点、磨刀加成
 let CM = 1, RM = 1, CK = '';   // CK：当前出手的招式（统计输出用）   // CM：当前这一招的伤害倍率（出身熟练×共鸣×熟练度）；RM：范围倍率
-  const DM = () => RT.dmg * CM;
+  const DM = () => RT.dmg * CM * critRoll();
   const rec = d => { if (CK) S.dps[CK] = (S.dps[CK] || 0) + d; };
 const bossCount = () => RT.on ? (RT.node ? (RT.node.type === 'boss' ? 2 : RT.node.type === 'elite' ? 1 : 0) : 0) : (BOSS_WAVES[W.n] || 0);
 const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: false, between: 0, started: false };
@@ -251,8 +251,64 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const MAST_T = [0, 8, 20, 40, 70, 110, 160, 220, 300, 400];   // 施放次数 → 熟练度 LV1~10
   const lvOf = k => { const m = S.mast[k] || 0; let l = 1; while (l < 10 && m >= MAST_T[l]) l++; return l; };
   const mastMul = k => { const l = lvOf(k); return 1 + .06 * Math.min(3, l - 1) + (l >= 5 ? .12 : 0) + .05 * Math.max(0, Math.min(l, 9) - 5); };   // LV2-4、6-9 递增，LV5 质变
-  function skillMul(k) { const c = catOf(k), n = RES().cnt[c]; return profOf(c) * (1 + RESD[Math.min(5, n)]) * mastMul(k); }
+  function skillMul(k) {
+    const c = catOf(k), n = RES().cnt[c], low = hero.hp / maxHp() < .3 ? 1 + .25 * GM.low : 1;
+    return profOf(c) * (1 + RESD[Math.min(5, n)]) * mastMul(k) * GM.all * GM.cat[c] * low * (1 + .06 * S.xy);
+  }
+  function critRoll() {   // 暴击：基础 5% + 功法；伤害 ×1.5 + 心诀
+    if (!CK || !SK[CK]) return 1;
+    const c = catOf(CK);
+    if (S.lhjOn || Math.random() < .05 + GM.crit + GM.critC[c]) { if (Math.random() < .35) floaters.push({ x: hero.x, y: hero.y - 54, t: 0, txt: '会心', color: '#ff9a4a' }); return 1.5 + GM.critD[c]; }
+    return 1;
+  }
   const CDM = () => RT.cd * RES().cd;
+  // ---------- 功法（三国幸存者 38 个：20 心法 + 8 通用 + 5 杂项 + 5 轻功） ----------
+  const GGEN = [.02, .03, .045, .065], GSPEC = [.08, .13, .19, .28], GLVM = [1, 1.3, 1.7], GFTH = [120, 300], GTN = ['黄', '玄', '地', '天'], GTC = ['#c9b27a', '#6fb8ff', '#c58cff', '#ffb347'];
+  const GF = {};
+  const gadd = (id, n, t, o) => { GF[id] = Object.assign({ id, n, t, c: -1, x: {}, d: '', qg: false }, o); };
+  gadd('tuna', '吐纳心法', 0, { x: { hy: 2 }, d: '回元 +2（真气回复更快）' });
+  gadd('yangqi', '养气诀', 0, { x: { hp: 1.12, qh: 2 }, d: '等效生命 +12%，气海 +2（真气上限）' });
+  gadd('tieyi', '铁衣功', 1, { x: { take: .92 }, d: '受到伤害 -8%' });
+  gadd('tayun', '踏云步法', 1, { x: { spd: 1.07 }, d: '移动速度 +7%' });
+  gadd('jubao', '聚宝心经', 2, { x: {}, d: '银两 +20%（商店开放后生效）', off: true });
+  gadd('guanxing', '观星诀', 2, { x: { crit: .05 }, d: '暴击率 +5%' });
+  gadd('taiping', '太平清领心经', 3, { x: { all: 1.12, take: .94 }, kh: .004, d: '全部伤害 +12%，受到伤害 -6%', xj: '每次击杀回复 0.4% 生命' });
+  gadd('hunyuan', '混元一气功', 3, { x: { all: 1.08, hp: 1.1, crit: .03 }, kh: .002, d: '全部伤害 +8%，等效生命 +10%，暴击 +3%', xj: '每次击杀回复 0.2% 生命' });
+  [['短兵', 1, ['快刀心法', '断水心经', '破军心经', '霸王心经']], ['长兵', 2, ['抖枪诀', '贯虹心法', '龙胆心经', '无双心经']], ['射艺', 3, ['听风诀', '穿云心经', '追月心经', '落日心经']], ['体术', 0, ['熊经诀', '金钟罩', '铁骨功', '不动明王功']], ['术法', 4, ['引气诀', '通玄心法', '紫气心经', '太平玄元经']]].forEach(([cn, ci, ns], k) => ns.forEach((n, t) => gadd('gf' + k + t, n, t, { c: ci, cn })));
+  gadd('qingshen', '轻身术', 0, { x: { dcd: .92 }, d: '翻滚冷却 -8%' });
+  gadd('juqi', '聚气诀', 1, { x: { qh: 1, hy: 1 }, d: '气海 +1，回元 +1' });
+  gadd('shixue', '嗜血功', 1, { x: {}, kh: .006, d: '每次击杀回复 0.6% 生命' });
+  gadd('beishui', '背水一战', 2, { x: {}, low: 1, d: '生命低于 30% 时，招式伤害 +25%，受到伤害 -10%' });
+  gadd('lhj', '连环劲', 2, { x: {}, lhj: 1, d: '连续 3 秒不受伤，下一招必定暴击' });
+  gadd('caoshang', '草上飞', 0, { qg: true, d: '轻功：跑动时脚下留风痕，敌人踩上减速 30%' });
+  gadd('xingyun', '行云诀', 1, { qg: true, d: '轻功：跑动每 1 秒积 1 层势（最多 5），每层伤害 +6%；停下后每 1.5 秒散 1 层' });
+  gadd('taxue', '踏雪无痕', 2, { qg: true, d: '轻功：跑动时受到伤害 -15%' });
+  gadd('tiesha', '铁砂掌劲', 2, { qg: true, d: '轻功：翻滚时把周围敌人击退并僵直' });
+  gadd('yufeng', '御风而行', 3, { qg: true, d: '轻功：跑动时身周不断扫出风刃' });
+  const GM0 = () => ({ all: 1, take: 1, spd: 1, dcd: 1, hp: 1, crit: 0, hy: 0, qh: 0, cat: [1, 1, 1, 1, 1], critC: [0, 0, 0, 0, 0], critD: [0, 0, 0, 0, 0], block: 0, still: 0, kh: 0, low: 0, lhj: false });
+  let GM = GM0();
+  const gfLv = id => { const e = S.gfExp[id] || 0; return 1 + (e >= GFTH[0] ? 1 : 0) + (e >= GFTH[1] ? 1 : 0); };   // 杀敌数 → LV1~3，×1 / ×1.3 / ×1.7
+  function gfCalc() {   // 主修：全额 + 心诀；辅修：数值 50%，没有心诀
+    const r = GM0();
+    S.gf.forEach((id, i) => {
+      const g = GF[id]; if (!g) return;
+      const main = i === 0, f = (main ? 1 : .5) * GLVM[gfLv(id) - 1];
+      if (g.c >= 0) {
+        r.all *= 1 + GGEN[g.t] * f; r.cat[g.c] *= 1 + GSPEC[g.t] * f;
+        if (main && g.t >= 2) { if (g.c === 0) { r.block += .10; if (g.t === 3) r.still += .4; } else { r.critC[g.c] += .10; if (g.t === 3) r.critD[g.c] += .5; } }
+      } else {
+        for (const k in g.x) { const v = g.x[k]; if (k === 'crit' || k === 'hy' || k === 'qh') r[k] += v * f; else r[k] *= 1 + (v - 1) * f; }
+        if (g.kh) r.kh += g.kh * f; if (g.low) r.low += f; if (g.lhj) r.lhj = true;
+      }
+    });
+    r.still = Math.min(.7, r.still); return r;
+  }
+  const zqMax = () => Math.round(maxHp() * (1 + .06 * GM.qh) * 10) / 10;
+  function gfText(g, main) {
+    const f = (main ? 1 : .5) * GLVM[gfLv(g.id) - 1], pc = v => (v * 100).toFixed(1).replace(/\.0$/, '') + '%';
+    if (g.c >= 0) { let t = `全部伤害 +${pc(GGEN[g.t] * f)}，${g.cn}类招式伤害 +${pc(GSPEC[g.t] * f)}`; if (main && g.t >= 2) t += g.c === 0 ? '；心诀：10% 格挡' + (g.t === 3 ? '，站定 1 秒后受伤 -40%' : '') : '；心诀：该类暴击 +10%' + (g.t === 3 ? '，暴击伤害 +50%' : ''); return t; }
+    return g.d + (main && g.xj ? '；心诀：' + g.xj : '') + (!g.qg && !main ? '（辅修减半）' : '');
+  }
   // 波间习得招式：从还没学会的招式里随机给最多 3 个，选一个放进空格
   function offerSkill(cb) {
     const owned = S.slots.filter(Boolean), free = S.slots.indexOf('');
@@ -269,7 +325,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     document.body.appendChild(box);
     return true;
   }
-  const S = { slots: ['hengsao', '', '', '', ''], qi: 0, qt: 0, hold: 0, wind: null, recov: null, skip: [0, 0, 0, 0, 0], later: [], mast: {}, dps: {}, combo: 0, comboT: 0, lk: 0, chain: 0, lastCat: -1, lastI: -9, poseOverride: null, cycles: 0, flash: [0, 0, 0, 0, 0] };
+  const S = { slots: ['hengsao', '', '', '', ''], qi: 0, qt: 0, hold: 0, wind: null, recov: null, skip: [0, 0, 0, 0, 0], later: [], gf: ['', '', ''], qg: '', gfExp: {}, zq: 10, hp0: 10, noHitT: 0, stillT: 0, mvT: 0, xyD: 0, xy: 0, trailT: 0, ywT: 0, lhjReady: false, lhjOn: false, mast: {}, dps: {}, combo: 0, comboT: 0, lk: 0, chain: 0, lastCat: -1, lastI: -9, poseOverride: null, cycles: 0, flash: [0, 0, 0, 0, 0] };
   const busy = () => hero.st === 'roll' || hero.air || ['down', 'bounce', 'getup', 'hurt'].includes(hero.st) || hero.dazeT > 0;
   // 眩晕：每个目标有冷却（杂兵 4 秒 0.75 秒；精英 6 秒 0.5；小头目 10 秒 0.3；首领 16 秒 0.2，且不击倒）
   const STUN = [[4, .75], [6, .5], [10, .3], [16, .2]];
@@ -280,7 +336,32 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     return { stun: st[1], knock: knock && t < 2 };
   }
   function skillTick(dt) {
-    if (typeof kills === 'number') { if (kills < S.lk) S.lk = kills; if (kills > S.lk) { S.combo += kills - S.lk; S.comboT = 3; } S.lk = kills; }
+    GM = gfCalc();
+    if (typeof kills === 'number') {
+      if (kills < S.lk) S.lk = kills;
+      if (kills > S.lk) {
+        const d = kills - S.lk; S.combo += d; S.comboT = 3;
+        if (RT.on) {
+          S.gf.forEach(id => { if (id) { const l0 = gfLv(id); S.gfExp[id] = (S.gfExp[id] || 0) + d; if (gfLv(id) > l0) floaters.push({ x: hero.x, y: hero.y - 90, t: 0, txt: GF[id].n + ' LV' + gfLv(id), color: '#ffd86e' }); } });
+          if (GM.kh) heal(maxHp() * GM.kh * d);
+          S.zq = Math.min(zqMax(), S.zq + zqMax() * .006 * d);
+        }
+      }
+      S.lk = kills;
+    }
+    if (RT.on) {
+      S.zq = Math.min(zqMax(), S.zq + zqMax() * (.010 + .004 * GM.hy) * dt);
+      if (hero.hp < S.hp0 - 1e-6) S.noHitT = 0; else S.noHitT += dt;
+      S.hp0 = hero.hp;
+      if (S.noHitT >= 3 && GM.lhj) S.lhjReady = true;
+      const mv = Math.abs(hero.ix) > .1 || Math.abs(hero.iy) > .1;
+      S.stillT = mv ? 0 : S.stillT + dt;
+      if (S.qg === 'xingyun') { if (mv) { S.xyD = 0; if ((S.mvT += dt) >= 1) { S.mvT -= 1; S.xy = Math.min(5, S.xy + 1); } } else { S.mvT = 0; if ((S.xyD += dt) >= 1.5) { S.xyD -= 1.5; S.xy = Math.max(0, S.xy - 1); } } } else S.xy = 0;
+      if (mv && W.started && !(W.retreat > 0)) {
+        if (S.qg === 'caoshang' && (S.trailT -= dt) <= 0) { S.trailT = .3; zones.push({ x: hero.x, y: hero.y, r: 26, t: 0, T: 2.2, tk: 0, dmg: 0, kind: 'trail' }); }
+        if (S.qg === 'yufeng' && (S.ywT -= dt) <= 0) { S.ywT = .7; CM = 1; CK = 'yufeng'; blast(hero.x, hero.y, 44, .5, 30, '180,230,255'); CK = ''; }
+      }
+    }
     if ((S.comboT -= dt) <= 0) S.combo = 0;
     for (let i = 0; i < 5; i++) { S.skip[i] = Math.max(0, S.skip[i] - dt); S.flash[i] = Math.max(0, S.flash[i] - dt); }
     for (let i = S.later.length - 1; i >= 0; i--) { const q = S.later[i]; if ((q.t -= dt) <= 0) { S.later.splice(i, 1); if (!busy()) q.f(); } }
@@ -295,7 +376,8 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
         const t = nearest(200); if (t) hero.f = Math.sign(t.x - hero.x) || hero.f;
         CM = skillMul(key); RM = lvOf(key) >= 5 ? 1.1 : 1; const ch = S.wind.ch; S.chain = ch; S.lastCat = catOf(key); S.lastI = i;
         if (ch > 0) floaters.push({ x: hero.x, y: hero.y - 62, t: 0, txt: '连携 ×' + ch, color: '#9fe0ff' });
-        CK = key; k.cast();
+        S.lhjOn = S.lhjReady; S.lhjReady = false; if (S.lhjOn) S.noHitT = 0;
+        CK = key; k.cast(); S.lhjOn = false;
         const l0 = lvOf(key); S.mast[key] = (S.mast[key] || 0) + 1; if (lvOf(key) > l0) floaters.push({ x: hero.x, y: hero.y - 76, t: 0, txt: k.name + ' LV' + lvOf(key), color: '#ffd86e' });
         if (lvOf(key) >= 10) later(.2, () => { CM *= .6; k.cast(); });   // LV10 质变：多出一击
         CM = 1; RM = 1; CK = '';
@@ -315,6 +397,8 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     S.skip[S.qi] = .2; S.qt = -.05; S.qi = (S.qi + 1) % 5; if (S.qi === 0) S.cycles++; S.hold = 0;
   }
   function onRoll() {
+    hero.rollCd *= GM.dcd;
+    if (S.qg === 'tiesha') for (const z of near(hero.x, hero.y, 64)) hit(z, .3 * RT.dmg, 110, Math.sign(z.x - hero.x) || hero.f, true, 0, .5, false, false, { secondary: true, survSkill: true });
     if (OG().roll) hero.rollCd *= OG().roll;   // 翻滚：前摇中 = 这一招作废、跳到下一招；后摇中 = 直接取消后摇
     if (S.wind) { S.skip[S.wind.i] = .35; S.wind = null; S.qi = (S.qi + 1) % 5; if (S.qi === 0) S.cycles++; S.qt = 0; floaters.push({ x: hero.x, y: hero.y - 50, t: 0, txt: '打断', color: '#9aa' }); }
     S.recov = null;
@@ -324,17 +408,12 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const maxHp = () => window.GEAR ? GEAR.maxHp() : 10;
   const heal = v => { hero.hp = Math.min(maxHp(), hero.hp + v); };
   // ---------- 节点结算：连选 n 次（招式 / 强化 三选一）----------
-  const PERKS = [
-    { id: 'li', name: '力道', icon: '力', color: '#ffb45a', desc: '招式伤害 +10%', ok: () => RT.dmg < 2.6, ap() { RT.dmg *= 1.1; } },
-    { id: 'xun', name: '迅捷', icon: '迅', color: '#8fd0ff', desc: '出招间隔 -8%', ok: () => RT.cd > .6, ap() { RT.cd *= .92; } },
-    { id: 'xing', name: '疾行', icon: '行', color: '#b8e08a', desc: '移动速度 +6%', ok: () => RT.move < 1.4, ap() { RT.move *= 1.06; } },
-    { id: 'gu', name: '铁骨', icon: '骨', color: '#d8c8a8', desc: '受到伤害 -8%', ok: () => RT.take > .55, ap() { RT.take *= .92; } },
-    { id: 'chun', name: '回春', icon: '春', color: '#ff9a9a', desc: '立刻回复 40% 血量', ok: () => true, ap() { heal(maxHp() * .4); } },
-  ];
   function rewardOptions(kind) {
     const owned = S.slots.filter(Boolean), free = S.slots.indexOf('') >= 0;
     const sk = (free ? Object.keys(SK).filter(k => !owned.includes(k) && tierOk(k)) : []).sort(() => Math.random() - .5).slice(0, kind === 'skill' ? 3 : 2).map(k => ({ kind: 'skill', k, name: SK[k].name, icon: SK[k].icon, color: SK[k].color, desc: (SK[k].tier ? TIERN[SK[k].tier] + '阶 · ' : '') + SK[k].desc }));
-    const pk = PERKS.filter(p => p.ok()).sort(() => Math.random() - .5).map(p => ({ kind: 'perk', p, name: p.name, icon: p.icon, color: p.color, desc: p.desc }));
+    const gp = Object.keys(GF).filter(id => { const g = GF[id]; return !g.off && !S.gf.includes(id) && S.qg !== id && W.n >= TMIN[g.t + 1] && (g.qg || S.gf.includes('')); });
+    const pk = gp.sort(() => Math.random() - .5).map(id => { const g = GF[id]; return { kind: 'gf', id, name: g.n, icon: g.qg ? '轻' : g.n[0], color: GTC[g.t], desc: GTN[g.t] + '阶 · ' + (g.qg ? '轻功 · ' : g.c >= 0 ? g.cn + '心法 · ' : '内功 · ') + gfText(g, true) }; });
+    if (pk.length < 3) pk.push({ kind: 'heal', name: '回春', icon: '春', color: '#ff9a9a', desc: '立刻回复 40% 血量' });
     if (kind === 'perk') return pk.slice(0, 3);
     return sk.concat(pk).slice(0, 3).sort(() => Math.random() - .5);
   }
@@ -343,10 +422,10 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     const kind = kinds && kinds[Math.min(i, kinds.length) - 1], opts = rewardOptions(kind); W.pick = true;
     const old = document.getElementById('survPick'); if (old) old.remove();
     const box = document.createElement('div'); box.id = 'survPick';
-    box.innerHTML = `<div class="p"><h3>战利 · ${kind === 'skill' ? '招式 · ' : kind === 'perk' ? '强化 · ' : ''}${n > 1 ? '第 ' + i + '/' + n + ' 次 · ' : ''}三选一</h3><div class="row">${opts.map((o, j) => `<button data-j="${j}"><i style="font-style:normal;font-size:11px;opacity:.7">${o.kind === 'skill' ? '新招式' : '强化'}</i><b style="color:${o.color}">${o.icon}</b><span>${o.name}</span><small>${o.desc}</small></button>`).join('')}</div>${S.slots.indexOf('') >= 0 ? '<p>新招式放进空着的格子，按 1→5 顺序轮流放</p>' : ''}</div>`;
+    box.innerHTML = `<div class="p"><h3>战利 · ${kind === 'skill' ? '招式 · ' : kind === 'perk' ? '功法 · ' : ''}${n > 1 ? '第 ' + i + '/' + n + ' 次 · ' : ''}三选一</h3><div class="row">${opts.map((o, j) => `<button data-j="${j}"><i style="font-style:normal;font-size:11px;opacity:.7">${o.kind === 'skill' ? '新招式' : '强化'}</i><b style="color:${o.color}">${o.icon}</b><span>${o.name}</span><small>${o.desc}</small></button>`).join('')}</div>${S.slots.indexOf('') >= 0 ? '<p>新招式放进空着的格子，按 1→5 顺序轮流放</p>' : ''}</div>`;
     box.querySelectorAll('button').forEach(b => b.onclick = () => {
       const o = opts[+b.dataset.j];
-      if (o.kind === 'skill') { const f = S.slots.indexOf(''); if (f >= 0) S.slots[f] = o.k; } else o.p.ap();
+      if (o.kind === 'skill') { const f = S.slots.indexOf(''); if (f >= 0) S.slots[f] = o.k; } else if (o.kind === 'gf') { if (GF[o.id].qg) S.qg = o.id; else { const f = S.gf.indexOf(''); if (f >= 0) S.gf[f] = o.id; } } else heal(maxHp() * .4);
       box.remove(); offerReward(n, cb, i + 1, kinds);
     });
     document.body.appendChild(box);
@@ -364,6 +443,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   }
   function nodeClear() {   // 一个节点打完：发奖励，回长卷
     const nd = RT.node; W.started = false; zs.length = 0; eshots.length = 0;
+    { const c = S.zq * .3; if (c > .05) { heal(c); floaters.push({ x: hero.x, y: hero.y - 60, t: 0, txt: '真气化血 +' + Math.round(c * 10), color: '#7fd0ff' }); } S.zq = 0; }   // 战后：剩余真气 30% 转成气血
     if (nd.type === 'boss' && nd.final) { won = true; return; }
     const back = () => { W.pick = false; ROUTE.done(nd); };
     if (nd.type === 'boss') { say('敌将已破！', 1.4); heal(maxHp() * .3); offerReward(2, back, 1, ['skill', 'perk']); }   // 血量是资源：只有首领、营地、疗伤奖励、奇遇才回血
@@ -373,6 +453,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   }
   function beginNode(nd) {
     if (!c2ok && typeof ensureAssets === 'function') ensureAssets('chapter2', { silent: true }).then(() => { c2ok = true; });
+    GM = gfCalc(); S.zq = zqMax(); S.hp0 = hero.hp; S.noHitT = 0; S.xy = 0;
     RT.node = nd; W.N = ROUTE.waves(nd); W.started = true; W.between = 0; W.pick = false; S.wind = null; S.recov = null; S.later = []; bolts.length = 0; zones.length = 0; fx.length = 0;
     zs.length = 0; eshots.length = 0; if (window.ARENA) ARENA.start(ROUTE.mapOf(nd));
     startWave(1);
@@ -380,7 +461,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   // ---------- 对外接口 ----------
   function forceBlade() { weapon = 'blade'; pendingWeapon = null; try { if (window.GEAR && GEAR.switch) GEAR.switch(); } catch (e) {} if (typeof ui === 'function') ui(); }
   function startRun() {
-    S.slots = [OG().skill || 'hengsao', '', '', '', '']; S.mast = {}; S.dps = {}; S.combo = 0; S.lk = typeof kills === 'number' ? kills : 0; S.chain = 0; S.lastCat = -1; S.lastI = -9; W.pick = false; const old = document.getElementById('survPick'); if (old) old.remove();
+    S.slots = [OG().skill || 'hengsao', '', '', '', '']; S.mast = {}; S.dps = {}; S.gf = ['', '', '']; S.qg = ''; S.gfExp = {}; S.xy = 0; S.lhjReady = false; S.lhjOn = false; GM = GM0(); S.zq = zqMax(); S.hp0 = hero.hp; S.combo = 0; S.lk = typeof kills === 'number' ? kills : 0; S.chain = 0; S.lastCat = -1; S.lastI = -9; W.pick = false; const old = document.getElementById('survPick'); if (old) old.remove();
     W.started = true; W.between = 0; S.wind = null; S.recov = null; S.later = []; S.qi = 0; bolts.length = 0; zones.length = 0; S.cycles = 0; fx.length = 0;
     forceBlade();
     const vw = viewW(); arenaL = M.gates[0] + 10; lockR = arenaL + vw * 1.5; gateI = 0;
@@ -393,7 +474,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   function tick(dt) {
     if (weapon !== 'blade') forceBlade();
     if (charging || atkHeldSince) cancelCharge();
-    for (const z of zs) if (z.stunCd > 0) z.stunCd -= dt;
+    for (const z of zs) { if (z.stunCd > 0) z.stunCd -= dt; if (z.survSlow > 0) z.survSlow -= dt; }
     skillTick(dt);
     for (const e of fx) e.t += dt;
     for (const b of bolts) {
@@ -404,7 +485,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     CM = 1; CK = '';
     for (const zn of zones) {
       CM = zn.cm || 1; CK = zn.ck || ''; zn.t += dt; if (zn.follow) { zn.x = hero.x; zn.y = hero.y; }
-      if ((zn.tk -= dt) <= 0) { zn.tk = .35; for (const z of near(zn.x, zn.y, zn.r)) HT(z, zn.dmg, zn.kind === 'wheel' ? 25 : 4, Math.sign(z.x - zn.x) || hero.f, .02); }
+      if ((zn.tk -= dt) <= 0) { zn.tk = .35; if (zn.kind === 'trail') { for (const z of near(zn.x, zn.y, zn.r)) z.survSlow = .6; } else for (const z of near(zn.x, zn.y, zn.r)) HT(z, zn.dmg, zn.kind === 'wheel' ? 25 : 4, Math.sign(z.x - zn.x) || hero.f, .02); }
     }
     CM = 1; CK = '';
     for (let i = zones.length - 1; i >= 0; i--) if (zones[i].t >= zones[i].T) zones.splice(i, 1);
@@ -473,30 +554,37 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   }
   function hud(HW) {
     hudT = performance.now(); buildUi();
-    const HH = ctx.canvas.height / DPR, fine = !(window.matchMedia && matchMedia('(pointer:coarse)').matches), n = 5, sz = fine ? 44 : 38, gap = 6, w = n * sz + (n - 1) * gap;
-    const x0 = fine ? 16 : (HW - w) / 2, y0 = fine ? HH - 16 - sz * 2 - 8 : 44, labY = fine ? 54 : y0 + sz + 28;
+    const HH = ctx.canvas.height / DPR, fine = !(window.matchMedia && matchMedia('(pointer:coarse)').matches), n = 5, sz = fine ? 44 : 38, sz0 = sz, gap = 6, w = n * sz + (n - 1) * gap;
+    const x0 = fine ? 16 : (HW - w) / 2, y0 = fine ? HH - 16 - sz * 2 - 8 : 44, labY = fine ? 54 : y0 + sz + 4 + 26 + 18;
     ctx.save();
-    const slot = (x, y, k, cur, i) => {
+    const slot = (x, y, k, cur, i, lbl, sz = sz0) => {
       ctx.fillStyle = '#241812'; ctx.fillRect(x, y, sz, sz);
       if (k) {
         ctx.fillStyle = k.color; ctx.globalAlpha = .22 + (i >= 0 && S.flash[i] > 0 ? .5 : 0); ctx.fillRect(x, y, sz, sz); ctx.globalAlpha = 1;
         if (i >= 0 && S.wind && S.wind.i === i) { ctx.fillStyle = 'rgba(255,230,140,.45)'; ctx.fillRect(x, y + sz * (1 - S.wind.t / S.wind.dur), sz, sz * S.wind.t / S.wind.dur); }   // 前摇进度
         ctx.font = 'bold 20px "PingFang SC",sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = k.color; ctx.fillText(k.icon, x + sz / 2, y + sz / 2 + 1);
         if (!cur) { ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fillRect(x, y, sz, sz); }   // 没轮到的格子压暗
-        ctx.font = '10px "PingFang SC",sans-serif'; ctx.fillStyle = '#c9b58c'; ctx.textBaseline = 'alphabetic'; ctx.fillText('LV' + lvOf(S.slots[i]), x + sz - 12, y + sz - 3);
+        ctx.font = '10px "PingFang SC",sans-serif'; ctx.fillStyle = '#c9b58c'; ctx.textBaseline = 'alphabetic'; ctx.fillText(lbl != null ? lbl : 'LV' + lvOf(S.slots[i]), x + sz - 12, y + sz - 3);
       } else { ctx.font = 'bold 18px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#4a3a2a'; ctx.fillText('+', x + sz / 2, y + sz / 2 + 1); }
       if (i >= 0 && S.skip[i] > 0) { ctx.fillStyle = 'rgba(160,160,170,.5)'; ctx.fillRect(x, y, sz, sz); }
       ctx.strokeStyle = cur ? '#ffe27a' : 'rgba(176,138,74,.75)'; ctx.lineWidth = cur ? 2.5 : 1.2; ctx.strokeRect(x + .5, y + .5, sz - 1, sz - 1);
     };
-    ctx.fillStyle = 'rgba(14,9,6,.55)'; ctx.fillRect(x0 - 6, y0 - 6, w + 12, fine ? sz * 2 + 8 + 12 : sz + 12);
+    ctx.fillStyle = 'rgba(14,9,6,.55)'; ctx.fillRect(x0 - 6, y0 - 6, w + 12, fine ? sz * 2 + 8 + 12 : sz + 26 + 4 + 12);
     for (let i = 0; i < n; i++) slot(x0 + i * (sz + gap), y0, SK[S.slots[i]], i === S.qi, i);
-    if (fine) for (let i = 0; i < 3; i++) slot(x0 + i * (sz + gap), y0 + sz + 8, null, false, -1);   // 内功格（功法下一批开放）
+    const gk = id => GF[id] ? { icon: GF[id].qg ? '轻' : GF[id].n[0], color: GTC[GF[id].t] } : null, sz2 = fine ? sz : 26, ry2 = y0 + sz + (fine ? 8 : 4);
+    for (let i = 0; i < 3; i++) slot(x0 + i * (sz2 + gap), ry2, gk(S.gf[i]), true, -1, S.gf[i] ? 'LV' + gfLv(S.gf[i]) : '', sz2);   // 内功：主修 + 2 辅修
+    slot(x0 + 3 * (sz2 + gap) + 8, ry2, gk(S.qg), true, -1, '', sz2);   // 轻功
     // 血条：屏幕底部正中（血量 ×10 显示成整数）
     const bw = fine ? Math.min(HW * .46, 520) : Math.min(HW * .44, 230), bh = fine ? 20 : 16, bx = (HW - bw) / 2, by = HH - (fine ? 18 : 12) - bh, mh = maxHp(), r = Math.max(0, Math.min(1, hero.hp / mh));
     ctx.fillStyle = 'rgba(14,9,6,.8)'; ctx.fillRect(bx - 3, by - 3, bw + 6, bh + 6); ctx.strokeStyle = '#8a6a3a'; ctx.lineWidth = 1.5; ctx.strokeRect(bx - 2.5, by - 2.5, bw + 5, bh + 5);
     const g = ctx.createLinearGradient(0, by, 0, by + bh); g.addColorStop(0, '#e0463a'); g.addColorStop(1, '#8c1c18'); ctx.fillStyle = g; ctx.fillRect(bx, by, bw * r, bh);
     ctx.font = 'bold ' + (fine ? 13 : 11) + 'px "PingFang SC",sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(20,8,6,.9)';
     const ht = Math.ceil(hero.hp * 10 - 1e-6) + ' / ' + Math.round(mh * 10); ctx.strokeText(ht, HW / 2, by + bh / 2 + 1); ctx.fillStyle = '#fff2d8'; ctx.fillText(ht, HW / 2, by + bh / 2 + 1);
+    { const zh = fine ? 12 : 9, zy = by - 8 - zh, zr = Math.max(0, Math.min(1, S.zq / zqMax()));   // 真气：蓝条叠在血条上方
+      ctx.fillStyle = 'rgba(14,9,6,.8)'; ctx.fillRect(bx - 3, zy - 2, bw + 6, zh + 4);
+      const g2 = ctx.createLinearGradient(0, zy, 0, zy + zh); g2.addColorStop(0, '#5cc0ff'); g2.addColorStop(1, '#1f5fa8'); ctx.fillStyle = g2; ctx.fillRect(bx, zy, bw * zr, zh);
+      ctx.strokeStyle = '#4a7aa8'; ctx.lineWidth = 1; ctx.strokeRect(bx - 2.5, zy - 1.5, bw + 5, zh + 3);
+      if (fine) { ctx.font = 'bold 10px "PingFang SC",sans-serif'; ctx.textBaseline = 'middle'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(8,16,30,.9)'; const zt = '真气 ' + Math.round(S.zq * 10) + ' / ' + Math.round(zqMax() * 10); ctx.strokeText(zt, HW / 2, zy + zh / 2 + 1); ctx.fillStyle = '#e2f4ff'; ctx.fillText(zt, HW / 2, zy + zh / 2 + 1); } }
     // 右侧大字：击杀、连击
     const nf = fine ? 46 : 30, rx = HW - (fine ? 22 : 12), ry = HH * (fine ? .36 : .3);
     const big = (num, label, y, a) => { ctx.globalAlpha = a; ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.font = 'bold ' + nf + 'px "PingFang SC",sans-serif'; ctx.lineWidth = 6; ctx.strokeStyle = 'rgba(30,18,10,.85)'; ctx.strokeText(num, rx, y); ctx.fillStyle = '#f4ead0'; ctx.fillText(num, rx, y); ctx.font = 'bold ' + (fine ? 20 : 14) + 'px "PingFang SC",sans-serif'; ctx.lineWidth = 4; ctx.strokeText(label, rx, y + nf * .72); ctx.fillStyle = '#d9a84a'; ctx.fillText(label, rx, y + nf * .72); ctx.globalAlpha = 1; };
@@ -533,23 +621,31 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     const rows = S.slots.map((k, i) => !SK[k] ? `<div class="r" style="opacity:.4">${i + 1}. 空</div>` :
       `<div class="r"><b style="color:${SK[k].color}">${i + 1}. ${SK[k].name}</b> <span class="t">${CATN[catOf(k)]}${SK[k].tier ? ' · ' + TIERN[SK[k].tier] + '阶' : ''}</span><span class="v">LV${lvOf(k)} · ×${skillMul(k).toFixed(2)}${tot ? ' · 输出 ' + Math.round((S.dps[k] || 0) / tot * 100) + '%' : ''}</span><span class="mv"><button data-mv="${i}:-1"${i < 1 ? ' disabled' : ''}>▲</button><button data-mv="${i}:1"${i > 3 || !SK[S.slots[i + 1]] ? ' disabled' : ''}>▼</button></span></div>`).join('');
     const res = R.cnt.map((n, c) => n >= 2 ? `<div class="r"><b>${CATN[c]}共鸣 ${n} 件</b><span class="v">本类招式伤害 +${Math.round(RESD[Math.min(5, n)] * 100)}%</span></div>` : '').join('') || '<div class="r" style="opacity:.5">还没有（同类别招式 2 件起）</div>';
+    const gfRows = S.gf.map((id, i) => { const g = GF[id]; return !g ? `<div class="r" style="opacity:.4">${i ? '辅修' : '主修'} · 空</div>` : `<div class="r"><b style="color:${GTC[g.t]}">${i ? '辅修' : '主修'} · ${g.n}</b> <span class="t">${GTN[g.t]}阶 · LV${gfLv(id)} · 杀敌 ${S.gfExp[id] || 0}</span><span class="mv"><button data-gm="${i}"${i < 1 ? ' disabled' : ''}>▲</button><button data-gx="${i}">✕</button></span></div><div class="gd">${gfText(g, i === 0)}</div>`; }).join('');
+    const qgRow = GF[S.qg] ? `<div class="r"><b style="color:${GTC[GF[S.qg].t]}">${GF[S.qg].n}</b> <span class="t">${GTN[GF[S.qg].t]}阶</span><span class="mv"><button data-qx="1">✕</button></span></div><div class="gd">${GF[S.qg].d}</div>` : '<div class="r" style="opacity:.4">空（战利品里可能出现轻功）</div>';
     const mx = Math.max(...R.cnt), ex = [mx >= 3 ? '受伤 -5%' : '', mx >= 4 ? '出招 -5% 间隔' : '', mx >= 5 ? '出招再快（共 -10%）' : ''].filter(Boolean).join('，');
     return `<div class="bp"><h3>构筑总览 <button class="x">✕</button></h3>
       <h4>出身 · ${o.name}</h4><div style="font-size:12px">${cats}</div><div style="font-size:11px;opacity:.6">出身对各类招式的熟练系数：跨类也能用，只是偏弱</div>
       <h4>招式（按 1→5 顺序放，可用 ▲▼ 调顺序）</h4>${rows}
       <h4>类别共鸣</h4>${res}${ex ? `<div style="font-size:11px;opacity:.7;margin-top:2px">额外：${ex}</div>` : ''}
       <h4>连携</h4><div style="font-size:12px">相邻两招类别相同，后一招前摇缩短，逐次叠加最多 -80%；换类别就断。当前：${S.chain > 0 ? '×' + S.chain : '无'}</div>
-      <h4>功法 · 真气</h4><div style="font-size:12px;opacity:.5">下一批开放</div></div>`;
+      <h4>内功（主修全额 + 心诀，辅修数值减半）</h4>${gfRows}
+      <h4>轻功</h4>${qgRow}
+      <h4>真气</h4><div style="font-size:12px">${Math.round(S.zq * 10)} / ${Math.round(zqMax() * 10)}　<span style="opacity:.65">受伤先扣真气；真气自己回复、杀敌回复；战后剩余的 30% 化成气血</span></div></div>`;
   }
   function toggleBuild(on) {
     buildOpen = on != null ? on : !buildOpen;
     let box = document.getElementById('survBuild');
     if (!buildOpen) { if (box) box.remove(); return; }
     if (!box) {
-      if (!document.getElementById('survBuildCss')) { const st = document.createElement('style'); st.id = 'survBuildCss'; st.textContent = '#survBuild{position:fixed;inset:0;z-index:10030;display:flex;align-items:center;justify-content:center;background:rgba(10,6,4,.62);font-family:"PingFang SC","Noto Sans CJK SC",sans-serif;color:#eee}#survBuild .bp{width:min(92vw,520px);max-height:86vh;overflow:auto;background:#1c140e;border:2px solid #8a6a3a;border-radius:8px;padding:10px 14px}#survBuild h3{margin:0 0 4px;font-size:16px;display:flex;justify-content:space-between;color:#ffd27a}#survBuild h4{margin:10px 0 3px;font-size:13px;color:#d8b070;border-bottom:1px solid #4a3820}#survBuild .r{display:flex;gap:8px;align-items:baseline;font-size:13px;padding:2px 0}#survBuild .t{opacity:.6;font-size:11px}#survBuild .v{margin-left:auto;white-space:nowrap;font-size:12px;opacity:.85}#survBuild .mv{display:flex;gap:3px;margin-left:6px}#survBuild .mv button{background:#2e2118;border:1px solid #8a6a3a;color:#ddd;border-radius:4px;font-size:12px;padding:2px 8px}#survBuild .mv button:disabled{opacity:.25}#survBuild .x{background:none;border:1px solid #8a6a3a;color:#ddd;border-radius:4px;font-size:14px;padding:0 8px}#survBuildBtn{position:fixed;top:10px;right:104px;z-index:10025;width:34px;height:34px;border-radius:6px;border:2px solid #8a6a3a;background:rgba(28,20,14,.85);color:#ffd27a;font-size:15px;display:none}'; document.head.appendChild(st); }
+      if (!document.getElementById('survBuildCss')) { const st = document.createElement('style'); st.id = 'survBuildCss'; st.textContent = '#survBuild{position:fixed;inset:0;z-index:10030;display:flex;align-items:center;justify-content:center;background:rgba(10,6,4,.62);font-family:"PingFang SC","Noto Sans CJK SC",sans-serif;color:#eee}#survBuild .bp{width:min(92vw,520px);max-height:86vh;overflow:auto;background:#1c140e;border:2px solid #8a6a3a;border-radius:8px;padding:10px 14px}#survBuild h3{margin:0 0 4px;font-size:16px;display:flex;justify-content:space-between;color:#ffd27a}#survBuild h4{margin:10px 0 3px;font-size:13px;color:#d8b070;border-bottom:1px solid #4a3820}#survBuild .r{display:flex;gap:8px;align-items:baseline;font-size:13px;padding:2px 0}#survBuild .gd{font-size:11px;opacity:.7;margin:0 0 3px 8px}#survBuild .t{opacity:.6;font-size:11px}#survBuild .v{margin-left:auto;white-space:nowrap;font-size:12px;opacity:.85}#survBuild .mv{display:flex;gap:3px;margin-left:6px}#survBuild .mv button{background:#2e2118;border:1px solid #8a6a3a;color:#ddd;border-radius:4px;font-size:12px;padding:2px 8px}#survBuild .mv button:disabled{opacity:.25}#survBuild .x{background:none;border:1px solid #8a6a3a;color:#ddd;border-radius:4px;font-size:14px;padding:0 8px}#survBuildBtn{position:fixed;top:10px;right:104px;z-index:10025;width:34px;height:34px;border-radius:6px;border:2px solid #8a6a3a;background:rgba(28,20,14,.85);color:#ffd27a;font-size:15px;display:none}'; document.head.appendChild(st); }
       box = document.createElement('div'); box.id = 'survBuild'; document.body.appendChild(box);
       box.onclick = e => {
         if (e.target === box || e.target.classList.contains('x')) { toggleBuild(false); return; }
+        const t = e.target.closest ? e.target : null, gm = t && t.closest('[data-gm]'), gx = t && t.closest('[data-gx]'), qx = t && t.closest('[data-qx]');
+        if (gm) { const i = +gm.dataset.gm; if (i > 0) { const q = S.gf[i]; S.gf[i] = S.gf[i - 1]; S.gf[i - 1] = q; box.innerHTML = buildHtml(); } return; }
+        if (gx) { S.gf[+gx.dataset.gx] = ''; box.innerHTML = buildHtml(); return; }
+        if (qx) { S.qg = ''; box.innerHTML = buildHtml(); return; }
         const m = e.target.closest && e.target.closest('[data-mv]'); if (!m) return;
         const [i, d] = m.dataset.mv.split(':').map(Number), j = i + d;
         if (j >= 0 && j < 5 && SK[S.slots[i]] && SK[S.slots[j]]) { const t = S.slots[i]; S.slots[i] = S.slots[j]; S.slots[j] = t; S.lastI = -9; S.chain = 0; box.innerHTML = buildHtml(); }
@@ -565,5 +661,11 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   addEventListener('keydown', e => { if (e.key === 'Tab' && RT.on && (ROUTE.shown() || performance.now() - hudT < 800)) { e.preventDefault(); toggleBuild(); } });
   setInterval(buildUi, 400);
 
-  window.SURV = { newHud: () => RT.on && !!RT.node, stunGate, noStun: () => RT.on, get slots() { return S.slots; }, SK, beginNode, frozen: () => RT.on && (ROUTE.shown() || buildOpen), routeHp: () => [hero.hp, maxHp()], camp(k) { if (k === 'heal') heal(maxHp() * .3); else RT.dmg *= 1.1; }, ORIGINS, setOrigin(k) { if (ORIGINS[k] && !ORIGINS[k].locked) origin = k; }, origin: () => origin, takeMul: () => (OG().take || 1) * RT.take * RES().take, moveMul: () => (OG().move || 1) * RT.move, left: () => RT.on && RT.node && W.started ? Math.max(0, WT() - W.t) : null, reward: (n, cb) => offerReward(n, cb), event(k, cb) { eventDo(k, cb); }, SK, tick, drawWorld, hud, startRun, waveFlow, pose, rooted, onRoll, skipWave() { if (W.retreat <= 0 && W.between <= 0 && W.started) endWave(); }, state: () => ({ wave: W.n, t: W.t, slots: S.slots.slice() }) };
+  window.SURV = { dbg: () => ({ gf: S.gf.slice(), qg: S.qg, zq: S.zq, zqMax: zqMax(), exp: S.gfExp, GM }), giveGf: id => { if (GF[id]) { if (GF[id].qg) S.qg = id; else { const f = S.gf.indexOf(""); if (f >= 0) S.gf[f] = id; } } }, newHud: () => RT.on && !!RT.node, stunGate, noStun: () => RT.on, get slots() { return S.slots; }, SK, beginNode, frozen: () => RT.on && (ROUTE.shown() || buildOpen), routeHp: () => [hero.hp, maxHp()], camp(k) { if (k === 'heal') heal(maxHp() * .3); else RT.dmg *= 1.1; }, ORIGINS, setOrigin(k) { if (ORIGINS[k] && !ORIGINS[k].locked) origin = k; }, origin: () => origin, takeMul: () => {
+      if (RT.on && GM.block && Math.random() < GM.block) { floaters.push({ x: hero.x, y: hero.y - 50, t: 0, txt: '格挡', color: '#bfe0ff' }); return 0; }
+      const mv = Math.abs(hero.ix) > .1 || Math.abs(hero.iy) > .1, low = hero.hp / maxHp() < .3 ? 1 - .10 * GM.low : 1;
+      return (OG().take || 1) * RT.take * RES().take * GM.take / GM.hp * low * (S.qg === 'taxue' && mv ? .85 : 1) * (GM.still && S.stillT > 1 ? 1 - GM.still : 1);
+    },
+    absorb: n => { if (!RT.on || S.zq <= 0) return n; const a = Math.min(S.zq, n); S.zq -= a; return n - a; },   // 真气先吃伤害，吃完才扣血
+     moveMul: () => (OG().move || 1) * RT.move * GM.spd, left: () => RT.on && RT.node && W.started ? Math.max(0, WT() - W.t) : null, reward: (n, cb) => offerReward(n, cb), event(k, cb) { eventDo(k, cb); }, SK, tick, drawWorld, hud, startRun, waveFlow, pose, rooted, onRoll, skipWave() { if (W.retreat <= 0 && W.between <= 0 && W.started) endWave(); }, state: () => ({ wave: W.n, t: W.t, slots: S.slots.slice() }) };
 })();

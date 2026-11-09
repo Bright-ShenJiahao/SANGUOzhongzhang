@@ -29,7 +29,7 @@
   // 第 17 层单个营地，第 18 层最终首领。段内节奏：第 1 层纯近战；第 2 层加远程/盾枪；第 3 层精锐或小营地；第 4 层段首领。
   const SEGS = 4, SEGLEN = 4;
   const TAGN = { melee: '流民群', raid: '刀盾队', range: '弓手阵', shield: '盾枪阵', patrol: '精锐巡逻' };
-  const RWN = { skill: '招式', perk: '强化', heal: '疗伤', both: '招式+强化' };
+  const RWN = { skill: '招式', perk: '功法', heal: '疗伤', both: '招式+功法' };
   const SECBOSS = [['程远志', '邓茂'], ['波才', '何仪'], ['管亥', '张曼成'], ['张梁', '张宝']];
   function gen() {
     const nodes = [], byLayer = [], cells = {};
@@ -259,7 +259,7 @@
     icon(n.type, R * 2.0, vis || (!reach && !cur));
     g.globalAlpha = 1; g.shadowBlur = 0; g.shadowColor = 'transparent'; g.shadowOffsetY = 0;
     if (vis && !cur) { g.beginPath(); g.arc(R * .62, -R * .62, 7, 0, 7); g.fillStyle = CINNABAR; g.fill(); g.strokeStyle = PAPER; g.lineWidth = 1.6; g.beginPath(); g.moveTo(R * .62 - 3, -R * .62); g.lineTo(R * .62 - .8, -R * .62 + 2.6); g.lineTo(R * .62 + 3.4, -R * .62 - 2.6); g.stroke(); }
-    if (n.rw && !vis) { const bc = { skill: ['招', '#3b6ea8'], perk: ['强', '#a8662a'], heal: ['疗', '#3f8a4a'], both: ['双', '#7a3a8a'] }[n.rw]; g.beginPath(); g.arc(R * .7, R * .7, 9, 0, 7); g.fillStyle = bc[1]; g.fill(); g.strokeStyle = PAPER; g.lineWidth = 1.5; g.stroke(); g.fillStyle = '#fff'; g.font = `bold 11px ${FONT}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(bc[0], R * .7, R * .7 + 1); }
+    if (n.rw && !vis) { const bc = { skill: ['招', '#3b6ea8'], perk: ['功', '#a8662a'], heal: ['疗', '#3f8a4a'], both: ['双', '#7a3a8a'] }[n.rw]; g.beginPath(); g.arc(R * .7, R * .7, 9, 0, 7); g.fillStyle = bc[1]; g.fill(); g.strokeStyle = PAPER; g.lineWidth = 1.5; g.stroke(); g.fillStyle = '#fff'; g.font = `bold 11px ${FONT}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(bc[0], R * .7, R * .7 + 1); }
     g.restore();
     // 名字：可走的节点、当前、Boss 常显；其他鼠标悬停才显
     if ((reach && !port()) || cur || n.type === 'boss' || hov.n === n) tag(p, R, n, hov.n === n || cur || n.type === 'boss');
