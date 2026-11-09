@@ -189,6 +189,8 @@ bg = {'mid': uri(P('art', 'bg', 'village_mid.webp')), 'far': uri(P('art', 'bg', 
       'arena': uri(P('art', 'bg', 'arena.webp')),
       'field': uri(P('art', 'bg', 'field.webp')),
       'town': uri(P('art', 'bg', 'town.webp')),
+      'forest': uri(P('art', 'bg', 'forest.webp')),
+      'camp': uri(P('art', 'bg', 'camp.webp')),
       'altar': uri(P('art', 'bg', 'altar.webp'))}
 assets['chapter2'] = {
     'far': uri(P('art', 'bg', 'chapter2_far.webp')),

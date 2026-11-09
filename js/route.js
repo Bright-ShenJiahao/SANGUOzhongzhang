@@ -8,8 +8,8 @@
   const WAVES_OF = { battle: 3, elite: 4, boss: 3 };   // 每种节点打几波（可调）
   const TIME_K = 1.1;                                   // 路线模式下每波时间缩放（20 波表 ≈21 分钟，12 层约合 30 分钟）
   const ICON = { battle: 0, elite: 1, camp: 2, boss: 3, start: 4, shop: 5, event: 6, chest: 7 };   // 图标表（art/ui/route_icons.webp，4×2，每格 256）
-  const MAPN = { field: '打谷场', town: '县城街巷', yz: '黄巾营寨', altar: '张角祭坛' };
-  const SECT = [['field', 1, 4, '120,140,80', .13], ['town', 5, 8, '160,115,70', .13], ['yz', 9, 17, '165,70,45', .12], ['altar', 18, 18, '70,55,95', .2]];   // 分段：地图、起止层、淡墨色调
+  const MAPN = { field: '打谷场', town: '县城街巷', yz: '黄巾营寨', forest: '林间空地', camp: '营寨腹地', altar: '张角祭坛' };
+  const SECT = [['field', 1, 4, '120,140,80', .13], ['town', 5, 8, '160,115,70', .13], ['forest', 9, 12, '110,130,70', .12], ['camp', 13, 17, '165,70,45', .12], ['altar', 18, 18, '70,55,95', .2]];   // 分段：地图、起止层、淡墨色调
   const hov = { n: null };
   const LABEL = { battle: '黄巾游兵', elite: '黄巾精锐', camp: '营地', boss: '张角祭坛', start: '涿郡', event: '奇遇', chest: '宝箱' };
   const EVENTS = [   // 奇遇：几个小抉择，选完不打架直接回长卷
@@ -309,7 +309,7 @@
   }
 
   if (ON) { const poll = () => { if (pending && (!window.TITLE || TITLE.mode() === 'game')) { pending = false; open(); } requestAnimationFrame(poll); }; requestAnimationFrame(poll); }   // 真正进游戏（不是在标题页）才打开长卷
-  const MAP_OF = l => l <= 4 ? 'field' : l <= 8 ? 'town' : l <= 17 ? 'yz' : 'altar';   // 第 1~4 层打谷场，5~8 县城，9~17 黄巾营寨，18 张角祭坛
+  const MAP_OF = l => l <= 4 ? 'field' : l <= 8 ? 'town' : l <= 12 ? 'forest' : l <= 17 ? 'camp' : 'altar';   // 第 1~4 层打谷场，5~8 县城，9~12 林间空地，13~17 营寨腹地，18 张角祭坛
   window.ROUTE = {
     mapOf: n => MAP_OF(n.layer),
     on: () => ON, TIME_K, layers: () => LAYERS,

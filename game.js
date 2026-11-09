@@ -41,7 +41,7 @@ if (BG.arena && /[?&]bg=arena2?(?:&|$)/.test(location.search)) load('arena', BG.
 if (BG.field && /[?&]bg=field(?:&|$)/.test(location.search)) load('arena', BG.field);
 if (BG.town && /[?&]bg=town(?:&|$)/.test(location.search)) load('arena', BG.town);
 if (BG.altar && /[?&]bg=altar(?:&|$)/.test(location.search)) load('arena', BG.altar);   // 张角祭坛
-if (/[?&]route(?:=|&|$)/.test(location.search)) { load('map_field', BG.field); load('map_town', BG.town); load('map_altar', BG.altar); load('map_yz', BG.arena); }   // 路线图：四张战斗地图都先载入（测试用，以后改成按需）   // 县城街巷   // 打谷场：不规则可走区域 + 高台（用同一个 IMG.arena 槽位）   // 俯视竞技场（js/arena.js，试玩对比）
+if (/[?&]route(?:=|&|$)/.test(location.search)) { load('map_field', BG.field); load('map_town', BG.town); load('map_altar', BG.altar); load('map_yz', BG.arena); load('map_forest', BG.forest); load('map_camp', BG.camp); }   // 路线图：四张战斗地图都先载入（测试用，以后改成按需）   // 县城街巷   // 打谷场：不规则可走区域 + 高台（用同一个 IMG.arena 槽位）   // 俯视竞技场（js/arena.js，试玩对比）
 Object.entries(ASSETS.props).forEach(([k, v]) => load('p_' + k, v[0]));
 Object.entries(ASSETS.food || {}).forEach(([k, v]) => load('food_' + k, v[0]));
 
