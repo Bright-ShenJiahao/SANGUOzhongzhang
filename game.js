@@ -401,6 +401,7 @@ function moveEnt(e, dx, dy) {
   if (window.GEAR && !heroLike) { const mult=GEAR.enemyMove(e); dx*=mult; dy*=mult; }
   if (window.ROGUE && !heroLike && ROGUE.enemyMove) { const m = ROGUE.enemyMove(e); dx *= m; dy *= m; }   // 水淹七军减速
   if (e.halberdBleed > 0 && gameT < e.halberdBleedUntil) { dx *= .9; dy *= .9; }   // 裂伤减速（玩家被心魔的戟叠了裂伤也一样减速）
+  if (window.ARENA && ARENA.steer && !heroLike) { const r = ARENA.steer(e, dx, dy); dx = r[0]; dy = r[1]; }   // 竞技场：被地形挡住时绕路
   e.bx = false;
   if (!blocked(e.x + dx, e.y)) e.x += dx; else e.bx = true;
   if (!blocked(e.x, e.y + dy)) e.y += dy;
@@ -1066,6 +1067,7 @@ function draw() {
       list.push({ y: gy, d: () => { if (s.ball) { shadow(x, gy, 4); ctx.save(); ctx.translate(x, gy - z); ctx.fillStyle = 'rgba(255,120,30,.35)'; ctx.beginPath(); ctx.arc(0, 0, 6, 0, 7); ctx.fill(); ctx.fillStyle = '#ff8a24'; ctx.beginPath(); ctx.arc(0, 0, 3.5, 0, 7); ctx.fill(); ctx.fillStyle = '#ffe08a'; ctx.beginPath(); ctx.arc(-1, -1, 1.4, 0, 7); ctx.fill(); ctx.restore(); return; } shadow(x, gy, s.k === 'catapult' ? 6 : 3); drawEnemyMissile(s, x, gy - z, p); } });
     }
   }
+  if (window.ARENA && ARENA.layers) for (const o of ARENA.layers()) list.push(o);   // 草垛、石井等遮挡层
   list.sort((a, b) => a.y - b.y).forEach(o => o.d());
   if (window.XIAOCHANG) XIAOCHANG.drawMagicFx();
   drawPropFx();   // 道具碎屑画在人物上面，打击感更清楚

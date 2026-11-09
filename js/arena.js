@@ -6,7 +6,7 @@
   const ON_URL = FIELD || /[?&]bg=arena2?(?:&|$)/.test(location.search);
   const Z = FIELD || /[?&]bg=arena2(?:&|$)/.test(location.search) ? 1.25 : 1;
   // 可走区域（都是占整张图的比例）：地面多边形 − 障碍（椭圆、土台整块）+ 土台台面 + 斜坡
-  const FC = {"ground":[[0.0598,0.2497],[0.2512,0.1116],[0.2871,0.1116],[0.3589,0.17],[0.4187,0.1966],[0.4486,0.1041],[0.5012,0.1041],[0.5036,0.1966],[0.5383,0.2125],[0.5712,0.1807],[0.924,0.2125],[0.9091,0.3188],[0.951,0.4463],[0.9641,0.5951],[0.9569,0.7226],[0.9211,0.7864],[0.8373,0.8236],[0.7715,0.8342],[0.6579,0.8395],[0.5323,0.8342],[0.5293,0.9192],[0.4575,0.9192],[0.4396,0.8236],[0.3888,0.8342],[0.323,0.8555],[0.2392,0.8502],[0.1495,0.8077],[0.0718,0.7333],[0.0329,0.627],[0.0269,0.5526],[0.0718,0.5207],[0.1106,0.4995],[0.1077,0.457],[0.0778,0.4251],[0.0658,0.3507]],"block":[[0.5682,0.1594],[0.8852,0.0978],[0.93,0.2019],[0.9258,0.2465],[0.8343,0.3741],[0.7207,0.3804],[0.6549,0.2784],[0.5682,0.1966]],"top":[[0.5849,0.1594],[0.7177,0.1201],[0.8852,0.1063],[0.924,0.2019],[0.8325,0.3103],[0.7207,0.2614],[0.6579,0.2657],[0.573,0.1849]],"ramp":[[0.6071,0.3454],[0.6878,0.3741],[0.7207,0.2657],[0.6609,0.2444]],"ell":[[0.1645,0.2019,0.1166,0.1254],[0.1734,0.6376,0.1047,0.101],[0.8672,0.7067,0.0449,0.0638]]};
+  const FC = {"ground":[[0.0598,0.2497],[0.2512,0.1116],[0.2871,0.1116],[0.3589,0.17],[0.4187,0.1966],[0.4486,0.1041],[0.5012,0.1041],[0.5036,0.1966],[0.5383,0.2125],[0.5712,0.1807],[0.924,0.2125],[0.9091,0.3188],[0.951,0.4463],[0.9641,0.5951],[0.9569,0.7226],[0.9211,0.7864],[0.8373,0.8236],[0.7715,0.8342],[0.6579,0.8395],[0.5323,0.8342],[0.5293,0.9192],[0.4575,0.9192],[0.4396,0.8236],[0.3888,0.8342],[0.323,0.8555],[0.2392,0.8502],[0.1495,0.8077],[0.0718,0.7333],[0.0329,0.627],[0.0269,0.5526],[0.0718,0.5207],[0.1106,0.4995],[0.1077,0.457],[0.0778,0.4251],[0.0658,0.3507]],"block":[[0.5682,0.1594],[0.8852,0.0978],[0.93,0.2019],[0.9258,0.2465],[0.8343,0.3741],[0.7207,0.3804],[0.6549,0.2784],[0.5682,0.1966]],"top":[[0.5849,0.1594],[0.7177,0.1201],[0.8852,0.1063],[0.924,0.2019],[0.8325,0.3103],[0.7207,0.2614],[0.6579,0.2657],[0.573,0.1849]],"ramp":[[0.6071,0.3454],[0.6878,0.3741],[0.7207,0.2657],[0.6609,0.2444]],"ell":[[0.1645,0.2019,0.1166,0.1254],[0.1734,0.7067,0.0897,0.0404],[0.8672,0.7332,0.0359,0.0276]]};
   const inPoly = (pt, x, y) => { let c = false; for (let i = 0, j = pt.length - 1; i < pt.length; j = i++) { const a = pt[i], b = pt[j]; if ((a[1] > y) !== (b[1] > y) && x < (b[0] - a[0]) * (y - a[1]) / (b[1] - a[1]) + a[0]) c = !c; } return c; };
   const inEll = (e, x, y) => ((x - e[0]) / e[2]) ** 2 + ((y - e[1]) / e[3]) ** 2 < 1;
   const walk = (x, y) => (inPoly(FC.ground, x, y) && !inPoly(FC.block, x, y) && !FC.ell.some(e => inEll(e, x, y))) || inPoly(FC.top, x, y) || inPoly(FC.ramp, x, y);
@@ -18,6 +18,30 @@
   const AX = 1000;                                   // 场地中心的世界 x
   const ST = FIELD ? { x0: .44, x1: .56, top: FB.y0, bot: FB.y1 } : { x0: .466, x1: .534, top: .14, bot: .945 };   // 上下两处台阶：可以走上去（台阶宽度内），两边墙外不能走
   const FL = FIELD ? { x0: FB.x0, x1: FB.x1, y0: FB.y0 + .1, y1: FB.y1 - .1 } : { x0: .105, x1: .885, y0: .18, y1: .86 };   // 地面（围墙里面）占图的比例范围
+  // 遮挡层：把草垛(含推车)、石井的轮廓从背景图里抠出来，按脚底线 base 和人物前后排序；人物走到它们后面时被盖住（并且变半透明）
+  const OCC = FIELD ? [
+    { base: .7067, poly: [[290,518],[325,545],[345,585],[375,582],[405,598],[432,640],[420,668],[345,700],[335,722],[285,722],[250,700],[205,690],[150,672],[138,640],[170,600],[215,588],[240,565],[275,540]].map(p => [p[0] / 1672, p[1] / 941]) },
+    { base: .745, poly: [[1405,580],[1480,575],[1505,600],[1500,640],[1520,690],[1500,712],[1440,730],[1385,700],[1395,650],[1410,610]].map(p => [p[0] / 1672, p[1] / 941]) },
+  ] : [];
+  for (const o of OCC) { const xs = o.poly.map(p => p[0]), ys = o.poly.map(p => p[1]); o.bx = Math.min(...xs); o.by = Math.min(...ys); o.bw = Math.max(...xs) - o.bx; o.bh = Math.max(...ys) - o.by; o.cv = null; }
+  function occCanvas(o) {
+    if (o.cv) return o.cv; const i = img(); if (!i) return null;
+    const c = document.createElement('canvas'); c.width = Math.round(o.bw * i.width); c.height = Math.round(o.bh * i.height);
+    const x = c.getContext('2d'); x.beginPath(); o.poly.forEach((p, k) => { const px = (p[0] - o.bx) * i.width, py = (p[1] - o.by) * i.height; k ? x.lineTo(px, py) : x.moveTo(px, py); }); x.closePath(); x.clip();
+    x.drawImage(i, -o.bx * i.width, -o.by * i.height); return o.cv = c;
+  }
+  // 绕路：直线被挡住时，沿「到主角的最短可走路线」走（格子 96×54，主角换格子才重算）
+  const GX = 96, GY = 54; let flow = null, flowKey = -1, flowCells = null;
+  function cells() { if (flowCells) return flowCells; flowCells = new Uint8Array(GX * GY); for (let j = 0; j < GY; j++) for (let i = 0; i < GX; i++) flowCells[j * GX + i] = walk((i + .5) / GX, (j + .5) / GY) ? 1 : 0; return flowCells; }
+  function field(hx, hy) {
+    const ws = cells(); let hi = Math.max(0, Math.min(GX - 1, hx * GX | 0)), hj = Math.max(0, Math.min(GY - 1, hy * GY | 0));
+    if (!ws[hj * GX + hi]) { let best = 1e9; for (let j = 0; j < GY; j++) for (let i = 0; i < GX; i++) if (ws[j * GX + i]) { const d = (i - hi) ** 2 + (j - hj) ** 2; if (d < best) { best = d; var bi = i, bj = j; } } hi = bi; hj = bj; }
+    const key = hj * GX + hi; if (key === flowKey && flow) return flow; flowKey = key;
+    const d = flow = new Float32Array(GX * GY).fill(1e9), q = [key]; d[key] = 0;
+    for (let h = 0; h < q.length; h++) { const c = q[h], ci = c % GX, cj = c / GX | 0;
+      for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) { if (!di && !dj) continue; const ni = ci + di, nj = cj + dj; if (ni < 0 || nj < 0 || ni >= GX || nj >= GY) continue; const n = nj * GX + ni; if (!ws[n]) continue; if (di && dj && (!ws[cj * GX + ni] || !ws[nj * GX + ci])) continue; const nd = d[c] + (di && dj ? 1.41 : 1); if (nd < d[n]) { d[n] = nd; q.push(n); } } }
+    return d;
+  }
   let active = false;
   const img = () => (typeof IMG !== 'undefined' ? IMG.arena : null);
   const ready = () => { const i = img(); return !!(i && i.complete && i.width); };
@@ -90,6 +114,29 @@
       if (r < .6) return { x: g.R - 8, y: g.T + 6 + Math.random() * (g.B - g.T - 12) };
       if (r < .8) return { x: AX + (Math.random() - .5) * g.w * .06, y: Math.max(g.TS, Z === 1 ? 0 : -1e9) + 3 };
       return { x: AX + (Math.random() - .5) * g.w * .06, y: Math.min(g.BS, Z === 1 ? M.viewH : 1e9) - 3 };
+    },
+    layers() {   // 草垛、石井的遮挡层：交给 game.js 的前后排序列表
+      if (!FIELD || !this.on()) return [];
+      return OCC.map(o => ({ y: geo().oy + o.base * geo().h, d: () => {
+        const c = occCanvas(o); if (!c) return; const g = geo();
+        const bx = g.ox + o.bx * g.w, by = g.oy + o.by * g.h, bw = o.bw * g.w, bh = o.bh * g.h;
+        const hide = hero.y < g.oy + o.base * g.h && hero.x > bx - 10 && hero.x < bx + bw + 10 && hero.y > by - 10;   // 主角在它后面、位置重叠：半透明让人看得见
+        ctx.save(); ctx.globalAlpha = hide ? .55 : 1; ctx.drawImage(c, bx, by, bw, bh); ctx.restore();
+      } }));
+    },
+    steer(e, dx, dy) {   // 敌人和主角之间被挡住时，改走绕路方向（只改方向，不改步长）
+      if (!FIELD || !this.on() || e === hero) return [dx, dy];
+      const g = geo(), ex = (e.x - g.ox) / g.w, ey = (e.y - g.oy) / g.h, hx = (hero.x - g.ox) / g.w, hy = (hero.y - g.oy) / g.h;
+      const mag = Math.hypot(dx, dy); if (mag < 1e-4) return [dx, dy];
+      if (dx * (hero.x - e.x) + dy * (hero.y - e.y) <= 0) return [dx, dy];   // 不是朝主角走（后撤、绕圈）就不管
+      let clear = true; for (let k = 1; k <= 12; k++) if (!walk(ex + (hx - ex) * k / 12, ey + (hy - ey) * k / 12)) { clear = false; break; }
+      if (clear) return [dx, dy];
+      const d = field(hx, hy), ws = cells(), ci = Math.max(0, Math.min(GX - 1, ex * GX | 0)), cj = Math.max(0, Math.min(GY - 1, ey * GY | 0));
+      let bd = d[cj * GX + ci], bi = -1, bj = -1;
+      for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) { const ni = ci + di, nj = cj + dj; if ((!di && !dj) || ni < 0 || nj < 0 || ni >= GX || nj >= GY) continue; const n = nj * GX + ni; if (ws[n] && d[n] < bd) { bd = d[n]; bi = ni; bj = nj; } }
+      if (bi < 0) return [dx, dy];
+      const tx = g.ox + (bi + .5) / GX * g.w - e.x, ty = g.oy + (bj + .5) / GY * g.h - e.y, tl = Math.hypot(tx, ty) || 1;
+      return [tx / tl * mag, ty / tl * mag];
     },
     soft: HAZE ? (x, y, r) => {   // 更大更软的脚下阴影
       ctx.save(); ctx.translate(x, y); ctx.scale(1, .34);
