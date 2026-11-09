@@ -223,7 +223,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   add('xuehe', { tier: 3, name: '血河斩', icon: '血', color: '#ff5050', desc: '一道又宽又长的血色刀光', need: 180, beam: true, len: 180, wu: .7, rc: .4,
     cast() { lineHit(aim(), 180, 32, 3.8, 50, '255,70,70'); sfx('swing_knife', hero.x); shake = Math.max(shake, .3); } });
   add('sixiang', { tier: 4, name: '四象剑气', icon: '象', color: '#c8b0ff', desc: '四向射出穿透剑气', need: 200, wu: .7, rc: .4,
-    cast() { const a = aim(); for (let i = 0; i < 4; i++) shot(a + i * Math.PI / 2, { dmg: 2.6, T: 1, col: ['180,150,255', '245,235,255'] }); sfx('swing_knife', hero.x); shake = Math.max(shake, .2); } });
+    cast() { S.poseOverride = { f: 'wj_hx2', t: .14 }; const a = aim(); for (let i = 0; i < 4; i++) shot(a + i * Math.PI / 2, { dmg: 2.6, T: 1, col: ['180,150,255', '245,235,255'] }); sfx('swing_knife', hero.x); shake = Math.max(shake, .2); } });
   add('tianbeng', { tier: 4, name: '天崩地裂', icon: '崩', color: '#ffae54', desc: '身周巨震，再引六处崩裂', need: 120, none: true, wu: .9, rc: .5,
     cast() { blast(hero.x, hero.y, 100, 3.8, 90); pts(6, 240).forEach(([x, y], i) => later(.2 + i * .12, () => blast(x, y, 44, 2.4, 50))); sfx('crack', hero.x); shake = Math.max(shake, .5); } });
   add('wanren', { tier: 4, name: '万刃归宗', icon: '万', color: '#b8f0ff', desc: '十四柄飞刃自四面八方袭来', need: 200, none: true, wu: .8, rc: .5,
@@ -252,12 +252,12 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     const w = wepOf(k), [pre, n] = w === 8 && MAGE_FR[k] ? [MAGE_FR[k], 3] : FRW[w], f = i => pre + '_' + Math.min(n, i);
     SK[k].pose = [f(1), f(RECOV_N[k] || 2)]; SK[k].pose2 = f(3); SK[k].poseL = w === 8 || n < 4 ? SK[k].pose[1] : f(n);
   }
-  // 每个招式用自己的帧：[出招前摇帧, 出手帧, 收势帧, 第二击帧]。刀用白衣持刀帧 wd_*，剑暂时用披甲帧 jian_*
+  // 每个招式用自己的帧：[出招前摇帧, 出手帧, 收势帧, 第二击帧]。刀用白衣持刀帧 wd_*，剑用白衣持剑帧 wj_*
   const PAIR = { hengsao: ['wd_hs1', 'wd_hs2', 'wd_hs3'], daobo: ['wd_pi1', 'wd_pi2', 'wd_pi3'], huima: ['wd_kn1', 'wd_kn2', 'wd_kn3', 'wd_fs2'], daolun: ['wd_hx1', 'wd_hx3', 'wd_hx4'],
-    lianzhan: ['jian_3', 'jian_4', 'jian_4', 'jian_6'], sixiang: ['jian_5', 'jian_6'], wanren: ['jian_1', 'jian_2'] };
+    lianzhan: ['wj_hz1', 'wj_hz2', 'wj_hz3', 'wj_fs2'], sixiang: ['wj_hx1', 'wj_hx3', 'wj_hx4'], wanren: ['wj_sl1', 'wj_sl2', 'wj_sl3'] };
   for (const k of Object.keys(PAIR)) { const q = PAIR[k]; SK[k].pose = [q[0], q[1]]; SK[k].poseL = q[2] || q[1]; SK[k].pose2 = q[3] || q[1]; }
   // 手里拿的兵器：放哪种近战/长兵招式就拿哪种，之后待机、行走都拿着；暗器、法术不换（空手施放）。目前只有刀有持械待机和行走帧
-  const HELDP = { 0: 'wd_' };
+  const HELDP = { 0: 'wd_', 1: 'wj_' };
   const heldPre = () => (S.held != null && HELDP[S.held]) || '';
   const profOf = c => Math.max(.72, Math.min(1.35, .58 + .15 * ((OG().oa || [3, 3, 3, 3, 3, 3, 3, 3])[CATA[c]])));
   const RESD = [0, 0, .08, .16, .26, .40];   // 同类别 n 件：该类别招式伤害加成
