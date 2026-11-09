@@ -185,7 +185,8 @@ assets['voice'] = {os.path.splitext(os.path.basename(f))[0]: file_uri(f)
 bg = {'mid': uri(P('art', 'bg', 'village_mid.webp')), 'far': uri(P('art', 'bg', 'village_far.jpg')),
       'gnd': uri(P('art', 'bg', 'village_ground.jpg')),
       'inkFar': uri(P('art', 'bg', 'village_ink_far.webp')), 'inkNear': uri(P('art', 'bg', 'village_ink_near.webp')),
-      'arena': uri(P('art', 'bg', 'arena.webp'))}
+      'arena': uri(P('art', 'bg', 'arena.webp')),
+      'field': uri(P('art', 'bg', 'field.webp'))}
 assets['chapter2'] = {
     'far': uri(P('art', 'bg', 'chapter2_far.webp')),
     'battlefield': uri(P('art', 'bg', 'chapter2_battlefield.webp')),

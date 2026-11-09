@@ -37,7 +37,8 @@ load('far', BG.far); load('mid', BG.mid); load('gnd', BG.gnd);
 // 第一章水墨背景（远景 1 + 近景 1，和第二章同一套两层画法）；网址带 ?bg=old 可切回旧背景对比
 window.INK_BG = !!(BG.inkFar && BG.inkNear) && !/[?&]bg=old(?:&|$)/.test(location.search);
 if (BG.inkFar && BG.inkNear) { load('inkfar', BG.inkFar); load('inknear', BG.inkNear); }
-if (BG.arena && /[?&]bg=arena2?(?:&|$)/.test(location.search)) load('arena', BG.arena);   // 俯视竞技场（js/arena.js，试玩对比）
+if (BG.arena && /[?&]bg=arena2?(?:&|$)/.test(location.search)) load('arena', BG.arena);
+if (BG.field && /[?&]bg=field(?:&|$)/.test(location.search)) load('arena', BG.field);   // 打谷场：不规则可走区域 + 高台（用同一个 IMG.arena 槽位）   // 俯视竞技场（js/arena.js，试玩对比）
 Object.entries(ASSETS.props).forEach(([k, v]) => load('p_' + k, v[0]));
 Object.entries(ASSETS.food || {}).forEach(([k, v]) => load('food_' + k, v[0]));
 

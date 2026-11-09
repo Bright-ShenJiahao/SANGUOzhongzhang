@@ -2,15 +2,22 @@
 // 一张固定的俯视场地图，镜头不动，人物和敌人只能在围墙里面那块地面上走；敌人从四周（左右 + 上方城门 + 下方台阶）涌进来。
 // 场地图在世界里放在 AX 附近，地面范围用图内比例 FL 量出来；改图后只需要改 FL。
 (() => {
-  const ON_URL = /[?&]bg=arena2?(?:&|$)/.test(location.search);
-  const Z = /[?&]bg=arena2(?:&|$)/.test(location.search) ? 1.25 : 1;   // arena2：场地比屏幕大 25%，镜头跟着人物轻微移动（像群侠传）
+  const FIELD = /[?&]bg=field(?:&|$)/.test(location.search);   // 打谷场：形状不规则，有水塘/草垛/石井挡路，右上角有能走上去的土台
+  const ON_URL = FIELD || /[?&]bg=arena2?(?:&|$)/.test(location.search);
+  const Z = FIELD || /[?&]bg=arena2(?:&|$)/.test(location.search) ? 1.25 : 1;
+  // 可走区域（都是占整张图的比例）：地面多边形 − 障碍（椭圆、土台整块）+ 土台台面 + 斜坡
+  const FC = {"ground":[[0.0598,0.2497],[0.2512,0.1116],[0.2871,0.1116],[0.3589,0.17],[0.4187,0.1966],[0.4486,0.1041],[0.5012,0.1041],[0.5036,0.1966],[0.5383,0.2125],[0.5712,0.1807],[0.924,0.2125],[0.9091,0.3188],[0.951,0.4463],[0.9641,0.5951],[0.9569,0.7226],[0.9211,0.7864],[0.8373,0.8236],[0.7715,0.8342],[0.6579,0.8395],[0.5323,0.8342],[0.5293,0.9192],[0.4575,0.9192],[0.4396,0.8236],[0.3888,0.8342],[0.323,0.8555],[0.2392,0.8502],[0.1495,0.8077],[0.0718,0.7333],[0.0329,0.627],[0.0269,0.5526],[0.0718,0.5207],[0.1106,0.4995],[0.1077,0.457],[0.0778,0.4251],[0.0658,0.3507]],"block":[[0.5682,0.1594],[0.8852,0.0978],[0.93,0.2019],[0.9258,0.2465],[0.8343,0.3741],[0.7207,0.3804],[0.6549,0.2784],[0.5682,0.1966]],"top":[[0.5849,0.1594],[0.7177,0.1201],[0.8852,0.1063],[0.924,0.2019],[0.8325,0.3103],[0.7207,0.2614],[0.6579,0.2657],[0.573,0.1849]],"ramp":[[0.6071,0.3454],[0.6878,0.3741],[0.7207,0.2657],[0.6609,0.2444]],"ell":[[0.1645,0.2019,0.1166,0.1254],[0.1734,0.6376,0.1047,0.101],[0.8672,0.7067,0.0449,0.0638]]};
+  const inPoly = (pt, x, y) => { let c = false; for (let i = 0, j = pt.length - 1; i < pt.length; j = i++) { const a = pt[i], b = pt[j]; if ((a[1] > y) !== (b[1] > y) && x < (b[0] - a[0]) * (y - a[1]) / (b[1] - a[1]) + a[0]) c = !c; } return c; };
+  const inEll = (e, x, y) => ((x - e[0]) / e[2]) ** 2 + ((y - e[1]) / e[3]) ** 2 < 1;
+  const walk = (x, y) => (inPoly(FC.ground, x, y) && !inPoly(FC.block, x, y) && !FC.ell.some(e => inEll(e, x, y))) || inPoly(FC.top, x, y) || inPoly(FC.ramp, x, y);
+  const FB = FC.ground.reduce((r, p) => ({ x0: Math.min(r.x0, p[0]), x1: Math.max(r.x1, p[0]), y0: Math.min(r.y0, p[1]), y1: Math.max(r.y1, p[1]) }), { x0: 1, x1: 0, y0: 1, y1: 0 });   // arena2：场地比屏幕大 25%，镜头跟着人物轻微移动（像群侠传）
   let camTop = 0;
   const HAZE = /[?&]look=haze(?:&|$)/.test(location.search);   // 群侠传式氛围：薄雾 + 降饱和 + 暗角 + 飘尘 + 软阴影
   const DUST = Array.from({ length: 46 }, () => ({ x: Math.random(), y: Math.random(), r: .6 + Math.random() * 1.8, vx: .004 + Math.random() * .012, vy: (Math.random() - .5) * .004, a: .08 + Math.random() * .16 }));
   let dustT = 0;
   const AX = 1000;                                   // 场地中心的世界 x
-  const ST = { x0: .466, x1: .534, top: .14, bot: .945 };   // 上下两处台阶：可以走上去（台阶宽度内），两边墙外不能走
-  const FL = { x0: .105, x1: .885, y0: .18, y1: .86 };   // 地面（围墙里面）占图的比例范围
+  const ST = FIELD ? { x0: .44, x1: .56, top: FB.y0, bot: FB.y1 } : { x0: .466, x1: .534, top: .14, bot: .945 };   // 上下两处台阶：可以走上去（台阶宽度内），两边墙外不能走
+  const FL = FIELD ? { x0: FB.x0, x1: FB.x1, y0: FB.y0 + .1, y1: FB.y1 - .1 } : { x0: .105, x1: .885, y0: .18, y1: .86 };   // 地面（围墙里面）占图的比例范围
   let active = false;
   const img = () => (typeof IMG !== 'undefined' ? IMG.arena : null);
   const ready = () => { const i = img(); return !!(i && i.complete && i.width); };
@@ -35,7 +42,8 @@
       active = true;
       const g = apply(); if (!g) return;
       props.length = 0;                               // 场地里不放草垛推车，地面保持干净
-      hero.x = AX; hero.y = M.top + (M.bot - M.top) * .2; this.cam(true);   // 出生在城门前方（上中），不在正中间
+      if (FIELD) { hero.x = g.ox + .478 * g.w; hero.y = g.oy + .36 * g.h; hero._ax = null; } else { hero.x = AX; hero.y = M.top + (M.bot - M.top) * .2; }
+      this.cam(true);   // 出生在城门前方（上中），不在正中间
     },
     stop() { active = false; },
     tick() { if (!this.on()) return; apply(); this.clamp(hero); for (const z of zs) this.clamp(z); },
@@ -53,6 +61,17 @@
     },
     clamp(e) {   // 所有人物都只能待在围墙里面
       if (!this.on()) return;
+      if (FIELD) {   // 不规则地形：新位置走不了就沿 x 或 y 单独滑，再不行就退回上一帧位置
+        const g = geo(), fx = (x, y) => walk((x - g.ox) / g.w, (y - g.oy) / g.h);
+        if (fx(e.x, e.y)) { e._ax = e.x; e._ay = e.y; return; }
+        if (e._ax != null) {
+          if (fx(e.x, e._ay)) { e.y = e._ay; e._ax = e.x; return; }
+          if (fx(e._ax, e.y)) { e.x = e._ax; e._ay = e.y; return; }
+          if (fx(e._ax, e._ay)) { e.x = e._ax; e.y = e._ay; return; }
+        }
+        for (let r = 6; r < 400; r += 6) for (let k = 0; k < 16; k++) { const a = k / 16 * 6.283, x = e.x + Math.cos(a) * r, y = e.y + Math.sin(a) * r; if (fx(x, y)) { e.x = x; e.y = y; e._ax = x; e._ay = y; return; } }
+        return;
+      }
       const g = geo(), m = e === hero ? 10 : 8;
       e.x = Math.max(g.L + m, Math.min(g.R - m, e.x));
       const yT = Math.max(g.TS, Z === 1 ? 0 : -1e9), yB = Math.min(g.BS, Z === 1 ? M.viewH : 1e9);
@@ -61,6 +80,12 @@
     },
     edge() {     // 刷怪点：左右两侧随机高度，上方城门，下方台阶
       const g = geo(), r = Math.random();
+      if (FIELD) {   // 不规则地形：上下两处石阶口 + 离主角够远的随机可走点
+        if (r < .15) return { x: g.ox + .475 * g.w, y: g.TS + 4 };
+        if (r < .3) return { x: g.ox + .494 * g.w, y: g.BS - 4 };
+        for (let i = 0; i < 60; i++) { const x = g.ox + (FB.x0 + Math.random() * (FB.x1 - FB.x0)) * g.w, y = g.oy + (FB.y0 + Math.random() * (FB.y1 - FB.y0)) * g.h; if (walk((x - g.ox) / g.w, (y - g.oy) / g.h) && Math.hypot(x - hero.x, (y - hero.y) * 1.6) > 380) return { x, y }; }
+        return { x: g.ox + .475 * g.w, y: g.TS + 4 };
+      }
       if (r < .3) return { x: g.L + 8, y: g.T + 6 + Math.random() * (g.B - g.T - 12) };
       if (r < .6) return { x: g.R - 8, y: g.T + 6 + Math.random() * (g.B - g.T - 12) };
       if (r < .8) return { x: AX + (Math.random() - .5) * g.w * .06, y: Math.max(g.TS, Z === 1 ? 0 : -1e9) + 3 };
