@@ -186,7 +186,8 @@ bg = {'mid': uri(P('art', 'bg', 'village_mid.webp')), 'far': uri(P('art', 'bg', 
       'gnd': uri(P('art', 'bg', 'village_ground.jpg')),
       'inkFar': uri(P('art', 'bg', 'village_ink_far.webp')), 'inkNear': uri(P('art', 'bg', 'village_ink_near.webp')),
       'arena': uri(P('art', 'bg', 'arena.webp')),
-      'field': uri(P('art', 'bg', 'field.webp'))}
+      'field': uri(P('art', 'bg', 'field.webp')),
+      'town': uri(P('art', 'bg', 'town.webp'))}
 assets['chapter2'] = {
     'far': uri(P('art', 'bg', 'chapter2_far.webp')),
     'battlefield': uri(P('art', 'bg', 'chapter2_battlefield.webp')),

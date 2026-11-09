@@ -38,7 +38,8 @@ load('far', BG.far); load('mid', BG.mid); load('gnd', BG.gnd);
 window.INK_BG = !!(BG.inkFar && BG.inkNear) && !/[?&]bg=old(?:&|$)/.test(location.search);
 if (BG.inkFar && BG.inkNear) { load('inkfar', BG.inkFar); load('inknear', BG.inkNear); }
 if (BG.arena && /[?&]bg=arena2?(?:&|$)/.test(location.search)) load('arena', BG.arena);
-if (BG.field && /[?&]bg=field(?:&|$)/.test(location.search)) load('arena', BG.field);   // 打谷场：不规则可走区域 + 高台（用同一个 IMG.arena 槽位）   // 俯视竞技场（js/arena.js，试玩对比）
+if (BG.field && /[?&]bg=field(?:&|$)/.test(location.search)) load('arena', BG.field);
+if (BG.town && /[?&]bg=town(?:&|$)/.test(location.search)) load('arena', BG.town);   // 县城街巷   // 打谷场：不规则可走区域 + 高台（用同一个 IMG.arena 槽位）   // 俯视竞技场（js/arena.js，试玩对比）
 Object.entries(ASSETS.props).forEach(([k, v]) => load('p_' + k, v[0]));
 Object.entries(ASSETS.food || {}).forEach(([k, v]) => load('food_' + k, v[0]));
 
