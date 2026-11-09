@@ -695,7 +695,8 @@
       #tNovice, #tHintOff { color: #3b2e1d; text-shadow: none; justify-content: center; }
       #tNovice input { accent-color: #8b6a35; } #tHintOff input { accent-color: #8b6a35; }
       #tHelp { background: rgba(40,28,18,.72); border-color: #c9a24a; color: #f3dc9a; text-shadow: none; }
-      #tBoard { background: rgba(40,28,18,.78); border-color: #c9a24a; color: #f3dc9a; text-shadow: none; padding: 0 10px; letter-spacing: .16em; }
+      #tBoard { display: none !important; }   /* 英雄榜暂时拿掉 */
+      #tBoard_ { background: rgba(40,28,18,.78); border-color: #c9a24a; color: #f3dc9a; text-shadow: none; padding: 0 10px; letter-spacing: .16em; }
       #tInkTitle { position: fixed; z-index: 6; pointer-events: none; opacity: 0; user-select: none; -webkit-user-drag: none;
         filter: drop-shadow(0 2px 5px rgba(60,40,20,.18)); animation: tInkIn 1.5s .7s cubic-bezier(.2,.7,.2,1) forwards; }
       @keyframes tInkIn { from { opacity: 0; transform: translateY(-16px) scale(1.05); filter: blur(7px); } to { opacity: 1; transform: none; filter: drop-shadow(0 2px 5px rgba(60,40,20,.18)); } }

@@ -197,7 +197,10 @@ assets['xiaochang'] = uri(P('art', 'bg', 'xiaochang.webp'))
 assets['chapter2Intro'] = uri(P('art', 'bg', 'chapter2_intro.webp'))
 # js/ 里的模块（按文件名排序）先于 game.js 载入，供 game.js 调用
 import glob
-mods = sorted(glob.glob(P('js', '*.js')))
+# 三国终章暂时拿掉的旧功能（文件都保留，以后要用就从这里删掉对应名字）。_stubs.js 给 game.js 里没有判空保护的调用补空壳。
+DISABLED = {'rogue', 'meridian', 'artifact', 'shop', 'shop_goods', 'outfit', 'board', 'dmgtest', 'xiaochang',
+            'chapter2', 'chapter2_intro', 'ch2bosses', 'ch2opening', 'g_chapter2_flow', 'zhangjiao', 'boss', 'boss_block'}
+mods = [f for f in sorted(glob.glob(P('js', '*.js'))) if os.path.basename(f)[:-3] not in DISABLED]
 game = '\n'.join(open(f, encoding='utf-8').read() for f in mods) + '\n' + open(P('game.js'), encoding='utf-8').read()
 
 def _art_literal(m):

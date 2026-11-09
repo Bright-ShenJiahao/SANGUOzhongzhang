@@ -222,7 +222,7 @@ function reset() {
   if (window.WALLET) WALLET.startRun();
   M.W = 3600;
   const topTitle = document.querySelector('#top b');
-  if (topTitle) topTitle.textContent = '无名之辈 · 序章：黄巾流寇';
+  if (topTitle) topTitle.textContent = '三国终章 · 序章：黄巾流寇';
   pendingWeapon = null;
   weapon = (window.TITLE && TITLE.preparedWeapon && TITLE.preparedWeapon()) || 'hammer';
   ui();
