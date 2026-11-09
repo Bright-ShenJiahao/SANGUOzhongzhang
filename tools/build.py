@@ -120,10 +120,6 @@ def _sprite_uri(path, raw):
 assets = {'chars': {ch: {f: [sprite_uri(P('art', 'sprites', ch, f + '.png'))] + v
                          for f, v in fr.items() if os.path.isfile(P('art', 'sprites', ch, f + '.png'))}
                      for ch, fr in atlas.items()}}
-# 主角换色区域图：只提供网址，不进首次加载；OUTFIT 在选中非默认颜色时才按需下载。
-assets['heroMask'] = {f: sprite_uri(P('art', 'sprites', 'hero_mask', f + '.png'))
-                      for f in atlas.get('hero', {})
-                      if os.path.isfile(P('art', 'sprites', 'hero_mask', f + '.png'))}
 pm = json.load(open(P('art', 'props', 'meta.json')))
 _src = open(P('game.js'), encoding='utf-8').read() + ''.join(open(f, encoding='utf-8').read() for f in sorted(__import__('glob').glob(P('js', '*.js'))))   # 道具名可能写在拆出去的 js 里
 # 只打包 game.js 里实际用到的道具（按名字出现与否判断），减小网页体积
@@ -135,7 +131,7 @@ assets['tvMask'] = uri(P('art', 'title', 'tv_mask.png'))
 # 水墨标题页：横屏/竖屏背景 + 竖排/横排毛笔标题（透明底）
 assets['ink'] = {k: uri(P('art', 'title', 'ink_' + k + '.webp')) for k in ('pc', 'phone', 'title_v', 'title_h')}
 # UI（卷轴/木牌按钮/印章）与回血食物
-assets['ui'] = {k: uri(P('art', 'ui', k + '.webp')) for k in ('scroll', 'btn', 'btn_red', 'seal_square', 'seal_round', 'w_staff', 'w_hammer', 'w_stone', 'w_bow', 'arrow', 'fire0', 'fire1', 'fire2', 'fire3', 'rogue_card', 'charge_hit_staff', 'charge_hit_stone', 'stone_shot', 'stone_shot_final', 'stone_shot_charge', 'stone_hit', 'staff_sweep', 'hit_blunt', 'hit_finisher', 'halberd_rip', 'bleed_splash', 'bleed_drip', 'hammer_spin', 'hammer_slam', 'blade_slash', 'blade_crescent', 'bow_sky', 'bow_impact', 'bow_volley', 'enemy_slash', 'enemy_wave', 'tip_water1', 'tip_water2', 'tip_water3', 'tip_wave1', 'tip_wave2', 'tip_scare', 'tip_scare_hit', 'tip_scare_break1', 'tip_scare_break2', 'tip_wind1', 'tip_wind2', 'tip_wind3', 'tip_shield', 'tip_shield_break1', 'tip_shield_break2', 'tip_arrow', 'fj_ride', 'fj_stuck', 'fj_icon', 'sup_jinchuang', 'sup_jiu', 'sup_huoyou', 'mer_body', 'banner_meridian', 'banner_artifact', 'banner_outfit', 'lot_machine', 'lot_lever_up', 'lot_lever_down', 'lot_burst', 'lot_coin', 'lot_fu', 'lot_fruit', 'lot_stone', 'lot_w0', 'lot_w2', 'lot_w3', 'lot_w4') + tuple('gd_' + k for k in ('ration','jinchuang','dukang','reroll','amulet','fu_po','fu_ji','fu_shen','fu_gang','fu_hui','fu_ju','stone','bag','lottery')) + tuple(f'mer_{r}{c}' for r in range(7) for c in range(3))}
+assets['ui'] = {k: uri(P('art', 'ui', k + '.webp')) for k in ('scroll', 'btn', 'btn_red', 'seal_square', 'seal_round', 'w_staff', 'w_hammer', 'w_stone', 'w_bow', 'arrow', 'fire0', 'fire1', 'fire2', 'fire3', 'rogue_card', 'charge_hit_staff', 'charge_hit_stone', 'stone_shot', 'stone_shot_final', 'stone_shot_charge', 'stone_hit', 'staff_sweep', 'hit_blunt', 'hit_finisher', 'halberd_rip', 'bleed_splash', 'bleed_drip', 'hammer_spin', 'hammer_slam', 'blade_slash', 'blade_crescent', 'bow_sky', 'bow_impact', 'bow_volley', 'enemy_slash', 'enemy_wave', 'tip_water1', 'tip_water2', 'tip_water3', 'tip_wave1', 'tip_wave2', 'tip_scare', 'tip_scare_hit', 'tip_scare_break1', 'tip_scare_break2', 'tip_wind1', 'tip_wind2', 'tip_wind3', 'tip_shield', 'tip_shield_break1', 'tip_shield_break2', 'tip_arrow', 'fj_ride', 'fj_stuck', 'fj_icon', 'sup_jinchuang', 'sup_jiu', 'sup_huoyou', 'mer_body', 'banner_meridian', 'banner_artifact', 'lot_machine', 'lot_lever_up', 'lot_lever_down', 'lot_burst', 'lot_coin', 'lot_fu', 'lot_fruit', 'lot_stone', 'lot_w0', 'lot_w2', 'lot_w3', 'lot_w4') + tuple('gd_' + k for k in ('ration','jinchuang','dukang','reroll','amulet','fu_po','fu_ji','fu_shen','fu_gang','fu_hui','fu_ju','stone','bag','lottery')) + tuple(f'mer_{r}{c}' for r in range(7) for c in range(3))}
 assets['dialogPortraits'] = {
     'caocao': photo_uri(P('art', 'ui', 'portrait_caocao.png')),
     'messenger': photo_uri(P('art', 'ui', 'portrait_messenger.png')),
@@ -204,7 +200,7 @@ assets['chapter2Intro'] = uri(P('art', 'bg', 'chapter2_intro.webp'))
 # js/ 里的模块（按文件名排序）先于 game.js 载入，供 game.js 调用
 import glob
 # 三国终章暂时拿掉的旧功能（文件都保留，以后要用就从这里删掉对应名字）。_stubs.js 给 game.js 里没有判空保护的调用补空壳。
-DISABLED = {'rogue', 'meridian', 'artifact', 'shop', 'shop_goods', 'outfit', 'board', 'dmgtest', 'xiaochang',
+DISABLED = {'rogue', 'meridian', 'artifact', 'shop', 'shop_goods', 'board', 'dmgtest', 'xiaochang',
             'chapter2', 'chapter2_intro', 'ch2bosses', 'ch2opening', 'g_chapter2_flow', 'zhangjiao', 'boss', 'boss_block'}
 mods = [f for f in sorted(glob.glob(P('js', '*.js'))) if os.path.basename(f)[:-3] not in DISABLED]
 game = '\n'.join(open(f, encoding='utf-8').read() for f in mods) + '\n' + open(P('game.js'), encoding='utf-8').read()
