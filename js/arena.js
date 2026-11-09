@@ -147,6 +147,9 @@
       if (dx * (hero.x - e.x) + dy * (hero.y - e.y) <= 0) return [dx, dy];   // 不是朝主角走（后撤、绕圈）就不管
       if (Math.hypot(e.x - (e._lx ?? -1e9), e.y - (e._ly ?? -1e9)) < .05) e._stk = (e._stk || 0) + 1; else e._stk = 0;   // 位置几帧都没变 = 被卡住
       e._lx = e.x; e._ly = e.y;
+      if (e._stk >= 90 && Math.hypot(e.x - hero.x, e.y - hero.y) > 70) {   // 卡死超过 1.5 秒（高台边、墙角）：直接挪到主角附近一个走得通的点
+        for (let k = 0; k < 24; k++) { const an = Math.random() * 6.283, r = 90 + Math.random() * 70, nx = hero.x + Math.cos(an) * r, ny = hero.y + Math.sin(an) * r * .5; if (walk((nx - g.ox) / g.w, (ny - g.oy) / g.h)) { e.x = nx; e.y = ny; e._stk = 0; e._ax = nx; e._ay = ny; return [dx, dy]; } }
+      }
       const n = Math.max(12, Math.ceil(Math.hypot(hero.x - e.x, hero.y - e.y) / 6));
       let clear = e._stk < 8; for (let k = 1; clear && k <= n; k++) if (!walk(ex + (hx - ex) * k / n, ey + (hy - ey) * k / n)) clear = false;
       if (clear) return [dx, dy];

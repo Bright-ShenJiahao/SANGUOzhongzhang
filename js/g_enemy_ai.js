@@ -162,7 +162,7 @@ function zUpdate(z, dt) {
     else { z.moving = false; z.f = Math.sign(hero.x - z.x) || z.f; }
     return;
   }
-  const QK = z.st === 'wind' && !z.T.elite && !z.T.chapterBoss && !z.T.ranged ? 1.35 : 1;   // 用户定 11/09：小怪抬手更快
+  const QK = z.st === 'wind' && !z.T.elite && !z.T.chapterBoss && !z.T.ranged ? 1.2 : 1;   // 用户定 11/09：小怪抬手更快（1.35 太快，改 1.2）
   z.t += dt * QK * (window.GEAR ? GEAR.enemyAttack(z) : (z.attackSlowT > 0 ? .9 : 1)); z.flash = Math.max(0, z.flash - dt); z.cd -= dt * (window.GEAR ? GEAR.enemyAttack(z) : (z.attackSlowT > 0 ? .9 : 1));
   z.moveSlowT = Math.max(0, (z.moveSlowT || 0) - dt); z.attackSlowT = Math.max(0, (z.attackSlowT || 0) - dt);
   if (z.qiCd > 0) z.qiCd -= dt;
@@ -337,7 +337,7 @@ function zUpdate(z, dt) {
     if (T.elite && !z.qi && (z.qiCd || 0) <= 0 && Math.abs(dx) < 130 && Math.abs(dy) < 26) {
       set(z, 'wind'); z.qi = 0; z.qiCd = 6.5; sfx('bladeAlert', z.x); return;
     }
-    if (z.tok && !(ch2Troops() && z.type==='yellow-heavy' && ch2Formation(z) && Math.abs(z.x-ch2Formation(z).x)>18) && Math.abs(dx) < T.reach + (T.elite || T.chapterBoss ? 0 : 16) && Math.abs(dy) < 12) { set(z, 'wind'); if (T.heavy) sfx('bladeAlert', z.x); return; }
+    if (z.tok && !(ch2Troops() && z.type==='yellow-heavy' && ch2Formation(z) && Math.abs(z.x-ch2Formation(z).x)>18) && Math.abs(dx) < T.reach + (T.elite || T.chapterBoss ? 0 : 5) && Math.abs(dy) < 12) { set(z, 'wind'); if (T.heavy) sfx('bladeAlert', z.x); return; }
   }
   const formation=ch2Formation(z);if(formation){tx=formation.x;ty=formation.y;}
   const mx = tx - z.x, my = ty - z.y, l = Math.hypot(mx, my);
