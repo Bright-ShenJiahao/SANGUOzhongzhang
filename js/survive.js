@@ -25,7 +25,7 @@
 const DM = () => RT.dmg;
 const bossCount = () => RT.on ? (RT.node && W.k === W.N ? (RT.node.type === 'boss' ? 3 : RT.node.type === 'elite' ? 1 : 0) : (RT.node && RT.node.type === 'boss' && W.k === 1 ? 1 : 0)) : (BOSS_WAVES[W.n] || 0);
 const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: false, between: 0, started: false };
-  const WT = () => (WAVE_T[Math.min(W.n, WAVES) - 1] || 60) * (RT.on ? ROUTE.TIME_K : 1);
+  const WT = () => RT.on ? W.tot : (WAVE_T[Math.min(W.n, WAVES) - 1] || 60);   // 路线模式：一个节点是一整场连续的仗，时长 = 原来几波加起来
   const targetN = () => Math.max(8, Math.round((WAVE_N[W.n - 1] || 100) * N_SCALE));
   function pickType() {
     const pool = [];
@@ -46,11 +46,12 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     return z;
   }
   function startWave(n) {
-    if (RT.on) {   // 路线模式：n 是本节点第几波，难度按「所在层 + 波数」折算成 1~20 级
-      const nd = RT.node, L = ROUTE.layers(); W.k = n;
-      W.n = Math.max(1, Math.min(WAVES, 1 + Math.floor(((nd.layer - 1 + (n - 1) / W.N) / L) * WAVES) + (nd.type === 'elite' ? 2 : 0) + (nd.type === 'boss' ? 2 : 0)));
-      W.t = 0; W.retreat = 0; W.spawnT = 0; W.batchT = 0; W.bossDone = false;
-      say(`${ROUTE.name(nd)} · 第 ${n}/${W.N} 波`, 1.6); return;
+    if (RT.on) {   // 路线模式：一个节点 = 一整场连续的仗（不分波、不鸣金）。难度从「本节点第 1 波」平滑爬到「最后一波」的级别
+      const nd = RT.node, L = ROUTE.layers(), N0 = ROUTE.waves(nd);
+      const lvOf = k => Math.max(1, Math.min(WAVES, 1 + Math.floor(((nd.layer - 1 + (k - 1) / N0) / L) * WAVES) + (nd.type === 'elite' ? 2 : 0) + (nd.type === 'boss' ? 2 : 0)));
+      W.lv0 = lvOf(1); W.lv1 = lvOf(N0); W.tot = 0; for (let k = 1; k <= N0; k++) W.tot += (WAVE_T[lvOf(k) - 1] || 60) * ROUTE.TIME_K;
+      W.k = 1; W.N = 1; W.n = W.lv0; W.t = 0; W.retreat = 0; W.spawnT = 0; W.batchT = 0; W.bossDone = false;
+      say(ROUTE.name(nd), 1.6); return;
     }
     W.n = n; W.t = 0; W.retreat = 0; W.spawnT = 0; W.batchT = 0; W.bossDone = false;
     say(n === WAVES ? `第 ${n} 波 · 终局` : `第 ${n} 波`, 1.6);
@@ -78,6 +79,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       return;
     }
     W.t += dt;
+    if (RT.on) W.n = Math.round(W.lv0 + (W.lv1 - W.lv0) * Math.min(1, W.t / W.tot));   // 难度随时间平滑上升
     if (bossCount() && !W.bossDone && W.t >= 1) { W.bossDone = true; for (let i = 0; i < bossCount(); i++) edgeSpawn('elite', true); }
     // 补兵：开场慢慢涌进来（前 60% 时间里目标人数从少爬到满）
     const ramp = Math.min(30, WT() * .6), rf = Math.min(1, .08 + .92 * W.t / ramp), tn = Math.ceil(targetN() * rf);
@@ -325,7 +327,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     ctx.font = 'bold 14px "PingFang SC",sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#ffe9a0';
     const left = Math.max(0, Math.ceil(WT() - W.t));
     if (RT.on && !RT.node) { ctx.restore(); return; }   // 路线图还没选节点：不画波次文字
-    ctx.fillText(W.retreat > 0 || W.between > 0 ? `${RT.on ? '第 ' + W.k + '/' + W.N : '第 ' + W.n + '/' + WAVES} 波 · 鸣金收兵` : `${RT.on ? ROUTE.name(RT.node) + ' · 第 ' + W.k + '/' + W.N : '第 ' + W.n + '/' + WAVES} 波 · 还剩 ${left} 秒${bossCount() ? ' · 敌将' : ''}`, HW / 2, y0 + sz + 28);
+    ctx.fillText(W.retreat > 0 || W.between > 0 ? (RT.on ? '鸣金收兵' : `第 ${W.n}/${WAVES} 波 · 鸣金收兵`) : `${RT.on ? ROUTE.name(RT.node) : '第 ' + W.n + '/' + WAVES + ' 波'} · 还剩 ${left} 秒${bossCount() ? ' · 敌将' : ''}`, HW / 2, y0 + sz + 28);
     ctx.restore();
   }
   // 主角姿势：前摇举刀，出手和后摇用挥刀帧
