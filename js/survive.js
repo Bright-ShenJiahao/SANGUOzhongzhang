@@ -252,6 +252,9 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     const w = wepOf(k), [pre, n] = w === 8 && MAGE_FR[k] ? [MAGE_FR[k], 3] : FRW[w], f = i => pre + '_' + Math.min(n, i);
     SK[k].pose = [f(1), f(RECOV_N[k] || 2)]; SK[k].pose2 = f(3); SK[k].poseL = w === 8 || n < 4 ? SK[k].pose[1] : f(n);
   }
+  // 刀 / 剑 每个招式用自己的一对帧（起手 + 出手）；dao_1-8：横扫 劈 砍 回旋，jian_1-6：直刺 横斩 上撩
+  const PAIR = { hengsao: ['dao_1', 'dao_2'], daobo: ['dao_3', 'dao_4'], huima: ['dao_5', 'dao_6', 'dao_8'], daolun: ['dao_7', 'dao_8'], lianzhan: ['jian_3', 'jian_4', 'jian_6'], sixiang: ['jian_5', 'jian_6'], wanren: ['jian_1', 'jian_2'] };
+  for (const k of Object.keys(PAIR)) { const q = PAIR[k]; SK[k].pose = [q[0], q[1]]; SK[k].pose2 = q[2] || q[1]; SK[k].poseL = q[1]; }
   const profOf = c => Math.max(.72, Math.min(1.35, .58 + .15 * ((OG().oa || [3, 3, 3, 3, 3, 3, 3, 3])[CATA[c]])));
   const RESD = [0, 0, .08, .16, .26, .40];   // 同类别 n 件：该类别招式伤害加成
   function RES() {

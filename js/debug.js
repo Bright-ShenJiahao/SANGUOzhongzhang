@@ -94,6 +94,8 @@
     const heroGroup = addGroup('hero', '主角');
     btn(heroGroup, '回到主界面', 'alt', () => { if (typeof returnFromPausedGame === 'function') returnFromPausedGame(true); else if (window.TITLE && TITLE.show) TITLE.show(); });
     btn(heroGroup, '回到整军备战', 'alt', () => { if (typeof returnFromPausedGame === 'function') returnFromPausedGame(false); else if (window.TITLE && TITLE.openPreparation) TITLE.openPreparation(1); });
+    btn(heroGroup, '招式：刀（4招）', 'alt', () => { if (window.SURV) { SURV.slots.splice(0, 5, 'hengsao', 'daobo', 'huima', 'daolun', ''); tipLine('招式栏换成刀：横扫 刀波 回马 刀轮'); } });
+    btn(heroGroup, '招式：剑（3招）', 'alt', () => { if (window.SURV) { SURV.slots.splice(0, 5, 'lianzhan', 'sixiang', 'wanren', '', ''); tipLine('招式栏换成剑：连斩 四象 万刃'); } });
     btn(heroGroup, '回满血', '', () => { if (typeof hero !== 'undefined') hero.hp = maxHeroHp(); });
     // 面板底部临时提示（主界面、整备页时游戏内文字看不到）
     const tipLine = msg => { let t = panel.querySelector('.dbgTip'); if (!t) { t = document.createElement('div'); t.className = 'dbgTip'; t.style.cssText = 'margin-top:4px;padding:3px 6px;background:#3a5a2a;color:#eaffd8;border-radius:4px;font-size:11px'; panel.appendChild(t); } t.textContent = msg; clearTimeout(t._h); t._h = setTimeout(() => t.remove(), 4000); };
