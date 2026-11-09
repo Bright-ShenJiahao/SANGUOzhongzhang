@@ -177,16 +177,22 @@
   function sheets() {   // 图标表：彩色原图 + 水墨灰版（走过的节点用）
     const im = typeof IMG !== 'undefined' && IMG.ui_route_icons;
     if (!im || !im.complete || !im.naturalWidth) return null;
-    if (sheetG) return { c: im, g: sheetG };
-    const c = document.createElement('canvas'); c.width = im.naturalWidth; c.height = im.naturalHeight; const x = c.getContext('2d'); x.drawImage(im, 0, 0);
-    const d = x.getImageData(0, 0, c.width, c.height), a = d.data;
-    for (let i = 0; i < a.length; i += 4) { const l = a[i] * .3 + a[i + 1] * .59 + a[i + 2] * .11, v = 40 + l * .5; a[i] = v * 1.03; a[i + 1] = v * .96; a[i + 2] = v * .88; }
-    x.putImageData(d, 0, 0); sheetG = c; return { c: im, g: sheetG };
+    if (sheetG !== null) return { c: im, g: sheetG || null };
+    try {   // 灰版：逐像素去色；跨域图会读不出像素（抛安全错误），那就退回用滤镜
+      const c = document.createElement('canvas'); c.width = im.naturalWidth; c.height = im.naturalHeight; const x = c.getContext('2d'); x.drawImage(im, 0, 0);
+      const d = x.getImageData(0, 0, c.width, c.height), a = d.data;
+      for (let i = 0; i < a.length; i += 4) { const l = a[i] * .3 + a[i + 1] * .59 + a[i + 2] * .11, v = 40 + l * .5; a[i] = v * 1.03; a[i + 1] = v * .96; a[i + 2] = v * .88; }
+      x.putImageData(d, 0, 0); sheetG = c;
+    } catch (_) { sheetG = false; }
+    return { c: im, g: sheetG || null };
   }
   function icon(type, size, gray) {
     const sh = sheets(); if (!sh) return;
     const k = ICON[type] || 0, sx = (k % 4) * 256, sy = (k >> 2) * 256;
-    g.drawImage(gray ? sh.g : sh.c, sx, sy, 256, 256, -size / 2, -size / 2, size, size);
+    try {
+      if (gray && !sh.g) { g.save(); g.filter = 'grayscale(1) brightness(.85)'; g.drawImage(sh.c, sx, sy, 256, 256, -size / 2, -size / 2, size, size); g.restore(); }
+      else g.drawImage(gray ? sh.g : sh.c, sx, sy, 256, 256, -size / 2, -size / 2, size, size);
+    } catch (_) {}
   }
   function seal(n, now) {
     const p = pos(n), R = radius(n), vis = visited(n), reach = reachable(n), cur = run.cur === n, t = (now - t0) / 1000;
@@ -256,7 +262,7 @@
       const walked = visited(n) && visited(m), open = n === run.cur && reachable(m);
       trail(a, b, n, m, walked ? 2 : open ? 1 : 0, seedE);
     }
-    for (const n of run.nodes) seal(n, now);
+    for (const n of run.nodes) { try { seal(n, now); } catch (e) { if (!window._rtErr) { window._rtErr = 1; console.error('route seal', e); } } }
     // 抬头：章节、血量、提示（手机竖屏先垫一层纸色渐隐，免得节点叠在字上）
     if (port()) { const hb = g.createLinearGradient(0, 0, 0, 132); hb.addColorStop(0, 'rgba(234,220,192,.97)'); hb.addColorStop(.75, 'rgba(234,220,192,.9)'); hb.addColorStop(1, 'rgba(234,220,192,0)'); g.fillStyle = hb; g.fillRect(0, 0, W, 132); }
     g.textAlign = 'left'; g.textBaseline = 'alphabetic'; g.fillStyle = INK;
