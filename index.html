@@ -63,7 +63,7 @@ body.szz-pro #help{display:none}
 .x-back{min-height:34px!important}
 }
 #rot small{display:block;margin-top:10px;font-size:14px;font-weight:600;color:#c9b691;line-height:1.6}
-</style><link rel="preload" href="pack/fonts/result.woff2?v=42c36f534d" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=42c36f534d)format("woff2");font-display:swap}</style></head><body>
+</style><link rel="preload" href="pack/fonts/result.woff2?v=a5008ef49f" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=a5008ef49f)format("woff2");font-display:swap}</style></head><body>
 <div id="bootSplash" style="position:fixed;inset:0;z-index:99999;background:#1a1020;color:#f1d59a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;font:18px system-ui,sans-serif;text-align:center;padding:24px">
 <strong id="bootText">正在加载…</strong><button id="bootRefresh" hidden onclick="location.reload()" style="font:16px system-ui,sans-serif;padding:12px;color:#ffe0a0;background:#583b28;border:1px solid #ba9158;border-radius:6px">网络较慢，点此刷新</button><small id="bootError" style="overflow-wrap:anywhere;max-width:90vw"></small></div>
 <script>
@@ -77,7 +77,7 @@ if(location.protocol==='https:'&&!/[?&]debug(?:=|&|$)/.test(location.search)&&'s
 })();
 // 自动更新：打开游戏、或从后台切回来时，查一下线上有没有新版本；有就在标题/整备页自动刷新（战斗中不打扰）
 (function(){
-var BUILD='de2af50b7a76',busy=false;
+var BUILD='d3aeb208c016',busy=false;
 if(location.protocol!=='https:'||/[?&]debug(?:=|&|$)/.test(location.search))return;
 function check(){
   if(busy)return;
@@ -5620,17 +5620,15 @@ function resultKey(e) {
     if (p.x < -80 || p.x > W + 80 || p.y < -80 || p.y > H + 80) return;
     const bob = reach ? Math.sin(t * 3 + n.id) * 1.6 : 0;
     g.save(); g.translate(p.x, p.y);
-    // 底：淡纸色圆片 + 墨圈（让图标在水墨背景上立得住）
-    g.beginPath(); g.arc(0, 0, R + 4, 0, 7);
-    g.fillStyle = vis ? 'rgba(210,196,168,.7)' : 'rgba(246,236,214,.88)'; g.fill();
-    g.lineWidth = n.type === 'boss' ? 3 : 2; g.strokeStyle = vis ? 'rgba(60,48,38,.55)' : INK; g.globalAlpha = reach || cur ? 1 : .55; g.stroke(); g.globalAlpha = 1;
-    if (reach) { const k = .5 + .5 * Math.sin(t * 3); g.beginPath(); g.arc(0, 0, R + 10 + k * 4, 0, 7); g.strokeStyle = `rgba(179,40,30,${.3 + .4 * k})`; g.lineWidth = 3; g.stroke(); }
-    g.translate(0, bob);
-    g.globalAlpha = vis ? .8 : reach || cur ? 1 : .6;
-    icon(n.type, R * 2.15, vis || (!reach && !cur));
-    g.globalAlpha = 1;
+    // 不画圆底：图标直接落在地图上，靠柔和投影立住；可走的放大并发出朱红光晕，当前节点发金光
+    const k = .5 + .5 * Math.sin(t * 3), sc = reach ? 1.12 + k * .05 : 1;
+    g.translate(0, bob); g.scale(sc, sc);
+    g.shadowColor = cur ? 'rgba(201,162,74,.95)' : reach ? `rgba(179,40,30,${.6 + .35 * k})` : 'rgba(40,28,18,.4)';
+    g.shadowBlur = cur ? 16 : reach ? 12 + k * 8 : 5; g.shadowOffsetY = reach || cur ? 0 : 2;
+    g.globalAlpha = vis ? .75 : reach || cur ? 1 : .55;
+    icon(n.type, R * 2.3, vis || (!reach && !cur));
+    g.globalAlpha = 1; g.shadowBlur = 0; g.shadowColor = 'transparent'; g.shadowOffsetY = 0;
     if (vis && !cur) { g.beginPath(); g.arc(R * .62, -R * .62, 7, 0, 7); g.fillStyle = CINNABAR; g.fill(); g.strokeStyle = PAPER; g.lineWidth = 1.6; g.beginPath(); g.moveTo(R * .62 - 3, -R * .62); g.lineTo(R * .62 - .8, -R * .62 + 2.6); g.lineTo(R * .62 + 3.4, -R * .62 - 2.6); g.stroke(); }
-    if (cur) { g.beginPath(); g.arc(0, 0, R + 8, 0, 7); g.strokeStyle = '#c9a24a'; g.lineWidth = 3; g.stroke(); }
     g.restore();
     // 名字：可走的节点、当前、Boss 常显；其他鼠标悬停才显
     if ((reach && !port()) || cur || n.type === 'boss' || hov.n === n) tag(p, R, n, hov.n === n || cur || n.type === 'boss');

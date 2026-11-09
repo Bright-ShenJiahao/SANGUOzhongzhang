@@ -199,17 +199,15 @@
     if (p.x < -80 || p.x > W + 80 || p.y < -80 || p.y > H + 80) return;
     const bob = reach ? Math.sin(t * 3 + n.id) * 1.6 : 0;
     g.save(); g.translate(p.x, p.y);
-    // 底：淡纸色圆片 + 墨圈（让图标在水墨背景上立得住）
-    g.beginPath(); g.arc(0, 0, R + 4, 0, 7);
-    g.fillStyle = vis ? 'rgba(210,196,168,.7)' : 'rgba(246,236,214,.88)'; g.fill();
-    g.lineWidth = n.type === 'boss' ? 3 : 2; g.strokeStyle = vis ? 'rgba(60,48,38,.55)' : INK; g.globalAlpha = reach || cur ? 1 : .55; g.stroke(); g.globalAlpha = 1;
-    if (reach) { const k = .5 + .5 * Math.sin(t * 3); g.beginPath(); g.arc(0, 0, R + 10 + k * 4, 0, 7); g.strokeStyle = `rgba(179,40,30,${.3 + .4 * k})`; g.lineWidth = 3; g.stroke(); }
-    g.translate(0, bob);
-    g.globalAlpha = vis ? .8 : reach || cur ? 1 : .6;
-    icon(n.type, R * 2.15, vis || (!reach && !cur));
-    g.globalAlpha = 1;
+    // 不画圆底：图标直接落在地图上，靠柔和投影立住；可走的放大并发出朱红光晕，当前节点发金光
+    const k = .5 + .5 * Math.sin(t * 3), sc = reach ? 1.12 + k * .05 : 1;
+    g.translate(0, bob); g.scale(sc, sc);
+    g.shadowColor = cur ? 'rgba(201,162,74,.95)' : reach ? `rgba(179,40,30,${.6 + .35 * k})` : 'rgba(40,28,18,.4)';
+    g.shadowBlur = cur ? 16 : reach ? 12 + k * 8 : 5; g.shadowOffsetY = reach || cur ? 0 : 2;
+    g.globalAlpha = vis ? .75 : reach || cur ? 1 : .55;
+    icon(n.type, R * 2.3, vis || (!reach && !cur));
+    g.globalAlpha = 1; g.shadowBlur = 0; g.shadowColor = 'transparent'; g.shadowOffsetY = 0;
     if (vis && !cur) { g.beginPath(); g.arc(R * .62, -R * .62, 7, 0, 7); g.fillStyle = CINNABAR; g.fill(); g.strokeStyle = PAPER; g.lineWidth = 1.6; g.beginPath(); g.moveTo(R * .62 - 3, -R * .62); g.lineTo(R * .62 - .8, -R * .62 + 2.6); g.lineTo(R * .62 + 3.4, -R * .62 - 2.6); g.stroke(); }
-    if (cur) { g.beginPath(); g.arc(0, 0, R + 8, 0, 7); g.strokeStyle = '#c9a24a'; g.lineWidth = 3; g.stroke(); }
     g.restore();
     // 名字：可走的节点、当前、Boss 常显；其他鼠标悬停才显
     if ((reach && !port()) || cur || n.type === 'boss' || hov.n === n) tag(p, R, n, hov.n === n || cur || n.type === 'boss');
