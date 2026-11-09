@@ -20,7 +20,7 @@
   const FONT = '"MaShanZheng","STKaiti","KaiTi","Songti SC",serif';
   const INK = '#2a211a', CINNABAR = '#b3281e', PAPER = '#eadcc0';
 
-  let run = null, pending = false, shown = false, root = null, cv = null, g = null, W = 0, H = 0, DPR = 1, scroll = 0, tScroll = 0, raf = 0, t0 = 0, drag = null, noise = null, campBox = null;
+  let run = null, pending = false, shown = false, root = null, cv = null, g = null, W = 0, H = 0, DPR = 1, scroll = 0, tScroll = 0, raf = 0, t0 = 0, drag = null, noise = null, campBox = null, bgC = null, bgKey = '';
   const rnd = () => Math.random();
   const seeded = n => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
 
@@ -224,8 +224,8 @@
     // 不画圆底：图标直接落在地图上，靠柔和投影立住；可走的放大并发出朱红光晕，当前节点发金光
     const k = .5 + .5 * Math.sin(t * 3), sc = reach ? 1.12 + k * .05 : 1;
     g.translate(0, bob); g.scale(sc, sc);
-    g.shadowColor = cur ? 'rgba(201,162,74,.95)' : reach ? `rgba(179,40,30,${.6 + .35 * k})` : 'rgba(40,28,18,.4)';
-    g.shadowBlur = cur ? 16 : reach ? 12 + k * 8 : 5; g.shadowOffsetY = reach || cur ? 0 : 2;
+    if (cur || reach) g.shadowColor = cur ? 'rgba(201,162,74,.95)' : reach ? `rgba(179,40,30,${.6 + .35 * k})` : 'rgba(40,28,18,.4)';
+    if (cur || reach) { g.shadowBlur = cur ? 16 : 12 + k * 8; g.shadowOffsetY = 0; }
     g.globalAlpha = vis ? .75 : reach || cur ? 1 : .55;
     icon(n.type, R * 2.0, vis || (!reach && !cur));
     g.globalAlpha = 1; g.shadowBlur = 0; g.shadowColor = 'transparent'; g.shadowOffsetY = 0;
@@ -269,8 +269,13 @@
     if (!shown) { raf = 0; return; }
     raf = requestAnimationFrame(frame);
     if (!drag || !drag.moved) scroll += (tScroll - scroll) * .1;
-    g.setTransform(DPR, 0, 0, DPR, 0, 0);
-    g.fillStyle = PAPER; g.fillRect(0, 0, W, H);
+    // 静态底图（纸、淡墨分段、远山、路径）缓存成一张图：只在滚动/状态变化时重画，平时每帧只贴图 + 画发光的节点
+    const key = W + 'x' + H + 'x' + DPR + '|' + scroll.toFixed(1) + '|' + (run.cur ? run.cur.id : -1) + '|' + run.visited.size + '|' + (port() ? 1 : 0);
+    if (!bgC) bgC = document.createElement('canvas');
+    if (key !== bgKey) {
+      bgKey = key; if (bgC.width !== cv.width || bgC.height !== cv.height) { bgC.width = cv.width; bgC.height = cv.height; }
+      const gMain = g; g = bgC.getContext('2d'); g.setTransform(DPR, 0, 0, DPR, 0, 0);
+      g.fillStyle = PAPER; g.fillRect(0, 0, W, H);
     g.fillStyle = paperNoise(); g.fillRect(0, 0, W, H);
     const wash = g.createRadialGradient(W * .5, H * .45, Math.min(W, H) * .2, W * .5, H * .5, Math.max(W, H) * .75);
     wash.addColorStop(0, 'rgba(255,248,230,.35)'); wash.addColorStop(1, 'rgba(120,90,50,.28)'); g.fillStyle = wash; g.fillRect(0, 0, W, H);
@@ -282,6 +287,9 @@
       const walked = visited(n) && visited(m), open = n === run.cur && reachable(m);
       trail(a, b, n, m, walked ? 2 : open ? 1 : 0, seedE);
     }
+      g = gMain;
+    }
+    g.setTransform(1, 0, 0, 1, 0, 0); g.drawImage(bgC, 0, 0); g.setTransform(DPR, 0, 0, DPR, 0, 0);
     for (const n of run.nodes) { try { seal(n, now); } catch (e) { if (!window._rtErr) { window._rtErr = 1; console.error('route seal', e); } } }
     // 抬头：章节、血量、提示（手机竖屏先垫一层纸色渐隐，免得节点叠在字上）
     if (port()) { const hb = g.createLinearGradient(0, 0, 0, 132); hb.addColorStop(0, 'rgba(234,220,192,.97)'); hb.addColorStop(.75, 'rgba(234,220,192,.9)'); hb.addColorStop(1, 'rgba(234,220,192,0)'); g.fillStyle = hb; g.fillRect(0, 0, W, 132); }
