@@ -238,13 +238,16 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   let origin = 'nongfu';
   const OG = () => ORIGINS[origin] || ORIGINS.nongfu;
   // ---------- 招式类别 / 出身熟练 / 类别共鸣 / 连携 / 熟练度 ----------
-  const CATN = ['体术', '短兵', '长兵', '射艺', '术法'], CATA = [0, 1, 2, 3, 6];   // 类别 → 出身属性下标
-  const CAT = { chong: 0, hengsao: 1, lianzhan: 1, daobo: 1, xuanfeng: 1, daolun: 1, zhendi: 1, dilie: 1, shuanghuan: 1, sixiang: 1, tianbeng: 1, huima: 1, feilun: 1, xuehe: 1, wanren: 1, qiang: 2, feidao: 3, jianyu: 3, huogong: 4, pili: 4 };
-  const catOf = k => CAT[k] != null ? CAT[k] : 1;
+  // 大类（出身熟练、功法专精）→ 具体兵器（连携、共鸣、施法时手里拿什么）
+  const CATN = ['短兵器', '长兵器', '远程', '法师'], CATA = [1, 2, 3, 6];   // 大类 → 出身属性下标
+  const WEPN = ['刀', '剑', '锤', '枪', '关刀', '弓', '弩', '石子', '法术'], WEPCAT = [0, 0, 0, 1, 1, 2, 2, 2, 3];
+  const WOF = { hengsao: 0, daobo: 0, huima: 0, daolun: 0, lianzhan: 1, sixiang: 1, wanren: 1, zhendi: 2, dilie: 2, shuanghuan: 2, tianbeng: 2, qiang: 3, chong: 3, xuanfeng: 4, xuehe: 4, jianyu: 5, feidao: 7, feilun: 7, huogong: 8, pili: 8 };
+  const wepOf = k => WOF[k] != null ? WOF[k] : 0;
+  const catOf = k => WEPCAT[wepOf(k)];
   const profOf = c => Math.max(.72, Math.min(1.35, .58 + .15 * ((OG().oa || [3, 3, 3, 3, 3, 3, 3, 3])[CATA[c]])));
   const RESD = [0, 0, .08, .16, .26, .40];   // 同类别 n 件：该类别招式伤害加成
   function RES() {
-    const cnt = [0, 0, 0, 0, 0]; for (const k of S.slots) if (SK[k]) cnt[catOf(k)]++;
+    const cnt = [0, 0, 0, 0, 0, 0, 0, 0, 0]; for (const k of S.slots) if (SK[k]) cnt[wepOf(k)]++;   // 按具体兵器数
     const mx = Math.max(...cnt);
     return { cnt, take: mx >= 3 ? .95 : 1, cd: mx >= 5 ? .9 : mx >= 4 ? .95 : 1 };
   }
@@ -252,7 +255,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const lvOf = k => { const m = S.mast[k] || 0; let l = 1; while (l < 10 && m >= MAST_T[l]) l++; return l; };
   const mastMul = k => { const l = lvOf(k); return 1 + .06 * Math.min(3, l - 1) + (l >= 5 ? .12 : 0) + .05 * Math.max(0, Math.min(l, 9) - 5); };   // LV2-4、6-9 递增，LV5 质变
   function skillMul(k) {
-    const c = catOf(k), n = RES().cnt[c], low = hero.hp / maxHp() < .3 ? 1 + .25 * GM.low : 1;
+    const c = catOf(k), n = RES().cnt[wepOf(k)], low = hero.hp / maxHp() < .3 ? 1 + .25 * GM.low : 1;
     return profOf(c) * (1 + RESD[Math.min(5, n)]) * mastMul(k) * GM.all * GM.cat[c] * low * (1 + .06 * S.xy);
   }
   function critRoll() {   // 暴击：基础 5% + 功法；伤害 ×1.5 + 心诀
@@ -274,7 +277,11 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   gadd('guanxing', '观星诀', 2, { x: { crit: .05 }, d: '暴击率 +5%' });
   gadd('taiping', '太平清领心经', 3, { x: { all: 1.12, take: .94 }, kh: .004, d: '全部伤害 +12%，受到伤害 -6%', xj: '每次击杀回复 0.4% 生命' });
   gadd('hunyuan', '混元一气功', 3, { x: { all: 1.08, hp: 1.1, crit: .03 }, kh: .002, d: '全部伤害 +8%，等效生命 +10%，暴击 +3%', xj: '每次击杀回复 0.2% 生命' });
-  [['短兵', 1, ['快刀心法', '断水心经', '破军心经', '霸王心经']], ['长兵', 2, ['抖枪诀', '贯虹心法', '龙胆心经', '无双心经']], ['射艺', 3, ['听风诀', '穿云心经', '追月心经', '落日心经']], ['体术', 0, ['熊经诀', '金钟罩', '铁骨功', '不动明王功']], ['术法', 4, ['引气诀', '通玄心法', '紫气心经', '太平玄元经']]].forEach(([cn, ci, ns], k) => ns.forEach((n, t) => gadd('gf' + k + t, n, t, { c: ci, cn })));
+  [['短兵器', 0, ['快刀心法', '断水心经', '破军心经', '霸王心经'], 0], ['长兵器', 1, ['抖枪诀', '贯虹心法', '龙胆心经', '无双心经'], 1], ['远程', 2, ['听风诀', '穿云心经', '追月心经', '落日心经'], 2], ['法师', 3, ['引气诀', '通玄心法', '紫气心经', '太平玄元经'], 4]].forEach(([cn, ci, ns, k]) => ns.forEach((n, t) => gadd('gf' + k + t, n, t, { c: ci, cn })));
+  gadd('gf30', '熊经诀', 0, { x: { take: .95 }, d: '受到伤害 -5%' });   // 原「体术」四本心法：体术取消，改成守御通用功法
+  gadd('gf31', '金钟罩', 1, { x: { take: .92 }, d: '受到伤害 -8%' });
+  gadd('gf32', '铁骨功', 2, { x: { take: .9 }, blk: .10, d: '受到伤害 -10%；心诀：10% 概率格挡一次伤害' });
+  gadd('gf33', '不动明王功', 3, { x: { take: .88 }, blk: .10, stl: .4, d: '受到伤害 -12%；心诀：10% 格挡，站定 1 秒后受伤再 -40%' });
   gadd('qingshen', '轻身术', 0, { x: { dcd: .92 }, d: '翻滚冷却 -8%' });
   gadd('juqi', '聚气诀', 1, { x: { qh: 1, hy: 1 }, d: '气海 +1，回元 +1' });
   gadd('shixue', '嗜血功', 1, { x: {}, kh: .006, d: '每次击杀回复 0.6% 生命' });
@@ -285,29 +292,31 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   gadd('taxue', '踏雪无痕', 2, { qg: true, d: '轻功：跑动时受到伤害 -15%' });
   gadd('tiesha', '铁砂掌劲', 2, { qg: true, d: '轻功：翻滚时把周围敌人击退并僵直' });
   gadd('yufeng', '御风而行', 3, { qg: true, d: '轻功：跑动时身周不断扫出风刃' });
-  const GM0 = () => ({ all: 1, take: 1, spd: 1, dcd: 1, hp: 1, crit: 0, hy: 0, qh: 0, cat: [1, 1, 1, 1, 1], critC: [0, 0, 0, 0, 0], critD: [0, 0, 0, 0, 0], block: 0, still: 0, kh: 0, low: 0, lhj: false });
+  const GM0 = () => ({ all: 1, take: 1, spd: 1, dcd: 1, hp: 1, crit: 0, hy: 0, qh: 0, cat: [1, 1, 1, 1], critC: [0, 0, 0, 0], critD: [0, 0, 0, 0], block: 0, still: 0, kh: 0, low: 0, lhj: false });
   let GM = GM0();
   const gfLv = id => { const e = S.gfExp[id] || 0; return 1 + (e >= GFTH[0] ? 1 : 0) + (e >= GFTH[1] ? 1 : 0); };   // 杀敌数 → LV1~3，×1 / ×1.3 / ×1.7
-  function gfCalc() {   // 主修：全额 + 心诀；辅修：数值 50%，没有心诀
+  const gfSame = c => S.gf.filter(id => GF[id] && GF[id].c === c).length;
+  const SPECM = [1, 1, 1.3, 1.6], XPM = [1, 1, 1.5, 2];   // 同类心法 1 / 2 / 3 件：专精 ×1 / ×1.3 / ×1.6，升级速度 ×1 / ×1.5 / ×2
+  function gfCalc() {   // 3 个内功格不分主辅；同类心法越多越专精；地、天阶心法带心诀
     const r = GM0();
-    S.gf.forEach((id, i) => {
+    S.gf.forEach(id => {
       const g = GF[id]; if (!g) return;
-      const main = i === 0, f = (main ? 1 : .5) * GLVM[gfLv(id) - 1];
+      const f = .85 * GLVM[gfLv(id) - 1];
       if (g.c >= 0) {
-        r.all *= 1 + GGEN[g.t] * f; r.cat[g.c] *= 1 + GSPEC[g.t] * f;
-        if (main && g.t >= 2) { if (g.c === 0) { r.block += .10; if (g.t === 3) r.still += .4; } else { r.critC[g.c] += .10; if (g.t === 3) r.critD[g.c] += .5; } }
+        r.all *= 1 + GGEN[g.t] * f; r.cat[g.c] *= 1 + GSPEC[g.t] * f * SPECM[gfSame(g.c)];
+        if (g.t >= 2) { r.critC[g.c] += .10; if (g.t === 3) r.critD[g.c] += .5; }
       } else {
         for (const k in g.x) { const v = g.x[k]; if (k === 'crit' || k === 'hy' || k === 'qh') r[k] += v * f; else r[k] *= 1 + (v - 1) * f; }
-        if (g.kh) r.kh += g.kh * f; if (g.low) r.low += f; if (g.lhj) r.lhj = true;
+        if (g.kh) r.kh += g.kh * f; if (g.low) r.low += f; if (g.lhj) r.lhj = true; if (g.blk) r.block += g.blk; if (g.stl) r.still += g.stl;
       }
     });
     r.still = Math.min(.7, r.still); return r;
   }
   const zqMax = () => Math.round(maxHp() * (1 + .06 * GM.qh) * 10) / 10;
-  function gfText(g, main) {
-    const f = (main ? 1 : .5) * GLVM[gfLv(g.id) - 1], pc = v => (v * 100).toFixed(1).replace(/\.0$/, '') + '%';
-    if (g.c >= 0) { let t = `全部伤害 +${pc(GGEN[g.t] * f)}，${g.cn}类招式伤害 +${pc(GSPEC[g.t] * f)}`; if (main && g.t >= 2) t += g.c === 0 ? '；心诀：10% 格挡' + (g.t === 3 ? '，站定 1 秒后受伤 -40%' : '') : '；心诀：该类暴击 +10%' + (g.t === 3 ? '，暴击伤害 +50%' : ''); return t; }
-    return g.d + (main && g.xj ? '；心诀：' + g.xj : '') + (!g.qg && !main ? '（辅修减半）' : '');
+  function gfText(g) {
+    const f = .85 * GLVM[gfLv(g.id) - 1], pc = v => (v * 100).toFixed(1).replace(/\.0$/, '') + '%';
+    if (g.c >= 0) { const sm = SPECM[Math.max(1, gfSame(g.c))]; return `全部伤害 +${pc(GGEN[g.t] * f)}，${g.cn}招式伤害 +${pc(GSPEC[g.t] * f * sm)}（同类心法越多越专精）` + (g.t >= 2 ? '；心诀：该类暴击 +10%' + (g.t === 3 ? '，暴击伤害 +50%' : '') : ''); }
+    return g.d + (g.xj ? '；心诀：' + g.xj : '');
   }
   // 波间习得招式：从还没学会的招式里随机给最多 3 个，选一个放进空格
   function offerSkill(cb) {
@@ -342,7 +351,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       if (kills > S.lk) {
         const d = kills - S.lk; S.combo += d; S.comboT = 3;
         if (RT.on) {
-          S.gf.forEach(id => { if (id) { const l0 = gfLv(id); S.gfExp[id] = (S.gfExp[id] || 0) + d; if (gfLv(id) > l0) floaters.push({ x: hero.x, y: hero.y - 90, t: 0, txt: GF[id].n + ' LV' + gfLv(id), color: '#ffd86e' }); } });
+          S.gf.forEach(id => { if (id) { const l0 = gfLv(id); S.gfExp[id] = (S.gfExp[id] || 0) + d * (GF[id].c >= 0 ? XPM[Math.max(1, gfSame(GF[id].c))] : 1); if (gfLv(id) > l0) floaters.push({ x: hero.x, y: hero.y - 90, t: 0, txt: GF[id].n + ' LV' + gfLv(id), color: '#ffd86e' }); } });
           if (GM.kh) heal(maxHp() * GM.kh * d);
           S.zq = Math.min(zqMax(), S.zq + zqMax() * .006 * d);
         }
@@ -374,7 +383,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       if (S.wind.t >= S.wind.dur) {
         const k = S.wind.k, i = S.wind.i, key = S.wind.key; S.flash[i] = .3;
         const t = nearest(200); if (t) hero.f = Math.sign(t.x - hero.x) || hero.f;
-        CM = skillMul(key); RM = lvOf(key) >= 5 ? 1.1 : 1; const ch = S.wind.ch; S.chain = ch; S.lastCat = catOf(key); S.lastI = i;
+        CM = skillMul(key); RM = lvOf(key) >= 5 ? 1.1 : 1; const ch = S.wind.ch; S.chain = ch; S.lastCat = wepOf(key); S.lastI = i;
         if (ch > 0) floaters.push({ x: hero.x, y: hero.y - 62, t: 0, txt: '连携 ×' + ch, color: '#9fe0ff' });
         S.lhjOn = S.lhjReady; S.lhjReady = false; if (S.lhjOn) S.noHitT = 0;
         CK = key; k.cast(); S.lhjOn = false;
@@ -391,7 +400,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     for (let n = 0; n < 5 && !SK[S.slots[S.qi]]; n++) { S.qi = (S.qi + 1) % 5; if (S.qi === 0) S.cycles++; }
     if ((S.qt += dt) < .05) return;
     const k = SK[S.slots[S.qi]];
-    if (k && nearest(k.need)) { const key = S.slots[S.qi], ch = S.lastCat === catOf(key) && S.lastI === S.qi - 1 ? Math.min(4, S.chain + 1) : 0;   // 只算同一轮里紧挨着的前一槽；同一招重复、轮回到第 1 槽都不算
+    if (k && nearest(k.need)) { const key = S.slots[S.qi], ch = S.lastCat === wepOf(key) && S.lastI === S.qi - 1 ? Math.min(4, S.chain + 1) : 0;   // 只算同一轮里紧挨着的前一槽；同一招重复、轮回到第 1 槽都不算
        S.wind = { i: S.qi, k, key, ch, t: 0, dur: k.wu * 1.2 * (OG().wu || 1) * CDM() * (1 - .2 * ch) }; S.hold = 0; return; }
     if (k && S.hold < 1.2) { S.hold += .05; S.qt = 0; return; }   // 这一招够不着人：等 1.2 秒，还不行就跳下一招
     S.skip[S.qi] = .2; S.qt = -.05; S.qi = (S.qi + 1) % 5; if (S.qi === 0) S.cycles++; S.hold = 0;
@@ -412,7 +421,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     const owned = S.slots.filter(Boolean), free = S.slots.indexOf('') >= 0;
     const sk = (free ? Object.keys(SK).filter(k => !owned.includes(k) && tierOk(k)) : []).sort(() => Math.random() - .5).slice(0, kind === 'skill' ? 3 : 2).map(k => ({ kind: 'skill', k, name: SK[k].name, icon: SK[k].icon, color: SK[k].color, desc: (SK[k].tier ? TIERN[SK[k].tier] + '阶 · ' : '') + SK[k].desc }));
     const gp = Object.keys(GF).filter(id => { const g = GF[id]; return !g.off && !S.gf.includes(id) && S.qg !== id && W.n >= TMIN[g.t + 1] && (g.qg || S.gf.includes('')); });
-    const pk = gp.sort(() => Math.random() - .5).map(id => { const g = GF[id]; return { kind: 'gf', id, name: g.n, icon: g.qg ? '轻' : g.n[0], color: GTC[g.t], desc: GTN[g.t] + '阶 · ' + (g.qg ? '轻功 · ' : g.c >= 0 ? g.cn + '心法 · ' : '内功 · ') + gfText(g, true) }; });
+    const pk = gp.sort(() => Math.random() - .5).map(id => { const g = GF[id]; return { kind: 'gf', id, name: g.n, icon: g.qg ? '轻' : g.n[0], color: GTC[g.t], desc: GTN[g.t] + '阶 · ' + (g.qg ? '轻功 · ' : g.c >= 0 ? g.cn + '心法 · ' : '内功 · ') + gfText(g) }; });
     if (pk.length < 3) pk.push({ kind: 'heal', name: '回春', icon: '春', color: '#ff9a9a', desc: '立刻回复 40% 血量' });
     if (kind === 'perk') return pk.slice(0, 3);
     return sk.concat(pk).slice(0, 3).sort(() => Math.random() - .5);
@@ -619,17 +628,17 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     const o = OG(), R = RES(), tot = Object.values(S.dps).reduce((a, b) => a + b, 0);
     const cats = CATN.map((n, c) => `<span style="display:inline-block;margin:2px 8px 2px 0">${n} <b style="color:${profOf(c) >= 1.15 ? '#9fe08a' : profOf(c) < .9 ? '#e08a8a' : '#ddd'}">×${profOf(c).toFixed(2)}</b></span>`).join('');
     const rows = S.slots.map((k, i) => !SK[k] ? `<div class="r" style="opacity:.4">${i + 1}. 空</div>` :
-      `<div class="r"><b style="color:${SK[k].color}">${i + 1}. ${SK[k].name}</b> <span class="t">${CATN[catOf(k)]}${SK[k].tier ? ' · ' + TIERN[SK[k].tier] + '阶' : ''}</span><span class="v">LV${lvOf(k)} · ×${skillMul(k).toFixed(2)}${tot ? ' · 输出 ' + Math.round((S.dps[k] || 0) / tot * 100) + '%' : ''}</span><span class="mv"><button data-mv="${i}:-1"${i < 1 ? ' disabled' : ''}>▲</button><button data-mv="${i}:1"${i > 3 || !SK[S.slots[i + 1]] ? ' disabled' : ''}>▼</button></span></div>`).join('');
-    const res = R.cnt.map((n, c) => n >= 2 ? `<div class="r"><b>${CATN[c]}共鸣 ${n} 件</b><span class="v">本类招式伤害 +${Math.round(RESD[Math.min(5, n)] * 100)}%</span></div>` : '').join('') || '<div class="r" style="opacity:.5">还没有（同类别招式 2 件起）</div>';
-    const gfRows = S.gf.map((id, i) => { const g = GF[id]; return !g ? `<div class="r" style="opacity:.4">${i ? '辅修' : '主修'} · 空</div>` : `<div class="r"><b style="color:${GTC[g.t]}">${i ? '辅修' : '主修'} · ${g.n}</b> <span class="t">${GTN[g.t]}阶 · LV${gfLv(id)} · 杀敌 ${S.gfExp[id] || 0}</span><span class="mv"><button data-gm="${i}"${i < 1 ? ' disabled' : ''}>▲</button><button data-gx="${i}">✕</button></span></div><div class="gd">${gfText(g, i === 0)}</div>`; }).join('');
+      `<div class="r"><b style="color:${SK[k].color}">${i + 1}. ${SK[k].name}</b> <span class="t">${WEPN[wepOf(k)]} · ${CATN[catOf(k)]}${SK[k].tier ? ' · ' + TIERN[SK[k].tier] + '阶' : ''}</span><span class="v">LV${lvOf(k)} · ×${skillMul(k).toFixed(2)}${tot ? ' · 输出 ' + Math.round((S.dps[k] || 0) / tot * 100) + '%' : ''}</span><span class="mv"><button data-mv="${i}:-1"${i < 1 ? ' disabled' : ''}>▲</button><button data-mv="${i}:1"${i > 3 || !SK[S.slots[i + 1]] ? ' disabled' : ''}>▼</button></span></div>`).join('');
+    const res = R.cnt.map((n, c) => n >= 2 ? `<div class="r"><b>${WEPN[c]}共鸣 ${n} 件</b><span class="v">${WEPN[c]}招式伤害 +${Math.round(RESD[Math.min(5, n)] * 100)}%</span></div>` : '').join('') || '<div class="r" style="opacity:.5">还没有（同一种兵器的招式 2 件起）</div>';
+    const gfRows = S.gf.map((id, i) => { const g = GF[id]; return !g ? `<div class="r" style="opacity:.4">内功 ${i + 1} · 空</div>` : `<div class="r"><b style="color:${GTC[g.t]}">${g.n}</b> <span class="t">${GTN[g.t]}阶 · ${g.c >= 0 ? g.cn + '心法' : '通用'} · LV${gfLv(id)} · 杀敌 ${S.gfExp[id] || 0}</span><span class="mv"><button data-gx="${i}">✕</button></span></div><div class="gd">${gfText(g)}</div>`; }).join('');
     const qgRow = GF[S.qg] ? `<div class="r"><b style="color:${GTC[GF[S.qg].t]}">${GF[S.qg].n}</b> <span class="t">${GTN[GF[S.qg].t]}阶</span><span class="mv"><button data-qx="1">✕</button></span></div><div class="gd">${GF[S.qg].d}</div>` : '<div class="r" style="opacity:.4">空（战利品里可能出现轻功）</div>';
     const mx = Math.max(...R.cnt), ex = [mx >= 3 ? '受伤 -5%' : '', mx >= 4 ? '出招 -5% 间隔' : '', mx >= 5 ? '出招再快（共 -10%）' : ''].filter(Boolean).join('，');
     return `<div class="bp"><h3>构筑总览 <button class="x">✕</button></h3>
       <h4>出身 · ${o.name}</h4><div style="font-size:12px">${cats}</div><div style="font-size:11px;opacity:.6">出身对各类招式的熟练系数：跨类也能用，只是偏弱</div>
       <h4>招式（按 1→5 顺序放，可用 ▲▼ 调顺序）</h4>${rows}
-      <h4>类别共鸣</h4>${res}${ex ? `<div style="font-size:11px;opacity:.7;margin-top:2px">额外：${ex}</div>` : ''}
-      <h4>连携</h4><div style="font-size:12px">相邻两招类别相同，后一招前摇缩短，逐次叠加最多 -80%；换类别就断。当前：${S.chain > 0 ? '×' + S.chain : '无'}</div>
-      <h4>内功（主修全额 + 心诀，辅修数值减半）</h4>${gfRows}
+      <h4>兵器共鸣</h4>${res}${ex ? `<div style="font-size:11px;opacity:.7;margin-top:2px">额外：${ex}</div>` : ''}
+      <h4>连携</h4><div style="font-size:12px">相邻两招用同一种兵器，后一招前摇缩短，逐次叠加最多 -80%；换兵器就断。当前：${S.chain > 0 ? '×' + S.chain : '无'}</div>
+      <h4>内功（同类心法装得越多，专精越高、升级越快）</h4>${gfRows}
       <h4>轻功</h4>${qgRow}
       <h4>真气</h4><div style="font-size:12px">${Math.round(S.zq * 10)} / ${Math.round(zqMax() * 10)}　<span style="opacity:.65">受伤先扣真气；真气自己回复、杀敌回复；战后剩余的 30% 化成气血</span></div></div>`;
   }
