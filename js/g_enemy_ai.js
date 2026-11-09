@@ -162,7 +162,8 @@ function zUpdate(z, dt) {
     else { z.moving = false; z.f = Math.sign(hero.x - z.x) || z.f; }
     return;
   }
-  z.t += dt * (window.GEAR ? GEAR.enemyAttack(z) : (z.attackSlowT > 0 ? .9 : 1)); z.flash = Math.max(0, z.flash - dt); z.cd -= dt * (window.GEAR ? GEAR.enemyAttack(z) : (z.attackSlowT > 0 ? .9 : 1));
+  const QK = z.st === 'wind' && !z.T.elite && !z.T.chapterBoss && !z.T.ranged ? 1.35 : 1;   // 用户定 11/09：小怪抬手更快
+  z.t += dt * QK * (window.GEAR ? GEAR.enemyAttack(z) : (z.attackSlowT > 0 ? .9 : 1)); z.flash = Math.max(0, z.flash - dt); z.cd -= dt * (window.GEAR ? GEAR.enemyAttack(z) : (z.attackSlowT > 0 ? .9 : 1));
   z.moveSlowT = Math.max(0, (z.moveSlowT || 0) - dt); z.attackSlowT = Math.max(0, (z.attackSlowT || 0) - dt);
   if (z.qiCd > 0) z.qiCd -= dt;
   if (z.qi != null) {                     // 老卒蓄力中：0.62 秒后劈出扇形剑气
@@ -292,6 +293,7 @@ function zUpdate(z, dt) {
   if (z.st === 'wind') {
     // 防卡Y值：近战前摇时慢慢对齐主角的上下位置（每秒最多 22 像素，大步跑开仍能躲）
     if (!T.ranged && Math.abs(dy) < 30) moveEnt(z, 0, Math.sign(dy) * Math.min(Math.abs(dy), 22 * dt));
+    if (!T.ranged && !T.elite && !T.chapterBoss && Math.abs(dx) > T.reach - 6) moveEnt(z, Math.sign(dx) * T.spd * .8 * dt, 0);   // 边走边蓄力：抬手时继续逼近
     // 完美闪避：敌人刀落下前 0.18 秒内翻滚 → 慢动作 + 1 秒暴击窗
     if (!z.pd && z.st === 'wind') {
       const rem = T.wind - z.t;
@@ -317,7 +319,7 @@ function zUpdate(z, dt) {
     return;
   }
   if (z.st === 'strike') { if (!T.ranged) moveEnt(z, z.f * 40 * dt, 0); if (z.t > .25) set(z, 'rec'); return; }
-  if (z.st === 'rec') { if (z.t > (T.ranged ? .4 : .7)) { z.tok = false; set(z, 'move'); } return; }
+  if (z.st === 'rec') { if (z.t > (T.ranged ? .4 : T.elite ? .7 : .5)) { z.tok = false; set(z, 'move'); } return; }
   z.f = Math.sign(dx) || z.f;
   let tx, ty;
   if (T.ranged) {   // 远程：和主角保持距离，站到差不多同一条线上
@@ -329,19 +331,19 @@ function zUpdate(z, dt) {
     if (z.cd <= 0 && ad > T.range[0] * .7 && ad < (z.siegeArcher ? 340 : T.range[1] * 1.2) && Math.abs(dy) < (z.siegeArcher ? 120 : T.ranged === 'stone' ? 14 : 60)) { set(z, 'wind'); z.cd = ch2Troops()&&z.type==='archer'?4.5:T.cd; return; }
   } else {          // 近战：最多 M.token 个同时贴身，其余在旁边游走
     const tokens = zs.filter(o => o.tok && !o.dead).length;
-    if (!z.tok && tokens < (window.XIAOCHANG && XIAOCHANG.tokenCap ? XIAOCHANG.tokenCap() : M.token) && Math.abs(dx) < 130) z.tok = true;
-    tx = hero.x - z.f * (z.tok ? T.reach - 6 : 52 + (z.slot % 3) * 14); ty = hero.y + (z.tok ? 0 : (z.slot % 2 ? 16 : -16));
+    if (!z.tok && tokens < (window.XIAOCHANG && XIAOCHANG.tokenCap ? XIAOCHANG.tokenCap() : M.token) && Math.abs(dx) < 200) z.tok = true;
+    tx = hero.x - z.f * (z.tok ? T.reach - 6 : 26 + (z.slot % 3) * 8); ty = hero.y + (z.tok ? 0 : (z.slot % 2 ? 16 : -16));
     // 老卒专属：站到中距离就蓄力放剑气（6.5 秒一次）
     if (T.elite && !z.qi && (z.qiCd || 0) <= 0 && Math.abs(dx) < 130 && Math.abs(dy) < 26) {
       set(z, 'wind'); z.qi = 0; z.qiCd = 6.5; sfx('bladeAlert', z.x); return;
     }
-    if (z.tok && !(ch2Troops() && z.type==='yellow-heavy' && ch2Formation(z) && Math.abs(z.x-ch2Formation(z).x)>18) && Math.abs(dx) < T.reach && Math.abs(dy) < 10) { set(z, 'wind'); if (T.heavy) sfx('bladeAlert', z.x); return; }
+    if (z.tok && !(ch2Troops() && z.type==='yellow-heavy' && ch2Formation(z) && Math.abs(z.x-ch2Formation(z).x)>18) && Math.abs(dx) < T.reach + (T.elite || T.chapterBoss ? 0 : 16) && Math.abs(dy) < 12) { set(z, 'wind'); if (T.heavy) sfx('bladeAlert', z.x); return; }
   }
   const formation=ch2Formation(z);if(formation){tx=formation.x;ty=formation.y;}
   const mx = tx - z.x, my = ty - z.y, l = Math.hypot(mx, my);
   z.moving = l > 4;
   if (z.moving) {
-    const sp = T.spd * (!window.GEAR && z.moveSlowT > 0 ? .85 : 1) * (Math.abs(dx) > 150 ? 1.8 : 1);   // 离得远时快步冲过来
+    const sp = T.spd * (!window.GEAR && z.moveSlowT > 0 ? .85 : 1) * (Math.abs(dx) > 150 ? 2.2 : 1) * (T.elite || T.chapterBoss ? 1 : 1.25);   // 离得远时快步冲过来
     moveEnt(z, mx / l * sp * dt, my / l * sp * .7 * dt);
     if (z.bx && z.avoidDir == null) moveEnt(z, 0, (z.slot % 2 ? 1 : -1) * T.spd * dt);   // 被草垛等挡住时上下绕开（已在绕行时不再额外推）
   }

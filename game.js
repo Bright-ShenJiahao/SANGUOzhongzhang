@@ -192,7 +192,7 @@ function rollFill(pool, budget) {
   }
   return out;
 }
-const M = { viewH: 300, W: 3600, top: 168, bot: 290, gates: [330, 900, 1450, 2000, 2500, 3000], token: 2 };
+const M = { viewH: 300, W: 3600, top: 168, bot: 290, gates: [330, 900, 1450, 2000, 2500, 3000], token: 8 };
 const RETREAT_SCREENS = 1.2;   // 非 Boss 战最多后退 1.2 个屏幕，防止无限风筝
 let hero, zs, shots, eshots, fires, props, propFx, cam, gateI, lockR, kills, msg, msgT, freeze, shake, weapon = 'hammer', over, won;
 let stoneHits = [];
