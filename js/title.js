@@ -1121,7 +1121,7 @@
     }
     lastPreviewFrame = frameName;
     g.clearRect(0, 0, canvas.width, canvas.height);
-    const frame = CH.hero && CH.hero[frameName];
+    const frame = CH.hero && (CH.hero[frameName] || CH.hero.idle);
     if (!frame) return;
     if (!frame.img.complete) {
       if (!frame.previewPending) {

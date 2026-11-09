@@ -152,21 +152,21 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   function nearest(r) { let best = null, bd = r; for (const z of hittable()) { const d = dist(z, hero); if (d < bd) { bd = d; best = z; } } return best; }
   // 用户定 11/09：招式没有各自冷却，1→5 依次放（放完一招才轮到下一招）；前摇/后摇照三国幸存者
   const SK = {
-    hengsao: { desc: '身前 270° 大横扫，击退', name: '横扫', icon: '扫', color: '#ffb45a', wu: .6, rc: .3, need: 70, pose: ['blade_4a', 'blade_2b'], range: 46, half: 2.356,
+    hengsao: { desc: '身前 270° 大横扫，击退', name: '横扫', icon: '扫', color: '#ffb45a', wu: .6, rc: .3, need: 70, pose: [], range: 46, half: 2.356,
       cast() { const a = aim(); sweep(a, 2.356, 46, 2.4, 60, ['rgba(255,170,90,', 'rgba(255,230,160,']); sfx('swing_knife', hero.x); shake = Math.max(shake, .12); } },
-    lianzhan: { desc: '180° 连砍两刀', name: '连斩', icon: '连', color: '#8fd0ff', wu: .5, rc: .4, need: 64, pose: ['blade_1a', 'blade_1b'], range: 40, half: 1.571,
+    lianzhan: { desc: '180° 连砍两刀', name: '连斩', icon: '连', color: '#8fd0ff', wu: .5, rc: .4, need: 64, pose: [], range: 40, half: 1.571,
       cast() {
         const a = aim(); sweep(a, 1.571, 40, 1.6, 30, ['rgba(120,200,255,', 'rgba(210,240,255,']); sfx('swing_knife', hero.x);
-        later(.25, () => { const b = aim(); S.poseOverride = { f: 'blade_2b', t: .25 }; sweep(b, 1.571, 40, 1.6, 45, ['rgba(255,120,120,', 'rgba(255,220,220,'], { rev: true }); sfx('swing_knife', hero.x); });
+        later(.25, () => { const b = aim(); S.poseOverride = { f: SK.lianzhan.pose2, t: .25 }; sweep(b, 1.571, 40, 1.6, 45, ['rgba(255,120,120,', 'rgba(255,220,220,'], { rev: true }); sfx('swing_knife', hero.x); });
       } },
   };
-  SK.daobo = { desc: '向前劈出穿透刀波', name: '刀波', icon: '波', color: '#c8f0ff', wu: .5, rc: .3, need: 160, pose: ['blade_1a', 'blade_2b'], range: 0, half: 0, beam: true,
+  SK.daobo = { desc: '向前劈出穿透刀波', name: '刀波', icon: '波', color: '#c8f0ff', wu: .5, rc: .3, need: 160, pose: [], range: 0, half: 0, beam: true,
     cast() {   // 朝最近的敌人劈出一道月牙刀波，一路穿透
       const a = aim(), vx = Math.cos(a), vy = Math.sin(a) / 2;
       bolts.push({ x: hero.x + vx * 14, y: hero.y + vy * 14, vx: vx * 270, vy: vy * 270, a, t: 0, T: .85, hitSet: [] });
       sfx('swing_knife', hero.x); shake = Math.max(shake, .08);
     } };
-  SK.zhendi = { desc: '砸地，脚下一圈震飞', name: '震地', icon: '震', color: '#ffd27a', wu: .7, rc: .35, need: 56, pose: ['blade_4a', 'blade_4b'], range: 52, half: Math.PI, ring: true,
+  SK.zhendi = { desc: '砸地，脚下一圈震飞', name: '震地', icon: '震', color: '#ffd27a', wu: .7, rc: .35, need: 56, pose: [], range: 52, half: Math.PI, ring: true,
     cast() {   // 一刀砸地，脚下一圈冲击波，把周围的人震飞
       fx.push({ k: 'ring', x: hero.x, y: hero.y, t: 0, T: .45, r: 52 });
       for (const z of hittable()) if (dist(z, hero) < 52) { const f0 = freeze; rec(2.0 * DM()); hit(z, 2.0 * DM(), 50, Math.sign(z.x - hero.x) || hero.f, true, 0, .4, false, false, { secondary: true, survSkill: true }); freeze = Math.min(freeze, Math.max(f0, .05)); }
@@ -194,10 +194,10 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   }
   const shot = (a, o) => bolts.push(Object.assign({ x: hero.x + Math.cos(a) * 14, y: hero.y + Math.sin(a) * 7, vx: Math.cos(a) * 270, vy: Math.sin(a) * 135, a, t: 0, T: .85, hitSet: [], dmg: 1.8, col: ['160,225,255', '240,252,255'] }, o));
   const later = (t, f) => { const c = CM, r = RM, k = CK; S.later.push({ t, f() { const o = CM, q = RM, w = CK; CM = c; RM = r; CK = k; f(); CM = o; RM = q; CK = w; } }); };
-  const add = (k, o) => { SK[k] = Object.assign({ wu: .6, rc: .35, pose: ['blade_1a', 'blade_2b'], range: 0, half: 0, tier: 0 }, o); };
+  const add = (k, o) => { SK[k] = Object.assign({ wu: .6, rc: .35, pose: [], range: 0, half: 0, tier: 0 }, o); };
   SK.hengsao.tier = 1; SK.lianzhan.tier = 1; SK.zhendi.tier = 2;
   add('huima', { tier: 1, name: '回马刀', icon: '回', color: '#ffc27a', desc: '先斩身前，再回身斩身后', need: 60, range: 44, half: 1.2, wu: .55, rc: .35,
-    cast() { const a = aim(); sweep(a, 1.2, 44, 1.8, 40, ['rgba(255,190,110,', 'rgba(255,235,180,']); sfx('swing_knife', hero.x); later(.22, () => { S.poseOverride = { f: 'blade_2b', t: .25 }; sweep(a + Math.PI, 1.2, 44, 2.2, 55, ['rgba(255,120,90,', 'rgba(255,215,200,'], { rev: true }); sfx('swing_knife', hero.x); }); } });
+    cast() { const a = aim(); sweep(a, 1.2, 44, 1.8, 40, ['rgba(255,190,110,', 'rgba(255,235,180,']); sfx('swing_knife', hero.x); later(.22, () => { S.poseOverride = { f: SK.huima.pose2, t: .25 }; sweep(a + Math.PI, 1.2, 44, 2.2, 55, ['rgba(255,120,90,', 'rgba(255,215,200,'], { rev: true }); sfx('swing_knife', hero.x); }); } });
   add('feidao', { name: '飞刀', icon: '刀', color: '#dfeeff', desc: '扇形掷出三把飞刀', need: 190,
     cast() { const a = aim(); for (const d of [-.24, 0, .24]) shot(a + d, { dmg: 1.2, T: .75, vx: Math.cos(a + d) * 330, vy: Math.sin(a + d) * 165, col: ['200,220,255', '255,255,255'] }); sfx('swing_knife', hero.x); } });
   add('qiang', { name: '枪刺', icon: '枪', color: '#ffe9a8', desc: '向前刺出一条长枪线', need: 130, beam: true, len: 100, wu: .5,
@@ -244,6 +244,14 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const WOF = { hengsao: 0, daobo: 0, huima: 0, daolun: 0, lianzhan: 1, sixiang: 1, wanren: 1, zhendi: 2, dilie: 2, shuanghuan: 2, tianbeng: 2, qiang: 3, chong: 3, xuanfeng: 4, xuehe: 4, jianyu: 5, feidao: 7, feilun: 7, huogong: 8, pili: 8 };
   const wepOf = k => WOF[k] != null ? WOF[k] : 0;
   const catOf = k => WEPCAT[wepOf(k)];
+  // 招式姿势：主角固定空手，放招时按这一招的兵器举起对应的施招帧（第 1 帧蓄力，第 2 帧出手，更多帧给第二刀和收势）
+  // FRW 下标同 WEPN：[帧名前缀, 帧数]；法术暂按招式配法器，之后改成按装备的法器
+  const FRW = [['dao', 4], ['jian', 4], ['chui', 2], ['qiang', 4], ['guandao', 5], ['gong', 2], ['nu', 2], ['shi', 2], ['zhang', 3]];
+  const MAGE_FR = { huogong: 'shan', pili: 'fu' }, RECOV_N = { hengsao: 3, xuanfeng: 3, xuehe: 4, pili: 3 };
+  for (const k of Object.keys(SK)) {
+    const w = wepOf(k), [pre, n] = w === 8 && MAGE_FR[k] ? [MAGE_FR[k], 3] : FRW[w], f = i => pre + '_' + Math.min(n, i);
+    SK[k].pose = [f(1), f(RECOV_N[k] || 2)]; SK[k].pose2 = f(3); SK[k].poseL = w === 8 || n < 4 ? SK[k].pose[1] : f(n);
+  }
   const profOf = c => Math.max(.72, Math.min(1.35, .58 + .15 * ((OG().oa || [3, 3, 3, 3, 3, 3, 3, 3])[CATA[c]])));
   const RESD = [0, 0, .08, .16, .26, .40];   // 同类别 n 件：该类别招式伤害加成
   function RES() {
@@ -390,7 +398,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
         const l0 = lvOf(key); S.mast[key] = (S.mast[key] || 0) + 1; if (lvOf(key) > l0) floaters.push({ x: hero.x, y: hero.y - 76, t: 0, txt: k.name + ' LV' + lvOf(key), color: '#ffd86e' });
         if (lvOf(key) >= 10) later(.2, () => { CM *= .6; k.cast(); });   // LV10 质变：多出一击
         CM = 1; RM = 1; CK = '';
-        S.recov = { t: 0, dur: k.rc * CDM(), pose: k.pose[1] }; S.wind = null;
+        S.recov = { t: 0, dur: k.rc * CDM(), pose: k.pose[1], late: k.poseL }; S.wind = null;
         S.qi = (S.qi + 1) % 5; if (S.qi === 0) S.cycles++;
       }
       return;
@@ -610,7 +618,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   // 主角姿势：前摇举刀，出手和后摇用挥刀帧
   function pose() {
     if (S.poseOverride) return S.poseOverride.f;
-    if (S.recov) return S.recov.pose;
+    if (S.recov) return S.recov.late && S.recov.t > S.recov.dur * .55 ? S.recov.late : S.recov.pose;
     if (S.wind && hero.st !== 'walk') return S.wind.k.pose[0];
     return null;
   }
