@@ -26,7 +26,7 @@ const DM = () => RT.dmg;
 const bossCount = () => RT.on ? (RT.node && W.k === W.N ? (RT.node.type === 'boss' ? 3 : RT.node.type === 'elite' ? 1 : 0) : (RT.node && RT.node.type === 'boss' && W.k === 1 ? 1 : 0)) : (BOSS_WAVES[W.n] || 0);
 const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: false, between: 0, started: false };
   const WT = () => RT.on ? W.tot : (WAVE_T[Math.min(W.n, WAVES) - 1] || 60);   // 路线模式：一个节点是一整场连续的仗，时长 = 原来几波加起来
-  const CNT_BASE = 12, CNT_STEP = 5.4, CNT_MAX = 150;   // 路线模式：场上同屏人数 = 12 + 5.4×(难度级-1)，1 级约 12 只，10 级约 60，20 级约 115；难度级随时间连续上升，所以人数是一路慢慢涨
+  const CNT_BASE = 28, CNT_STEP = 6.2, CNT_MAX = 180;   // 路线模式：场上同屏人数 = 28 + 6.2×(难度级-1)，1 级约 28 只，10 级约 84，20 级约 146；难度级随时间连续上升，所以人数是一路慢慢涨
   const targetN = () => RT.on ? Math.min(CNT_MAX, Math.round(CNT_BASE + CNT_STEP * ((W.lvF || 1) - 1))) : Math.max(8, Math.round((WAVE_N[W.n - 1] || 100) * N_SCALE));
   function pickType() {
     const pool = [];
@@ -51,6 +51,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       const nd = RT.node, L = ROUTE.layers(), N0 = ROUTE.waves(nd);
       const lvOf = k => Math.max(1, Math.min(WAVES, 1 + Math.floor(((nd.layer - 1 + (k - 1) / N0) / L) * WAVES) + (nd.type === 'elite' ? 2 : 0) + (nd.type === 'boss' ? 2 : 0)));
       W.lv0 = lvOf(1); W.lv1 = lvOf(N0); W.tot = 0; for (let k = 1; k <= N0; k++) W.tot += (WAVE_T[lvOf(k) - 1] || 60) * ROUTE.TIME_K;
+      W.tot = nd.type === 'boss' ? 180 : nd.type === 'elite' ? Math.min(240, Math.max(120, W.tot)) : Math.max(90, W.tot);   // 首领固定 3 分钟；精英 2~4 分钟；普通战斗至少 90 秒
       W.k = 1; W.N = 1; W.n = W.lv0; W.lvF = W.lv0; W.t = 0; W.retreat = 0; W.spawnT = 0; W.batchT = 0; W.bossDone = false;
       say(ROUTE.name(nd), 1.6); return;
     }
@@ -83,10 +84,10 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     if (RT.on) { W.lvF = W.lv0 + (W.lv1 - W.lv0) * Math.min(1, W.t / W.tot); W.n = Math.round(W.lvF); }   // 难度随时间平滑上升
     if (bossCount() && !W.bossDone && W.t >= 1) { W.bossDone = true; for (let i = 0; i < bossCount(); i++) edgeSpawn('elite', true); }
     // 补兵：开场慢慢涌进来（前 60% 时间里目标人数从少爬到满）
-    const ramp = RT.on ? WT() * .6 : Math.min(30, WT() * .6), rf = Math.min(1, .08 + .92 * W.t / ramp), tn = Math.ceil(targetN() * rf);
+    const ramp = RT.on ? WT() * .45 : Math.min(30, WT() * .6), r0 = RT.on ? .4 : .08, rf = Math.min(1, r0 + (1 - r0) * W.t / ramp), tn = Math.ceil(targetN() * rf);
     const cnt = alive().filter(z => !z.survBoss).length;
-    if (cnt < tn * .5) { if ((W.spawnT -= dt) <= 0) { edgeSpawn(pickType()); W.spawnT = rf < 1 ? .55 - .3 * rf : .2; } }
-    else if ((W.batchT -= dt) <= 0 && cnt < tn) { const k = Math.min(tn - cnt, rf < 1 ? 1 + (Math.random() * 2 | 0) : 3 + (Math.random() * 3 | 0)); for (let i = 0; i < k; i++) edgeSpawn(pickType()); W.batchT = R(1.6, 2.4); }
+    if (cnt < tn * .5) { if ((W.spawnT -= dt) <= 0) { edgeSpawn(pickType()); W.spawnT = RT.on ? .22 - .1 * rf : rf < 1 ? .55 - .3 * rf : .2; } }
+    else if ((W.batchT -= dt) <= 0 && cnt < tn) { const k = Math.min(tn - cnt, RT.on ? 3 + (Math.random() * 3 | 0) : rf < 1 ? 1 + (Math.random() * 2 | 0) : 3 + (Math.random() * 3 | 0)); for (let i = 0; i < k; i++) edgeSpawn(pickType()); W.batchT = RT.on ? R(.7, 1.1) : R(1.6, 2.4); }
     if (W.t >= WT()) endWave();
   }
 
@@ -328,7 +329,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     ctx.font = 'bold 14px "PingFang SC",sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#ffe9a0';
     const left = Math.max(0, Math.ceil(WT() - W.t));
     if (RT.on && !RT.node) { ctx.restore(); return; }   // 路线图还没选节点：不画波次文字
-    ctx.fillText(W.retreat > 0 || W.between > 0 ? (RT.on ? '鸣金收兵' : `第 ${W.n}/${WAVES} 波 · 鸣金收兵`) : `${RT.on ? ROUTE.name(RT.node) : '第 ' + W.n + '/' + WAVES + ' 波'} · 还剩 ${left} 秒${bossCount() ? ' · 敌将' : ''}`, HW / 2, y0 + sz + 28);
+    ctx.fillText(W.retreat > 0 || W.between > 0 ? (RT.on ? '鸣金收兵' : `第 ${W.n}/${WAVES} 波 · 鸣金收兵`) : (RT.on ? ROUTE.name(RT.node) + (bossCount() ? ' · 敌将' : '') : `第 ${W.n}/${WAVES} 波 · 还剩 ${left} 秒${bossCount() ? ' · 敌将' : ''}`), HW / 2, y0 + sz + 28);
     ctx.restore();
   }
   // 主角姿势：前摇举刀，出手和后摇用挥刀帧
@@ -346,5 +347,5 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     + '#survPick h3{margin:0 0 10px;color:#ffd86e;letter-spacing:4px}#survPick .row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}'
     + '#survPick button{width:140px;padding:12px 8px;background:#2e2118;border:1px solid #8a6a3a;border-radius:8px;color:#f2e4c8;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px}'
     + '#survPick button:hover{border-color:#ffd86e;background:#3a2a1c}#survPick b{font-size:30px}#survPick span{font-size:16px;font-weight:700}#survPick small{color:#cdb98e;font-size:12px}#survPick p{margin:10px 0 0;color:#a08d70;font-size:12px}'; document.head.appendChild(st);
-  window.SURV = { beginNode, frozen: () => RT.on && ROUTE.shown(), routeHp: () => [hero.hp, maxHp()], camp(k) { if (k === 'heal') heal(maxHp() * .3); else RT.dmg *= 1.1; }, ORIGINS, setOrigin(k) { if (ORIGINS[k] && !ORIGINS[k].locked) origin = k; }, origin: () => origin, takeMul: () => (OG().take || 1) * RT.take, moveMul: () => (OG().move || 1) * RT.move, reward: (n, cb) => offerReward(n, cb), event(k, cb) { eventDo(k, cb); }, SK, tick, drawWorld, hud, startRun, waveFlow, pose, rooted, onRoll, skipWave() { if (W.retreat <= 0 && W.between <= 0 && W.started) endWave(); }, state: () => ({ wave: W.n, t: W.t, slots: S.slots.slice() }) };
+  window.SURV = { beginNode, frozen: () => RT.on && ROUTE.shown(), routeHp: () => [hero.hp, maxHp()], camp(k) { if (k === 'heal') heal(maxHp() * .3); else RT.dmg *= 1.1; }, ORIGINS, setOrigin(k) { if (ORIGINS[k] && !ORIGINS[k].locked) origin = k; }, origin: () => origin, takeMul: () => (OG().take || 1) * RT.take, moveMul: () => (OG().move || 1) * RT.move, left: () => RT.on && RT.node && W.started ? Math.max(0, WT() - W.t) : null, reward: (n, cb) => offerReward(n, cb), event(k, cb) { eventDo(k, cb); }, SK, tick, drawWorld, hud, startRun, waveFlow, pose, rooted, onRoll, skipWave() { if (W.retreat <= 0 && W.between <= 0 && W.started) endWave(); }, state: () => ({ wave: W.n, t: W.t, slots: S.slots.slice() }) };
 })();

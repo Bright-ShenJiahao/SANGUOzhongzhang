@@ -6,7 +6,7 @@
   const ON = /[?&]route(?:=|&|$)/.test(location.search);
   const LAYERS = 12, LANES = 5;
   const WAVES_OF = { battle: 3, elite: 4, boss: 3 };   // 每种节点打几波（可调）
-  const TIME_K = .72;                                   // 路线模式下每波时间缩放（20 波表 ≈21 分钟，12 层约合 30 分钟）
+  const TIME_K = 1.1;                                   // 路线模式下每波时间缩放（20 波表 ≈21 分钟，12 层约合 30 分钟）
   const ICON = { battle: 0, elite: 1, camp: 2, boss: 3, start: 4, shop: 5, event: 6, chest: 7 };   // 图标表（art/ui/route_icons.webp，4×2，每格 256）
   const MAPN = { field: '打谷场', town: '县城街巷', yz: '黄巾营寨', altar: '张角祭坛' };
   const SECT = [['field', 1, 3, '120,140,80', .13], ['town', 4, 6, '160,115,70', .13], ['yz', 7, 11, '165,70,45', .12], ['altar', 12, 12, '70,55,95', .2]];   // 分段：地图、起止层、淡墨色调

@@ -1097,7 +1097,7 @@ function draw() {
   }
   // 用时：顶部正中的小牌子（原来那一行"击倒/武器/用时"已去掉）
   if (!(window.XIAOCHANG && XIAOCHANG.active())) {
-    const tstr = fmtTime(runT);
+    const _left = window.SURV && SURV.left ? SURV.left() : null, tstr = _left != null ? fmtTime(Math.ceil(_left)) : fmtTime(runT);   // 路线模式：顶部牌子改成本节点倒计时
     ctx.save();
     ctx.font = 'bold 18px "PingFang SC","Noto Sans CJK SC",sans-serif';
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
