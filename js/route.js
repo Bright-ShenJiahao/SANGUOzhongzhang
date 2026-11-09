@@ -7,7 +7,10 @@
   const LAYERS = 12, LANES = 5;
   const WAVES_OF = { battle: 3, elite: 4, boss: 3 };   // 每种节点打几波（可调）
   const TIME_K = .72;                                   // 路线模式下每波时间缩放（20 波表 ≈21 分钟，12 层约合 30 分钟）
-  const CH = { battle: '战', elite: '精', camp: '营', boss: '帅', start: '涿' };
+  const ICON = { battle: 0, elite: 1, camp: 2, boss: 3, start: 4, shop: 5, event: 6, chest: 7 };   // 图标表（art/ui/route_icons.webp，4×2，每格 256）
+  const MAPN = { field: '打谷场', town: '县城街巷', yz: '黄巾营寨', altar: '张角祭坛' };
+  const SECT = [['field', 1, 3, '120,140,80', .13], ['town', 4, 6, '160,115,70', .13], ['yz', 7, 11, '165,70,45', .12], ['altar', 12, 12, '70,55,95', .2]];   // 分段：地图、起止层、淡墨色调
+  const hov = { n: null };
   const LABEL = { battle: '黄巾游兵', elite: '黄巾精锐', camp: '营地', boss: '张角祭坛', start: '涿郡' };
   const FONT = '"MaShanZheng","STKaiti","KaiTi","Songti SC",serif';
   const INK = '#2a211a', CINNABAR = '#b3281e', PAPER = '#eadcc0';
@@ -58,11 +61,11 @@
   const maxScroll = () => Math.max(0, LEN() - VIEW());
   function pos(n) {
     const m = MARGIN() + n.layer * GAP() - scroll, span = port() ? W : H;
-    const lo = port() ? W * .13 : H * .24, hi = port() ? W * .87 : H * .8;
+    const lo = port() ? W * .18 : H * .24, hi = port() ? W * .82 : H * .8;
     const c = lo + (n.lane + n.jx * .35) / (LANES - 1) * (hi - lo) + n.jy * 10;
     return port() ? { x: c, y: H - m } : { x: m, y: c };
   }
-  const radius = n => n.type === 'boss' ? 34 : n.type === 'elite' ? 26 : 22;
+  const radius = n => n.type === 'boss' ? 42 : n.type === 'elite' ? 30 : n.type === 'start' ? 28 : 26;
   const reachable = n => !!run && run.cur.next.includes(n);
   const visited = n => !!run && run.visited.has(n);
 
@@ -78,7 +81,8 @@
     root.appendChild(exit);
     cv.addEventListener('pointerdown', e => { drag = { x: e.clientX, y: e.clientY, s: scroll, moved: false, id: e.pointerId }; try { cv.setPointerCapture(e.pointerId); } catch (_) {} });
     cv.addEventListener('pointermove', e => {
-      if (!drag || e.pointerId !== drag.id) return;
+      if (!drag) { hov.n = null; if (run && e.pointerType !== 'touch') for (const n of run.nodes) { const p = pos(n); if (Math.hypot(p.x - e.clientX, p.y - e.clientY) < radius(n) + 6) { hov.n = n; break; } } cv.style.cursor = hov.n && reachable(hov.n) ? 'pointer' : 'default'; return; }
+      if (e.pointerId !== drag.id) return;
       const d = port() ? e.clientY - drag.y : drag.x - e.clientX;
       if (Math.abs(e.clientX - drag.x) + Math.abs(e.clientY - drag.y) > 8) drag.moved = true;
       if (drag.moved) { scroll = Math.max(0, Math.min(maxScroll(), drag.s + (port() ? -d : d))); tScroll = scroll; }
@@ -155,32 +159,85 @@
     }
     g.fillStyle = `rgba(52,47,42,${alpha})`; g.fill();
   }
-  function brush(a, b, w, col, alpha, seed) {   // 毛笔线：略弯、粗细和浓淡有变化
+  function trail(a, b, na, nb, kind, seed) {   // 脚印虚线：沿略弯的曲线，左右脚交替的小墨点
     const dx = b.x - a.x, dy = b.y - a.y, len = Math.hypot(dx, dy) || 1, nx = -dy / len, ny = dx / len, bend = (seeded(seed) - .5) * len * .22;
     const cx = (a.x + b.x) / 2 + nx * bend, cy = (a.y + b.y) / 2 + ny * bend;
-    for (let k = 0; k < 3; k++) {
-      g.beginPath(); g.moveTo(a.x + nx * (k - 1) * .7, a.y + ny * (k - 1) * .7); g.quadraticCurveTo(cx + nx * (k - 1) * 1.1, cy + ny * (k - 1) * 1.1, b.x, b.y);
-      g.lineWidth = w * (k === 1 ? 1 : .55); g.strokeStyle = col; g.globalAlpha = alpha * (k === 1 ? 1 : .45); g.lineCap = 'round'; g.stroke();
+    const pt = t => { const u = 1 - t; return [u * u * a.x + 2 * u * t * cx + t * t * b.x, u * u * a.y + 2 * u * t * cy + t * t * b.y]; };
+    const t0_ = (radius(na) + 8) / len, t1_ = 1 - (radius(nb) + 8) / len, step = (kind === 2 ? 15 : 13) / len;
+    const col = kind === 2 ? INK : kind === 1 ? '#6a3a1c' : '#4a3a2c', al = kind === 2 ? .85 : kind === 1 ? .85 : .3, rr = kind === 2 ? 3.6 : kind === 1 ? 3.2 : 2.2;
+    g.fillStyle = col; let k = 0;
+    for (let t = t0_; t < t1_; t += step, k++) {
+      const [x, y] = pt(t), [x2, y2] = pt(Math.min(1, t + .01)), ang = Math.atan2(y2 - y, x2 - x), side = k % 2 ? 1 : -1;
+      g.globalAlpha = al * (.75 + seeded(seed + k) * .25);
+      g.beginPath(); g.ellipse(x + Math.cos(ang + 1.57) * side * 3.2, y + Math.sin(ang + 1.57) * side * 3.2, rr * 1.35, rr * .85, ang, 0, 7); g.fill();
     }
     g.globalAlpha = 1;
   }
+  let sheetG = null;
+  function sheets() {   // 图标表：彩色原图 + 水墨灰版（走过的节点用）
+    const im = typeof IMG !== 'undefined' && IMG.ui_route_icons;
+    if (!im || !im.complete || !im.naturalWidth) return null;
+    if (sheetG) return { c: im, g: sheetG };
+    const c = document.createElement('canvas'); c.width = im.naturalWidth; c.height = im.naturalHeight; const x = c.getContext('2d'); x.drawImage(im, 0, 0);
+    const d = x.getImageData(0, 0, c.width, c.height), a = d.data;
+    for (let i = 0; i < a.length; i += 4) { const l = a[i] * .3 + a[i + 1] * .59 + a[i + 2] * .11, v = 40 + l * .5; a[i] = v * 1.03; a[i + 1] = v * .96; a[i + 2] = v * .88; }
+    x.putImageData(d, 0, 0); sheetG = c; return { c: im, g: sheetG };
+  }
+  function icon(type, size, gray) {
+    const sh = sheets(); if (!sh) return;
+    const k = ICON[type] || 0, sx = (k % 4) * 256, sy = (k >> 2) * 256;
+    g.drawImage(gray ? sh.g : sh.c, sx, sy, 256, 256, -size / 2, -size / 2, size, size);
+  }
   function seal(n, now) {
     const p = pos(n), R = radius(n), vis = visited(n), reach = reachable(n), cur = run.cur === n, t = (now - t0) / 1000;
-    if (p.x < -60 || p.x > W + 60 || p.y < -60 || p.y > H + 60) return;
+    if (p.x < -80 || p.x > W + 80 || p.y < -80 || p.y > H + 80) return;
+    const bob = reach ? Math.sin(t * 3 + n.id) * 1.6 : 0;
     g.save(); g.translate(p.x, p.y);
-    if (reach) { const k = .5 + .5 * Math.sin(t * 3); g.beginPath(); g.arc(0, 0, R + 7 + k * 4, 0, 7); g.strokeStyle = `rgba(179,40,30,${.25 + .3 * k})`; g.lineWidth = 2.5; g.stroke(); }
-    // 印章：边缘略不规整的圆
-    g.beginPath(); const N = 28;
-    for (let i = 0; i <= N; i++) { const a = i / N * Math.PI * 2, r = R * (1 + (seeded(n.id * 31 + i) - .5) * .09); i ? g.lineTo(Math.cos(a) * r, Math.sin(a) * r) : g.moveTo(Math.cos(a) * r, Math.sin(a) * r); }
-    g.closePath();
-    const col = vis || cur ? INK : n.type === 'camp' ? '#3f6a52' : n.type === 'elite' ? '#8f1d14' : n.type === 'boss' ? '#8f1d14' : CINNABAR;
-    g.globalAlpha = reach || vis || cur ? 1 : .42; g.fillStyle = col; g.fill();
-    if (n.type === 'elite' || n.type === 'boss') { g.beginPath(); g.arc(0, 0, R - 4, 0, 7); g.strokeStyle = 'rgba(234,220,192,.75)'; g.lineWidth = n.type === 'boss' ? 2.5 : 1.8; g.stroke(); }
-    g.fillStyle = PAPER; g.font = `bold ${Math.round(R * 1.15)}px ${FONT}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(CH[n.type], 0, 1);
+    // 底：淡纸色圆片 + 墨圈（让图标在水墨背景上立得住）
+    g.beginPath(); g.arc(0, 0, R + 4, 0, 7);
+    g.fillStyle = vis ? 'rgba(210,196,168,.7)' : 'rgba(246,236,214,.88)'; g.fill();
+    g.lineWidth = n.type === 'boss' ? 3 : 2; g.strokeStyle = vis ? 'rgba(60,48,38,.55)' : INK; g.globalAlpha = reach || cur ? 1 : .55; g.stroke(); g.globalAlpha = 1;
+    if (reach) { const k = .5 + .5 * Math.sin(t * 3); g.beginPath(); g.arc(0, 0, R + 10 + k * 4, 0, 7); g.strokeStyle = `rgba(179,40,30,${.3 + .4 * k})`; g.lineWidth = 3; g.stroke(); }
+    g.translate(0, bob);
+    g.globalAlpha = vis ? .8 : reach || cur ? 1 : .6;
+    icon(n.type, R * 2.15, vis || (!reach && !cur));
     g.globalAlpha = 1;
-    if (cur) { g.beginPath(); g.arc(0, 0, R + 5, 0, 7); g.strokeStyle = '#c9a24a'; g.lineWidth = 2.5; g.stroke(); }
-    if (reach || cur || n.type === 'boss') { g.font = `14px ${FONT}`; g.fillStyle = INK; g.globalAlpha = .85; g.fillText(LABEL[n.type], 0, R + 16); g.globalAlpha = 1; }
+    if (vis && !cur) { g.beginPath(); g.arc(R * .62, -R * .62, 7, 0, 7); g.fillStyle = CINNABAR; g.fill(); g.strokeStyle = PAPER; g.lineWidth = 1.6; g.beginPath(); g.moveTo(R * .62 - 3, -R * .62); g.lineTo(R * .62 - .8, -R * .62 + 2.6); g.lineTo(R * .62 + 3.4, -R * .62 - 2.6); g.stroke(); }
+    if (cur) { g.beginPath(); g.arc(0, 0, R + 8, 0, 7); g.strokeStyle = '#c9a24a'; g.lineWidth = 3; g.stroke(); }
     g.restore();
+    // 名字：可走的节点、当前、Boss 常显；其他鼠标悬停才显
+    if ((reach && !port()) || cur || n.type === 'boss' || hov.n === n) tag(p, R, n, hov.n === n || cur || n.type === 'boss');
+  }
+  function tag(p, R, n, full) {
+    const l1 = n.type === 'start' ? '涿郡' : LABEL[n.type], l2 = n.type === 'start' || !full ? '' : MAPN[MAP_OF(n.layer)] + (n.type === 'camp' ? ' · 歇息' : '');
+    g.save(); g.font = `bold 15px ${FONT}`; const w1 = g.measureText(l1).width; g.font = `12px ${FONT}`; const w2 = l2 ? g.measureText(l2).width : 0;
+    const bw = Math.max(w1, w2) + 18, bh = l2 ? 38 : 24; let x = p.x - bw / 2, y = p.y + R + 10;
+    if (y + bh > H - 6) y = p.y - R - 10 - bh; x = Math.max(6, Math.min(W - bw - 6, x));
+    g.fillStyle = 'rgba(40,28,18,.82)'; g.beginPath(); g.roundRect ? g.roundRect(x, y, bw, bh, 5) : g.rect(x, y, bw, bh); g.fill();
+    g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#f3dc9a'; g.font = `bold 15px ${FONT}`; g.fillText(l1, x + bw / 2, y + (l2 ? 13 : 12));
+    if (l2) { g.fillStyle = 'rgba(243,220,154,.75)'; g.font = `12px ${FONT}`; g.fillText(l2, x + bw / 2, y + 28); }
+    g.restore();
+  }
+  function tint() {   // 每一段（打谷场/县城/营寨/祭坛）一档淡墨色调，段名用大字淡淡写在背景上
+    const ax = port() ? 'y' : 'x', at = l => pos({ layer: l, lane: 2, jx: 0, jy: 0 })[ax];
+    for (const [k, l0, l1, rgb, al] of SECT) {
+      const a = at(l0 - .5), b = at(l1 + .5), lo = Math.min(a, b), hi = Math.max(a, b), len = port() ? H : W;
+      if (hi < 0 || lo > len) continue;
+      const F = 110, gr = port() ? g.createLinearGradient(0, lo - F, 0, hi + F) : g.createLinearGradient(lo - F, 0, hi + F, 0), q = F / (hi - lo + 2 * F), c0 = `rgba(${rgb},0)`, c1 = `rgba(${rgb},${al})`;
+      gr.addColorStop(0, c0); gr.addColorStop(q * 1.6, c1); gr.addColorStop(1 - q * 1.6, c1); gr.addColorStop(1, c0);
+      g.fillStyle = gr; port() ? g.fillRect(0, lo - F, W, hi - lo + 2 * F) : g.fillRect(lo - F, 0, hi - lo + 2 * F, H);
+      g.save(); g.fillStyle = `rgba(${rgb},.5)`; g.globalAlpha = .16; g.font = `${port() ? 56 : 84}px ${FONT}`; g.textAlign = 'center'; g.textBaseline = 'middle';
+      const c = (lo + hi) / 2; if (port()) g.fillText(MAPN[k], W * .5, c); else g.fillText(MAPN[k], c, H * .5);
+      g.restore();
+    }
+  }
+  function edge() {   // 卷轴边：内框双线、两端渐暗（还能滚就暗）、右下角印章落款
+    g.save(); g.strokeStyle = 'rgba(42,33,26,.75)'; g.lineWidth = 3; g.strokeRect(9, 9, W - 18, H - 18); g.lineWidth = 1; g.strokeRect(15, 15, W - 30, H - 30);
+    const fade = (x0, y0, x1, y1, a, r, gx, gy, gw, gh) => { if (a <= 0) return; const gr = g.createLinearGradient(x0, y0, x1, y1); gr.addColorStop(0, `rgba(60,42,24,${.32 * a})`); gr.addColorStop(1, 'rgba(60,42,24,0)'); g.fillStyle = gr; g.fillRect(gx, gy, gw, gh); };
+    const m = maxScroll(), a0 = Math.min(1, scroll / 80), a1 = Math.min(1, (m - scroll) / 80), F = 56;
+    if (port()) { fade(0, 0, 0, F, a1, 0, 0, 0, W, F); fade(0, H, 0, H - F, a0, 0, 0, H - F, W, F); } else { fade(0, 0, F, 0, a0, 0, 0, 0, F, H); fade(W, 0, W - F, 0, a1, 0, W - F, 0, F, H); }
+    const s = 40, x = W - s - 26, y = H - s - 26; g.fillStyle = CINNABAR; g.globalAlpha = .9; g.fillRect(x, y, s, s); g.globalAlpha = 1; g.fillStyle = PAPER; g.font = `bold 17px ${FONT}`; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillText('三国', x + s / 2, y + s * .3); g.fillText('终章', x + s / 2, y + s * .72); g.restore();
   }
   function frame(now) {
     if (!shown) { raf = 0; return; }
@@ -191,27 +248,30 @@
     g.fillStyle = paperNoise(); g.fillRect(0, 0, W, H);
     const wash = g.createRadialGradient(W * .5, H * .45, Math.min(W, H) * .2, W * .5, H * .5, Math.max(W, H) * .75);
     wash.addColorStop(0, 'rgba(255,248,230,.35)'); wash.addColorStop(1, 'rgba(120,90,50,.28)'); g.fillStyle = wash; g.fillRect(0, 0, W, H);
+    tint();
     hills(.12, .07, H * .16, 1.3); hills(.25, .11, H * .1, 4.1); hills(.45, .16, H * .045, 7.7);
     // 路线
     for (const n of run.nodes) for (const m of n.next) {
       const a = pos(n), b = pos(m), seedE = n.id * 13 + m.id;
       const walked = visited(n) && visited(m), open = n === run.cur && reachable(m);
-      brush(a, b, walked ? 4.2 : open ? 3.4 : 2, walked ? INK : open ? '#5a3a1e' : 'rgba(70,55,40,1)', walked ? .92 : open ? .85 : .28, seedE);
+      trail(a, b, n, m, walked ? 2 : open ? 1 : 0, seedE);
     }
     for (const n of run.nodes) seal(n, now);
-    // 抬头：章节、血量、提示
+    // 抬头：章节、血量、提示（手机竖屏先垫一层纸色渐隐，免得节点叠在字上）
+    if (port()) { const hb = g.createLinearGradient(0, 0, 0, 132); hb.addColorStop(0, 'rgba(234,220,192,.97)'); hb.addColorStop(.75, 'rgba(234,220,192,.9)'); hb.addColorStop(1, 'rgba(234,220,192,0)'); g.fillStyle = hb; g.fillRect(0, 0, W, 132); }
     g.textAlign = 'left'; g.textBaseline = 'alphabetic'; g.fillStyle = INK;
     g.font = `${port() ? 30 : 38}px ${FONT}`; g.fillText('第一章 · 黄巾之乱', 22, 54);
-    g.font = `15px ${FONT}`; g.globalAlpha = .7; g.fillText('涿郡 → 张角祭坛　点选发亮的节点前进，可拖动长卷', 24, 78); g.globalAlpha = 1;
+    g.font = `15px ${FONT}`; g.globalAlpha = .7; g.fillText(port() ? '点选发亮的节点前进' : '涿郡 → 张角祭坛　点选发亮的节点前进，可拖动长卷', 24, 78); g.globalAlpha = 1;
     if (window.SURV && SURV.routeHp) {
       const [hp, mx] = SURV.routeHp(), bw = Math.min(190, W * .34), x = 24, y = 96;
       g.fillStyle = 'rgba(40,28,18,.55)'; g.fillRect(x, y, bw + 4, 14); g.fillStyle = CINNABAR; g.fillRect(x + 2, y + 2, bw * Math.max(0, Math.min(1, hp / mx)), 10);
       g.fillStyle = INK; g.font = `13px ${FONT}`; g.fillText('血 ' + Math.ceil(hp) + '/' + mx, x + bw + 12, y + 12);
     }
-    // 图例
-    g.font = `13px ${FONT}`; g.fillStyle = INK; g.globalAlpha = .75; g.textAlign = 'left';
-    const lg = [['战', '普通'], ['精', '精英'], ['营', '营地'], ['帅', 'Boss']]; let lx = 24;
-    lg.forEach(([c, t]) => { g.fillText(c + ' ' + t, lx, H - 18); lx += 76; }); g.globalAlpha = 1;
+    // 图例（手机竖屏放右上，避开右下印章）
+    const lg = [['battle', '普通'], ['elite', '精英'], ['camp', '营地'], ['boss', '首领']]; g.font = `13px ${FONT}`; g.fillStyle = INK; g.textAlign = 'left'; g.textBaseline = 'middle';
+    let lx = 30; const ly = H - 34;
+    lg.forEach(([ty, t]) => { g.save(); g.translate(lx + 12, ly); icon(ty, 28); g.restore(); g.globalAlpha = .8; g.fillText(t, lx + 30, ly + 1); g.globalAlpha = 1; lx += port() ? 68 : 82; });
+    edge();
   }
 
   if (ON) setInterval(() => { if (pending && (!window.TITLE || TITLE.mode() === 'game')) { pending = false; open(); } }, 150);   // 真正进游戏（不是在标题页）才打开长卷

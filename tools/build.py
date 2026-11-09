@@ -142,6 +142,7 @@ assets['dialogPortraits'] = {
 }
 assets['ui']['w_blade'] = uri(P('art', 'ui', 'w_blade.webp'))
 assets['ui']['w_halberd'] = uri(P('art', 'ui', 'w_halberd.webp'))
+assets['ui']['route_icons'] = uri(P('art', 'ui', 'route_icons.webp'))
 for _k in ('shopkeeper', 'shopkeeper_happy', 'shopkeeper_annoyed'):   # 商店老板三种表情
     if os.path.exists(P('art', 'ui', _k + '.webp')): assets['ui'][_k] = uri(P('art', 'ui', _k + '.webp'))
 assets['music'] = {'southernDrum': file_uri(P('art', 'audio', 'southern_drum.wav'))}
