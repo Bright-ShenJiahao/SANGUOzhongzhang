@@ -376,7 +376,7 @@ function dmgHero(n, from, kind = 'basic') {
   if (window.XIAOCHANG) XIAOCHANG.onHitHero(from);
   if (!steadyHold) { h.atk = null; cancelCharge(); }
   const dir = from ? Math.sign(h.x - from.x) || -h.f : -h.f;
-  if (steadyHold) { /* 蓄力韧性：照常受伤，但这次受击不中断蓄力 */ }
+  if (steadyHold || (h.hp > 0 && window.SURV && SURV.noStun && SURV.noStun())) { /* 蓄力韧性 / 三国终章：受击没有僵直、不击倒，招式照常放（死亡除外） */ }
   else if ((raw >= 2 * (window.MERIDIAN ? MERIDIAN.x('knock', 1) : 1) && !(h.hp > 0 && window.GOODS && GOODS.useAmulet())) || h.hp <= 0) {   // 护身符：第一次重击不倒地
     launch(h, h.hp <= 0 ? dir * 48 : dir * 85, h.hp <= 0 ? 145 : 120); h.f = -dir; h.inv = 9;
     if (window.ARTIFACT) ARTIFACT.onKnock(dir);   // 被击倒：从飞剑上摔下
