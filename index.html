@@ -63,7 +63,7 @@ body.szz-pro #help{display:none}
 .x-back{min-height:34px!important}
 }
 #rot small{display:block;margin-top:10px;font-size:14px;font-weight:600;color:#c9b691;line-height:1.6}
-</style><link rel="preload" href="pack/fonts/result.woff2?v=e737c6763b" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=e737c6763b)format("woff2");font-display:swap}</style></head><body>
+</style><link rel="preload" href="pack/fonts/result.woff2?v=f5848df443" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=f5848df443)format("woff2");font-display:swap}</style></head><body>
 <div id="bootSplash" style="position:fixed;inset:0;z-index:99999;background:#1a1020;color:#f1d59a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;font:18px system-ui,sans-serif;text-align:center;padding:24px">
 <strong id="bootText">正在加载…</strong><button id="bootRefresh" hidden onclick="location.reload()" style="font:16px system-ui,sans-serif;padding:12px;color:#ffe0a0;background:#583b28;border:1px solid #ba9158;border-radius:6px">网络较慢，点此刷新</button><small id="bootError" style="overflow-wrap:anywhere;max-width:90vw"></small></div>
 <script>
@@ -77,7 +77,7 @@ if(location.protocol==='https:'&&!/[?&]debug(?:=|&|$)/.test(location.search)&&'s
 })();
 // 自动更新：打开游戏、或从后台切回来时，查一下线上有没有新版本；有就在标题/整备页自动刷新（战斗中不打扰）
 (function(){
-var BUILD='a631477e732a',busy=false;
+var BUILD='6411f568bf24',busy=false;
 if(location.protocol!=='https:'||/[?&]debug(?:=|&|$)/.test(location.search))return;
 function check(){
   if(busy)return;
@@ -6509,7 +6509,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     document.body.appendChild(box);
     return true;
   }
-  const S = { slots: ['hengsao', '', '', '', ''], qi: 0, qt: 0, hold: 0, wind: null, recov: null, skip: [0, 0, 0, 0, 0], later: [], mast: {}, chain: 0, lastCat: -1, poseOverride: null, cycles: 0, flash: [0, 0, 0, 0, 0] };
+  const S = { slots: ['hengsao', '', '', '', ''], qi: 0, qt: 0, hold: 0, wind: null, recov: null, skip: [0, 0, 0, 0, 0], later: [], mast: {}, chain: 0, lastCat: -1, lastI: -9, poseOverride: null, cycles: 0, flash: [0, 0, 0, 0, 0] };
   const busy = () => hero.st === 'roll' || hero.air || ['down', 'bounce', 'getup', 'hurt'].includes(hero.st) || hero.dazeT > 0;
   // 眩晕：每个目标有冷却（杂兵 4 秒 0.75 秒；精英 6 秒 0.5；小头目 10 秒 0.3；首领 16 秒 0.2，且不击倒）
   const STUN = [[4, .75], [6, .5], [10, .3], [16, .2]];
@@ -6531,7 +6531,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       if (S.wind.t >= S.wind.dur) {
         const k = S.wind.k, i = S.wind.i, key = S.wind.key; S.flash[i] = .3;
         const t = nearest(200); if (t) hero.f = Math.sign(t.x - hero.x) || hero.f;
-        CM = skillMul(key); RM = lvOf(key) >= 5 ? 1.1 : 1; const ch = S.wind.ch; S.chain = ch; S.lastCat = catOf(key);
+        CM = skillMul(key); RM = lvOf(key) >= 5 ? 1.1 : 1; const ch = S.wind.ch; S.chain = ch; S.lastCat = catOf(key); S.lastI = i;
         if (ch > 0) floaters.push({ x: hero.x, y: hero.y - 62, t: 0, txt: '连携 ×' + ch, color: '#9fe0ff' });
         k.cast();
         const l0 = lvOf(key); S.mast[key] = (S.mast[key] || 0) + 1; if (lvOf(key) > l0) floaters.push({ x: hero.x, y: hero.y - 76, t: 0, txt: k.name + ' LV' + lvOf(key), color: '#ffd86e' });
@@ -6547,7 +6547,8 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     for (let n = 0; n < 5 && !SK[S.slots[S.qi]]; n++) { S.qi = (S.qi + 1) % 5; if (S.qi === 0) S.cycles++; }
     if ((S.qt += dt) < .05) return;
     const k = SK[S.slots[S.qi]];
-    if (k && nearest(k.need)) { const key = S.slots[S.qi], ch = S.lastCat === catOf(key) ? Math.min(4, S.chain + 1) : 0; S.wind = { i: S.qi, k, key, ch, t: 0, dur: k.wu * 1.2 * (OG().wu || 1) * CDM() * (1 - .2 * ch) }; S.hold = 0; return; }
+    if (k && nearest(k.need)) { const key = S.slots[S.qi], ch = S.lastCat === catOf(key) && S.lastI === S.qi - 1 ? Math.min(4, S.chain + 1) : 0;   // 只算同一轮里紧挨着的前一槽；同一招重复、轮回到第 1 槽都不算
+       S.wind = { i: S.qi, k, key, ch, t: 0, dur: k.wu * 1.2 * (OG().wu || 1) * CDM() * (1 - .2 * ch) }; S.hold = 0; return; }
     if (k && S.hold < 1.2) { S.hold += .05; S.qt = 0; return; }   // 这一招够不着人：等 1.2 秒，还不行就跳下一招
     S.skip[S.qi] = .2; S.qt = -.05; S.qi = (S.qi + 1) % 5; if (S.qi === 0) S.cycles++; S.hold = 0;
   }
@@ -6617,7 +6618,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   // ---------- 对外接口 ----------
   function forceBlade() { weapon = 'blade'; pendingWeapon = null; try { if (window.GEAR && GEAR.switch) GEAR.switch(); } catch (e) {} if (typeof ui === 'function') ui(); }
   function startRun() {
-    S.slots = [OG().skill || 'hengsao', '', '', '', '']; S.mast = {}; S.chain = 0; S.lastCat = -1; W.pick = false; const old = document.getElementById('survPick'); if (old) old.remove();
+    S.slots = [OG().skill || 'hengsao', '', '', '', '']; S.mast = {}; S.chain = 0; S.lastCat = -1; S.lastI = -9; W.pick = false; const old = document.getElementById('survPick'); if (old) old.remove();
     W.started = true; W.between = 0; S.wind = null; S.recov = null; S.later = []; S.qi = 0; bolts.length = 0; zones.length = 0; S.cycles = 0; fx.length = 0;
     forceBlade();
     const vw = viewW(); arenaL = M.gates[0] + 10; lockR = arenaL + vw * 1.5; gateI = 0;
