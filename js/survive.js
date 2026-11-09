@@ -26,7 +26,8 @@ const DM = () => RT.dmg;
 const bossCount = () => RT.on ? (RT.node && W.k === W.N ? (RT.node.type === 'boss' ? 3 : RT.node.type === 'elite' ? 1 : 0) : (RT.node && RT.node.type === 'boss' && W.k === 1 ? 1 : 0)) : (BOSS_WAVES[W.n] || 0);
 const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: false, between: 0, started: false };
   const WT = () => RT.on ? W.tot : (WAVE_T[Math.min(W.n, WAVES) - 1] || 60);   // 路线模式：一个节点是一整场连续的仗，时长 = 原来几波加起来
-  const targetN = () => Math.max(8, Math.round((WAVE_N[W.n - 1] || 100) * N_SCALE));
+  const CNT_BASE = 12, CNT_STEP = 5.4, CNT_MAX = 150;   // 路线模式：场上同屏人数 = 12 + 5.4×(难度级-1)，1 级约 12 只，10 级约 60，20 级约 115；难度级随时间连续上升，所以人数是一路慢慢涨
+  const targetN = () => RT.on ? Math.min(CNT_MAX, Math.round(CNT_BASE + CNT_STEP * ((W.lvF || 1) - 1))) : Math.max(8, Math.round((WAVE_N[W.n - 1] || 100) * N_SCALE));
   function pickType() {
     const pool = [];
     for (const s of SECTS) if (W.n >= s.from && W.n <= s.to) pool.push([s.u, W.n - s.from >= 1 ? 100 : 60]);
@@ -50,7 +51,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       const nd = RT.node, L = ROUTE.layers(), N0 = ROUTE.waves(nd);
       const lvOf = k => Math.max(1, Math.min(WAVES, 1 + Math.floor(((nd.layer - 1 + (k - 1) / N0) / L) * WAVES) + (nd.type === 'elite' ? 2 : 0) + (nd.type === 'boss' ? 2 : 0)));
       W.lv0 = lvOf(1); W.lv1 = lvOf(N0); W.tot = 0; for (let k = 1; k <= N0; k++) W.tot += (WAVE_T[lvOf(k) - 1] || 60) * ROUTE.TIME_K;
-      W.k = 1; W.N = 1; W.n = W.lv0; W.t = 0; W.retreat = 0; W.spawnT = 0; W.batchT = 0; W.bossDone = false;
+      W.k = 1; W.N = 1; W.n = W.lv0; W.lvF = W.lv0; W.t = 0; W.retreat = 0; W.spawnT = 0; W.batchT = 0; W.bossDone = false;
       say(ROUTE.name(nd), 1.6); return;
     }
     W.n = n; W.t = 0; W.retreat = 0; W.spawnT = 0; W.batchT = 0; W.bossDone = false;
@@ -79,10 +80,10 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       return;
     }
     W.t += dt;
-    if (RT.on) W.n = Math.round(W.lv0 + (W.lv1 - W.lv0) * Math.min(1, W.t / W.tot));   // 难度随时间平滑上升
+    if (RT.on) { W.lvF = W.lv0 + (W.lv1 - W.lv0) * Math.min(1, W.t / W.tot); W.n = Math.round(W.lvF); }   // 难度随时间平滑上升
     if (bossCount() && !W.bossDone && W.t >= 1) { W.bossDone = true; for (let i = 0; i < bossCount(); i++) edgeSpawn('elite', true); }
     // 补兵：开场慢慢涌进来（前 60% 时间里目标人数从少爬到满）
-    const ramp = Math.min(30, WT() * .6), rf = Math.min(1, .08 + .92 * W.t / ramp), tn = Math.ceil(targetN() * rf);
+    const ramp = RT.on ? WT() * .6 : Math.min(30, WT() * .6), rf = Math.min(1, .08 + .92 * W.t / ramp), tn = Math.ceil(targetN() * rf);
     const cnt = alive().filter(z => !z.survBoss).length;
     if (cnt < tn * .5) { if ((W.spawnT -= dt) <= 0) { edgeSpawn(pickType()); W.spawnT = rf < 1 ? .55 - .3 * rf : .2; } }
     else if ((W.batchT -= dt) <= 0 && cnt < tn) { const k = Math.min(tn - cnt, rf < 1 ? 1 + (Math.random() * 2 | 0) : 3 + (Math.random() * 3 | 0)); for (let i = 0; i < k; i++) edgeSpawn(pickType()); W.batchT = R(1.6, 2.4); }
