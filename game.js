@@ -784,8 +784,9 @@ function heroFrame(h) {
     if (h.st === 'roll') return Math.floor(h.t * 15) % 2 ? 'roll2' : 'roll1';
     if (h.air) return 'hurt';
     if (h.st === 'bounce' || h.st === 'getup' || h.st === 'down') return 'down';
-    if (h.st === 'walk') return 'walk' + [1, 2, 3, 2][Math.floor(h.t * 8) % 4];
-    return h.st === 'hurt' ? 'hurt' : 'idle';
+    const hp = SURV.heldPre ? SURV.heldPre() : '';   // 手里拿着兵器时，待机和行走用持械帧
+    if (h.st === 'walk') return (hp ? hp + 'walk' : 'walk') + [1, 2, 3, 2][Math.floor(h.t * 8) % 4];
+    return h.st === 'hurt' ? 'hurt' : hp + 'idle';
   }
   const frameWeapon = weapon === 'halberd' ? 'halberd' : weapon;
   if (h.st === 'atk') { const C = h.atk && WEAP[weapon].combo[h.atk.c]; if (C && C.f[h.atk.fi]) return C.f[h.atk.fi]; }   // 出招数据对不上（如中途换武器）时不再报错
