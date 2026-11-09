@@ -215,10 +215,12 @@
   }
 
   if (ON) setInterval(() => { if (pending && (!window.TITLE || TITLE.mode() === 'game')) { pending = false; open(); } }, 150);   // 真正进游戏（不是在标题页）才打开长卷
+  const MAP_OF = l => l <= 3 ? 'field' : l <= 6 ? 'town' : l <= 11 ? 'yz' : 'altar';   // 第 1~3 层打谷场，4~6 县城，7~11 黄巾营寨，12 张角祭坛
   window.ROUTE = {
+    mapOf: n => MAP_OF(n.layer),
     on: () => ON, TIME_K, layers: () => LAYERS,
     waves: n => WAVES_OF[n.type] || 3,
-    name: n => LABEL[n.type],
+    name: n => n ? LABEL[n.type] : '',
     shown: () => shown || pending,
     start() { run = { ...gen(), visited: new Set() }; run.cur = run.start; run.visited.add(run.start); pending = true; if (shown) close(); },
     done, close,

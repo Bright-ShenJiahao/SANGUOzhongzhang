@@ -63,7 +63,7 @@ body.szz-pro #help{display:none}
 .x-back{min-height:34px!important}
 }
 #rot small{display:block;margin-top:10px;font-size:14px;font-weight:600;color:#c9b691;line-height:1.6}
-</style><link rel="preload" href="pack/fonts/result.woff2?v=f2a9e38795" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=f2a9e38795)format("woff2");font-display:swap}</style></head><body>
+</style><link rel="preload" href="pack/fonts/result.woff2?v=4bfdd76ef1" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=4bfdd76ef1)format("woff2");font-display:swap}</style></head><body>
 <div id="bootSplash" style="position:fixed;inset:0;z-index:99999;background:#1a1020;color:#f1d59a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;font:18px system-ui,sans-serif;text-align:center;padding:24px">
 <strong id="bootText">正在加载…</strong><button id="bootRefresh" hidden onclick="location.reload()" style="font:16px system-ui,sans-serif;padding:12px;color:#ffe0a0;background:#583b28;border:1px solid #ba9158;border-radius:6px">网络较慢，点此刷新</button><small id="bootError" style="overflow-wrap:anywhere;max-width:90vw"></small></div>
 <script>
@@ -77,7 +77,7 @@ if(location.protocol==='https:'&&!/[?&]debug(?:=|&|$)/.test(location.search)&&'s
 })();
 // 自动更新：打开游戏、或从后台切回来时，查一下线上有没有新版本；有就在标题/整备页自动刷新（战斗中不打扰）
 (function(){
-var BUILD='c3de9e211ae5',busy=false;
+var BUILD='43c8b1d4d1b9',busy=false;
 if(location.protocol!=='https:'||/[?&]debug(?:=|&|$)/.test(location.search))return;
 function check(){
   if(busy)return;
@@ -213,34 +213,34 @@ const XIAOCHANG = { drawBackground() {}, state: () => null, start() {}, on: () =
 // 一张固定的俯视场地图，镜头不动，人物和敌人只能在围墙里面那块地面上走；敌人从四周（左右 + 上方城门 + 下方台阶）涌进来。
 // 场地图在世界里放在 AX 附近，地面范围用图内比例 FL 量出来；改图后只需要改 FL。
 (() => {
-  const MSEL = (location.search.match(/[?&]bg=(field|town|altar)(?:&|$)/) || [])[1];
-  const FIELD = !!MSEL;   // 打谷场：形状不规则，有水塘/草垛/石井挡路，右上角有能走上去的土台
-  const ON_URL = FIELD || /[?&]bg=arena2?(?:&|$)/.test(location.search);
-  const Z = FIELD || /[?&]bg=arena2(?:&|$)/.test(location.search) ? 1.25 : 1;
+  // 每张地图都是一份「可走区域」配置（MAPS）；网址 ?bg=field|town|altar|arena2 试玩单张，?route 路线图里每个节点用 ARENA.start(地图名) 切换
+  let MSEL = (location.search.match(/[?&]bg=(field|town|altar)(?:&|$)/) || [])[1] || (/[?&]bg=arena2?(?:&|$)/.test(location.search) ? 'yz' : undefined);
+  const ROUTE_ON = /[?&]route(?:=|&|$)/.test(location.search);
+  const FIELD = !!MSEL || ROUTE_ON;
+  const ON_URL = FIELD;
+  const Z = FIELD && !/[?&]bg=arena(?:&|$)/.test(location.search) ? 1.25 : 1;
   // 可走区域（都是占整张图的比例）：地面多边形 − 障碍（椭圆、土台整块）+ 土台台面 + 斜坡
   const MAPS = {
     field: { fc: {"ground":[[0.0598,0.2497],[0.2512,0.1116],[0.2871,0.1116],[0.3589,0.17],[0.4187,0.1966],[0.4486,0.1041],[0.4653,0.0595],[0.4874,0.0595],[0.5012,0.1041],[0.5036,0.1966],[0.5383,0.2125],[0.5712,0.1807],[0.924,0.2125],[0.9091,0.3188],[0.951,0.4463],[0.9641,0.5951],[0.9569,0.7226],[0.9211,0.7864],[0.8373,0.8236],[0.7715,0.8342],[0.6579,0.8395],[0.5323,0.8342],[0.5293,0.9192],[0.5592,0.9936],[0.4187,0.9936],[0.4575,0.9192],[0.4396,0.8236],[0.3888,0.8342],[0.323,0.8555],[0.2392,0.8502],[0.1495,0.8077],[0.0718,0.7333],[0.0329,0.627],[0.0269,0.5526],[0.0718,0.5207],[0.1106,0.4995],[0.1077,0.457],[0.0778,0.4251],[0.0658,0.3507]],"block":[[[0.5682,0.1594],[0.8852,0.0978],[0.93,0.2019],[0.9258,0.2465],[0.8343,0.3741],[0.7207,0.3804],[0.6549,0.2784],[0.5682,0.1966]]],"top":[[[0.5849,0.1594],[0.7177,0.1201],[0.8852,0.1063],[0.924,0.2019],[0.8325,0.3103],[0.7207,0.2614],[0.6579,0.2657],[0.573,0.1849]]],"ramp":[[[0.6071,0.3454],[0.6878,0.3741],[0.7207,0.2657],[0.6609,0.2444]]],"ell":[[0.1645,0.2019,0.1166,0.1254],[0.1734,0.7067,0.0897,0.0404],[0.8672,0.7332,0.0359,0.0276]]}, hero: [.478, .36], sp: [.475, .494] },
     altar: { fc: {"ground":[[0.326,0.2582],[0.6788,0.2582],[0.7057,0.2317],[0.7715,0.2508],[0.8612,0.3029],[0.9151,0.356],[0.9569,0.4251],[0.9809,0.4995],[0.9868,0.5951],[0.9689,0.6801],[0.933,0.7651],[0.8612,0.8502],[0.7775,0.9033],[0.7416,0.9267],[0.7386,1.0],[0.2721,1.0],[0.2691,0.9267],[0.1794,0.8629],[0.0897,0.7885],[0.0359,0.6908],[0.015,0.5951],[0.0179,0.4995],[0.0359,0.4357],[0.0598,0.3613],[0.1196,0.2976],[0.1734,0.255],[0.2392,0.2359]],"block":[[[0.0239,0.3889],[0.1423,0.3889],[0.1495,0.4293],[0.1148,0.4718],[0.1124,0.5058],[0.0239,0.5058]]],"top":[[[0.0467,0.3911],[0.1388,0.3911],[0.1286,0.4272],[0.1136,0.4591],[0.0275,0.4612]]],"ramp":[[[0.1148,0.4166],[0.1447,0.4187],[0.1483,0.44],[0.1292,0.4718],[0.1112,0.4718]]],"ell":[]}, hero: [.5, .6], sp: [.502, .5] },
+    yz: { fc: {"ground":[[0.105,0.18],[0.466,0.18],[0.466,0.14],[0.534,0.14],[0.534,0.18],[0.885,0.18],[0.885,0.86],[0.534,0.86],[0.534,0.945],[0.466,0.945],[0.466,0.86],[0.105,0.86]],"block":[],"top":[],"ramp":[],"ell":[]}, hero: [.5, .3], sp: [.5, .5] },
     town: { fc: {"ground":[[0.1914,0.2189],[0.4474,0.2189],[0.4456,0.1296],[0.4695,0.0638],[0.5413,0.0638],[0.5742,0.1296],[0.5754,0.2189],[0.7727,0.221],[0.7751,0.2253],[0.8266,0.2529],[0.8589,0.2465],[0.8762,0.3188],[0.9031,0.4251],[0.933,0.5313],[0.9569,0.6376],[0.9809,0.7439],[0.9809,0.7917],[0.933,0.8236],[0.8493,0.8448],[0.7476,0.8767],[0.6489,0.8874],[0.5772,0.898],[0.5772,0.9373],[0.6071,1.0],[0.3888,1.0],[0.4276,0.9373],[0.4276,0.898],[0.3589,0.898],[0.2572,0.8927],[0.1495,0.8661],[0.1268,0.8395],[0.1226,0.8098],[0.0395,0.6674],[0.0628,0.6376],[0.0957,0.5313],[0.1286,0.4251],[0.1585,0.3188]],"block":[],"top":[[[0.1926,0.1966],[0.1495,0.3188],[0.1166,0.4251],[0.0807,0.5313],[0.0419,0.6376],[0.0239,0.6589],[0.0,0.6695],[0.0,0.5739],[0.0179,0.5313],[0.0419,0.4251],[0.0778,0.3188],[0.1226,0.2019]],[[0.8612,0.1573],[0.8852,0.1573],[0.933,0.2657],[0.9689,0.4038],[0.9928,0.5101],[1.0,0.5526],[1.0,0.6482],[0.9868,0.5951],[0.9569,0.457],[0.9091,0.3188],[0.866,0.1753]]],"ramp":[[[0.0108,0.6801],[0.0377,0.6652],[0.1208,0.8055],[0.1226,0.8204],[0.067,0.8438],[0.0132,0.7067]],[[0.7751,0.2253],[0.8176,0.152],[0.8642,0.1573],[0.8594,0.1785],[0.8266,0.2508]]],"ell":[]}, hero: [.5, .5], sp: [.507, .5] },
   };
-  const MAP = MAPS[MSEL] || MAPS.field, FC = MAP.fc;
+  let MAP = MAPS.field, FC = MAP.fc, FB, ST, FL, OCC = [];
   const inPoly = (pt, x, y) => { let c = false; for (let i = 0, j = pt.length - 1; i < pt.length; j = i++) { const a = pt[i], b = pt[j]; if ((a[1] > y) !== (b[1] > y) && x < (b[0] - a[0]) * (y - a[1]) / (b[1] - a[1]) + a[0]) c = !c; } return c; };
   const inEll = (e, x, y) => ((x - e[0]) / e[2]) ** 2 + ((y - e[1]) / e[3]) ** 2 < 1;
   const walk = (x, y) => (inPoly(FC.ground, x, y) && !FC.block.some(b => inPoly(b, x, y)) && !FC.ell.some(e => inEll(e, x, y))) || FC.top.some(b => inPoly(b, x, y)) || FC.ramp.some(b => inPoly(b, x, y));
-  const FB = FC.ground.reduce((r, p) => ({ x0: Math.min(r.x0, p[0]), x1: Math.max(r.x1, p[0]), y0: Math.min(r.y0, p[1]), y1: Math.max(r.y1, p[1]) }), { x0: 1, x1: 0, y0: 1, y1: 0 });   // arena2：场地比屏幕大 25%，镜头跟着人物轻微移动（像群侠传）
   let camTop = 0;
   const HAZE = /[?&]look=haze(?:&|$)/.test(location.search);   // 群侠传式氛围：薄雾 + 降饱和 + 暗角 + 飘尘 + 软阴影
   const DUST = Array.from({ length: 46 }, () => ({ x: Math.random(), y: Math.random(), r: .6 + Math.random() * 1.8, vx: .004 + Math.random() * .012, vy: (Math.random() - .5) * .004, a: .08 + Math.random() * .16 }));
   let dustT = 0;
   const AX = 1000;                                   // 场地中心的世界 x
-  const ST = FIELD ? { x0: .44, x1: .56, top: FB.y0, bot: FB.y1 } : { x0: .466, x1: .534, top: .14, bot: .945 };   // 上下两处台阶：可以走上去（台阶宽度内），两边墙外不能走
-  const FL = FIELD ? { x0: FB.x0, x1: FB.x1, y0: FB.y0 + .1, y1: FB.y1 - .1 } : { x0: .105, x1: .885, y0: .18, y1: .86 };   // 地面（围墙里面）占图的比例范围
   // 遮挡层：把草垛(含推车)、石井的轮廓从背景图里抠出来，按脚底线 base 和人物前后排序；人物走到它们后面时被盖住（并且变半透明）
-  const OCC = MSEL === 'field' ? [
+  const OCCS = { field: [
     { base: .7067, poly: [[290,518],[325,545],[345,585],[375,582],[405,598],[432,640],[420,668],[345,700],[335,722],[285,722],[250,700],[205,690],[150,672],[138,640],[170,600],[215,588],[240,565],[275,540]].map(p => [p[0] / 1672, p[1] / 941]) },
     { base: .745, poly: [[1405,580],[1480,575],[1505,600],[1500,640],[1520,690],[1500,712],[1440,730],[1385,700],[1395,650],[1410,610]].map(p => [p[0] / 1672, p[1] / 941]) },
-  ] : [];
-  for (const o of OCC) { const xs = o.poly.map(p => p[0]), ys = o.poly.map(p => p[1]); o.bx = Math.min(...xs); o.by = Math.min(...ys); o.bw = Math.max(...xs) - o.bx; o.bh = Math.max(...ys) - o.by; o.cv = null; }
+  ] };
+  for (const k in OCCS) for (const o of OCCS[k]) { const xs = o.poly.map(p => p[0]), ys = o.poly.map(p => p[1]); o.bx = Math.min(...xs); o.by = Math.min(...ys); o.bw = Math.max(...xs) - o.bx; o.bh = Math.max(...ys) - o.by; o.cv = null; }
   function occCanvas(o) {
     if (o.cv) return o.cv; const i = img(); if (!i) return null;
     const c = document.createElement('canvas'); c.width = Math.round(o.bw * i.width); c.height = Math.round(o.bh * i.height);
@@ -259,6 +259,13 @@ const XIAOCHANG = { drawBackground() {}, state: () => null, start() {}, on: () =
       for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) { if (!di && !dj) continue; const ni = ci + di, nj = cj + dj; if (ni < 0 || nj < 0 || ni >= GX || nj >= GY) continue; const n = nj * GX + ni; if (!ws[n]) continue; if (di && dj && (!ws[cj * GX + ni] || !ws[nj * GX + ci])) continue; const nd = d[c] + (di && dj ? 1.41 : 1); if (nd < d[n]) { d[n] = nd; q.push(n); } } }
     return d;
   }
+  function setMap(key) {   // 换地图：重算范围、遮挡层、绕路格子，并把当前背景图指到这张图
+    if (!MAPS[key]) key = 'field'; MSEL = key; MAP = MAPS[key]; FC = MAP.fc;
+    FB = FC.ground.reduce((r, p) => ({ x0: Math.min(r.x0, p[0]), x1: Math.max(r.x1, p[0]), y0: Math.min(r.y0, p[1]), y1: Math.max(r.y1, p[1]) }), { x0: 1, x1: 0, y0: 1, y1: 0 });
+    ST = { x0: .44, x1: .56, top: FB.y0, bot: FB.y1 }; FL = { x0: FB.x0, x1: FB.x1, y0: FB.y0 + .1, y1: FB.y1 - .1 }; OCC = OCCS[key] || [];
+    flowCells = null; flow = null; flowKey = -1;
+    if (typeof IMG !== 'undefined' && IMG['map_' + key]) IMG.arena = IMG['map_' + key];
+  }
   let active = false;
   const img = () => (typeof IMG !== 'undefined' ? IMG.arena : null);
   const ready = () => { const i = img(); return !!(i && i.complete && i.width); };
@@ -276,10 +283,12 @@ const XIAOCHANG = { drawBackground() {}, state: () => null, start() {}, on: () =
     return g;
   }
   window.ARENA = {
-    available: () => ON_URL && typeof BG !== 'undefined' && !!BG.arena,
+    available: () => ON_URL && typeof BG !== 'undefined' && !!(BG.arena || BG.field || BG.town || BG.altar),
+    map: () => MSEL,
     on: () => active && ready(),
-    start() {
+    start(key) {
       if (!this.available()) return;
+      setMap(key || MSEL || 'field');
       active = true;
       const g = apply(); if (!g) return;
       props.length = 0;                               // 场地里不放草垛推车，地面保持干净
@@ -5627,10 +5636,12 @@ function resultKey(e) {
   }
 
   if (ON) setInterval(() => { if (pending && (!window.TITLE || TITLE.mode() === 'game')) { pending = false; open(); } }, 150);   // 真正进游戏（不是在标题页）才打开长卷
+  const MAP_OF = l => l <= 3 ? 'field' : l <= 6 ? 'town' : l <= 11 ? 'yz' : 'altar';   // 第 1~3 层打谷场，4~6 县城，7~11 黄巾营寨，12 张角祭坛
   window.ROUTE = {
+    mapOf: n => MAP_OF(n.layer),
     on: () => ON, TIME_K, layers: () => LAYERS,
     waves: n => WAVES_OF[n.type] || 3,
-    name: n => LABEL[n.type],
+    name: n => n ? LABEL[n.type] : '',
     shown: () => shown || pending,
     start() { run = { ...gen(), visited: new Set() }; run.cur = run.start; run.visited.add(run.start); pending = true; if (shown) close(); },
     done, close,
@@ -6294,7 +6305,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   }
   function beginNode(nd) {
     RT.node = nd; W.N = ROUTE.waves(nd); W.started = true; W.between = 0; W.pick = false; S.wind = null; S.recov = null; S.later = []; bolts.length = 0; fx.length = 0;
-    zs.length = 0; eshots.length = 0; if (window.ARENA) ARENA.start();
+    zs.length = 0; eshots.length = 0; if (window.ARENA) ARENA.start(ROUTE.mapOf(nd));
     startWave(1);
   }
   // ---------- 对外接口 ----------
@@ -6382,6 +6393,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     // 波次与倒计时
     ctx.font = 'bold 14px "PingFang SC",sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#ffe9a0';
     const left = Math.max(0, Math.ceil(WT() - W.t));
+    if (RT.on && !RT.node) { ctx.restore(); return; }   // 路线图还没选节点：不画波次文字
     ctx.fillText(W.retreat > 0 || W.between > 0 ? `${RT.on ? '第 ' + W.k + '/' + W.N : '第 ' + W.n + '/' + WAVES} 波 · 鸣金收兵` : `${RT.on ? ROUTE.name(RT.node) + ' · 第 ' + W.k + '/' + W.N : '第 ' + W.n + '/' + WAVES} 波 · 还剩 ${left} 秒${bossCount() ? ' · 敌将' : ''}`, HW / 2, y0 + sz + 28);
     ctx.restore();
   }
@@ -9036,7 +9048,8 @@ if (BG.inkFar && BG.inkNear) { load('inkfar', BG.inkFar); load('inknear', BG.ink
 if (BG.arena && /[?&]bg=arena2?(?:&|$)/.test(location.search)) load('arena', BG.arena);
 if (BG.field && /[?&]bg=field(?:&|$)/.test(location.search)) load('arena', BG.field);
 if (BG.town && /[?&]bg=town(?:&|$)/.test(location.search)) load('arena', BG.town);
-if (BG.altar && /[?&]bg=altar(?:&|$)/.test(location.search)) load('arena', BG.altar);   // 张角祭坛   // 县城街巷   // 打谷场：不规则可走区域 + 高台（用同一个 IMG.arena 槽位）   // 俯视竞技场（js/arena.js，试玩对比）
+if (BG.altar && /[?&]bg=altar(?:&|$)/.test(location.search)) load('arena', BG.altar);   // 张角祭坛
+if (/[?&]route(?:=|&|$)/.test(location.search)) { load('map_field', BG.field); load('map_town', BG.town); load('map_altar', BG.altar); load('map_yz', BG.arena); }   // 路线图：四张战斗地图都先载入（测试用，以后改成按需）   // 县城街巷   // 打谷场：不规则可走区域 + 高台（用同一个 IMG.arena 槽位）   // 俯视竞技场（js/arena.js，试玩对比）
 Object.entries(ASSETS.props).forEach(([k, v]) => load('p_' + k, v[0]));
 Object.entries(ASSETS.food || {}).forEach(([k, v]) => load('food_' + k, v[0]));
 

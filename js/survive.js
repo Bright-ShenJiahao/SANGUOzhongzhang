@@ -198,7 +198,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   }
   function beginNode(nd) {
     RT.node = nd; W.N = ROUTE.waves(nd); W.started = true; W.between = 0; W.pick = false; S.wind = null; S.recov = null; S.later = []; bolts.length = 0; fx.length = 0;
-    zs.length = 0; eshots.length = 0; if (window.ARENA) ARENA.start();
+    zs.length = 0; eshots.length = 0; if (window.ARENA) ARENA.start(ROUTE.mapOf(nd));
     startWave(1);
   }
   // ---------- 对外接口 ----------
@@ -286,6 +286,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     // 波次与倒计时
     ctx.font = 'bold 14px "PingFang SC",sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#ffe9a0';
     const left = Math.max(0, Math.ceil(WT() - W.t));
+    if (RT.on && !RT.node) { ctx.restore(); return; }   // 路线图还没选节点：不画波次文字
     ctx.fillText(W.retreat > 0 || W.between > 0 ? `${RT.on ? '第 ' + W.k + '/' + W.N : '第 ' + W.n + '/' + WAVES} 波 · 鸣金收兵` : `${RT.on ? ROUTE.name(RT.node) + ' · 第 ' + W.k + '/' + W.N : '第 ' + W.n + '/' + WAVES} 波 · 还剩 ${left} 秒${bossCount() ? ' · 敌将' : ''}`, HW / 2, y0 + sz + 28);
     ctx.restore();
   }
