@@ -115,6 +115,7 @@
       if (r < .8) return { x: AX + (Math.random() - .5) * g.w * .06, y: Math.max(g.TS, Z === 1 ? 0 : -1e9) + 3 };
       return { x: AX + (Math.random() - .5) * g.w * .06, y: Math.min(g.BS, Z === 1 ? M.viewH : 1e9) - 3 };
     },
+    dbg: { walk, cells, field, GX, GY },
     layers() {   // 草垛、石井的遮挡层：交给 game.js 的前后排序列表
       if (!FIELD || !this.on()) return [];
       return OCC.map(o => ({ y: geo().oy + o.base * geo().h, d: () => {
@@ -129,14 +130,20 @@
       const g = geo(), ex = (e.x - g.ox) / g.w, ey = (e.y - g.oy) / g.h, hx = (hero.x - g.ox) / g.w, hy = (hero.y - g.oy) / g.h;
       const mag = Math.hypot(dx, dy); if (mag < 1e-4) return [dx, dy];
       if (dx * (hero.x - e.x) + dy * (hero.y - e.y) <= 0) return [dx, dy];   // 不是朝主角走（后撤、绕圈）就不管
-      let clear = true; for (let k = 1; k <= 12; k++) if (!walk(ex + (hx - ex) * k / 12, ey + (hy - ey) * k / 12)) { clear = false; break; }
+      if (Math.hypot(e.x - (e._lx ?? -1e9), e.y - (e._ly ?? -1e9)) < .05) e._stk = (e._stk || 0) + 1; else e._stk = 0;   // 位置几帧都没变 = 被卡住
+      e._lx = e.x; e._ly = e.y;
+      const n = Math.max(12, Math.ceil(Math.hypot(hero.x - e.x, hero.y - e.y) / 6));
+      let clear = e._stk < 8; for (let k = 1; clear && k <= n; k++) if (!walk(ex + (hx - ex) * k / n, ey + (hy - ey) * k / n)) clear = false;
       if (clear) return [dx, dy];
       const d = field(hx, hy), ws = cells(), ci = Math.max(0, Math.min(GX - 1, ex * GX | 0)), cj = Math.max(0, Math.min(GY - 1, ey * GY | 0));
-      let bd = d[cj * GX + ci], bi = -1, bj = -1;
-      for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) { const ni = ci + di, nj = cj + dj; if ((!di && !dj) || ni < 0 || nj < 0 || ni >= GX || nj >= GY) continue; const n = nj * GX + ni; if (ws[n] && d[n] < bd) { bd = d[n]; bi = ni; bj = nj; } }
-      if (bi < 0) return [dx, dy];
-      const tx = g.ox + (bi + .5) / GX * g.w - e.x, ty = g.oy + (bj + .5) / GY * g.h - e.y, tl = Math.hypot(tx, ty) || 1;
-      return [tx / tl * mag, ty / tl * mag];
+      const cur = d[cj * GX + ci], cand = [];
+      for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) { const ni = ci + di, nj = cj + dj; if ((!di && !dj) || ni < 0 || nj < 0 || ni >= GX || nj >= GY) continue; const n = nj * GX + ni; if (ws[n] && d[n] < cur) cand.push([d[n], ni, nj]); }
+      cand.sort((a, b) => a[0] - b[0]);
+      for (const [, ni, nj] of cand) {   // 按「离主角更近」的顺序挑，挑第一个真能迈出去的方向（格子比墙边粗，不能只信格子中心）
+        const tx = g.ox + (ni + .5) / GX * g.w - e.x, ty = g.oy + (nj + .5) / GY * g.h - e.y, tl = Math.hypot(tx, ty) || 1, ux = tx / tl, uy = ty / tl;
+        if (walk((e.x + ux * 10 - g.ox) / g.w, (e.y + uy * 10 - g.oy) / g.h)) return [ux * mag, uy * mag];
+      }
+      return [dx, dy];
     },
     soft: HAZE ? (x, y, r) => {   // 更大更软的脚下阴影
       ctx.save(); ctx.translate(x, y); ctx.scale(1, .34);
