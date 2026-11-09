@@ -11,7 +11,12 @@
   const MAPN = { field: '打谷场', town: '县城街巷', yz: '黄巾营寨', altar: '张角祭坛' };
   const SECT = [['field', 1, 3, '120,140,80', .13], ['town', 4, 6, '160,115,70', .13], ['yz', 7, 11, '165,70,45', .12], ['altar', 12, 12, '70,55,95', .2]];   // 分段：地图、起止层、淡墨色调
   const hov = { n: null };
-  const LABEL = { battle: '黄巾游兵', elite: '黄巾精锐', camp: '营地', boss: '张角祭坛', start: '涿郡' };
+  const LABEL = { battle: '黄巾游兵', elite: '黄巾精锐', camp: '营地', boss: '张角祭坛', start: '涿郡', event: '奇遇', chest: '宝箱' };
+  const EVENTS = [   // 奇遇：几个小抉择，选完不打架直接回长卷
+    { t: '破庙神像', d: '路边一座破庙，神像前还摆着供品。', o: [['上香祈福', '回复 40% 血量', 'pray'], ['搜刮供品', '失去 20% 血量，换一次战利三选一', 'loot']] },
+    { t: '路边老兵', d: '一个断了腿的老兵坐在树下，招呼你过去。', o: [['请他喝酒', '招式伤害 +8%', 'wine'], ['向他求教', '一次战利三选一', 'learn']] },
+    { t: '溪边磨石', d: '溪水边有一块平整的磨刀石。', o: [['磨刀', '招式伤害 +10%', 'sharpen'], ['歇脚', '回复 30% 血量', 'rest']] },
+  ];
   const FONT = '"MaShanZheng","STKaiti","KaiTi","Songti SC",serif';
   const INK = '#2a211a', CINNABAR = '#b3281e', PAPER = '#eadcc0';
 
@@ -45,7 +50,7 @@
     // 节点类型：第 1 层必是战；精英第 4 层以后；营地第 3 层以后；上一层同类特殊节点不连着出现
     for (let l = 2; l <= LAYERS - 2; l++) for (const n of byLayer[l] || []) {
       const r = rnd(); let t = 'battle';
-      if (l >= 4 && r < .2) t = 'elite'; else if (l >= 3 && r > .83) t = 'camp';
+      if (l >= 4 && r < .2) t = 'elite'; else if (l >= 3 && r > .86) t = 'camp'; else if (l >= 3 && r > .78) t = 'event'; else if (l >= 3 && r > .72) t = 'chest'; else if (l === 2 && r > .8) t = 'event';
       if (t !== 'battle' && n.prev.some(p => p.type === t)) t = 'battle';
       n.type = t;
     }
@@ -117,9 +122,26 @@
   function choose(n) {
     if (!reachable(n)) return;
     if (n.type === 'camp') return camp(n);
+    if (n.type === 'chest') return chest(n);
+    if (n.type === 'event') return happen(n);
     close();
     if (window.SURV && SURV.beginNode) SURV.beginNode(n);
   }
+  function popup(title, sub, desc, opts, pick) {   // 通用选择弹窗（奇遇用）
+    const box = campBox = document.createElement('div');
+    box.style.cssText = 'position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(30,20,12,.45);z-index:3';
+    const bs = 'width:170px;padding:12px 8px;font:700 18px ' + FONT + ';color:' + INK + ';background:#f3e6c8;border:1px solid #7a5a2c;border-radius:8px;cursor:pointer';
+    box.innerHTML = '<div style="background:' + PAPER + ';border:2px solid #7a5a2c;border-radius:10px;padding:18px 22px;max-width:92vw;text-align:center;font-family:' + FONT + ';color:' + INK + ';box-shadow:0 10px 40px rgba(0,0,0,.45)">'
+      + '<div style="font-size:26px;letter-spacing:6px;margin-bottom:6px">' + title + '</div><div style="font-size:14px;opacity:.75;margin-bottom:14px;max-width:340px">' + desc + '</div>'
+      + '<div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">' + opts.map((o, i) => '<button data-i="' + i + '" style="' + bs + '">' + o[0] + '<br><small style="font:12px sans-serif;opacity:.8">' + o[1] + '</small></button>').join('') + '</div></div>';
+    box.querySelectorAll('button').forEach(b => b.onclick = () => { box.remove(); campBox = null; pick(opts[+b.dataset.i][2]); });
+    root.appendChild(box);
+  }
+  function happen(n) {
+    const ev = EVENTS[(n.id * 7 + n.layer) % EVENTS.length];
+    popup(ev.t, '', ev.d, ev.o, k => SURV.event(k, () => done(n, true)));
+  }
+  function chest(n) { SURV.reward(2, () => done(n, true)); }
   function camp(n) {
     const box = campBox = document.createElement('div');
     box.style.cssText = 'position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(30,20,12,.45);z-index:3';
@@ -287,7 +309,7 @@
     name: n => n ? LABEL[n.type] : '',
     shown: () => shown || pending,
     start() { run = { ...gen(), visited: new Set() }; run.cur = run.start; run.visited.add(run.start); pending = true; if (shown) close(); },
-    done, close,
+    done, close, choose,
     debug: () => run,
   };
 })();
