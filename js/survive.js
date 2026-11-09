@@ -21,8 +21,11 @@
     { from: 1, to: 7, u: 'grunt' }, { from: 3, to: 20, u: 'blade' }, { from: 5, to: 16, u: 'slinger' },
     { from: 7, to: 20, u: 'archer' }, { from: 10, to: 20, u: 'priest' }, { from: 13, to: 20, u: 'grunt' },
   ];
-  const W = { n: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: false, between: 0, started: false };
-  const WT = () => WAVE_T[Math.min(W.n, WAVES) - 1] || 60;
+  const RT = { on: false, node: null, dmg: 1 };   // 路线模式（?route）：当前节点、磨刀加成
+const DM = () => RT.dmg;
+const bossCount = () => RT.on ? (RT.node && W.k === W.N ? (RT.node.type === 'boss' ? 3 : RT.node.type === 'elite' ? 1 : 0) : (RT.node && RT.node.type === 'boss' && W.k === 1 ? 1 : 0)) : (BOSS_WAVES[W.n] || 0);
+const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: false, between: 0, started: false };
+  const WT = () => (WAVE_T[Math.min(W.n, WAVES) - 1] || 60) * (RT.on ? ROUTE.TIME_K : 1);
   const targetN = () => Math.max(8, Math.round((WAVE_N[W.n - 1] || 100) * N_SCALE));
   function pickType() {
     const pool = [];
@@ -43,6 +46,12 @@
     return z;
   }
   function startWave(n) {
+    if (RT.on) {   // 路线模式：n 是本节点第几波，难度按「所在层 + 波数」折算成 1~20 级
+      const nd = RT.node, L = ROUTE.layers(); W.k = n;
+      W.n = Math.max(1, Math.min(WAVES, 1 + Math.floor(((nd.layer - 1 + (n - 1) / W.N) / L) * WAVES) + (nd.type === 'elite' ? 2 : 0) + (nd.type === 'boss' ? 2 : 0)));
+      W.t = 0; W.retreat = 0; W.spawnT = 0; W.batchT = 0; W.bossDone = false;
+      say(`${ROUTE.name(nd)} · 第 ${n}/${W.N} 波`, 1.6); return;
+    }
     W.n = n; W.t = 0; W.retreat = 0; W.spawnT = 0; W.batchT = 0; W.bossDone = false;
     say(n === WAVES ? `第 ${n} 波 · 终局` : `第 ${n} 波`, 1.6);
   }
@@ -54,12 +63,14 @@
   function waveFlow(dt) {
     if (!W.started) return;
     if (W.pick) return;   // 正在选招式
-    if (W.between > 0) { W.between -= dt; if (W.between <= 0) startWave(W.n + 1); return; }
+    if (W.between > 0) { W.between -= dt; if (W.between <= 0) startWave(RT.on ? W.k + 1 : W.n + 1); return; }
     if (W.retreat > 0) {
       W.retreat -= dt;
       if (W.retreat <= 0) {
         zs.length = 0; eshots.length = 0;
-        if (W.n >= WAVES) { won = true; return; }
+        if (RT.on) {
+          if (W.k >= W.N) { nodeClear(); return; }
+        } else if (W.n >= WAVES) { won = true; return; }
         hero.hp = Math.min(window.GEAR ? GEAR.maxHp() : 10, hero.hp + 2);   // 波间调息：回一点血
         W.between = .8;
         if (!offerSkill() && window.ROGUE) ROGUE.offer();   // 波间：还有没学会的招式就先选招式，否则选锦囊
@@ -67,7 +78,7 @@
       return;
     }
     W.t += dt;
-    if (BOSS_WAVES[W.n] && !W.bossDone && W.t >= 1) { W.bossDone = true; for (let i = 0; i < BOSS_WAVES[W.n]; i++) edgeSpawn('elite', true); }
+    if (bossCount() && !W.bossDone && W.t >= 1) { W.bossDone = true; for (let i = 0; i < bossCount(); i++) edgeSpawn('elite', true); }
     // 补兵：开场慢慢涌进来（前 60% 时间里目标人数从少爬到满）
     const ramp = Math.min(30, WT() * .6), rf = Math.min(1, .08 + .92 * W.t / ramp), tn = Math.ceil(targetN() * rf);
     const cnt = alive().filter(z => !z.survBoss).length;
@@ -86,7 +97,7 @@
       let da = Math.abs(Math.atan2(dy, dx) - a0); if (da > Math.PI) da = Math.PI * 2 - da;
       if (d > 14 && da > half) continue;
       const f0 = freeze;
-      hit(z, dmg, kb, Math.sign(dx) || hero.f, false, 0, .3, false, false, { secondary: true, survSkill: true });
+      hit(z, dmg * DM(), kb, Math.sign(dx) || hero.f, false, 0, .3, false, false, { secondary: true, survSkill: true });
       freeze = Math.min(freeze, Math.max(f0, .04));
     }
   }
@@ -111,7 +122,7 @@
   SK.zhendi = { desc: '砸地，脚下一圈震飞', name: '震地', icon: '震', color: '#ffd27a', wu: .7, rc: .35, need: 62, pose: ['blade_4a', 'blade_4b'], range: 66, half: Math.PI, ring: true,
     cast() {   // 一刀砸地，脚下一圈冲击波，把周围的人震飞
       fx.push({ k: 'ring', x: hero.x, y: hero.y, t: 0, T: .45, r: 66 });
-      for (const z of hittable()) if (dist(z, hero) < 66) { const f0 = freeze; hit(z, 2.0, 50, Math.sign(z.x - hero.x) || hero.f, true, 0, .4, false, false, { secondary: true, survSkill: true }); freeze = Math.min(freeze, Math.max(f0, .05)); }
+      for (const z of hittable()) if (dist(z, hero) < 66) { const f0 = freeze; hit(z, 2.0 * DM(), 50, Math.sign(z.x - hero.x) || hero.f, true, 0, .4, false, false, { secondary: true, survSkill: true }); freeze = Math.min(freeze, Math.max(f0, .05)); }
       sfx('crack', hero.x); shake = Math.max(shake, .3);
     } };
   const bolts = [];
@@ -126,7 +137,7 @@
   let origin = 'nongfu';
   const OG = () => ORIGINS[origin] || ORIGINS.nongfu;
   // 波间习得招式：从还没学会的招式里随机给最多 3 个，选一个放进空格
-  function offerSkill() {
+  function offerSkill(cb) {
     const owned = S.slots.filter(Boolean), free = S.slots.indexOf('');
     const pool = Object.keys(SK).filter(k => !owned.includes(k));
     if (free < 0 || !pool.length) return false;
@@ -136,7 +147,7 @@
     box.innerHTML = `<div class="p"><h3>习得招式 · 三选一</h3><div class="row">${pick.map(k => `<button data-k="${k}"><b style="color:${SK[k].color}">${SK[k].icon}</b><span>${SK[k].name}</span><small>${SK[k].desc}</small></button>`).join('')}</div><p>新招式放进第 ${free + 1} 格，按 1→5 顺序轮流放</p></div>`;
     box.querySelectorAll('button').forEach(b => b.onclick = () => {
       const i = S.slots.indexOf(''); if (i >= 0) S.slots[i] = b.dataset.k;
-      box.remove(); W.pick = false; if (window.ROGUE) ROGUE.offer();
+      box.remove(); W.pick = false; if (cb) cb(); else if (window.ROGUE) ROGUE.offer();
     });
     document.body.appendChild(box);
     return true;
@@ -175,6 +186,21 @@
     S.recov = null;
   }
 
+  // ---------- 路线模式 ----------
+  const maxHp = () => window.GEAR ? GEAR.maxHp() : 10;
+  const heal = v => { hero.hp = Math.min(maxHp(), hero.hp + v); };
+  function nodeClear() {   // 一个节点打完：发奖励，回长卷
+    const nd = RT.node; W.started = false; zs.length = 0; eshots.length = 0;
+    if (nd.type === 'boss') { won = true; return; }
+    const back = () => { W.pick = false; ROUTE.done(nd); };
+    if (nd.type === 'elite') { say('精锐已破！', 1.4); if (!offerSkill(back)) { heal(maxHp()); back(); } }
+    else { heal(2); if (!offerSkill(back)) { heal(3); back(); } }
+  }
+  function beginNode(nd) {
+    RT.node = nd; W.N = ROUTE.waves(nd); W.started = true; W.between = 0; W.pick = false; S.wind = null; S.recov = null; S.later = []; bolts.length = 0; fx.length = 0;
+    zs.length = 0; eshots.length = 0; if (window.ARENA) ARENA.start();
+    startWave(1);
+  }
   // ---------- 对外接口 ----------
   function forceBlade() { weapon = 'blade'; pendingWeapon = null; try { if (window.GEAR && GEAR.switch) GEAR.switch(); } catch (e) {} if (typeof ui === 'function') ui(); }
   function startRun() {
@@ -184,6 +210,8 @@
     const vw = viewW(); arenaL = M.gates[0] + 10; lockR = arenaL + vw * 1.5; gateI = 0;
     hero.x = arenaL + vw * .5; cam.x = arenaL;
     if (window.ARENA) ARENA.start();   // 竞技场试玩：重设边界、镜头和出生点
+    RT.on = !!(window.ROUTE && ROUTE.on()); RT.dmg = 1; RT.node = null;
+    if (RT.on) { W.started = false; ROUTE.start(); return; }
     startWave(1);
   }
   function tick(dt) {
@@ -194,7 +222,7 @@
     for (const b of bolts) {
       b.t += dt; b.x += b.vx * dt; b.y += b.vy * dt;
       if (b.y < M.top - 4 || b.y > M.bot + 4) b.t = b.T;
-      for (const z of hittable()) if (!b.hitSet.includes(z) && Math.abs(z.x - b.x) < 16 && Math.abs(z.y - b.y) < 16) { b.hitSet.push(z); const f0 = freeze; hit(z, 1.8, 40, Math.sign(b.vx) || hero.f, false, 0, .3, false, false, { secondary: true, survSkill: true }); freeze = Math.min(freeze, Math.max(f0, .03)); }
+      for (const z of hittable()) if (!b.hitSet.includes(z) && Math.abs(z.x - b.x) < 16 && Math.abs(z.y - b.y) < 16) { b.hitSet.push(z); const f0 = freeze; hit(z, 1.8 * DM(), 40, Math.sign(b.vx) || hero.f, false, 0, .3, false, false, { secondary: true, survSkill: true }); freeze = Math.min(freeze, Math.max(f0, .03)); }
     }
     for (let i = bolts.length - 1; i >= 0; i--) if (bolts[i].t >= bolts[i].T) bolts.splice(i, 1);
     for (let i = fx.length - 1; i >= 0; i--) if (fx[i].t > fx[i].T) fx.splice(i, 1);
@@ -258,7 +286,7 @@
     // 波次与倒计时
     ctx.font = 'bold 14px "PingFang SC",sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#ffe9a0';
     const left = Math.max(0, Math.ceil(WT() - W.t));
-    ctx.fillText(W.retreat > 0 || W.between > 0 ? `第 ${W.n}/${WAVES} 波 · 鸣金收兵` : `第 ${W.n}/${WAVES} 波 · 还剩 ${left} 秒${BOSS_WAVES[W.n] ? ' · 敌将' : ''}`, HW / 2, y0 + sz + 28);
+    ctx.fillText(W.retreat > 0 || W.between > 0 ? `${RT.on ? '第 ' + W.k + '/' + W.N : '第 ' + W.n + '/' + WAVES} 波 · 鸣金收兵` : `${RT.on ? ROUTE.name(RT.node) + ' · 第 ' + W.k + '/' + W.N : '第 ' + W.n + '/' + WAVES} 波 · 还剩 ${left} 秒${bossCount() ? ' · 敌将' : ''}`, HW / 2, y0 + sz + 28);
     ctx.restore();
   }
   // 主角姿势：前摇举刀，出手和后摇用挥刀帧
@@ -276,5 +304,5 @@
     + '#survPick h3{margin:0 0 10px;color:#ffd86e;letter-spacing:4px}#survPick .row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}'
     + '#survPick button{width:140px;padding:12px 8px;background:#2e2118;border:1px solid #8a6a3a;border-radius:8px;color:#f2e4c8;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px}'
     + '#survPick button:hover{border-color:#ffd86e;background:#3a2a1c}#survPick b{font-size:30px}#survPick span{font-size:16px;font-weight:700}#survPick small{color:#cdb98e;font-size:12px}#survPick p{margin:10px 0 0;color:#a08d70;font-size:12px}'; document.head.appendChild(st);
-  window.SURV = { ORIGINS, setOrigin(k) { if (ORIGINS[k] && !ORIGINS[k].locked) origin = k; }, origin: () => origin, takeMul: () => OG().take || 1, moveMul: () => OG().move || 1, SK, tick, drawWorld, hud, startRun, waveFlow, pose, rooted, onRoll, skipWave() { if (W.retreat <= 0 && W.between <= 0 && W.started) endWave(); }, state: () => ({ wave: W.n, t: W.t, slots: S.slots.slice() }) };
+  window.SURV = { beginNode, frozen: () => RT.on && ROUTE.shown(), routeHp: () => [hero.hp, maxHp()], camp(k) { if (k === 'heal') heal(maxHp() * .3); else RT.dmg *= 1.1; }, ORIGINS, setOrigin(k) { if (ORIGINS[k] && !ORIGINS[k].locked) origin = k; }, origin: () => origin, takeMul: () => OG().take || 1, moveMul: () => OG().move || 1, SK, tick, drawWorld, hud, startRun, waveFlow, pose, rooted, onRoll, skipWave() { if (W.retreat <= 0 && W.between <= 0 && W.started) endWave(); }, state: () => ({ wave: W.n, t: W.t, slots: S.slots.slice() }) };
 })();

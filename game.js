@@ -644,6 +644,7 @@ function update(dt) {
   if (!coreAsked && !(window.TITLE && TITLE.blocks && TITLE.blocks())) { coreAsked = true; if (LAZY.core.some(([i]) => !(i.complete && i.naturalWidth))) { coreHold = true; flushLoads(); ensureAssets('core', { label: '正在载入战场' }).then(() => { coreHold = false; }); } }
   if (coreHold) return;
   if (window.PAUSE && PAUSE.paused()) { PAUSE.update(dt); return; }
+  if (window.SURV && SURV.frozen && SURV.frozen()) return;   // 路线图打开时战斗冻结
   if (window.CHAPTER2_INTRO && CHAPTER2_INTRO.active()) { CHAPTER2_INTRO.update(dt); return; }
   if (chargeTierFlash > 0) chargeTierFlash = Math.max(0, chargeTierFlash - dt);
   if (slowT > 0) { slowT -= dt; dt *= .35; }      // 完美闪避的慢动作

@@ -63,7 +63,7 @@ body.szz-pro #help{display:none}
 .x-back{min-height:34px!important}
 }
 #rot small{display:block;margin-top:10px;font-size:14px;font-weight:600;color:#c9b691;line-height:1.6}
-</style><link rel="preload" href="pack/fonts/result.woff2?v=7c2ebaa8cb" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=7c2ebaa8cb)format("woff2");font-display:swap}</style></head><body>
+</style><link rel="preload" href="pack/fonts/result.woff2?v=6c5632ec9e" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=6c5632ec9e)format("woff2");font-display:swap}</style></head><body>
 <div id="bootSplash" style="position:fixed;inset:0;z-index:99999;background:#1a1020;color:#f1d59a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;font:18px system-ui,sans-serif;text-align:center;padding:24px">
 <strong id="bootText">正在加载…</strong><button id="bootRefresh" hidden onclick="location.reload()" style="font:16px system-ui,sans-serif;padding:12px;color:#ffe0a0;background:#583b28;border:1px solid #ba9158;border-radius:6px">网络较慢，点此刷新</button><small id="bootError" style="overflow-wrap:anywhere;max-width:90vw"></small></div>
 <script>
@@ -77,7 +77,7 @@ if(location.protocol==='https:'&&!/[?&]debug(?:=|&|$)/.test(location.search)&&'s
 })();
 // 自动更新：打开游戏、或从后台切回来时，查一下线上有没有新版本；有就在标题/整备页自动刷新（战斗中不打扰）
 (function(){
-var BUILD='4bf0f50e7dbe',busy=false;
+var BUILD='722689ee0696',busy=false;
 if(location.protocol!=='https:'||/[?&]debug(?:=|&|$)/.test(location.search))return;
 function check(){
   if(busy)return;
@@ -5325,6 +5325,234 @@ function resultKey(e) {
   };
 })();
 
+// 三国终章：杀戮尖塔式路线图（水墨长卷）。网址带 ?route 才启用（和现在「一路 20 波」对比用）。
+// - 横向长卷：左边涿郡出发，右边张角祭坛；每一列是一层，每层 3~5 个节点，随机分叉。手机竖屏自动改成纵向。
+// - 节点：战（普通战斗）/ 精（精英）/ 营（营地：回血或磨刀）/ 帅（Boss，暂用第 18~20 级敌人顶替）。
+// - 战斗由 survive.js 负责：SURV.beginNode(节点) 开打，打完回到这里 ROUTE.done(节点)。
+(() => {
+  const ON = /[?&]route(?:=|&|$)/.test(location.search);
+  const LAYERS = 12, LANES = 5;
+  const WAVES_OF = { battle: 3, elite: 4, boss: 3 };   // 每种节点打几波（可调）
+  const TIME_K = .72;                                   // 路线模式下每波时间缩放（20 波表 ≈21 分钟，12 层约合 30 分钟）
+  const CH = { battle: '战', elite: '精', camp: '营', boss: '帅', start: '涿' };
+  const LABEL = { battle: '黄巾游兵', elite: '黄巾精锐', camp: '营地', boss: '张角祭坛', start: '涿郡' };
+  const FONT = '"MaShanZheng","STKaiti","KaiTi","Songti SC",serif';
+  const INK = '#2a211a', CINNABAR = '#b3281e', PAPER = '#eadcc0';
+
+  let run = null, pending = false, shown = false, root = null, cv = null, g = null, W = 0, H = 0, DPR = 1, scroll = 0, tScroll = 0, raf = 0, t0 = 0, drag = null, noise = null, campBox = null;
+  const rnd = () => Math.random();
+  const seeded = n => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+  // ---------- 生成地图 ----------
+  function gen() {
+    const nodes = [], byLayer = [], cells = {};
+    const mk = (l, c, type) => { const n = { id: nodes.length, layer: l, lane: c, type: type || 'battle', next: [], prev: [], jx: seeded(nodes.length + 1) - .5, jy: seeded(nodes.length + 9) - .5 }; nodes.push(n); (byLayer[l] = byLayer[l] || []).push(n); return n; };
+    const cell = (l, c) => cells[l + ':' + c] || (cells[l + ':' + c] = mk(l, c));
+    const start = mk(0, 2, 'start');
+    const link = (a, b) => { if (!a.next.includes(b)) { a.next.push(b); b.prev.push(a); } };
+    const crosses = (a, b) => nodes.some(o => o.layer === a.layer && o !== a && o.next.some(p => p !== b && p.layer === b.layer && (o.lane - a.lane) * (p.lane - b.lane) < 0));
+    // 4 条路径：每一步同列或相邻列，避免交叉
+    const PATHS = 4, starts = [0, 1, 2, 3, 4].sort(() => rnd() - .5);
+    for (let p = 0; p < PATHS; p++) {
+      let cur = cell(1, starts[p % 5]); link(start, cur);
+      for (let l = 2; l <= LAYERS - 2; l++) {
+        const opts = [-1, 0, 1].map(d => cur.lane + d).filter(c => c >= 0 && c < LANES).sort(() => rnd() - .5);
+        let nx = null;
+        for (const c of opts) { const n = cell(l, c); if (!crosses(cur, n)) { nx = n; break; } }
+        if (!nx) nx = cell(l, cur.lane);
+        link(cur, nx); cur = nx;
+      }
+      const camp = cell(LAYERS - 1, cur.lane); link(cur, camp);
+    }
+    const boss = mk(LAYERS, 2, 'boss');
+    for (const n of byLayer[LAYERS - 1]) { n.type = 'camp'; link(n, boss); }
+    // 节点类型：第 1 层必是战；精英第 4 层以后；营地第 3 层以后；上一层同类特殊节点不连着出现
+    for (let l = 2; l <= LAYERS - 2; l++) for (const n of byLayer[l] || []) {
+      const r = rnd(); let t = 'battle';
+      if (l >= 4 && r < .2) t = 'elite'; else if (l >= 3 && r > .83) t = 'camp';
+      if (t !== 'battle' && n.prev.some(p => p.type === t)) t = 'battle';
+      n.type = t;
+    }
+    return { nodes, byLayer, start };
+  }
+
+  // ---------- 界面 ----------
+  const port = () => W < H * .9;
+  const GAP = () => port() ? Math.max(104, H * .15) : Math.max(150, W * .125);
+  const MARGIN = () => port() ? 110 : 150;
+  const LEN = () => MARGIN() * 2 + LAYERS * GAP();
+  const VIEW = () => port() ? H : W;
+  const maxScroll = () => Math.max(0, LEN() - VIEW());
+  function pos(n) {
+    const m = MARGIN() + n.layer * GAP() - scroll, span = port() ? W : H;
+    const lo = port() ? W * .13 : H * .24, hi = port() ? W * .87 : H * .8;
+    const c = lo + (n.lane + n.jx * .35) / (LANES - 1) * (hi - lo) + n.jy * 10;
+    return port() ? { x: c, y: H - m } : { x: m, y: c };
+  }
+  const radius = n => n.type === 'boss' ? 34 : n.type === 'elite' ? 26 : 22;
+  const reachable = n => !!run && run.cur.next.includes(n);
+  const visited = n => !!run && run.visited.has(n);
+
+  function ensureDom() {
+    if (root) return;
+    root = document.createElement('div'); root.id = 'routeMap';
+    root.style.cssText = 'position:fixed;inset:0;z-index:10010;background:' + PAPER + ';touch-action:none;user-select:none;-webkit-user-select:none';
+    cv = document.createElement('canvas'); cv.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;display:block';
+    root.appendChild(cv); document.body.appendChild(root); g = cv.getContext('2d');
+    const exit = document.createElement('button'); exit.textContent = '退出';
+    exit.style.cssText = 'position:absolute;right:14px;top:12px;padding:6px 14px;font:700 14px ' + FONT + ';letter-spacing:2px;color:#f3dc9a;background:rgba(40,28,18,.8);border:1px solid #c9a24a;border-radius:6px;cursor:pointer;z-index:2';
+    exit.onclick = () => { if (!confirm('退出本局，回到主界面？')) return; close(); if (typeof returnFromPausedGame === 'function') returnFromPausedGame(true); else if (window.TITLE && TITLE.show) TITLE.show(); };
+    root.appendChild(exit);
+    cv.addEventListener('pointerdown', e => { drag = { x: e.clientX, y: e.clientY, s: scroll, moved: false, id: e.pointerId }; try { cv.setPointerCapture(e.pointerId); } catch (_) {} });
+    cv.addEventListener('pointermove', e => {
+      if (!drag || e.pointerId !== drag.id) return;
+      const d = port() ? e.clientY - drag.y : drag.x - e.clientX;
+      if (Math.abs(e.clientX - drag.x) + Math.abs(e.clientY - drag.y) > 8) drag.moved = true;
+      if (drag.moved) { scroll = Math.max(0, Math.min(maxScroll(), drag.s + (port() ? -d : d))); tScroll = scroll; }
+    });
+    cv.addEventListener('pointerup', e => { const d = drag; drag = null; if (d && !d.moved) tap(e.clientX, e.clientY); });
+    cv.addEventListener('wheel', e => { e.preventDefault(); scroll = Math.max(0, Math.min(maxScroll(), scroll + (port() ? -e.deltaY : e.deltaY + e.deltaX))); tScroll = scroll; }, { passive: false });
+    addEventListener('resize', () => { if (shown) fit(); });
+  }
+  function fit() {
+    DPR = Math.min(2, window.devicePixelRatio || 1); W = innerWidth; H = innerHeight;
+    cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
+    scroll = Math.max(0, Math.min(maxScroll(), scroll));
+  }
+  function focus(snap) {
+    const m = MARGIN() + run.cur.layer * GAP();
+    tScroll = Math.max(0, Math.min(maxScroll(), m - VIEW() * (port() ? .62 : .3)));
+    if (snap) scroll = tScroll;
+  }
+  function open() {
+    if (!run) return;
+    ensureDom(); fit(); focus(true); shown = true; root.style.display = ''; t0 = performance.now();
+    if (!raf) raf = requestAnimationFrame(frame);
+  }
+  function close() { shown = false; if (root) root.style.display = 'none'; if (campBox) { campBox.remove(); campBox = null; } cancelAnimationFrame(raf); raf = 0; }
+
+  function tap(cx, cy) {
+    if (campBox || !run) return;
+    let best = null, bd = 1e9;
+    for (const n of run.cur.next) { const p = pos(n), d = Math.hypot(p.x - cx, p.y - cy); if (d < radius(n) + 16 && d < bd) { bd = d; best = n; } }
+    if (best) choose(best);
+  }
+  function choose(n) {
+    if (!reachable(n)) return;
+    if (n.type === 'camp') return camp(n);
+    close();
+    if (window.SURV && SURV.beginNode) SURV.beginNode(n);
+  }
+  function camp(n) {
+    const box = campBox = document.createElement('div');
+    box.style.cssText = 'position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(30,20,12,.45);z-index:3';
+    const hp = SURV.routeHp();
+    box.innerHTML = '<div style="background:' + PAPER + ';border:2px solid #7a5a2c;border-radius:10px;padding:18px 22px;max-width:92vw;text-align:center;font-family:' + FONT + ';color:' + INK + ';box-shadow:0 10px 40px rgba(0,0,0,.45)">'
+      + '<div style="font-size:26px;letter-spacing:6px;margin-bottom:6px">营 地</div><div style="font-size:14px;opacity:.75;margin-bottom:14px">血量 ' + Math.ceil(hp[0]) + ' / ' + hp[1] + '</div>'
+      + '<div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">'
+      + '<button data-k="heal" style="width:150px;padding:12px 8px;font:700 18px ' + FONT + ';color:' + INK + ';background:#f3e6c8;border:1px solid #7a5a2c;border-radius:8px;cursor:pointer">歇息<br><small style="font:12px sans-serif;opacity:.8">回复 30% 血量</small></button>'
+      + '<button data-k="up" style="width:150px;padding:12px 8px;font:700 18px ' + FONT + ';color:' + INK + ';background:#f3e6c8;border:1px solid #7a5a2c;border-radius:8px;cursor:pointer">磨刀<br><small style="font:12px sans-serif;opacity:.8">招式伤害 +10%</small></button></div></div>';
+    box.querySelectorAll('button').forEach(b => b.onclick = () => { SURV.camp(b.dataset.k); box.remove(); campBox = null; done(n, true); });
+    root.appendChild(box);
+  }
+  // 节点打完（或营地选完）：记下走过的路，回到长卷
+  function done(n, keepOpen) {
+    run.cur = n; run.visited.add(n);
+    ensureDom(); fit(); focus(false); shown = true; root.style.display = ''; t0 = performance.now();
+    if (!raf) raf = requestAnimationFrame(frame);
+  }
+
+  // ---------- 绘制 ----------
+  function paperNoise() {
+    if (noise) return noise;
+    const c = document.createElement('canvas'); c.width = c.height = 220; const x = c.getContext('2d');
+    for (let i = 0; i < 1400; i++) { x.fillStyle = `rgba(${90 + seeded(i) * 40 | 0},${70 + seeded(i + 5) * 30 | 0},40,${.02 + seeded(i + 11) * .05})`; x.fillRect(seeded(i + 2) * 220, seeded(i + 3) * 220, 1 + seeded(i + 4) * 2, 1 + seeded(i + 6) * 2); }
+    return noise = g.createPattern(c, 'repeat');
+  }
+  function hills(par, alpha, h0, seed) {   // 远山：层层淡墨，随长卷慢慢错位
+    g.beginPath(); const off = scroll * par;
+    if (port()) {
+      g.moveTo(0, H);
+      for (let y = H; y >= 0; y -= 12) { const v = y + off; const x = W * .06 + Math.sin(v * .008 + seed) * 22 + Math.sin(v * .021 + seed * 2) * 12; g.lineTo(x * (h0 / 100), y); }
+      g.lineTo(0, 0); g.closePath();
+    } else {
+      g.moveTo(0, H);
+      for (let x = 0; x <= W; x += 12) { const v = x + off; const y = H - h0 - Math.abs(Math.sin(v * .004 + seed)) * H * .18 - Math.sin(v * .013 + seed * 3) * 14; g.lineTo(x, y); }
+      g.lineTo(W, H); g.closePath();
+    }
+    g.fillStyle = `rgba(52,47,42,${alpha})`; g.fill();
+  }
+  function brush(a, b, w, col, alpha, seed) {   // 毛笔线：略弯、粗细和浓淡有变化
+    const dx = b.x - a.x, dy = b.y - a.y, len = Math.hypot(dx, dy) || 1, nx = -dy / len, ny = dx / len, bend = (seeded(seed) - .5) * len * .22;
+    const cx = (a.x + b.x) / 2 + nx * bend, cy = (a.y + b.y) / 2 + ny * bend;
+    for (let k = 0; k < 3; k++) {
+      g.beginPath(); g.moveTo(a.x + nx * (k - 1) * .7, a.y + ny * (k - 1) * .7); g.quadraticCurveTo(cx + nx * (k - 1) * 1.1, cy + ny * (k - 1) * 1.1, b.x, b.y);
+      g.lineWidth = w * (k === 1 ? 1 : .55); g.strokeStyle = col; g.globalAlpha = alpha * (k === 1 ? 1 : .45); g.lineCap = 'round'; g.stroke();
+    }
+    g.globalAlpha = 1;
+  }
+  function seal(n, now) {
+    const p = pos(n), R = radius(n), vis = visited(n), reach = reachable(n), cur = run.cur === n, t = (now - t0) / 1000;
+    if (p.x < -60 || p.x > W + 60 || p.y < -60 || p.y > H + 60) return;
+    g.save(); g.translate(p.x, p.y);
+    if (reach) { const k = .5 + .5 * Math.sin(t * 3); g.beginPath(); g.arc(0, 0, R + 7 + k * 4, 0, 7); g.strokeStyle = `rgba(179,40,30,${.25 + .3 * k})`; g.lineWidth = 2.5; g.stroke(); }
+    // 印章：边缘略不规整的圆
+    g.beginPath(); const N = 28;
+    for (let i = 0; i <= N; i++) { const a = i / N * Math.PI * 2, r = R * (1 + (seeded(n.id * 31 + i) - .5) * .09); i ? g.lineTo(Math.cos(a) * r, Math.sin(a) * r) : g.moveTo(Math.cos(a) * r, Math.sin(a) * r); }
+    g.closePath();
+    const col = vis || cur ? INK : n.type === 'camp' ? '#3f6a52' : n.type === 'elite' ? '#8f1d14' : n.type === 'boss' ? '#8f1d14' : CINNABAR;
+    g.globalAlpha = reach || vis || cur ? 1 : .42; g.fillStyle = col; g.fill();
+    if (n.type === 'elite' || n.type === 'boss') { g.beginPath(); g.arc(0, 0, R - 4, 0, 7); g.strokeStyle = 'rgba(234,220,192,.75)'; g.lineWidth = n.type === 'boss' ? 2.5 : 1.8; g.stroke(); }
+    g.fillStyle = PAPER; g.font = `bold ${Math.round(R * 1.15)}px ${FONT}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(CH[n.type], 0, 1);
+    g.globalAlpha = 1;
+    if (cur) { g.beginPath(); g.arc(0, 0, R + 5, 0, 7); g.strokeStyle = '#c9a24a'; g.lineWidth = 2.5; g.stroke(); }
+    if (reach || cur || n.type === 'boss') { g.font = `14px ${FONT}`; g.fillStyle = INK; g.globalAlpha = .85; g.fillText(LABEL[n.type], 0, R + 16); g.globalAlpha = 1; }
+    g.restore();
+  }
+  function frame(now) {
+    if (!shown) { raf = 0; return; }
+    raf = requestAnimationFrame(frame);
+    if (!drag || !drag.moved) scroll += (tScroll - scroll) * .1;
+    g.setTransform(DPR, 0, 0, DPR, 0, 0);
+    g.fillStyle = PAPER; g.fillRect(0, 0, W, H);
+    g.fillStyle = paperNoise(); g.fillRect(0, 0, W, H);
+    const wash = g.createRadialGradient(W * .5, H * .45, Math.min(W, H) * .2, W * .5, H * .5, Math.max(W, H) * .75);
+    wash.addColorStop(0, 'rgba(255,248,230,.35)'); wash.addColorStop(1, 'rgba(120,90,50,.28)'); g.fillStyle = wash; g.fillRect(0, 0, W, H);
+    hills(.12, .07, H * .16, 1.3); hills(.25, .11, H * .1, 4.1); hills(.45, .16, H * .045, 7.7);
+    // 路线
+    for (const n of run.nodes) for (const m of n.next) {
+      const a = pos(n), b = pos(m), seedE = n.id * 13 + m.id;
+      const walked = visited(n) && visited(m), open = n === run.cur && reachable(m);
+      brush(a, b, walked ? 4.2 : open ? 3.4 : 2, walked ? INK : open ? '#5a3a1e' : 'rgba(70,55,40,1)', walked ? .92 : open ? .85 : .28, seedE);
+    }
+    for (const n of run.nodes) seal(n, now);
+    // 抬头：章节、血量、提示
+    g.textAlign = 'left'; g.textBaseline = 'alphabetic'; g.fillStyle = INK;
+    g.font = `${port() ? 30 : 38}px ${FONT}`; g.fillText('第一章 · 黄巾之乱', 22, 54);
+    g.font = `15px ${FONT}`; g.globalAlpha = .7; g.fillText('涿郡 → 张角祭坛　点选发亮的节点前进，可拖动长卷', 24, 78); g.globalAlpha = 1;
+    if (window.SURV && SURV.routeHp) {
+      const [hp, mx] = SURV.routeHp(), bw = Math.min(190, W * .34), x = 24, y = 96;
+      g.fillStyle = 'rgba(40,28,18,.55)'; g.fillRect(x, y, bw + 4, 14); g.fillStyle = CINNABAR; g.fillRect(x + 2, y + 2, bw * Math.max(0, Math.min(1, hp / mx)), 10);
+      g.fillStyle = INK; g.font = `13px ${FONT}`; g.fillText('血 ' + Math.ceil(hp) + '/' + mx, x + bw + 12, y + 12);
+    }
+    // 图例
+    g.font = `13px ${FONT}`; g.fillStyle = INK; g.globalAlpha = .75; g.textAlign = 'left';
+    const lg = [['战', '普通'], ['精', '精英'], ['营', '营地'], ['帅', 'Boss']]; let lx = 24;
+    lg.forEach(([c, t]) => { g.fillText(c + ' ' + t, lx, H - 18); lx += 76; }); g.globalAlpha = 1;
+  }
+
+  if (ON) setInterval(() => { if (pending && (!window.TITLE || TITLE.mode() === 'game')) { pending = false; open(); } }, 150);   // 真正进游戏（不是在标题页）才打开长卷
+  window.ROUTE = {
+    on: () => ON, TIME_K, layers: () => LAYERS,
+    waves: n => WAVES_OF[n.type] || 3,
+    name: n => LABEL[n.type],
+    shown: () => shown || pending,
+    start() { run = { ...gen(), visited: new Set() }; run.cur = run.start; run.visited.add(run.start); pending = true; if (shown) close(); },
+    done, close,
+    debug: () => run,
+  };
+})();
+
 // 音效：Web Audio 实时合成，不需要外部音频文件。
 // 设计思路：每个音效由几层组成（瞬态 + 主体 + 尾音），用滤波后的噪声做挥风、布料、泥土，
 // 用正弦/三角波做身体闷响和木头敲击，用不和谐泛音做金属声；每次播放带一点随机音高和音量，
@@ -5804,8 +6032,11 @@ function resultKey(e) {
     { from: 1, to: 7, u: 'grunt' }, { from: 3, to: 20, u: 'blade' }, { from: 5, to: 16, u: 'slinger' },
     { from: 7, to: 20, u: 'archer' }, { from: 10, to: 20, u: 'priest' }, { from: 13, to: 20, u: 'grunt' },
   ];
-  const W = { n: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: false, between: 0, started: false };
-  const WT = () => WAVE_T[Math.min(W.n, WAVES) - 1] || 60;
+  const RT = { on: false, node: null, dmg: 1 };   // 路线模式（?route）：当前节点、磨刀加成
+const DM = () => RT.dmg;
+const bossCount = () => RT.on ? (RT.node && W.k === W.N ? (RT.node.type === 'boss' ? 3 : RT.node.type === 'elite' ? 1 : 0) : (RT.node && RT.node.type === 'boss' && W.k === 1 ? 1 : 0)) : (BOSS_WAVES[W.n] || 0);
+const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: false, between: 0, started: false };
+  const WT = () => (WAVE_T[Math.min(W.n, WAVES) - 1] || 60) * (RT.on ? ROUTE.TIME_K : 1);
   const targetN = () => Math.max(8, Math.round((WAVE_N[W.n - 1] || 100) * N_SCALE));
   function pickType() {
     const pool = [];
@@ -5826,6 +6057,12 @@ function resultKey(e) {
     return z;
   }
   function startWave(n) {
+    if (RT.on) {   // 路线模式：n 是本节点第几波，难度按「所在层 + 波数」折算成 1~20 级
+      const nd = RT.node, L = ROUTE.layers(); W.k = n;
+      W.n = Math.max(1, Math.min(WAVES, 1 + Math.floor(((nd.layer - 1 + (n - 1) / W.N) / L) * WAVES) + (nd.type === 'elite' ? 2 : 0) + (nd.type === 'boss' ? 2 : 0)));
+      W.t = 0; W.retreat = 0; W.spawnT = 0; W.batchT = 0; W.bossDone = false;
+      say(`${ROUTE.name(nd)} · 第 ${n}/${W.N} 波`, 1.6); return;
+    }
     W.n = n; W.t = 0; W.retreat = 0; W.spawnT = 0; W.batchT = 0; W.bossDone = false;
     say(n === WAVES ? `第 ${n} 波 · 终局` : `第 ${n} 波`, 1.6);
   }
@@ -5837,12 +6074,14 @@ function resultKey(e) {
   function waveFlow(dt) {
     if (!W.started) return;
     if (W.pick) return;   // 正在选招式
-    if (W.between > 0) { W.between -= dt; if (W.between <= 0) startWave(W.n + 1); return; }
+    if (W.between > 0) { W.between -= dt; if (W.between <= 0) startWave(RT.on ? W.k + 1 : W.n + 1); return; }
     if (W.retreat > 0) {
       W.retreat -= dt;
       if (W.retreat <= 0) {
         zs.length = 0; eshots.length = 0;
-        if (W.n >= WAVES) { won = true; return; }
+        if (RT.on) {
+          if (W.k >= W.N) { nodeClear(); return; }
+        } else if (W.n >= WAVES) { won = true; return; }
         hero.hp = Math.min(window.GEAR ? GEAR.maxHp() : 10, hero.hp + 2);   // 波间调息：回一点血
         W.between = .8;
         if (!offerSkill() && window.ROGUE) ROGUE.offer();   // 波间：还有没学会的招式就先选招式，否则选锦囊
@@ -5850,7 +6089,7 @@ function resultKey(e) {
       return;
     }
     W.t += dt;
-    if (BOSS_WAVES[W.n] && !W.bossDone && W.t >= 1) { W.bossDone = true; for (let i = 0; i < BOSS_WAVES[W.n]; i++) edgeSpawn('elite', true); }
+    if (bossCount() && !W.bossDone && W.t >= 1) { W.bossDone = true; for (let i = 0; i < bossCount(); i++) edgeSpawn('elite', true); }
     // 补兵：开场慢慢涌进来（前 60% 时间里目标人数从少爬到满）
     const ramp = Math.min(30, WT() * .6), rf = Math.min(1, .08 + .92 * W.t / ramp), tn = Math.ceil(targetN() * rf);
     const cnt = alive().filter(z => !z.survBoss).length;
@@ -5869,7 +6108,7 @@ function resultKey(e) {
       let da = Math.abs(Math.atan2(dy, dx) - a0); if (da > Math.PI) da = Math.PI * 2 - da;
       if (d > 14 && da > half) continue;
       const f0 = freeze;
-      hit(z, dmg, kb, Math.sign(dx) || hero.f, false, 0, .3, false, false, { secondary: true, survSkill: true });
+      hit(z, dmg * DM(), kb, Math.sign(dx) || hero.f, false, 0, .3, false, false, { secondary: true, survSkill: true });
       freeze = Math.min(freeze, Math.max(f0, .04));
     }
   }
@@ -5894,7 +6133,7 @@ function resultKey(e) {
   SK.zhendi = { desc: '砸地，脚下一圈震飞', name: '震地', icon: '震', color: '#ffd27a', wu: .7, rc: .35, need: 62, pose: ['blade_4a', 'blade_4b'], range: 66, half: Math.PI, ring: true,
     cast() {   // 一刀砸地，脚下一圈冲击波，把周围的人震飞
       fx.push({ k: 'ring', x: hero.x, y: hero.y, t: 0, T: .45, r: 66 });
-      for (const z of hittable()) if (dist(z, hero) < 66) { const f0 = freeze; hit(z, 2.0, 50, Math.sign(z.x - hero.x) || hero.f, true, 0, .4, false, false, { secondary: true, survSkill: true }); freeze = Math.min(freeze, Math.max(f0, .05)); }
+      for (const z of hittable()) if (dist(z, hero) < 66) { const f0 = freeze; hit(z, 2.0 * DM(), 50, Math.sign(z.x - hero.x) || hero.f, true, 0, .4, false, false, { secondary: true, survSkill: true }); freeze = Math.min(freeze, Math.max(f0, .05)); }
       sfx('crack', hero.x); shake = Math.max(shake, .3);
     } };
   const bolts = [];
@@ -5909,7 +6148,7 @@ function resultKey(e) {
   let origin = 'nongfu';
   const OG = () => ORIGINS[origin] || ORIGINS.nongfu;
   // 波间习得招式：从还没学会的招式里随机给最多 3 个，选一个放进空格
-  function offerSkill() {
+  function offerSkill(cb) {
     const owned = S.slots.filter(Boolean), free = S.slots.indexOf('');
     const pool = Object.keys(SK).filter(k => !owned.includes(k));
     if (free < 0 || !pool.length) return false;
@@ -5919,7 +6158,7 @@ function resultKey(e) {
     box.innerHTML = `<div class="p"><h3>习得招式 · 三选一</h3><div class="row">${pick.map(k => `<button data-k="${k}"><b style="color:${SK[k].color}">${SK[k].icon}</b><span>${SK[k].name}</span><small>${SK[k].desc}</small></button>`).join('')}</div><p>新招式放进第 ${free + 1} 格，按 1→5 顺序轮流放</p></div>`;
     box.querySelectorAll('button').forEach(b => b.onclick = () => {
       const i = S.slots.indexOf(''); if (i >= 0) S.slots[i] = b.dataset.k;
-      box.remove(); W.pick = false; if (window.ROGUE) ROGUE.offer();
+      box.remove(); W.pick = false; if (cb) cb(); else if (window.ROGUE) ROGUE.offer();
     });
     document.body.appendChild(box);
     return true;
@@ -5958,6 +6197,21 @@ function resultKey(e) {
     S.recov = null;
   }
 
+  // ---------- 路线模式 ----------
+  const maxHp = () => window.GEAR ? GEAR.maxHp() : 10;
+  const heal = v => { hero.hp = Math.min(maxHp(), hero.hp + v); };
+  function nodeClear() {   // 一个节点打完：发奖励，回长卷
+    const nd = RT.node; W.started = false; zs.length = 0; eshots.length = 0;
+    if (nd.type === 'boss') { won = true; return; }
+    const back = () => { W.pick = false; ROUTE.done(nd); };
+    if (nd.type === 'elite') { say('精锐已破！', 1.4); if (!offerSkill(back)) { heal(maxHp()); back(); } }
+    else { heal(2); if (!offerSkill(back)) { heal(3); back(); } }
+  }
+  function beginNode(nd) {
+    RT.node = nd; W.N = ROUTE.waves(nd); W.started = true; W.between = 0; W.pick = false; S.wind = null; S.recov = null; S.later = []; bolts.length = 0; fx.length = 0;
+    zs.length = 0; eshots.length = 0; if (window.ARENA) ARENA.start();
+    startWave(1);
+  }
   // ---------- 对外接口 ----------
   function forceBlade() { weapon = 'blade'; pendingWeapon = null; try { if (window.GEAR && GEAR.switch) GEAR.switch(); } catch (e) {} if (typeof ui === 'function') ui(); }
   function startRun() {
@@ -5967,6 +6221,8 @@ function resultKey(e) {
     const vw = viewW(); arenaL = M.gates[0] + 10; lockR = arenaL + vw * 1.5; gateI = 0;
     hero.x = arenaL + vw * .5; cam.x = arenaL;
     if (window.ARENA) ARENA.start();   // 竞技场试玩：重设边界、镜头和出生点
+    RT.on = !!(window.ROUTE && ROUTE.on()); RT.dmg = 1; RT.node = null;
+    if (RT.on) { W.started = false; ROUTE.start(); return; }
     startWave(1);
   }
   function tick(dt) {
@@ -5977,7 +6233,7 @@ function resultKey(e) {
     for (const b of bolts) {
       b.t += dt; b.x += b.vx * dt; b.y += b.vy * dt;
       if (b.y < M.top - 4 || b.y > M.bot + 4) b.t = b.T;
-      for (const z of hittable()) if (!b.hitSet.includes(z) && Math.abs(z.x - b.x) < 16 && Math.abs(z.y - b.y) < 16) { b.hitSet.push(z); const f0 = freeze; hit(z, 1.8, 40, Math.sign(b.vx) || hero.f, false, 0, .3, false, false, { secondary: true, survSkill: true }); freeze = Math.min(freeze, Math.max(f0, .03)); }
+      for (const z of hittable()) if (!b.hitSet.includes(z) && Math.abs(z.x - b.x) < 16 && Math.abs(z.y - b.y) < 16) { b.hitSet.push(z); const f0 = freeze; hit(z, 1.8 * DM(), 40, Math.sign(b.vx) || hero.f, false, 0, .3, false, false, { secondary: true, survSkill: true }); freeze = Math.min(freeze, Math.max(f0, .03)); }
     }
     for (let i = bolts.length - 1; i >= 0; i--) if (bolts[i].t >= bolts[i].T) bolts.splice(i, 1);
     for (let i = fx.length - 1; i >= 0; i--) if (fx[i].t > fx[i].T) fx.splice(i, 1);
@@ -6041,7 +6297,7 @@ function resultKey(e) {
     // 波次与倒计时
     ctx.font = 'bold 14px "PingFang SC",sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#ffe9a0';
     const left = Math.max(0, Math.ceil(WT() - W.t));
-    ctx.fillText(W.retreat > 0 || W.between > 0 ? `第 ${W.n}/${WAVES} 波 · 鸣金收兵` : `第 ${W.n}/${WAVES} 波 · 还剩 ${left} 秒${BOSS_WAVES[W.n] ? ' · 敌将' : ''}`, HW / 2, y0 + sz + 28);
+    ctx.fillText(W.retreat > 0 || W.between > 0 ? `${RT.on ? '第 ' + W.k + '/' + W.N : '第 ' + W.n + '/' + WAVES} 波 · 鸣金收兵` : `${RT.on ? ROUTE.name(RT.node) + ' · 第 ' + W.k + '/' + W.N : '第 ' + W.n + '/' + WAVES} 波 · 还剩 ${left} 秒${bossCount() ? ' · 敌将' : ''}`, HW / 2, y0 + sz + 28);
     ctx.restore();
   }
   // 主角姿势：前摇举刀，出手和后摇用挥刀帧
@@ -6059,7 +6315,7 @@ function resultKey(e) {
     + '#survPick h3{margin:0 0 10px;color:#ffd86e;letter-spacing:4px}#survPick .row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}'
     + '#survPick button{width:140px;padding:12px 8px;background:#2e2118;border:1px solid #8a6a3a;border-radius:8px;color:#f2e4c8;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px}'
     + '#survPick button:hover{border-color:#ffd86e;background:#3a2a1c}#survPick b{font-size:30px}#survPick span{font-size:16px;font-weight:700}#survPick small{color:#cdb98e;font-size:12px}#survPick p{margin:10px 0 0;color:#a08d70;font-size:12px}'; document.head.appendChild(st);
-  window.SURV = { ORIGINS, setOrigin(k) { if (ORIGINS[k] && !ORIGINS[k].locked) origin = k; }, origin: () => origin, takeMul: () => OG().take || 1, moveMul: () => OG().move || 1, SK, tick, drawWorld, hud, startRun, waveFlow, pose, rooted, onRoll, skipWave() { if (W.retreat <= 0 && W.between <= 0 && W.started) endWave(); }, state: () => ({ wave: W.n, t: W.t, slots: S.slots.slice() }) };
+  window.SURV = { beginNode, frozen: () => RT.on && ROUTE.shown(), routeHp: () => [hero.hp, maxHp()], camp(k) { if (k === 'heal') heal(maxHp() * .3); else RT.dmg *= 1.1; }, ORIGINS, setOrigin(k) { if (ORIGINS[k] && !ORIGINS[k].locked) origin = k; }, origin: () => origin, takeMul: () => OG().take || 1, moveMul: () => OG().move || 1, SK, tick, drawWorld, hud, startRun, waveFlow, pose, rooted, onRoll, skipWave() { if (W.retreat <= 0 && W.between <= 0 && W.started) endWave(); }, state: () => ({ wave: W.n, t: W.t, slots: S.slots.slice() }) };
 })();
 
 // 整军备战页「锦囊」按钮：新锦囊系统的卡表 + 锁定面板（锁定功能尚未接入局内，先能浏览）。
@@ -9299,6 +9555,7 @@ function update(dt) {
   if (!coreAsked && !(window.TITLE && TITLE.blocks && TITLE.blocks())) { coreAsked = true; if (LAZY.core.some(([i]) => !(i.complete && i.naturalWidth))) { coreHold = true; flushLoads(); ensureAssets('core', { label: '正在载入战场' }).then(() => { coreHold = false; }); } }
   if (coreHold) return;
   if (window.PAUSE && PAUSE.paused()) { PAUSE.update(dt); return; }
+  if (window.SURV && SURV.frozen && SURV.frozen()) return;   // 路线图打开时战斗冻结
   if (window.CHAPTER2_INTRO && CHAPTER2_INTRO.active()) { CHAPTER2_INTRO.update(dt); return; }
   if (chargeTierFlash > 0) chargeTierFlash = Math.max(0, chargeTierFlash - dt);
   if (slowT > 0) { slowT -= dt; dt *= .35; }      // 完美闪避的慢动作
