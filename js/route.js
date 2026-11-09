@@ -205,7 +205,7 @@
     g.shadowColor = cur ? 'rgba(201,162,74,.95)' : reach ? `rgba(179,40,30,${.6 + .35 * k})` : 'rgba(40,28,18,.4)';
     g.shadowBlur = cur ? 16 : reach ? 12 + k * 8 : 5; g.shadowOffsetY = reach || cur ? 0 : 2;
     g.globalAlpha = vis ? .75 : reach || cur ? 1 : .55;
-    icon(n.type, R * 2.3, vis || (!reach && !cur));
+    icon(n.type, R * 2.0, vis || (!reach && !cur));
     g.globalAlpha = 1; g.shadowBlur = 0; g.shadowColor = 'transparent'; g.shadowOffsetY = 0;
     if (vis && !cur) { g.beginPath(); g.arc(R * .62, -R * .62, 7, 0, 7); g.fillStyle = CINNABAR; g.fill(); g.strokeStyle = PAPER; g.lineWidth = 1.6; g.beginPath(); g.moveTo(R * .62 - 3, -R * .62); g.lineTo(R * .62 - .8, -R * .62 + 2.6); g.lineTo(R * .62 + 3.4, -R * .62 - 2.6); g.stroke(); }
     g.restore();
