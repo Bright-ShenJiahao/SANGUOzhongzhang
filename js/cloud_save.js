@@ -100,7 +100,7 @@
     return ARMORY.lastMergeChanged?ARMORY.lastMergeChanged():true;
   }
   async function exchange(player,download){
-    if(debug||!player||player==='__debug__')return true;
+    if(debug||!player||player==='__debug__'||!window.ARMORY)return true;   // 旧武器/装备系统已下架，云存档先停用（它同步的就是装备档）
     if(blocked(player)){renderStatus();return false;}
     // 串行队列可能等到玩家已出征才开始；再次检查，不能在战斗中发起下载。
     const pull=download&&player===name()&&canMerge();

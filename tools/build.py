@@ -201,7 +201,9 @@ assets['chapter2Intro'] = uri(P('art', 'bg', 'chapter2_intro.webp'))
 import glob
 # 三国终章暂时拿掉的旧功能（文件都保留，以后要用就从这里删掉对应名字）。_stubs.js 给 game.js 里没有判空保护的调用补空壳。
 DISABLED = {'rogue', 'meridian', 'artifact', 'shop', 'shop_goods', 'board', 'dmgtest', 'xiaochang',
-            'chapter2', 'chapter2_intro', 'ch2bosses', 'ch2opening', 'g_chapter2_flow', 'zhangjiao', 'boss', 'boss_block'}
+            'chapter2', 'chapter2_intro', 'ch2bosses', 'ch2opening', 'g_chapter2_flow', 'zhangjiao', 'boss', 'boss_block',
+            # 旧武器系统（装备仓库/词条/属性结算/熟练度/汉弓箭数/锦囊）：三国终章改用招式+功法+新武器系统，伤害速度不再由旧装备算
+            'armory', 'affix_data', 'gear_combat', 'equipment_rules', 'equipment_detail', 'equipment_tooltip', 'mastery', 'bowammo', 'tipbag'}
 mods = [f for f in sorted(glob.glob(P('js', '*.js'))) if os.path.basename(f)[:-3] not in DISABLED]
 game = '\n'.join(open(f, encoding='utf-8').read() for f in mods) + '\n' + open(P('game.js'), encoding='utf-8').read()
 

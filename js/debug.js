@@ -102,34 +102,9 @@
     });
     btn(heroGroup, '伤害测试场', '', () => { if (window.DMGTEST) DMGTEST.open(); });
     btn(heroGroup, '心魔记忆', '', () => { if (window.XINMO) XINMO.memory(); });
-    btn(heroGroup, '恢复存档', '', () => { if (!window.ARMORY || !ARMORY.backups) return; const l = ARMORY.backups(); if (!l.length) { tipLine('还没有备份（云端同步时才会自动备份）'); return; }
-      const i = l.length > 1 ? Number(prompt(l.map((b, k) => `${k}：${new Date(b.at).toLocaleString()}`).join('\n') + '\n输入要恢复的编号', '0')) : 0;
-      if (!Number.isInteger(i) || !l[i]) return; tipLine(ARMORY.restore(i) ? '已恢复 ' + new Date(l[i].at).toLocaleString() + ' 的存档，刷新后生效' : '恢复失败'); });
     btn(heroGroup, '给 7 颗通脉丹', '', () => { if (window.MERIDIAN) { ['ch1','ch2','ch3','xc1','xc2','xc3','tg'].forEach(k => MERIDIAN.award(k)); tipLine('通脉丹 7/7：整军备战 → 经脉'); try { if (window.TITLE && TITLE.refreshPreparation) TITLE.refreshPreparation(); } catch (e) {} } });
     btn(heroGroup, '跳过这一波', '', () => { if (window.SURV) SURV.skipWave(); });
     btn(heroGroup, '给太平飞剑', '', () => { if (window.ARTIFACT) { ARTIFACT.grant('feijian'); ARTIFACT.equip('feijian'); ARTIFACT.startRun(); if (typeof say === 'function') say('已获得并装备太平飞剑', 2); try { if (window.TITLE && TITLE.refreshPreparation) TITLE.refreshPreparation(); } catch (e) {} } });
-    // 测评锦囊：直接挑任意一张拿到手（要在关卡里用）
-    btn(heroGroup, '选锦囊', '', () => {
-      let box = document.getElementById('dbgTips');
-      if (!box) {
-        box = document.createElement('div'); box.id = 'dbgTips';
-        box.addEventListener('touchmove', e => e.stopPropagation(), { passive: true }); box.style.cssText = 'position:fixed;left:8px;top:8px;bottom:8px;touch-action:pan-y;overscroll-behavior:contain;width:min(420px,60vw);overflow:auto;z-index:10003;background:#1d140ef2;border:1px solid #9d7845;border-radius:8px;padding:8px;font:13px sans-serif;color:#ecdcbc';
-        document.body.append(box);
-        box.addEventListener('click', e => {
-          const b = e.target.closest('[data-tip]');
-          if (b) { const ok = window.ROGUE && ROGUE.grant(b.dataset.tip); if (typeof say === 'function') say(ok ? '获得「' + b.dataset.tip + '」' : '已经有了，或不在关卡里', 1.6); render(); return; }
-          if (e.target.closest('[data-x]')) box.hidden = true;
-        });
-      }
-      const render = () => {
-        const T = window.TIPBAG; if (!T) return;
-        box.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><b style="color:#f1d58f">选锦囊（点一下直接获得）</b><button data-x style="min-height:30px">关闭</button></div>' +
-          T.CATS.map(c => `<div style="margin:6px 0 2px;color:${c.color};font-weight:700">${c.name}</div><div style="display:flex;flex-wrap:wrap;gap:4px">` +
-            T.CARDS[c.id].map(([n, r, d]) => { const got = window.ROGUE && ROGUE.has(n); return `<button data-tip="${n}" title="${d}" style="min-height:30px;padding:2px 8px;border-radius:5px;border:1px solid ${r === 'l' ? '#e0a63a' : r === 'r' ? '#5d9ad6' : '#7a5c38'};background:${got ? '#4a6a3a' : '#35271d'};color:#f5e6c4;cursor:pointer">${got ? '✓ ' : ''}${n}</button>`; }).join('') + '</div>').join('') +
-          '<div style="margin-top:8px;font-size:12px;color:#cdb78e">鼠标停在按钮上看说明；兵卡（将令）只能有一张，选新的会顶替旧的，按 U 使用。</div>';
-      };
-      render(); box.hidden = false;
-    });
     // 预览结算动画（数字滚动 + 铜钱雨）：直接判本局通关，结算显示 37 击倒、180 金币
     btn(heroGroup, '看结算动画', '', () => {
       if (window.TITLE && TITLE.blocks && TITLE.blocks()) { if (TITLE.skip) TITLE.skip(); if (window.ROOM && ROOM.skip) ROOM.skip(); }
@@ -140,36 +115,7 @@
       }, 400);
     });
     const revive = btn(heroGroup, '复活次数 +1', '', () => { if (typeof reviveUsed !== 'undefined') reviveUsed = false; });
-    // 测试用：六种武器熟练度拉满，并每种各给一把传说武器（会写进当前玩家的存档）
-    btn(heroGroup, '满熟练+传说武器', '', () => {
-      if (!window.MASTERY || !window.ARMORY || !window.AFFIX_DATA) return;
-      const top = MASTERY.NEED[MASTERY.NEED.length - 1], m = {};
-      MASTERY.TYPES.forEach(t => { m[t] = top; });
-      ARMORY.setMastery(m);
-      // 每种武器已经有传说的就不再给（以前每点一次塞 6 把，仓库很快满 50 把，之后再点就没反应）
-      let n = 0, full = false;
-      const items = (ARMORY.state().items || []);
-      for (const t of MASTERY.TYPES) {
-        if (items.some(i => i.type === t && i.q >= 4)) continue;
-        if (ARMORY.add(AFFIX_DATA.generate(t, 'boss', '', 4))) n++; else full = true;
-      }
-      if (window.TITLE && TITLE.grantWeapon) for (const t of MASTERY.TYPES) TITLE.grantWeapon(t, false);
-      try { if (window.TITLE && TITLE.refreshPreparation) TITLE.refreshPreparation(); } catch (e) {}
-      const msg = full ? `仓库满了（${items.length}/50），先熔炼或卖掉一些武器` : n ? `熟练度已满；新给传说武器 ${n} 把` : '熟练度已满；每种武器都已经有传说了';
-      if (typeof say === 'function') say(msg, 3);
-      tipLine(msg);   // 在主界面/整备页 say 看不到，面板上也提示
-    });
     revive.classList.add('dbgWide');
-    const trial = document.createElement('div'); trial.className = 'dbgTrial';
-    const tlabel = document.createElement('span'); tlabel.textContent = '试用：'; trial.appendChild(tlabel);
-    for (const [id, label] of [['halberd', '长戟'], ['bow', '汉弓'], ['blade', '大刀']]) {
-      btn(trial, label, 'alt', () => {
-        if (window.TITLE) { TITLE.skip(); if (TITLE.grantWeapon) TITLE.grantWeapon(id, true); }
-        if (window.ROOM) ROOM.skip();
-        if (typeof setW === 'function') setW(id);
-      });
-    }
-    heroGroup.appendChild(trial);
 
     const c1 = addGroup('chapter1', '第一章');
     btn(c1, 'Boss 一阶段', 'alt', () => jumpBoss(false));
