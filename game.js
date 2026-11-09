@@ -1085,6 +1085,8 @@ function draw() {
   ctx.setTransform(DPR, 0, 0, DPR, SA.l * DPR, 0); Boss.hud(W / DPR - SA.l - SA.r); if (window.ZJ) ZJ.hud(W / DPR - SA.l - SA.r); if (window.CH2OPEN) CH2OPEN.hud(W / DPR - SA.l - SA.r, H / DPR);
   ctx.setTransform(DPR, 0, 0, DPR, SA.l * DPR, 0); const HW = W / DPR - SA.l - SA.r, HH = H / DPR;
   const bw = Math.min(260, HW * .4);
+  const _nh = window.SURV && SURV.newHud && SURV.newHud();   // 三国终章战斗：血条改画在屏幕底部（survive.js）
+  if (!_nh) {
   ctx.fillStyle = 'rgba(20,14,30,.7)'; ctx.fillRect(14, 64, bw + 6, 18);
   ctx.fillStyle = '#d23c30'; ctx.fillRect(17, 67, bw * Math.max(0, Math.min(maxHeroHp(), hero.hp)) / maxHeroHp(), 12);
   // 血条旁边显示玩家名字（标题页输入的）
@@ -1094,6 +1096,7 @@ function draw() {
     const nw = ctx.measureText(pnm).width;
     ctx.fillStyle = 'rgba(20,14,30,.7)'; ctx.fillRect(14 + bw + 6, 64, nw + 14, 18);
     ctx.fillStyle = '#ffd86e'; ctx.fillText(pnm, 14 + bw + 13, 78);
+  }
   }
   // 用时：顶部正中的小牌子（原来那一行"击倒/武器/用时"已去掉）
   if (!(window.XIAOCHANG && XIAOCHANG.active())) {
