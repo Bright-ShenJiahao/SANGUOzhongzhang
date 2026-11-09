@@ -3,13 +3,13 @@
 (() => {
   const ATTR = ['体魄', '短兵', '长兵', '身法', '运气', '悟性'];
   const STAT = {   // 出身的属性条（先只是展示，数值以后再接）
-    nongfu: [6, 4, 2, 2, 3, 2], xiaozu: [4, 3, 4, 3, 2, 2], liehu: [3, 3, 1, 5, 3, 2], mafu: [4, 3, 2, 4, 2, 3], shusheng: [2, 1, 1, 2, 3, 6],
+    nongfu: [6, 4, 2, 2, 3, 2], xiaozu: [4, 3, 4, 3, 2, 2], liehu: [3, 3, 1, 5, 3, 2], shusheng: [2, 1, 1, 2, 3, 6],
   };
   const FIELDS = [
     { name: '黄巾之乱 · 村口', note: '撑过 20 波黄巾，第 10/14/17/20 波有敌将。', open: true },
     { name: '黄巾决战 · 祭台', note: '第二章，暂未开放。', open: false },
   ];
-  const ICON = { nongfu: '农', xiaozu: '卒', liehu: '猎', mafu: '马', shusheng: '书' };
+  const ICON = { nongfu: '农', xiaozu: '卒', liehu: '猎', shusheng: '书' };
   let el = null, field = 0, name = '无名';
   const CSS = `
   #kaiju{position:fixed;inset:0;z-index:10005;background:radial-gradient(ellipse at 50% 30%,#2a1c12,#120c08 75%);color:#f2e4c8;

@@ -226,7 +226,6 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     nongfu: { name: '农夫', tag: '短兵器', skill: 'hengsao', desc: '庄稼汉，挨得住打。受到伤害 -20%', take: .8 },
     xiaozu: { name: '小卒', tag: '长兵器', skill: 'lianzhan', desc: '行伍出身，出手利落。招式前摇 -20%', wu: .8 },
     liehu: { name: '猎户', tag: '远程', skill: 'daobo', desc: '山里跑惯了。移动速度 +12%', move: 1.12 },
-    mafu: { name: '马夫', tag: '骑乘', skill: 'zhendi', desc: '身手灵活。翻滚冷却 -30%', roll: .7 },
     shusheng: { name: '书生', tag: '法术', skill: '', desc: '法术招式还没做，暂未开放', locked: true },
   };
   let origin = 'nongfu';

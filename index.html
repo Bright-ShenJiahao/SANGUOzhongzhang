@@ -63,7 +63,7 @@ body.szz-pro #help{display:none}
 .x-back{min-height:34px!important}
 }
 #rot small{display:block;margin-top:10px;font-size:14px;font-weight:600;color:#c9b691;line-height:1.6}
-</style><link rel="preload" href="pack/fonts/result.woff2?v=053a8a4014" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=053a8a4014)format("woff2");font-display:swap}</style></head><body>
+</style><link rel="preload" href="pack/fonts/result.woff2?v=6f969f2cca" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=6f969f2cca)format("woff2");font-display:swap}</style></head><body>
 <div id="bootSplash" style="position:fixed;inset:0;z-index:99999;background:#1a1020;color:#f1d59a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;font:18px system-ui,sans-serif;text-align:center;padding:24px">
 <strong id="bootText">正在加载…</strong><button id="bootRefresh" hidden onclick="location.reload()" style="font:16px system-ui,sans-serif;padding:12px;color:#ffe0a0;background:#583b28;border:1px solid #ba9158;border-radius:6px">网络较慢，点此刷新</button><small id="bootError" style="overflow-wrap:anywhere;max-width:90vw"></small></div>
 <script>
@@ -77,7 +77,7 @@ if(location.protocol==='https:'&&!/[?&]debug(?:=|&|$)/.test(location.search)&&'s
 })();
 // 自动更新：打开游戏、或从后台切回来时，查一下线上有没有新版本；有就在标题/整备页自动刷新（战斗中不打扰）
 (function(){
-var BUILD='aea02e25388d',busy=false;
+var BUILD='a575fe1ab217',busy=false;
 if(location.protocol!=='https:'||/[?&]debug(?:=|&|$)/.test(location.search))return;
 function check(){
   if(busy)return;
@@ -4237,13 +4237,13 @@ let blessFx = []; // 方士施法成功的黄圈
 (() => {
   const ATTR = ['体魄', '短兵', '长兵', '身法', '运气', '悟性'];
   const STAT = {   // 出身的属性条（先只是展示，数值以后再接）
-    nongfu: [6, 4, 2, 2, 3, 2], xiaozu: [4, 3, 4, 3, 2, 2], liehu: [3, 3, 1, 5, 3, 2], mafu: [4, 3, 2, 4, 2, 3], shusheng: [2, 1, 1, 2, 3, 6],
+    nongfu: [6, 4, 2, 2, 3, 2], xiaozu: [4, 3, 4, 3, 2, 2], liehu: [3, 3, 1, 5, 3, 2], shusheng: [2, 1, 1, 2, 3, 6],
   };
   const FIELDS = [
     { name: '黄巾之乱 · 村口', note: '撑过 20 波黄巾，第 10/14/17/20 波有敌将。', open: true },
     { name: '黄巾决战 · 祭台', note: '第二章，暂未开放。', open: false },
   ];
-  const ICON = { nongfu: '农', xiaozu: '卒', liehu: '猎', mafu: '马', shusheng: '书' };
+  const ICON = { nongfu: '农', xiaozu: '卒', liehu: '猎', shusheng: '书' };
   let el = null, field = 0, name = '无名';
   const CSS = `
   #kaiju{position:fixed;inset:0;z-index:10005;background:radial-gradient(ellipse at 50% 30%,#2a1c12,#120c08 75%);color:#f2e4c8;
@@ -6466,7 +6466,6 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     nongfu: { name: '农夫', tag: '短兵器', skill: 'hengsao', desc: '庄稼汉，挨得住打。受到伤害 -20%', take: .8 },
     xiaozu: { name: '小卒', tag: '长兵器', skill: 'lianzhan', desc: '行伍出身，出手利落。招式前摇 -20%', wu: .8 },
     liehu: { name: '猎户', tag: '远程', skill: 'daobo', desc: '山里跑惯了。移动速度 +12%', move: 1.12 },
-    mafu: { name: '马夫', tag: '骑乘', skill: 'zhendi', desc: '身手灵活。翻滚冷却 -30%', roll: .7 },
     shusheng: { name: '书生', tag: '法术', skill: '', desc: '法术招式还没做，暂未开放', locked: true },
   };
   let origin = 'nongfu';
