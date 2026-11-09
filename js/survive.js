@@ -51,7 +51,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       const nd = RT.node, L = ROUTE.layers(), N0 = ROUTE.waves(nd);
       const lvOf = k => Math.max(1, Math.min(WAVES, 1 + Math.floor(((nd.layer - 1 + (k - 1) / N0) / L) * WAVES) + (nd.type === 'elite' ? 2 : 0) + (nd.type === 'boss' ? 2 : 0)));
       W.lv0 = lvOf(1); W.lv1 = lvOf(N0); W.tot = 0; for (let k = 1; k <= N0; k++) W.tot += (WAVE_T[lvOf(k) - 1] || 60) * ROUTE.TIME_K;
-      W.tot = nd.type === 'boss' ? 180 : nd.type === 'elite' ? Math.min(240, Math.max(120, W.tot)) : Math.max(90, W.tot);   // 首领固定 3 分钟；精英 2~4 分钟；普通战斗至少 90 秒
+      W.tot = nd.type === 'boss' ? 180 : nd.type === 'elite' ? 85 + 25 * nd.layer / L : 50 + 15 * nd.layer / L;   // 用户定 11/09：首领 3 分钟；精英约 1.5~2 分钟；普通战斗约 50~65 秒（18 层）
       W.k = 1; W.N = 1; W.n = W.lv0; W.lvF = W.lv0; W.t = 0; W.retreat = 0; W.spawnT = 0; W.batchT = 0; W.bossDone = false;
       say(ROUTE.name(nd), 1.6); return;
     }
@@ -84,7 +84,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     if (RT.on) { W.lvF = W.lv0 + (W.lv1 - W.lv0) * Math.min(1, W.t / W.tot); W.n = Math.round(W.lvF); }   // 难度随时间平滑上升
     if (bossCount() && !W.bossDone && W.t >= 1) { W.bossDone = true; for (let i = 0; i < bossCount(); i++) edgeSpawn('elite', true); }
     // 补兵：开场慢慢涌进来（前 60% 时间里目标人数从少爬到满）
-    const ramp = RT.on ? WT() * .45 : Math.min(30, WT() * .6), r0 = RT.on ? .4 : .08, rf = Math.min(1, r0 + (1 - r0) * W.t / ramp), tn = Math.ceil(targetN() * rf);
+    const ramp = RT.on ? WT() * .35 : Math.min(30, WT() * .6), r0 = RT.on ? .5 : .08, rf = Math.min(1, r0 + (1 - r0) * W.t / ramp), tn = Math.ceil(targetN() * rf);
     const cnt = alive().filter(z => !z.survBoss).length;
     if (cnt < tn * .5) { if ((W.spawnT -= dt) <= 0) { edgeSpawn(pickType()); W.spawnT = RT.on ? .22 - .1 * rf : rf < 1 ? .55 - .3 * rf : .2; } }
     else if ((W.batchT -= dt) <= 0 && cnt < tn) { const k = Math.min(tn - cnt, RT.on ? 3 + (Math.random() * 3 | 0) : rf < 1 ? 1 + (Math.random() * 2 | 0) : 3 + (Math.random() * 3 | 0)); for (let i = 0; i < k; i++) edgeSpawn(pickType()); W.batchT = RT.on ? R(.7, 1.1) : R(1.6, 2.4); }
@@ -288,8 +288,8 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     const nd = RT.node; W.started = false; zs.length = 0; eshots.length = 0;
     if (nd.type === 'boss') { won = true; return; }
     const back = () => { W.pick = false; ROUTE.done(nd); };
-    if (nd.type === 'elite') { say('精锐已破！', 1.4); heal(maxHp()); offerReward(3, back); }
-    else { heal(2); offerReward(2, back); }
+    if (nd.type === 'elite') { say('精锐已破！', 1.4); heal(maxHp()); offerReward(2, back); }
+    else { heal(1); offerReward(1, back); }
   }
   function beginNode(nd) {
     RT.node = nd; W.N = ROUTE.waves(nd); W.started = true; W.between = 0; W.pick = false; S.wind = null; S.recov = null; S.later = []; bolts.length = 0; zones.length = 0; fx.length = 0;
