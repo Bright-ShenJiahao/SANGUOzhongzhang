@@ -23,12 +23,31 @@
   ];
   const RT = { on: false, node: null, dmg: 1, cd: 1, move: 1, take: 1 };   // 路线模式（?route）：当前节点、磨刀加成
 const DM = () => RT.dmg;
-const bossCount = () => RT.on ? (RT.node && W.k === W.N ? (RT.node.type === 'boss' ? 3 : RT.node.type === 'elite' ? 1 : 0) : (RT.node && RT.node.type === 'boss' && W.k === 1 ? 1 : 0)) : (BOSS_WAVES[W.n] || 0);
+const bossCount = () => RT.on ? (RT.node ? (RT.node.type === 'boss' ? 2 : RT.node.type === 'elite' ? 1 : 0) : 0) : (BOSS_WAVES[W.n] || 0);
 const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: false, between: 0, started: false };
   const WT = () => RT.on ? W.tot : (WAVE_T[Math.min(W.n, WAVES) - 1] || 60);   // 路线模式：一个节点是一整场连续的仗，时长 = 原来几波加起来
   const CNT_BASE = 28, CNT_STEP = 6.2, CNT_MAX = 180;   // 路线模式：场上同屏人数 = 28 + 6.2×(难度级-1)，1 级约 28 只，10 级约 84，20 级约 146；难度级随时间连续上升，所以人数是一路慢慢涨
   const targetN = () => RT.on ? Math.min(CNT_MAX, Math.round(CNT_BASE + CNT_STEP * ((W.lvF || 1) - 1))) : Math.max(8, Math.round((WAVE_N[W.n - 1] || 100) * N_SCALE));
+  // ---------- 路线模式：按「段」和「节点标签」出兵 ----------
+  // 单位简写：g 喽啰 b 刀手 s 投石 a 弓箭 p 方士 e 老卒 | 第二章兵（贴图没加载完时用刀手/老卒顶替）：h 大刀 d 盾 q 枪 l 力士
+  const U = { g: ['grunt'], b: ['blade'], s: ['slinger'], a: ['archer'], p: ['priest'], e: ['elite'], h: ['yellow-heavy', 'blade'], d: ['yellow-shield', 'blade'], q: ['yellow-spear', 'blade'], l: ['yellow-golem', 'elite'] };
+  const POOL = [   // [段][标签] = 单位:权重
+    { melee: { g: 100, b: 20 }, raid: { b: 70, g: 40 }, range: { g: 50, s: 50 }, shield: { b: 50, g: 40, s: 15 }, patrol: { g: 60, b: 40, e: 5 } },
+    { melee: { g: 60, b: 50, h: 20 }, raid: { b: 50, h: 50, g: 20 }, range: { b: 30, s: 40, a: 30 }, shield: { d: 50, h: 30, s: 20 }, patrol: { b: 50, h: 40, e: 8 } },
+    { melee: { q: 60, b: 40, g: 30 }, raid: { b: 40, h: 40, q: 30 }, range: { q: 30, a: 60, s: 30 }, shield: { d: 40, q: 50, a: 20 }, patrol: { q: 50, h: 40, e: 8, l: 4 } },
+    { melee: { h: 50, q: 50, g: 20 }, raid: { h: 60, q: 40, b: 20 }, range: { h: 25, a: 50, s: 30, p: 10 }, shield: { d: 50, q: 40, a: 20, p: 10 }, patrol: { h: 50, q: 40, e: 10, l: 6 } },
+    { melee: { h: 50, q: 50, g: 20 }, raid: { h: 60, q: 40, b: 20 }, range: { h: 25, a: 50, s: 30, p: 10 }, shield: { d: 50, q: 40, a: 20, p: 10 }, patrol: { h: 50, q: 40, e: 10, l: 6 } },
+  ];
+  let c2ok = false;
+  const unit = k => { const u = U[k]; return c2ok || !u[1] ? u[0] : u[1]; };
+  const secOf = nd => Math.min(4, ((nd.layer - 1) / 4) | 0);
   function pickType() {
+    if (RT.on && RT.node) {
+      const nd = RT.node, w = (POOL[secOf(nd)][nd.tag || 'melee']) || POOL[0].melee, ks = Object.keys(w);
+      let sum = 0; for (const k of ks) sum += w[k]; let r = Math.random() * sum;
+      for (const k of ks) if ((r -= w[k]) <= 0) return unit(k);
+      return 'grunt';
+    }
     const pool = [];
     for (const s of SECTS) if (W.n >= s.from && W.n <= s.to) pool.push([s.u, W.n - s.from >= 1 ? 100 : 60]);
     if (W.n >= 4) pool.push(['elite', 4 + W.n]);   // 精英（老卒）随波次越来越常见
@@ -36,14 +55,32 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     for (const [u, w] of pool) if ((r -= w) <= 0) return u;
     return 'grunt';
   }
-  function edgeSpawn(type, boss) {
+  // 段首领 / 最终首领 / 精锐小首领：t 兵种、fb 贴图没加载时的替身、hp 基础血量（0 = 用兵种自带 × m）、sc 放大
+  const BOSSES = [
+    [{ t: 'yellow-golem', fb: 'elite', name: '程远志', hp: 70, sc: 1.3 }, { t: 'elite', name: '邓茂', hp: 40, sc: 1.15 }],
+    [{ t: 'yellow-heavy', fb: 'elite', name: '波才', hp: 80, sc: 1.35 }, { t: 'yellow-spear', fb: 'elite', name: '何仪', hp: 50, sc: 1.15 }],
+    [{ t: 'yellow-heavy', fb: 'elite', name: '管亥', hp: 95, sc: 1.4 }, { t: 'yellow-spear', fb: 'elite', name: '张曼成', hp: 55, sc: 1.2 }],
+    [{ t: 'zhang_liang', fb: 'elite', name: '张梁', m: 1.4 }, { t: 'zhang_bao', fb: 'elite', name: '张宝', m: 1.5 }],
+    [{ t: 'zhang_jiao', fb: 'elite', name: '张角', m: 1.0 }, { t: 'yellow-heavy', fb: 'elite', name: '马元义', hp: 90, sc: 1.4 }],
+  ];
+  function spawnNamed() {
+    const nd = RT.node;
+    if (nd.type === 'elite') {
+      const sec = secOf(nd), t = sec >= 2 && c2ok ? 'yellow-golem' : 'elite';
+      edgeSpawn(t, { name: '精锐头目', hp: t === 'elite' ? 40 : 55, sc: 1.2 }); return;
+    }
+    const list = BOSSES[nd.final ? 4 : secOf(nd)];
+    for (const b of list) edgeSpawn(c2ok || !b.fb ? b.t : b.fb, b);
+  }
+  function edgeSpawn(type, boss) {   // boss：true = 老卒式 ×4 血；对象 = 命名首领 {name, hp 或 m, sc}
     const vw = viewW(); let side = Math.random() < .5 ? -1 : 1, x, y;
     if (window.ARENA && ARENA.on()) { const p = ARENA.edge(); x = p.x; y = p.y; side = x < hero.x ? -1 : 1; }   // 俯视竞技场：四周都刷
     else { x = side < 0 ? cam.x + 6 : cam.x + vw - 6; x = Math.max(arenaL + 14, Math.min(lockR - 14, x)); y = R(M.top + 6, M.bot - 6); }
     spawn(type, x, y);
     const z = zs[zs.length - 1]; z.f = -side; z.survMul = 1 + HP_SCALE * (W.n - 1);
     z.hp *= z.survMul;
-    if (boss) { z.hp *= 4; z.sc = (z.sc || 1) * 1.25; z.survBoss = true; floaters.push({ x: z.x, y: z.y - 60, t: 0, txt: '敌将出阵！', color: '#ff6a4a' }); }
+    if (boss && boss !== true) { const hb = boss.hp || z.T.hp * (boss.m || 1); z.hp = hb * z.survMul; z.maxHp = z.hp; z.sc = (z.sc || 1) * (boss.sc || 1); z.survBoss = true; z.bossLabel = boss.name; floaters.push({ x: z.x, y: z.y - 60, t: 0, txt: boss.name + ' 出阵！', color: '#ff6a4a' }); }
+    else if (boss) { z.hp *= 4; z.sc = (z.sc || 1) * 1.25; z.survBoss = true; floaters.push({ x: z.x, y: z.y - 60, t: 0, txt: '敌将出阵！', color: '#ff6a4a' }); }
     return z;
   }
   function startWave(n) {
@@ -51,7 +88,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       const nd = RT.node, L = ROUTE.layers(), N0 = ROUTE.waves(nd);
       const lvOf = k => Math.max(1, Math.min(WAVES, 1 + Math.floor(((nd.layer - 1 + (k - 1) / N0) / L) * WAVES) + (nd.type === 'elite' ? 2 : 0) + (nd.type === 'boss' ? 2 : 0)));
       W.lv0 = lvOf(1); W.lv1 = lvOf(N0); W.tot = 0; for (let k = 1; k <= N0; k++) W.tot += (WAVE_T[lvOf(k) - 1] || 60) * ROUTE.TIME_K;
-      W.tot = nd.type === 'boss' ? 180 : nd.type === 'elite' ? 85 + 25 * nd.layer / L : 50 + 15 * nd.layer / L;   // 用户定 11/09：首领 3 分钟；精英约 1.5~2 分钟；普通战斗约 50~65 秒（18 层）
+      W.tot = nd.type === 'boss' ? (nd.final ? 180 : 100) : nd.type === 'elite' ? 85 + 25 * nd.layer / L : 50 + 15 * nd.layer / L;   // 用户定 11/09：首领 3 分钟；精英约 1.5~2 分钟；普通战斗约 50~65 秒（18 层）
       W.k = 1; W.N = 1; W.n = W.lv0; W.lvF = W.lv0; W.t = 0; W.retreat = 0; W.spawnT = 0; W.batchT = 0; W.bossDone = false;
       say(ROUTE.name(nd), 1.6); return;
     }
@@ -82,12 +119,13 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     }
     W.t += dt;
     if (RT.on) { W.lvF = W.lv0 + (W.lv1 - W.lv0) * Math.min(1, W.t / W.tot); W.n = Math.round(W.lvF); }   // 难度随时间平滑上升
-    if (bossCount() && !W.bossDone && W.t >= 1) { W.bossDone = true; for (let i = 0; i < bossCount(); i++) edgeSpawn('elite', true); }
+    if (bossCount() && !W.bossDone && W.t >= 1) { W.bossDone = true; if (RT.on) spawnNamed(); else for (let i = 0; i < bossCount(); i++) edgeSpawn('elite', true); }
     // 补兵：开场慢慢涌进来（前 60% 时间里目标人数从少爬到满）
     const ramp = RT.on ? WT() * .35 : Math.min(30, WT() * .6), r0 = RT.on ? .5 : .08, rf = Math.min(1, r0 + (1 - r0) * W.t / ramp), tn = Math.ceil(targetN() * rf);
     const cnt = alive().filter(z => !z.survBoss).length;
     if (cnt < tn * .5) { if ((W.spawnT -= dt) <= 0) { edgeSpawn(pickType()); W.spawnT = RT.on ? .22 - .1 * rf : rf < 1 ? .55 - .3 * rf : .2; } }
     else if ((W.batchT -= dt) <= 0 && cnt < tn) { const k = Math.min(tn - cnt, RT.on ? 3 + (Math.random() * 3 | 0) : rf < 1 ? 1 + (Math.random() * 2 | 0) : 3 + (Math.random() * 3 | 0)); for (let i = 0; i < k; i++) edgeSpawn(pickType()); W.batchT = RT.on ? R(.7, 1.1) : R(1.6, 2.4); }
+    if (RT.on && RT.node && RT.node.type === 'boss' && W.bossDone && W.t > 3 && !alive().some(z => z.survBoss)) { say(RT.node.final ? '黄巾首领已破！' : '敌将已破！', 1.6); W.t = WT(); }   // 首领战：把场上的敌将都打倒就算赢
     if (W.t >= WT()) endWave();
   }
 
@@ -254,22 +292,23 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     { id: 'gu', name: '铁骨', icon: '骨', color: '#d8c8a8', desc: '受到伤害 -8%', ok: () => RT.take > .55, ap() { RT.take *= .92; } },
     { id: 'chun', name: '回春', icon: '春', color: '#ff9a9a', desc: '立刻回复 40% 血量', ok: () => true, ap() { heal(maxHp() * .4); } },
   ];
-  function rewardOptions() {
+  function rewardOptions(kind) {
     const owned = S.slots.filter(Boolean), free = S.slots.indexOf('') >= 0;
-    const sk = (free ? Object.keys(SK).filter(k => !owned.includes(k) && tierOk(k)) : []).sort(() => Math.random() - .5).slice(0, 2).map(k => ({ kind: 'skill', k, name: SK[k].name, icon: SK[k].icon, color: SK[k].color, desc: (SK[k].tier ? TIERN[SK[k].tier] + '阶 · ' : '') + SK[k].desc }));
+    const sk = (free ? Object.keys(SK).filter(k => !owned.includes(k) && tierOk(k)) : []).sort(() => Math.random() - .5).slice(0, kind === 'skill' ? 3 : 2).map(k => ({ kind: 'skill', k, name: SK[k].name, icon: SK[k].icon, color: SK[k].color, desc: (SK[k].tier ? TIERN[SK[k].tier] + '阶 · ' : '') + SK[k].desc }));
     const pk = PERKS.filter(p => p.ok()).sort(() => Math.random() - .5).map(p => ({ kind: 'perk', p, name: p.name, icon: p.icon, color: p.color, desc: p.desc }));
+    if (kind === 'perk') return pk.slice(0, 3);
     return sk.concat(pk).slice(0, 3).sort(() => Math.random() - .5);
   }
-  function offerReward(n, cb, i) {
+  function offerReward(n, cb, i, kinds) {
     i = i || 1; if (i > n) { W.pick = false; if (cb) cb(); return; }
-    const opts = rewardOptions(); W.pick = true;
+    const kind = kinds && kinds[Math.min(i, kinds.length) - 1], opts = rewardOptions(kind); W.pick = true;
     const old = document.getElementById('survPick'); if (old) old.remove();
     const box = document.createElement('div'); box.id = 'survPick';
-    box.innerHTML = `<div class="p"><h3>战利 · ${n > 1 ? '第 ' + i + '/' + n + ' 次 · ' : ''}三选一</h3><div class="row">${opts.map((o, j) => `<button data-j="${j}"><i style="font-style:normal;font-size:11px;opacity:.7">${o.kind === 'skill' ? '新招式' : '强化'}</i><b style="color:${o.color}">${o.icon}</b><span>${o.name}</span><small>${o.desc}</small></button>`).join('')}</div>${S.slots.indexOf('') >= 0 ? '<p>新招式放进空着的格子，按 1→5 顺序轮流放</p>' : ''}</div>`;
+    box.innerHTML = `<div class="p"><h3>战利 · ${kind === 'skill' ? '招式 · ' : kind === 'perk' ? '强化 · ' : ''}${n > 1 ? '第 ' + i + '/' + n + ' 次 · ' : ''}三选一</h3><div class="row">${opts.map((o, j) => `<button data-j="${j}"><i style="font-style:normal;font-size:11px;opacity:.7">${o.kind === 'skill' ? '新招式' : '强化'}</i><b style="color:${o.color}">${o.icon}</b><span>${o.name}</span><small>${o.desc}</small></button>`).join('')}</div>${S.slots.indexOf('') >= 0 ? '<p>新招式放进空着的格子，按 1→5 顺序轮流放</p>' : ''}</div>`;
     box.querySelectorAll('button').forEach(b => b.onclick = () => {
       const o = opts[+b.dataset.j];
       if (o.kind === 'skill') { const f = S.slots.indexOf(''); if (f >= 0) S.slots[f] = o.k; } else o.p.ap();
-      box.remove(); offerReward(n, cb, i + 1);
+      box.remove(); offerReward(n, cb, i + 1, kinds);
     });
     document.body.appendChild(box);
   }
@@ -286,12 +325,15 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   }
   function nodeClear() {   // 一个节点打完：发奖励，回长卷
     const nd = RT.node; W.started = false; zs.length = 0; eshots.length = 0;
-    if (nd.type === 'boss') { won = true; return; }
+    if (nd.type === 'boss' && nd.final) { won = true; return; }
     const back = () => { W.pick = false; ROUTE.done(nd); };
-    if (nd.type === 'elite') { say('精锐已破！', 1.4); heal(maxHp()); offerReward(2, back); }
-    else { heal(1); offerReward(1, back); }
+    if (nd.type === 'boss') { say('敌将已破！', 1.4); heal(maxHp() * .3); offerReward(2, back, 1, ['skill', 'perk']); }   // 血量是资源：只有首领、营地、疗伤奖励、奇遇才回血
+    else if (nd.type === 'elite') { say('精锐已破！', 1.4); offerReward(2, back, 1, ['skill', 'perk']); }
+    else if (nd.rw === 'heal') { say('包扎伤口', 1.2); heal(maxHp() * .35); back(); }
+    else offerReward(1, back, 1, [nd.rw || 'skill']);
   }
   function beginNode(nd) {
+    if (!c2ok && typeof ensureAssets === 'function') ensureAssets('chapter2', { silent: true }).then(() => { c2ok = true; });
     RT.node = nd; W.N = ROUTE.waves(nd); W.started = true; W.between = 0; W.pick = false; S.wind = null; S.recov = null; S.later = []; bolts.length = 0; zones.length = 0; fx.length = 0;
     zs.length = 0; eshots.length = 0; if (window.ARENA) ARENA.start(ROUTE.mapOf(nd));
     startWave(1);

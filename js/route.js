@@ -9,7 +9,7 @@
   const TIME_K = 1.1;                                   // 路线模式下每波时间缩放（20 波表 ≈21 分钟，12 层约合 30 分钟）
   const ICON = { battle: 0, elite: 1, camp: 2, boss: 3, start: 4, shop: 5, event: 6, chest: 7 };   // 图标表（art/ui/route_icons.webp，4×2，每格 256）
   const MAPN = { field: '打谷场', town: '县城街巷', yz: '黄巾营寨', forest: '林间空地', camp: '营寨腹地', altar: '张角祭坛' };
-  const SECT = [['field', 1, 4, '120,140,80', .13], ['town', 5, 8, '160,115,70', .13], ['forest', 9, 12, '110,130,70', .12], ['camp', 13, 17, '165,70,45', .12], ['altar', 18, 18, '70,55,95', .2]];   // 分段：地图、起止层、淡墨色调
+  const SECT = [['field', 1, 4, '120,140,80', .13], ['town', 5, 8, '160,115,70', .13], ['forest', 9, 12, '110,130,70', .12], ['camp', 13, 16, '165,70,45', .12], ['altar', 17, 18, '70,55,95', .2]];   // 分段：地图、起止层、淡墨色调
   const hov = { n: null };
   const LABEL = { battle: '黄巾游兵', elite: '黄巾精锐', camp: '营地', boss: '张角祭坛', start: '涿郡', event: '奇遇', chest: '宝箱' };
   const EVENTS = [   // 奇遇：几个小抉择，选完不打架直接回长卷
@@ -25,34 +25,62 @@
   const seeded = n => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
 
   // ---------- 生成地图 ----------
+  // 结构（用户定 11/09，仿杀戮尖塔 + 群侠传）：4 段 × 4 层。每段：3 层岔路（4 条路径）→ 汇聚到该段唯一的首领节点 → 下一段从首领再散开。
+  // 第 17 层单个营地，第 18 层最终首领。段内节奏：第 1 层纯近战；第 2 层加远程/盾枪；第 3 层精锐或小营地；第 4 层段首领。
+  const SEGS = 4, SEGLEN = 4;
+  const TAGN = { melee: '流民群', raid: '刀盾队', range: '弓手阵', shield: '盾枪阵', patrol: '精锐巡逻' };
+  const RWN = { skill: '招式', perk: '强化', heal: '疗伤', both: '招式+强化' };
+  const SECBOSS = [['程远志', '邓茂'], ['波才', '何仪'], ['管亥', '张曼成'], ['张梁', '张宝']];
   function gen() {
     const nodes = [], byLayer = [], cells = {};
-    const mk = (l, c, type) => { const n = { id: nodes.length, layer: l, lane: c, type: type || 'battle', next: [], prev: [], jx: seeded(nodes.length + 1) - .5, jy: seeded(nodes.length + 9) - .5 }; nodes.push(n); (byLayer[l] = byLayer[l] || []).push(n); return n; };
+    const mk = (l, c, type) => { const n = { id: nodes.length, layer: l, lane: c, type: type || 'battle', tag: '', rw: '', next: [], prev: [], jx: seeded(nodes.length + 1) - .5, jy: seeded(nodes.length + 9) - .5 }; nodes.push(n); (byLayer[l] = byLayer[l] || []).push(n); return n; };
     const cell = (l, c) => cells[l + ':' + c] || (cells[l + ':' + c] = mk(l, c));
     const start = mk(0, 2, 'start');
     const link = (a, b) => { if (!a.next.includes(b)) { a.next.push(b); b.prev.push(a); } };
     const crosses = (a, b) => nodes.some(o => o.layer === a.layer && o !== a && o.next.some(p => p !== b && p.layer === b.layer && (o.lane - a.lane) * (p.lane - b.lane) < 0));
-    // 4 条路径：每一步同列或相邻列，避免交叉
-    const PATHS = 4, starts = [0, 1, 2, 3, 4].sort(() => rnd() - .5);
-    for (let p = 0; p < PATHS; p++) {
-      let cur = cell(1, starts[p % 5]); link(start, cur);
-      for (let l = 2; l <= LAYERS - 2; l++) {
-        const opts = [-1, 0, 1].map(d => cur.lane + d).filter(c => c >= 0 && c < LANES).sort(() => rnd() - .5);
-        let nx = null;
-        for (const c of opts) { const n = cell(l, c); if (!crosses(cur, n)) { nx = n; break; } }
-        if (!nx) nx = cell(l, cur.lane);
-        link(cur, nx); cur = nx;
+    let from = start;
+    for (let s = 0; s < SEGS; s++) {
+      const l0 = s * SEGLEN + 1, lb = l0 + SEGLEN - 1;
+      const bossN = mk(lb, 2, 'boss'); bossN.sec = s + 1;
+      const lanes = [0, 1, 2, 3, 4].sort(() => rnd() - .5).slice(0, 4);
+      for (const ln of lanes) {
+        let cur = cell(l0, ln); link(from, cur);
+        for (let l = l0 + 1; l < lb; l++) {
+          const opts = [-1, 0, 1].map(d => cur.lane + d).filter(c => c >= 0 && c < LANES).sort(() => rnd() - .5);
+          let nx = null;
+          for (const c of opts) { const n = cell(l, c); if (!crosses(cur, n)) { nx = n; break; } }
+          if (!nx) nx = cell(l, cur.lane);
+          link(cur, nx); cur = nx;
+        }
+        link(cur, bossN);
       }
-      const camp = cell(LAYERS - 1, cur.lane); link(cur, camp);
+      from = bossN;
     }
-    const boss = mk(LAYERS, 2, 'boss');
-    for (const n of byLayer[LAYERS - 1]) { n.type = 'camp'; link(n, boss); }
-    // 节点类型：第 1 层必是战；精英第 4 层以后；营地第 3 层以后；上一层同类特殊节点不连着出现
-    for (let l = 2; l <= LAYERS - 2; l++) for (const n of byLayer[l] || []) {
-      const r = rnd(); let t = 'battle';
-      if (l >= 4 && r < .2) t = 'elite'; else if (l >= 3 && r > .86) t = 'camp'; else if (l >= 3 && r > .78) t = 'event'; else if (l >= 3 && r > .72) t = 'chest'; else if (l === 2 && r > .8) t = 'event';
-      if (t !== 'battle' && n.prev.some(p => p.type === t)) t = 'battle';
-      n.type = t;
+    const camp = mk(LAYERS - 1, 2, 'camp'); link(from, camp);
+    const fin = mk(LAYERS, 2, 'boss'); fin.final = true; fin.sec = 5; link(camp, fin);
+    // 节点类型：按「段内第几层」定节奏
+    const pickRw = () => { const r = rnd(); return r < .4 ? 'skill' : r < .72 ? 'perk' : 'heal'; };
+    for (let l = 1; l < LAYERS - 1; l++) {
+      const k = (l - 1) % SEGLEN + 1, sg = (l - 1) / SEGLEN | 0; if (k === SEGLEN) continue;
+      for (const n of byLayer[l] || []) {
+        const r = rnd(); let t = 'battle';
+        if (k === 1) t = l > 1 && r > .9 ? 'event' : l > 1 && r > .82 ? 'chest' : 'battle';
+        else if (k === 2) t = r < .12 && sg >= 1 ? 'elite' : r < .24 ? 'camp' : r < .34 ? 'event' : r < .4 ? 'chest' : 'battle';
+        else t = r < .5 ? 'elite' : r < .68 ? 'camp' : r < .75 ? 'event' : 'battle';
+        if ((t === 'camp' || t === 'elite') && n.prev.some(p => p.type === t)) t = 'battle';
+        n.type = t;
+      }
+      const lay = byLayer[l] || [];
+      if (lay.length >= 2 && new Set(lay.map(n => n.type)).size === 1) {   // 同层不能全是同一种
+        const n = lay[lay.length - 1], cur = n.type;
+        const alts = k === 1 ? (l > 1 ? ['event', 'chest'] : []) : k === 2 ? ['camp', 'event', 'elite'] : cur === 'elite' ? ['battle'] : ['elite'];
+        const a = alts.filter(x => x !== cur && !(n.prev.some(p => p.type === x) && (x === 'camp' || x === 'elite')));
+        if (a.length) n.type = a[(rnd() * a.length) | 0];
+      }
+      const bat = lay.filter(n => n.type === 'battle');
+      const opt = k === 1 ? ['melee', 'raid'] : ['range', 'shield'];
+      bat.forEach((n, i) => { n.tag = opt[(i + (rnd() < .5 ? 1 : 0)) % 2]; if (bat.length >= 2 && i > 0 && n.tag === bat[i - 1].tag) n.tag = opt.find(x => x !== n.tag); });
+      for (const n of lay) { if (n.type === 'elite') { n.tag = 'patrol'; n.rw = 'both'; } else if (n.type === 'battle') n.rw = l === 1 ? (rnd() < .6 ? 'skill' : 'perk') : pickRw(); }
     }
     return { nodes, byLayer, start };
   }
@@ -70,6 +98,7 @@
     const c = lo + (n.lane + n.jx * .35) / (LANES - 1) * (hi - lo) + n.jy * 10;
     return port() ? { x: c, y: H - m } : { x: m, y: c };
   }
+  const nlabel = n => !n ? '' : n.type === 'boss' ? (n.final ? '张角祭坛' : SECBOSS[n.sec - 1][0] + ' 营垒') : (n.tag && TAGN[n.tag]) || LABEL[n.type];
   const radius = n => n.type === 'boss' ? 42 : n.type === 'elite' ? 30 : n.type === 'start' ? 28 : 26;
   const reachable = n => !!run && run.cur.next.includes(n);
   const visited = n => !!run && run.visited.has(n);
@@ -230,12 +259,13 @@
     icon(n.type, R * 2.0, vis || (!reach && !cur));
     g.globalAlpha = 1; g.shadowBlur = 0; g.shadowColor = 'transparent'; g.shadowOffsetY = 0;
     if (vis && !cur) { g.beginPath(); g.arc(R * .62, -R * .62, 7, 0, 7); g.fillStyle = CINNABAR; g.fill(); g.strokeStyle = PAPER; g.lineWidth = 1.6; g.beginPath(); g.moveTo(R * .62 - 3, -R * .62); g.lineTo(R * .62 - .8, -R * .62 + 2.6); g.lineTo(R * .62 + 3.4, -R * .62 - 2.6); g.stroke(); }
+    if (n.rw && !vis) { const bc = { skill: ['招', '#3b6ea8'], perk: ['强', '#a8662a'], heal: ['疗', '#3f8a4a'], both: ['双', '#7a3a8a'] }[n.rw]; g.beginPath(); g.arc(R * .7, R * .7, 9, 0, 7); g.fillStyle = bc[1]; g.fill(); g.strokeStyle = PAPER; g.lineWidth = 1.5; g.stroke(); g.fillStyle = '#fff'; g.font = `bold 11px ${FONT}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(bc[0], R * .7, R * .7 + 1); }
     g.restore();
     // 名字：可走的节点、当前、Boss 常显；其他鼠标悬停才显
     if ((reach && !port()) || cur || n.type === 'boss' || hov.n === n) tag(p, R, n, hov.n === n || cur || n.type === 'boss');
   }
   function tag(p, R, n, full) {
-    const l1 = n.type === 'start' ? '涿郡' : LABEL[n.type], l2 = n.type === 'start' || !full ? '' : MAPN[MAP_OF(n.layer)] + (n.type === 'camp' ? ' · 歇息' : '');
+    const l1 = n.type === 'start' ? '涿郡' : nlabel(n), l2 = n.type === 'start' || !full ? '' : MAPN[MAP_OF(n.layer)] + (n.type === 'camp' ? ' · 歇息' : n.rw ? ' · 奖励 ' + RWN[n.rw] : '');
     g.save(); g.font = `bold 15px ${FONT}`; const w1 = g.measureText(l1).width; g.font = `12px ${FONT}`; const w2 = l2 ? g.measureText(l2).width : 0;
     const bw = Math.max(w1, w2) + 18, bh = l2 ? 38 : 24; let x = p.x - bw / 2, y = p.y + R + 10;
     if (y + bh > H - 6) y = p.y - R - 10 - bh; x = Math.max(6, Math.min(W - bw - 6, x));
@@ -309,12 +339,14 @@
   }
 
   if (ON) { const poll = () => { if (pending && (!window.TITLE || TITLE.mode() === 'game')) { pending = false; open(); } requestAnimationFrame(poll); }; requestAnimationFrame(poll); }   // 真正进游戏（不是在标题页）才打开长卷
-  const MAP_OF = l => l <= 4 ? 'field' : l <= 8 ? 'town' : l <= 12 ? 'forest' : l <= 17 ? 'camp' : 'altar';   // 第 1~4 层打谷场，5~8 县城，9~12 林间空地，13~17 营寨腹地，18 张角祭坛
+  const MAP_OF = l => l <= 4 ? 'field' : l <= 8 ? 'town' : l <= 12 ? 'forest' : l <= 16 ? 'camp' : 'altar';   // 第 1~4 层打谷场，5~8 县城，9~12 林间空地，13~17 营寨腹地，18 张角祭坛
   window.ROUTE = {
     mapOf: n => MAP_OF(n.layer),
     on: () => ON, TIME_K, layers: () => LAYERS,
     waves: n => WAVES_OF[n.type] || 3,
-    name: n => n ? LABEL[n.type] : '',
+    name: n => nlabel(n),
+    secBoss: n => n && n.final ? [['张角', 'zhang_jiao'], ['马元义', '']] : n && n.sec ? SECBOSS[n.sec - 1] : [],
+    tagOf: n => n.tag,
     shown: () => shown || pending,
     start() { run = { ...gen(), visited: new Set() }; run.cur = run.start; run.visited.add(run.start); pending = true; if (shown) close(); },
     done, close, choose,
