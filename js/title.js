@@ -1332,6 +1332,7 @@
     draw: () => draw(),                          // 返回 true = 这一帧由标题界面接管
     playerName: () => S.name,
     hardMode: () => hardMode,
+    setHard: v => { writeNovice(!!v); if (dom.noviceInput) dom.noviceInput.checked = !!v; },
     noviceMode: () => !hardMode,
     hasCleared: (chapter = 1, name = S.name) => hasCleared(name, chapter),
     markCleared: (chapter = 1, name = S.name) => markCleared(name, chapter),
