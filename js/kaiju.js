@@ -1,5 +1,5 @@
 // 开局配置（三国终章，用户定 11/09）：照三国幸存者的三栏布局。
-// 左：称号 / 势力 / 出身；中：所选战场；右：兵籍牒（属性 + 起手招式）。整军备战不要了。
+// 左：称号 / 势力 / 出身；中：所选战场；右：兵籍牒（属性 + 起手武艺）。整军备战不要了。
 (() => {
   const WEP = [['dao', '刀', true], ['jian', '剑'], ['chui', '锤'], ['qiang', '枪'], ['guandao', '关刀'], ['gong', '弓']];   // 兵器路数（11/11）：只有刀有美术，其余上锁
   let axSel = -1;
@@ -8,7 +8,7 @@
     { name: '董卓乱京', sub: '第二章 · 中平六年', note: '西凉铁骑入洛阳，京城大乱。第二章 · 暂未开放', open: false, pic: 'art/ui/kaiju/field2.webp' },   // 11/11 用户定：先放出来，但不能选
   ];
   const OGI = { nongfu: 'art/ui/kaiju/og_nongfu.webp', xiaozu: 'art/ui/kaiju/og_xiaozu.webp', liehu: 'art/ui/kaiju/og_liehu.webp', shusheng: 'art/ui/kaiju/og_shusheng.webp' };
-  const SKI = { hengsao: 'art/ui/kaiju/sk_hengsao.webp', daobo: 'art/ui/kaiju/sk_daobo.webp', huima: 'art/ui/kaiju/sk_huima.webp', daolun: 'art/ui/kaiju/sk_daolun.webp' };   // 招式图标（11/11 Gemini）
+  const SKI = { hengsao: 'art/ui/kaiju/sk_hengsao.webp', daobo: 'art/ui/kaiju/sk_daobo.webp', huima: 'art/ui/kaiju/sk_huima.webp', daolun: 'art/ui/kaiju/sk_daolun.webp' };   // 武艺图标（11/11 Gemini）
   const PIC = { bg: 'art/ui/kaiju/bg.webp', field1: 'art/ui/kaiju/field1.webp', std: 'art/ui/kaiju/diff_std.webp', hard: 'art/ui/kaiju/diff_hard.webp', plate: 'art/ui/kaiju/plate.webp' };
   let el = null, field = 0, name = '无名';
   // 11/11 改版（用户给了美术）：宣纸水墨背景 + 深色木框面板压在纸上；出身/难度做成「图标 + 名字 + 一句话」卡片
@@ -104,7 +104,7 @@
           <h4>势力</h4><select disabled><option>普通乡勇　增：无；减：无</option></select>
           <h4 style="margin-top:10px">出身</h4>
           <div class="og">${Object.keys(O).map(k => `<button data-o="${k}" class="card ${k === cur ? 'on' : ''} ${O[k].locked ? 'lock' : ''}"><div class="ico" ${ic(OGI[k] || '')}></div><span><b>${O[k].name}</b><small>${O[k].locked ? '🔒 暂未开放' : (O[k].desc || '').split('。')[0]}</small></span></button>`).join('')}</div>
-          <div class="ogd"><b>${o.name}</b><span class="tag">${o.tag}</span><p>${o.desc}</p><p>起手招式：<b style="font-size:calc(13px*var(--k));color:${sk ? sk.color : '#fff'}">${sk ? sk.name : '—'}</b>${sk ? '（' + sk.desc + '）' : ''}</p></div>
+          <div class="ogd"><b>${o.name}</b><span class="tag">${o.tag}</span><p>${o.desc}</p><p>起手武艺：<b style="font-size:calc(13px*var(--k));color:${sk ? sk.color : '#fff'}">${sk ? sk.name : '—'}</b>${sk ? '（' + sk.desc + '）' : ''}</p></div>
           <h4 style="margin-top:10px">兵器路数</h4>
           <div class="wp">${WEP.map(w => `<button data-w="${w[0]}" class="${w[2] ? 'on' : 'lock'}" title="${w[2] ? '' : '暂未开放'}">${w[1]}</button>`).join('')}</div>
           <h4 style="margin-top:10px">难度</h4>
@@ -116,10 +116,10 @@
           <h4 style="margin-top:8px">属性</h4>
           ${ai.map((r, i) => `<div class="bar ${i === axSel ? 'sel' : ''}" data-a="${i}" title="${r[3]}"><span>${r[0]}</span><i><u style="width:${r[1] * 14}%"></u></i><span>${r[1]}</span><span class="ax">${r[2]}</span></div>`).join('')}
           <div class="axd">${axSel >= 0 && ai[axSel] ? ai[axSel][0] + '：' + ai[axSel][3] : '点属性看说明（3 为常人水平）'}</div>
-          <h4 style="margin-top:8px">起手招式</h4>
+          <h4 style="margin-top:8px">起手武艺</h4>
           <div class="sk">${[0, 1, 2, 3, 4].map(i => i === 0 && sk ? (SKI[o.skill] ? `<div class="has" title="${sk.name}" ${ic(SKI[o.skill])}></div>` : `<div class="has" title="${sk.name}">${sk.icon}</div>`) : '<div></div>').join('')}</div>
-          ${sk ? `<div class="skd"><b style="color:${sk.color}">${sk.name}</b>　${sk.desc}<br>单刀招式 · 受「短兵」加成 · 自动出手</div>` : ''}
-          <div class="hint" style="margin-bottom:6px">起手只有 1 个招式，其余在路上习得；5 格按 1→5 依次自动放。</div>
+          ${sk ? `<div class="skd"><b style="color:${sk.color}">${sk.name}</b>　${sk.desc}<br>单刀武艺 · 受「短兵」加成 · 自动出手</div>` : ''}
+          <div class="hint" style="margin-bottom:6px">起手只有 1 个武艺，其余在路上习得；5 格按 1→5 依次自动放。</div>
           <h4 style="margin-top:8px">行囊</h4>
           <div class="bag"><div class="has" style="background-image:url('art/ui/kaiju/bag.webp')" title="盘缠"><i>0</i></div>${'<div></div>'.repeat(9)}</div>
           <div class="axd">路上拾得的物品会放在这里（物品系统制作中）</div>

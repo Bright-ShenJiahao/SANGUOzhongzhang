@@ -14,8 +14,8 @@
   const LABEL = { battle: '黄巾游兵', elite: '黄巾精锐', camp: '营地', boss: '张角祭坛', start: '涿郡', event: '奇遇', chest: '宝箱' };
   const EVENTS = [   // 奇遇：几个小抉择，选完不打架直接回长卷
     { t: '破庙神像', d: '路边一座破庙，神像前还摆着供品。', o: [['上香祈福', '回复 40% 血量', 'pray'], ['搜刮供品', '失去 20% 血量，换一次战利三选一', 'loot']] },
-    { t: '路边老兵', d: '一个断了腿的老兵坐在树下，招呼你过去。', o: [['请他喝酒', '招式伤害 +8%', 'wine'], ['向他求教', '一次战利三选一', 'learn']] },
-    { t: '溪边磨石', d: '溪水边有一块平整的磨刀石。', o: [['磨刀', '招式伤害 +10%', 'sharpen'], ['歇脚', '回复 30% 血量', 'rest']] },
+    { t: '路边老兵', d: '一个断了腿的老兵坐在树下，招呼你过去。', o: [['请他喝酒', '武艺伤害 +8%', 'wine'], ['向他求教', '一次战利三选一', 'learn']] },
+    { t: '溪边磨石', d: '溪水边有一块平整的磨刀石。', o: [['磨刀', '武艺伤害 +10%', 'sharpen'], ['歇脚', '回复 30% 血量', 'rest']] },
   ];
   const FONT = '"MaShanZheng","STKaiti","KaiTi","Songti SC",serif';
   const UI = '"PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif';   // 小字用黑体加粗，毛笔字只用在标题和节点名（11/11：字太小太细）
@@ -33,7 +33,7 @@
   // 第 17 层单个营地，第 18 层最终首领。段内节奏：第 1 层纯近战；第 2 层加远程/盾枪；第 3 层精锐或小营地；第 4 层段首领。
   const SEGS = 4, SEGLEN = 4;
   const TAGN = { melee: '流民群', raid: '刀盾队', range: '弓手阵', shield: '盾枪阵', patrol: '精锐巡逻' };
-  const RWN = { skill: '学一个新招式', perk: '学一门功法', heal: '包扎回血', both: '招式 + 功法' };
+  const RWN = { skill: '学一个新武艺', perk: '学一门心法', heal: '包扎回血', both: '武艺 + 心法' };
   const SECBOSS = [['程远志', '邓茂'], ['波才', '何仪'], ['管亥', '张曼成'], ['张梁', '张宝']];
   function gen() {
     const nodes = [], byLayer = [], cells = {};
@@ -60,7 +60,7 @@
       }
       from = bossN;
     }
-    const camp = mk(LAYERS - 1, 2, 'camp'); link(from, camp);
+    const camp = mk(LAYERS - 1, 2, 'event'); link(from, camp);
     const fin = mk(LAYERS, 2, 'boss'); fin.final = true; fin.sec = 5; link(camp, fin);
     // 节点类型：按「段内第几层」定节奏
     const pickRw = () => { const r = rnd(); return r < .4 ? 'skill' : r < .72 ? 'perk' : 'heal'; };
@@ -68,23 +68,23 @@
       const k = (l - 1) % SEGLEN + 1, sg = (l - 1) / SEGLEN | 0; if (k === SEGLEN) continue;
       for (const n of byLayer[l] || []) {
         const r = rnd(); let t = 'battle';
-        if (k === 1) t = l > 1 && r > .9 ? 'event' : l > 1 && r > .82 ? 'chest' : 'battle';
-        else if (k === 2) t = r < .12 && sg >= 1 ? 'elite' : r < .24 ? 'camp' : r < .34 ? 'event' : r < .4 ? 'chest' : 'battle';
-        else t = r < .5 ? 'elite' : r < .68 ? 'camp' : r < .75 ? 'event' : 'battle';
+        if (k === 1) t = l > 1 && r > .84 ? 'event' : 'battle';
+        else if (k === 2) t = r < .14 && sg >= 1 ? 'elite' : r < .32 ? 'event' : 'battle';
+        else t = r < .5 ? 'elite' : r < .7 ? 'event' : 'battle';
         if ((t === 'camp' || t === 'elite') && n.prev.some(p => p.type === t)) t = 'battle';
         n.type = t;
       }
       const lay = byLayer[l] || [];
       if (lay.length >= 2 && new Set(lay.map(n => n.type)).size === 1) {   // 同层不能全是同一种
         const n = lay[lay.length - 1], cur = n.type;
-        const alts = k === 1 ? (l > 1 ? ['event', 'chest'] : []) : k === 2 ? ['camp', 'event', 'elite'] : cur === 'elite' ? ['battle'] : ['elite'];
+        const alts = k === 1 ? (l > 1 ? ['event'] : []) : k === 2 ? ['event', 'elite'] : cur === 'elite' ? ['battle'] : ['elite'];
         const a = alts.filter(x => x !== cur && !(n.prev.some(p => p.type === x) && (x === 'camp' || x === 'elite')));
         if (a.length) n.type = a[(rnd() * a.length) | 0];
       }
       const bat = lay.filter(n => n.type === 'battle');
       const opt = k === 1 ? ['melee', 'raid'] : ['range', 'shield'];
       bat.forEach((n, i) => { n.tag = opt[(i + (rnd() < .5 ? 1 : 0)) % 2]; if (bat.length >= 2 && i > 0 && n.tag === bat[i - 1].tag) n.tag = opt.find(x => x !== n.tag); });
-      for (const n of lay) { if (n.type === 'elite') { n.tag = 'patrol'; n.rw = 'both'; } else if (n.type === 'battle') n.rw = l === 1 ? (rnd() < .6 ? 'skill' : 'perk') : pickRw(); }
+      for (const n of lay) { if (n.type === 'elite') { n.tag = 'patrol'; } }
     }
     return { nodes, byLayer, start };
   }
@@ -115,7 +115,7 @@
     root.appendChild(cv); document.body.appendChild(root); g = cv.getContext('2d');
     const exit = document.createElement('button'); exit.textContent = '退出';
     const bk = Math.max(1, Math.min(1.45, Math.min(innerWidth / 1280, innerHeight / 720)));
-    const card = document.createElement('button'); card.textContent = '兵籍牒';   // 11/11：这一局的当前属性、修为、招式
+    const card = document.createElement('button'); card.textContent = '兵籍牒';   // 11/11：这一局的当前属性、修为、武艺
     card.style.cssText = 'position:absolute;right:' + (innerWidth < innerHeight * .9 ? 14 : Math.round(96 * bk)) + 'px;top:' + (innerWidth < innerHeight * .9 ? Math.round(56 * bk) : 12) + 'px;padding:6px 14px;font:700 ' + Math.round(16 * bk) + 'px ' + UI + ';letter-spacing:2px;color:#3b2a1c;background:#f3e6c8;border:1px solid #7a5a2c;border-radius:6px;cursor:pointer;z-index:2';
     card.onclick = () => sheet();
     root.appendChild(card);
@@ -189,12 +189,12 @@
       + '<div style="font-size:26px;letter-spacing:6px;margin-bottom:6px">营 地</div><div style="font-size:14px;opacity:.75;margin-bottom:14px">血量 ' + Math.ceil(hp[0]) + ' / ' + hp[1] + '</div>'
       + '<div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">'
       + '<button data-k="heal" style="width:150px;padding:12px 8px;font:700 18px ' + FONT + ';color:' + INK + ';background:#f3e6c8;border:1px solid #7a5a2c;border-radius:8px;cursor:pointer">歇息<br><small style="font:12px sans-serif;opacity:.8">回复 30% 血量</small></button>'
-      + '<button data-k="up" style="width:150px;padding:12px 8px;font:700 18px ' + FONT + ';color:' + INK + ';background:#f3e6c8;border:1px solid #7a5a2c;border-radius:8px;cursor:pointer">磨刀<br><small style="font:12px sans-serif;opacity:.8">招式伤害 +10%</small></button></div></div>';
+      + '<button data-k="up" style="width:150px;padding:12px 8px;font:700 18px ' + FONT + ';color:' + INK + ';background:#f3e6c8;border:1px solid #7a5a2c;border-radius:8px;cursor:pointer">磨刀<br><small style="font:12px sans-serif;opacity:.8">武艺伤害 +10%</small></button></div></div>';
     box.querySelectorAll('button').forEach(b => b.onclick = () => { SURV.camp(b.dataset.k); box.remove(); campBox = null; done(n, true); });
     root.appendChild(box);
   }
   // 节点打完（或营地选完）：记下走过的路，回到长卷
-  function sheet() {   // 兵籍牒：这一局当前的修为、属性、招式、功法
+  function sheet() {   // 兵籍牒：这一局当前的修为、属性、武艺、心法
     if (campBox || !window.SURV || !SURV.status) return;
     const FONT = FONT_Q, UI = UI_Q;   // 写进 style="..." 里，字体名要用单引号
     const st = SURV.status(), box = campBox = document.createElement('div');
@@ -203,10 +203,10 @@
     const h = t => '<div style="margin:10px 0 4px;font:900 15px ' + FONT + ';letter-spacing:4px;color:#7a2a1e">◆ ' + t + '</div>';
     box.innerHTML = '<div style="background:radial-gradient(ellipse at 50% 30%,#f6ead4,#e6d2b0);border:2px solid #7a5a2c;border-radius:8px;padding:16px 20px;width:min(94vw,460px);max-height:92vh;overflow:auto;font:600 13px ' + UI + ';color:' + INK + ';box-shadow:0 12px 40px rgba(0,0,0,.45)">'
       + '<div style="display:flex;justify-content:space-between;align-items:center"><div style="font:900 24px ' + FONT + ';letter-spacing:6px">兵籍牒</div><button class="x" style="font:700 14px ' + UI + ';padding:4px 12px;background:#2e2016;color:#f3dc9a;border:1px solid #7a5a2c;border-radius:5px;cursor:pointer">关闭</button></div>'
-      + row('出身', st.origin) + row('修为', 'LV.' + st.lv + '　' + st.pct + '%', st.bank ? '待修炼 ×' + st.bank : '') + row('气血', st.hp[0] + ' / ' + st.hp[1]) + (st.dmg > 1.001 ? row('招式伤害', '+' + Math.round((st.dmg - 1) * 100) + '%', '磨刀/奇遇') : '')
+      + row('出身', st.origin) + row('修为', 'LV.' + st.lv + '　' + st.pct + '%', st.bank ? '待修炼 ×' + st.bank : '') + row('气血', st.hp[0] + ' / ' + st.hp[1]) + (st.dmg > 1.001 ? row('武艺伤害', '+' + Math.round((st.dmg - 1) * 100) + '%', '磨刀/奇遇') : '')
       + h('属性') + st.attrs.map((r, i) => row(r[0], r[1] + (st.add[i] ? ' <small style="color:#3f8a4a">(+' + st.add[i] + ')</small>' : ''), r[2])).join('')
-      + h('招式') + (st.slots.filter(Boolean).map((k, i) => row((i + 1) + '. <i style="display:inline-block;width:9px;height:9px;border-radius:2px;background:' + k.color + ';box-shadow:0 0 0 1px rgba(0,0,0,.4);margin-right:4px"></i><b>' + k.name + '</b> LV' + k.lv, '', k.desc)).join('') || '<div style="opacity:.6">无</div>')
-      + h('功法') + (st.gf.filter(Boolean).map(g => row(g.name + ' LV' + g.lv, '', g.desc)).join('') || '<div style="opacity:.6">无</div>')
+      + h('武艺') + (st.slots.filter(Boolean).map((k, i) => row((i + 1) + '. <i style="display:inline-block;width:9px;height:9px;border-radius:2px;background:' + k.color + ';box-shadow:0 0 0 1px rgba(0,0,0,.4);margin-right:4px"></i><b>' + k.name + '</b> LV' + k.lv, '', k.desc)).join('') || '<div style="opacity:.6">无</div>')
+      + h('心法') + (st.gf.filter(Boolean).map(g => row(g.name + ' LV' + g.lv, '', g.desc)).join('') || '<div style="opacity:.6">无</div>')
       + (st.qg ? h('轻功') + row(st.qg.name, '', st.qg.desc) : '')
       + '</div>';
     const shut = () => { box.remove(); campBox = null; };
@@ -289,14 +289,14 @@
     icon(n.type, R * 2.0, vis || (!reach && !cur));
     g.globalAlpha = 1; g.shadowBlur = 0; g.shadowColor = 'transparent'; g.shadowOffsetY = 0;
     if (vis && !cur) { g.beginPath(); g.arc(R * .62, -R * .62, 7, 0, 7); g.fillStyle = CINNABAR; g.fill(); g.strokeStyle = PAPER; g.lineWidth = 1.6; g.beginPath(); g.moveTo(R * .62 - 3, -R * .62); g.lineTo(R * .62 - .8, -R * .62 + 2.6); g.lineTo(R * .62 + 3.4, -R * .62 - 2.6); g.stroke(); }
-    if (n.rw && !vis) { const bc = { skill: ['招', '#3b6ea8'], perk: ['功', '#a8662a'], heal: ['疗', '#3f8a4a'], both: ['双', '#7a3a8a'] }[n.rw]; g.beginPath(); g.arc(R * .7, R * .7, 9, 0, 7); g.fillStyle = bc[1]; g.fill(); g.strokeStyle = PAPER; g.lineWidth = 1.5; g.stroke(); g.fillStyle = '#fff'; g.font = `bold 11px ${UI}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(bc[0], R * .7, R * .7 + 1); }
+    if (false && n.rw && !vis) { const bc = { skill: ['招', '#3b6ea8'], perk: ['功', '#a8662a'], heal: ['疗', '#3f8a4a'], both: ['双', '#7a3a8a'] }[n.rw]; g.beginPath(); g.arc(R * .7, R * .7, 9, 0, 7); g.fillStyle = bc[1]; g.fill(); g.strokeStyle = PAPER; g.lineWidth = 1.5; g.stroke(); g.fillStyle = '#fff'; g.font = `bold 11px ${UI}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(bc[0], R * .7, R * .7 + 1); }
     g.restore();
     // 名字：可走的节点、当前、Boss 常显；其他鼠标悬停才显
-    if ((reach && !port()) || cur || n.type === 'boss' || hov.n === n) tag(p, R, n, hov.n === n || cur || n.type === 'boss');
+    if (hov.n !== n && ((reach && !port()) || cur || n.type === 'boss')) tag(p, R, n, cur || n.type === 'boss');
   }
   function tag(p, R, n, full) {
-    const RWS = { skill: '新招式', perk: '功法', heal: '回血', both: '招式+功法' }, sh = !full && n.rw && n.type !== 'boss';   // 没悬停时一行写完（相邻节点挤不下两行）
-    const l1 = n.type === 'start' ? '涿郡' : nlabel(n) + (sh ? ' · ' + RWS[n.rw] : ''), l2 = sh ? '' : n.type === 'start' ? '' : n.type === 'camp' ? '歇息回血 / 磨刀' : n.type === 'chest' ? '开箱：三选一' : n.type === 'event' ? '奇遇：做个选择' : n.rw ? '打赢：' + RWN[n.rw] : full ? MAPN[MAP_OF(n.layer)] : '';
+    const RWS = { skill: '新武艺', perk: '心法', heal: '回血', both: '武艺+心法' }, sh = false;   // 没悬停时一行写完（相邻节点挤不下两行）
+    const l1 = n.type === 'start' ? '涿郡' : nlabel(n) + (sh ? ' · ' + RWS[n.rw] : ''), l2 = sh || !full ? '' : n.type === 'start' ? '' : n.type === 'event' ? '奇遇：做个选择' : n.type === 'elite' ? '精锐 · 掉落更好' : full ? MAPN[MAP_OF(n.layer)] : '';
     const k = KS(), f1 = `bold ${Math.round(18 * k)}px ${FONT}`, f2 = `600 ${Math.round(13 * k)}px ${UI}`;
     g.save(); g.font = f1; const w1 = g.measureText(l1).width; g.font = f2; const w2 = l2 ? g.measureText(l2).width : 0;
     const bw = Math.max(w1, w2) + 20 * k, bh = (l2 ? 44 : 28) * k; let x = p.x - bw / 2, y = p.y + R + 10;
@@ -358,6 +358,7 @@
     }
     g.setTransform(1, 0, 0, 1, 0, 0); g.drawImage(bgC, 0, 0); g.setTransform(DPR, 0, 0, DPR, 0, 0);
     for (const n of run.nodes) { try { seal(n, now); } catch (e) { if (!window._rtErr) { window._rtErr = 1; console.error('route seal', e); } } }
+    if (hov.n) tag(pos(hov.n), radius(hov.n), hov.n, true);   // 悬停的牌子最后画，不被旁边节点压住
     // 抬头：章节、血量、提示（手机竖屏先垫一层纸色渐隐，免得节点叠在字上）
     if (port()) { const hb = g.createLinearGradient(0, 0, 0, 132); hb.addColorStop(0, 'rgba(234,220,192,.97)'); hb.addColorStop(.75, 'rgba(234,220,192,.9)'); hb.addColorStop(1, 'rgba(234,220,192,0)'); g.fillStyle = hb; g.fillRect(0, 0, W, 132); }
     g.textAlign = 'left'; g.textBaseline = 'alphabetic'; g.fillStyle = INK;
@@ -369,11 +370,11 @@
       g.fillStyle = INK; g.font = `bold ${Math.round(14 * k)}px ${UI}`; g.textBaseline = 'middle'; g.fillText('气血 ' + Math.ceil(hp * 10) + ' / ' + Math.round(mx * 10), x + bw + 12, y + bh / 2); g.textBaseline = 'alphabetic';
     }
     // 图例（手机竖屏放右上，避开右下印章）
-    const lg = [['battle', '普通'], ['elite', '精英'], ['camp', '营地'], ['boss', '首领']]; g.font = `bold ${Math.round(14 * k)}px ${UI}`; g.fillStyle = INK; g.textAlign = 'left'; g.textBaseline = 'middle';
+    const lg = [['battle', '普通'], ['elite', '精英'], ['event', '奇遇'], ['boss', '首领']]; g.font = `bold ${Math.round(14 * k)}px ${UI}`; g.fillStyle = INK; g.textAlign = 'left'; g.textBaseline = 'middle';
     let lx = 30; const ly = H - 36 * k;
     lg.forEach(([ty, t]) => { g.save(); g.translate(lx + 14 * k, ly); icon(ty, 32 * k); g.restore(); g.globalAlpha = .9; g.fillText(t, lx + 34 * k, ly + 1); g.globalAlpha = 1; lx += (port() ? 70 : 90) * k; });
-    if (!port()) {   // 奖励角标说明（11/11：玩家看不懂「招/功/疗/双」）
-      lx += 16 * k; const bc = [['招', '#3b6ea8', '新招式'], ['功', '#a8662a', '功法'], ['疗', '#3f8a4a', '回血'], ['双', '#7a3a8a', '招式+功法']];
+    if (false) {   // 奖励角标说明（已取消：奖励统一在整备屏拿）（11/11：玩家看不懂「招/功/疗/双」）
+      lx += 16 * k; const bc = [['招', '#3b6ea8', '新武艺'], ['功', '#a8662a', '心法'], ['疗', '#3f8a4a', '回血'], ['双', '#7a3a8a', '武艺+心法']];
       g.globalAlpha = .9; g.fillText('奖励：', lx, ly + 1); lx += g.measureText('奖励：').width + 6;
       for (const [c, col, t] of bc) { g.beginPath(); g.arc(lx + 9 * k, ly, 9 * k, 0, 7); g.fillStyle = col; g.fill(); g.fillStyle = '#fff'; g.font = `bold ${Math.round(11 * k)}px ${UI}`; g.textAlign = 'center'; g.fillText(c, lx + 9 * k, ly + 1); g.textAlign = 'left'; g.fillStyle = INK; g.font = `bold ${Math.round(14 * k)}px ${UI}`; g.fillText(t, lx + 22 * k, ly + 1); lx += 22 * k + g.measureText(t).width + 14 * k; }
       g.globalAlpha = 1;

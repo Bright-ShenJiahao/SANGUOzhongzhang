@@ -61,7 +61,7 @@ body.szz-pro #help{display:none}
 .x-back{min-height:34px!important}
 }
 #rot small{display:block;margin-top:10px;font-size:14px;font-weight:600;color:#c9b691;line-height:1.6}
-</style><link rel="preload" href="pack/fonts/result.woff2?v=a874cecf5d" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=a874cecf5d)format("woff2");font-display:swap}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
+</style><link rel="preload" href="pack/fonts/result.woff2?v=1271326b34" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=1271326b34)format("woff2");font-display:swap}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
 </head><body>
 <style>
 #bootSplash{position:fixed;inset:0;z-index:99999;background:radial-gradient(ellipse at 50% 45%,#f3e4cf 0%,#ecd9c0 55%,#d9c09f 100%);transition:opacity .45s ease-out}
@@ -100,7 +100,7 @@ if(location.protocol==='https:'&&!/[?&]debug(?:=|&|$)/.test(location.search)&&'s
 })();
 // 自动更新：打开游戏、或从后台切回来时，查一下线上有没有新版本；有就在标题/整备页自动刷新（战斗中不打扰）
 (function(){
-var BUILD='048b8721b1b9',busy=false;
+var BUILD='f93c1f9f9a48',busy=false;
 if(location.protocol!=='https:'||/[?&]debug(?:=|&|$)/.test(location.search))return;
 function check(){
   if(busy)return;
@@ -1241,8 +1241,8 @@ const XIAOCHANG = { drawBackground() {}, state: () => null, start() {}, on: () =
     const heroGroup = addGroup('hero', '主角');
     btn(heroGroup, '回到主界面', 'alt', () => { if (typeof returnFromPausedGame === 'function') returnFromPausedGame(true); else if (window.TITLE && TITLE.show) TITLE.show(); });
     btn(heroGroup, '回到整军备战', 'alt', () => { if (typeof returnFromPausedGame === 'function') returnFromPausedGame(false); else if (window.TITLE && TITLE.openPreparation) TITLE.openPreparation(1); });
-    btn(heroGroup, '招式：刀（4招）', 'alt', () => { if (window.SURV) { SURV.slots.splice(0, 5, 'hengsao', 'daobo', 'huima', 'daolun', ''); tipLine('招式栏换成刀：横扫 刀波 回马 刀轮'); } });
-    btn(heroGroup, '招式：剑（3招）', 'alt', () => { if (window.SURV) { SURV.slots.splice(0, 5, 'lianzhan', 'sixiang', 'wanren', '', ''); tipLine('招式栏换成剑：连斩 四象 万刃'); } });
+    btn(heroGroup, '武艺：刀（4招）', 'alt', () => { if (window.SURV) { SURV.slots.splice(0, 5, 'hengsao', 'daobo', 'huima', 'daolun', ''); tipLine('武艺栏换成刀：横扫 刀波 回马 刀轮'); } });
+    btn(heroGroup, '武艺：剑（3招）', 'alt', () => { if (window.SURV) { SURV.slots.splice(0, 5, 'lianzhan', 'sixiang', 'wanren', '', ''); tipLine('武艺栏换成剑：连斩 四象 万刃'); } });
     btn(heroGroup, '回满血', '', () => { if (typeof hero !== 'undefined') hero.hp = maxHeroHp(); });
     btn(heroGroup, '修为 +100', '', () => { if (window.SURV && SURV.addXiu) SURV.addXiu(100); });
     // 面板底部临时提示（主界面、整备页时游戏内文字看不到）
@@ -1360,7 +1360,7 @@ const XIAOCHANG = { drawBackground() {}, state: () => null, start() {}, on: () =
 
   // 三国终章：老游戏的按钮先藏起来（锦囊、经脉、神器、校场、第二章、Boss 等已拿掉），只留测试要用的几个
   function trimPanel() {
-    const keep = ['回到主界面', '招式：刀', '招式：剑', '回满血', '无敌', '跳过这一波', '恢复存档', '跳到第', '修为'];
+    const keep = ['回到主界面', '武艺：刀', '武艺：剑', '回满血', '无敌', '跳过这一波', '恢复存档', '跳到第', '修为'];
     panel.querySelectorAll('button').forEach(b => { if (!keep.some(k => b.textContent.startsWith(k))) b.style.display = 'none'; });
     panel.querySelectorAll('.dbgTrial,.dbgFloors').forEach(e => { e.style.display = 'none'; });
     panel.querySelectorAll('.dbgGroup').forEach(g => { if (![...g.querySelectorAll('button')].some(b => b.style.display !== 'none')) g.style.display = 'none'; });
@@ -3433,7 +3433,7 @@ let blessFx = []; // 方士施法成功的黄圈
 })();
 
 // 开局配置（三国终章，用户定 11/09）：照三国幸存者的三栏布局。
-// 左：称号 / 势力 / 出身；中：所选战场；右：兵籍牒（属性 + 起手招式）。整军备战不要了。
+// 左：称号 / 势力 / 出身；中：所选战场；右：兵籍牒（属性 + 起手武艺）。整军备战不要了。
 (() => {
   const WEP = [['dao', '刀', true], ['jian', '剑'], ['chui', '锤'], ['qiang', '枪'], ['guandao', '关刀'], ['gong', '弓']];   // 兵器路数（11/11）：只有刀有美术，其余上锁
   let axSel = -1;
@@ -3442,7 +3442,7 @@ let blessFx = []; // 方士施法成功的黄圈
     { name: '董卓乱京', sub: '第二章 · 中平六年', note: '西凉铁骑入洛阳，京城大乱。第二章 · 暂未开放', open: false, pic: 'pack/ui/kaiju/field2.webp?v=84b673b515' },   // 11/11 用户定：先放出来，但不能选
   ];
   const OGI = { nongfu: 'pack/ui/kaiju/og_nongfu.webp?v=58022ac191', xiaozu: 'pack/ui/kaiju/og_xiaozu.webp?v=407477e423', liehu: 'pack/ui/kaiju/og_liehu.webp?v=af8851d220', shusheng: 'pack/ui/kaiju/og_shusheng.webp?v=95c8496e12' };
-  const SKI = { hengsao: 'pack/ui/kaiju/sk_hengsao.webp?v=dc67bef9b0', daobo: 'pack/ui/kaiju/sk_daobo.webp?v=902b4ea16f', huima: 'pack/ui/kaiju/sk_huima.webp?v=6943b2ffa3', daolun: 'pack/ui/kaiju/sk_daolun.webp?v=57f7c46e21' };   // 招式图标（11/11 Gemini）
+  const SKI = { hengsao: 'pack/ui/kaiju/sk_hengsao.webp?v=dc67bef9b0', daobo: 'pack/ui/kaiju/sk_daobo.webp?v=902b4ea16f', huima: 'pack/ui/kaiju/sk_huima.webp?v=6943b2ffa3', daolun: 'pack/ui/kaiju/sk_daolun.webp?v=57f7c46e21' };   // 武艺图标（11/11 Gemini）
   const PIC = { bg: 'pack/ui/kaiju/bg.webp?v=44658dec16', field1: 'pack/ui/kaiju/field1.webp?v=81f5bafa90', std: 'pack/ui/kaiju/diff_std.webp?v=0a1ebbc8bd', hard: 'pack/ui/kaiju/diff_hard.webp?v=c7e07995c5', plate: 'pack/ui/kaiju/plate.webp?v=aea2eca69d' };
   let el = null, field = 0, name = '无名';
   // 11/11 改版（用户给了美术）：宣纸水墨背景 + 深色木框面板压在纸上；出身/难度做成「图标 + 名字 + 一句话」卡片
@@ -3538,7 +3538,7 @@ let blessFx = []; // 方士施法成功的黄圈
           <h4>势力</h4><select disabled><option>普通乡勇　增：无；减：无</option></select>
           <h4 style="margin-top:10px">出身</h4>
           <div class="og">${Object.keys(O).map(k => `<button data-o="${k}" class="card ${k === cur ? 'on' : ''} ${O[k].locked ? 'lock' : ''}"><div class="ico" ${ic(OGI[k] || '')}></div><span><b>${O[k].name}</b><small>${O[k].locked ? '🔒 暂未开放' : (O[k].desc || '').split('。')[0]}</small></span></button>`).join('')}</div>
-          <div class="ogd"><b>${o.name}</b><span class="tag">${o.tag}</span><p>${o.desc}</p><p>起手招式：<b style="font-size:calc(13px*var(--k));color:${sk ? sk.color : '#fff'}">${sk ? sk.name : '—'}</b>${sk ? '（' + sk.desc + '）' : ''}</p></div>
+          <div class="ogd"><b>${o.name}</b><span class="tag">${o.tag}</span><p>${o.desc}</p><p>起手武艺：<b style="font-size:calc(13px*var(--k));color:${sk ? sk.color : '#fff'}">${sk ? sk.name : '—'}</b>${sk ? '（' + sk.desc + '）' : ''}</p></div>
           <h4 style="margin-top:10px">兵器路数</h4>
           <div class="wp">${WEP.map(w => `<button data-w="${w[0]}" class="${w[2] ? 'on' : 'lock'}" title="${w[2] ? '' : '暂未开放'}">${w[1]}</button>`).join('')}</div>
           <h4 style="margin-top:10px">难度</h4>
@@ -3550,10 +3550,10 @@ let blessFx = []; // 方士施法成功的黄圈
           <h4 style="margin-top:8px">属性</h4>
           ${ai.map((r, i) => `<div class="bar ${i === axSel ? 'sel' : ''}" data-a="${i}" title="${r[3]}"><span>${r[0]}</span><i><u style="width:${r[1] * 14}%"></u></i><span>${r[1]}</span><span class="ax">${r[2]}</span></div>`).join('')}
           <div class="axd">${axSel >= 0 && ai[axSel] ? ai[axSel][0] + '：' + ai[axSel][3] : '点属性看说明（3 为常人水平）'}</div>
-          <h4 style="margin-top:8px">起手招式</h4>
+          <h4 style="margin-top:8px">起手武艺</h4>
           <div class="sk">${[0, 1, 2, 3, 4].map(i => i === 0 && sk ? (SKI[o.skill] ? `<div class="has" title="${sk.name}" ${ic(SKI[o.skill])}></div>` : `<div class="has" title="${sk.name}">${sk.icon}</div>`) : '<div></div>').join('')}</div>
-          ${sk ? `<div class="skd"><b style="color:${sk.color}">${sk.name}</b>　${sk.desc}<br>单刀招式 · 受「短兵」加成 · 自动出手</div>` : ''}
-          <div class="hint" style="margin-bottom:6px">起手只有 1 个招式，其余在路上习得；5 格按 1→5 依次自动放。</div>
+          ${sk ? `<div class="skd"><b style="color:${sk.color}">${sk.name}</b>　${sk.desc}<br>单刀武艺 · 受「短兵」加成 · 自动出手</div>` : ''}
+          <div class="hint" style="margin-bottom:6px">起手只有 1 个武艺，其余在路上习得；5 格按 1→5 依次自动放。</div>
           <h4 style="margin-top:8px">行囊</h4>
           <div class="bag"><div class="has" style="background-image:url('pack/ui/kaiju/bag.webp?v=65acba9c9c')" title="盘缠"><i>0</i></div>${'<div></div>'.repeat(9)}</div>
           <div class="axd">路上拾得的物品会放在这里（物品系统制作中）</div>
@@ -4644,8 +4644,8 @@ function resultKey(e) {
   const LABEL = { battle: '黄巾游兵', elite: '黄巾精锐', camp: '营地', boss: '张角祭坛', start: '涿郡', event: '奇遇', chest: '宝箱' };
   const EVENTS = [   // 奇遇：几个小抉择，选完不打架直接回长卷
     { t: '破庙神像', d: '路边一座破庙，神像前还摆着供品。', o: [['上香祈福', '回复 40% 血量', 'pray'], ['搜刮供品', '失去 20% 血量，换一次战利三选一', 'loot']] },
-    { t: '路边老兵', d: '一个断了腿的老兵坐在树下，招呼你过去。', o: [['请他喝酒', '招式伤害 +8%', 'wine'], ['向他求教', '一次战利三选一', 'learn']] },
-    { t: '溪边磨石', d: '溪水边有一块平整的磨刀石。', o: [['磨刀', '招式伤害 +10%', 'sharpen'], ['歇脚', '回复 30% 血量', 'rest']] },
+    { t: '路边老兵', d: '一个断了腿的老兵坐在树下，招呼你过去。', o: [['请他喝酒', '武艺伤害 +8%', 'wine'], ['向他求教', '一次战利三选一', 'learn']] },
+    { t: '溪边磨石', d: '溪水边有一块平整的磨刀石。', o: [['磨刀', '武艺伤害 +10%', 'sharpen'], ['歇脚', '回复 30% 血量', 'rest']] },
   ];
   const FONT = '"MaShanZheng","STKaiti","KaiTi","Songti SC",serif';
   const UI = '"PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif';   // 小字用黑体加粗，毛笔字只用在标题和节点名（11/11：字太小太细）
@@ -4663,7 +4663,7 @@ function resultKey(e) {
   // 第 17 层单个营地，第 18 层最终首领。段内节奏：第 1 层纯近战；第 2 层加远程/盾枪；第 3 层精锐或小营地；第 4 层段首领。
   const SEGS = 4, SEGLEN = 4;
   const TAGN = { melee: '流民群', raid: '刀盾队', range: '弓手阵', shield: '盾枪阵', patrol: '精锐巡逻' };
-  const RWN = { skill: '学一个新招式', perk: '学一门功法', heal: '包扎回血', both: '招式 + 功法' };
+  const RWN = { skill: '学一个新武艺', perk: '学一门心法', heal: '包扎回血', both: '武艺 + 心法' };
   const SECBOSS = [['程远志', '邓茂'], ['波才', '何仪'], ['管亥', '张曼成'], ['张梁', '张宝']];
   function gen() {
     const nodes = [], byLayer = [], cells = {};
@@ -4690,7 +4690,7 @@ function resultKey(e) {
       }
       from = bossN;
     }
-    const camp = mk(LAYERS - 1, 2, 'camp'); link(from, camp);
+    const camp = mk(LAYERS - 1, 2, 'event'); link(from, camp);
     const fin = mk(LAYERS, 2, 'boss'); fin.final = true; fin.sec = 5; link(camp, fin);
     // 节点类型：按「段内第几层」定节奏
     const pickRw = () => { const r = rnd(); return r < .4 ? 'skill' : r < .72 ? 'perk' : 'heal'; };
@@ -4698,23 +4698,23 @@ function resultKey(e) {
       const k = (l - 1) % SEGLEN + 1, sg = (l - 1) / SEGLEN | 0; if (k === SEGLEN) continue;
       for (const n of byLayer[l] || []) {
         const r = rnd(); let t = 'battle';
-        if (k === 1) t = l > 1 && r > .9 ? 'event' : l > 1 && r > .82 ? 'chest' : 'battle';
-        else if (k === 2) t = r < .12 && sg >= 1 ? 'elite' : r < .24 ? 'camp' : r < .34 ? 'event' : r < .4 ? 'chest' : 'battle';
-        else t = r < .5 ? 'elite' : r < .68 ? 'camp' : r < .75 ? 'event' : 'battle';
+        if (k === 1) t = l > 1 && r > .84 ? 'event' : 'battle';
+        else if (k === 2) t = r < .14 && sg >= 1 ? 'elite' : r < .32 ? 'event' : 'battle';
+        else t = r < .5 ? 'elite' : r < .7 ? 'event' : 'battle';
         if ((t === 'camp' || t === 'elite') && n.prev.some(p => p.type === t)) t = 'battle';
         n.type = t;
       }
       const lay = byLayer[l] || [];
       if (lay.length >= 2 && new Set(lay.map(n => n.type)).size === 1) {   // 同层不能全是同一种
         const n = lay[lay.length - 1], cur = n.type;
-        const alts = k === 1 ? (l > 1 ? ['event', 'chest'] : []) : k === 2 ? ['camp', 'event', 'elite'] : cur === 'elite' ? ['battle'] : ['elite'];
+        const alts = k === 1 ? (l > 1 ? ['event'] : []) : k === 2 ? ['event', 'elite'] : cur === 'elite' ? ['battle'] : ['elite'];
         const a = alts.filter(x => x !== cur && !(n.prev.some(p => p.type === x) && (x === 'camp' || x === 'elite')));
         if (a.length) n.type = a[(rnd() * a.length) | 0];
       }
       const bat = lay.filter(n => n.type === 'battle');
       const opt = k === 1 ? ['melee', 'raid'] : ['range', 'shield'];
       bat.forEach((n, i) => { n.tag = opt[(i + (rnd() < .5 ? 1 : 0)) % 2]; if (bat.length >= 2 && i > 0 && n.tag === bat[i - 1].tag) n.tag = opt.find(x => x !== n.tag); });
-      for (const n of lay) { if (n.type === 'elite') { n.tag = 'patrol'; n.rw = 'both'; } else if (n.type === 'battle') n.rw = l === 1 ? (rnd() < .6 ? 'skill' : 'perk') : pickRw(); }
+      for (const n of lay) { if (n.type === 'elite') { n.tag = 'patrol'; } }
     }
     return { nodes, byLayer, start };
   }
@@ -4745,7 +4745,7 @@ function resultKey(e) {
     root.appendChild(cv); document.body.appendChild(root); g = cv.getContext('2d');
     const exit = document.createElement('button'); exit.textContent = '退出';
     const bk = Math.max(1, Math.min(1.45, Math.min(innerWidth / 1280, innerHeight / 720)));
-    const card = document.createElement('button'); card.textContent = '兵籍牒';   // 11/11：这一局的当前属性、修为、招式
+    const card = document.createElement('button'); card.textContent = '兵籍牒';   // 11/11：这一局的当前属性、修为、武艺
     card.style.cssText = 'position:absolute;right:' + (innerWidth < innerHeight * .9 ? 14 : Math.round(96 * bk)) + 'px;top:' + (innerWidth < innerHeight * .9 ? Math.round(56 * bk) : 12) + 'px;padding:6px 14px;font:700 ' + Math.round(16 * bk) + 'px ' + UI + ';letter-spacing:2px;color:#3b2a1c;background:#f3e6c8;border:1px solid #7a5a2c;border-radius:6px;cursor:pointer;z-index:2';
     card.onclick = () => sheet();
     root.appendChild(card);
@@ -4819,12 +4819,12 @@ function resultKey(e) {
       + '<div style="font-size:26px;letter-spacing:6px;margin-bottom:6px">营 地</div><div style="font-size:14px;opacity:.75;margin-bottom:14px">血量 ' + Math.ceil(hp[0]) + ' / ' + hp[1] + '</div>'
       + '<div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">'
       + '<button data-k="heal" style="width:150px;padding:12px 8px;font:700 18px ' + FONT + ';color:' + INK + ';background:#f3e6c8;border:1px solid #7a5a2c;border-radius:8px;cursor:pointer">歇息<br><small style="font:12px sans-serif;opacity:.8">回复 30% 血量</small></button>'
-      + '<button data-k="up" style="width:150px;padding:12px 8px;font:700 18px ' + FONT + ';color:' + INK + ';background:#f3e6c8;border:1px solid #7a5a2c;border-radius:8px;cursor:pointer">磨刀<br><small style="font:12px sans-serif;opacity:.8">招式伤害 +10%</small></button></div></div>';
+      + '<button data-k="up" style="width:150px;padding:12px 8px;font:700 18px ' + FONT + ';color:' + INK + ';background:#f3e6c8;border:1px solid #7a5a2c;border-radius:8px;cursor:pointer">磨刀<br><small style="font:12px sans-serif;opacity:.8">武艺伤害 +10%</small></button></div></div>';
     box.querySelectorAll('button').forEach(b => b.onclick = () => { SURV.camp(b.dataset.k); box.remove(); campBox = null; done(n, true); });
     root.appendChild(box);
   }
   // 节点打完（或营地选完）：记下走过的路，回到长卷
-  function sheet() {   // 兵籍牒：这一局当前的修为、属性、招式、功法
+  function sheet() {   // 兵籍牒：这一局当前的修为、属性、武艺、心法
     if (campBox || !window.SURV || !SURV.status) return;
     const FONT = FONT_Q, UI = UI_Q;   // 写进 style="..." 里，字体名要用单引号
     const st = SURV.status(), box = campBox = document.createElement('div');
@@ -4833,10 +4833,10 @@ function resultKey(e) {
     const h = t => '<div style="margin:10px 0 4px;font:900 15px ' + FONT + ';letter-spacing:4px;color:#7a2a1e">◆ ' + t + '</div>';
     box.innerHTML = '<div style="background:radial-gradient(ellipse at 50% 30%,#f6ead4,#e6d2b0);border:2px solid #7a5a2c;border-radius:8px;padding:16px 20px;width:min(94vw,460px);max-height:92vh;overflow:auto;font:600 13px ' + UI + ';color:' + INK + ';box-shadow:0 12px 40px rgba(0,0,0,.45)">'
       + '<div style="display:flex;justify-content:space-between;align-items:center"><div style="font:900 24px ' + FONT + ';letter-spacing:6px">兵籍牒</div><button class="x" style="font:700 14px ' + UI + ';padding:4px 12px;background:#2e2016;color:#f3dc9a;border:1px solid #7a5a2c;border-radius:5px;cursor:pointer">关闭</button></div>'
-      + row('出身', st.origin) + row('修为', 'LV.' + st.lv + '　' + st.pct + '%', st.bank ? '待修炼 ×' + st.bank : '') + row('气血', st.hp[0] + ' / ' + st.hp[1]) + (st.dmg > 1.001 ? row('招式伤害', '+' + Math.round((st.dmg - 1) * 100) + '%', '磨刀/奇遇') : '')
+      + row('出身', st.origin) + row('修为', 'LV.' + st.lv + '　' + st.pct + '%', st.bank ? '待修炼 ×' + st.bank : '') + row('气血', st.hp[0] + ' / ' + st.hp[1]) + (st.dmg > 1.001 ? row('武艺伤害', '+' + Math.round((st.dmg - 1) * 100) + '%', '磨刀/奇遇') : '')
       + h('属性') + st.attrs.map((r, i) => row(r[0], r[1] + (st.add[i] ? ' <small style="color:#3f8a4a">(+' + st.add[i] + ')</small>' : ''), r[2])).join('')
-      + h('招式') + (st.slots.filter(Boolean).map((k, i) => row((i + 1) + '. <i style="display:inline-block;width:9px;height:9px;border-radius:2px;background:' + k.color + ';box-shadow:0 0 0 1px rgba(0,0,0,.4);margin-right:4px"></i><b>' + k.name + '</b> LV' + k.lv, '', k.desc)).join('') || '<div style="opacity:.6">无</div>')
-      + h('功法') + (st.gf.filter(Boolean).map(g => row(g.name + ' LV' + g.lv, '', g.desc)).join('') || '<div style="opacity:.6">无</div>')
+      + h('武艺') + (st.slots.filter(Boolean).map((k, i) => row((i + 1) + '. <i style="display:inline-block;width:9px;height:9px;border-radius:2px;background:' + k.color + ';box-shadow:0 0 0 1px rgba(0,0,0,.4);margin-right:4px"></i><b>' + k.name + '</b> LV' + k.lv, '', k.desc)).join('') || '<div style="opacity:.6">无</div>')
+      + h('心法') + (st.gf.filter(Boolean).map(g => row(g.name + ' LV' + g.lv, '', g.desc)).join('') || '<div style="opacity:.6">无</div>')
       + (st.qg ? h('轻功') + row(st.qg.name, '', st.qg.desc) : '')
       + '</div>';
     const shut = () => { box.remove(); campBox = null; };
@@ -4919,14 +4919,14 @@ function resultKey(e) {
     icon(n.type, R * 2.0, vis || (!reach && !cur));
     g.globalAlpha = 1; g.shadowBlur = 0; g.shadowColor = 'transparent'; g.shadowOffsetY = 0;
     if (vis && !cur) { g.beginPath(); g.arc(R * .62, -R * .62, 7, 0, 7); g.fillStyle = CINNABAR; g.fill(); g.strokeStyle = PAPER; g.lineWidth = 1.6; g.beginPath(); g.moveTo(R * .62 - 3, -R * .62); g.lineTo(R * .62 - .8, -R * .62 + 2.6); g.lineTo(R * .62 + 3.4, -R * .62 - 2.6); g.stroke(); }
-    if (n.rw && !vis) { const bc = { skill: ['招', '#3b6ea8'], perk: ['功', '#a8662a'], heal: ['疗', '#3f8a4a'], both: ['双', '#7a3a8a'] }[n.rw]; g.beginPath(); g.arc(R * .7, R * .7, 9, 0, 7); g.fillStyle = bc[1]; g.fill(); g.strokeStyle = PAPER; g.lineWidth = 1.5; g.stroke(); g.fillStyle = '#fff'; g.font = `bold 11px ${UI}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(bc[0], R * .7, R * .7 + 1); }
+    if (false && n.rw && !vis) { const bc = { skill: ['招', '#3b6ea8'], perk: ['功', '#a8662a'], heal: ['疗', '#3f8a4a'], both: ['双', '#7a3a8a'] }[n.rw]; g.beginPath(); g.arc(R * .7, R * .7, 9, 0, 7); g.fillStyle = bc[1]; g.fill(); g.strokeStyle = PAPER; g.lineWidth = 1.5; g.stroke(); g.fillStyle = '#fff'; g.font = `bold 11px ${UI}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(bc[0], R * .7, R * .7 + 1); }
     g.restore();
     // 名字：可走的节点、当前、Boss 常显；其他鼠标悬停才显
-    if ((reach && !port()) || cur || n.type === 'boss' || hov.n === n) tag(p, R, n, hov.n === n || cur || n.type === 'boss');
+    if (hov.n !== n && ((reach && !port()) || cur || n.type === 'boss')) tag(p, R, n, cur || n.type === 'boss');
   }
   function tag(p, R, n, full) {
-    const RWS = { skill: '新招式', perk: '功法', heal: '回血', both: '招式+功法' }, sh = !full && n.rw && n.type !== 'boss';   // 没悬停时一行写完（相邻节点挤不下两行）
-    const l1 = n.type === 'start' ? '涿郡' : nlabel(n) + (sh ? ' · ' + RWS[n.rw] : ''), l2 = sh ? '' : n.type === 'start' ? '' : n.type === 'camp' ? '歇息回血 / 磨刀' : n.type === 'chest' ? '开箱：三选一' : n.type === 'event' ? '奇遇：做个选择' : n.rw ? '打赢：' + RWN[n.rw] : full ? MAPN[MAP_OF(n.layer)] : '';
+    const RWS = { skill: '新武艺', perk: '心法', heal: '回血', both: '武艺+心法' }, sh = false;   // 没悬停时一行写完（相邻节点挤不下两行）
+    const l1 = n.type === 'start' ? '涿郡' : nlabel(n) + (sh ? ' · ' + RWS[n.rw] : ''), l2 = sh || !full ? '' : n.type === 'start' ? '' : n.type === 'event' ? '奇遇：做个选择' : n.type === 'elite' ? '精锐 · 掉落更好' : full ? MAPN[MAP_OF(n.layer)] : '';
     const k = KS(), f1 = `bold ${Math.round(18 * k)}px ${FONT}`, f2 = `600 ${Math.round(13 * k)}px ${UI}`;
     g.save(); g.font = f1; const w1 = g.measureText(l1).width; g.font = f2; const w2 = l2 ? g.measureText(l2).width : 0;
     const bw = Math.max(w1, w2) + 20 * k, bh = (l2 ? 44 : 28) * k; let x = p.x - bw / 2, y = p.y + R + 10;
@@ -4988,6 +4988,7 @@ function resultKey(e) {
     }
     g.setTransform(1, 0, 0, 1, 0, 0); g.drawImage(bgC, 0, 0); g.setTransform(DPR, 0, 0, DPR, 0, 0);
     for (const n of run.nodes) { try { seal(n, now); } catch (e) { if (!window._rtErr) { window._rtErr = 1; console.error('route seal', e); } } }
+    if (hov.n) tag(pos(hov.n), radius(hov.n), hov.n, true);   // 悬停的牌子最后画，不被旁边节点压住
     // 抬头：章节、血量、提示（手机竖屏先垫一层纸色渐隐，免得节点叠在字上）
     if (port()) { const hb = g.createLinearGradient(0, 0, 0, 132); hb.addColorStop(0, 'rgba(234,220,192,.97)'); hb.addColorStop(.75, 'rgba(234,220,192,.9)'); hb.addColorStop(1, 'rgba(234,220,192,0)'); g.fillStyle = hb; g.fillRect(0, 0, W, 132); }
     g.textAlign = 'left'; g.textBaseline = 'alphabetic'; g.fillStyle = INK;
@@ -4999,11 +5000,11 @@ function resultKey(e) {
       g.fillStyle = INK; g.font = `bold ${Math.round(14 * k)}px ${UI}`; g.textBaseline = 'middle'; g.fillText('气血 ' + Math.ceil(hp * 10) + ' / ' + Math.round(mx * 10), x + bw + 12, y + bh / 2); g.textBaseline = 'alphabetic';
     }
     // 图例（手机竖屏放右上，避开右下印章）
-    const lg = [['battle', '普通'], ['elite', '精英'], ['camp', '营地'], ['boss', '首领']]; g.font = `bold ${Math.round(14 * k)}px ${UI}`; g.fillStyle = INK; g.textAlign = 'left'; g.textBaseline = 'middle';
+    const lg = [['battle', '普通'], ['elite', '精英'], ['event', '奇遇'], ['boss', '首领']]; g.font = `bold ${Math.round(14 * k)}px ${UI}`; g.fillStyle = INK; g.textAlign = 'left'; g.textBaseline = 'middle';
     let lx = 30; const ly = H - 36 * k;
     lg.forEach(([ty, t]) => { g.save(); g.translate(lx + 14 * k, ly); icon(ty, 32 * k); g.restore(); g.globalAlpha = .9; g.fillText(t, lx + 34 * k, ly + 1); g.globalAlpha = 1; lx += (port() ? 70 : 90) * k; });
-    if (!port()) {   // 奖励角标说明（11/11：玩家看不懂「招/功/疗/双」）
-      lx += 16 * k; const bc = [['招', '#3b6ea8', '新招式'], ['功', '#a8662a', '功法'], ['疗', '#3f8a4a', '回血'], ['双', '#7a3a8a', '招式+功法']];
+    if (false) {   // 奖励角标说明（已取消：奖励统一在整备屏拿）（11/11：玩家看不懂「招/功/疗/双」）
+      lx += 16 * k; const bc = [['招', '#3b6ea8', '新武艺'], ['功', '#a8662a', '心法'], ['疗', '#3f8a4a', '回血'], ['双', '#7a3a8a', '武艺+心法']];
       g.globalAlpha = .9; g.fillText('奖励：', lx, ly + 1); lx += g.measureText('奖励：').width + 6;
       for (const [c, col, t] of bc) { g.beginPath(); g.arc(lx + 9 * k, ly, 9 * k, 0, 7); g.fillStyle = col; g.fill(); g.fillStyle = '#fff'; g.font = `bold ${Math.round(11 * k)}px ${UI}`; g.textAlign = 'center'; g.fillText(c, lx + 9 * k, ly + 1); g.textAlign = 'left'; g.fillStyle = INK; g.font = `bold ${Math.round(14 * k)}px ${UI}`; g.fillText(t, lx + 22 * k, ly + 1); lx += 22 * k + g.measureText(t).width + 14 * k; }
       g.globalAlpha = 1;
@@ -5533,7 +5534,7 @@ function resultKey(e) {
 })();
 
 // 三国终章：全自动出招 + 20 波限时（用户定 11/09）
-// - 取消普攻/蓄力，只用大刀；身上 5 个招式格按 1→5 顺序自动放（周天），目前只有「横扫」「连斩」两招。
+// - 取消普攻/蓄力，只用大刀；身上 5 个武艺格按 1→5 顺序自动放（周天），目前只有「横扫」「连斩」两招。
 // - 出招规则照三国幸存者：附近有敌人才起前摇；前摇时能走；前摇中翻滚 = 这一招作废、跳到下一招；
 //   出手后有短暂后摇（站定），翻滚可以取消后摇。
 // - 波次照三国幸存者（群侠传指引书）：20 波，每波限时 22～180 秒，撑到时间就算过关（鸣金收兵）；
@@ -5556,7 +5557,7 @@ function resultKey(e) {
     { from: 7, to: 20, u: 'archer' }, { from: 10, to: 20, u: 'priest' }, { from: 13, to: 20, u: 'grunt' },
   ];
   const RT = { on: false, node: null, dmg: 1, cd: 1, move: 1, take: 1 };   // 路线模式（?route）：当前节点、磨刀加成
-let CM = 1, RM = 1, CK = '';   // CK：当前出手的招式（统计输出用）   // CM：当前这一招的伤害倍率（出身熟练×共鸣×熟练度）；RM：范围倍率
+let CM = 1, RM = 1, CK = '';   // CK：当前出手的武艺（统计输出用）   // CM：当前这一招的伤害倍率（出身熟练×共鸣×熟练度）；RM：范围倍率
   const DM = () => RT.dmg * CM * critRoll();
   const rec = d => { if (CK) S.dps[CK] = (S.dps[CK] || 0) + d; };
 const bossCount = () => RT.on ? (RT.node ? (RT.node.type === 'boss' ? 2 : RT.node.type === 'elite' ? 1 : 0) : 0) : (BOSS_WAVES[W.n] || 0);
@@ -5641,7 +5642,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   }
   function waveFlow(dt) {
     if (!W.started) return;
-    if (W.pick) return;   // 正在选招式
+    if (W.pick) return;   // 正在选武艺
     if (W.between > 0) { W.between -= dt; if (W.between <= 0) startWave(RT.on ? W.k + 1 : W.n + 1); return; }
     if (W.retreat > 0) {
       W.retreat -= dt;
@@ -5652,7 +5653,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
         } else if (W.n >= WAVES) { won = true; return; }
         hero.hp = Math.min(window.GEAR ? GEAR.maxHp() : 10, hero.hp + 2);   // 波间调息：回一点血
         W.between = .8;
-        if (!offerSkill() && window.ROGUE) ROGUE.offer();   // 波间：还有没学会的招式就先选招式，否则选锦囊
+        if (!offerSkill() && window.ROGUE) ROGUE.offer();   // 波间：还有没学会的武艺就先选武艺，否则选锦囊
       }
       return;
     }
@@ -5668,7 +5669,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     if (W.t >= WT()) endWave();
   }
 
-  // ---------- 招式（代码画） ----------
+  // ---------- 武艺（代码画） ----------
   const fx = [];
   function sweep(a0, half, r, dmg, kb, color, opt = {}) {
     r *= RM;   // 扇形斩：a0 朝向，half 半角，r 半径（左右距离；上下按清版透视压一半）
@@ -5685,7 +5686,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   }
   const aim = () => { const t = nearest(200); if (!t) return Math.atan2(0, hero.f); return Math.atan2((t.y - hero.y) * 2, t.x - hero.x); };
   function nearest(r) { let best = null, bd = r; for (const z of hittable()) { const d = dist(z, hero); if (d < bd) { bd = d; best = z; } } return best; }
-  // 用户定 11/09：招式没有各自冷却，1→5 依次放（放完一招才轮到下一招）；前摇/后摇照三国幸存者
+  // 用户定 11/09：武艺没有各自冷却，1→5 依次放（放完一招才轮到下一招）；前摇/后摇照三国幸存者
   const SK = {
     hengsao: { desc: '身前 270° 大横扫，击退', name: '横扫', icon: '扫', color: '#ffb45a', wu: .6, rc: .3, need: 70, pose: [], range: 46, half: 2.356,
       cast() { const a = aim(); sweep(a, 2.356, 46, 2.4, 60, ['rgba(255,170,90,', 'rgba(255,230,160,']); sfx('swing_knife', hero.x); shake = Math.max(shake, .12); } },
@@ -5710,7 +5711,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const bolts = [], zones = [];
   for (const a of [bolts, zones]) { const pu = a.push; a.push = function (...o) { o.forEach(x => { x.cm = CM; x.ck = CK; }); return pu.apply(this, o); }; }   // 弹道/地面效果记下出手那一刻的倍率
 
-  // ---------- 三国幸存者招式（黄玄地天；tier 0 基础 / 黄 / 玄 / 地 / 天） ----------
+  // ---------- 三国幸存者武艺（黄玄地天；tier 0 基础 / 黄 / 玄 / 地 / 天） ----------
   const TIERN = ['基础', '黄', '玄', '地', '天'], TMIN = [0, 0, 2, 4, 6];
   const tierOk = k => W.n >= TMIN[SK[k].tier || 0];
   const HT = (z, dmg, kb, dir, fr) => { rec(dmg * DM()); const f0 = freeze; hit(z, dmg * DM(), kb, dir || hero.f, false, 0, .3, false, false, { secondary: true, survSkill: true }); freeze = Math.min(freeze, Math.max(f0, fr || .04)); };
@@ -5759,35 +5760,35 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     cast() { blast(hero.x, hero.y, 100, 3.8, 90); pts(6, 240).forEach(([x, y], i) => later(.2 + i * .12, () => blast(x, y, 44, 2.4, 50))); sfx('crack', hero.x); shake = Math.max(shake, .5); } });
   add('wanren', { tier: 4, name: '万刃归宗', icon: '万', color: '#b8f0ff', desc: '十四柄飞刃自四面八方袭来', need: 200, none: true, wu: .8, rc: .5,
     cast() { for (let i = 0; i < 14; i++) later(i * .05, () => { const a = i * Math.PI * 2 / 14 + R(-.1, .1); shot(a, { dmg: 1.6, T: .9, vx: Math.cos(a) * 300, vy: Math.sin(a) * 150, col: ['170,235,255', '255,255,255'] }); }); sfx('swing_knife', hero.x); shake = Math.max(shake, .2); } });
-  // ---------- 出身（开局配置里选；起手只有 1 个招式） ----------
+  // ---------- 出身（开局配置里选；起手只有 1 个武艺） ----------
   const ORIGINS = {
     nongfu: { name: '农夫', tag: '短兵器', skill: 'hengsao', desc: '庄稼汉，挨得住打。受到伤害 -20%', take: .8, oa: [5, 4, 2, 1, 1, 2, 1, 3], at: [6, 4, 2, 2, 3, 2] },
-    xiaozu: { locked: true, name: '小卒', tag: '长兵器', skill: 'daolun', desc: '行伍出身，出手利落。招式前摇 -20%', wu: .8, oa: [4, 4, 5, 1, 1, 2, 1, 3], at: [4, 3, 4, 3, 2, 2] },
+    xiaozu: { locked: true, name: '小卒', tag: '长兵器', skill: 'daolun', desc: '行伍出身，出手利落。武艺前摇 -20%', wu: .8, oa: [4, 4, 5, 1, 1, 2, 1, 3], at: [4, 3, 4, 3, 2, 2] },
     liehu: { locked: true, name: '猎户', tag: '远程', skill: 'daobo', desc: '山里跑惯了。移动速度 +12%', move: 1.12, oa: [3, 4, 1, 5, 1, 4, 1, 3], at: [3, 3, 1, 5, 3, 2] },
-    shusheng: { locked: true, name: '书生', tag: '术法', skill: 'huima', desc: '手无缚鸡之力，却通术法。术法招式最强，近战偏弱', oa: [2, 1, 1, 1, 1, 2, 6, 4], at: [2, 1, 1, 2, 3, 6] },
+    shusheng: { locked: true, name: '书生', tag: '术法', skill: 'huima', desc: '手无缚鸡之力，却通术法。术法最强，近战偏弱', oa: [2, 1, 1, 1, 1, 2, 6, 4], at: [2, 1, 1, 2, 3, 6] },
   };
   let origin = 'nongfu';
   const OG = () => ORIGINS[origin] || ORIGINS.nongfu;
-  // ---------- 招式类别 / 出身熟练 / 类别共鸣 / 连携 / 熟练度 ----------
-  // 大类（出身熟练、功法专精）→ 具体兵器（连携、共鸣、施法时手里拿什么）
+  // ---------- 武艺类别 / 出身熟练 / 类别共鸣 / 连携 / 熟练度 ----------
+  // 大类（出身熟练、心法专精）→ 具体兵器（连携、共鸣、施法时手里拿什么）
   const CATN = ['短兵器', '长兵器', '远程', '法师'], CATA = [1, 2, 3, 6];   // 大类 → 出身属性下标
   const WEPN = ['刀', '剑', '锤', '枪', '关刀', '弓', '弩', '石子', '法术'], WEPCAT = [0, 0, 0, 1, 1, 2, 2, 2, 3];
   const WOF = { hengsao: 0, daobo: 0, huima: 0, daolun: 0, lianzhan: 1, sixiang: 1, wanren: 1, zhendi: 2, dilie: 2, shuanghuan: 2, tianbeng: 2, qiang: 3, chong: 3, xuanfeng: 4, xuehe: 4, jianyu: 5, huogong: 8, pili: 8 };
   const wepOf = k => WOF[k] != null ? WOF[k] : 0;
-  const ONLY_DAO = true;   // 用户定 11/10：目前只有刀的美术，招式奖励只出刀系；其他武器等美术补齐再开
+  const ONLY_DAO = true;   // 用户定 11/10：目前只有刀的美术，武艺奖励只出刀系；其他武器等美术补齐再开
   const catOf = k => WEPCAT[wepOf(k)];
-  // 招式姿势：主角固定空手，放招时按这一招的兵器举起对应的施招帧（第 1 帧蓄力，第 2 帧出手，更多帧给第二刀和收势）
-  // FRW 下标同 WEPN：[帧名前缀, 帧数]；法术暂按招式配法器，之后改成按装备的法器
+  // 武艺姿势：主角固定空手，放招时按这一招的兵器举起对应的施招帧（第 1 帧蓄力，第 2 帧出手，更多帧给第二刀和收势）
+  // FRW 下标同 WEPN：[帧名前缀, 帧数]；法术暂按武艺配法器，之后改成按装备的法器
   const FRW = [['dao', 4], ['jian', 4], ['chui', 2], ['qiang', 4], ['guandao', 5], ['gong', 2], ['nu', 2], ['shi', 2], ['zhang', 3]];
   const MAGE_FR = { huogong: 'shan', pili: 'fu' }, RECOV_N = { hengsao: 3, xuanfeng: 3, xuehe: 4, pili: 3 };
   for (const k of Object.keys(SK)) {
     const w = wepOf(k), [pre, n] = w === 8 && MAGE_FR[k] ? [MAGE_FR[k], 3] : FRW[w], f = i => pre + '_' + Math.min(n, i);
     SK[k].pose = [f(1), f(RECOV_N[k] || 2)]; SK[k].pose2 = f(3); SK[k].poseL = w === 8 || n < 4 ? SK[k].pose[1] : f(n);
   }
-  // 每个招式用自己的帧：[出招前摇帧, 出手帧, 收势帧, 第二击帧]。刀用白衣持刀帧 wd_*，剑用白衣持剑帧 wj_*
+  // 每个武艺用自己的帧：[出招前摇帧, 出手帧, 收势帧, 第二击帧]。刀用白衣持刀帧 wd_*，剑用白衣持剑帧 wj_*
   const PAIR = { daobo: ['wd_1', 'wd_2', 'wd_2'], hengsao: ['wd_3', 'wd_4', 'wd_4'], huima: ['wd_1', 'wd_6', 'wd_6', 'wd_2'], daolun: ['wd_7', 'wd_4', 'wd_4'] };
   for (const k of Object.keys(PAIR)) { const q = PAIR[k]; SK[k].pose = [q[0], q[1]]; SK[k].poseL = q[2] || q[1]; SK[k].pose2 = q[3] || q[1]; }
-  // 手里拿的兵器：放哪种近战/长兵招式就拿哪种，之后待机、行走都拿着；暗器、法术不换（空手施放）。目前只有刀有持械待机和行走帧
+  // 手里拿的兵器：放哪种近战/长兵武艺就拿哪种，之后待机、行走都拿着；暗器、法术不换（空手施放）。目前只有刀有持械待机和行走帧
   const HELDP = { 0: 'wd_' };
   const heldPre = () => 'wd_';   // 目前只有刀的美术：主角始终拿刀
   // 出身六项属性（11/11 用户定 A：全部接上效果）：体魄 短兵 长兵 身法 运气 悟性
@@ -5798,7 +5799,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     hp: () => 1 + (AT()[0] - 3) * .07,          // 体魄：气血（以受伤减免折算）
     move: () => 1 + (AT()[3] - 3) * .04,        // 身法：移动速度
     crit: () => (AT()[4] - 3) * .03,            // 运气：暴击率
-    xp: () => Math.max(.5, 1 + (AT()[5] - 3) * .1),   // 悟性：招式/功法熟练度获取
+    xp: () => Math.max(.5, 1 + (AT()[5] - 3) * .1),   // 悟性：武艺/心法熟练度获取
   };
   // ---------- 修为（11/11 用户定，照群侠幸存者）：杀敌和打完节点涨修为，满了升级攒一次「修炼」，节点打完后统一修炼（属性三选一），战斗中不打断 ----------
   const ATN = ['体魄', '短兵', '长兵', '身法', '运气', '悟性'];
@@ -5831,8 +5832,8 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     const rr = box.querySelector('.rr'); if (rr) rr.onclick = e => { e.preventDefault(); box.remove(); cultivate(cb, i, n, true); };
     document.body.appendChild(box);
   }
-  const profOf = c => c === 0 ? profV(AT()[1]) : c === 1 ? profV(AT()[2]) : profV((OG().oa || [3, 3, 3, 3, 3, 3, 3, 3])[CATA[c]]);   // 短兵/长兵：对应大类招式伤害
-  const RESD = [0, 0, .08, .16, .26, .40];   // 同类别 n 件：该类别招式伤害加成
+  const profOf = c => c === 0 ? profV(AT()[1]) : c === 1 ? profV(AT()[2]) : profV((OG().oa || [3, 3, 3, 3, 3, 3, 3, 3])[CATA[c]]);   // 短兵/长兵：对应大类武艺伤害
+  const RESD = [0, 0, .08, .16, .26, .40];   // 同类别 n 件：该类别武艺伤害加成
   function RES() {
     const cnt = [0, 0, 0, 0, 0, 0, 0, 0, 0]; for (const k of S.slots) if (SK[k]) cnt[wepOf(k)]++;   // 按具体兵器数
     const mx = Math.max(...cnt);
@@ -5845,14 +5846,14 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     const c = catOf(k), n = RES().cnt[wepOf(k)], low = hero.hp / maxHp() < .3 ? 1 + .25 * GM.low : 1;
     return profOf(c) * (1 + RESD[Math.min(5, n)]) * mastMul(k) * GM.all * GM.cat[c] * low * (1 + .06 * S.xy);
   }
-  function critRoll() {   // 暴击：基础 5% + 功法；伤害 ×1.5 + 心诀
+  function critRoll() {   // 暴击：基础 5% + 心法；伤害 ×1.5 + 心诀
     if (!CK || !SK[CK]) return 1;
     const c = catOf(CK);
     if (S.lhjOn || Math.random() < .05 + AFX.crit() + GM.crit + GM.critC[c]) { if (Math.random() < .35) floaters.push({ x: hero.x, y: hero.y - 54, t: 0, txt: '会心', color: '#ff9a4a' }); return 1.5 + GM.critD[c]; }
     return 1;
   }
   const CDM = () => RT.cd * RES().cd;
-  // ---------- 功法（三国幸存者 38 个：20 心法 + 8 通用 + 5 杂项 + 5 轻功） ----------
+  // ---------- 心法（三国幸存者 38 个：20 心法 + 8 通用 + 5 杂项 + 5 轻功） ----------
   const GGEN = [.02, .03, .045, .065], GSPEC = [.08, .13, .19, .28], GLVM = [1, 1.3, 1.7], GFTH = [120, 300], GTN = ['黄', '玄', '地', '天'], GTC = ['#c9b27a', '#6fb8ff', '#c58cff', '#ffb347'];
   const GF = {};
   const gadd = (id, n, t, o) => { GF[id] = Object.assign({ id, n, t, c: -1, x: {}, d: '', qg: false }, o); };
@@ -5865,14 +5866,14 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   gadd('taiping', '太平清领心经', 3, { x: { all: 1.12, take: .94 }, kh: .004, d: '全部伤害 +12%，受到伤害 -6%', xj: '每次击杀回复 0.4% 生命' });
   gadd('hunyuan', '混元一气功', 3, { x: { all: 1.08, hp: 1.1, crit: .03 }, kh: .002, d: '全部伤害 +8%，等效生命 +10%，暴击 +3%', xj: '每次击杀回复 0.2% 生命' });
   [['短兵器', 0, ['快刀心法', '断水心经', '破军心经', '霸王心经'], 0], ['长兵器', 1, ['抖枪诀', '贯虹心法', '龙胆心经', '无双心经'], 1], ['远程', 2, ['听风诀', '穿云心经', '追月心经', '落日心经'], 2], ['法师', 3, ['引气诀', '通玄心法', '紫气心经', '太平玄元经'], 4]].forEach(([cn, ci, ns, k]) => ns.forEach((n, t) => gadd('gf' + k + t, n, t, { c: ci, cn })));
-  gadd('gf30', '熊经诀', 0, { x: { take: .95 }, d: '受到伤害 -5%' });   // 原「体术」四本心法：体术取消，改成守御通用功法
+  gadd('gf30', '熊经诀', 0, { x: { take: .95 }, d: '受到伤害 -5%' });   // 原「体术」四本心法：体术取消，改成守御通用心法
   gadd('gf31', '金钟罩', 1, { x: { take: .92 }, d: '受到伤害 -8%' });
   gadd('gf32', '铁骨功', 2, { x: { take: .9 }, blk: .10, d: '受到伤害 -10%；心诀：10% 概率格挡一次伤害' });
   gadd('gf33', '不动明王功', 3, { x: { take: .88 }, blk: .10, stl: .4, d: '受到伤害 -12%；心诀：10% 格挡，站定 1 秒后受伤再 -40%' });
   gadd('qingshen', '轻身术', 0, { x: { dcd: .92 }, d: '翻滚冷却 -8%' });
   gadd('juqi', '聚气诀', 1, { x: { qh: 1, hy: 1 }, d: '气海 +1，回元 +1' });
   gadd('shixue', '嗜血功', 1, { x: {}, kh: .006, d: '每次击杀回复 0.6% 生命' });
-  gadd('beishui', '背水一战', 2, { x: {}, low: 1, d: '生命低于 30% 时，招式伤害 +25%，受到伤害 -10%' });
+  gadd('beishui', '背水一战', 2, { x: {}, low: 1, d: '生命低于 30% 时，武艺伤害 +25%，受到伤害 -10%' });
   gadd('lhj', '连环劲', 2, { x: {}, lhj: 1, d: '连续 3 秒不受伤，下一招必定暴击' });
   gadd('caoshang', '草上飞', 0, { qg: true, d: '轻功：跑动时脚下留风痕，敌人踩上减速 30%' });
   gadd('xingyun', '行云诀', 1, { qg: true, d: '轻功：跑动每 1 秒积 1 层势（最多 5），每层伤害 +6%；停下后每 1.5 秒散 1 层' });
@@ -5902,10 +5903,10 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const zqMax = () => Math.round(maxHp() * (1 + .06 * GM.qh) * 10) / 10;
   function gfText(g) {
     const f = .85 * GLVM[gfLv(g.id) - 1], pc = v => (v * 100).toFixed(1).replace(/\.0$/, '') + '%';
-    if (g.c >= 0) { const sm = SPECM[Math.max(1, gfSame(g.c))]; return `全部伤害 +${pc(GGEN[g.t] * f)}，${g.cn}招式伤害 +${pc(GSPEC[g.t] * f * sm)}（同类心法越多越专精）` + (g.t >= 2 ? '；心诀：该类暴击 +10%' + (g.t === 3 ? '，暴击伤害 +50%' : '') : ''); }
+    if (g.c >= 0) { const sm = SPECM[Math.max(1, gfSame(g.c))]; return `全部伤害 +${pc(GGEN[g.t] * f)}，${g.cn}武艺伤害 +${pc(GSPEC[g.t] * f * sm)}（同类心法越多越专精）` + (g.t >= 2 ? '；心诀：该类暴击 +10%' + (g.t === 3 ? '，暴击伤害 +50%' : '') : ''); }
     return g.d + (g.xj ? '；心诀：' + g.xj : '');
   }
-  // 波间习得招式：从还没学会的招式里随机给最多 3 个，选一个放进空格
+  // 波间习得武艺：从还没学会的武艺里随机给最多 3 个，选一个放进空格
   function offerSkill(cb) {
     const owned = S.slots.filter(Boolean), free = S.slots.indexOf('');
     const pool = Object.keys(SK).filter(k => !owned.includes(k) && tierOk(k));
@@ -5913,7 +5914,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     const pick = pool.sort(() => Math.random() - .5).slice(0, 3);
     W.pick = true;
     const box = document.createElement('div'); box.id = 'survPick';
-    box.innerHTML = `<div class="p"><h3>习得招式 · 三选一</h3><div class="row">${pick.map(k => `<button data-k="${k}"><b style="color:${SK[k].color}">${SK[k].icon}</b><span>${SK[k].name}</span><small>${SK[k].desc}</small></button>`).join('')}</div><p>新招式放进第 ${free + 1} 格，按 1→5 顺序轮流放</p></div>`;
+    box.innerHTML = `<div class="p"><h3>习得武艺 · 三选一</h3><div class="row">${pick.map(k => `<button data-k="${k}"><b style="color:${SK[k].color}">${SK[k].icon}</b><span>${SK[k].name}</span><small>${SK[k].desc}</small></button>`).join('')}</div><p>新武艺放进第 ${free + 1} 格，按 1→5 顺序轮流放</p></div>`;
     box.querySelectorAll('button').forEach(b => b.onclick = () => {
       const i = S.slots.indexOf(''); if (i >= 0) S.slots[i] = b.dataset.k;
       box.remove(); W.pick = false; if (cb) cb(); else if (window.ROGUE) ROGUE.offer();
@@ -6004,12 +6005,12 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   // ---------- 路线模式 ----------
   const maxHp = () => window.GEAR ? GEAR.maxHp() : 10;
   const heal = v => { hero.hp = Math.min(maxHp(), hero.hp + v); };
-  // ---------- 节点结算：连选 n 次（招式 / 强化 三选一）----------
+  // ---------- 节点结算：连选 n 次（武艺 / 强化 三选一）----------
   function rewardOptions(kind) {
     const owned = S.slots.filter(Boolean), free = S.slots.indexOf('') >= 0;
     const sk = (free ? Object.keys(SK).filter(k => !owned.includes(k) && tierOk(k) && (!ONLY_DAO || wepOf(k) === 0)) : []).sort(() => Math.random() - .5).slice(0, kind === 'skill' ? 3 : 2).map(k => ({ kind: 'skill', k, q: Math.min(3, SK[k].tier || 0), name: SK[k].name, icon: SK[k].icon, color: SK[k].color, desc: (SK[k].tier ? TIERN[SK[k].tier] + '阶 · ' : '') + SK[k].desc }));
     const gp = Object.keys(GF).filter(id => { const g = GF[id]; return !g.off && (!ONLY_DAO || g.c < 1) && !S.gf.includes(id) && S.qg !== id && W.n >= TMIN[g.t + 1] && (g.qg || S.gf.includes('')); });
-    const pk = gp.sort(() => Math.random() - .5).map(id => { const g = GF[id]; return { kind: 'gf', id, q: g.t, name: g.n, icon: g.qg ? '轻' : g.n[0], color: GTC[g.t], desc: GTN[g.t] + '阶 · ' + (g.qg ? '轻功 · ' : g.c >= 0 ? g.cn + '心法 · ' : '内功 · ') + gfText(g) }; });
+    const pk = gp.sort(() => Math.random() - .5).map(id => { const g = GF[id]; return { kind: 'gf', id, q: g.t, name: g.n, icon: g.qg ? '轻' : g.n[0], color: GTC[g.t], desc: GTN[g.t] + '阶 · ' + (g.qg ? '轻功 · ' : g.c >= 0 ? g.cn + ' · ' : '内功 · ') + gfText(g) }; });
     if (pk.length < 3) pk.push({ kind: 'heal', name: '回春', icon: '春', color: '#ff9a9a', desc: '立刻回复 40% 血量' });
     if (kind === 'perk') return pk.slice(0, 3);
     return sk.concat(pk).slice(0, 3).sort(() => Math.random() - .5);
@@ -6019,7 +6020,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     const kind = kinds && kinds[Math.min(i, kinds.length) - 1], opts = rewardOptions(kind); W.pick = true;
     const old = document.getElementById('survPick'); if (old) old.remove();
     const box = document.createElement('div'); box.id = 'survPick';
-    box.innerHTML = `<div class="p"><h3>战利 · ${kind === 'skill' ? '招式 · ' : kind === 'perk' ? '功法 · ' : ''}${n > 1 ? '第 ' + i + '/' + n + ' 次 · ' : ''}三选一</h3><div class="row">${opts.map((o, j) => `<button data-j="${j}" class="q${o.q || 0}"><i style="font-style:normal;font-size:11px;opacity:.7">${o.kind === 'skill' ? '新招式' : '强化'}</i>${iconUrl(o.kind, o.k || o.id) ? `<em class="ic" style="background-image:url('${iconUrl(o.kind, o.k || o.id)}')"></em>` : `<b style="color:${o.color}">${o.icon}</b>`}<span>${o.name}</span><small>${o.desc}</small></button>`).join('')}</div>${S.slots.indexOf('') >= 0 ? '<p>新招式放进空着的格子，按 1→5 顺序轮流放</p>' : ''}</div>`;
+    box.innerHTML = `<div class="p"><h3>战利 · ${kind === 'skill' ? '武艺 · ' : kind === 'perk' ? '心法 · ' : ''}${n > 1 ? '第 ' + i + '/' + n + ' 次 · ' : ''}三选一</h3><div class="row">${opts.map((o, j) => `<button data-j="${j}" class="q${o.q || 0}"><i style="font-style:normal;font-size:11px;opacity:.7">${o.kind === 'skill' ? '新武艺 · 主动' : o.kind === 'gf' ? '心法 · 被动' : '回血'}</i>${iconUrl(o.kind, o.k || o.id) ? `<em class="ic" style="background-image:url('${iconUrl(o.kind, o.k || o.id)}')"></em>` : `<b style="color:${o.color}">${o.icon}</b>`}<span>${o.name}</span><small>${o.desc}</small></button>`).join('')}</div>${S.slots.indexOf('') >= 0 ? '<p>新武艺放进空着的格子，按 1→5 顺序轮流放</p>' : ''}</div>`;
     box.querySelectorAll('button').forEach(b => b.onclick = () => {
       const o = opts[+b.dataset.j];
       if (o.kind === 'skill') { const f = S.slots.indexOf(''); if (f >= 0) S.slots[f] = o.k; } else if (o.kind === 'gf') { if (GF[o.id].qg) S.qg = o.id; else { const f = S.gf.indexOf(''); if (f >= 0) S.gf[f] = o.id; } } else heal(maxHp() * .4);
@@ -6052,8 +6053,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   function loot(nd, back) {
     if (nd.type === 'boss') { say('敌将已破！', 1.4); heal(maxHp() * .3); offerReward(2, back, 1, ['skill', 'perk']); }   // 血量是资源：只有首领、营地、疗伤奖励、奇遇才回血
     else if (nd.type === 'elite') { say('精锐已破！', 1.4); offerReward(2, back, 1, ['skill', 'perk']); }
-    else if (nd.rw === 'heal') { say('包扎伤口', 1.2); heal(maxHp() * .35); back(); }
-    else offerReward(1, back, 1, [nd.rw || 'skill']);
+    else offerReward(1, back, 1, [undefined]);
   }
   function beginNode(nd) {
     if (!c2ok && typeof ensureAssets === 'function') ensureAssets('chapter2', { silent: true }).then(() => { c2ok = true; });
@@ -6173,7 +6173,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       ctx.restore();
     }
   }
-  // HUD 美术（11/11 Gemini）：招式图标、行标、空格、太极、血滴
+  // HUD 美术（11/11 Gemini）：武艺图标、行标、空格、太极、血滴
   const HIMG = {}; const himg = (k, u) => { const i = new Image(); i.src = u; HIMG[k] = i; };
   himg('empty', 'pack/ui/hud/empty.webp?v=1ff90ff6f0'); himg('waigong', 'pack/ui/hud/waigong.webp?v=46599d0712'); himg('neigong', 'pack/ui/hud/neigong.webp?v=d64ca46cd2'); himg('qinggong', 'pack/ui/hud/qinggong.webp?v=63c88bd340');
   himg('taiji', 'pack/ui/hud/taiji.webp?v=b56fd73675'); himg('blood', 'pack/ui/hud/blood.webp?v=386ce79fa3');
@@ -6286,18 +6286,18 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     const cats = CATN.map((n, c) => `<span style="display:inline-block;margin:2px 8px 2px 0">${n} <b style="color:${profOf(c) >= 1.15 ? '#9fe08a' : profOf(c) < .9 ? '#e08a8a' : '#ddd'}">×${profOf(c).toFixed(2)}</b></span>`).join('');
     const rows = S.slots.map((k, i) => !SK[k] ? `<div class="r" style="opacity:.4">${i + 1}. 空</div>` :
       `<div class="r"><b style="color:${SK[k].color}">${i + 1}. ${SK[k].name}</b> <span class="t">${WEPN[wepOf(k)]} · ${CATN[catOf(k)]}${SK[k].tier ? ' · ' + TIERN[SK[k].tier] + '阶' : ''}</span><span class="v">LV${lvOf(k)} · ×${skillMul(k).toFixed(2)}${tot ? ' · 输出 ' + Math.round((S.dps[k] || 0) / tot * 100) + '%' : ''}</span><span class="mv"><button data-mv="${i}:-1"${i < 1 ? ' disabled' : ''}>▲</button><button data-mv="${i}:1"${i > 3 || !SK[S.slots[i + 1]] ? ' disabled' : ''}>▼</button></span></div>`).join('');
-    const res = R.cnt.map((n, c) => n >= 2 ? `<div class="r"><b>${WEPN[c]}共鸣 ${n} 件</b><span class="v">${WEPN[c]}招式伤害 +${Math.round(RESD[Math.min(5, n)] * 100)}%</span></div>` : '').join('') || '<div class="r" style="opacity:.5">还没有（同一种兵器的招式 2 件起）</div>';
+    const res = R.cnt.map((n, c) => n >= 2 ? `<div class="r"><b>${WEPN[c]}共鸣 ${n} 件</b><span class="v">${WEPN[c]}武艺伤害 +${Math.round(RESD[Math.min(5, n)] * 100)}%</span></div>` : '').join('') || '<div class="r" style="opacity:.5">还没有（同一种兵器的武艺 2 件起）</div>';
     const gfRows = S.gf.map((id, i) => { const g = GF[id]; return !g ? `<div class="r" style="opacity:.4">内功 ${i + 1} · 空</div>` : `<div class="r"><b style="color:${GTC[g.t]}">${g.n}</b> <span class="t">${GTN[g.t]}阶 · ${g.c >= 0 ? g.cn + '心法' : '通用'} · LV${gfLv(id)} · 杀敌 ${S.gfExp[id] || 0}</span><span class="mv"><button data-gx="${i}">✕</button></span></div><div class="gd">${gfText(g)}</div>`; }).join('');
     const qgRow = GF[S.qg] ? `<div class="r"><b style="color:${GTC[GF[S.qg].t]}">${GF[S.qg].n}</b> <span class="t">${GTN[GF[S.qg].t]}阶</span><span class="mv"><button data-qx="1">✕</button></span></div><div class="gd">${GF[S.qg].d}</div>` : '<div class="r" style="opacity:.4">空（战利品里可能出现轻功）</div>';
     const mx = Math.max(...R.cnt), ex = [mx >= 3 ? '受伤 -5%' : '', mx >= 4 ? '出招 -5% 间隔' : '', mx >= 5 ? '出招再快（共 -10%）' : ''].filter(Boolean).join('，');
     return `<div class="bp"><h3>构筑总览 <button class="x">✕</button></h3>
-      <h4>出身 · ${o.name}</h4><div style="font-size:12px">${cats}</div><div style="font-size:11px;opacity:.6">出身对各类招式的熟练系数：跨类也能用，只是偏弱</div>
-      <h4>招式（按 1→5 顺序放，可用 ▲▼ 调顺序）</h4>${rows}
+      <h4>出身 · ${o.name}</h4><div style="font-size:12px">${cats}</div><div style="font-size:11px;opacity:.6">出身对各类武艺的熟练系数：跨类也能用，只是偏弱</div>
+      <h4>武艺（按 1→5 顺序放，可用 ▲▼ 调顺序）</h4>${rows}
       <h4>兵器共鸣</h4>${res}${ex ? `<div style="font-size:11px;opacity:.7;margin-top:2px">额外：${ex}</div>` : ''}
       <h4>连携</h4><div style="font-size:12px">相邻两招用同一种兵器，后一招前摇缩短，逐次叠加最多 -80%；换兵器就断。当前：${S.chain > 0 ? '×' + S.chain : '无'}</div>
       <h4>内功（同类心法装得越多，专精越高、升级越快）</h4>${gfRows}
       <h4>轻功</h4>${qgRow}
-      <h4>真气</h4><div style="font-size:12px">${Math.round(S.zq * 10)} / ${Math.round(zqMax() * 10)}　<span style="opacity:.65">护体：受伤时真气挡 30%；发劲：真气过半时招式自动 +30% 伤害、每招耗 5% 真气；战后剩余的 30% 化成气血</span></div></div>`;
+      <h4>真气</h4><div style="font-size:12px">${Math.round(S.zq * 10)} / ${Math.round(zqMax() * 10)}　<span style="opacity:.65">护体：受伤时真气挡 30%；发劲：真气过半时武艺自动 +30% 伤害、每招耗 5% 真气；战后剩余的 30% 化成气血</span></div></div>`;
   }
   function toggleBuild(on) {
     buildOpen = on != null ? on : !buildOpen;
@@ -6328,8 +6328,8 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   setInterval(buildUi, 400);
 
   const attrInfo = (k, cur) => { const o0 = origin, d0 = S.atAdd; if (ORIGINS[k]) origin = k; if (!cur) S.atAdd = null; const at = AT(), pct = x => (x >= 0 ? '+' : '') + Math.round(x * 100) + '%';
-    const r = [['体魄', at[0], '气血 ' + pct(AFX.hp() - 1), '越高越扛打：受到的伤害按比例减少'], ['短兵', at[1], '刀剑招式 ' + pct(profV(at[1]) - 1), '刀、剑等短兵器招式的伤害'], ['长兵', at[2], '枪戟招式 ' + pct(profV(at[2]) - 1), '枪、关刀等长兵器招式的伤害'],
-      ['身法', at[3], '移速 ' + pct(AFX.move() - 1), '移动速度'], ['运气', at[4], '暴击 ' + pct(AFX.crit()), '暴击率（基础 5%）'], ['悟性', at[5], '熟练 ' + pct(AFX.xp() - 1), '招式、功法熟练度涨得更快']];
+    const r = [['体魄', at[0], '气血 ' + pct(AFX.hp() - 1), '越高越扛打：受到的伤害按比例减少'], ['短兵', at[1], '刀剑武艺 ' + pct(profV(at[1]) - 1), '刀、剑等短兵器武艺的伤害'], ['长兵', at[2], '枪戟武艺 ' + pct(profV(at[2]) - 1), '枪、关刀等长兵器武艺的伤害'],
+      ['身法', at[3], '移速 ' + pct(AFX.move() - 1), '移动速度'], ['运气', at[4], '暴击 ' + pct(AFX.crit()), '暴击率（基础 5%）'], ['悟性', at[5], '熟练 ' + pct(AFX.xp() - 1), '武艺、心法熟练度涨得更快']];
     origin = o0; S.atAdd = d0; return r; };
   const status = () => ({   // 路线长卷「兵籍牒」用：这一局的当前状态（11/11）
     origin: OG().name, lv: S.lv || 1, pct: Math.floor(Math.min(1, (S.xiu || 0) / XIU_NEED(S.lv || 1)) * 100), bank: S.bank || 0,

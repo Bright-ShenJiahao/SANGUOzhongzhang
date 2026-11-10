@@ -94,8 +94,8 @@
     const heroGroup = addGroup('hero', '主角');
     btn(heroGroup, '回到主界面', 'alt', () => { if (typeof returnFromPausedGame === 'function') returnFromPausedGame(true); else if (window.TITLE && TITLE.show) TITLE.show(); });
     btn(heroGroup, '回到整军备战', 'alt', () => { if (typeof returnFromPausedGame === 'function') returnFromPausedGame(false); else if (window.TITLE && TITLE.openPreparation) TITLE.openPreparation(1); });
-    btn(heroGroup, '招式：刀（4招）', 'alt', () => { if (window.SURV) { SURV.slots.splice(0, 5, 'hengsao', 'daobo', 'huima', 'daolun', ''); tipLine('招式栏换成刀：横扫 刀波 回马 刀轮'); } });
-    btn(heroGroup, '招式：剑（3招）', 'alt', () => { if (window.SURV) { SURV.slots.splice(0, 5, 'lianzhan', 'sixiang', 'wanren', '', ''); tipLine('招式栏换成剑：连斩 四象 万刃'); } });
+    btn(heroGroup, '武艺：刀（4招）', 'alt', () => { if (window.SURV) { SURV.slots.splice(0, 5, 'hengsao', 'daobo', 'huima', 'daolun', ''); tipLine('武艺栏换成刀：横扫 刀波 回马 刀轮'); } });
+    btn(heroGroup, '武艺：剑（3招）', 'alt', () => { if (window.SURV) { SURV.slots.splice(0, 5, 'lianzhan', 'sixiang', 'wanren', '', ''); tipLine('武艺栏换成剑：连斩 四象 万刃'); } });
     btn(heroGroup, '回满血', '', () => { if (typeof hero !== 'undefined') hero.hp = maxHeroHp(); });
     btn(heroGroup, '修为 +100', '', () => { if (window.SURV && SURV.addXiu) SURV.addXiu(100); });
     // 面板底部临时提示（主界面、整备页时游戏内文字看不到）
@@ -213,7 +213,7 @@
 
   // 三国终章：老游戏的按钮先藏起来（锦囊、经脉、神器、校场、第二章、Boss 等已拿掉），只留测试要用的几个
   function trimPanel() {
-    const keep = ['回到主界面', '招式：刀', '招式：剑', '回满血', '无敌', '跳过这一波', '恢复存档', '跳到第', '修为'];
+    const keep = ['回到主界面', '武艺：刀', '武艺：剑', '回满血', '无敌', '跳过这一波', '恢复存档', '跳到第', '修为'];
     panel.querySelectorAll('button').forEach(b => { if (!keep.some(k => b.textContent.startsWith(k))) b.style.display = 'none'; });
     panel.querySelectorAll('.dbgTrial,.dbgFloors').forEach(e => { e.style.display = 'none'; });
     panel.querySelectorAll('.dbgGroup').forEach(g => { if (![...g.querySelectorAll('button')].some(b => b.style.display !== 'none')) g.style.display = 'none'; });
