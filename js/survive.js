@@ -504,36 +504,171 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     else if (k === 'rest') { heal(maxHp() * .3); done(); }
     else done();
   }
-  function nodeClear() {   // 一个节点打完：发奖励，回长卷
+  function nodeClear() {   // 一个节点打完：敌人站定淡出 → 左下战报 → 整备屏（结算/拾取/修炼/行商/武艺）→ 回长卷
     const nd = RT.node; W.started = false; eshots.length = 0;
-    for (const z of zs) if (!z.dead) { z.endFade = .9; z.st = 'idle'; z.t = 0; z.enemySkill = null; z.air = false; z.stun = 0; z.daze = 0; }   // 站定淡出，弹窗出来时已经消失
+    for (const z of zs) if (!z.dead) { z.endFade = .9; z.st = 'idle'; z.t = 0; z.enemySkill = null; z.air = false; z.stun = 0; z.daze = 0; }
     setTimeout(() => { zs.length = 0; }, 950);
-    { const c = S.zq * .3; if (c > .05) { heal(c); floaters.push({ x: hero.x, y: hero.y - 60, t: 0, txt: '真气化血 +' + Math.round(c * 10), color: '#7fd0ff' }); } S.zq = 0; }   // 战后：剩余真气 30% 转成气血
+    const R = S.rep = { kills: (typeof kills === 'number' ? kills : 0) - (S.k0 || 0), got: S.coinGot || 0, left: 0, taken: Math.round((S.taken || 0) * 10), tiao: 0, lv0: S.lvAt0 || S.lv, xiu: 0 };
+    { let sum = 0; for (const c of S.coins) sum += c.v; R.left = Math.floor(sum * .9); S.money += R.left; S.coins.length = 0; }   // 地上没捡的铜钱：收回九成
+    { const c = S.zq * .3; if (c > .05) { heal(c); R.tiao = Math.round(c * 10); } S.zq = 0; }   // 调息：剩余真气 30% 化成气血
     if (nd.type === 'boss' && nd.final) { won = true; return; }
     if (window.SFX) SFX.play('j_win');
-    const back = () => { W.pick = false; ROUTE.done(nd); };
-    addXiu(nd.type === 'boss' ? 60 : nd.type === 'elite' ? 40 : 25);   // 节点结算修为
-    W.pick = true; setTimeout(() => cultivate(() => loot(nd, back)), 900);
-  }
-  function loot(nd, back) {
-    if (nd.type === 'boss') { say('敌将已破！', 1.4); heal(maxHp() * .3); offerReward(2, back, 1, ['skill', 'perk']); }   // 血量是资源：只有首领、营地、疗伤奖励、奇遇才回血
-    else if (nd.type === 'elite') { say('精锐已破！', 1.4); offerReward(2, back, 1, ['skill', 'perk']); }
-    else offerReward(1, back, 1, [undefined]);
+    R.xiu = nd.type === 'boss' ? 60 : nd.type === 'elite' ? 40 : 25; addXiu(R.xiu);
+    if (nd.type === 'boss') heal(maxHp() * .3);
+    S.loot = rollLoot(nd); S.shop = rollShop(); S.bought = -1;
+    report(R);
+    W.pick = true; setTimeout(() => prepOpen(nd), 1000);
   }
   function beginNode(nd) {
     if (!c2ok && typeof ensureAssets === 'function') ensureAssets('chapter2', { silent: true }).then(() => { c2ok = true; });
     GM = gfCalc(); S.zq = zqMax(); S.hp0 = hero.hp; S.noHitT = 0; S.xy = 0;
+    S.k0 = typeof kills === 'number' ? kills : 0; S.coinGot = 0; S.taken = 0; S.lastHp = hero.hp; S.coins = []; S.lvAt0 = S.lv; S.tutT = 0;
     RT.node = nd; W.N = ROUTE.waves(nd); W.started = true; W.between = 0; W.pick = false; S.wind = null; S.recov = null; S.later = []; bolts.length = 0; zones.length = 0; fx.length = 0;
     zs.length = 0; eshots.length = 0; if (window.ARENA) ARENA.start(ROUTE.mapOf(nd));
     startWave(1);
   }
+
+  // ================= 铜钱 / 战报 / 整备屏 / 刘备教学（11/11 用户定） =================
+  const COIN_IMG = new Image(); COIN_IMG.src = 'art/ui/hud/coin.webp';
+  const PORTRAIT = new Image(); PORTRAIT.src = 'art/ui/npc/liubei_face.webp';
+  function dropCoins(z) {   // 敌人倒下掉铜钱：普通 1，精锐 3，敌将 15
+    const v = z.survTier >= 2 ? 15 : z.survTier === 1 ? 4 : (Math.random() < .3 ? 2 : 1);
+    const n = Math.min(5, v), each = Math.ceil(v / n);
+    for (let i = 0; i < n; i++) S.coins.push({ x: z.x + R(-14, 14), y: z.y + R(-6, 6), z: 8 + R(0, 10), vz: R(60, 110), vx: R(-40, 40), v: each, t: 0 });
+    tut('coin');
+  }
+  function coinTick(dt) {
+    for (const z of zs) if (z.dead && !z.coinDone && !z.endFade) { z.coinDone = 1; dropCoins(z); }
+    if (S.coinComboT > 0) S.coinComboT -= dt; else S.coinCombo = 0;
+    for (let i = S.coins.length - 1; i >= 0; i--) {
+      const c = S.coins[i]; c.t += dt;
+      if (c.z > 0 || c.vz > 0) { c.vz -= 380 * dt; c.z = Math.max(0, c.z + c.vz * dt); c.x += c.vx * dt; if (c.z === 0) { c.vz = 0; c.vx = 0; } }
+      const dx = hero.x - c.x, dy = hero.y - c.y, d = Math.hypot(dx, dy * 1.6);
+      if (d < 70 && c.t > .35) { const sp = 260 + (70 - d) * 6; c.x += dx / (d || 1) * sp * dt; c.y += dy / (d || 1) * sp * dt; }   // 走近自动吸过来
+      if (d < 14 && c.t > .35) { S.money += c.v; S.coinGot += c.v; S.coins.splice(i, 1); S.coinCombo = Math.min(14, S.coinCombo + 1); S.coinComboT = .7; if (window.SFX) SFX.play('coin', 0, 1 + S.coinCombo * .05); }
+    }
+    if (hero.hp < (S.lastHp == null ? hero.hp : S.lastHp)) S.taken += S.lastHp - hero.hp; S.lastHp = hero.hp;
+  }
+  function coinDraw() {
+    const ok = COIN_IMG.complete && COIN_IMG.naturalWidth;
+    for (const c of S.coins) {
+      const bob = Math.sin(c.t * 5 + c.x) * 1.2, sz = 11;
+      ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(c.x, c.y + 2, 5, 2, 0, 0, 7); ctx.fill();
+      if (ok) ctx.drawImage(COIN_IMG, 20, 20, 88, 88, c.x - sz / 2, c.y - sz - c.z + bob, sz, sz);
+      else { ctx.fillStyle = '#e8b84a'; ctx.beginPath(); ctx.arc(c.x, c.y - 5 - c.z + bob, 4, 0, 7); ctx.fill(); }
+    }
+  }
+  function moneyHud() {   // 左上角：铜钱
+    const x = 10, y = 30, w = 104, h = 30;
+    ctx.save(); ctx.fillStyle = 'rgba(16,10,6,.82)'; ctx.fillRect(x, y, w, h); ctx.strokeStyle = '#b08a4a'; ctx.lineWidth = 1.2; ctx.strokeRect(x + .5, y + .5, w - 1, h - 1);
+    if (COIN_IMG.complete && COIN_IMG.naturalWidth) ctx.drawImage(COIN_IMG, x + 3, y + 2, 26, 26);
+    ctx.font = 'bold 17px "PingFang SC",sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#ffe9a8'; ctx.fillText(String(S.money), x + 36, y + h / 2 + 1);
+    ctx.restore();
+  }
+  function report(R) {   // 左下角战报，2.6 秒后淡出
+    const old = document.getElementById('survRep'); if (old) old.remove();
+    const d = document.createElement('div'); d.id = 'survRep';
+    d.innerHTML = `<b>战报</b><span>击倒 ${R.kills}</span><span>铜钱 +${R.got + R.left}</span><span>受伤 ${R.taken}</span>`;
+    document.body.appendChild(d); setTimeout(() => d.classList.add('out'), 2600); setTimeout(() => d.remove(), 3200);
+  }
+
+  // ---- 掉落与货品 ----
+  const SELL = [6, 12, 20, 30, 40];
+  function itemFrom(o) { return o.kind === 'heal' ? null : Object.assign({}, o, { price: (o.kind === 'skill' ? 20 : 16) + (o.q || 0) * 15, sell: SELL[o.q || 0] }); }
+  function rollLoot(nd) {   // 拾取页：普通战斗 1 本秘籍（四成概率再多 1 本），精锐 2，敌将 3
+    const n = nd.type === 'boss' ? 3 : nd.type === 'elite' ? 2 : (Math.random() < .4 ? 2 : 1), out = [], seen = new Set();
+    for (let i = 0; i < 6 && out.length < n; i++) for (const o of rewardOptions(i % 2 ? 'perk' : undefined)) { const it = itemFrom(o); const key = it && (it.k || it.id); if (it && !seen.has(key) && out.length < n) { seen.add(key); out.push(it); } }
+    return out;
+  }
+  function rollShop() {   // 行商：三选一买一件，不能刷新
+    const out = [], seen = new Set(S.loot.map(it => it.k || it.id));
+    for (const o of rewardOptions(undefined).concat(rewardOptions('perk'))) { const it = itemFrom(o); const key = it && (it.k || it.id); if (it && !seen.has(key) && out.length < 2) { seen.add(key); out.push(it); } }
+    out.push({ kind: 'potion', name: '金创药', icon: '药', color: '#ff9a9a', desc: '立刻回复 40% 气血', price: 12, q: 0 });
+    return out;
+  }
+  const canLearn = it => it.kind === 'skill' ? S.slots.includes('') : it.kind === 'gf' ? (GF[it.id].qg ? !S.qg : S.gf.includes('')) : true;
+  function learn(it) {
+    if (it.kind === 'skill') { const f = S.slots.indexOf(''); if (f < 0) return false; S.slots[f] = it.k; tut('learn'); }
+    else if (it.kind === 'gf') { if (GF[it.id].qg) { if (S.qg) return false; S.qg = it.id; } else { const f = S.gf.indexOf(''); if (f < 0) return false; S.gf[f] = it.id; } GM = gfCalc(); }
+    else if (it.kind === 'potion') heal(maxHp() * .4);
+    return true;
+  }
+
+  // ---- 整备屏 ----
+  let prepNd = null, prepTab = 'jie';
+  const TABS = [['jie', '结算'], ['shi', '拾取'], ['xiu', '修炼'], ['shang', '行商'], ['wu', '武艺']];
+  function prepOpen(nd) { prepNd = nd; prepTab = 'jie'; if (window.SFX) SFX.play('j_shop'); tut('prep'); prepRender(); }
+  function prepClose() {
+    for (const it of S.loot || []) S.money += it.sell;   // 没处理的秘籍：按卖价自动换钱
+    S.loot = []; S.prepTip = ''; const el = document.getElementById('survPrep'); if (el) el.remove(); W.pick = false; const nd = prepNd; prepNd = null; ROUTE.done(nd);
+  }
+  const card = (it, extra, btns) => `<div class="pc q${Math.min(3, it.q || 0)}">${iconUrl(it.kind, it.k || it.id) ? `<em style="background-image:url('${iconUrl(it.kind, it.k || it.id)}')"></em>` : `<b class="gl" style="color:${it.color}">${it.icon}</b>`}<i>${it.kind === 'skill' ? '武艺 · 主动' : it.kind === 'gf' ? (GF[it.id].qg ? '轻功 · 被动' : '心法 · 被动') : '药品'}</i><span>${it.name}</span><small>${it.desc}</small>${extra || ''}<div class="bt">${btns}</div></div>`;
+  function prepRender() {
+    let el = document.getElementById('survPrep');
+    if (!el) { el = document.createElement('div'); el.id = 'survPrep'; document.body.appendChild(el); el.addEventListener('pointerdown', e => e.stopPropagation()); }
+    const R = S.rep || {}, bar = (lab, lv, r) => `<div class="br"><span>${lab}</span><i><u style="width:${Math.round(r * 100)}%"></u></i><b>LV.${lv}</b></div>`;
+    let body = '';
+    if (prepTab === 'jie') {
+      const sk = S.slots.filter(Boolean).map(k => { const m = S.mast[k] || 0, l = lvOf(k); return bar(SK[k].name, l, Math.min(1, (m % 30) / 30)); }).join('');
+      body = `<div class="cols2"><div><h4>本仗战果</h4><div class="kv"><span>击倒</span><b>${R.kills}</b></div><div class="kv"><span>拾得铜钱</span><b>+${R.got}</b></div><div class="kv"><span>地上没捡的（收回九成）</span><b>+${R.left}</b></div><div class="kv"><span>受到伤害</span><b>${R.taken}</b></div><div class="kv"><span>调息（剩余真气化成气血）</span><b style="color:#ff8a7a">+${R.tiao}</b></div><div class="kv"><span>修为结算</span><b>+${R.xiu}</b></div></div>
+        <div><h4>修为与武艺</h4>${bar('修为', S.lv, Math.min(1, S.xiu / XIU_NEED(S.lv)))}${sk}<div class="kv"><span>气血</span><b>${Math.ceil(hero.hp * 10)} / ${Math.round(maxHp() * 10)}</b></div>${S.bank ? `<p class="hint">有 ${S.bank} 次修炼机会，去「修炼」页</p>` : ''}</div></div>`;
+    } else if (prepTab === 'shi') {
+      body = S.loot.length ? `<p class="hint">敌人掉落的秘籍。学会，或卖给行商换铜钱；不处理就离开会自动卖掉。</p><div class="row">${S.loot.map((it, i) => card(it, `<p class="pr">卖价 ${it.sell} 铜钱</p>`, `<button data-a="learn" data-i="${i}" ${canLearn(it) ? '' : 'disabled title="格子满了"'}>学会</button><button data-a="sell" data-i="${i}">卖掉</button>`)).join('')}</div>` : '<p class="empty">这一仗没有捡到秘籍。</p>';
+    } else if (prepTab === 'xiu') {
+      if (!S.bank) body = `<p class="empty">修为 LV.${S.lv}　暂无修炼机会。杀敌、打完仗都会涨修为，满一级得一次修炼。</p>`;
+      else { S.xopts = S.xopts || rollXiu(); body = `<p class="hint">剩余修炼 ${S.bank} 次 · 三选一提升属性（被动）· 运气越高越容易出好品阶</p><div class="row">${S.xopts.map((o, j) => `<div class="pc q${o.q}"><i style="color:${RAR[o.q][1]}">${RAR[o.q][0]}</i><span style="color:${RAR[o.q][1]};font-size:22px">${o.adds.map(([a]) => ATN[a]).join(' · ')}</span><small>${o.adds.map(([a, v]) => ATN[a] + ' +' + v + '（' + AT()[a] + ' → ' + (AT()[a] + v) + '）').join('<br>')}</small><div class="bt"><button data-a="xiu" data-i="${j}">选这个</button></div></div>`).join('')}</div>${S.xrr ? '' : '<p class="hint"><a href="#" data-a="xrr">不合适？刷新一次</a></p>'}`; }
+    } else if (prepTab === 'shang') {
+      body = `<p class="hint">行商：三件货只能买一件，不能刷新。手上铜钱 ${S.money}</p><div class="row">${S.shop.map((it, i) => card(it, `<p class="pr">${it.price} 铜钱</p>`, S.bought >= 0 ? (S.bought === i ? '<button disabled>已买下</button>' : '<button disabled>—</button>') : `<button data-a="buy" data-i="${i}" ${S.money >= it.price && canLearn(it) ? '' : 'disabled'}>买下</button>`)).join('')}</div>`;
+    } else if (prepTab === 'wu') {
+      const rows = S.slots.map((k, i) => `<div class="wr"><b>${i + 1}</b>${k && SK[k] ? `${IMGU[k] ? `<em style="background-image:url('${IMGU[k]}')"></em>` : ''}<span>${SK[k].name} <small>LV${lvOf(k)} · ${SK[k].desc}</small></span><button data-a="up" data-i="${i}" ${i ? '' : 'disabled'}>▲</button><button data-a="dn" data-i="${i}" ${i < 4 && S.slots[i + 1] ? '' : 'disabled'}>▼</button><button data-a="off" data-i="${i}" ${S.slots.filter(Boolean).length > 1 ? '' : 'disabled'}>卸下</button>` : '<span class="em">空格</span>'}</div>`).join('');
+      const gfr = S.gf.concat([S.qg]).map((id, i) => `<div class="wr">${id && GF[id] ? `${HIMG['gf_' + id] ? `<em style="background-image:url('art/ui/gf/${id}.webp')"></em>` : ''}<span>${GF[id].n} <small>${GF[id].d}</small></span><button data-a="goff" data-i="${i}">卸下</button>` : `<span class="em">${i < 3 ? '心法空格' : '轻功空格'}</span>`}</div>`).join('');
+      body = `<div class="cols2"><div><h4>武艺（主动 · 按 1→5 轮流出手）</h4>${rows}</div><div><h4>心法（被动）</h4>${gfr}</div></div>`;
+    }
+    el.innerHTML = `<div class="pp"><div class="tb">${TABS.map(([k, t]) => `<button data-t="${k}" class="${k === prepTab ? 'on' : ''}">${t}${k === 'xiu' && S.bank ? ` <i>${S.bank}</i>` : k === 'shi' && S.loot.length ? ` <i>${S.loot.length}</i>` : ''}</button>`).join('')}<span class="mo"><em></em>${S.money}</span></div><div class="bd">${S.prepTip ? `<div class="lb"><em></em><p><b>刘备</b>${S.prepTip}</p><a href="#" data-a="tipx">知道了</a></div>` : ''}${body}</div><div class="ft"><span>第 ${prepNd ? prepNd.layer : ''} 层 · ${prepNd ? ROUTE.name(prepNd) : ''} 已平定</span><button class="go">继续 ▶</button></div></div>`;
+    el.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { prepTab = b.dataset.t; prepRender(); });
+    el.querySelector('.go').onclick = () => { if (S.bank && !confirm('还有 ' + S.bank + ' 次修炼没用，确定离开？（会保留到下次）')) return; prepClose(); };
+    el.querySelectorAll('[data-a]').forEach(b => b.onclick = e => {
+      e.preventDefault(); const a = b.dataset.a, i = +b.dataset.i;
+      if (a === 'learn') { if (learn(S.loot[i])) S.loot.splice(i, 1); }
+      else if (a === 'sell') { S.money += S.loot[i].sell; S.loot.splice(i, 1); if (window.SFX) SFX.play('coin'); }
+      else if (a === 'buy') { const it = S.shop[i]; if (S.money >= it.price && learn(it)) { S.money -= it.price; S.bought = i; if (window.SFX) SFX.play('j_shop'); } }
+      else if (a === 'xiu') { const o = S.xopts[i]; if (window.SFX) SFX.play('j_pick' + o.q); for (const [k, v] of o.adds) S.atAdd[k] += v; S.bank--; S.xopts = null; S.xrr = false; }
+      else if (a === 'xrr') { S.xopts = null; S.xrr = true; }
+      else if (a === 'tipx') S.prepTip = '';
+      else if (a === 'up' || a === 'dn') { const j = a === 'up' ? i - 1 : i + 1; [S.slots[i], S.slots[j]] = [S.slots[j], S.slots[i]]; }
+      else if (a === 'off') { S.slots.splice(i, 1); S.slots.push(''); }
+      else if (a === 'goff') { if (i === 3) S.qg = ''; else S.gf[i] = ''; GM = gfCalc(); }
+      prepRender();
+    });
+  }
+
+  // ---- 刘备教学：只在第一局 ----
+  const TUT_KEY = 'szz-tut', TUT = {
+    start: '贤弟，兵器自己会出手，你只管走位，别让贼兵围住。',
+    roll: matchMedia('(pointer:coarse)').matches ? '被围住了？点右下角翻滚！滚的时候刀枪不入。' : '被围住了？按空格翻滚！滚的时候刀枪不入。',
+    zq: '看到血条上面的蓝条了吗？那是真气：挨打时替你挡下三成伤害，过半时出手更重。',
+    coin: '贼兵掉了铜钱，走过去就能捡。没捡的，打完只能收回九成。',
+    prep: '打完一仗，先看「结算」，再去「修炼」「拾取」「行商」，整理好「武艺」顺序，最后点继续。',
+    learn: '学会了新武艺！武艺按格子顺序轮流出手，可以在「武艺」页调整。',
+  };
+  let tutSeen = {}; try { tutSeen = JSON.parse(localStorage.getItem(TUT_KEY) || '{}') || {}; } catch (e) {}
+  function tut(k) {
+    if (!RT.on || tutSeen[k] || tutSeen.all) return; tutSeen[k] = 1;
+    if (document.getElementById('survPrep') || k === 'prep') { S.prepTip = TUT[k]; try { localStorage.setItem(TUT_KEY, JSON.stringify(tutSeen)); } catch (e) {} if (document.getElementById('survPrep')) prepRender(); return; }   // 整备屏开着：师父的话嵌在面板顶部，不挡按钮 if (Object.keys(TUT).every(x => tutSeen[x])) tutSeen.all = 1;
+    try { localStorage.setItem(TUT_KEY, JSON.stringify(tutSeen)); } catch (e) {}
+    const old = document.getElementById('survTut'); if (old) old.remove();
+    const d = document.createElement('div'); d.id = 'survTut';
+    d.innerHTML = `<div class="tx"><b>刘备</b><p>${TUT[k]}</p><small>点一下关闭</small></div><em style="background-image:url('art/ui/npc/liubei_face.webp')"></em>`;
+    d.onclick = () => d.remove(); document.body.appendChild(d); setTimeout(() => { if (d.parentNode) d.classList.add('out'); setTimeout(() => d.remove(), 500); }, 7000);
+  }
   // ---------- 局内存档（11/11 用户定：回到长卷自动存；主界面「继续」读档） ----------
   const RUN_KEY = 'szz-run';
-  const snap = () => ({ origin, slots: S.slots.slice(), held: S.held, mast: { ...S.mast }, gf: S.gf.slice(), qg: S.qg, gfExp: { ...S.gfExp }, xy: S.xy, rt: { dmg: RT.dmg, cd: RT.cd, move: RT.move, take: RT.take }, hp: hero ? hero.hp : null, lv: S.lv, xiu: S.xiu, bank: S.bank, atAdd: (S.atAdd || []).slice() });
+  const snap = () => ({ origin, slots: S.slots.slice(), held: S.held, mast: { ...S.mast }, gf: S.gf.slice(), qg: S.qg, gfExp: { ...S.gfExp }, xy: S.xy, rt: { dmg: RT.dmg, cd: RT.cd, move: RT.move, take: RT.take }, hp: hero ? hero.hp : null, lv: S.lv, xiu: S.xiu, bank: S.bank, atAdd: (S.atAdd || []).slice(), money: S.money || 0 });
   function restore(o) {
     if (!o) return;
     if (ORIGINS[o.origin]) origin = o.origin;
     S.slots = o.slots || S.slots; S.held = o.held != null ? o.held : S.held; S.mast = o.mast || {}; S.gf = o.gf || ['', '', '']; S.qg = o.qg || ''; S.gfExp = o.gfExp || {}; S.xy = o.xy || 0;
+    S.money = o.money || 0; S.coins = []; S.loot = []; S.shop = [];
     S.lv = o.lv || 1; S.xiu = o.xiu || 0; S.bank = o.bank || 0; S.atAdd = o.atAdd || [0, 0, 0, 0, 0, 0];
     Object.assign(RT, o.rt || {}); GM = gfCalc(); S.zq = zqMax();
     if (hero && o.hp > 0) hero.hp = Math.min(o.hp, maxHp());
@@ -547,7 +682,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   // ---------- 对外接口 ----------
   function forceBlade() { weapon = 'blade'; pendingWeapon = null; try { if (window.GEAR && GEAR.switch) GEAR.switch(); } catch (e) {} if (typeof ui === 'function') ui(); }
   function startRun() {
-    S.lv = 1; S.xiu = 0; S.bank = 0; S.atAdd = [0, 0, 0, 0, 0, 0]; S.lvFx = 0; S.slots = [OG().skill || 'hengsao', '', '', '', '']; S.held = wepOf(S.slots[0]) < 7 ? wepOf(S.slots[0]) : null; S.mast = {}; S.dps = {}; S.gf = ['', '', '']; S.qg = ''; S.gfExp = {}; S.xy = 0; S.lhjReady = false; S.lhjOn = false; GM = GM0(); S.zq = zqMax(); S.hp0 = hero.hp; S.combo = 0; S.lk = typeof kills === 'number' ? kills : 0; S.chain = 0; S.lastCat = -1; S.lastI = -9; W.pick = false; const old = document.getElementById('survPick'); if (old) old.remove();
+    S.lv = 1; S.xiu = 0; S.bank = 0; S.atAdd = [0, 0, 0, 0, 0, 0]; S.lvFx = 0; S.money = 0; S.coins = []; S.loot = []; S.shop = []; S.slots = [OG().skill || 'hengsao', '', '', '', '']; S.held = wepOf(S.slots[0]) < 7 ? wepOf(S.slots[0]) : null; S.mast = {}; S.dps = {}; S.gf = ['', '', '']; S.qg = ''; S.gfExp = {}; S.xy = 0; S.lhjReady = false; S.lhjOn = false; GM = GM0(); S.zq = zqMax(); S.hp0 = hero.hp; S.combo = 0; S.lk = typeof kills === 'number' ? kills : 0; S.chain = 0; S.lastCat = -1; S.lastI = -9; W.pick = false; const old = document.getElementById('survPick'); if (old) old.remove();
     W.started = true; W.between = 0; S.wind = null; S.recov = null; S.later = []; S.qi = 0; bolts.length = 0; zones.length = 0; S.cycles = 0; fx.length = 0;
     forceBlade();
     const vw = viewW(); arenaL = M.gates[0] + 10; lockR = arenaL + vw * 1.5; gateI = 0;
@@ -558,6 +693,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     startWave(1);
   }
   function tick(dt) {
+    if (RT.on && RT.node && W.started && S.coins) { coinTick(dt); S.tutT = (S.tutT || 0) + dt; if (S.tutT > 1.5) tut('start'); if (S.tutT > 25) tut('zq'); if (zs.filter(z => !z.dead && Math.hypot(z.x - hero.x, z.y - hero.y) < 60).length >= 4) tut('roll'); }
     if (weapon !== 'blade') forceBlade();
     if (charging || atkHeldSince) cancelCharge();
     for (const z of zs) { if (z.stunCd > 0) z.stunCd -= dt; if (z.survSlow > 0) z.survSlow -= dt; }
@@ -579,6 +715,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     for (let i = fx.length - 1; i >= 0; i--) if (fx[i].t > fx[i].T) fx.splice(i, 1);
   }
   function drawWorld() {
+    if (RT.on && S.coins && S.coins.length) coinDraw();
     // 前摇：脚下画出这一招将要覆盖的范围，越接近出手越亮
     if (S.wind && !S.wind.k.none) {
       const k = S.wind.k, p = S.wind.t / S.wind.dur, a = aim();
@@ -656,6 +793,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   }
   function hud(HW) {
     hudT = performance.now(); buildUi();
+    if (RT.on && RT.node && S.money != null) moneyHud();
     for (const id of ['bR', 'top']) { const e = document.getElementById(id); if (e && e.style.visibility) e.style.visibility = ''; }
     const HH = ctx.canvas.height / DPR, fine = !(window.matchMedia && matchMedia('(pointer:coarse)').matches), n = 5, sz = fine ? 44 : 38, sz0 = sz, gap = 6, w = n * sz + (n - 1) * gap;
     const lab = fine ? sz * .8 : 0, x0 = fine ? 16 + lab + 6 : (HW - w) / 2, y0 = fine ? HH - 16 - sz * 2 - 8 : (RT.on ? 60 : 44), labY = (fine ? 54 : y0 + sz + 4 + 26 + 18) + (RT.on ? 16 : 0);
@@ -739,6 +877,26 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     + '#survPick button.q0:hover,#survPick button.q1:hover,#survPick button.q2:hover,#survPick button.q3:hover{transform:translateY(-4px);filter:brightness(1.15)}'
     + '#survPick em.ic{display:block;width:64px;height:64px;background:center/cover;border-radius:3px;box-shadow:0 0 0 1px rgba(216,176,96,.6);margin:4px 0}'
     + '@media (max-height:520px){#survPick button.q0,#survPick button.q1,#survPick button.q2,#survPick button.q3{width:130px!important;min-height:180px;padding:16px 10px 12px!important}#survPick em.ic{width:48px;height:48px}}'
+    + '#survRep{position:fixed;left:14px;bottom:calc(120px + env(safe-area-inset-bottom));z-index:10011;display:flex;gap:12px;align-items:center;padding:8px 16px;background:linear-gradient(90deg,rgba(16,10,6,.92),rgba(16,10,6,.6));border-left:3px solid #d8b060;color:#f6e6c4;font:700 15px "PingFang SC",sans-serif;animation:repIn .35s ease-out;transition:opacity .5s;pointer-events:none}#survRep b{color:#ffd86e;font-family:"Songti SC","Noto Serif SC",serif;letter-spacing:.2em}#survRep.out{opacity:0}@keyframes repIn{from{transform:translateX(-30px);opacity:0}}'
+    + '#survTut{position:fixed;right:12px;top:calc(78px + env(safe-area-inset-top));z-index:10030;display:flex;align-items:stretch;max-width:min(560px,92vw);cursor:pointer;animation:repIn .35s ease-out;transition:opacity .5s}#survTut.out{opacity:0}'
+    + '#survTut .tx{flex:1;background:rgba(18,12,8,.94);border:1px solid #b08a4a;border-right:0;padding:10px 16px;color:#f6e6c4}#survTut b{display:inline-block;padding:1px 12px;margin-bottom:4px;background:#5a3a1e;border:1px solid #d8b060;color:#ffe9b8;font:900 15px "Songti SC","Noto Serif SC",serif;letter-spacing:.3em}'
+    + '#survTut p{margin:2px 0 4px;font:600 16px/1.6 "PingFang SC",sans-serif}#survTut small{opacity:.55;font-size:11px}#survPrep .lb{display:flex;align-items:center;gap:10px;margin:-4px 0 12px;padding:6px 10px;background:rgba(90,58,30,.35);border:1px solid #6b5230}#survPrep .lb em{width:44px;height:44px;flex:none;background:url(art/ui/npc/liubei_face.webp) center/cover;border:1px solid #b08a4a}#survPrep .lb p{flex:1;margin:0;font-size:14px;line-height:1.5}#survPrep .lb b{color:#ffd86e;margin-right:8px;font-family:"Songti SC",serif}#survPrep .lb a{color:#ffd86e;font-size:13px;white-space:nowrap}#survTut em{width:96px;flex:none;background:#2a1c12 center/cover;border:1px solid #b08a4a}'
+    + '#survPrep{position:fixed;inset:0;z-index:10025;background:rgba(10,6,4,.78);display:flex;align-items:center;justify-content:center;padding:10px;font-family:"PingFang SC",sans-serif;color:#f2e4c8}'
+    + '#survPrep .pp{width:min(980px,96vw);max-height:94vh;display:flex;flex-direction:column;background:linear-gradient(180deg,#22170f,#150e09);border:1px solid #b08a4a;box-shadow:inset 0 0 0 3px #0e0906,inset 0 0 0 4px rgba(176,138,74,.45),0 20px 60px rgba(0,0,0,.6)}'
+    + '#survPrep .tb{display:flex;align-items:center;gap:4px;padding:8px 10px 0;border-bottom:1px solid #6b5230;flex-wrap:wrap}#survPrep .tb button{position:relative;padding:8px 20px;border:1px solid #5a4226;border-bottom:0;background:#1c140d;color:#bfa98a;font:900 17px "Songti SC","Noto Serif SC",serif;letter-spacing:.25em;cursor:pointer;border-radius:4px 4px 0 0}'
+    + '#survPrep .tb button.on{background:linear-gradient(180deg,#6a4424,#3a2614);color:#ffe9b8;border-color:#d8b060}#survPrep .tb i{position:absolute;right:2px;top:-6px;background:#b8281e;color:#fff;font:700 11px sans-serif;padding:1px 5px;border-radius:8px;letter-spacing:0}'
+    + '#survPrep .mo{margin-left:auto;display:flex;align-items:center;gap:6px;font:700 18px sans-serif;color:#ffe9a8}#survPrep .mo em{width:26px;height:26px;background:url(art/ui/hud/coin.webp) center/cover}'
+    + '#survPrep .bd{flex:1;overflow:auto;padding:14px 16px;min-height:200px}#survPrep h4{margin:0 0 8px;color:#e9cf98;letter-spacing:.3em;font:900 15px "Songti SC","Noto Serif SC",serif}'
+    + '#survPrep .cols2{display:grid;grid-template-columns:1fr 1fr;gap:18px}#survPrep .kv{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px dotted #5a4226;font-size:15px}#survPrep .kv span{color:#bfa98a}'
+    + '#survPrep .br{display:grid;grid-template-columns:70px 1fr 50px;gap:8px;align-items:center;margin:6px 0;font-size:14px}#survPrep .br i{height:10px;background:#3a2a1c;border:1px solid #6b5230}#survPrep .br u{display:block;height:100%;background:linear-gradient(90deg,#b8801e,#ffe08a)}'
+    + '#survPrep .hint{color:#cdb98e;font-size:14px;margin:0 0 10px}#survPrep .hint a{color:#ffd86e}#survPrep .empty{color:#9a8668;text-align:center;padding:40px 0;font-size:15px}'
+    + '#survPrep .row{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}#survPrep .pc{width:180px;min-height:250px;padding:24px 16px 18px;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;background:center/100% 100% no-repeat}'
+    + '#survPrep .pc.q0{background-image:url(art/ui/card/q0.webp)}#survPrep .pc.q1{background-image:url(art/ui/card/q1.webp)}#survPrep .pc.q2{background-image:url(art/ui/card/q2.webp)}#survPrep .pc.q3{background-image:url(art/ui/card/q3.webp)}'
+    + '#survPrep .pc em{width:64px;height:64px;background:center/cover;box-shadow:0 0 0 1px rgba(216,176,96,.6)}#survPrep .pc .gl{font-size:34px}#survPrep .pc i{font-style:normal;font-size:12px;opacity:.75}#survPrep .pc span{font-size:17px;font-weight:700}#survPrep .pc small{font-size:12px;color:#d8c39a;line-height:1.5;flex:1}#survPrep .pc .pr{margin:0;color:#ffe08a;font-weight:700;font-size:14px}'
+    + '#survPrep .bt{display:flex;gap:6px}#survPrep button[data-a],#survPrep .ft .go{padding:6px 14px;border:1px solid #b08a4a;border-radius:4px;background:linear-gradient(180deg,#5a3a20,#2a1a10);color:#ffe9b8;font:700 14px "PingFang SC",sans-serif;cursor:pointer}#survPrep button:disabled{opacity:.4;cursor:not-allowed}'
+    + '#survPrep .wr{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px dotted #5a4226;font-size:14px}#survPrep .wr>b{width:20px;color:#ffd86e}#survPrep .wr em{width:38px;height:38px;flex:none;background:center/cover}#survPrep .wr span{flex:1}#survPrep .wr small{color:#bfa98a;font-size:12px}#survPrep .wr .em{color:#6b5a44}#survPrep .wr button{padding:3px 8px!important}'
+    + '#survPrep .ft{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-top:1px solid #6b5230;color:#bfa98a;font-size:14px}#survPrep .ft .go{padding:10px 34px;font:900 18px "Songti SC","Noto Serif SC",serif;letter-spacing:.2em;border:2px solid #d8b060}'
+    + '@media (max-width:700px),(max-height:500px){#survPrep .cols2{grid-template-columns:1fr}#survPrep .tb button{padding:6px 10px;font-size:14px;letter-spacing:.1em}#survPrep .pc{width:146px;min-height:200px;padding:18px 10px 14px}#survPrep .bd{padding:10px}#survTut p{font-size:13px;line-height:1.45}#survTut em{width:60px}#survTut{max-width:min(420px,62vw);top:calc(64px + env(safe-area-inset-top))}#survTut .tx{padding:6px 10px}}'
     + '#survPick{position:fixed;inset:0;z-index:10020;display:flex;align-items:center;justify-content:center;background:rgba(10,6,4,.6);font-family:"PingFang SC","Noto Sans CJK SC",sans-serif}'
     + '#survPick .p{background:linear-gradient(180deg,#2a1d13,#1a120c);border:2px solid #b08a4a;border-radius:10px;padding:14px 16px;color:#f2e4c8;text-align:center;max-width:94vw}'
     + '#survPick h3{margin:0 0 10px;color:#ffd86e;letter-spacing:4px}#survPick .row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}'
@@ -797,7 +955,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       ['身法', at[3], '移速 ' + pct(AFX.move() - 1), '移动速度'], ['运气', at[4], '暴击 ' + pct(AFX.crit()), '暴击率（基础 5%）'], ['悟性', at[5], '熟练 ' + pct(AFX.xp() - 1), '武艺、心法熟练度涨得更快']];
     origin = o0; S.atAdd = d0; return r; };
   const status = () => ({   // 路线长卷「兵籍牒」用：这一局的当前状态（11/11）
-    origin: OG().name, lv: S.lv || 1, pct: Math.floor(Math.min(1, (S.xiu || 0) / XIU_NEED(S.lv || 1)) * 100), bank: S.bank || 0,
+    origin: OG().name, money: S.money || 0, lv: S.lv || 1, pct: Math.floor(Math.min(1, (S.xiu || 0) / XIU_NEED(S.lv || 1)) * 100), bank: S.bank || 0,
     hp: hero ? [Math.ceil(hero.hp * 10), Math.round(maxHp() * 10)] : [0, 0], attrs: attrInfo(origin, true), base: AT0(), add: (S.atAdd || []).slice(),
     slots: S.slots.map(k => k && SK[k] ? { name: SK[k].name, icon: SK[k].icon, color: SK[k].color, desc: SK[k].desc, lv: lvOf(k) } : null),
     gf: S.gf.map(id => id && GF[id] ? { name: GF[id].n, desc: GF[id].d, lv: gfLv(id) } : null), qg: S.qg && GF[S.qg] ? { name: GF[S.qg].n, desc: GF[S.qg].d } : null,
