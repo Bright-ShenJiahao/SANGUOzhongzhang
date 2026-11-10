@@ -639,7 +639,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
 #survPrep .pbf{position:relative;flex:1;height:calc(30px*var(--k));border:calc(10px*var(--k)) solid transparent;border-image:url(art/ui/prep/pbar.webp) 40 60 fill stretch;box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;padding:0 calc(10px*var(--k));overflow:hidden}
 #survPrep .pbf u{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#8a5a14,#e8b040 80%,#fff0a8);opacity:.9}#survPrep .pbf b,#survPrep .pbf i{position:relative;font:900 calc(15px*var(--kt)) sans-serif;font-style:normal;color:#fff6dc;text-shadow:0 1px 2px #000}
 #survPrep .em2{text-align:center;color:#8f7c5e;font-size:calc(20px*var(--kt));line-height:1.8}#survPrep .em2 small{font-size:.7em}#survPrep .ov{position:absolute;left:0;right:0;top:45%}
-#survPrep .gd{display:grid;grid-template-columns:repeat(4,1fr);gap:calc(10px*var(--k))}
+#survPrep .gd{display:grid;grid-template-columns:repeat(4,1fr);gap:calc(10px*var(--k))}#survPrep .gd.sg{grid-template-columns:repeat(3,1fr);gap:calc(16px*var(--k)) calc(14px*var(--k))}@media (max-height:520px){#survPrep .gd.sg{grid-template-columns:repeat(5,1fr)}}#survPrep .sl .pr{position:absolute;left:50%;bottom:calc(-10px*var(--k));transform:translateX(-50%);padding:0 calc(8px*var(--k));background:rgba(10,6,4,.9);border:1px solid #8a6a3a;font:900 calc(15px*var(--kt)) "Arial Black",Impact,sans-serif;font-style:normal;color:#ffe08a;white-space:nowrap}#survPrep .sl.sold{filter:grayscale(.8) brightness(.6)}#survPrep .sl .lki{position:absolute;right:2px;top:2px;font-style:normal;font-size:calc(16px*var(--kt))}#survPrep .shn2{margin-left:auto;font:700 calc(13px*var(--kt)) "PingFang SC",sans-serif;color:#9e8a6a}#survPrep .lkh{margin-top:calc(18px*var(--k));font-size:calc(13px*var(--kt))}
 #survPrep .sl{position:relative;aspect-ratio:1;background:url(art/ui/prep/slot.webp) center/100% 100% no-repeat;display:flex;align-items:center;justify-content:center;cursor:default}#survPrep .sl[data-a]{cursor:pointer}
 #survPrep .sl em{width:80%;height:80%;background-size:cover}#survPrep .sl em.ghost{opacity:.5;background-size:contain}
 #survPrep .sl.on{filter:drop-shadow(0 0 calc(8px*var(--k)) rgba(255,210,110,.9))}#survPrep .sl[style*="--rc"]{box-shadow:inset 0 0 0 2px var(--rc)}
@@ -715,12 +715,12 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(900px,58v
     if (nd.type !== 'battle') { const ks = Object.keys(ITEMS).filter(k => !ITEMS[k].use); out.push(itemOf(ks[Math.random() * ks.length | 0])); }
     return out;
   }
-  function rollShop(nd) {   // 行商：两件道具 + 一本秘籍，三件都能买（11/11 用户定 C），不能刷新；价格随层数涨（B：第 1 层原价，每 8 层 +100%）
-    const ks = Object.keys(ITEMS).sort(() => Math.random() - .5), out = [itemOf(ks[0]), itemOf(ks[1])], seen = new Set(ownedAll().concat(S.loot.map(it => it.k || it.id)));
-    for (const o of rewardOptions(undefined).concat(rewardOptions('perk'))) { const it = itemFrom(o); const key = it && (it.k || it.id); if (it && !seen.has(key)) { out.push(it); break; } }
+  function rollShop(nd) {   // 行商：3 件道具 + 2 本秘籍（11/11 用户定 5 件），都能买，不能刷新；价格随层数涨（第 1 层 ×2，每 8 层再 +100%）
+    const ks = Object.keys(ITEMS).sort(() => Math.random() - .5), out = ks.slice(0, 3).map(itemOf), seen = new Set(ownedAll().concat(S.loot.map(it => it.k || it.id)));
+    let nb = 0; for (const o of rewardOptions(undefined).concat(rewardOptions('perk'), rewardOptions('skill'))) { const it = itemFrom(o); const key = it && (it.k || it.id); if (it && !seen.has(key) && nb < 2) { seen.add(key); out.push(it); nb++; } }
     const m = 2 * (1 + ((nd && nd.layer || 1) - 1) / 8); for (const it of out) it.price = Math.round(it.price * m);   // 11/11 用户定：整体 ×2，平均每关只买得起三件里的两件左右
     if (S.shopLock) { const L = S.shopLock; S.shopLock = null; const k = L.k || L.id; const j = out.findIndex(o => (o.k || o.id) === k); out.splice(j >= 0 ? j : 0, 1, Object.assign({}, L, { kept: 1 })); }   // 上一关锁定的货：原价留到这一关（只留一关）
-    return out.sort(() => Math.random() - .5);
+    return out.sort((a, b) => (a.kind === 'item') - (b.kind === 'item') || (b.q || 0) - (a.q || 0));   // 秘籍在前，道具在后
   }
   function learn(it) {   // 格子满了也能学：先放进「掌握武学」，在武学页换上
     S.owned = S.owned || [];
@@ -731,7 +731,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(900px,58v
   }
 
   // ---- 整备屏（1:1 照群侠幸存者：结算 / 拾取 / 修炼 / 行商 / 武学）----
-  let prepNd = null, prepTab = 'jie', selLoot = 0, selWu = null;
+  let prepNd = null, prepTab = 'jie', selLoot = 0, selWu = null, selShop = 0;
   const TABS = [['jie', '结算'], ['shi', '拾取'], ['xiu', '修炼'], ['shang', '行商'], ['wu', '武学']];
   const A = n => `art/ui/attr/${n}.webp`, PU = n => `art/ui/prep/${n}.webp`;
   const ATI = ['tipo', 'duan', 'chang', 'shen', 'yun', 'wu'];
@@ -740,7 +740,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(900px,58v
   const RQ = ['普通', '精良', '稀有', '绝世'], RQC = ['#e8e0d0', '#6fb8ff', '#c58cff', '#ffb347'];
   const tagsOf = it => it.kind === 'skill' ? ['武艺', '主动', '刀'] : it.kind === 'gf' ? (GF[it.id].qg ? ['轻功', '被动'] : ['心法', '被动']) : ITEMS[it.id].use ? ['道具', '消耗'] : ['道具', '永久'];
   function prepOpen(nd) { { const t = document.getElementById('survTut'); if (t) t.remove(); tutQ = []; }   // 战斗里没看完的提醒不带进整备屏
-    prepNd = nd; prepTab = 'jie'; selLoot = 0; selWu = null; if (window.SFX) SFX.play('j_shop'); prepRender(); tut('prep'); }
+    prepNd = nd; prepTab = 'jie'; selLoot = 0; selWu = null; selShop = 0; if (window.SFX) SFX.play('j_shop'); prepRender(); tut('prep'); }
   function prepClose() {
     for (const it of S.loot || []) S.money += it.sell;   // 没处理的战利品：按卖价自动换钱
     S.loot = []; const el = document.getElementById('survPrep'); if (el) el.remove(); document.body.classList.remove('prep-open'); { const t = document.getElementById('survTut'); if (t) t.remove(); tutQ = []; } W.pick = false; const nd = prepNd; prepNd = null; ROUTE.done(nd);
@@ -783,9 +783,12 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(900px,58v
       if (!S.bank) body = `<div class="pn wide"><p class="em2">修为 LV.${S.lv} · 暂无修炼机会<br><small>斩敌、打完仗都会攒修为，每升一层得一次修炼</small></p></div>`;
       else { S.xopts = S.xopts || rollXiu(); body = S.xopts.map((o, j) => { const [a0, v0] = o.adds[0]; return `<div class="pn cd"><em class="bi" style="background-image:url('${A(ATI[a0])}')"></em><h3>${ATN[a0]}修炼</h3><p style="color:${RAR[o.q][1]}">${['普通', '精良', '稀有', '绝世'][o.q]}</p><i class="dv"></i>${o.adds.map(([a, v]) => `<p class="up"><b>+${v}</b> ${ATN[a]}</p>`).join('')}<p class="sd">${ATD[a0]}</p><button class="bb" data-a="xiu" data-i="${j}">修 炼</button></div>`; }).join('');
         left = `<button class="bb rf" data-a="xrr" ${S.xrr ? 'disabled' : ''}>刷新<span>${S.xrr ? 0 : 1}/1</span></button>`; }
-    } else if (prepTab === 'shang') {
-      body = S.shop.map((it, i) => `<div class="pn cd sh"><div class="dh"><em style="background-image:url('${icoOf(it)}')"></em><div><h3>${it.name}</h3><p style="color:${RQC[Math.min(3, it.q || 0)]}">${RQ[Math.min(3, it.q || 0)]}</p><div class="tg">${tagsOf(it).map(t => `<span>${t}</span>`).join('')}</div></div></div><h5>${it.kind === 'item' ? '道具属性' : it.kind === 'skill' ? '武艺效果' : '心法效果'}</h5><p class="ds">${it.desc}</p><button class="bb buy" data-a="buy" data-i="${i}" ${[].concat(S.bought ?? []).includes(i) || S.money < it.price ? 'disabled' : ''}>${[].concat(S.bought ?? []).includes(i) ? '已买下' : `购买 <b>${it.price}</b><em style="background-image:url('${A('coin')}')"></em>`}</button>${[].concat(S.bought ?? []).includes(i) ? '' : it.kept ? '<p class="lk" title="上一关锁定的货，原价保留">🔒<i>留</i></p>' : `<button class="lkb${S.shopLock === it ? ' on' : ''}" data-a="lock" data-i="${i}" title="锁定：这一关买不起就锁上，下一关原价还在（只留一关）">${S.shopLock === it ? '🔒<i>已锁</i>' : '🔓<i>锁定</i>'}</button>`}</div>`).join('');
-      left = `<p class="shn">可买多件 · 不刷新 · 越后越贵 · 可锁一件留到下关</p>`;
+    } else if (prepTab === 'shang') {   // 11/11：5 件货，排成「拾取」页那样：左边货架，右边详情（购买 / 锁定）
+      const L = S.shop, bt = [].concat(S.bought ?? []); selShop = Math.max(0, Math.min(selShop, L.length - 1)); const sel = L[selShop], sb = bt.includes(selShop);
+      body = `<div class="pn"><h4>行商货架<span class="shn2">可买多件 · 不刷新 · 越往后越贵</span></h4><div class="gd sg">${L.map((it, i) => `<div class="sl ${i === selShop ? 'on' : ''}${bt.includes(i) ? ' sold' : ''}" data-a="ssel" data-i="${i}" style="--rc:${RQC[Math.min(3, it.q || 0)]}"><em style="background-image:url('${icoOf(it)}')"></em>${bt.includes(i) ? '<i class="pr">已买</i>' : `<i class="pr">${it.price}</i>`}${S.shopLock === it || it.kept ? '<i class="lki">🔒</i>' : ''}</div>`).join('')}</div>
+        <p class="em2 lkh">买不起的货可以锁定一件，下一关原价还在（只留一关）</p></div>
+        <div class="pn">${sel ? detail(sel, (sb ? '<button disabled>已买下</button>' : `<button data-a="buy" data-i="${selShop}" ${S.money < sel.price ? 'disabled' : ''}>购买 ${sel.price}<em style="background-image:url('${A('coin')}')"></em></button>`)
+          + (sb ? '' : sel.kept ? '<button disabled>🔒 上关锁定</button>' : `<button data-a="lock" data-i="${selShop}">${S.shopLock === sel ? '🔒 取消锁定' : '🔓 锁定到下一关'}</button>`)) : detail(null)}</div>`;
     } else if (prepTab === 'wu') {
       const all = S.slots.filter(Boolean).concat(S.gf.filter(Boolean), S.qg ? [S.qg] : [], S.owned || []);
       if (!selWu || !all.includes(selWu)) selWu = S.slots[0];
@@ -810,6 +813,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(900px,58v
     el.querySelectorAll('[data-a]').forEach(b => b.onclick = e => {
       e.preventDefault(); if (b.disabled) return; const a = b.dataset.a, i = +b.dataset.i, k = b.dataset.k;
       if (a === 'sel') selLoot = i;
+      else if (a === 'ssel') selShop = i;
       else if (a === 'sort') { S.sortDn = S.sortDn === false; selLoot = 0; }
       else if (a === 'learn') { learn(S.loot[i]); S.loot.splice(i, 1); if (window.SFX) SFX.play('j_pick1'); }
       else if (a === 'sell') { S.money += S.loot[i].sell; S.loot.splice(i, 1); if (window.SFX) SFX.play('coin'); }
