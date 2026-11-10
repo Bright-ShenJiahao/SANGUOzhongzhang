@@ -249,13 +249,10 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     SK[k].pose = [f(1), f(RECOV_N[k] || 2)]; SK[k].pose2 = f(3); SK[k].poseL = w === 8 || n < 4 ? SK[k].pose[1] : f(n);
   }
   // 每个招式用自己的帧：[出招前摇帧, 出手帧, 收势帧, 第二击帧]。刀用白衣持刀帧 wd_*，剑用白衣持剑帧 wj_*
-  const PAIR = { hengsao: ['wd_hs1', 'wd_hs2', 'wd_hs3'], daobo: ['wd_pi1', 'wd_pi2', 'wd_pi3'], huima: ['wd_kn1', 'wd_kn2', 'wd_kn3', 'wd_fs2'], daolun: ['wd_hx1', 'wd_hx3', 'wd_hx4'],
-    zhendi: ['wc_1', 'wc_2', 'wc_2'], dilie: ['wc_3', 'wc_7', 'wc_7'], shuanghuan: ['wc_1', 'wc_4', 'wc_4'], tianbeng: ['wc_3', 'wc_2', 'wc_2'],
-    qiang: ['wq_2', 'wq_4', 'wq_6', 'wq_6'], chong: ['wq_7', 'wq_13', 'wq_13'], xuanfeng: ['wg_9', 'wg_12', 'wg_11'], xuehe: ['wg_5', 'wg_12', 'wg_11'], jianyu: ['wb_2', 'wb_6', 'wb_12'],
-    lianzhan: ['wj_hz1', 'wj_hz2', 'wj_hz3', 'wj_fs2'], sixiang: ['wj_hx1', 'wj_hx3', 'wj_hx4'], wanren: ['wj_sl1', 'wj_sl2', 'wj_sl3'] };
+  const PAIR = { hengsao: ['wd_3', 'wd_5', 'wd_5'], daobo: ['wd_1', 'wd_2', 'wd_2'], huima: ['wd_6', 'wd_4', 'wd_4', 'wd_5'], daolun: ['wd_1', 'wd_5', 'wd_2'] };
   for (const k of Object.keys(PAIR)) { const q = PAIR[k]; SK[k].pose = [q[0], q[1]]; SK[k].poseL = q[2] || q[1]; SK[k].pose2 = q[3] || q[1]; }
   // 手里拿的兵器：放哪种近战/长兵招式就拿哪种，之后待机、行走都拿着；暗器、法术不换（空手施放）。目前只有刀有持械待机和行走帧
-  const HELDP = { 0: 'wd_', 1: 'wj_', 2: 'wc_', 3: 'wq_', 4: 'wg_', 5: 'wb_' };
+  const HELDP = { 0: 'wd_' };
   const heldPre = () => (S.held != null && HELDP[S.held]) || '';
   const profOf = c => Math.max(.72, Math.min(1.35, .58 + .15 * ((OG().oa || [3, 3, 3, 3, 3, 3, 3, 3])[CATA[c]])));
   const RESD = [0, 0, .08, .16, .26, .40];   // 同类别 n 件：该类别招式伤害加成
