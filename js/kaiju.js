@@ -5,7 +5,7 @@
   let axSel = -1;
   const FIELDS = [
     { name: '黄巾之乱', sub: '第一章 · 中平元年', note: '从涿郡一路杀到张角祭坛：18 层、4 位段首领、终战张角。', open: true, pic: 'art/ui/kaiju/field1.webp' },
-    { name: '董卓乱京', sub: '第二章 · 中平六年', note: '暂未开放，敬请期待。', open: false },   // 11/11 用户定：先放出来，但不能选
+    { name: '董卓乱京', sub: '第二章 · 中平六年', note: '西凉铁骑入洛阳，京城大乱。第二章 · 暂未开放', open: false, pic: 'art/ui/kaiju/field2.webp' },   // 11/11 用户定：先放出来，但不能选
   ];
   const OGI = { nongfu: 'art/ui/kaiju/og_nongfu.webp', xiaozu: 'art/ui/kaiju/og_xiaozu.webp', liehu: 'art/ui/kaiju/og_liehu.webp', shusheng: 'art/ui/kaiju/og_shusheng.webp' };
   const SKI = { hengsao: 'art/ui/kaiju/sk_hengsao.webp', daobo: 'art/ui/kaiju/sk_daobo.webp', huima: 'art/ui/kaiju/sk_huima.webp', daolun: 'art/ui/kaiju/sk_daolun.webp' };   // 招式图标（11/11 Gemini）
@@ -48,7 +48,8 @@
   #kaiju .diff{display:grid;grid-template-columns:1fr 1fr;gap:6px}
   #kaiju .field{display:flex;flex-direction:column;height:100%}
   #kaiju .pic{flex:1;min-height:90px;border:1px solid #6b5230;border-radius:2px;background:#1c140d center/cover no-repeat;position:relative;overflow:hidden}
-  #kaiju .pic.lock{filter:grayscale(1) brightness(.5)}
+  #kaiju .pic.lock{filter:grayscale(.85) brightness(.62)}
+  #kaiju .pic .lk{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);padding:8px 22px;border:1px solid #d8b060;background:rgba(12,8,5,.75);color:#ffe9b8;font-size:calc(18px*var(--k));letter-spacing:6px;font-family:"Songti SC","Noto Serif SC",serif;font-weight:900}
   #kaiju .pic .ban{position:absolute;left:0;right:0;bottom:0;padding:26px 10px 10px;background:linear-gradient(180deg,transparent,rgba(12,8,5,.88) 55%);text-align:center}
   #kaiju .pic .arr{position:absolute;top:50%;transform:translateY(-50%);width:30px;height:46px;border:1px solid rgba(216,176,96,.6);border-radius:3px;background:rgba(12,8,5,.55);color:#f2e4c8;font-size:calc(20px*var(--k));cursor:pointer}
   #kaiju .fl{display:flex;gap:8px;margin-top:8px}
@@ -93,9 +94,9 @@
       <div class="cols">
         <div class="pan field">
           <h4>所选战场</h4>
-          <div class="pic" style="background-image:url('${F.pic}')">
+          <div class="pic ${F.open ? '' : 'lock'}" style="background-image:url('${F.pic}')">${F.open ? '' : '<div class="lk">🔒 暂未开放</div>'}
             <div class="ban"><div class="fname">${F.name}</div><div class="fnote">${F.note}</div></div></div>
-          <div class="fl">${FIELDS.map((f, i) => `<button data-i="${i}" class="${i === field ? 'on' : ''} ${f.open ? '' : 'lock'}" title="${f.open ? '' : '暂未开放'}"><b>${f.name}</b><small>${f.open ? f.sub : '暂未开放'}</small></button>`).join('')}</div>
+          <div class="fl">${FIELDS.map((f, i) => `<button data-i="${i}" class="${i === field ? 'on' : ''} ${f.open ? '' : 'lock'}" title="${f.open ? '' : '暂未开放'}"><b>${f.name}</b><small>${f.open ? f.sub : f.sub + ' · 未开放'}</small></button>`).join('')}</div>
         </div>
         <div class="pan">
           <h4>名号</h4>
@@ -129,7 +130,7 @@
     el.querySelectorAll('.wp button.lock').forEach(b => b.onclick = () => { b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake'); });
     el.querySelectorAll('.bar').forEach(b => b.onclick = () => { axSel = +b.dataset.a === axSel ? -1 : +b.dataset.a; render(); });
     el.querySelectorAll('.diff .card').forEach(b => b.onclick = () => { if (window.TITLE && TITLE.setHard) TITLE.setHard(b.dataset.h === '1'); render(); });
-    el.querySelectorAll('.fl button').forEach(b => b.onclick = () => { const f = FIELDS[+b.dataset.i]; if (!f.open) { b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake'); return; } field = +b.dataset.i; render(); });
+    el.querySelectorAll('.fl button').forEach(b => b.onclick = () => { field = +b.dataset.i; render(); });   // 上锁的章节也能点开预览（灰图），但「出发」不可用
     el.querySelector('.dice').onclick = () => { const ks = Object.keys(O).filter(k => !O[k].locked); SURV.setOrigin(ks[Math.random() * ks.length | 0]); render(); };
     el.querySelector('.back').onclick = () => { close(); if (window.TITLE && TITLE.show) TITLE.show(); };
     el.querySelector('.go').onclick = () => { if (!FIELDS[field].open) return; close(); if (window.TITLE && TITLE.beginRun) TITLE.beginRun(); };
