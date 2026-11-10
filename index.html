@@ -61,7 +61,7 @@ body.szz-pro #help{display:none}
 .x-back{min-height:34px!important}
 }
 #rot small{display:block;margin-top:10px;font-size:14px;font-weight:600;color:#c9b691;line-height:1.6}
-</style><link rel="preload" href="pack/fonts/result.woff2?v=44944b4a84" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=44944b4a84)format("woff2");font-display:swap}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
+</style><link rel="preload" href="pack/fonts/result.woff2?v=7784dee45b" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=7784dee45b)format("woff2");font-display:swap}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
 </head><body>
 <style>
 #bootSplash{position:fixed;inset:0;z-index:99999;background:radial-gradient(ellipse at 50% 45%,#f3e4cf 0%,#ecd9c0 55%,#d9c09f 100%);transition:opacity .45s ease-out}
@@ -100,7 +100,7 @@ if(location.protocol==='https:'&&!/[?&]debug(?:=|&|$)/.test(location.search)&&'s
 })();
 // 自动更新：打开游戏、或从后台切回来时，查一下线上有没有新版本；有就在标题/整备页自动刷新（战斗中不打扰）
 (function(){
-var BUILD='85c1ce5e76e0',busy=false;
+var BUILD='346088dff180',busy=false;
 if(location.protocol!=='https:'||/[?&]debug(?:=|&|$)/.test(location.search))return;
 function check(){
   if(busy)return;
@@ -6200,6 +6200,10 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
 #survPrep .lf{position:absolute;left:1.5vw;bottom:calc(14px*var(--k))}#survPrep .rf{font-size:calc(24px*var(--k))!important;padding:calc(4px*var(--k)) calc(30px*var(--k))!important}#survPrep .rf span{margin-left:calc(20px*var(--k));font-family:sans-serif;color:#fff}
 #survPrep .shn{margin:0;color:#8f7c5e;font-size:calc(15px*var(--k))}
 #survPrep .go{position:absolute;right:1.5vw;bottom:calc(10px*var(--k));min-width:calc(250px*var(--k));justify-content:center;font-size:calc(30px*var(--k))!important;padding:calc(6px*var(--k)) calc(30px*var(--k))!important;letter-spacing:.4em!important}
+#survPrep .ac b,#survPrep .mo b,#survPrep .sm b,#survPrep .pbf b,#survPrep .pbf i,#survPrep .vf b,#survPrep .ln b,#survPrep .rf span,#survPrep .buy b{font-family:"Arial Black","Impact","PingFang SC",sans-serif;letter-spacing:.04em;-webkit-text-stroke:calc(1px*var(--k)) rgba(20,10,4,.9);paint-order:stroke fill}
+#survPrep .pn::-webkit-scrollbar{width:calc(8px*var(--k))}#survPrep .pn::-webkit-scrollbar-track{background:rgba(0,0,0,.35);border:1px solid #5a4226}#survPrep .pn::-webkit-scrollbar-thumb{background:linear-gradient(90deg,#8a6a3a,#d8b060,#8a6a3a);border-radius:4px}#survPrep .pn{scrollbar-color:#b08a4a rgba(0,0,0,.35)}
+#survPrep h4 .so{padding:0 calc(10px*var(--k));height:calc(26px*var(--k));border:calc(6px*var(--k)) solid transparent;border-image:url(pack/ui/prep/sbtn.webp?v=e344f1bf61) 30 fill stretch;background:none;color:#cbb894;font:600 calc(14px*var(--k)) sans-serif;letter-spacing:0;cursor:pointer;line-height:1}
+#survTut .tskip{position:fixed;right:calc(20px*var(--k));top:calc(18px*var(--k));padding:calc(4px*var(--k)) calc(14px*var(--k));background:linear-gradient(90deg,transparent,rgba(0,0,0,.7) 30%);font:600 calc(22px*var(--k)) "PingFang SC",sans-serif;color:#9a8a70}#survTut .tskip b{color:#efe2c6}
 @media (max-height:520px){#survPrep .ac span{display:none}}
 #survTut{position:fixed;right:1vw;bottom:calc(16vh + 60px);z-index:10040;display:flex;align-items:stretch;width:min(820px,60vw);cursor:pointer;animation:tutIn .3s ease-out}
 @keyframes tutIn{from{transform:translateY(16px);opacity:0}}
@@ -6298,9 +6302,9 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(900px,58v
           <h4>调息</h4><p class="ln">剩余 <em style="background-image:url('${A('zq')}')"></em> 真气 <b class="c1">${R.zqLeft || 0}</b> 点</p><p class="ln">转换为 <b class="c2">${R.tiao}</b> 点 <em style="background-image:url('${A('hp')}')"></em> 气血</p><p class="ln"><em style="background-image:url('${A('huti')}')"></em> 护体 总共免除了 <b>${Math.round((S.hutiSum || 0) * 10)}</b> 点伤害</p></div>
         <div class="pn"><h4>修为</h4>${bar(S.lv, Math.min(1, S.xiu / XIU_NEED(S.lv)), A('xiu'))}<h4>武艺</h4>${S.slots.filter(Boolean).map(k => bar(lvOf(k), mastR(k), IMGU[k])).join('')}<h4>心法</h4>${S.gf.concat([S.qg]).filter(Boolean).map(id => bar(gfLv(id), gfR(id), `art/ui/gf/${id}.webp`)).join('') || '<p class="em2" style="padding:6px 0">还没有心法</p>'}</div>`;
     } else if (prepTab === 'shi') {
-      const L = S.loot.slice().sort((a, b) => (b.q || 0) - (a.q || 0)); S.loot = L; selLoot = Math.min(selLoot, L.length - 1);
+      const L = S.loot.slice().sort((a, b) => S.sortDn === false ? (a.q || 0) - (b.q || 0) : (b.q || 0) - (a.q || 0)); S.loot = L; selLoot = Math.min(selLoot, L.length - 1);
       const sel = L[selLoot];
-      body = `<div class="pn"><h4>战利品<small>按稀有度</small></h4><div class="gd">${Array.from({ length: 16 }, (_, i) => L[i] ? `<div class="sl ${i === selLoot ? 'on' : ''}" data-a="sel" data-i="${i}" style="--rc:${RQC[Math.min(3, L[i].q || 0)]}"><em style="background-image:url('${icoOf(L[i])}')"></em></div>` : '<div class="sl"></div>').join('')}</div>${L.length ? '' : '<p class="em2 ov">暂无战利品</p>'}</div>
+      body = `<div class="pn"><h4>战利品<button class="so" data-a="sort">稀有度 ${S.sortDn === false ? '▲' : '▼'}</button></h4><div class="gd">${Array.from({ length: 16 }, (_, i) => L[i] ? `<div class="sl ${i === selLoot ? 'on' : ''}" data-a="sel" data-i="${i}" style="--rc:${RQC[Math.min(3, L[i].q || 0)]}"><em style="background-image:url('${icoOf(L[i])}')"></em></div>` : '<div class="sl"></div>').join('')}</div>${L.length ? '' : '<p class="em2 ov">暂无战利品</p>'}</div>
         <div class="pn">${sel ? detail(sel, `<button data-a="learn" data-i="${selLoot}">${sel.kind === 'item' ? '收下' : '学会'}</button><button data-a="sell" data-i="${selLoot}">卖掉 ${sel.sell}<em style="background-image:url('${A('coin')}')"></em></button>`) : detail(null)}</div>`;
     } else if (prepTab === 'xiu') {
       if (!S.bank) body = `<div class="pn wide"><p class="em2">修为 LV.${S.lv} · 暂无修炼机会<br><small>斩敌、打完仗都会攒修为，每升一层得一次修炼</small></p></div>`;
@@ -6333,6 +6337,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(900px,58v
     el.querySelectorAll('[data-a]').forEach(b => b.onclick = e => {
       e.preventDefault(); if (b.disabled) return; const a = b.dataset.a, i = +b.dataset.i, k = b.dataset.k;
       if (a === 'sel') selLoot = i;
+      else if (a === 'sort') { S.sortDn = S.sortDn === false; selLoot = 0; }
       else if (a === 'learn') { learn(S.loot[i]); S.loot.splice(i, 1); if (window.SFX) SFX.play('j_pick1'); }
       else if (a === 'sell') { S.money += S.loot[i].sell; S.loot.splice(i, 1); if (window.SFX) SFX.play('coin'); }
       else if (a === 'buy') { const it = S.shop[i]; if (S.money >= it.price) { S.money -= it.price; learn(it); S.bought = i; if (window.SFX) SFX.play('j_shop'); } }
@@ -6373,9 +6378,13 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(900px,58v
     const d = document.createElement('div'); d.id = 'survTut'; if (big) d.className = 'big'; d.style.setProperty('--k', uiK());
     d.innerHTML = (big ? `<div class="lh" style="background-image:url('pack/ui/npc/liubei_full.webp?v=077a423f0c')"></div>` : '') + `<div class="bx"><b class="nm">${nm}</b><p>${txt}</p><small>${document.getElementById('survPrep') ? '按 <b>空格键</b> 或点一下 继续' : '点一下关闭'}</small></div>${big ? '' : `<em style="background-image:url('${face}')"></em>`}`;
     const go = () => { removeEventListener('keydown', key, true); if (!d.parentNode) return; d.remove(); tutNext(); };
+    let holdT = 0; const up = e => { if (e.code === 'Space') clearTimeout(holdT); };
     const key = e => { if (!document.getElementById('survPrep')) return;   // 战斗中空格是翻滚，不拿来关提醒（11/11 用户报冲突）
+      if (e.code === 'Space' && !e.repeat) { clearTimeout(holdT); holdT = setTimeout(() => { tutQ = []; go(); }, 600); }   // 长按空格：跳过本段
+      if (e.code === 'Space' && e.repeat) { e.preventDefault(); e.stopImmediatePropagation(); return; }
       if (e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); e.stopImmediatePropagation(); go(); } };
-    d.onclick = go; addEventListener('keydown', key, true); document.body.appendChild(d);
+    d.onclick = go; addEventListener('keydown', key, true); addEventListener('keyup', up, true); document.body.appendChild(d);
+    if (document.getElementById('survPrep')) { const sk = document.createElement('div'); sk.className = 'tskip'; sk.innerHTML = '长按 <b>空格键</b> 跳过本段'; d.appendChild(sk); }
     if (!document.getElementById('survPrep')) setTimeout(() => { if (d.parentNode && !document.getElementById('survPrep')) go(); }, 9000);   // 战斗中 9 秒自动收起
   }
   // ---------- 局内存档（11/11 用户定：回到长卷自动存；主界面「继续」读档） ----------
