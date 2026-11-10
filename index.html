@@ -61,7 +61,7 @@ body.szz-pro #help{display:none}
 .x-back{min-height:34px!important}
 }
 #rot small{display:block;margin-top:10px;font-size:14px;font-weight:600;color:#c9b691;line-height:1.6}
-</style><link rel="preload" href="pack/fonts/result.woff2?v=7784dee45b" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=7784dee45b)format("woff2");font-display:swap}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
+</style><link rel="preload" href="pack/fonts/result.woff2?v=6dcc9a5c5e" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=6dcc9a5c5e)format("woff2");font-display:swap}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
 </head><body>
 <style>
 #bootSplash{position:fixed;inset:0;z-index:99999;background:radial-gradient(ellipse at 50% 45%,#f3e4cf 0%,#ecd9c0 55%,#d9c09f 100%);transition:opacity .45s ease-out}
@@ -100,7 +100,7 @@ if(location.protocol==='https:'&&!/[?&]debug(?:=|&|$)/.test(location.search)&&'s
 })();
 // 自动更新：打开游戏、或从后台切回来时，查一下线上有没有新版本；有就在标题/整备页自动刷新（战斗中不打扰）
 (function(){
-var BUILD='346088dff180',busy=false;
+var BUILD='b78f4d560193',busy=false;
 if(location.protocol!=='https:'||/[?&]debug(?:=|&|$)/.test(location.search))return;
 function check(){
   if(busy)return;
@@ -1820,6 +1820,7 @@ function zUpdate(z, dt) {
     return;
   }
   if (z.st === 'wake') { if (z.t > (z.T.elite ? 1.0 : .55)) set(z, 'move'); else return; }
+  if (T.thief && window.SURV && SURV.thief) { SURV.thief(z, dt); return; }   // 窃贼：AI 在 survive.js（要用到地上的铜钱）
   if (T.priest) {                        // 方士：远离玩家 → 念咒 → 回血/火球，念咒可被打断
     if (z.daze > 0) { z.daze -= dt; z.stun = Math.max(0, z.stun - dt); moveEnt(z, z.vx * dt, 0); z.vx *= .85; return; }
     if (z.stun > 0) { z.stun -= dt; moveEnt(z, z.vx * dt, 0); z.vx *= .85; if (z.stun <= 0) set(z, 'idle'); return; }
@@ -5655,7 +5656,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     if (!boss && (z.T.elite || ['yellow-heavy', 'yellow-shield', 'yellow-golem'].includes(type))) { z.survTier = 1; z.hp = 7.5; z.maxHp = z.hp * z.survMul; }   // 四档：杂兵 ×1（3）、精英 ×2.5（7.5）
     z.hp *= z.survMul;
     if (boss && boss !== true) { z.survTier = boss.tier || 2; const hb = boss.hp || 21; z.hp = hb * z.survMul; z.maxHp = z.hp; z.sc = (z.sc || 1) * (boss.sc || 1); z.survBoss = true; z.bossLabel = boss.name; floaters.push({ x: z.x, y: z.y - 60, t: 0, txt: boss.name + ' 出阵！', color: '#ff6a4a' }); }
-    else if (boss) { z.hp *= 4; z.sc = (z.sc || 1) * 1.25; z.survBoss = true; floaters.push({ x: z.x, y: z.y - 60, t: 0, txt: '敌将出阵！', color: '#ff6a4a' }); }
+    else if (boss) { z.hp *= 4; z.maxHp = z.hp; z.sc = (z.sc || 1) * 1.25; z.survBoss = true; floaters.push({ x: z.x, y: z.y - 60, t: 0, txt: '敌将出阵！', color: '#ff6a4a' }); }
     return z;
   }
   function startWave(n) {
@@ -6079,7 +6080,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     const nd = RT.node; W.started = false; eshots.length = 0;
     for (const z of zs) if (!z.dead) { z.endFade = .9; z.st = 'idle'; z.t = 0; z.enemySkill = null; z.air = false; z.stun = 0; z.daze = 0; }
     setTimeout(() => { zs.length = 0; }, 950);
-    const R = S.rep = { kills: (typeof kills === 'number' ? kills : 0) - (S.k0 || 0), got: S.coinGot || 0, left: 0, taken: Math.round((S.taken || 0) * 10), tiao: 0, lv0: S.lvAt0 || S.lv, xiu: 0 };
+    const R = S.rep = { stolen: S.stolen || 0, kills: (typeof kills === 'number' ? kills : 0) - (S.k0 || 0), got: S.coinGot || 0, left: 0, taken: Math.round((S.taken || 0) * 10), tiao: 0, lv0: S.lvAt0 || S.lv, xiu: 0 };
     { let sum = 0; for (const c of S.coins) sum += c.v; R.left = Math.floor(sum * .9); S.money += R.left; S.coins.length = 0; }   // 地上没捡的铜钱：收回九成
     { R.zqLeft = Math.round(S.zq * 10); const c = S.zq * (.3 + IT('tiao')); if (c > .05) { heal(c); R.tiao = Math.round(c * 10); } S.zq = 0; if (IT('after')) heal(maxHp() * IT('after')); }   // 调息：剩余真气 30% 化成气血
     if (nd.type === 'boss' && nd.final) { won = true; return; }
@@ -6093,7 +6094,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   function beginNode(nd) {
     if (!c2ok && typeof ensureAssets === 'function') ensureAssets('chapter2', { silent: true }).then(() => { c2ok = true; });
     GM = gfCalc(); S.zq = zqMax(); S.hp0 = hero.hp; S.noHitT = 0; S.xy = 0;
-    S.k0 = typeof kills === 'number' ? kills : 0; S.coinGot = 0; S.taken = 0; S.hutiSum = 0; S.dps = {}; S.lastHp = hero.hp; S.coins = []; S.lvAt0 = S.lv; S.tutT = 0;
+    S.k0 = typeof kills === 'number' ? kills : 0; S.coinGot = 0; S.taken = 0; S.hutiSum = 0; S.dps = {}; S.lastHp = hero.hp; S.coins = []; S.lvAt0 = S.lv; S.tutT = 0; S.stolen = 0; S.thiefCd = 8;
     RT.node = nd; W.N = ROUTE.waves(nd); W.started = true; W.between = 0; W.pick = false; S.wind = null; S.recov = null; S.later = []; bolts.length = 0; zones.length = 0; fx.length = 0;
     zs.length = 0; eshots.length = 0; if (window.ARENA) ARENA.start(ROUTE.mapOf(nd));
     startWave(1);
@@ -6103,13 +6104,50 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const COIN_IMG = new Image(); COIN_IMG.src = 'pack/ui/hud/coin.webp?v=ce7d335478';
   const PORTRAIT = new Image(); PORTRAIT.src = 'pack/ui/npc/liubei_face.webp?v=53597c466f';
   function dropCoins(z) {   // 敌人倒下掉铜钱：普通 1，精锐 3，敌将 15
+    if (z.T.thief) { const v = (z.loot || 0) + 4; z.loot = 0; for (let i = 0; i < Math.min(6, v); i++) S.coins.push({ x: z.x + R(-14, 14), y: z.y + R(-6, 6), z: 8 + R(0, 10), vz: R(60, 110), vx: R(-40, 40), v: Math.ceil(v / Math.min(6, v)), t: 0 }); floaters.push({ x: z.x, y: z.y - 44, t: 0, txt: '钱袋破了！', color: '#ffd86e' }); return; }   // 窃贼：偷的钱 + 4 全撒出来
     if (z.survTier < 1) { S.money += 1; S.coinGot += 1; if (Math.random() > .07) return; }   // 11/11 用户定：普通杀敌直接入账，只有多出来的钱掉在地上要捡
     const v = z.survTier >= 2 ? 15 : z.survTier === 1 ? 5 : 3 + (Math.random() * 3 | 0);
     const n = Math.min(5, v), each = Math.ceil(v / n);
     for (let i = 0; i < n; i++) S.coins.push({ x: z.x + R(-14, 14), y: z.y + R(-6, 6), z: 8 + R(0, 10), vz: R(60, 110), vx: R(-40, 40), v: each, t: 0 });
     tut('coin');
   }
+  // 窃贼（11/11 用户定）：跑去捡地上的铜钱，捡够了或没钱可捡就逃跑；打死会把偷的钱连本带利吐出来，跑掉了战报里记一笔
+  function thiefAI(z, dt) {
+    z.t += dt; z.flash = Math.max(0, z.flash - dt);
+    if (z.daze > 0) { z.daze -= dt; z.stun = Math.max(0, z.stun - dt); moveEnt(z, z.vx * dt, 0); z.vx *= .85; z.moving = false; return; }
+    if (z.stun > 0) { z.stun -= dt; moveEnt(z, z.vx * dt, 0); z.vx *= .85; z.moving = false; if (z.stun <= 0) set(z, 'move'); return; }
+    if (z.st !== 'move' && z.st !== 'idle' && z.st !== 'wind') set(z, 'move');
+    z.loot = z.loot || 0; z.life = (z.life || 0) + dt;
+    if (z.st === 'wind') { z.moving = false; if (z.t > .35) set(z, 'move'); return; }   // 弯腰把钱塞进麻袋
+    const sp = z.T.spd * (z.survSlow > 0 ? .5 : 1) * dt;
+    if (!z.flee && (z.loot >= 8 || z.life > 14 || (z.life > 6 && !S.coins.length))) {   // 捡够了 / 太久 / 没钱可捡：开溜
+      z.flee = 1; floaters.push({ x: z.x, y: z.y - 46, t: 0, txt: z.loot ? '贼人要跑了！' : '贼人溜了', color: '#ffcf6a' });
+      const p = window.ARENA && ARENA.on() ? ARENA.edge() : { x: z.x < hero.x ? cam.x - 60 : cam.x + viewW() + 60, y: z.y };
+      z.fx = p.x; z.fy = p.y;
+    }
+    if (z.flee) {
+      z.flee += dt; const dx = z.fx - z.x, dy = z.fy - z.y, d = Math.hypot(dx, dy) || 1;
+      z.moving = true; z.f = Math.sign(dx) || z.f; moveEnt(z, dx / d * sp * 1.25, dy / d * sp * .9);
+      if (d < 16 || z.flee > 3.2) { S.stolen = (S.stolen || 0) + z.loot; z.loot = 0; z.hidden = true; z.endFade = .45; z.thiefGone = 1; }
+      return;
+    }
+    let best = null, bd = 1e9;
+    for (const c of S.coins) { if (c.z > 0) continue; const d = Math.hypot(c.x - z.x, (c.y - z.y) * 1.4); if (d < bd) { bd = d; best = c; } }
+    if (best) {
+      const dx = best.x - z.x, dy = best.y - z.y, d = Math.hypot(dx, dy) || 1;
+      if (d < 9) { S.coins.splice(S.coins.indexOf(best), 1); z.loot += best.v; set(z, 'wind'); floaters.push({ x: z.x, y: z.y - 40, t: 0, txt: '-' + best.v + ' 铜钱', color: '#ff8a5a' }); if (window.SFX) SFX.play('coin', 0, .7); return; }
+      z.moving = true; z.f = Math.sign(dx) || z.f; moveEnt(z, dx / d * sp, dy / d * sp * .8);
+    } else {   // 没钱可捡：在主角外圈绕着等
+      const dx = z.x - hero.x, dy = z.y - hero.y, d = Math.hypot(dx, dy) || 1, want = 130;
+      const tx = hero.x + dx / d * want - dy / d * 40, ty = hero.y + dy / d * want + dx / d * 40, ex = tx - z.x, ey = ty - z.y, e = Math.hypot(ex, ey) || 1;
+      z.moving = e > 6; if (z.moving) { z.f = Math.sign(ex) || z.f; moveEnt(z, ex / e * sp * .7, ey / e * sp * .5); }
+    }
+  }
   function coinTick(dt) {
+    for (const z of zs) if (z.thiefGone && z.endFade <= 0 && z.st !== 'gone') { z.st = 'gone'; z.t = 1; }
+    if (RT.node && W.started && !W.pick && (S.thiefCd = (S.thiefCd == null ? 8 : S.thiefCd) - dt) <= 0 && S.coins.length >= 2 && !zs.some(z => z.T.thief && !z.dead && !z.thiefGone)) {
+      S.thiefCd = R(14, 22); const z = edgeSpawn('thief'); floaters.push({ x: z.x, y: z.y - 50, t: 0, txt: '有贼！', color: '#ffcf6a' }); tut('thief');
+    }
     for (const z of zs) if (z.dead && !z.coinDone && !z.endFade) { z.coinDone = 1; dropCoins(z); }
     if (S.coinComboT > 0) S.coinComboT -= dt; else S.coinCombo = 0;
     for (let i = S.coins.length - 1; i >= 0; i--) {
@@ -6139,7 +6177,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   function report(R) {   // 左下角战报，2.6 秒后淡出
     const old = document.getElementById('survRep'); if (old) old.remove();
     const d = document.createElement('div'); d.id = 'survRep';
-    d.innerHTML = `<b>战报</b><span>击倒 ${R.kills}</span><span>铜钱 +${R.got + R.left}</span><span>受伤 ${R.taken}</span>`;
+    d.innerHTML = `<b>战报</b><span>击倒 ${R.kills}</span><span>铜钱 +${R.got + R.left}</span><span>受伤 ${R.taken}</span>${R.stolen ? `<span style="color:#ff7a5a">被贼人顺走 ${R.stolen} 铜钱……</span>` : ''}`;
     document.body.appendChild(d); setTimeout(() => d.classList.add('out'), 2600); setTimeout(() => d.remove(), 3200);
   }
 
@@ -6358,6 +6396,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(900px,58v
     roll: ['guan', matchMedia('(pointer:coarse)').matches ? '被围了就点右下角翻滚，滚的时候刀枪不入。' : '被围了就按空格翻滚，滚的时候刀枪不入。'],
     zq: ['guan', '血条上面的蓝条是真气：挨打时替你挡下三成伤害，过半时出手更重。'],
     coin: ['zhang', '哈哈！这袋钱掉地上了，走过去捡！不捡的话，打完只能收回九成！'],
+    thief: ['zhang', '有个背麻袋的贼在偷地上的钱！快去砍他，打死了钱袋会破，连本带利吐出来！'],
     prep: ['liu', '打完一仗先歇口气。从「结算」看起，再去「拾取」「修炼」「行商」，最后在「武学」排好出手顺序。'],
     loot: ['zhang', '这些都是从贼兵身上扒下来的！用得上就学，用不上就卖给行商换钱！'],
     xiu: ['liu', '你在阵上攒下的修为，每升一层就能修炼一次，三选一，挑你最缺的。'],
@@ -6440,7 +6479,27 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(900px,58v
     for (let i = bolts.length - 1; i >= 0; i--) if (bolts[i].t >= bolts[i].T) bolts.splice(i, 1);
     for (let i = fx.length - 1; i >= 0; i--) if (fx[i].t > fx[i].T) fx.splice(i, 1);
   }
+  const BIMG = { f: new Image(), n: new Image() }; BIMG.f.src = 'pack/ui/prep/pbar.webp?v=88f796ee7a'; BIMG.n.src = 'pack/ui/prep/btn.webp?v=f850bb7611';
+  function bar3(img, cap, x, y, w, h) {   // 横向三段拉伸：两头按高度等比，中间拉长
+    const H = img.naturalHeight, W2 = img.naturalWidth, c = Math.min(w / 2, cap * h / H);
+    ctx.drawImage(img, 0, 0, cap, H, x, y, c, h); ctx.drawImage(img, cap, 0, W2 - cap * 2, H, x + c, y, w - c * 2, h); ctx.drawImage(img, W2 - cap, 0, cap, H, x + w - c, y, c, h);
+  }
   function drawWorld() {
+    // 敌将气焰（11/11）：脚下一圈黄巾土红光 + 身上往上窜的火苗，人堆里一眼认出来
+    if (RT.on) for (const z of zs) if (z.survBoss && !z.dead && z.endFade == null) {
+      const t = performance.now() / 1000, sc = z.sc || 1, pr = .5 + .5 * Math.sin(t * 4 + z.x);
+      ctx.save(); ctx.globalCompositeOperation = 'lighter';
+      ctx.translate(z.x, z.y); ctx.scale(1, .42);
+      const g = ctx.createRadialGradient(0, 0, 4, 0, 0, 34 * sc); g.addColorStop(0, `rgba(255,170,60,${.35 + .2 * pr})`); g.addColorStop(.6, `rgba(220,70,30,${.18 + .1 * pr})`); g.addColorStop(1, 'rgba(160,30,10,0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, 34 * sc, 0, 7); ctx.fill();
+      ctx.strokeStyle = `rgba(255,190,90,${.35 + .3 * pr})`; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(0, 0, (24 + 4 * pr) * sc, 0, 7); ctx.stroke();
+      ctx.setTransform(ctx.getTransform().scale(1, 1 / .42));
+      for (let k = 0; k < 7; k++) {   // 火苗：从脚边往上飘
+        const ph = (t * .9 + k / 7 + (z.x % 1)) % 1, ax = Math.sin(k * 2.3 + t * 2) * 13 * sc, ay = -ph * 58 * sc, rr = (4.5 - 3 * ph) * sc;
+        ctx.fillStyle = `rgba(255,${140 + 80 * (1 - ph) | 0},60,${.5 * (1 - ph)})`; ctx.beginPath(); ctx.ellipse(ax, ay, rr * .7, rr * 1.5, 0, 0, 7); ctx.fill();
+      }
+      ctx.restore();
+    }
     if (RT.on && S.coins && S.coins.length) coinDraw();
     // 前摇：脚下画出这一招将要覆盖的范围，越接近出手越亮
     if (S.wind && !S.wind.k.none) {
@@ -6577,6 +6636,28 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(900px,58v
       if (S.bank > 0) { ctx.textAlign = 'left'; ctx.fillStyle = '#ffd86e'; const t = '待修炼 ×' + S.bank; ctx.strokeText(t, bx + bw + 10, by + bh / 2 + .5); ctx.fillText(t, bx + bw + 10, by + bh / 2 + .5); }
       ctx.restore();
     }
+    // 敌将名牌血条（11/11 用户定，照群侠：屏幕上方正中，名字牌 + 宽红条 + 剩余血量；两个敌将上下叠，手机左右并排）
+    const bosses = RT.on && RT.node ? zs.filter(z => z.survBoss && !z.dead && z.hp > 0 && z.endFade == null) : [];
+    if (bosses.length) {
+      ctx.save();
+      const side = !fine && bosses.length > 1, bw = side ? Math.min(HW * .3, 220) : Math.min(HW * (fine ? .4 : .5), fine ? 460 : 300), bh = fine ? 22 : 15, nh = fine ? 22 : 15;
+      bosses.slice(0, 2).forEach((z, i) => {
+        const cx = side ? HW / 2 + (i ? 1 : -1) * (bw / 2 + 6) : HW / 2, bx = cx - bw / 2, ny = (fine ? 26 : 22) + (side ? 0 : i * (nh + bh + 8)), by = ny + nh - 3;
+        const mx = z.maxHp || z.hp, r = Math.max(0, Math.min(1, z.hp / mx));
+        z.hpLag = z.hpLag == null ? r : Math.max(r, z.hpLag - .5 / 60);   // 掉血后橙色残影慢慢追上
+        if (BIMG.f.complete && BIMG.f.naturalWidth) bar3(BIMG.f, 60, bx, by, bw, bh); else { ctx.fillStyle = 'rgba(14,9,6,.85)'; ctx.fillRect(bx, by, bw, bh); }
+        const s0 = bh / 54, ix = bx + 40 * s0, iw = bw - 80 * s0, iy = by + 13 * s0, ih = bh - 26 * s0;
+        ctx.fillStyle = '#e88a3a'; ctx.fillRect(ix, iy, iw * z.hpLag, ih);
+        const g = ctx.createLinearGradient(0, iy, 0, iy + ih); g.addColorStop(0, '#f05a44'); g.addColorStop(.5, '#c02a22'); g.addColorStop(1, '#6c1210'); ctx.fillStyle = g; ctx.fillRect(ix, iy, iw * r, ih);
+        ctx.fillStyle = 'rgba(255,255,255,.18)'; ctx.fillRect(ix, iy, iw * r, ih * .35);
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(20,6,4,.95)'; ctx.fillStyle = '#fff2d8';
+        ctx.font = '900 ' + (fine ? 13 : 10) + 'px Arial Black,Impact,sans-serif'; const ht = String(Math.ceil(z.hp * 10)); ctx.strokeText(ht, cx, by + bh / 2 + .5); ctx.fillText(ht, cx, by + bh / 2 + .5);
+        ctx.font = 'bold ' + (fine ? 14 : 10) + 'px "Songti SC","STSong","Noto Serif SC",serif'; const nm = z.bossLabel || z.T.name || '敌将', nw = ctx.measureText(nm).width + (fine ? 44 : 30);
+        if (BIMG.n.complete && BIMG.n.naturalWidth) bar3(BIMG.n, 40, cx - nw / 2, ny, nw, nh); else { ctx.fillStyle = 'rgba(30,18,10,.9)'; ctx.fillRect(cx - nw / 2, ny, nw, nh); }
+        ctx.fillStyle = '#f3d08a'; ctx.strokeText(nm, cx, ny + nh / 2 + .5); ctx.fillText(nm, cx, ny + nh / 2 + .5);
+      });
+      ctx.restore(); ctx.restore(); return;   // 有敌将名牌时不再写节点名
+    }
     // 波次与倒计时
     ctx.font = 'bold 14px "PingFang SC",sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#ffe9a0';
     const left = Math.max(0, Math.ceil(WT() - W.t));
@@ -6678,7 +6759,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(900px,58v
       return (OG().take || 1) / AFX.hp() * (1 - IT('take')) * RT.take * RES().take * GM.take / GM.hp * low * (S.qg === 'taxue' && mv ? .85 : 1) * (GM.still && S.stillT > 1 ? 1 - GM.still : 1);
     },
     absorb: n => { if (!RT.on || S.zq <= 0) return n; const a = Math.min(S.zq, n * (.3 + IT('huti'))); S.zq -= a; S.hutiSum = (S.hutiSum || 0) + a; return n - a; },   // 护体（11/11 用户定，照群侠幸存者）：真气只挡 30% 伤害，其余直接扣血；真气空了全扣血
-     moveMul: () => (OG().move || 1) * AFX.move() * (1 + IT('move')) * RT.move * GM.spd, left: () => RT.on && RT.node && W.started ? Math.max(0, WT() - W.t) : null, reward: (n, cb) => offerReward(n, cb), event(k, cb) { eventDo(k, cb); }, SK, tick, drawWorld, hud, startRun, waveFlow, pose, rooted, onRoll, skipWave() { if (W.retreat <= 0 && W.between <= 0 && W.started) endWave(); }, state: () => ({ wave: W.n, t: W.t, slots: S.slots.slice() }) };
+     moveMul: () => (OG().move || 1) * AFX.move() * (1 + IT('move')) * RT.move * GM.spd, left: () => RT.on && RT.node && W.started ? Math.max(0, WT() - W.t) : null, reward: (n, cb) => offerReward(n, cb), event(k, cb) { eventDo(k, cb); }, SK, tick, drawWorld, hud, thief: thiefAI, startRun, waveFlow, pose, rooted, onRoll, skipWave() { if (W.retreat <= 0 && W.between <= 0 && W.started) endWave(); }, state: () => ({ wave: W.n, t: W.t, slots: S.slots.slice() }) };
 })();
 
 // 开始界面（登录页）：标题 / 电视演示 / 名字输入 / 开始按钮 / 操作说明 / 穿越转场。
@@ -9328,6 +9409,7 @@ const TYPES = {
   zhang_liang: { name: '人公将军·张梁', hp: 54, spd: 24, wind: .78, reach: 34, dmg: 2.5, heavy: true, chapterBoss: true, sprite: 'zhang_liang', scale: .95 },
   'yellow-golem': { name: '黄巾力士', hp: 16, spd: 22, wind: 1, reach: 34, dmg: 3, heavy: true, noLaunch: true, w: 14, sprite: 'yellow_golem', scale: 1 },
   zhang_jiao: { name: '天公将军·张角', hp: 135, spd: 42, wind: .5, reach: 34, dmg: 3, chapterBoss: true, sprite: 'zhang_jiao', scale: 0.7105 },
+  thief: { name: '黄巾窃贼', hp: 3, spd: 72, thief: true, sprite: 'grunt', scale: .84 },   // 11/11 用户定：背麻袋的小偷，专捡地上的铜钱，捡够就跑；贴图没画好前先借喽啰
   zhang_bao: { name: '地公将军·张宝', hp: 48, spd: 28, wind: .68, reach: 31, dmg: 2, chapterBoss: true, sprite: 'zhang_bao', scale: 1.15 },
 };
 const WAVES = [
