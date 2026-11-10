@@ -19,6 +19,7 @@
   ];
   const FONT = '"MaShanZheng","STKaiti","KaiTi","Songti SC",serif';
   const UI = '"PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif';   // 小字用黑体加粗，毛笔字只用在标题和节点名（11/11：字太小太细）
+  const FONT_Q = FONT.replace(/"/g, "'"), UI_Q = UI.replace(/"/g, "'");
   const KS = () => Math.max(1, Math.min(1.45, Math.min(W / 1280, H / 720)));
   const INK = '#2a211a', CINNABAR = '#b3281e', PAPER = '#eadcc0';
 
@@ -112,6 +113,11 @@
     cv = document.createElement('canvas'); cv.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;display:block';
     root.appendChild(cv); document.body.appendChild(root); g = cv.getContext('2d');
     const exit = document.createElement('button'); exit.textContent = '退出';
+    const bk = Math.max(1, Math.min(1.45, Math.min(innerWidth / 1280, innerHeight / 720)));
+    const card = document.createElement('button'); card.textContent = '兵籍牒';   // 11/11：这一局的当前属性、修为、招式
+    card.style.cssText = 'position:absolute;right:' + (innerWidth < innerHeight * .9 ? 14 : Math.round(96 * bk)) + 'px;top:' + (innerWidth < innerHeight * .9 ? Math.round(56 * bk) : 12) + 'px;padding:6px 14px;font:700 ' + Math.round(16 * bk) + 'px ' + UI + ';letter-spacing:2px;color:#3b2a1c;background:#f3e6c8;border:1px solid #7a5a2c;border-radius:6px;cursor:pointer;z-index:2';
+    card.onclick = () => sheet();
+    root.appendChild(card);
     exit.style.cssText = 'position:absolute;right:14px;top:12px;padding:6px 14px;font:700 ' + Math.round(16 * Math.max(1, Math.min(1.45, Math.min(innerWidth / 1280, innerHeight / 720)))) + 'px ' + UI + ';letter-spacing:2px;color:#f3dc9a;background:rgba(40,28,18,.8);border:1px solid #c9a24a;border-radius:6px;cursor:pointer;z-index:2';
     exit.onclick = () => { if (!confirm('退出本局，回到主界面？')) return; close(); if (typeof returnFromPausedGame === 'function') returnFromPausedGame(true); else if (window.TITLE && TITLE.show) TITLE.show(); };
     root.appendChild(exit);
@@ -186,6 +192,25 @@
     root.appendChild(box);
   }
   // 节点打完（或营地选完）：记下走过的路，回到长卷
+  function sheet() {   // 兵籍牒：这一局当前的修为、属性、招式、功法
+    if (campBox || !window.SURV || !SURV.status) return;
+    const FONT = FONT_Q, UI = UI_Q;   // 写进 style="..." 里，字体名要用单引号
+    const st = SURV.status(), box = campBox = document.createElement('div');
+    box.style.cssText = 'position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(30,20,12,.5);z-index:3;padding:10px';
+    const row = (a, b, c) => '<div style="display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-bottom:1px dotted rgba(122,90,44,.4)"><span style="opacity:.75">' + a + '</span><span>' + b + (c ? '　<small style="opacity:.7">' + c + '</small>' : '') + '</span></div>';
+    const h = t => '<div style="margin:10px 0 4px;font:900 15px ' + FONT + ';letter-spacing:4px;color:#7a2a1e">◆ ' + t + '</div>';
+    box.innerHTML = '<div style="background:radial-gradient(ellipse at 50% 30%,#f6ead4,#e6d2b0);border:2px solid #7a5a2c;border-radius:8px;padding:16px 20px;width:min(94vw,460px);max-height:92vh;overflow:auto;font:600 13px ' + UI + ';color:' + INK + ';box-shadow:0 12px 40px rgba(0,0,0,.45)">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center"><div style="font:900 24px ' + FONT + ';letter-spacing:6px">兵籍牒</div><button class="x" style="font:700 14px ' + UI + ';padding:4px 12px;background:#2e2016;color:#f3dc9a;border:1px solid #7a5a2c;border-radius:5px;cursor:pointer">关闭</button></div>'
+      + row('出身', st.origin) + row('修为', 'LV.' + st.lv + '　' + st.pct + '%', st.bank ? '待修炼 ×' + st.bank : '') + row('气血', st.hp[0] + ' / ' + st.hp[1]) + (st.dmg > 1.001 ? row('招式伤害', '+' + Math.round((st.dmg - 1) * 100) + '%', '磨刀/奇遇') : '')
+      + h('属性') + st.attrs.map((r, i) => row(r[0], r[1] + (st.add[i] ? ' <small style="color:#3f8a4a">(+' + st.add[i] + ')</small>' : ''), r[2])).join('')
+      + h('招式') + (st.slots.filter(Boolean).map((k, i) => row((i + 1) + '. <i style="display:inline-block;width:9px;height:9px;border-radius:2px;background:' + k.color + ';box-shadow:0 0 0 1px rgba(0,0,0,.4);margin-right:4px"></i><b>' + k.name + '</b> LV' + k.lv, '', k.desc)).join('') || '<div style="opacity:.6">无</div>')
+      + h('功法') + (st.gf.filter(Boolean).map(g => row(g.name + ' LV' + g.lv, '', g.desc)).join('') || '<div style="opacity:.6">无</div>')
+      + (st.qg ? h('轻功') + row(st.qg.name, '', st.qg.desc) : '')
+      + '</div>';
+    const shut = () => { box.remove(); campBox = null; };
+    box.querySelector('.x').onclick = shut; box.onclick = e => { if (e.target === box) shut(); };
+    root.appendChild(box);
+  }
   function done(n, keepOpen) {
     run.cur = n; run.visited.add(n);
     if (window.RUNSAVE) RUNSAVE.save();   // 自动存档（11/11 用户定）：每打完一个节点、回到长卷时存一次；战斗中途不存
