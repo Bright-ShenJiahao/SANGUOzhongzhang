@@ -800,11 +800,12 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(900px,58v
     const k = tutQ.shift(); if (!k) return;
     const [who, txt] = TUT[k], [nm, face] = NPC[who], big = k === 'prep';
     const d = document.createElement('div'); d.id = 'survTut'; if (big) d.className = 'big'; d.style.setProperty('--k', uiK());
-    d.innerHTML = (big ? `<div class="lh" style="background-image:url('art/ui/npc/liubei_full.webp')"></div>` : '') + `<div class="bx"><b class="nm">${nm}</b><p>${txt}</p><small>按 <b>空格键</b> 或点一下 继续</small></div>${big ? '' : `<em style="background-image:url('${face}')"></em>`}`;
+    d.innerHTML = (big ? `<div class="lh" style="background-image:url('art/ui/npc/liubei_full.webp')"></div>` : '') + `<div class="bx"><b class="nm">${nm}</b><p>${txt}</p><small>${document.getElementById('survPrep') ? '按 <b>空格键</b> 或点一下 继续' : '点一下关闭'}</small></div>${big ? '' : `<em style="background-image:url('${face}')"></em>`}`;
     const go = () => { removeEventListener('keydown', key, true); if (!d.parentNode) return; d.remove(); tutNext(); };
-    const key = e => { if (e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); e.stopImmediatePropagation(); go(); } };
+    const key = e => { if (!document.getElementById('survPrep')) return;   // 战斗中空格是翻滚，不拿来关提醒（11/11 用户报冲突）
+      if (e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); e.stopImmediatePropagation(); go(); } };
     d.onclick = go; addEventListener('keydown', key, true); document.body.appendChild(d);
-    if (!document.getElementById('survPrep')) setTimeout(() => { if (d.parentNode) go(); }, 8000);   // 战斗中 8 秒自动收起
+    if (!document.getElementById('survPrep')) setTimeout(() => { if (d.parentNode && !document.getElementById('survPrep')) go(); }, 9000);   // 战斗中 9 秒自动收起
   }
   // ---------- 局内存档（11/11 用户定：回到长卷自动存；主界面「继续」读档） ----------
   const RUN_KEY = 'szz-run';
