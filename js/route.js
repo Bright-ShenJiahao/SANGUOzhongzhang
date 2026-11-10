@@ -13,9 +13,9 @@
   const hov = { n: null };
   const LABEL = { battle: '黄巾游兵', elite: '黄巾精锐', camp: '营地', boss: '张角祭坛', start: '涿郡', event: '奇遇', chest: '宝箱' };
   const EVENTS = [   // 奇遇：几个小抉择，选完不打架直接回长卷
-    { t: '破庙神像', d: '路边一座破庙，神像前还摆着供品。', o: [['上香祈福', '回复 40% 血量', 'pray'], ['搜刮供品', '失去 20% 血量，换一次战利三选一', 'loot']] },
-    { t: '路边老兵', d: '一个断了腿的老兵坐在树下，招呼你过去。', o: [['请他喝酒', '武艺伤害 +8%', 'wine'], ['向他求教', '一次战利三选一', 'learn']] },
-    { t: '溪边磨石', d: '溪水边有一块平整的磨刀石。', o: [['磨刀', '武艺伤害 +10%', 'sharpen'], ['歇脚', '回复 30% 血量', 'rest']] },
+    { t: '破庙神像', npc: ['刘备', 'art/ui/npc/liubei_face.webp', '神明面前，取舍由你。只是拿了供品，心里要过意得去。'], d: '路边一座破庙，神像前还摆着供品。', o: [['上香祈福', '回复 40% 血量', 'pray'], ['搜刮供品', '失去 20% 血量，换一次战利三选一', 'loot']] },
+    { t: '路边老兵', npc: ['关羽', 'art/ui/npc/guanyu_face.webp', '老卒阅阵无数，一碗酒换他一句话，不亏。'], d: '一个断了腿的老兵坐在树下，招呼你过去。', o: [['请他喝酒', '武艺伤害 +8%', 'wine'], ['向他求教', '一次战利三选一', 'learn']] },
+    { t: '溪边磨石', npc: ['张飞', 'art/ui/npc/zhangfei_face.webp', '磨快了刀，砍起贼来才痛快！不过歇歇脚也行。'], d: '溪水边有一块平整的磨刀石。', o: [['磨刀', '武艺伤害 +10%', 'sharpen'], ['歇脚', '回复 30% 血量', 'rest']] },
   ];
   const FONT = '"MaShanZheng","STKaiti","KaiTi","Songti SC",serif';
   const UI = '"PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif';   // 小字用黑体加粗，毛笔字只用在标题和节点名（11/11：字太小太细）
@@ -165,20 +165,33 @@
     close();
     if (window.SURV && SURV.beginNode) SURV.beginNode(n);
   }
-  function popup(title, sub, desc, opts, pick) {   // 通用选择弹窗（奇遇用）
-    const box = campBox = document.createElement('div');
-    box.style.cssText = 'position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(30,20,12,.45);z-index:3';
-    const bs = 'width:170px;padding:12px 8px;font:700 18px ' + FONT + ';color:' + INK + ';background:#f3e6c8;border:1px solid #7a5a2c;border-radius:8px;cursor:pointer';
-    box.innerHTML = '<div style="background:' + PAPER + ';border:2px solid #7a5a2c;border-radius:10px;padding:18px 22px;max-width:92vw;text-align:center;font-family:' + FONT + ';color:' + INK + ';box-shadow:0 10px 40px rgba(0,0,0,.45)">'
-      + '<div style="font-size:26px;letter-spacing:6px;margin-bottom:6px">' + title + '</div><div style="font-size:14px;opacity:.75;margin-bottom:14px;max-width:340px">' + desc + '</div>'
-      + '<div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">' + opts.map((o, i) => '<button data-i="' + i + '" style="' + bs + '">' + o[0] + '<br><small style="font:12px sans-serif;opacity:.8">' + o[1] + '</small></button>').join('') + '</div></div>';
+  // 奇遇弹窗（11/11 改成整备屏那套：金框深色面板 + 名字牌 + 左边刘关张头像点评 + 金框按钮）
+  const EV_CSS = '.rtEv{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 45%,rgba(14,10,8,.55),rgba(6,4,3,.82));z-index:3;font-family:' + UI_Q + ';color:#efe2c6}'
+    + '.rtEv .pn{position:relative;width:min(720px,94vw);box-sizing:border-box;padding:clamp(26px,5vh,46px) clamp(26px,4vw,48px) clamp(20px,4vh,36px);border:clamp(26px,5vh,40px) solid transparent;border-image:url(art/ui/prep/panel.webp) 90 fill stretch;text-align:center}'
+    + '.rtEv .tt{position:absolute;left:50%;top:clamp(-30px,-4.5vh,-18px);transform:translateX(-50%);padding:0 clamp(28px,4vw,46px);height:clamp(36px,7vh,52px);display:flex;align-items:center;white-space:nowrap;border:12px solid transparent;border-image:url(art/ui/prep/btn.webp) 40 fill stretch;font:900 clamp(20px,3.6vh,30px) ' + FONT_Q + ';letter-spacing:.3em;text-indent:.3em;color:#f3d08a;text-shadow:0 2px 0 #2a1608}'
+    + '.rtEv .bd{display:flex;gap:clamp(12px,2vw,22px);align-items:center;text-align:left;margin:clamp(6px,1.5vh,14px) 0 clamp(12px,2.6vh,22px)}'
+    + '.rtEv .pf{flex:none;width:clamp(72px,15vh,112px);height:clamp(72px,15vh,112px);border:10px solid transparent;border-image:url(art/ui/prep/pframe.webp) 50 stretch;background:#1a120c center/cover no-repeat}'
+    + '.rtEv .ds{font:700 clamp(15px,2.6vh,19px)/1.55 ' + UI_Q + ';color:#efe2c6}.rtEv .sy{margin-top:.5em;font:700 clamp(14px,2.4vh,17px)/1.5 ' + UI_Q + ';color:#e8c47a}.rtEv .sy b{color:#ffd86e;margin-right:.4em}'
+    + '.rtEv .hp{margin-top:.4em;font:700 clamp(13px,2.2vh,15px) ' + UI_Q + ';color:#e88070}'
+    + '.rtEv .op{display:flex;gap:clamp(10px,1.6vw,18px);justify-content:center;flex-wrap:wrap}'
+    + '.rtEv button{min-width:clamp(150px,22vw,230px);padding:clamp(6px,1.4vh,12px) 14px;border:14px solid transparent;border-image:url(art/ui/prep/btn.webp) 40 fill stretch;background:none;color:#f3d08a;cursor:pointer;font:900 clamp(18px,3.2vh,24px) ' + FONT_Q + ';letter-spacing:.15em;transition:transform .12s,filter .12s}'
+    + '.rtEv button:hover{transform:translateY(-3px);filter:brightness(1.25)}.rtEv button small{display:block;margin-top:.25em;font:700 clamp(12px,2.2vh,15px) ' + UI_Q + ';letter-spacing:0;color:#efe2c6}';
+  { const st = document.createElement('style'); st.textContent = EV_CSS; document.head.appendChild(st); }
+  function popup(title, sub, desc, opts, pick, npc) {   // 通用选择弹窗（奇遇用）
+    const box = campBox = document.createElement('div'); box.className = 'rtEv';
+    const hp = window.SURV && SURV.routeHp ? SURV.routeHp() : null;
+    box.innerHTML = '<div class="pn"><div class="tt">' + title + '</div><div class="bd">'
+      + (npc ? '<div class="pf" style="background-image:url(' + npc[1] + ')"></div>' : '')
+      + '<div><div class="ds">' + desc + '</div>' + (npc ? '<div class="sy"><b>' + npc[0] + '</b>' + npc[2] + '</div>' : '')
+      + (hp ? '<div class="hp">当前气血 ' + Math.ceil(hp[0] * 10) + ' / ' + Math.round(hp[1] * 10) + '</div>' : '') + '</div></div>'
+      + '<div class="op">' + opts.map((o, i) => '<button data-i="' + i + '">' + o[0] + '<small>' + o[1] + '</small></button>').join('') + '</div></div>';
     box.querySelectorAll('button').forEach(b => b.onclick = () => { box.remove(); campBox = null; pick(opts[+b.dataset.i][2]); });
     root.appendChild(box);
   }
   function happen(n) {
     if (window.SFX) SFX.play('j_event');
     const ev = EVENTS[(n.id * 7 + n.layer) % EVENTS.length];
-    popup(ev.t, '', ev.d, ev.o, k => SURV.event(k, () => done(n, true)));
+    popup(ev.t, '', ev.d, ev.o, k => SURV.event(k, () => done(n, true)), ev.npc);
   }
   function chest(n) { SURV.reward(2, () => done(n, true)); }
   function camp(n) {
