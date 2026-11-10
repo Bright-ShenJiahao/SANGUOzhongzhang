@@ -249,11 +249,11 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     SK[k].pose = [f(1), f(RECOV_N[k] || 2)]; SK[k].pose2 = f(3); SK[k].poseL = w === 8 || n < 4 ? SK[k].pose[1] : f(n);
   }
   // 每个招式用自己的帧：[出招前摇帧, 出手帧, 收势帧, 第二击帧]。刀用白衣持刀帧 wd_*，剑用白衣持剑帧 wj_*
-  const PAIR = { hengsao: ['wd_3', 'wd_5', 'wd_5'], daobo: ['wd_1', 'wd_2', 'wd_2'], huima: ['wd_6', 'wd_4', 'wd_4', 'wd_5'], daolun: ['wd_1', 'wd_5', 'wd_2'] };
+  const PAIR = { daobo: ['wd_1', 'wd_2', 'wd_2'], hengsao: ['wd_3', 'wd_4', 'wd_4'], huima: ['wd_5', 'wd_6', 'wd_6', 'wd_2'], daolun: ['wd_7', 'wd_4', 'wd_4'] };
   for (const k of Object.keys(PAIR)) { const q = PAIR[k]; SK[k].pose = [q[0], q[1]]; SK[k].poseL = q[2] || q[1]; SK[k].pose2 = q[3] || q[1]; }
   // 手里拿的兵器：放哪种近战/长兵招式就拿哪种，之后待机、行走都拿着；暗器、法术不换（空手施放）。目前只有刀有持械待机和行走帧
   const HELDP = { 0: 'wd_' };
-  const heldPre = () => (S.held != null && HELDP[S.held]) || '';
+  const heldPre = () => 'wd_';   // 目前只有刀的美术：主角始终拿刀
   const profOf = c => Math.max(.72, Math.min(1.35, .58 + .15 * ((OG().oa || [3, 3, 3, 3, 3, 3, 3, 3])[CATA[c]])));
   const RESD = [0, 0, .08, .16, .26, .40];   // 同类别 n 件：该类别招式伤害加成
   function RES() {

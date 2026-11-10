@@ -780,14 +780,16 @@ function drawChar(name, f, x, y, flip, alpha = 1, white = false, sc = 1, dark = 
 }
 function heroFrame(h) {
   if (window.SURV) { const p = SURV.pose(h); if (p) return p; }
-  if (window.SURV && SURV.noStun && SURV.noStun()) {   // 三国终章：主角固定空手，兵器只在施招时出现（SURV.pose）；没有击飞，死亡腾空时用受伤帧
-    if (h.st === 'roll') return 'roll' + (1 + Math.min(3, Math.floor(h.t / .1)));
-    if (h.air) return 'hurt';
-    if (h.st === 'bounce' || h.st === 'getup' || h.st === 'down') return 'down';
-    const hp = SURV.heldPre ? SURV.heldPre() : '';   // 手里拿着兵器时，待机和行走用持械帧
-    if (h.st === 'walk') return (hp ? hp + 'walk' : 'walk') + [1, 2, 3, 2][Math.floor(h.t * 8) % 4];
-    return h.st === 'hurt' ? 'hurt' : hp + 'idle';
+  if (window.SURV && SURV.noStun && SURV.noStun()) {   // 三国终章：手里有兵器时用持械帧（目前只有刀 wd_*），缺的帧回落到空手帧
+    const hp = SURV.heldPre ? SURV.heldPre() : '';
+    const H = n => hp && CH.hero && CH.hero[hp + n] ? hp + n : n;
+    if (h.st === 'roll') return H('roll' + (1 + Math.min(3, Math.floor(h.t / .1))));
+    if (h.air) return H('hurt');
+    if (h.st === 'bounce' || h.st === 'getup' || h.st === 'down') return H('down');
+    if (h.st === 'walk') return H('walk' + [1, 2, 3, 2][Math.floor(h.t * 8) % 4]);
+    return h.st === 'hurt' ? H('hurt') : H('idle');
   }
+
   const frameWeapon = weapon === 'halberd' ? 'halberd' : weapon;
   if (h.st === 'atk') { const C = h.atk && WEAP[weapon].combo[h.atk.c]; if (C && C.f[h.atk.fi]) return C.f[h.atk.fi]; }   // 出招数据对不上（如中途换武器）时不再报错
   if (h.st === 'roll') return 'roll' + (1 + Math.min(3, Math.floor(h.t / .1)));
