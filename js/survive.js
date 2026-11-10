@@ -587,12 +587,15 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     if (hero.hp < (S.lastHp == null ? hero.hp : S.lastHp)) S.taken += S.lastHp - hero.hp; S.lastHp = hero.hp;
   }
   function coinDraw() {
-    const ok = COIN_IMG.complete && COIN_IMG.naturalWidth;
-    for (const c of S.coins) {
+        for (const c of S.coins) {
       const bob = Math.sin(c.t * 5 + c.x) * 1.2, sz = 11;
       ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(c.x, c.y + 2, 5, 2, 0, 0, 7); ctx.fill();
-      if (ok) ctx.drawImage(COIN_IMG, 20, 20, 88, 88, c.x - sz / 2, c.y - sz - c.z + bob, sz, sz);
-      else { ctx.fillStyle = '#e8b84a'; ctx.beginPath(); ctx.arc(c.x, c.y - 5 - c.z + bob, 4, 0, 7); ctx.fill(); }
+      { const cx = c.x, cy = c.y - 5 - c.z + bob, sp = Math.abs(Math.cos(c.t * 3 + c.x));   // 地上的铜钱：画成透明底的方孔钱（coin.webp 带底色，画在地上是一块方砖）
+        ctx.save(); ctx.translate(cx, cy); ctx.scale(.45 + .55 * sp, 1);
+        ctx.fillStyle = '#5a3208'; ctx.beginPath(); ctx.arc(0, 0, 5, 0, 7); ctx.fill();
+        ctx.fillStyle = '#e8a83a'; ctx.beginPath(); ctx.arc(0, 0, 4, 0, 7); ctx.fill();
+        ctx.fillStyle = '#ffe08a'; ctx.beginPath(); ctx.arc(-1, -1, 2.6, 0, 7); ctx.fill();
+        ctx.fillStyle = '#5a3208'; ctx.fillRect(-1.3, -1.3, 2.6, 2.6); ctx.restore(); }
     }
   }
   function moneyHud() {   // 左上角：铜钱
