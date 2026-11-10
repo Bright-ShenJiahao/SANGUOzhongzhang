@@ -210,7 +210,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   add('chong', { name: '冲锋', icon: '冲', color: '#ffb0a0', desc: '向前猛冲，撞飞路上的人', need: 120, beam: true, len: 90, wu: .45,
     cast() { const a = aim(); lineHit(a, 90, 16, 2.2, 70, '255,180,160'); hero.x += Math.cos(a) * 36; hero.y += Math.sin(a) * 18; sfx('crack', hero.x); shake = Math.max(shake, .15); } });
   add('daolun', { name: '刀轮', icon: '轮', color: '#cfe8ff', desc: '身周刀轮急转一圈（约 1 秒）', need: 90, wu: .5,
-    cast() { S.poseOverride = { f: 'wd_hx2', t: .14 }; zones.push({ x: 0, y: 0, follow: 1, r: 44, t: 0, T: 1.05, tk: 0, dmg: 1.25, kind: 'wheel' });   // 11/11 用户：3 秒太长，下一轮又接上，等于常驻 → 缩到 1 秒，单跳伤害提高 sfx('swing_knife', hero.x); } });
+    cast() { S.poseOverride = { f: 'wd_hx2', t: .14 }; zones.push({ x: 0, y: 0, follow: 1, r: 44, t: 0, T: 1.05, tk: 0, dmg: 1.25, kind: 'wheel' }); /* 11/11：3 秒太长等于常驻，缩到约 1 秒 */ sfx('swing_knife', hero.x); } });
   add('xuanfeng', { tier: 2, name: '回旋斩', icon: '旋', color: '#a0d0ff', desc: '周身 360° 回旋一斩', need: 80, range: 66, half: Math.PI,
     cast() { sweep(0, Math.PI, 66, 2.5, 55, ['rgba(160,210,255,', 'rgba(225,245,255,']); sfx('swing_knife', hero.x); shake = Math.max(shake, .15); } });
   add('dilie', { tier: 3, name: '地裂波', icon: '裂', color: '#d8a060', desc: '向前裂开长长一道地缝', need: 200, beam: true, len: 200, wu: .7, rc: .4,
