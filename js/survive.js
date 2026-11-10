@@ -227,9 +227,9 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   // ---------- 出身（开局配置里选；起手只有 1 个招式） ----------
   const ORIGINS = {
     nongfu: { name: '农夫', tag: '短兵器', skill: 'hengsao', desc: '庄稼汉，挨得住打。受到伤害 -20%', take: .8, oa: [5, 4, 2, 1, 1, 2, 1, 3] },
-    xiaozu: { name: '小卒', tag: '长兵器', skill: 'lianzhan', desc: '行伍出身，出手利落。招式前摇 -20%', wu: .8, oa: [4, 4, 5, 1, 1, 2, 1, 3] },
+    xiaozu: { name: '小卒', tag: '长兵器', skill: 'daolun', desc: '行伍出身，出手利落。招式前摇 -20%', wu: .8, oa: [4, 4, 5, 1, 1, 2, 1, 3] },
     liehu: { name: '猎户', tag: '远程', skill: 'daobo', desc: '山里跑惯了。移动速度 +12%', move: 1.12, oa: [3, 4, 1, 5, 1, 4, 1, 3] },
-    shusheng: { name: '书生', tag: '术法', skill: 'huogong', desc: '手无缚鸡之力，却通术法。术法招式最强，近战偏弱', oa: [2, 1, 1, 1, 1, 2, 6, 4] },
+    shusheng: { name: '书生', tag: '术法', skill: 'huima', desc: '手无缚鸡之力，却通术法。术法招式最强，近战偏弱', oa: [2, 1, 1, 1, 1, 2, 6, 4] },
   };
   let origin = 'nongfu';
   const OG = () => ORIGINS[origin] || ORIGINS.nongfu;
@@ -239,6 +239,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const WEPN = ['刀', '剑', '锤', '枪', '关刀', '弓', '弩', '石子', '法术'], WEPCAT = [0, 0, 0, 1, 1, 2, 2, 2, 3];
   const WOF = { hengsao: 0, daobo: 0, huima: 0, daolun: 0, lianzhan: 1, sixiang: 1, wanren: 1, zhendi: 2, dilie: 2, shuanghuan: 2, tianbeng: 2, qiang: 3, chong: 3, xuanfeng: 4, xuehe: 4, jianyu: 5, huogong: 8, pili: 8 };
   const wepOf = k => WOF[k] != null ? WOF[k] : 0;
+  const ONLY_DAO = true;   // 用户定 11/10：目前只有刀的美术，招式奖励只出刀系；其他武器等美术补齐再开
   const catOf = k => WEPCAT[wepOf(k)];
   // 招式姿势：主角固定空手，放招时按这一招的兵器举起对应的施招帧（第 1 帧蓄力，第 2 帧出手，更多帧给第二刀和收势）
   // FRW 下标同 WEPN：[帧名前缀, 帧数]；法术暂按招式配法器，之后改成按装备的法器
@@ -429,7 +430,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   // ---------- 节点结算：连选 n 次（招式 / 强化 三选一）----------
   function rewardOptions(kind) {
     const owned = S.slots.filter(Boolean), free = S.slots.indexOf('') >= 0;
-    const sk = (free ? Object.keys(SK).filter(k => !owned.includes(k) && tierOk(k)) : []).sort(() => Math.random() - .5).slice(0, kind === 'skill' ? 3 : 2).map(k => ({ kind: 'skill', k, name: SK[k].name, icon: SK[k].icon, color: SK[k].color, desc: (SK[k].tier ? TIERN[SK[k].tier] + '阶 · ' : '') + SK[k].desc }));
+    const sk = (free ? Object.keys(SK).filter(k => !owned.includes(k) && tierOk(k) && (!ONLY_DAO || wepOf(k) === 0)) : []).sort(() => Math.random() - .5).slice(0, kind === 'skill' ? 3 : 2).map(k => ({ kind: 'skill', k, name: SK[k].name, icon: SK[k].icon, color: SK[k].color, desc: (SK[k].tier ? TIERN[SK[k].tier] + '阶 · ' : '') + SK[k].desc }));
     const gp = Object.keys(GF).filter(id => { const g = GF[id]; return !g.off && !S.gf.includes(id) && S.qg !== id && W.n >= TMIN[g.t + 1] && (g.qg || S.gf.includes('')); });
     const pk = gp.sort(() => Math.random() - .5).map(id => { const g = GF[id]; return { kind: 'gf', id, name: g.n, icon: g.qg ? '轻' : g.n[0], color: GTC[g.t], desc: GTN[g.t] + '阶 · ' + (g.qg ? '轻功 · ' : g.c >= 0 ? g.cn + '心法 · ' : '内功 · ') + gfText(g) }; });
     if (pk.length < 3) pk.push({ kind: 'heal', name: '回春', icon: '春', color: '#ff9a9a', desc: '立刻回复 40% 血量' });

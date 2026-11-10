@@ -1,0 +1,37 @@
+# 路线试玩机器人（用户定 11/10）：改 tools/routebot/RUN 并推到 preview 就自动跑；也可以在 Actions 页面手动跑。
+# 结果（report.txt + 截图）强推到 bot-report 分支，不碰 preview / main。
+name: 路线试玩机器人
+on:
+  push:
+    branches: [preview]
+    paths: ['tools/routebot/RUN']
+  workflow_dispatch:
+    inputs:
+      minutes: { description: '跑多少分钟', default: '20' }
+permissions: { contents: write }
+concurrency: { group: routebot, cancel-in-progress: true }
+jobs:
+  bot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install pillow fonttools brotli && npm i --no-save playwright@1.48.2 && npx playwright install --with-deps chromium
+      - run: python3 tools/build.py && git checkout art/fonts/result.ttf || true
+      - name: 试玩
+        run: |
+          python3 -m http.server 8765 >/dev/null 2>&1 &
+          sleep 2
+          M="${{ github.event.inputs.minutes }}"; [ -z "$M" ] && M=$(head -1 tools/routebot/RUN | tr -dc 0-9); [ -z "$M" ] && M=20
+          node tools/routebot/bot.cjs "$M" /tmp/botreport
+      - name: 推结果到 bot-report 分支
+        if: always()
+        run: |
+          cd /tmp/botreport && git init -q && git checkout -q -b bot-report
+          git config user.name routebot && git config user.email routebot@users.noreply.github.com
+          git add -A && git commit -qm "试玩报告 ${{ github.sha }}"
+          git push -qf "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" bot-report
