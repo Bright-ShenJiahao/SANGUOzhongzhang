@@ -1,10 +1,8 @@
 // 开局配置（三国终章，用户定 11/09）：照三国幸存者的三栏布局。
 // 左：称号 / 势力 / 出身；中：所选战场；右：兵籍牒（属性 + 起手招式）。整军备战不要了。
 (() => {
-  const ATTR = ['体魄', '短兵', '长兵', '身法', '运气', '悟性'];
-  const STAT = {   // 出身的属性条（先只是展示，数值以后再接）
-    nongfu: [6, 4, 2, 2, 3, 2], xiaozu: [4, 3, 4, 3, 2, 2], liehu: [3, 3, 1, 5, 3, 2], shusheng: [2, 1, 1, 2, 3, 6],
-  };
+  const WEP = [['dao', '刀', true], ['jian', '剑'], ['chui', '锤'], ['qiang', '枪'], ['guandao', '关刀'], ['gong', '弓']];   // 兵器路数（11/11）：只有刀有美术，其余上锁
+  let axSel = -1;
   const FIELDS = [
     { name: '黄巾之乱', sub: '第一章 · 中平元年', note: '从涿郡一路杀到张角祭坛：18 层、4 位段首领、终战张角。', open: true, pic: 'art/ui/kaiju/field1.webp' },
     { name: '董卓乱京', sub: '第二章 · 中平六年', note: '暂未开放，敬请期待。', open: false },   // 11/11 用户定：先放出来，但不能选
@@ -22,7 +20,7 @@
   #kaiju .top{display:flex;align-items:center;gap:12px;padding:7px 14px;margin:0 0 10px;align-self:flex-start;min-width:min(420px,100%);background:linear-gradient(90deg,rgba(22,15,10,.94) 0%,rgba(22,15,10,.88) 70%,rgba(22,15,10,0) 100%);border-bottom:1px solid #b08a4a;border-radius:3px 0 0 0}
   #kaiju .seal{width:34px;height:34px;background:#a8281e;color:#ffe9c0;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;border-radius:4px;transform:rotate(-4deg);box-shadow:0 2px 6px rgba(80,20,10,.35)}
   #kaiju .top h1{margin:0;font-size:22px;letter-spacing:8px;color:#f5e2b8;text-shadow:0 1px 3px #000}#kaiju .top small{color:#c9b08a;font-size:12px;letter-spacing:3px}
-  #kaiju .cols{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1.3fr 1fr;gap:12px}
+  #kaiju .cols{flex:1;min-height:0;display:grid;grid-template-columns:1.25fr 1fr 1fr;gap:12px}
   #kaiju .pan{position:relative;border:1px solid #b08a4a;border-radius:3px;background:linear-gradient(180deg,rgba(34,24,16,.94),rgba(22,15,10,.95));padding:12px 12px 10px;overflow:auto;min-height:0;
     box-shadow:inset 0 0 0 3px rgba(14,9,6,.9),inset 0 0 0 4px rgba(176,138,74,.45),0 8px 24px rgba(40,25,10,.35)}
   #kaiju .pan:before,#kaiju .pan:after{content:"";position:absolute;width:14px;height:14px;border:2px solid #d8b060;pointer-events:none}
@@ -56,8 +54,20 @@
   #kaiju .fl button.lock{opacity:.55;cursor:not-allowed;filter:grayscale(.6)}#kaiju .fl button.lock b:before{content:"🔒 ";font-size:12px;letter-spacing:0}
   #kaiju .fl button.shake{animation:kjShake .3s}@keyframes kjShake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
   #kaiju .fname{font-size:20px;letter-spacing:8px;color:#ffe9b8;text-shadow:0 2px 6px #000}#kaiju .fnote{font-size:12px;color:#d8c39a;margin-top:2px}
+  #kaiju .wp{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+  #kaiju .wp button{padding:6px 2px;border:1px solid #5a4226;border-radius:4px;background:rgba(36,25,16,.85);color:#e9cf98;font:700 15px inherit;font-family:inherit;letter-spacing:3px;cursor:pointer}
+  #kaiju .wp button.on{border-color:#ffd86e;background:linear-gradient(180deg,rgba(90,62,30,.9),rgba(50,34,18,.9));box-shadow:0 0 0 1px #ffd86e,0 0 10px rgba(255,200,90,.4);color:#ffe9b8}
+  #kaiju .wp button.lock{opacity:.45;cursor:not-allowed;font-weight:400}#kaiju .wp button.lock:after{content:"🔒";font-size:10px;margin-left:2px}
+  #kaiju .wp button.shake,#kaiju .fl button.shake{animation:kjShake .3s}
+  #kaiju .skd{margin-top:6px;padding:7px 8px;border:1px solid rgba(176,138,74,.5);border-radius:4px;background:rgba(60,42,26,.4);font-size:12px;color:#d8c39a;line-height:1.6}
+  #kaiju .skd b{font-size:14px}
+  #kaiju .bag{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-top:4px}#kaiju .bag div{aspect-ratio:1;max-width:48px;border:1px dashed #5a4226;border-radius:3px;background:rgba(20,14,9,.7) center/cover;position:relative}
+  #kaiju .bag div.has{border:1px solid #8a6a3a}#kaiju .bag div i{position:absolute;right:2px;bottom:1px;font-style:normal;font-size:10px;color:#ffe9b8;text-shadow:0 1px 2px #000}
+  #kaiju .ax{font-size:11px;color:#c9b08a;white-space:nowrap;text-align:right}
+  #kaiju .bar{cursor:help}#kaiju .bar.sel span:first-child{color:#ffd86e}
+  #kaiju .axd{min-height:1.5em;margin:4px 0 2px;font-size:11px;color:#a8916c}
   #kaiju .rows div{display:flex;justify-content:space-between;border-bottom:1px dotted #5a4226;padding:3px 0;font-size:13px}#kaiju .rows span{color:#a8916c}
-  #kaiju .bar{display:grid;grid-template-columns:34px 1fr 16px;align-items:center;gap:6px;font-size:12px;margin:3px 0}
+  #kaiju .bar{display:grid;grid-template-columns:34px 1fr 14px 70px;align-items:center;gap:6px;font-size:12px;margin:3px 0}
   #kaiju .bar i{display:block;height:7px;background:#3a2a1c;border-radius:2px;overflow:hidden}#kaiju .bar i u{display:block;height:100%;background:linear-gradient(90deg,#8a2a1e,#e0804a)}
   #kaiju .sk{display:flex;gap:6px;margin-top:4px}#kaiju .sk div{flex:1;aspect-ratio:1;max-width:48px;border:1px dashed #5a4226;border-radius:3px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;background:rgba(20,14,9,.7) center/cover;color:#5a4a36}
   #kaiju .sk div.has{border:1px solid #ffd86e;color:#ffd86e;box-shadow:0 0 8px rgba(255,200,90,.35)}
@@ -71,22 +81,12 @@
     #kaiju .pic{min-height:60px}#kaiju .bot{margin-top:5px}#kaiju .bot button{padding:6px 14px;font-size:14px}#kaiju .bot .go{padding:7px 36px}#kaiju .fname{font-size:16px}#kaiju .fl{margin-top:5px}#kaiju .fl button{padding:4px}#kaiju .fl button small{display:none}#kaiju .top{padding:4px 10px;margin-bottom:6px}}
   @media (max-width:700px) and (orientation:portrait){#kaiju .cols{display:flex;flex-direction:column;overflow-y:auto;gap:10px;-webkit-overflow-scrolling:touch}#kaiju .pan{overflow:visible;flex:none}#kaiju .field{order:-1;height:auto}#kaiju .pic{flex:none;height:min(56vw,240px)}#kaiju .bot button{letter-spacing:2px;padding:9px 12px;white-space:nowrap}#kaiju .bot .go{flex:1;padding:10px 0;letter-spacing:8px}}`;
   function render() {
-    const O = window.SURV ? SURV.ORIGINS : {}, cur = SURV.origin(), o = O[cur], st = STAT[cur] || [], SK = SURV.SK, sk = SK[o.skill];
+    const O = window.SURV ? SURV.ORIGINS : {}, cur = SURV.origin(), o = O[cur], ai = SURV.attrInfo ? SURV.attrInfo(cur) : [], SK = SURV.SK, sk = SK[o.skill];
     const F = FIELDS[field], hard = !!(window.TITLE && TITLE.hardMode && TITLE.hardMode());
     const ic = u => `style="background-image:url('${u}')"`;
     el.innerHTML = `
       <div class="top"><div class="seal">卒</div><div><h1>开局配置</h1><small>选择你的出身</small></div></div>
       <div class="cols">
-        <div class="pan">
-          <h4>名号</h4>
-          <div class="namep"><div class="ico" ${ic(PIC.plate)}></div><div><b>${esc(name)}</b><small>称号：无（通关或达成条件后获得）</small></div></div>
-          <h4>势力</h4><select disabled><option>普通乡勇　增：无；减：无</option></select>
-          <h4 style="margin-top:10px">出身</h4>
-          <div class="og">${Object.keys(O).map(k => `<button data-o="${k}" class="card ${k === cur ? 'on' : ''} ${O[k].locked ? 'lock' : ''}"><div class="ico" ${ic(OGI[k] || '')}></div><span><b>${O[k].name}</b><small>${(O[k].desc || '').split('。')[0]}</small></span></button>`).join('')}</div>
-          <div class="ogd"><b>${o.name}</b><span class="tag">${o.tag}</span><p>${o.desc}</p><p>起手招式：<b style="font-size:13px;color:${sk ? sk.color : '#fff'}">${sk ? sk.name : '—'}</b>${sk ? '（' + sk.desc + '）' : ''}</p></div>
-          <h4 style="margin-top:10px">难度</h4>
-          <div class="diff"><button class="card ${hard ? '' : 'on'}" data-h="0"><div class="ico" ${ic(PIC.std)}></div><span><b>标准</b><small>试牛刀，来去自如</small></span></button><button class="card ${hard ? 'on' : ''}" data-h="1"><div class="ico" ${ic(PIC.hard)}></div><span><b style="color:#ff8a70">困难</b><small>敌人更强，积分×1.25</small></span></button></div>
-        </div>
         <div class="pan field">
           <h4>所选战场</h4>
           <div class="pic" style="background-image:url('${F.pic}')">
@@ -94,17 +94,36 @@
           <div class="fl">${FIELDS.map((f, i) => `<button data-i="${i}" class="${i === field ? 'on' : ''} ${f.open ? '' : 'lock'}" title="${f.open ? '' : '暂未开放'}"><b>${f.name}</b><small>${f.open ? f.sub : '暂未开放'}</small></button>`).join('')}</div>
         </div>
         <div class="pan">
+          <h4>名号</h4>
+          <div class="namep"><div class="ico" ${ic(PIC.plate)}></div><div><b>${esc(name)}</b><small>称号：无（通关或达成条件后获得）</small></div></div>
+          <h4>势力</h4><select disabled><option>普通乡勇　增：无；减：无</option></select>
+          <h4 style="margin-top:10px">出身</h4>
+          <div class="og">${Object.keys(O).map(k => `<button data-o="${k}" class="card ${k === cur ? 'on' : ''} ${O[k].locked ? 'lock' : ''}"><div class="ico" ${ic(OGI[k] || '')}></div><span><b>${O[k].name}</b><small>${(O[k].desc || '').split('。')[0]}</small></span></button>`).join('')}</div>
+          <div class="ogd"><b>${o.name}</b><span class="tag">${o.tag}</span><p>${o.desc}</p><p>起手招式：<b style="font-size:13px;color:${sk ? sk.color : '#fff'}">${sk ? sk.name : '—'}</b>${sk ? '（' + sk.desc + '）' : ''}</p></div>
+          <h4 style="margin-top:10px">兵器路数</h4>
+          <div class="wp">${WEP.map(w => `<button data-w="${w[0]}" class="${w[2] ? 'on' : 'lock'}" title="${w[2] ? '' : '暂未开放'}">${w[1]}</button>`).join('')}</div>
+          <h4 style="margin-top:10px">难度</h4>
+          <div class="diff"><button class="card ${hard ? '' : 'on'}" data-h="0"><div class="ico" ${ic(PIC.std)}></div><span><b>标准</b><small>试牛刀，来去自如</small></span></button><button class="card ${hard ? 'on' : ''}" data-h="1"><div class="ico" ${ic(PIC.hard)}></div><span><b style="color:#ff8a70">困难</b><small>敌人更强，积分×1.25</small></span></button></div>
+        </div>
+        <div class="pan">
           <h4>兵籍牒</h4>
-          <div class="rows"><div><span>姓名</span>${esc(name)}</div><div><span>出身</span>${o.name}</div><div><span>兵器</span>单刀</div><div><span>难度</span>${hard ? '困难' : '标准'}</div></div>
+          <div class="rows"><div><span>姓名</span>${esc(name)}</div><div><span>出身</span>${o.name}</div><div><span>兵器</span>刀</div><div><span>难度</span>${hard ? '困难' : '标准'}</div></div>
           <h4 style="margin-top:8px">属性</h4>
-          ${ATTR.map((a, i) => `<div class="bar"><span>${a}</span><i><u style="width:${(st[i] || 0) * 14}%"></u></i><span>${st[i] || 0}</span></div>`).join('')}
+          ${ai.map((r, i) => `<div class="bar ${i === axSel ? 'sel' : ''}" data-a="${i}" title="${r[3]}"><span>${r[0]}</span><i><u style="width:${r[1] * 14}%"></u></i><span>${r[1]}</span><span class="ax">${r[2]}</span></div>`).join('')}
+          <div class="axd">${axSel >= 0 && ai[axSel] ? ai[axSel][0] + '：' + ai[axSel][3] : '点属性看说明（3 为常人水平）'}</div>
           <h4 style="margin-top:8px">起手招式</h4>
           <div class="sk">${[0, 1, 2, 3, 4].map(i => i === 0 && sk ? (SKI[o.skill] ? `<div class="has" title="${sk.name}" ${ic(SKI[o.skill])}></div>` : `<div class="has" title="${sk.name}">${sk.icon}</div>`) : '<div></div>').join('')}</div>
-          <div class="hint" style="margin-bottom:0">起手只有 1 个招式，其余在路上习得；5 格按 1→5 依次自动放。</div>
+          ${sk ? `<div class="skd"><b style="color:${sk.color}">${sk.name}</b>　${sk.desc}<br>单刀招式 · 受「短兵」加成 · 自动出手</div>` : ''}
+          <div class="hint" style="margin-bottom:6px">起手只有 1 个招式，其余在路上习得；5 格按 1→5 依次自动放。</div>
+          <h4 style="margin-top:8px">行囊</h4>
+          <div class="bag"><div class="has" style="background-image:url('art/ui/kaiju/bag.webp')" title="盘缠"><i>0</i></div>${'<div></div>'.repeat(9)}</div>
+          <div class="axd">路上拾得的物品会放在这里（物品系统制作中）</div>
         </div>
       </div>
       <div class="bot"><button class="back">返回主菜单</button><button class="dice" title="随机出身">🎲</button><button class="go" ${F.open ? '' : 'disabled style="opacity:.5"'}>出　发</button></div>`;
     el.querySelectorAll('.og .card').forEach(b => b.onclick = () => { if (O[b.dataset.o].locked) return; SURV.setOrigin(b.dataset.o); render(); });
+    el.querySelectorAll('.wp button.lock').forEach(b => b.onclick = () => { b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake'); });
+    el.querySelectorAll('.bar').forEach(b => b.onclick = () => { axSel = +b.dataset.a === axSel ? -1 : +b.dataset.a; render(); });
     el.querySelectorAll('.diff .card').forEach(b => b.onclick = () => { if (window.TITLE && TITLE.setHard) TITLE.setHard(b.dataset.h === '1'); render(); });
     el.querySelectorAll('.fl button').forEach(b => b.onclick = () => { const f = FIELDS[+b.dataset.i]; if (!f.open) { b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake'); return; } field = +b.dataset.i; render(); });
     el.querySelector('.dice').onclick = () => { const ks = Object.keys(O).filter(k => !O[k].locked); SURV.setOrigin(ks[Math.random() * ks.length | 0]); render(); };
