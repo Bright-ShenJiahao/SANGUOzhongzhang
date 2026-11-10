@@ -589,13 +589,13 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   function coinDraw() {
         for (const c of S.coins) {
       const bob = Math.sin(c.t * 5 + c.x) * 1.2, sz = 11;
-      ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(c.x, c.y + 2, 5, 2, 0, 0, 7); ctx.fill();
+      ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(c.x, c.y + 2, 3.5, 1.4, 0, 0, 7); ctx.fill();
       { const cx = c.x, cy = c.y - 5 - c.z + bob, sp = Math.abs(Math.cos(c.t * 3 + c.x));   // 地上的铜钱：画成透明底的方孔钱（coin.webp 带底色，画在地上是一块方砖）
         ctx.save(); ctx.translate(cx, cy); ctx.scale(.45 + .55 * sp, 1);
-        ctx.fillStyle = '#5a3208'; ctx.beginPath(); ctx.arc(0, 0, 5, 0, 7); ctx.fill();
-        ctx.fillStyle = '#e8a83a'; ctx.beginPath(); ctx.arc(0, 0, 4, 0, 7); ctx.fill();
-        ctx.fillStyle = '#ffe08a'; ctx.beginPath(); ctx.arc(-1, -1, 2.6, 0, 7); ctx.fill();
-        ctx.fillStyle = '#5a3208'; ctx.fillRect(-1.3, -1.3, 2.6, 2.6); ctx.restore(); }
+        ctx.fillStyle = '#3e2408'; ctx.beginPath(); ctx.arc(0, 0, 3.8, 0, 7); ctx.fill();   // 11/11：地上的钱缩小、压暗一点，不抢眼
+        ctx.fillStyle = '#c08a34'; ctx.beginPath(); ctx.arc(0, 0, 3, 0, 7); ctx.fill();
+        ctx.fillStyle = 'rgba(255,224,150,.75)'; ctx.beginPath(); ctx.arc(-.8, -.8, 1.6, 0, 7); ctx.fill();
+        ctx.fillStyle = '#3e2408'; ctx.fillRect(-1, -1, 2, 2); ctx.restore(); }
     }
   }
   function moneyHud() {   // 左上角：铜钱
@@ -733,6 +733,18 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(900px,58v
 @media (pointer:coarse){#survPrep .sc.on .tip{display:block}}
 #survPrep .lkh{margin-top:calc(16px*var(--k));font-size:calc(14px*var(--kt))}
 @media (max-height:520px){#survPrep .srow{flex-wrap:nowrap;gap:calc(12px*var(--k))}#survPrep .sc .ci{height:calc(120px*var(--k))}#survPrep .lkh{display:none}}
+/* 标签页 / 属性栏也换细线款；翻页、卡片出现加过渡 */
+#survPrep .tb{gap:calc(2px*var(--k))}
+#survPrep .tb button{background:linear-gradient(180deg,rgba(34,28,22,.92),rgba(14,12,10,.92))!important;border:1px solid rgba(184,149,90,.4);filter:none!important;color:#a8977a!important;height:calc(52px*var(--k));width:calc(170px*var(--k));font-size:calc(23px*var(--kt));text-shadow:none!important;transition:color .15s,border-color .15s}
+#survPrep .tb button:hover{color:#e6d3a4!important;border-color:rgba(226,194,122,.7)}
+#survPrep .tb button.on{background:linear-gradient(180deg,rgba(84,64,34,.95),rgba(36,27,16,.95))!important;border-color:#e2c27a;color:#f6e6bd!important;box-shadow:inset 0 -2px 0 #e2c27a,0 0 calc(12px*var(--k)) rgba(226,194,122,.25)}
+#survPrep .ar{border:1px solid rgba(184,149,90,.45)!important;border-image:none!important;background:linear-gradient(180deg,rgba(22,19,16,.92),rgba(10,9,8,.94));filter:none!important;height:calc(96px*var(--k));margin:0 calc(-8px*var(--k));box-shadow:inset 0 0 0 1px rgba(0,0,0,.7)}
+#survPrep .ab{height:calc(110px*var(--k))}#survPrep .ab .md{width:calc(110px*var(--k));height:calc(110px*var(--k));filter:saturate(.55) brightness(.8)!important}
+#survPrep .ar .sp{background:linear-gradient(transparent,rgba(184,149,90,.6),transparent)}
+#survPrep .ac span{color:#a8977a;font-weight:600}
+@keyframes pfade{from{opacity:0;transform:translateY(calc(6px*var(--k)))}}
+#survPrep .bd.an{animation:pfade .2s ease-out}
+#survPrep .bd.an .sc{animation:pfade .25s ease-out backwards}#survPrep .bd.an .sc:nth-child(2){animation-delay:.04s}#survPrep .bd.an .sc:nth-child(3){animation-delay:.08s}#survPrep .bd.an .sc:nth-child(4){animation-delay:.12s}#survPrep .bd.an .sc:nth-child(5){animation-delay:.16s}
 /* 线装秘籍（CSS 版，等 Gemini 书封到了换图） */
 .bk{position:relative;width:calc(104px*var(--k,1));height:calc(138px*var(--k,1));box-sizing:border-box;border-radius:2px 4px 4px 2px;background-size:100% 100%;
   box-shadow:inset calc(16px*var(--k,1)) 0 0 rgba(0,0,0,.35),inset calc(17px*var(--k,1)) 0 0 var(--rc),inset 0 0 0 2px rgba(0,0,0,.45),inset 0 0 calc(18px*var(--k,1)) rgba(0,0,0,.55),3px 4px 8px rgba(0,0,0,.6)}
@@ -804,7 +816,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   }
 
   // ---- 整备屏（1:1 照群侠幸存者：结算 / 拾取 / 修炼 / 行商 / 武学）----
-  let prepNd = null, prepTab = 'jie', selLoot = 0, selWu = null, selShop = 0;
+  let prepLastTab = '', prepNd = null, prepTab = 'jie', selLoot = 0, selWu = null, selShop = 0;
   const TABS = [['jie', '结算'], ['shi', '拾取'], ['xiu', '修炼'], ['shang', '行商'], ['wu', '武学']];
   const A = n => `art/ui/attr/${n}.webp`, PU = n => `art/ui/prep/${n}.webp`;
   const ATI = ['tipo', 'duan', 'chang', 'shen', 'yun', 'wu'];
@@ -813,7 +825,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   const RQ = ['普通', '精良', '稀有', '绝世'], RQC = ['#e8e0d0', '#6fb8ff', '#c58cff', '#ffb347'];
   const tagsOf = it => it.kind === 'skill' ? ['武艺', '主动', '刀'] : it.kind === 'gf' ? (GF[it.id].qg ? ['轻功', '被动'] : ['心法', '被动']) : ITEMS[it.id].use ? ['道具', '消耗'] : ['道具', '永久'];
   function prepOpen(nd) { { const t = document.getElementById('survTut'); if (t) t.remove(); tutQ = []; }   // 战斗里没看完的提醒不带进整备屏
-    prepNd = nd; prepTab = 'jie'; selLoot = 0; selWu = null; selShop = 0; if (window.SFX) SFX.play('j_shop'); prepRender(); tut('prep'); }
+    prepNd = nd; prepTab = 'jie'; prepLastTab = ''; selLoot = 0; selWu = null; selShop = 0; if (window.SFX) SFX.play('j_shop'); prepRender(); tut('prep'); }
   function prepClose() {
     for (const it of S.loot || []) S.money += it.sell;   // 没处理的战利品：按卖价自动换钱
     S.loot = []; const el = document.getElementById('survPrep'); if (el) el.remove(); document.body.classList.remove('prep-open'); { const t = document.getElementById('survTut'); if (t) t.remove(); tutQ = []; } W.pick = false; const nd = prepNd; prepNd = null; ROUTE.done(nd);
@@ -889,8 +901,9 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     const badge = k => k === 'xiu' && S.bank ? `<i>${S.bank}</i>` : k === 'shi' && S.loot.length ? `<i>${S.loot.length}</i>` : '';
     el.innerHTML = `<div class="mo"><em style="background-image:url('${A('coin')}')"></em><b>${S.money}</b></div>
       <div class="tb">${TABS.map(([k, t]) => `<button data-t="${k}" class="${k === prepTab ? 'on' : ''}">${t}${badge(k)}</button>`).join('')}</div><i class="tl"></i>
-      <div class="bd t-${prepTab}">${body}</div>
+      <div class="bd t-${prepTab}${prepTab !== prepLastTab ? ' an' : ''}">${body}</div>
       ${attrBar()}${vitals()}<div class="lf">${left}</div><button class="bb go">${prepTab === 'wu' ? '出 发' : '继 续'}</button>`;
+    prepLastTab = prepTab;
     el.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { prepTab = b.dataset.t; if (window.SFX) SFX.play('tick'); prepRender(); tut({ shi: 'loot', xiu: 'xiu', shang: 'shop', wu: 'wu' }[prepTab]); });
     el.querySelector('.go').onclick = () => { const i = TABS.findIndex(t => t[0] === prepTab); if (i < TABS.length - 1) { prepTab = TABS[i + 1][0]; prepRender(); tut({ shi: 'loot', xiu: 'xiu', shang: 'shop', wu: 'wu' }[prepTab]); } else prepClose(); };   // 照原作：继续 = 下一页，最后一页「出发」
     el.querySelectorAll('[data-a]').forEach(b => b.onclick = e => {
@@ -1107,22 +1120,22 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     const lab = fine ? sz * .8 : 0, x0 = fine ? 16 + lab + 6 : (HW - w) / 2, y0 = fine ? HH - 16 - sz * 2 - 8 : (RT.on ? 60 : 44), labY = (fine ? 54 : y0 + sz + 4 + 26 + 18) + (RT.on ? 16 : 0);
     ctx.save();
     const slot = (x, y, k, cur, i, lbl, sz = sz0) => {
-      ctx.fillStyle = '#241812'; ctx.fillRect(x, y, sz, sz);
+      ctx.fillStyle = 'rgba(8,7,6,.78)'; ctx.fillRect(x, y, sz, sz);   // 11/11：照群侠，格子近黑底 + 细暗金边，不再铺颜色
       if (k) {
-        ctx.fillStyle = k.color; ctx.globalAlpha = .22 + (i >= 0 && S.flash[i] > 0 ? .5 : 0); ctx.fillRect(x, y, sz, sz); ctx.globalAlpha = 1;
+        if (i >= 0 && S.flash[i] > 0) { ctx.fillStyle = k.color; ctx.globalAlpha = .45; ctx.fillRect(x, y, sz, sz); ctx.globalAlpha = 1; }
         if (i >= 0 && S.wind && S.wind.i === i) { ctx.fillStyle = 'rgba(255,230,140,.45)'; ctx.fillRect(x, y + sz * (1 - S.wind.t / S.wind.dur), sz, sz * S.wind.t / S.wind.dur); }   // 前摇进度
         if (k.ik && hok(k.ik)) ctx.drawImage(HIMG[k.ik], x, y, sz, sz); else { ctx.font = 'bold 20px "PingFang SC",sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = k.color; ctx.fillText(k.icon, x + sz / 2, y + sz / 2 + 1); }
         if (!cur) { ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fillRect(x, y, sz, sz); }   // 没轮到的格子压暗
-        ctx.font = '10px "PingFang SC",sans-serif'; ctx.fillStyle = '#c9b58c'; ctx.textBaseline = 'alphabetic'; ctx.fillText(lbl != null ? lbl : 'LV' + lvOf(S.slots[i]), x + sz - 12, y + sz - 3);
+        { const t = lbl != null ? lbl : 'LV' + lvOf(S.slots[i]); if (t) { ctx.font = '900 ' + (sz > 30 ? 9 : 8) + 'px "Arial Black",Impact,sans-serif'; ctx.textAlign = 'right'; ctx.textBaseline = 'alphabetic'; ctx.lineWidth = 2.5; ctx.lineJoin = 'round'; ctx.strokeStyle = 'rgba(8,6,4,.95)'; ctx.strokeText(t, x + sz - 2, y + sz - 2); ctx.fillStyle = '#e6d3a4'; ctx.fillText(t, x + sz - 2, y + sz - 2); ctx.textAlign = 'left'; } }
       } else if (hok('empty')) { ctx.fillStyle = '#0b0705'; ctx.fillRect(x, y, sz, sz); ctx.globalAlpha = .3; ctx.drawImage(HIMG.empty, x, y, sz, sz); ctx.globalAlpha = 1; }   // 空格压暗，和有图标的格子拉开 else { ctx.font = 'bold 18px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#4a3a2a'; ctx.fillText('+', x + sz / 2, y + sz / 2 + 1); }
       if (i >= 0 && S.skip[i] > 0) { ctx.fillStyle = 'rgba(160,160,170,.5)'; ctx.fillRect(x, y, sz, sz); }
-      if (!k) { ctx.strokeStyle = 'rgba(120,96,60,.5)'; ctx.lineWidth = 1; ctx.strokeRect(x + .5, y + .5, sz - 1, sz - 1); }
-      else {   // 有东西的格子：亮金边；轮到出手的那格再加白色外发光
-        if (cur && i >= 0) { ctx.save(); ctx.shadowColor = '#fff2b0'; ctx.shadowBlur = 10; ctx.strokeStyle = '#fff4c8'; ctx.lineWidth = 3; ctx.strokeRect(x - 1, y - 1, sz + 2, sz + 2); ctx.restore(); }
-        ctx.strokeStyle = '#f0c860'; ctx.lineWidth = 2; ctx.strokeRect(x + 1, y + 1, sz - 2, sz - 2);
+      if (!k) { ctx.strokeStyle = 'rgba(184,149,90,.28)'; ctx.lineWidth = 1; ctx.strokeRect(x + .5, y + .5, sz - 1, sz - 1); }
+      else {   // 有东西的格子：细暗金边；轮到出手的那格换亮金边 + 柔光
+        if (cur && i >= 0) { ctx.save(); ctx.shadowColor = 'rgba(255,220,150,.85)'; ctx.shadowBlur = 9; ctx.strokeStyle = '#ecd08e'; ctx.lineWidth = 1.5; ctx.strokeRect(x - .5, y - .5, sz + 1, sz + 1); ctx.restore(); }
+        else { ctx.strokeStyle = 'rgba(184,149,90,.75)'; ctx.lineWidth = 1; ctx.strokeRect(x + .5, y + .5, sz - 1, sz - 1); }
       }
     };
-    ctx.fillStyle = 'rgba(14,9,6,.55)'; ctx.fillRect(x0 - 6 - (lab ? lab + 6 : 0), y0 - 6, w + 12 + (lab ? lab + 6 : 0), fine ? sz * 2 + 8 + 12 : sz + 26 + 4 + 12);
+    { const gx = x0 - 6 - (lab ? lab + 6 : 0), gw = w + 12 + (lab ? lab + 6 : 0), gh = fine ? sz * 2 + 8 + 12 : sz + 26 + 4 + 12, gg = ctx.createLinearGradient(gx, 0, gx + gw, 0); gg.addColorStop(0, 'rgba(6,5,4,.5)'); gg.addColorStop(1, 'rgba(6,5,4,0)'); ctx.fillStyle = gg; ctx.fillRect(gx, y0 - 6, gw, gh); }   // 11/11：去掉整块底板，只留一层往右淡出的暗影
     if (lab && hok('waigong')) { ctx.drawImage(HIMG.waigong, 16, y0 + (sz - lab) / 2, lab, lab); if (hok('neigong')) ctx.drawImage(HIMG.neigong, 16, y0 + sz + 8 + (sz - lab) / 2, lab, lab); }
     for (let i = 0; i < n; i++) { const kk = S.slots[i], o = SK[kk]; if (o && !o.ik && HIMG[kk]) o.ik = kk; slot(x0 + i * (sz + gap), y0, o, i === S.qi, i); }
     const gk = id => GF[id] ? { icon: GF[id].qg ? '轻' : GF[id].n[0], color: GTC[GF[id].t], ik: HIMG['gf_' + id] ? 'gf_' + id : '' } : null, sz2 = fine ? sz : 26, ry2 = y0 + sz + (fine ? 8 : 4);
@@ -1151,7 +1164,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       if (fine) { ctx.font = '900 10px "Arial Black",Impact,"PingFang SC",sans-serif'; ctx.textBaseline = 'middle'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(8,16,30,.9)'; const zt = '真气 ' + Math.round(S.zq * 10) + ' / ' + Math.round(zqMax() * 10); ctx.strokeText(zt, HW / 2, zy + zh / 2 + 1); ctx.fillStyle = '#e2f4ff'; ctx.fillText(zt, HW / 2, zy + zh / 2 + 1); } }
     // 右侧大字：击杀、连击
     const nf = fine ? 46 : 30, rx = HW - (fine ? 22 : 12), ry = HH * (fine ? .36 : .3);
-    const big = (num, label, y, a) => { ctx.globalAlpha = a; ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.font = 'bold ' + nf + 'px "PingFang SC",sans-serif'; ctx.lineWidth = 6; ctx.strokeStyle = 'rgba(30,18,10,.85)'; ctx.strokeText(num, rx, y); ctx.fillStyle = '#f4ead0'; ctx.fillText(num, rx, y); ctx.font = 'bold ' + (fine ? 20 : 14) + 'px "PingFang SC",sans-serif'; ctx.lineWidth = 4; ctx.strokeText(label, rx, y + nf * .72); ctx.fillStyle = '#d9a84a'; ctx.fillText(label, rx, y + nf * .72); ctx.globalAlpha = 1; };
+    const big = (num, label, y, a) => { ctx.globalAlpha = a * .92; ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round'; ctx.font = '900 ' + nf + 'px "Arial Black",Impact,sans-serif'; ctx.lineWidth = 6; ctx.strokeStyle = 'rgba(8,6,4,.85)'; ctx.strokeText(num, rx, y); ctx.fillStyle = '#efe4cc'; ctx.fillText(num, rx, y); ctx.font = 'bold ' + (fine ? 17 : 12) + 'px "Songti SC","STSong","Noto Serif SC",serif'; ctx.lineWidth = 4; ctx.strokeText(label, rx, y + nf * .7); ctx.fillStyle = '#b8955a'; ctx.fillText(label, rx, y + nf * .7); ctx.globalAlpha = 1; };   // 11/11：游戏数字字体 + 暗金小标签
     big(String(typeof kills === 'number' ? kills : 0), '击杀', ry, 1);
     if (S.combo > 1) big(String(S.combo), '连击', ry + nf * 1.7, Math.min(1, S.comboT / .6));
     // 修为条（11/11）：顶部正中，LV + 百分比；攒着的修炼次数写在右边
