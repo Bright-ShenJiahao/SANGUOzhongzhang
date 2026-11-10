@@ -1181,13 +1181,22 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       const el = zs.filter(z => z.survTier === 1 && (z.T.elite || z.type === 'yellow-golem') && !z.survBoss && !z.dead && z.hp > 0 && z.endFade == null && !z.hidden).sort((a, b) => Math.hypot(a.x - hero.x, a.y - hero.y) - Math.hypot(b.x - hero.x, b.y - hero.y));
       bosses = bosses.concat(el.slice(0, 2 - bosses.length));
     }
-    if (bosses.length) {
+    if (bosses.length) {   // 11/11 用户定：首领（第一档）最高最大；小头目 / 精锐小一号
       ctx.save();
-      const side = !fine && bosses.length > 1, bw = side ? Math.min(HW * .3, 220) : Math.min(HW * (fine ? .4 : .5), fine ? 460 : 300), bh = fine ? 22 : 15, nh = fine ? 22 : 15;
-      bosses.slice(0, 2).forEach((z, i) => {
-        const lite = !z.survBoss; ctx.globalAlpha = lite ? .88 : 1;
-        if (lite && z.maxHp == null) z.maxHp = z.hp;
-        const cx = side ? HW / 2 + (i ? 1 : -1) * (bw / 2 + 6) : HW / 2, bx = cx - bw / 2, ny = (fine ? 50 : 22) + (side ? 0 : i * (nh + bh + 8)), by = ny + nh - 3;
+      const big = bosses.filter(z => z.survTier >= 3).slice(0, 1), small = bosses.filter(z => !(z.survTier >= 3)).slice(0, 2), list = [];
+      const BG = fine ? { bw: Math.min(HW * .46, 620), bh: 26, nh: 24, fn: 17, fh: 15 } : { bw: Math.min(HW * .42, 330), bh: 16, nh: 15, fn: 11, fh: 11 };
+      const SM = fine ? { bw: Math.min(HW * .27, 320), bh: 15, nh: 17, fn: 12, fh: 11 } : { bw: big.length ? Math.min(HW * .17, 140) : Math.min(HW * .26, 200), bh: 11, nh: 13, fn: 9, fh: 9 };
+      let y0 = fine ? 50 : 22;
+      if (big.length) { list.push([big[0], BG, HW / 2, y0]); if (fine) y0 += BG.nh + BG.bh + 8; }
+      small.forEach((z, i) => {
+        const two = small.length > 1;
+        let cx = HW / 2 + (two ? (i ? 1 : -1) * (SM.bw / 2 + 10) : 0);
+        if (!fine && big.length) cx = HW / 2 + (i ? 1 : -1) * (BG.bw / 2 + SM.bw / 2 + 14);   // 手机：小头目挂在首领条左右两边，不往下压到武艺格
+        list.push([z, SM, cx, y0 + (!fine && big.length ? BG.nh + BG.bh - SM.nh - SM.bh : 0)]);
+      });
+      for (const [z, D, cx, ny] of list) {
+        const lite = !z.survBoss; if (z.maxHp == null) z.maxHp = z.hp;
+        const { bw, bh, nh } = D, bx = cx - bw / 2, by = ny + nh - 3;
         const mx = z.maxHp || z.hp, r = Math.max(0, Math.min(1, z.hp / mx));
         z.hpLag = z.hpLag == null ? r : Math.max(r, z.hpLag - .5 / 60);   // 掉血后橙色残影慢慢追上
         if (BIMG.f.complete && BIMG.f.naturalWidth) bar3(BIMG.f, 60, bx, by, bw, bh); else { ctx.fillStyle = 'rgba(14,9,6,.85)'; ctx.fillRect(bx, by, bw, bh); }
@@ -1196,11 +1205,11 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
         const g = ctx.createLinearGradient(0, iy, 0, iy + ih); g.addColorStop(0, '#f05a44'); g.addColorStop(.5, '#c02a22'); g.addColorStop(1, '#6c1210'); ctx.fillStyle = g; ctx.fillRect(ix, iy, iw * r, ih);
         ctx.fillStyle = 'rgba(255,255,255,.18)'; ctx.fillRect(ix, iy, iw * r, ih * .35);
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(20,6,4,.95)'; ctx.fillStyle = '#fff2d8';
-        ctx.font = '900 ' + (fine ? 13 : 10) + 'px Arial Black,Impact,sans-serif'; const ht = String(Math.ceil(z.hp * 10)); ctx.strokeText(ht, cx, by + bh / 2 + .5); ctx.fillText(ht, cx, by + bh / 2 + .5);
-        ctx.font = 'bold ' + (fine ? 14 : 10) + 'px "Songti SC","STSong","Noto Serif SC",serif'; const nm = (lite ? '精锐 · ' : '') + (z.bossLabel || z.T.name || '敌将'), nw = ctx.measureText(nm).width + (fine ? 44 : 30);
+        ctx.font = '900 ' + D.fh + 'px Arial Black,Impact,sans-serif'; const ht = String(Math.ceil(z.hp * 10)); ctx.strokeText(ht, cx, by + bh / 2 + .5); ctx.fillText(ht, cx, by + bh / 2 + .5);
+        ctx.font = 'bold ' + D.fn + 'px "Songti SC","STSong","Noto Serif SC",serif'; const nm = (lite ? '精锐 · ' : '') + (z.bossLabel || z.T.name || '敌将'), nw = ctx.measureText(nm).width + D.fn * 2.6;
         if (BIMG.n.complete && BIMG.n.naturalWidth) bar3(BIMG.n, 40, cx - nw / 2, ny, nw, nh); else { ctx.fillStyle = 'rgba(30,18,10,.9)'; ctx.fillRect(cx - nw / 2, ny, nw, nh); }
-        ctx.fillStyle = lite ? '#d9cfb4' : '#f3d08a'; ctx.strokeText(nm, cx, ny + nh / 2 + .5); ctx.fillText(nm, cx, ny + nh / 2 + .5);
-      });
+        ctx.fillStyle = D === BG ? '#f3d08a' : '#d9cfb4'; ctx.strokeText(nm, cx, ny + nh / 2 + .5); ctx.fillText(nm, cx, ny + nh / 2 + .5);
+      }
       ctx.globalAlpha = 1; ctx.restore(); ctx.restore(); return;   // 有敌将名牌时不再写节点名
     }
     // 波次与倒计时

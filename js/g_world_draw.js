@@ -341,6 +341,7 @@ function drawZ(z) {
   }
   if (z.poisonT > 0) { ctx.fillStyle = '#8fd16a'; ctx.fillRect(z.x - 1, top - 5, 3, 3); ctx.fillStyle = '#4c8a43'; ctx.fillRect(z.x + 3, top - 7, 2, 2); }
   if (z.st === 'wind' && !z.T.ranged) { ctx.fillStyle = '#e03a2a'; ctx.fillRect(z.x - 1, top - 10, 3, 6); ctx.fillRect(z.x - 1, top - 2.5, 3, 2); }
+  if (window.ROUTE && ROUTE.on && ROUTE.on()) return;   // 11/11 用户定：路线模式去掉小怪头顶血条（首领/精锐在屏幕上方挂大名牌血条）
   const barW = (z.T.elite || z.T.ch2Elite) ? 26 : 18;
   const barY = top;
   ctx.fillStyle = '#18101e'; ctx.fillRect(z.x - barW / 2, barY, barW, 3); ctx.fillStyle = (z.T.elite || z.T.ch2Elite) ? '#e04a2a' : z.T.heavy ? '#e0a030' : '#7ad06a'; ctx.fillRect(z.x - barW / 2 + 1, barY + 1, (barW - 2) * z.hp / z.T.hp, 1);
