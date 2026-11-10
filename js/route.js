@@ -197,12 +197,13 @@
   function sheet() {   // 兵籍牒：这一局当前的修为、属性、武艺、心法
     if (campBox || !window.SURV || !SURV.status) return;
     const FONT = FONT_Q, UI = UI_Q;   // 写进 style="..." 里，字体名要用单引号
+    const kz = Math.max(1.15, Math.min(1.6, Math.min(innerWidth / 1100, innerHeight / 640))), px = n => Math.round(n * kz) + 'px';   // 11/11：字太小 → 整体放大
     const st = SURV.status(), box = campBox = document.createElement('div');
     box.style.cssText = 'position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(30,20,12,.5);z-index:3;padding:10px';
-    const row = (a, b, c) => '<div style="display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-bottom:1px dotted rgba(122,90,44,.4)"><span style="opacity:.75">' + a + '</span><span>' + b + (c ? '　<small style="opacity:.7">' + c + '</small>' : '') + '</span></div>';
-    const h = t => '<div style="margin:10px 0 4px;font:900 15px ' + FONT + ';letter-spacing:4px;color:#7a2a1e">◆ ' + t + '</div>';
-    box.innerHTML = '<div style="background:radial-gradient(ellipse at 50% 30%,#f6ead4,#e6d2b0);border:2px solid #7a5a2c;border-radius:8px;padding:16px 20px;width:min(94vw,460px);max-height:92vh;overflow:auto;font:600 13px ' + UI + ';color:' + INK + ';box-shadow:0 12px 40px rgba(0,0,0,.45)">'
-      + '<div style="display:flex;justify-content:space-between;align-items:center"><div style="font:900 24px ' + FONT + ';letter-spacing:6px">兵籍牒</div><button class="x" style="font:700 14px ' + UI + ';padding:4px 12px;background:#2e2016;color:#f3dc9a;border:1px solid #7a5a2c;border-radius:5px;cursor:pointer">关闭</button></div>'
+    const row = (a, b, c) => '<div style="display:flex;justify-content:space-between;gap:10px;padding:' + px(4) + ' 0;border-bottom:1px dotted rgba(122,90,44,.4)"><span style="opacity:.75">' + a + '</span><span>' + b + (c ? '　<small style="opacity:.75;font-size:.85em">' + c + '</small>' : '') + '</span></div>';
+    const h = t => '<div style="margin:10px 0 4px;font:900 ' + px(18) + ' ' + FONT + ';letter-spacing:4px;color:#7a2a1e">◆ ' + t + '</div>';
+    box.innerHTML = '<div style="background:radial-gradient(ellipse at 50% 30%,#f6ead4,#e6d2b0);border:2px solid #7a5a2c;border-radius:8px;padding:16px 20px;width:min(94vw,' + px(470) + ');max-height:92vh;overflow:auto;font:600 ' + px(15) + ' ' + UI + ';color:' + INK + ';box-shadow:0 12px 40px rgba(0,0,0,.45)">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center"><div style="font:900 ' + px(28) + ' ' + FONT + ';letter-spacing:6px">兵籍牒</div><button class="x" style="font:700 ' + px(14) + ' ' + UI + ';padding:4px 12px;background:#2e2016;color:#f3dc9a;border:1px solid #7a5a2c;border-radius:5px;cursor:pointer">关闭</button></div>'
       + row('出身', st.origin) + row('修为', 'LV.' + st.lv + '　' + st.pct + '%', st.bank ? '待修炼 ×' + st.bank : '') + row('气血', st.hp[0] + ' / ' + st.hp[1]) + (st.dmg > 1.001 ? row('武艺伤害', '+' + Math.round((st.dmg - 1) * 100) + '%', '磨刀/奇遇') : '')
       + h('属性') + st.attrs.map((r, i) => row(r[0], r[1] + (st.add[i] ? ' <small style="color:#3f8a4a">(+' + st.add[i] + ')</small>' : ''), r[2])).join('')
       + h('武艺') + (st.slots.filter(Boolean).map((k, i) => row((i + 1) + '. <i style="display:inline-block;width:9px;height:9px;border-radius:2px;background:' + k.color + ';box-shadow:0 0 0 1px rgba(0,0,0,.4);margin-right:4px"></i><b>' + k.name + '</b> LV' + k.lv, '', k.desc)).join('') || '<div style="opacity:.6">无</div>')
@@ -404,7 +405,7 @@
       run = { nodes, byLayer, start: nodes.find(n => n.type === 'start') || nodes[0], visited: new Set(o.visited.map(i => nodes[i])) };
       run.cur = nodes[o.cur]; pending = true; if (shown) close();
     },
-    done, close, choose,
+    done, close, choose, posOf: n => pos(n),
     debug: () => run,
   };
 })();

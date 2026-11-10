@@ -121,7 +121,7 @@
   }
   pauseButton.addEventListener('click', () => { if (paused) { sel = 0; mark(); } });
   window.addEventListener('keydown', onKey, true);
-  window.addEventListener('blur', () => { if (allowed()) setPaused(true); });
+  // 11/11：去掉「窗口失焦就暂停」——在内嵌浏览器/分屏里一点别处就会误暂停（用户报一进游戏就是暂停）；切到后台（页面隐藏）仍会暂停
   document.addEventListener('visibilitychange', () => { if (document.hidden && allowed()) setPaused(true); });
 
   window.PAUSE = {
