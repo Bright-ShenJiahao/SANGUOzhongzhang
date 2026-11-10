@@ -198,8 +198,6 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   SK.hengsao.tier = 1; SK.lianzhan.tier = 1; SK.zhendi.tier = 2;
   add('huima', { tier: 1, name: '回马刀', icon: '回', color: '#ffc27a', desc: '先斩身前，再回身斩身后', need: 60, range: 44, half: 1.2, wu: .55, rc: .35,
     cast() { const a = aim(); sweep(a, 1.2, 44, 1.8, 40, ['rgba(255,190,110,', 'rgba(255,235,180,']); sfx('swing_knife', hero.x); later(.22, () => { S.poseOverride = { f: SK.huima.pose2, t: .25 }; sweep(a + Math.PI, 1.2, 44, 2.2, 55, ['rgba(255,120,90,', 'rgba(255,215,200,'], { rev: true }); sfx('swing_knife', hero.x); }); } });
-  add('feidao', { name: '飞刀', icon: '刀', color: '#dfeeff', desc: '扇形掷出三把飞刀', need: 190,
-    cast() { const a = aim(); for (const d of [-.24, 0, .24]) shot(a + d, { dmg: 1.2, T: .75, vx: Math.cos(a + d) * 330, vy: Math.sin(a + d) * 165, col: ['200,220,255', '255,255,255'] }); sfx('swing_knife', hero.x); } });
   add('qiang', { name: '枪刺', icon: '枪', color: '#ffe9a8', desc: '向前刺出一条长枪线', need: 130, beam: true, len: 100, wu: .5,
     cast() { lineHit(aim(), 100, 10, 2.6, 36, '255,233,168'); sfx('swing_knife', hero.x); shake = Math.max(shake, .08); } });
   add('jianyu', { name: '箭雨', icon: '箭', color: '#e9dcb0', desc: '数处落箭，片刻后覆盖落点', need: 180, none: true, wu: .5,
@@ -214,8 +212,6 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     cast() { S.poseOverride = { f: 'wd_hx2', t: .14 }; zones.push({ x: 0, y: 0, follow: 1, r: 40, t: 0, T: 3, tk: 0, dmg: .7, kind: 'wheel' }); sfx('swing_knife', hero.x); } });
   add('xuanfeng', { tier: 2, name: '回旋斩', icon: '旋', color: '#a0d0ff', desc: '周身 360° 回旋一斩', need: 80, range: 66, half: Math.PI,
     cast() { sweep(0, Math.PI, 66, 2.5, 55, ['rgba(160,210,255,', 'rgba(225,245,255,']); sfx('swing_knife', hero.x); shake = Math.max(shake, .15); } });
-  add('feilun', { tier: 2, name: '飞轮刃', icon: '飞', color: '#9fe0ff', desc: '两道穿透飞轮缓缓飞出', need: 190,
-    cast() { const a = aim(); for (const d of [-.5, .5]) shot(a + d, { dmg: 2, T: 1.3, vx: Math.cos(a + d) * 200, vy: Math.sin(a + d) * 100, col: ['110,200,255', '230,250,255'] }); sfx('swing_knife', hero.x); } });
   add('dilie', { tier: 3, name: '地裂波', icon: '裂', color: '#d8a060', desc: '向前裂开长长一道地缝', need: 200, beam: true, len: 200, wu: .7, rc: .4,
     cast() { lineHit(aim(), 200, 18, 3.4, 60, '230,170,100'); sfx('crack', hero.x); shake = Math.max(shake, .3); } });
   add('shuanghuan', { tier: 3, name: '双环击飞', icon: '环', color: '#ffd27a', desc: '内外两环依次震飞', need: 90, range: 80, half: Math.PI, ring: true, wu: .7, rc: .4,
@@ -241,7 +237,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   // 大类（出身熟练、功法专精）→ 具体兵器（连携、共鸣、施法时手里拿什么）
   const CATN = ['短兵器', '长兵器', '远程', '法师'], CATA = [1, 2, 3, 6];   // 大类 → 出身属性下标
   const WEPN = ['刀', '剑', '锤', '枪', '关刀', '弓', '弩', '石子', '法术'], WEPCAT = [0, 0, 0, 1, 1, 2, 2, 2, 3];
-  const WOF = { hengsao: 0, daobo: 0, huima: 0, daolun: 0, lianzhan: 1, sixiang: 1, wanren: 1, zhendi: 2, dilie: 2, shuanghuan: 2, tianbeng: 2, qiang: 3, chong: 3, xuanfeng: 4, xuehe: 4, jianyu: 5, feidao: 7, feilun: 7, huogong: 8, pili: 8 };
+  const WOF = { hengsao: 0, daobo: 0, huima: 0, daolun: 0, lianzhan: 1, sixiang: 1, wanren: 1, zhendi: 2, dilie: 2, shuanghuan: 2, tianbeng: 2, qiang: 3, chong: 3, xuanfeng: 4, xuehe: 4, jianyu: 5, huogong: 8, pili: 8 };
   const wepOf = k => WOF[k] != null ? WOF[k] : 0;
   const catOf = k => WEPCAT[wepOf(k)];
   // 招式姿势：主角固定空手，放招时按这一招的兵器举起对应的施招帧（第 1 帧蓄力，第 2 帧出手，更多帧给第二刀和收势）
@@ -254,10 +250,12 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   }
   // 每个招式用自己的帧：[出招前摇帧, 出手帧, 收势帧, 第二击帧]。刀用白衣持刀帧 wd_*，剑用白衣持剑帧 wj_*
   const PAIR = { hengsao: ['wd_hs1', 'wd_hs2', 'wd_hs3'], daobo: ['wd_pi1', 'wd_pi2', 'wd_pi3'], huima: ['wd_kn1', 'wd_kn2', 'wd_kn3', 'wd_fs2'], daolun: ['wd_hx1', 'wd_hx3', 'wd_hx4'],
+    zhendi: ['wc_1', 'wc_2', 'wc_2'], dilie: ['wc_3', 'wc_7', 'wc_7'], shuanghuan: ['wc_1', 'wc_4', 'wc_4'], tianbeng: ['wc_3', 'wc_2', 'wc_2'],
+    qiang: ['wq_2', 'wq_4', 'wq_6', 'wq_6'], chong: ['wq_7', 'wq_13', 'wq_13'], xuanfeng: ['wg_9', 'wg_12', 'wg_11'], xuehe: ['wg_5', 'wg_12', 'wg_11'], jianyu: ['wb_2', 'wb_6', 'wb_12'],
     lianzhan: ['wj_hz1', 'wj_hz2', 'wj_hz3', 'wj_fs2'], sixiang: ['wj_hx1', 'wj_hx3', 'wj_hx4'], wanren: ['wj_sl1', 'wj_sl2', 'wj_sl3'] };
   for (const k of Object.keys(PAIR)) { const q = PAIR[k]; SK[k].pose = [q[0], q[1]]; SK[k].poseL = q[2] || q[1]; SK[k].pose2 = q[3] || q[1]; }
   // 手里拿的兵器：放哪种近战/长兵招式就拿哪种，之后待机、行走都拿着；暗器、法术不换（空手施放）。目前只有刀有持械待机和行走帧
-  const HELDP = { 0: 'wd_', 1: 'wj_' };
+  const HELDP = { 0: 'wd_', 1: 'wj_', 2: 'wc_', 3: 'wq_', 4: 'wg_', 5: 'wb_' };
   const heldPre = () => (S.held != null && HELDP[S.held]) || '';
   const profOf = c => Math.max(.72, Math.min(1.35, .58 + .15 * ((OG().oa || [3, 3, 3, 3, 3, 3, 3, 3])[CATA[c]])));
   const RESD = [0, 0, .08, .16, .26, .40];   // 同类别 n 件：该类别招式伤害加成
