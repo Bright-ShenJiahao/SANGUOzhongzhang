@@ -432,6 +432,7 @@
   // 读 game.js 的全局变量（同一个 <script> 里，let 声明的可以直接读；开局前是 TDZ，用 try 兜住）
   function readState() {
     try {
+      if (window.ROUTE && ROUTE.on()) return 'file';   // 路线模式：放 Pixabay 曲子（FILEBGM），合成曲全部停
       // 主界面、整军备战、校场页：放《灯下》（js/menu_music.js）
       if (window.MENU_MUSIC && window.TITLE && TITLE.mode && ['title', 'chapter'].includes(TITLE.mode())) return 'menu';
       // 第二章素材加载中：直接进第二章行军鼓乐（此时 chapter2Run 还没建好，不能落到第一章曲子）
@@ -496,6 +497,7 @@
       return;
     }
     menuStop();
+    if (st === 'file') { stopJingle(.4); layers.filter(L => !L.stopping).forEach(L => stopLayer(L, XFADE)); return; }
     if (st === 'victory' || st === 'defeat') {
       if (layers.length) { layers.slice().forEach(L => stopLayer(L, .6)); }
       if (prev !== st) playJingle(st);
@@ -578,4 +580,37 @@
     isMuted: () => muted,
     setPauseDucked(value) { pauseDucked = !!value; applyVolume(); },
   };
+})();
+
+// ---------- 路线模式背景音乐（11/11 用户从 Pixabay 下载，Pixabay License 可商用免署名）----------
+// 主界面/开局 = atlas china（vadim_makes_sound）；路线长卷/整备 = chinese（kulakovka）；普通战斗 = bamboo forest taiko drums trailer（vasilyatsevich）；
+// 精英 = action drums 6（ashenrise）；首领 = serpents of war（epicaist）。结算时停，交给 SFX 的合成短曲。
+(() => {
+  if (!/[?&]route(?:=|&|$)/.test(location.search) || typeof ASSETS === 'undefined' || !ASSETS.bgm) return;
+  const LV = { title: .55, route: .5, battle: .5, elite: .55, boss: .55 };
+  const el = {}; let cur = null, started = false;
+  const get = k => { if (!el[k]) { const a = new Audio(); a.src = ASSETS.bgm[k]; a.loop = true; a.preload = 'auto'; a.volume = 0; el[k] = a; } return el[k]; };
+  function scene() {
+    try {
+      if (window.TITLE && TITLE.mode && ['title', 'chapter', 'intro'].includes(TITLE.mode())) return 'title';
+      if (window.KAIJU && KAIJU.active()) return 'title';
+      if ((typeof won !== 'undefined' && won) || (typeof over !== 'undefined' && over)) return null;
+      if (window.ROUTE && ROUTE.shown()) return 'route';
+      const nd = window.SURV && SURV.curNode && SURV.curNode();
+      if (!nd) return 'route';
+      return nd.type === 'boss' ? 'boss' : nd.type === 'elite' ? 'elite' : 'battle';
+    } catch (e) { return null; }
+  }
+  function tick() {
+    const want = scene(), muted = !!(window.SFX && SFX.isMuted && SFX.isMuted()), duck = document.getElementById('pauseScreen') && !document.getElementById('pauseScreen').hidden ? .35 : 1;
+    if (want !== cur) { if (want) { const a = get(want); if (a.paused) { try { a.currentTime = 0; } catch (e) {} a.play().catch(() => {}); } } cur = want; }
+    for (const k in el) {
+      const a = el[k], target = k === cur && !muted ? LV[k] * duck : 0;
+      a.volume = Math.max(0, Math.min(1, a.volume + Math.sign(target - a.volume) * Math.min(Math.abs(target - a.volume), .04)));   // 约 1.3 秒交叉淡入淡出
+      if (a.volume === 0 && k !== cur && !a.paused) a.pause();
+    }
+  }
+  const go = () => { if (started) return; started = true; setInterval(tick, 50); tick(); };
+  ['pointerdown', 'keydown', 'touchend'].forEach(ev => addEventListener(ev, go, { capture: true, passive: true }));
+  document.addEventListener('visibilitychange', () => { if (document.hidden) for (const k in el) el[k].pause(); else if (cur && el[cur]) el[cur].play().catch(() => {}); });
 })();

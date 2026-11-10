@@ -142,6 +142,7 @@ assets['ui']['route_icons'] = uri(P('art', 'ui', 'route_icons.webp'))
 for _k in ('shopkeeper', 'shopkeeper_happy', 'shopkeeper_annoyed'):   # 商店老板三种表情
     if os.path.exists(P('art', 'ui', _k + '.webp')): assets['ui'][_k] = uri(P('art', 'ui', _k + '.webp'))
 assets['music'] = {'southernDrum': file_uri(P('art', 'audio', 'southern_drum.wav'))}
+assets['bgm'] = {k: file_uri(P('art', 'audio', 'bgm_' + k + '.m4a')) for k in ('title', 'route', 'battle', 'elite', 'boss')}   # 11/11 Pixabay 曲子（路线模式用）
 _fm = json.load(open(P('art', 'food', 'meta.json'), encoding='utf-8'))
 assets['food'] = {k: [uri(P('art', 'food', k + '.png'))] + v for k, v in _fm.items()}
 
