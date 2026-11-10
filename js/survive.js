@@ -65,14 +65,28 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     [{ t: 'zhang_liang', fb: 'elite', name: '张梁', m: 1.4 }, { t: 'zhang_bao', fb: 'elite', name: '张宝', m: 1.5 }],
     [{ t: 'zhang_jiao', fb: 'elite', name: '张角', m: 1.0 }, { t: 'yellow-heavy', fb: 'elite', name: '马元义', hp: 90, sc: 1.4 }],
   ];
+  function bossBuff(z, dm) { if (!z) return; z.T = Object.assign({}, z.T, { dmg: (z.T.dmg || 1) * dm, heavy: true }); z.bossT = 6; }   // 首领/头目：伤害加成、出手不被打断（眩晕另有 stunGate 冷却）
+  // 首领战机制（11/11）：每 13 秒喊人，从四周涌来一圈喽啰；血量过半「暴怒」：移速 +30%、抬手更快，脚下气焰变红
+  function bossTick(dt) {
+    if (!RT.on || !RT.node || !W.started || W.pick) return;
+    for (const z of zs) {
+      if (!z.survBoss || z.dead || z.hp <= 0 || z.endFade != null || !(z.survTier >= 3)) continue;
+      if (!z.rage && z.hp < (z.maxHp || z.hp) * .5) { z.rage = 1; z.T = Object.assign({}, z.T, { spd: (z.T.spd || 30) * 1.3, wind: (z.T.wind || .8) * .75 }); floaters.push({ x: z.x, y: z.y - 64, t: 0, txt: (z.bossLabel || '敌将') + ' 暴怒！', color: '#ff4a2a' }); shake = Math.max(shake, .3); if (window.SFX) SFX.play('j_banner'); }
+      if ((z.bossT -= dt) <= 0) {
+        z.bossT = z.rage ? 10 : 13; const n = 5 + (z.rage ? 2 : 0);
+        floaters.push({ x: z.x, y: z.y - 60, t: 0, txt: (z.bossLabel || '敌将') + '：给我上！', color: '#ffcf6a' });
+        for (let k = 0; k < n; k++) { const e = edgeSpawn(pickType()); if (e) { const a = k / n * Math.PI * 2; e.x = hero.x + Math.cos(a) * 170; e.y = Math.max(M.top + 6, Math.min(M.bot - 6, hero.y + Math.sin(a) * 90)); } }
+      }
+    }
+  }
   function spawnNamed() {
     const nd = RT.node;
     if (nd.type === 'elite') {
       const sec = secOf(nd), t = sec >= 2 && c2ok ? 'yellow-golem' : 'elite';
-      edgeSpawn(t, { name: '精锐头目', hp: 21, sc: 1.2, tier: 2 }); return;
+      bossBuff(edgeSpawn(t, { name: '精锐头目', hp: 30, sc: 1.2, tier: 2 }), 1.25); return;
     }
     const list = BOSSES[nd.final ? 4 : secOf(nd)];
-    list.forEach((b, i) => edgeSpawn(c2ok || !b.fb ? b.t : b.fb, Object.assign({}, b, { tier: i === 0 ? 3 : 2, hp: i === 0 ? 54 : 21 })));   // 四档：小头目 ×7（21）、首领 ×18（54）
+    list.forEach((b, i) => { const z = edgeSpawn(c2ok || !b.fb ? b.t : b.fb, Object.assign({}, b, { tier: i === 0 ? 3 : 2, hp: i === 0 ? 130 : 40 })); bossBuff(z, i === 0 ? 1.6 : 1.3); });   // 11/11 用户：BOSS 太简单 → 首领血 54→130、小头目 21→40，伤害 ×1.6 / ×1.3   // 四档：小头目 ×7（21）、首领 ×18（54）
   }
   function edgeSpawn(type, boss) {   // boss：true = 老卒式 ×4 血；对象 = 命名首领 {name, hp 或 m, sc}
     const vw = viewW(); let side = Math.random() < .5 ? -1 : 1, x, y;
@@ -130,7 +144,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     const cnt = alive().filter(z => !z.survBoss).length;
     if (cnt < tn * .5) { if ((W.spawnT -= dt) <= 0) { edgeSpawn(pickType()); W.spawnT = RT.on ? .22 - .1 * rf : rf < 1 ? .55 - .3 * rf : .2; } }
     else if ((W.batchT -= dt) <= 0 && cnt < tn) { const k = Math.min(tn - cnt, RT.on ? 3 + (Math.random() * 3 | 0) : rf < 1 ? 1 + (Math.random() * 2 | 0) : 3 + (Math.random() * 3 | 0)); for (let i = 0; i < k; i++) edgeSpawn(pickType()); W.batchT = RT.on ? R(.7, 1.1) : R(1.6, 2.4); }
-    if (RT.on && RT.node && RT.node.type === 'boss' && W.bossDone && W.t > 3 && !alive().some(z => z.survBoss)) { say(RT.node.final ? '黄巾首领已破！' : '敌将已破！', 1.6); W.t = WT(); }   // 首领战：把场上的敌将都打倒就算赢
+    if (RT.on && RT.node && RT.node.type === 'boss' && W.bossDone && W.t > 3 && !alive().some(z => z.survBoss && z.survTier >= 3)) {   /* 11/11 用户：打死首领就结束（以前要连小头目一起打死） */ say(RT.node.final ? '黄巾首领已破！' : '敌将已破！', 1.6); W.t = WT(); }   // 首领战：把场上的敌将都打倒就算赢
     if (W.t >= WT()) endWave();
   }
 
@@ -1013,7 +1027,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     if (weapon !== 'blade') forceBlade();
     if (charging || atkHeldSince) cancelCharge();
     for (const z of zs) { if (z.stunCd > 0) z.stunCd -= dt; if (z.survSlow > 0) z.survSlow -= dt; }
-    skillTick(dt);
+    skillTick(dt); bossTick(dt);
     for (const e of fx) e.t += dt;
     for (const b of bolts) {
       CM = b.cm || 1; CK = b.ck || ''; b.t += dt; b.x += b.vx * dt; b.y += b.vy * dt;
@@ -1038,7 +1052,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   function drawWorld() {
     // 敌将气焰（11/11）：脚下一圈黄巾土红光 + 身上往上窜的火苗，人堆里一眼认出来
     if (RT.on) for (const z of zs) if (z.survBoss && !z.dead && z.endFade == null) {
-      const t = performance.now() / 1000, sc = z.sc || 1, pr = .5 + .5 * Math.sin(t * 4 + z.x);
+      const t = performance.now() / 1000, sc = z.sc || 1, pr = .5 + .5 * Math.sin(t * (z.rage ? 9 : 4) + z.x);
       ctx.save(); ctx.globalCompositeOperation = 'lighter';
       ctx.translate(z.x, z.y); ctx.scale(1, .42);
       const g = ctx.createRadialGradient(0, 0, 4, 0, 0, 34 * sc); g.addColorStop(0, `rgba(255,170,60,${.35 + .2 * pr})`); g.addColorStop(.6, `rgba(220,70,30,${.18 + .1 * pr})`); g.addColorStop(1, 'rgba(160,30,10,0)');
