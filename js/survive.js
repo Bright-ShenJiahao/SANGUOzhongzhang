@@ -258,7 +258,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const heldPre = () => 'wd_';   // 目前只有刀的美术：主角始终拿刀
   // 出身六项属性（11/11 用户定 A：全部接上效果）：体魄 短兵 长兵 身法 运气 悟性
   const AT0 = () => OG().at || [3, 3, 3, 3, 3, 3];
-  const AT = () => { const b = AT0(), d = S.atAdd || []; return b.map((v, i) => v + (d[i] || 0)); };   // 出身底子 + 本局修炼
+  const AT = () => { const b = AT0(), d = S.atAdd || [], it = S.atAdd ? itemAt() : [0, 0, 0, 0, 0, 0]; return b.map((v, i) => v + (d[i] || 0) + it[i]); };   // 出身底子 + 本局修炼
   const profV = v => Math.max(.72, Math.min(1.35, .58 + .15 * v));
   const AFX = {
     hp: () => 1 + (AT()[0] - 3) * .07,          // 体魄：气血（以受伤减免折算）
@@ -314,7 +314,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   function critRoll() {   // 暴击：基础 5% + 心法；伤害 ×1.5 + 心诀
     if (!CK || !SK[CK]) return 1;
     const c = catOf(CK);
-    if (S.lhjOn || Math.random() < .05 + AFX.crit() + GM.crit + GM.critC[c]) { if (Math.random() < .35) floaters.push({ x: hero.x, y: hero.y - 54, t: 0, txt: '会心', color: '#ff9a4a' }); return 1.5 + GM.critD[c]; }
+    if (S.lhjOn || Math.random() < .05 + AFX.crit() + IT('crit') + GM.crit + GM.critC[c]) { if (Math.random() < .35) floaters.push({ x: hero.x, y: hero.y - 54, t: 0, txt: '会心', color: '#ff9a4a' }); return 1.5 + GM.critD[c]; }
     return 1;
   }
   const CDM = () => RT.cd * RES().cd;
@@ -413,7 +413,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       S.lk = kills;
     }
     if (RT.on) {
-      S.zq = Math.min(zqMax(), S.zq + zqMax() * (.005 + .004 * GM.hy) * dt);
+      S.zq = Math.min(zqMax(), S.zq + zqMax() * (.005 + .004 * GM.hy) * (1 + IT('regen')) * dt);
       if (hero.hp < S.hp0 - 1e-6) S.noHitT = 0; else S.noHitT += dt;
       S.hp0 = hero.hp;
       if (S.noHitT >= 3 && GM.lhj) S.lhjReady = true;
@@ -472,9 +472,9 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const heal = v => { hero.hp = Math.min(maxHp(), hero.hp + v); };
   // ---------- 节点结算：连选 n 次（武艺 / 强化 三选一）----------
   function rewardOptions(kind) {
-    const owned = S.slots.filter(Boolean), free = S.slots.indexOf('') >= 0;
+    const owned = S.slots.filter(Boolean).concat(S.owned || []), free = true;   // 格子满了也能学（放进掌握武学）
     const sk = (free ? Object.keys(SK).filter(k => !owned.includes(k) && tierOk(k) && (!ONLY_DAO || wepOf(k) === 0)) : []).sort(() => Math.random() - .5).slice(0, kind === 'skill' ? 3 : 2).map(k => ({ kind: 'skill', k, q: Math.min(3, SK[k].tier || 0), name: SK[k].name, icon: SK[k].icon, color: SK[k].color, desc: (SK[k].tier ? TIERN[SK[k].tier] + '阶 · ' : '') + SK[k].desc }));
-    const gp = Object.keys(GF).filter(id => { const g = GF[id]; return !g.off && (!ONLY_DAO || g.c < 1) && !S.gf.includes(id) && S.qg !== id && W.n >= TMIN[g.t + 1] && (g.qg || S.gf.includes('')); });
+    const gp = Object.keys(GF).filter(id => { const g = GF[id]; return !g.off && (!ONLY_DAO || g.c < 1) && !S.gf.includes(id) && S.qg !== id && !(S.owned || []).includes(id) && W.n >= TMIN[g.t + 1]; });
     const pk = gp.sort(() => Math.random() - .5).map(id => { const g = GF[id]; return { kind: 'gf', id, q: g.t, name: g.n, icon: g.qg ? '轻' : g.n[0], color: GTC[g.t], desc: GTN[g.t] + '阶 · ' + (g.qg ? '轻功 · ' : g.c >= 0 ? g.cn + ' · ' : '内功 · ') + gfText(g) }; });
     if (pk.length < 3) pk.push({ kind: 'heal', name: '回春', icon: '春', color: '#ff9a9a', desc: '立刻回复 40% 血量' });
     if (kind === 'perk') return pk.slice(0, 3);
@@ -510,7 +510,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     setTimeout(() => { zs.length = 0; }, 950);
     const R = S.rep = { kills: (typeof kills === 'number' ? kills : 0) - (S.k0 || 0), got: S.coinGot || 0, left: 0, taken: Math.round((S.taken || 0) * 10), tiao: 0, lv0: S.lvAt0 || S.lv, xiu: 0 };
     { let sum = 0; for (const c of S.coins) sum += c.v; R.left = Math.floor(sum * .9); S.money += R.left; S.coins.length = 0; }   // 地上没捡的铜钱：收回九成
-    { const c = S.zq * .3; if (c > .05) { heal(c); R.tiao = Math.round(c * 10); } S.zq = 0; }   // 调息：剩余真气 30% 化成气血
+    { R.zqLeft = Math.round(S.zq * 10); const c = S.zq * (.3 + IT('tiao')); if (c > .05) { heal(c); R.tiao = Math.round(c * 10); } S.zq = 0; if (IT('after')) heal(maxHp() * IT('after')); }   // 调息：剩余真气 30% 化成气血
     if (nd.type === 'boss' && nd.final) { won = true; return; }
     if (window.SFX) SFX.play('j_win');
     R.xiu = nd.type === 'boss' ? 60 : nd.type === 'elite' ? 40 : 25; addXiu(R.xiu);
@@ -522,7 +522,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   function beginNode(nd) {
     if (!c2ok && typeof ensureAssets === 'function') ensureAssets('chapter2', { silent: true }).then(() => { c2ok = true; });
     GM = gfCalc(); S.zq = zqMax(); S.hp0 = hero.hp; S.noHitT = 0; S.xy = 0;
-    S.k0 = typeof kills === 'number' ? kills : 0; S.coinGot = 0; S.taken = 0; S.lastHp = hero.hp; S.coins = []; S.lvAt0 = S.lv; S.tutT = 0;
+    S.k0 = typeof kills === 'number' ? kills : 0; S.coinGot = 0; S.taken = 0; S.hutiSum = 0; S.dps = {}; S.lastHp = hero.hp; S.coins = []; S.lvAt0 = S.lv; S.tutT = 0;
     RT.node = nd; W.N = ROUTE.waves(nd); W.started = true; W.between = 0; W.pick = false; S.wind = null; S.recov = null; S.later = []; bolts.length = 0; zones.length = 0; fx.length = 0;
     zs.length = 0; eshots.length = 0; if (window.ARENA) ARENA.start(ROUTE.mapOf(nd));
     startWave(1);
@@ -572,103 +572,248 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     document.body.appendChild(d); setTimeout(() => d.classList.add('out'), 2600); setTimeout(() => d.remove(), 3200);
   }
 
+  // 整备屏样式（11/11：1:1 照群侠幸存者，框体/图标用用户给的 Gemini 素材）
+  const uiK = () => Math.max(.5, Math.min(1.45, Math.min(innerHeight / 860, innerWidth / 1500)));   // 整备屏/提醒框的缩放系数（CSS 里 calc 不能把长度除成纯数字，只能 JS 算）
+  addEventListener('resize', () => { for (const id of ['survPrep', 'survTut']) { const e = document.getElementById(id); if (e) e.style.setProperty('--k', uiK()); } });
+  const PREP_CSS = `
+#survPrep{position:fixed;inset:0;z-index:10025;background:radial-gradient(ellipse at 50% 40%,rgba(14,10,8,.72),rgba(6,4,3,.9));font-family:"PingFang SC","Microsoft YaHei",sans-serif;color:#efe2c6;user-select:none}
+#survPrep em{display:inline-block;background:center/contain no-repeat;vertical-align:middle;font-style:normal}
+#survPrep .mo{position:absolute;left:1.2vw;top:1.6vh;height:calc(56px*var(--k));min-width:calc(200px*var(--k));display:flex;align-items:center;gap:calc(14px*var(--k));padding:0 calc(22px*var(--k));border:calc(14px*var(--k)) solid transparent;border-image:url(art/ui/prep/btn.webp) 40 fill stretch;box-sizing:border-box}
+#survPrep .mo em{width:calc(40px*var(--k));height:calc(40px*var(--k))}#survPrep .mo b{font:900 calc(30px*var(--k)) "PingFang SC",sans-serif;color:#fff2d4}
+#survPrep .tb{position:absolute;left:50%;transform:translateX(-50%);top:1.5vh;display:flex;gap:calc(4px*var(--k))}
+#survPrep .tb button{position:relative;width:calc(180px*var(--k));height:calc(66px*var(--k));border:0;background:url(art/ui/prep/tab.webp) center/100% 100% no-repeat;color:#cbb894;font:900 calc(26px*var(--k)) "Songti SC","STSong","Noto Serif SC",serif;letter-spacing:.3em;text-indent:.3em;cursor:pointer}
+#survPrep .tb button.on{background-image:url(art/ui/prep/tab_on.webp);color:#3a1e08;text-shadow:0 1px 0 rgba(255,240,200,.6);filter:drop-shadow(0 0 calc(10px*var(--k)) rgba(255,190,80,.55))}
+#survPrep .tb button i{position:absolute;right:calc(10px*var(--k));top:calc(-4px*var(--k));min-width:calc(22px*var(--k));height:calc(22px*var(--k));border-radius:11px;background:#b8281e;color:#fff;font:700 calc(13px*var(--k))/calc(22px*var(--k)) sans-serif;font-style:normal;letter-spacing:0;text-indent:0}
+#survPrep .tl{position:absolute;left:30vw;right:30vw;top:calc(1.5vh + 74px*var(--k));height:1px;background:linear-gradient(90deg,transparent,#b08a4a 15%,#b08a4a 85%,transparent)}
+#survPrep .bd{position:absolute;left:3vw;right:3vw;top:calc(1.5vh + 92px*var(--k));bottom:calc(250px*var(--k));display:flex;gap:calc(18px*var(--k));justify-content:center}
+#survPrep .pn{position:relative;flex:1;max-width:calc(660px*var(--k));border:calc(34px*var(--k)) solid transparent;border-image:url(art/ui/prep/panel.webp) 90 fill stretch;padding:calc(4px*var(--k)) calc(8px*var(--k));overflow:auto;box-sizing:border-box;scrollbar-width:thin}
+#survPrep .pn.wide{max-width:none;display:flex;align-items:center;justify-content:center}
+#survPrep h4{margin:calc(4px*var(--k)) 0 calc(8px*var(--k));padding-bottom:calc(5px*var(--k));border-bottom:1px solid rgba(176,138,74,.5);font:700 calc(19px*var(--k)) "Songti SC","Noto Serif SC",serif;color:#cbb894;letter-spacing:.15em;display:flex;justify-content:space-between;align-items:flex-end}
+#survPrep h4 small{font:400 calc(13px*var(--k)) sans-serif;color:#8f7c5e;letter-spacing:0}
+#survPrep .sm{display:grid;grid-template-columns:auto 1fr auto 1fr;gap:calc(10px*var(--k));align-items:center;font-size:calc(19px*var(--k));color:#bfa98a}#survPrep .sm span{display:flex;align-items:center;gap:6px}#survPrep .sm em{width:calc(30px*var(--k));height:calc(30px*var(--k))}#survPrep .sm b{font:900 calc(26px*var(--k)) sans-serif;color:#fff2d4}
+#survPrep .nt{margin:calc(6px*var(--k)) 0 0;font-size:calc(14px*var(--k));color:#8f7c5e}
+#survPrep .ln{margin:calc(6px*var(--k)) 0;font-size:calc(18px*var(--k));color:#cbb894;display:flex;align-items:center;gap:calc(8px*var(--k))}#survPrep .ln em{width:calc(28px*var(--k));height:calc(28px*var(--k))}#survPrep .ln b{color:#fff;font-size:calc(21px*var(--k))}#survPrep .c1{color:#5cc8ff!important}#survPrep .c2{color:#ff5a5a!important}
+#survPrep .pb{display:flex;align-items:center;gap:calc(10px*var(--k));margin:calc(6px*var(--k)) 0}#survPrep .pb>em{width:calc(42px*var(--k));height:calc(42px*var(--k));flex:none;border:1px solid #8a6a3a;background-size:cover}
+#survPrep .pbf{position:relative;flex:1;height:calc(30px*var(--k));border:calc(10px*var(--k)) solid transparent;border-image:url(art/ui/prep/pbar.webp) 40 60 fill stretch;box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;padding:0 calc(10px*var(--k));overflow:hidden}
+#survPrep .pbf u{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#8a5a14,#e8b040 80%,#fff0a8);opacity:.9}#survPrep .pbf b,#survPrep .pbf i{position:relative;font:900 calc(15px*var(--k)) sans-serif;font-style:normal;color:#fff6dc;text-shadow:0 1px 2px #000}
+#survPrep .em2{text-align:center;color:#8f7c5e;font-size:calc(20px*var(--k));line-height:1.8}#survPrep .em2 small{font-size:.7em}#survPrep .ov{position:absolute;left:0;right:0;top:45%}
+#survPrep .gd{display:grid;grid-template-columns:repeat(4,1fr);gap:calc(10px*var(--k))}
+#survPrep .sl{position:relative;aspect-ratio:1;background:url(art/ui/prep/slot.webp) center/100% 100% no-repeat;display:flex;align-items:center;justify-content:center;cursor:default}#survPrep .sl[data-a]{cursor:pointer}
+#survPrep .sl em{width:80%;height:80%;background-size:cover}#survPrep .sl em.ghost{opacity:.5;background-size:contain}
+#survPrep .sl.on{filter:drop-shadow(0 0 calc(8px*var(--k)) rgba(255,210,110,.9))}#survPrep .sl[style*="--rc"]{box-shadow:inset 0 0 0 2px var(--rc)}
+#survPrep .sl .eq{position:absolute;right:2px;bottom:2px;padding:0 4px;background:rgba(10,6,4,.85);border:1px solid #b08a4a;font:700 calc(12px*var(--k)) sans-serif;font-style:normal;color:#ffe9b8}
+#survPrep .dt{display:flex;flex-direction:column;height:100%}#survPrep .dh{display:flex;gap:calc(14px*var(--k));align-items:center}#survPrep .dh>em{width:calc(96px*var(--k));height:calc(96px*var(--k));flex:none;border:2px solid #8a6a3a;background-size:cover}
+#survPrep .dh h3{margin:0;font:900 calc(30px*var(--k)) "Songti SC","Noto Serif SC",serif;color:#fff2d4}#survPrep .dh p{margin:calc(2px*var(--k)) 0;font-size:calc(17px*var(--k))}
+#survPrep .tg{display:flex;gap:calc(5px*var(--k));flex-wrap:wrap}#survPrep .tg span{padding:0 calc(6px*var(--k));border:1px solid #b08a4a;border-radius:3px;font-size:calc(14px*var(--k));color:#e9cf98}
+#survPrep h5{margin:calc(14px*var(--k)) 0 calc(4px*var(--k));font:400 calc(17px*var(--k)) sans-serif;color:#8f7c5e}#survPrep .ds{margin:0;font-size:calc(18px*var(--k));line-height:1.6;color:#efe2c6;flex:1}#survPrep .ds2{margin:calc(4px*var(--k)) 0;font-size:calc(14px*var(--k));color:#8f7c5e}
+#survPrep .db{display:flex;gap:calc(10px*var(--k));justify-content:center;margin-top:calc(8px*var(--k));flex-wrap:wrap}
+#survPrep .db button,#survPrep .bb{border:calc(12px*var(--k)) solid transparent;border-image:url(art/ui/prep/btn.webp) 40 fill stretch;background:none;color:#f6e6c4;font:900 calc(20px*var(--k)) "Songti SC","Noto Serif SC",serif;letter-spacing:.15em;padding:calc(2px*var(--k)) calc(18px*var(--k));cursor:pointer;display:inline-flex;align-items:center;gap:calc(6px*var(--k))}
+#survPrep .db button em,#survPrep .bb em{width:calc(26px*var(--k));height:calc(26px*var(--k))}#survPrep button:disabled{opacity:.45;cursor:not-allowed}#survPrep .db button:hover:not(:disabled),#survPrep .bb:hover:not(:disabled){filter:brightness(1.25)}
+#survPrep .cd{display:flex;flex-direction:column;align-items:center;text-align:center;max-width:calc(420px*var(--k))}#survPrep .cd .bi{width:calc(120px*var(--k));height:calc(120px*var(--k));padding:calc(12px*var(--k));box-sizing:border-box;background-color:rgba(0,0,0,.35);background-origin:content-box;border:calc(10px*var(--k)) solid transparent;border-image:url(art/ui/prep/pframe.webp) 50 stretch}
+#survPrep .cd h3{margin:calc(10px*var(--k)) 0 0;font:900 calc(32px*var(--k)) "Songti SC","Noto Serif SC",serif;color:#fff2d4}#survPrep .cd>p{margin:calc(2px*var(--k)) 0;font-size:calc(18px*var(--k))}
+#survPrep .dv{display:block;width:60%;height:1px;margin:calc(10px*var(--k)) 0;background:linear-gradient(90deg,transparent,#b08a4a,transparent)}#survPrep .up{font-size:calc(24px*var(--k))!important;color:#efe2c6}#survPrep .up b{color:#ffd86e;margin-right:6px}
+#survPrep .sd{flex:1;font-size:calc(16px*var(--k))!important;color:#bfa98a}#survPrep .cd .bb{margin-top:auto;font-size:calc(26px*var(--k))}
+#survPrep .cd.sh{align-items:stretch;text-align:left}#survPrep .cd.sh .buy{align-self:center;font-family:"PingFang SC",sans-serif}#survPrep .cd.sh .buy b{font-size:calc(26px*var(--k));color:#fff}
+#survPrep .ch{display:flex;align-items:center;gap:calc(4px*var(--k))}#survPrep .ch .sl{width:calc(78px*var(--k))}#survPrep .ar2{width:calc(14px*var(--k));height:calc(18px*var(--k));background:url(art/ui/prep/arrow.webp) center/contain no-repeat;flex:none}
+#survPrep .two{display:grid;grid-template-columns:3fr 1fr;gap:calc(16px*var(--k))}#survPrep .rw{display:flex;gap:calc(8px*var(--k))}#survPrep .rw .sl{width:calc(70px*var(--k))}
+#survPrep .t-wu .pn:first-child{flex:1.35;max-width:calc(820px*var(--k))}
+#survPrep .ab{position:absolute;left:1.5vw;right:1.5vw;bottom:calc(84px*var(--k));height:calc(140px*var(--k));display:flex;align-items:center}
+#survPrep .ab .md{width:calc(150px*var(--k));height:calc(150px*var(--k));flex:none;background:url(art/ui/prep/medal.webp) center/contain no-repeat;display:flex;align-items:center;justify-content:center;z-index:1}#survPrep .ab .md em{width:58%;height:58%}
+#survPrep .ar{flex:1;height:calc(124px*var(--k));margin:0 calc(-20px*var(--k));border:calc(22px*var(--k)) solid transparent;border-image:url(art/ui/prep/bar.webp) 60 90 fill stretch;display:flex;align-items:center;justify-content:space-around;padding:0 calc(26px*var(--k));box-sizing:border-box}
+#survPrep .ac{display:flex;flex-direction:column;align-items:center;gap:calc(2px*var(--k));cursor:help}#survPrep .ac span{font:700 calc(17px*var(--k)) "Songti SC","Noto Serif SC",serif;color:#bfa98a}#survPrep .ac em{width:calc(36px*var(--k));height:calc(36px*var(--k))}#survPrep .ac b{font:900 calc(20px*var(--k)) sans-serif;color:#ffcf6a}
+#survPrep .ar .sp{width:1px;align-self:stretch;margin:calc(8px*var(--k)) 0;background:linear-gradient(transparent,#b08a4a,transparent)}
+#survPrep .vt{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(8px*var(--k));width:min(46vw,calc(760px*var(--k)));display:flex;flex-direction:column;gap:calc(4px*var(--k))}
+#survPrep .vb{display:flex;align-items:center;gap:calc(6px*var(--k))}#survPrep .vb>em{width:calc(34px*var(--k));height:calc(34px*var(--k))}
+#survPrep .vf{position:relative;flex:1;height:calc(32px*var(--k));border:calc(10px*var(--k)) solid transparent;border-image:url(art/ui/prep/pbar.webp) 40 60 fill stretch;box-sizing:border-box;display:flex;align-items:center;justify-content:center;overflow:hidden}
+#survPrep .vf u{position:absolute;left:0;top:0;bottom:0}#survPrep .vf.zq u{background:linear-gradient(180deg,#5cc0ff,#1f5fa8)}#survPrep .vf.hp u{background:linear-gradient(180deg,#e0463a,#8c1c18)}#survPrep .vf b{position:relative;font:900 calc(16px*var(--k)) sans-serif;color:#fff;text-shadow:0 1px 2px #000}
+#survPrep .lf{position:absolute;left:1.5vw;bottom:calc(14px*var(--k))}#survPrep .rf{font-size:calc(24px*var(--k))!important;padding:calc(4px*var(--k)) calc(30px*var(--k))!important}#survPrep .rf span{margin-left:calc(20px*var(--k));font-family:sans-serif;color:#fff}
+#survPrep .shn{margin:0;color:#8f7c5e;font-size:calc(15px*var(--k))}
+#survPrep .go{position:absolute;right:1.5vw;bottom:calc(10px*var(--k));min-width:calc(250px*var(--k));justify-content:center;font-size:calc(30px*var(--k))!important;padding:calc(6px*var(--k)) calc(30px*var(--k))!important;letter-spacing:.4em!important}
+@media (max-height:520px){#survPrep .ac span{display:none}}
+#survTut{position:fixed;right:1vw;bottom:calc(16vh + 60px);z-index:10040;display:flex;align-items:stretch;width:min(820px,60vw);cursor:pointer;animation:tutIn .3s ease-out}
+@keyframes tutIn{from{transform:translateY(16px);opacity:0}}
+#survTut .bx{position:relative;flex:1;border:calc(18px*var(--k)) solid transparent;border-image:url(art/ui/prep/dialog.webp) 40 fill stretch;padding:calc(6px*var(--k)) calc(18px*var(--k));color:#f6ecd6;display:flex;flex-direction:column;justify-content:center}
+#survTut .nm{position:absolute;left:calc(14px*var(--k));top:calc(-34px*var(--k));padding:calc(2px*var(--k)) calc(22px*var(--k));border:calc(10px*var(--k)) solid transparent;border-image:url(art/ui/prep/tab.webp) 30 fill stretch;font:900 calc(22px*var(--k)) "Songti SC","Noto Serif SC",serif;letter-spacing:.2em;color:#ffe9b8}
+#survTut p{margin:calc(6px*var(--k)) 0;font:600 calc(21px*var(--k))/1.55 "PingFang SC",sans-serif}#survTut small{align-self:flex-end;font-size:calc(13px*var(--k));color:#8f7c5e}#survTut small b{color:#e9dcc0}
+#survTut>em{width:calc(150px*var(--k));flex:none;background:center/cover no-repeat;border:calc(14px*var(--k)) solid transparent;border-image:url(art/ui/prep/pframe.webp) 50 stretch;background-clip:padding-box}
+#survTut.big{left:0;right:0;bottom:3vh;width:auto;padding-left:22vw}#survTut.big .bx{min-height:calc(170px*var(--k))}#survTut .lh{position:fixed;left:0;bottom:0;width:34vw;height:88vh;background:left bottom/contain no-repeat;pointer-events:none;filter:drop-shadow(0 0 20px rgba(0,0,0,.6))}
+body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(900px,58vw)}
+@media (max-height:520px){#survTut{bottom:calc(30vh);width:min(620px,70vw)}#survTut.big{padding-left:26vw}}
+`;
+  // ---- 道具（11/11 用户定，照群侠幸存者：行商主要卖永久道具）----
+  const ITEMS = {
+    hufu: { n: '护身符', d: '体魄 +1，护体 +5%', at: [1, 0, 0, 0, 0, 0], huti: .05 },
+    modao: { n: '磨刀石', d: '短兵 +1', at: [0, 1, 0, 0, 0, 0] },
+    qiangying: { n: '红枪缨', d: '长兵 +1，暴击 +2%', at: [0, 0, 1, 0, 0, 0], crit: .02 },
+    bangtui: { n: '绑腿', d: '身法 +1，移速 +3%', at: [0, 0, 0, 1, 0, 0], move: .03 },
+    pingan: { n: '平安符', d: '运气 +1', at: [0, 0, 0, 0, 1, 0] },
+    bingshu: { n: '兵书残卷', d: '悟性 +1', at: [0, 0, 0, 0, 0, 1] },
+    jiuhulu: { n: '酒葫芦', d: '调息效率 +15%（战后剩余真气化血更多）', tiao: .15 },
+    huwan: { n: '铁护腕', d: '受到伤害 -4%', take: .04 },
+    ganliang: { n: '干粮袋', d: '每打完一仗回复 6% 气血', after: .06 },
+    chazhan: { n: '清茶盏', d: '真气回复 +25%', regen: .25 },
+    yupei: { n: '玉佩', d: '暴击 +4%', crit: .04, q: 1 },
+    yaoping: { n: '小药瓶', d: '立刻回复 40% 气血（用掉）', use: true },
+  };
+  const IT = k => (S.items || []).reduce((t, id) => t + ((ITEMS[id] && ITEMS[id][k]) || 0), 0);
+  const itemAt = () => { const t = [0, 0, 0, 0, 0, 0]; for (const id of S.items || []) if (ITEMS[id] && ITEMS[id].at) ITEMS[id].at.forEach((v, i) => t[i] += v); return t; };
+  const itemOf = id => ({ kind: 'item', id, q: ITEMS[id].q || 0, name: ITEMS[id].n, desc: ITEMS[id].d, price: ITEMS[id].use ? 12 : 22 + (ITEMS[id].q || 0) * 12, sell: 8 });
+
   // ---- 掉落与货品 ----
   const SELL = [6, 12, 20, 30, 40];
-  function itemFrom(o) { return o.kind === 'heal' ? null : Object.assign({}, o, { price: (o.kind === 'skill' ? 20 : 16) + (o.q || 0) * 15, sell: SELL[o.q || 0] }); }
-  function rollLoot(nd) {   // 拾取页：普通战斗 1 本秘籍（四成概率再多 1 本），精锐 2，敌将 3
-    const n = nd.type === 'boss' ? 3 : nd.type === 'elite' ? 2 : (Math.random() < .4 ? 2 : 1), out = [], seen = new Set();
+  function itemFrom(o) { return o.kind === 'heal' ? null : Object.assign({}, o, { price: (o.kind === 'skill' ? 24 : 18) + (o.q || 0) * 15, sell: SELL[o.q || 0] }); }
+  const ownedAll = () => S.slots.filter(Boolean).concat(S.gf.filter(Boolean), S.qg ? [S.qg] : [], S.owned || []);
+  function rollLoot(nd) {   // 拾取：普通战斗 1 本（四成 2 本），精锐 2 本 + 1 件道具，敌将 3 本 + 1 件道具
+    const n = nd.type === 'boss' ? 3 : nd.type === 'elite' ? 2 : (Math.random() < .4 ? 2 : 1), out = [], seen = new Set(ownedAll());
     for (let i = 0; i < 6 && out.length < n; i++) for (const o of rewardOptions(i % 2 ? 'perk' : undefined)) { const it = itemFrom(o); const key = it && (it.k || it.id); if (it && !seen.has(key) && out.length < n) { seen.add(key); out.push(it); } }
+    if (nd.type !== 'battle') { const ks = Object.keys(ITEMS).filter(k => !ITEMS[k].use); out.push(itemOf(ks[Math.random() * ks.length | 0])); }
     return out;
   }
-  function rollShop() {   // 行商：三选一买一件，不能刷新
-    const out = [], seen = new Set(S.loot.map(it => it.k || it.id));
-    for (const o of rewardOptions(undefined).concat(rewardOptions('perk'))) { const it = itemFrom(o); const key = it && (it.k || it.id); if (it && !seen.has(key) && out.length < 2) { seen.add(key); out.push(it); } }
-    out.push({ kind: 'potion', name: '金创药', icon: '药', color: '#ff9a9a', desc: '立刻回复 40% 气血', price: 12, q: 0 });
-    return out;
+  function rollShop() {   // 行商：两件道具 + 一本秘籍，三选一只能买一件，不能刷新
+    const ks = Object.keys(ITEMS).sort(() => Math.random() - .5), out = [itemOf(ks[0]), itemOf(ks[1])], seen = new Set(ownedAll().concat(S.loot.map(it => it.k || it.id)));
+    for (const o of rewardOptions(undefined).concat(rewardOptions('perk'))) { const it = itemFrom(o); const key = it && (it.k || it.id); if (it && !seen.has(key)) { out.push(it); break; } }
+    return out.sort(() => Math.random() - .5);
   }
-  const canLearn = it => it.kind === 'skill' ? S.slots.includes('') : it.kind === 'gf' ? (GF[it.id].qg ? !S.qg : S.gf.includes('')) : true;
-  function learn(it) {
-    if (it.kind === 'skill') { const f = S.slots.indexOf(''); if (f < 0) return false; S.slots[f] = it.k; tut('learn'); }
-    else if (it.kind === 'gf') { if (GF[it.id].qg) { if (S.qg) return false; S.qg = it.id; } else { const f = S.gf.indexOf(''); if (f < 0) return false; S.gf[f] = it.id; } GM = gfCalc(); }
-    else if (it.kind === 'potion') heal(maxHp() * .4);
+  function learn(it) {   // 格子满了也能学：先放进「掌握武学」，在武学页换上
+    S.owned = S.owned || [];
+    if (it.kind === 'skill') { const f = S.slots.indexOf(''); if (f >= 0) S.slots[f] = it.k; else S.owned.push(it.k); tut('learn'); }
+    else if (it.kind === 'gf') { if (GF[it.id].qg) { if (!S.qg) S.qg = it.id; else S.owned.push(it.id); } else { const f = S.gf.indexOf(''); if (f >= 0) S.gf[f] = it.id; else S.owned.push(it.id); } GM = gfCalc(); }
+    else if (it.kind === 'item') { if (ITEMS[it.id].use) heal(maxHp() * .4); else (S.items = S.items || []).push(it.id); GM = gfCalc(); }
     return true;
   }
 
-  // ---- 整备屏 ----
-  let prepNd = null, prepTab = 'jie';
-  const TABS = [['jie', '结算'], ['shi', '拾取'], ['xiu', '修炼'], ['shang', '行商'], ['wu', '武艺']];
-  function prepOpen(nd) { prepNd = nd; prepTab = 'jie'; if (window.SFX) SFX.play('j_shop'); tut('prep'); prepRender(); }
+  // ---- 整备屏（1:1 照群侠幸存者：结算 / 拾取 / 修炼 / 行商 / 武学）----
+  let prepNd = null, prepTab = 'jie', selLoot = 0, selWu = null;
+  const TABS = [['jie', '结算'], ['shi', '拾取'], ['xiu', '修炼'], ['shang', '行商'], ['wu', '武学']];
+  const A = n => `art/ui/attr/${n}.webp`, PU = n => `art/ui/prep/${n}.webp`;
+  const ATI = ['tipo', 'duan', 'chang', 'shen', 'yun', 'wu'];
+  const ATD = ['提高气血，受到的伤害按比例减少', '提高刀、剑等短兵武艺伤害', '提高枪、关刀等长兵武艺伤害', '提高移动速度', '提高暴击率，修炼更容易出好品阶', '武艺、心法熟练度和修为涨得更快'];
+  const icoOf = it => it.kind === 'item' ? `art/ui/item/${it.id}.webp` : iconUrl(it.kind, it.k || it.id) || '';
+  const RQ = ['普通', '精良', '稀有', '绝世'], RQC = ['#e8e0d0', '#6fb8ff', '#c58cff', '#ffb347'];
+  const tagsOf = it => it.kind === 'skill' ? ['武艺', '主动', '刀'] : it.kind === 'gf' ? (GF[it.id].qg ? ['轻功', '被动'] : ['心法', '被动']) : ITEMS[it.id].use ? ['道具', '消耗'] : ['道具', '永久'];
+  function prepOpen(nd) { { const t = document.getElementById('survTut'); if (t) t.remove(); tutQ = []; }   // 战斗里没看完的提醒不带进整备屏
+    prepNd = nd; prepTab = 'jie'; selLoot = 0; selWu = null; if (window.SFX) SFX.play('j_shop'); prepRender(); tut('prep'); }
   function prepClose() {
-    for (const it of S.loot || []) S.money += it.sell;   // 没处理的秘籍：按卖价自动换钱
-    S.loot = []; S.prepTip = ''; const el = document.getElementById('survPrep'); if (el) el.remove(); W.pick = false; const nd = prepNd; prepNd = null; ROUTE.done(nd);
+    for (const it of S.loot || []) S.money += it.sell;   // 没处理的战利品：按卖价自动换钱
+    S.loot = []; const el = document.getElementById('survPrep'); if (el) el.remove(); document.body.classList.remove('prep-open'); { const t = document.getElementById('survTut'); if (t) t.remove(); tutQ = []; } W.pick = false; const nd = prepNd; prepNd = null; ROUTE.done(nd);
   }
-  const card = (it, extra, btns) => `<div class="pc q${Math.min(3, it.q || 0)}">${iconUrl(it.kind, it.k || it.id) ? `<em style="background-image:url('${iconUrl(it.kind, it.k || it.id)}')"></em>` : `<b class="gl" style="color:${it.color}">${it.icon}</b>`}<i>${it.kind === 'skill' ? '武艺 · 主动' : it.kind === 'gf' ? (GF[it.id].qg ? '轻功 · 被动' : '心法 · 被动') : '药品'}</i><span>${it.name}</span><small>${it.desc}</small>${extra || ''}<div class="bt">${btns}</div></div>`;
+  const bar = (lv, r, ic) => `<div class="pb">${ic ? `<em style="background-image:url('${ic}')"></em>` : ''}<div class="pbf"><u style="width:${Math.round(r * 100)}%"></u><b>LV. ${lv}</b><i>${(r * 100).toFixed(1)}%</i></div></div>`;
+  const mastR = k => { const m = S.mast[k] || 0, l = lvOf(k); return l >= 10 ? 1 : Math.min(1, (m - MAST_T[l - 1]) / (MAST_T[l] - MAST_T[l - 1])); };
+  const gfR = id => { const e = S.gfExp[id] || 0, l = gfLv(id); return l >= 3 ? 1 : Math.min(1, (e - (l === 1 ? 0 : GFTH[0])) / (GFTH[l - 1] - (l === 1 ? 0 : GFTH[0]))); };
+  function attrBar() {   // 底部常驻属性栏
+    const ai = attrInfo(origin, true), mh = maxHp(), cr = .05 + AFX.crit() + GM.crit + IT('crit');
+    const col = (lab, ic, v, tip) => `<div class="ac" title="${tip}"><span>${lab}</span><em style="background-image:url('${A(ic)}')"></em><b>${v}</b></div>`;
+    return `<div class="ab"><div class="md"><em style="background-image:url('${A('bag')}')"></em></div><div class="ar">${ai.map((r, i) => col(r[0], ATI[i], r[1], r[0] + '：' + ATD[i] + '（' + r[2] + '）')).join('')}<i class="sp"></i>${col('气血', 'hp', Math.round(mh * 10), '最大气血')}${col('真气', 'zq', Math.round(zqMax() * 10), '护体挡三成伤害；过半自动发劲')}${col('会心', 'crit', Math.round(cr * 100) + '%', '暴击率')}${col('修为', 'xiu', 'LV' + S.lv, '修为等级')}</div><div class="md"><em style="background-image:url('${A('wuxue')}')"></em></div></div>`;
+  }
+  function vitals() {
+    const mh = maxHp(), zr = Math.max(0, S.zq / zqMax()), hr = hero.hp / mh;
+    return `<div class="vt"><div class="vb"><em style="background-image:url('${A('zq')}')"></em><div class="vf zq"><u style="width:${zr * 100}%"></u><b>${Math.round(S.zq * 10)} / ${Math.round(zqMax() * 10)}</b></div></div><div class="vb"><em style="background-image:url('${A('hp')}')"></em><div class="vf hp"><u style="width:${hr * 100}%"></u><b>${Math.ceil(hero.hp * 10)} / ${Math.round(mh * 10)}</b></div></div></div>`;
+  }
+  function detail(it, btns) {
+    if (!it) return '<p class="em2">选择一件战利品</p>';
+    return `<div class="dt"><div class="dh"><em style="background-image:url('${icoOf(it)}')"></em><div><h3>${it.name}</h3><p style="color:${RQC[Math.min(3, it.q || 0)]}">${RQ[Math.min(3, it.q || 0)]}</p><div class="tg">${tagsOf(it).map(t => `<span>${t}</span>`).join('')}</div></div></div><h5>${it.kind === 'item' ? '道具属性' : it.kind === 'skill' ? '武艺效果' : '心法效果'}</h5><p class="ds">${it.desc}</p><div class="db">${btns}</div></div>`;
+  }
   function prepRender() {
     let el = document.getElementById('survPrep');
     if (!el) { el = document.createElement('div'); el.id = 'survPrep'; document.body.appendChild(el); el.addEventListener('pointerdown', e => e.stopPropagation()); }
-    const R = S.rep || {}, bar = (lab, lv, r) => `<div class="br"><span>${lab}</span><i><u style="width:${Math.round(r * 100)}%"></u></i><b>LV.${lv}</b></div>`;
-    let body = '';
+    el.style.setProperty('--k', uiK()); document.body.classList.add('prep-open');
+    const R = S.rep || {};
+    let body = '', left = '';
     if (prepTab === 'jie') {
-      const sk = S.slots.filter(Boolean).map(k => { const m = S.mast[k] || 0, l = lvOf(k); return bar(SK[k].name, l, Math.min(1, (m % 30) / 30)); }).join('');
-      body = `<div class="cols2"><div><h4>本仗战果</h4><div class="kv"><span>击倒</span><b>${R.kills}</b></div><div class="kv"><span>拾得铜钱</span><b>+${R.got}</b></div><div class="kv"><span>地上没捡的（收回九成）</span><b>+${R.left}</b></div><div class="kv"><span>受到伤害</span><b>${R.taken}</b></div><div class="kv"><span>调息（剩余真气化成气血）</span><b style="color:#ff8a7a">+${R.tiao}</b></div><div class="kv"><span>修为结算</span><b>+${R.xiu}</b></div></div>
-        <div><h4>修为与武艺</h4>${bar('修为', S.lv, Math.min(1, S.xiu / XIU_NEED(S.lv)))}${sk}<div class="kv"><span>气血</span><b>${Math.ceil(hero.hp * 10)} / ${Math.round(maxHp() * 10)}</b></div>${S.bank ? `<p class="hint">有 ${S.bank} 次修炼机会，去「修炼」页</p>` : ''}</div></div>`;
+      const tot = S.slots.filter(Boolean).reduce((t, k) => t + (S.dps[k] || 0), 0) || 1;
+      const outs = S.slots.filter(Boolean).map(k => `<div class="pb"><em style="background-image:url('${IMGU[k] || ''}')"></em><div class="pbf"><u style="width:${(S.dps[k] || 0) / tot * 100}%"></u><b>${Math.round((S.dps[k] || 0) * 10)}</b><i>${((S.dps[k] || 0) / tot * 100).toFixed(1)}%</i></div></div>`).join('');
+      body = `<div class="pn"><h4>总结</h4><div class="sm"><span><em style="background-image:url('${A('kill')}')"></em>斩敌</span><b>${R.kills}</b><span><em style="background-image:url('${A('coin')}')"></em>铜钱</span><b>${R.got + R.left}</b></div>${R.left ? `<p class="nt">地上没捡的铜钱，帮你收回了九成：+${R.left}</p>` : ''}
+          <h4>输出统计</h4>${outs}
+          <h4>调息</h4><p class="ln">剩余 <em style="background-image:url('${A('zq')}')"></em> 真气 <b class="c1">${R.zqLeft || 0}</b> 点</p><p class="ln">转换为 <b class="c2">${R.tiao}</b> 点 <em style="background-image:url('${A('hp')}')"></em> 气血</p><p class="ln"><em style="background-image:url('${A('huti')}')"></em> 护体 总共免除了 <b>${Math.round((S.hutiSum || 0) * 10)}</b> 点伤害</p></div>
+        <div class="pn"><h4>修为</h4>${bar(S.lv, Math.min(1, S.xiu / XIU_NEED(S.lv)), A('xiu'))}<h4>武艺</h4>${S.slots.filter(Boolean).map(k => bar(lvOf(k), mastR(k), IMGU[k])).join('')}<h4>心法</h4>${S.gf.concat([S.qg]).filter(Boolean).map(id => bar(gfLv(id), gfR(id), `art/ui/gf/${id}.webp`)).join('') || '<p class="em2" style="padding:6px 0">还没有心法</p>'}</div>`;
     } else if (prepTab === 'shi') {
-      body = S.loot.length ? `<p class="hint">敌人掉落的秘籍。学会，或卖给行商换铜钱；不处理就离开会自动卖掉。</p><div class="row">${S.loot.map((it, i) => card(it, `<p class="pr">卖价 ${it.sell} 铜钱</p>`, `<button data-a="learn" data-i="${i}" ${canLearn(it) ? '' : 'disabled title="格子满了"'}>学会</button><button data-a="sell" data-i="${i}">卖掉</button>`)).join('')}</div>` : '<p class="empty">这一仗没有捡到秘籍。</p>';
+      const L = S.loot.slice().sort((a, b) => (b.q || 0) - (a.q || 0)); S.loot = L; selLoot = Math.min(selLoot, L.length - 1);
+      const sel = L[selLoot];
+      body = `<div class="pn"><h4>战利品<small>按稀有度</small></h4><div class="gd">${Array.from({ length: 16 }, (_, i) => L[i] ? `<div class="sl ${i === selLoot ? 'on' : ''}" data-a="sel" data-i="${i}" style="--rc:${RQC[Math.min(3, L[i].q || 0)]}"><em style="background-image:url('${icoOf(L[i])}')"></em></div>` : '<div class="sl"></div>').join('')}</div>${L.length ? '' : '<p class="em2 ov">暂无战利品</p>'}</div>
+        <div class="pn">${sel ? detail(sel, `<button data-a="learn" data-i="${selLoot}">${sel.kind === 'item' ? '收下' : '学会'}</button><button data-a="sell" data-i="${selLoot}">卖掉 ${sel.sell}<em style="background-image:url('${A('coin')}')"></em></button>`) : detail(null)}</div>`;
     } else if (prepTab === 'xiu') {
-      if (!S.bank) body = `<p class="empty">修为 LV.${S.lv}　暂无修炼机会。杀敌、打完仗都会涨修为，满一级得一次修炼。</p>`;
-      else { S.xopts = S.xopts || rollXiu(); body = `<p class="hint">剩余修炼 ${S.bank} 次 · 三选一提升属性（被动）· 运气越高越容易出好品阶</p><div class="row">${S.xopts.map((o, j) => `<div class="pc q${o.q}"><i style="color:${RAR[o.q][1]}">${RAR[o.q][0]}</i><span style="color:${RAR[o.q][1]};font-size:22px">${o.adds.map(([a]) => ATN[a]).join(' · ')}</span><small>${o.adds.map(([a, v]) => ATN[a] + ' +' + v + '（' + AT()[a] + ' → ' + (AT()[a] + v) + '）').join('<br>')}</small><div class="bt"><button data-a="xiu" data-i="${j}">选这个</button></div></div>`).join('')}</div>${S.xrr ? '' : '<p class="hint"><a href="#" data-a="xrr">不合适？刷新一次</a></p>'}`; }
+      if (!S.bank) body = `<div class="pn wide"><p class="em2">修为 LV.${S.lv} · 暂无修炼机会<br><small>斩敌、打完仗都会攒修为，每升一层得一次修炼</small></p></div>`;
+      else { S.xopts = S.xopts || rollXiu(); body = S.xopts.map((o, j) => { const [a0, v0] = o.adds[0]; return `<div class="pn cd"><em class="bi" style="background-image:url('${A(ATI[a0])}')"></em><h3>${ATN[a0]}修炼</h3><p style="color:${RAR[o.q][1]}">${['普通', '精良', '稀有', '绝世'][o.q]}</p><i class="dv"></i>${o.adds.map(([a, v]) => `<p class="up"><b>+${v}</b> ${ATN[a]}</p>`).join('')}<p class="sd">${ATD[a0]}</p><button class="bb" data-a="xiu" data-i="${j}">修 炼</button></div>`; }).join('');
+        left = `<button class="bb rf" data-a="xrr" ${S.xrr ? 'disabled' : ''}>刷新<span>${S.xrr ? 0 : 1}/1</span></button>`; }
     } else if (prepTab === 'shang') {
-      body = `<p class="hint">行商：三件货只能买一件，不能刷新。手上铜钱 ${S.money}</p><div class="row">${S.shop.map((it, i) => card(it, `<p class="pr">${it.price} 铜钱</p>`, S.bought >= 0 ? (S.bought === i ? '<button disabled>已买下</button>' : '<button disabled>—</button>') : `<button data-a="buy" data-i="${i}" ${S.money >= it.price && canLearn(it) ? '' : 'disabled'}>买下</button>`)).join('')}</div>`;
+      body = S.shop.map((it, i) => `<div class="pn cd sh"><div class="dh"><em style="background-image:url('${icoOf(it)}')"></em><div><h3>${it.name}</h3><p style="color:${RQC[Math.min(3, it.q || 0)]}">${RQ[Math.min(3, it.q || 0)]}</p><div class="tg">${tagsOf(it).map(t => `<span>${t}</span>`).join('')}</div></div></div><h5>${it.kind === 'item' ? '道具属性' : it.kind === 'skill' ? '武艺效果' : '心法效果'}</h5><p class="ds">${it.desc}</p><button class="bb buy" data-a="buy" data-i="${i}" ${S.bought >= 0 || S.money < it.price ? 'disabled' : ''}>${S.bought === i ? '已买下' : `购买 <b>${it.price}</b><em style="background-image:url('${A('coin')}')"></em>`}</button></div>`).join('');
+      left = `<p class="shn">三件只能买一件 · 不能刷新</p>`;
     } else if (prepTab === 'wu') {
-      const rows = S.slots.map((k, i) => `<div class="wr"><b>${i + 1}</b>${k && SK[k] ? `${IMGU[k] ? `<em style="background-image:url('${IMGU[k]}')"></em>` : ''}<span>${SK[k].name} <small>LV${lvOf(k)} · ${SK[k].desc}</small></span><button data-a="up" data-i="${i}" ${i ? '' : 'disabled'}>▲</button><button data-a="dn" data-i="${i}" ${i < 4 && S.slots[i + 1] ? '' : 'disabled'}>▼</button><button data-a="off" data-i="${i}" ${S.slots.filter(Boolean).length > 1 ? '' : 'disabled'}>卸下</button>` : '<span class="em">空格</span>'}</div>`).join('');
-      const gfr = S.gf.concat([S.qg]).map((id, i) => `<div class="wr">${id && GF[id] ? `${HIMG['gf_' + id] ? `<em style="background-image:url('art/ui/gf/${id}.webp')"></em>` : ''}<span>${GF[id].n} <small>${GF[id].d}</small></span><button data-a="goff" data-i="${i}">卸下</button>` : `<span class="em">${i < 3 ? '心法空格' : '轻功空格'}</span>`}</div>`).join('');
-      body = `<div class="cols2"><div><h4>武艺（主动 · 按 1→5 轮流出手）</h4>${rows}</div><div><h4>心法（被动）</h4>${gfr}</div></div>`;
+      const all = S.slots.filter(Boolean).concat(S.gf.filter(Boolean), S.qg ? [S.qg] : [], S.owned || []);
+      if (!selWu || !all.includes(selWu)) selWu = S.slots[0];
+      const isSk = id => !!SK[id], on = id => S.slots.includes(id) || S.gf.includes(id) || S.qg === id;
+      const ic = id => isSk(id) ? IMGU[id] || '' : `art/ui/gf/${id}.webp`;
+      const chain = S.slots.map((k, i) => `${i ? `<i class="ar2"></i>` : ''}<div class="sl ${k === selWu ? 'on' : ''}" ${k ? `data-a="wsel" data-k="${k}"` : ''}><em style="background-image:url('${k ? ic(k) : A('e_wu')}')" class="${k ? '' : 'ghost'}"></em></div>`).join('');
+      const gfs = S.gf.map(id => `<div class="sl ${id && id === selWu ? 'on' : ''}" ${id ? `data-a="wsel" data-k="${id}"` : ''}><em class="${id ? '' : 'ghost'}" style="background-image:url('${id ? ic(id) : A('e_xin')}')"></em></div>`).join('');
+      const zt = S.slots.filter(Boolean).reduce((t, k) => t + SK[k].wu + SK[k].rc, 0);
+      const sel = selWu, o = sel && (isSk(sel) ? SK[sel] : GF[sel]);
+      const det = o ? `<div class="dt"><div class="dh"><em style="background-image:url('${ic(sel)}')"></em><div><h3>${isSk(sel) ? o.name : o.n}</h3><p>${isSk(sel) ? (o.tier ? TIERN[o.tier] + '阶' : '基础') : GTN[o.t] + '阶'}</p><div class="tg">${(isSk(sel) ? ['武艺', '主动', '刀'] : [o.qg ? '轻功' : '心法', '被动']).map(t => `<span>${t}</span>`).join('')}</div></div></div>${isSk(sel) ? bar(lvOf(sel), mastR(sel)) : bar(gfLv(sel), gfR(sel))}<h5>效果</h5><p class="ds">${isSk(sel) ? o.desc : o.d}</p>${isSk(sel) ? `<p class="ds2">前摇 ${o.wu.toFixed(2)} 秒 · 收招 ${o.rc.toFixed(2)} 秒</p>` : ''}
+        <div class="db">${on(sel) ? `<button data-a="woff">卸下</button>` : `<button data-a="won">上阵</button>`}${isSk(sel) && on(sel) ? `<button data-a="wl">◀ 提前</button><button data-a="wr">延后 ▶</button>` : ''}</div></div>` : '<p class="em2">选择一门武学</p>';
+      body = `<div class="pn"><h4>上阵武艺<small>按顺序循环出手</small></h4><div class="ch">${chain}</div><div class="two"><div><h4>心法</h4><div class="rw">${gfs}</div></div><div><h4>轻功</h4><div class="rw"><div class="sl ${S.qg && S.qg === selWu ? 'on' : ''}" ${S.qg ? `data-a="wsel" data-k="${S.qg}"` : ''}><em class="${S.qg ? '' : 'ghost'}" style="background-image:url('${S.qg ? ic(S.qg) : A('e_qing')}')"></em></div></div></div></div><h4>周天信息</h4><p class="ln">一轮出手总时长 <b class="c1">${zt.toFixed(1)}</b> 秒　真气回复 <b class="c1">${((.005 + .004 * GM.hy) * (1 + IT('regen')) * 100).toFixed(1)}%</b>/秒</p></div>
+        <div class="pn">${det}</div><div class="pn"><h4>掌握武学</h4><div class="gd">${Array.from({ length: Math.max(12, all.length) }, (_, i) => all[i] ? `<div class="sl ${all[i] === selWu ? 'on' : ''}" data-a="wsel" data-k="${all[i]}"><em style="background-image:url('${ic(all[i])}')"></em>${on(all[i]) ? '<i class="eq">装</i>' : ''}</div>` : '<div class="sl"></div>').join('')}</div><h4>道具</h4><div class="gd">${(S.items || []).map(id => `<div class="sl" title="${ITEMS[id].n}：${ITEMS[id].d}"><em style="background-image:url('art/ui/item/${id}.webp')"></em></div>`).join('') || '<p class="em2" style="padding:4px 0;font-size:13px">还没有道具</p>'}</div></div>`;
     }
-    el.innerHTML = `<div class="pp"><div class="tb">${TABS.map(([k, t]) => `<button data-t="${k}" class="${k === prepTab ? 'on' : ''}">${t}${k === 'xiu' && S.bank ? ` <i>${S.bank}</i>` : k === 'shi' && S.loot.length ? ` <i>${S.loot.length}</i>` : ''}</button>`).join('')}<span class="mo"><em></em>${S.money}</span></div><div class="bd">${S.prepTip ? `<div class="lb"><em></em><p><b>刘备</b>${S.prepTip}</p><a href="#" data-a="tipx">知道了</a></div>` : ''}${body}</div><div class="ft"><span>第 ${prepNd ? prepNd.layer : ''} 层 · ${prepNd ? ROUTE.name(prepNd) : ''} 已平定</span><button class="go">继续 ▶</button></div></div>`;
-    el.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { prepTab = b.dataset.t; prepRender(); });
-    el.querySelector('.go').onclick = () => { if (S.bank && !confirm('还有 ' + S.bank + ' 次修炼没用，确定离开？（会保留到下次）')) return; prepClose(); };
+    const badge = k => k === 'xiu' && S.bank ? `<i>${S.bank}</i>` : k === 'shi' && S.loot.length ? `<i>${S.loot.length}</i>` : '';
+    el.innerHTML = `<div class="mo"><em style="background-image:url('${A('coin')}')"></em><b>${S.money}</b></div>
+      <div class="tb">${TABS.map(([k, t]) => `<button data-t="${k}" class="${k === prepTab ? 'on' : ''}">${t}${badge(k)}</button>`).join('')}</div><i class="tl"></i>
+      <div class="bd t-${prepTab}">${body}</div>
+      ${attrBar()}${vitals()}<div class="lf">${left}</div><button class="bb go">${prepTab === 'wu' ? '出 发' : '继 续'}</button>`;
+    el.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { prepTab = b.dataset.t; if (window.SFX) SFX.play('tick'); prepRender(); tut({ shi: 'loot', xiu: 'xiu', shang: 'shop', wu: 'wu' }[prepTab]); });
+    el.querySelector('.go').onclick = () => { const i = TABS.findIndex(t => t[0] === prepTab); if (i < TABS.length - 1) { prepTab = TABS[i + 1][0]; prepRender(); tut({ shi: 'loot', xiu: 'xiu', shang: 'shop', wu: 'wu' }[prepTab]); } else prepClose(); };   // 照原作：继续 = 下一页，最后一页「出发」
     el.querySelectorAll('[data-a]').forEach(b => b.onclick = e => {
-      e.preventDefault(); const a = b.dataset.a, i = +b.dataset.i;
-      if (a === 'learn') { if (learn(S.loot[i])) S.loot.splice(i, 1); }
+      e.preventDefault(); if (b.disabled) return; const a = b.dataset.a, i = +b.dataset.i, k = b.dataset.k;
+      if (a === 'sel') selLoot = i;
+      else if (a === 'learn') { learn(S.loot[i]); S.loot.splice(i, 1); if (window.SFX) SFX.play('j_pick1'); }
       else if (a === 'sell') { S.money += S.loot[i].sell; S.loot.splice(i, 1); if (window.SFX) SFX.play('coin'); }
-      else if (a === 'buy') { const it = S.shop[i]; if (S.money >= it.price && learn(it)) { S.money -= it.price; S.bought = i; if (window.SFX) SFX.play('j_shop'); } }
-      else if (a === 'xiu') { const o = S.xopts[i]; if (window.SFX) SFX.play('j_pick' + o.q); for (const [k, v] of o.adds) S.atAdd[k] += v; S.bank--; S.xopts = null; S.xrr = false; }
+      else if (a === 'buy') { const it = S.shop[i]; if (S.money >= it.price) { S.money -= it.price; learn(it); S.bought = i; if (window.SFX) SFX.play('j_shop'); } }
+      else if (a === 'xiu') { const o = S.xopts[i]; if (window.SFX) SFX.play('j_pick' + o.q); for (const [q, v] of o.adds) S.atAdd[q] += v; S.bank--; S.xopts = null; S.xrr = false; }
       else if (a === 'xrr') { S.xopts = null; S.xrr = true; }
-      else if (a === 'tipx') S.prepTip = '';
-      else if (a === 'up' || a === 'dn') { const j = a === 'up' ? i - 1 : i + 1; [S.slots[i], S.slots[j]] = [S.slots[j], S.slots[i]]; }
-      else if (a === 'off') { S.slots.splice(i, 1); S.slots.push(''); }
-      else if (a === 'goff') { if (i === 3) S.qg = ''; else S.gf[i] = ''; GM = gfCalc(); }
+      else if (a === 'wsel') selWu = k;
+      else if (a === 'won') { const id = selWu; S.owned = (S.owned || []).filter(x => x !== id); if (SK[id]) { const f = S.slots.indexOf(''); if (f >= 0) S.slots[f] = id; else { S.owned.push(S.slots[4]); S.slots[4] = id; } } else if (GF[id].qg) { if (S.qg) S.owned.push(S.qg); S.qg = id; } else { const f = S.gf.indexOf(''); if (f >= 0) S.gf[f] = id; else { S.owned.push(S.gf[2]); S.gf[2] = id; } } GM = gfCalc(); }
+      else if (a === 'woff') { const id = selWu; if (SK[id]) { if (S.slots.filter(Boolean).length <= 1) return; const j = S.slots.indexOf(id); S.slots.splice(j, 1); S.slots.push(''); } else if (S.qg === id) S.qg = ''; else S.gf[S.gf.indexOf(id)] = ''; (S.owned = S.owned || []).push(id); GM = gfCalc(); }
+      else if (a === 'wl' || a === 'wr') { const j = S.slots.indexOf(selWu), t = a === 'wl' ? j - 1 : j + 1; if (t >= 0 && t < 5 && S.slots[t]) [S.slots[j], S.slots[t]] = [S.slots[t], S.slots[j]]; }
       prepRender();
     });
   }
 
-  // ---- 刘备教学：只在第一局 ----
-  const TUT_KEY = 'szz-tut', TUT = {
-    start: '贤弟，兵器自己会出手，你只管走位，别让贼兵围住。',
-    roll: matchMedia('(pointer:coarse)').matches ? '被围住了？点右下角翻滚！滚的时候刀枪不入。' : '被围住了？按空格翻滚！滚的时候刀枪不入。',
-    zq: '看到血条上面的蓝条了吗？那是真气：挨打时替你挡下三成伤害，过半时出手更重。',
-    coin: '贼兵掉了铜钱，走过去就能捡。没捡的，打完只能收回九成。',
-    prep: '打完一仗，先看「结算」，再去「修炼」「拾取」「行商」，整理好「武艺」顺序，最后点继续。',
-    learn: '学会了新武艺！武艺按格子顺序轮流出手，可以在「武艺」页调整。',
+  // ---- 刘关张轮流提醒（照原作：右下角弹出头像对话框，空格/点击继续；第一次进整备屏左边出半身立绘）----
+  const NPC = { liu: ['刘备', 'art/ui/npc/liubei_face.webp'], guan: ['关羽', 'art/ui/npc/guanyu_face.webp'], zhang: ['张飞', 'art/ui/npc/zhangfei_face.webp'] };
+  const TUT_KEY = 'szz-tut2', TUT = {
+    start: ['liu', '贤弟，兵器自己会出手，你只管走位，别让贼兵围住。'],
+    roll: ['guan', matchMedia('(pointer:coarse)').matches ? '被围了就点右下角翻滚，滚的时候刀枪不入。' : '被围了就按空格翻滚，滚的时候刀枪不入。'],
+    zq: ['guan', '血条上面的蓝条是真气：挨打时替你挡下三成伤害，过半时出手更重。'],
+    coin: ['zhang', '哈哈！贼兵掉钱了，快捡！没捡的，打完只能收回九成！'],
+    prep: ['liu', '打完一仗先歇口气。从「结算」看起，再去「拾取」「修炼」「行商」，最后在「武学」排好出手顺序。'],
+    loot: ['zhang', '这些都是从贼兵身上扒下来的！用得上就学，用不上就卖给行商换钱！'],
+    xiu: ['liu', '你在阵上攒下的修为，每升一层就能修炼一次，三选一，挑你最缺的。'],
+    shop: ['zhang', '行商那里三件货只能买一件，想好了再掏钱！'],
+    wu: ['guan', '武艺最多同使五路，照你排好的顺序循环出手。学会的武学都在右边，随时可以换上。'],
+    learn: ['guan', '学会了新武艺。去「武学」页看看出手顺序。'],
   };
   let tutSeen = {}; try { tutSeen = JSON.parse(localStorage.getItem(TUT_KEY) || '{}') || {}; } catch (e) {}
+  let tutQ = [];
   function tut(k) {
-    if (!RT.on || tutSeen[k] || tutSeen.all) return; tutSeen[k] = 1;
-    if (document.getElementById('survPrep') || k === 'prep') { S.prepTip = TUT[k]; try { localStorage.setItem(TUT_KEY, JSON.stringify(tutSeen)); } catch (e) {} if (document.getElementById('survPrep')) prepRender(); return; }   // 整备屏开着：师父的话嵌在面板顶部，不挡按钮 if (Object.keys(TUT).every(x => tutSeen[x])) tutSeen.all = 1;
-    try { localStorage.setItem(TUT_KEY, JSON.stringify(tutSeen)); } catch (e) {}
+    if (!RT.on || tutSeen[k] || !TUT[k]) return; tutSeen[k] = 1; try { localStorage.setItem(TUT_KEY, JSON.stringify(tutSeen)); } catch (e) {}
+    tutQ.push(k); if (!document.getElementById('survTut')) tutNext();
+  }
+  function tutNext() {
     const old = document.getElementById('survTut'); if (old) old.remove();
-    const d = document.createElement('div'); d.id = 'survTut';
-    d.innerHTML = `<div class="tx"><b>刘备</b><p>${TUT[k]}</p><small>点一下关闭</small></div><em style="background-image:url('art/ui/npc/liubei_face.webp')"></em>`;
-    d.onclick = () => d.remove(); document.body.appendChild(d); setTimeout(() => { if (d.parentNode) d.classList.add('out'); setTimeout(() => d.remove(), 500); }, 7000);
+    const k = tutQ.shift(); if (!k) return;
+    const [who, txt] = TUT[k], [nm, face] = NPC[who], big = k === 'prep';
+    const d = document.createElement('div'); d.id = 'survTut'; if (big) d.className = 'big'; d.style.setProperty('--k', uiK());
+    d.innerHTML = (big ? `<div class="lh" style="background-image:url('art/ui/npc/liubei_full.webp')"></div>` : '') + `<div class="bx"><b class="nm">${nm}</b><p>${txt}</p><small>按 <b>空格键</b> 或点一下 继续</small></div>${big ? '' : `<em style="background-image:url('${face}')"></em>`}`;
+    const go = () => { removeEventListener('keydown', key, true); if (!d.parentNode) return; d.remove(); tutNext(); };
+    const key = e => { if (e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); e.stopImmediatePropagation(); go(); } };
+    d.onclick = go; addEventListener('keydown', key, true); document.body.appendChild(d);
+    if (!document.getElementById('survPrep')) setTimeout(() => { if (d.parentNode) go(); }, 8000);   // 战斗中 8 秒自动收起
   }
   // ---------- 局内存档（11/11 用户定：回到长卷自动存；主界面「继续」读档） ----------
   const RUN_KEY = 'szz-run';
-  const snap = () => ({ origin, slots: S.slots.slice(), held: S.held, mast: { ...S.mast }, gf: S.gf.slice(), qg: S.qg, gfExp: { ...S.gfExp }, xy: S.xy, rt: { dmg: RT.dmg, cd: RT.cd, move: RT.move, take: RT.take }, hp: hero ? hero.hp : null, lv: S.lv, xiu: S.xiu, bank: S.bank, atAdd: (S.atAdd || []).slice(), money: S.money || 0 });
+  const snap = () => ({ origin, slots: S.slots.slice(), held: S.held, mast: { ...S.mast }, gf: S.gf.slice(), qg: S.qg, gfExp: { ...S.gfExp }, xy: S.xy, rt: { dmg: RT.dmg, cd: RT.cd, move: RT.move, take: RT.take }, hp: hero ? hero.hp : null, lv: S.lv, xiu: S.xiu, bank: S.bank, atAdd: (S.atAdd || []).slice(), money: S.money || 0, items: (S.items || []).slice(), owned: (S.owned || []).slice() });
   function restore(o) {
     if (!o) return;
     if (ORIGINS[o.origin]) origin = o.origin;
     S.slots = o.slots || S.slots; S.held = o.held != null ? o.held : S.held; S.mast = o.mast || {}; S.gf = o.gf || ['', '', '']; S.qg = o.qg || ''; S.gfExp = o.gfExp || {}; S.xy = o.xy || 0;
-    S.money = o.money || 0; S.coins = []; S.loot = []; S.shop = [];
+    S.money = o.money || 0; S.coins = []; S.loot = []; S.shop = []; S.items = o.items || []; S.owned = o.owned || [];
     S.lv = o.lv || 1; S.xiu = o.xiu || 0; S.bank = o.bank || 0; S.atAdd = o.atAdd || [0, 0, 0, 0, 0, 0];
     Object.assign(RT, o.rt || {}); GM = gfCalc(); S.zq = zqMax();
     if (hero && o.hp > 0) hero.hp = Math.min(o.hp, maxHp());
@@ -682,7 +827,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   // ---------- 对外接口 ----------
   function forceBlade() { weapon = 'blade'; pendingWeapon = null; try { if (window.GEAR && GEAR.switch) GEAR.switch(); } catch (e) {} if (typeof ui === 'function') ui(); }
   function startRun() {
-    S.lv = 1; S.xiu = 0; S.bank = 0; S.atAdd = [0, 0, 0, 0, 0, 0]; S.lvFx = 0; S.money = 0; S.coins = []; S.loot = []; S.shop = []; S.slots = [OG().skill || 'hengsao', '', '', '', '']; S.held = wepOf(S.slots[0]) < 7 ? wepOf(S.slots[0]) : null; S.mast = {}; S.dps = {}; S.gf = ['', '', '']; S.qg = ''; S.gfExp = {}; S.xy = 0; S.lhjReady = false; S.lhjOn = false; GM = GM0(); S.zq = zqMax(); S.hp0 = hero.hp; S.combo = 0; S.lk = typeof kills === 'number' ? kills : 0; S.chain = 0; S.lastCat = -1; S.lastI = -9; W.pick = false; const old = document.getElementById('survPick'); if (old) old.remove();
+    S.lv = 1; S.xiu = 0; S.bank = 0; S.atAdd = [0, 0, 0, 0, 0, 0]; S.lvFx = 0; S.money = 0; S.coins = []; S.loot = []; S.shop = []; S.items = []; S.owned = []; S.hutiSum = 0; S.slots = [OG().skill || 'hengsao', '', '', '', '']; S.held = wepOf(S.slots[0]) < 7 ? wepOf(S.slots[0]) : null; S.mast = {}; S.dps = {}; S.gf = ['', '', '']; S.qg = ''; S.gfExp = {}; S.xy = 0; S.lhjReady = false; S.lhjOn = false; GM = GM0(); S.zq = zqMax(); S.hp0 = hero.hp; S.combo = 0; S.lk = typeof kills === 'number' ? kills : 0; S.chain = 0; S.lastCat = -1; S.lastI = -9; W.pick = false; const old = document.getElementById('survPick'); if (old) old.remove();
     W.started = true; W.between = 0; S.wind = null; S.recov = null; S.later = []; S.qi = 0; bolts.length = 0; zones.length = 0; S.cycles = 0; fx.length = 0;
     forceBlade();
     const vw = viewW(); arenaL = M.gates[0] + 10; lockR = arenaL + vw * 1.5; gateI = 0;
@@ -882,25 +1027,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     + '#survPick em.ic{display:block;width:64px;height:64px;background:center/cover;border-radius:3px;box-shadow:0 0 0 1px rgba(216,176,96,.6);margin:4px 0}'
     + '@media (max-height:520px){#survPick button.q0,#survPick button.q1,#survPick button.q2,#survPick button.q3{width:130px!important;min-height:180px;padding:16px 10px 12px!important}#survPick em.ic{width:48px;height:48px}}'
     + '#survRep{position:fixed;left:14px;bottom:calc(120px + env(safe-area-inset-bottom));z-index:10011;display:flex;gap:12px;align-items:center;padding:8px 16px;background:linear-gradient(90deg,rgba(16,10,6,.92),rgba(16,10,6,.6));border-left:3px solid #d8b060;color:#f6e6c4;font:700 15px "PingFang SC",sans-serif;animation:repIn .35s ease-out;transition:opacity .5s;pointer-events:none}#survRep b{color:#ffd86e;font-family:"Songti SC","Noto Serif SC",serif;letter-spacing:.2em}#survRep.out{opacity:0}@keyframes repIn{from{transform:translateX(-30px);opacity:0}}'
-    + '#survTut{position:fixed;right:12px;top:calc(78px + env(safe-area-inset-top));z-index:10030;display:flex;align-items:stretch;max-width:min(560px,92vw);cursor:pointer;animation:repIn .35s ease-out;transition:opacity .5s}#survTut.out{opacity:0}'
-    + '#survTut .tx{flex:1;background:rgba(18,12,8,.94);border:1px solid #b08a4a;border-right:0;padding:10px 16px;color:#f6e6c4}#survTut b{display:inline-block;padding:1px 12px;margin-bottom:4px;background:#5a3a1e;border:1px solid #d8b060;color:#ffe9b8;font:900 15px "Songti SC","Noto Serif SC",serif;letter-spacing:.3em}'
-    + '#survTut p{margin:2px 0 4px;font:600 16px/1.6 "PingFang SC",sans-serif}#survTut small{opacity:.55;font-size:11px}#survPrep .lb{display:flex;align-items:center;gap:10px;margin:-4px 0 12px;padding:6px 10px;background:rgba(90,58,30,.35);border:1px solid #6b5230}#survPrep .lb em{width:44px;height:44px;flex:none;background:url(art/ui/npc/liubei_face.webp) center/cover;border:1px solid #b08a4a}#survPrep .lb p{flex:1;margin:0;font-size:14px;line-height:1.5}#survPrep .lb b{color:#ffd86e;margin-right:8px;font-family:"Songti SC",serif}#survPrep .lb a{color:#ffd86e;font-size:13px;white-space:nowrap}#survTut em{width:96px;flex:none;background:#2a1c12 center/cover;border:1px solid #b08a4a}'
-    + '#survPrep{position:fixed;inset:0;z-index:10025;background:rgba(10,6,4,.78);display:flex;align-items:center;justify-content:center;padding:10px;font-family:"PingFang SC",sans-serif;color:#f2e4c8}'
-    + '#survPrep .pp{width:min(980px,96vw);max-height:94vh;display:flex;flex-direction:column;background:linear-gradient(180deg,#22170f,#150e09);border:1px solid #b08a4a;box-shadow:inset 0 0 0 3px #0e0906,inset 0 0 0 4px rgba(176,138,74,.45),0 20px 60px rgba(0,0,0,.6)}'
-    + '#survPrep .tb{display:flex;align-items:center;gap:4px;padding:8px 10px 0;border-bottom:1px solid #6b5230;flex-wrap:wrap}#survPrep .tb button{position:relative;padding:8px 20px;border:1px solid #5a4226;border-bottom:0;background:#1c140d;color:#bfa98a;font:900 17px "Songti SC","Noto Serif SC",serif;letter-spacing:.25em;cursor:pointer;border-radius:4px 4px 0 0}'
-    + '#survPrep .tb button.on{background:linear-gradient(180deg,#6a4424,#3a2614);color:#ffe9b8;border-color:#d8b060}#survPrep .tb i{position:absolute;right:2px;top:-6px;background:#b8281e;color:#fff;font:700 11px sans-serif;padding:1px 5px;border-radius:8px;letter-spacing:0}'
-    + '#survPrep .mo{margin-left:auto;display:flex;align-items:center;gap:6px;font:700 18px sans-serif;color:#ffe9a8}#survPrep .mo em{width:26px;height:26px;background:url(art/ui/hud/coin.webp) center/cover}'
-    + '#survPrep .bd{flex:1;overflow:auto;padding:14px 16px;min-height:200px}#survPrep h4{margin:0 0 8px;color:#e9cf98;letter-spacing:.3em;font:900 15px "Songti SC","Noto Serif SC",serif}'
-    + '#survPrep .cols2{display:grid;grid-template-columns:1fr 1fr;gap:18px}#survPrep .kv{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px dotted #5a4226;font-size:15px}#survPrep .kv span{color:#bfa98a}'
-    + '#survPrep .br{display:grid;grid-template-columns:70px 1fr 50px;gap:8px;align-items:center;margin:6px 0;font-size:14px}#survPrep .br i{height:10px;background:#3a2a1c;border:1px solid #6b5230}#survPrep .br u{display:block;height:100%;background:linear-gradient(90deg,#b8801e,#ffe08a)}'
-    + '#survPrep .hint{color:#cdb98e;font-size:14px;margin:0 0 10px}#survPrep .hint a{color:#ffd86e}#survPrep .empty{color:#9a8668;text-align:center;padding:40px 0;font-size:15px}'
-    + '#survPrep .row{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}#survPrep .pc{width:180px;min-height:250px;padding:24px 16px 18px;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;background:center/100% 100% no-repeat}'
-    + '#survPrep .pc.q0{background-image:url(art/ui/card/q0.webp)}#survPrep .pc.q1{background-image:url(art/ui/card/q1.webp)}#survPrep .pc.q2{background-image:url(art/ui/card/q2.webp)}#survPrep .pc.q3{background-image:url(art/ui/card/q3.webp)}'
-    + '#survPrep .pc em{width:64px;height:64px;background:center/cover;box-shadow:0 0 0 1px rgba(216,176,96,.6)}#survPrep .pc .gl{font-size:34px}#survPrep .pc i{font-style:normal;font-size:12px;opacity:.75}#survPrep .pc span{font-size:17px;font-weight:700}#survPrep .pc small{font-size:12px;color:#d8c39a;line-height:1.5;flex:1}#survPrep .pc .pr{margin:0;color:#ffe08a;font-weight:700;font-size:14px}'
-    + '#survPrep .bt{display:flex;gap:6px}#survPrep button[data-a],#survPrep .ft .go{padding:6px 14px;border:1px solid #b08a4a;border-radius:4px;background:linear-gradient(180deg,#5a3a20,#2a1a10);color:#ffe9b8;font:700 14px "PingFang SC",sans-serif;cursor:pointer}#survPrep button:disabled{opacity:.4;cursor:not-allowed}'
-    + '#survPrep .wr{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px dotted #5a4226;font-size:14px}#survPrep .wr>b{width:20px;color:#ffd86e}#survPrep .wr em{width:38px;height:38px;flex:none;background:center/cover}#survPrep .wr span{flex:1}#survPrep .wr small{color:#bfa98a;font-size:12px}#survPrep .wr .em{color:#6b5a44}#survPrep .wr button{padding:3px 8px!important}'
-    + '#survPrep .ft{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-top:1px solid #6b5230;color:#bfa98a;font-size:14px}#survPrep .ft .go{padding:10px 34px;font:900 18px "Songti SC","Noto Serif SC",serif;letter-spacing:.2em;border:2px solid #d8b060}'
-    + '@media (max-width:700px),(max-height:500px){#survPrep .cols2{grid-template-columns:1fr}#survPrep .tb button{padding:6px 10px;font-size:14px;letter-spacing:.1em}#survPrep .pc{width:146px;min-height:200px;padding:18px 10px 14px}#survPrep .bd{padding:10px}#survTut p{font-size:13px;line-height:1.45}#survTut em{width:60px}#survTut{max-width:min(420px,62vw);top:calc(64px + env(safe-area-inset-top))}#survTut .tx{padding:6px 10px}}'
+    + PREP_CSS
     + '#survPick{position:fixed;inset:0;z-index:10020;display:flex;align-items:center;justify-content:center;background:rgba(10,6,4,.6);font-family:"PingFang SC","Noto Sans CJK SC",sans-serif}'
     + '#survPick .p{background:linear-gradient(180deg,#2a1d13,#1a120c);border:2px solid #b08a4a;border-radius:10px;padding:14px 16px;color:#f2e4c8;text-align:center;max-width:94vw}'
     + '#survPick h3{margin:0 0 10px;color:#ffd86e;letter-spacing:4px}#survPick .row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}'
@@ -967,8 +1094,8 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   window.SURV = { curNode: () => RT.on && W.started ? RT.node : null, status, attrInfo, addXiu: n => addXiu(n), heldPre: () => heldPre(), dbg: () => ({ gf: S.gf.slice(), qg: S.qg, zq: S.zq, zqMax: zqMax(), exp: S.gfExp, GM }), giveGf: id => { if (GF[id]) { if (GF[id].qg) S.qg = id; else { const f = S.gf.indexOf(""); if (f >= 0) S.gf[f] = id; } } }, newHud: () => RT.on && !!RT.node, stunGate, noStun: () => RT.on, get slots() { return S.slots; }, SK, beginNode, frozen: () => RT.on && (ROUTE.shown() || buildOpen), routeHp: () => [hero.hp, maxHp()], camp(k) { if (k === 'heal') heal(maxHp() * .3); else RT.dmg *= 1.1; }, ORIGINS, setOrigin(k) { if (ORIGINS[k] && !ORIGINS[k].locked) origin = k; }, origin: () => origin, takeMul: () => {
       if (RT.on && GM.block && Math.random() < GM.block) { floaters.push({ x: hero.x, y: hero.y - 50, t: 0, txt: '格挡', color: '#bfe0ff' }); return 0; }
       const mv = Math.abs(hero.ix) > .1 || Math.abs(hero.iy) > .1, low = hero.hp / maxHp() < .3 ? 1 - .10 * GM.low : 1;
-      return (OG().take || 1) / AFX.hp() * RT.take * RES().take * GM.take / GM.hp * low * (S.qg === 'taxue' && mv ? .85 : 1) * (GM.still && S.stillT > 1 ? 1 - GM.still : 1);
+      return (OG().take || 1) / AFX.hp() * (1 - IT('take')) * RT.take * RES().take * GM.take / GM.hp * low * (S.qg === 'taxue' && mv ? .85 : 1) * (GM.still && S.stillT > 1 ? 1 - GM.still : 1);
     },
-    absorb: n => { if (!RT.on || S.zq <= 0) return n; const a = Math.min(S.zq, n * .3); S.zq -= a; return n - a; },   // 护体（11/11 用户定，照群侠幸存者）：真气只挡 30% 伤害，其余直接扣血；真气空了全扣血
-     moveMul: () => (OG().move || 1) * AFX.move() * RT.move * GM.spd, left: () => RT.on && RT.node && W.started ? Math.max(0, WT() - W.t) : null, reward: (n, cb) => offerReward(n, cb), event(k, cb) { eventDo(k, cb); }, SK, tick, drawWorld, hud, startRun, waveFlow, pose, rooted, onRoll, skipWave() { if (W.retreat <= 0 && W.between <= 0 && W.started) endWave(); }, state: () => ({ wave: W.n, t: W.t, slots: S.slots.slice() }) };
+    absorb: n => { if (!RT.on || S.zq <= 0) return n; const a = Math.min(S.zq, n * (.3 + IT('huti'))); S.zq -= a; S.hutiSum = (S.hutiSum || 0) + a; return n - a; },   // 护体（11/11 用户定，照群侠幸存者）：真气只挡 30% 伤害，其余直接扣血；真气空了全扣血
+     moveMul: () => (OG().move || 1) * AFX.move() * (1 + IT('move')) * RT.move * GM.spd, left: () => RT.on && RT.node && W.started ? Math.max(0, WT() - W.t) : null, reward: (n, cb) => offerReward(n, cb), event(k, cb) { eventDo(k, cb); }, SK, tick, drawWorld, hud, startRun, waveFlow, pose, rooted, onRoll, skipWave() { if (W.retreat <= 0 && W.between <= 0 && W.started) endWave(); }, state: () => ({ wave: W.n, t: W.t, slots: S.slots.slice() }) };
 })();
