@@ -31,10 +31,41 @@ function drawCoinRain(HW, HH, raw) {
   ctx.restore();
   R.rain = R.rain.filter(c => c.y < HH + 20);
 }
+// 三国终章路线模式结算（11/11）：整屏插画（胜利晨光 / 战败雨夜）+ 右侧战绩 + 两个按钮；不再出现旧系统的金币、长戟、复活
+const RES_IMG = { win: new Image(), lose: new Image() }; RES_IMG.win.src = 'art/ui/result/win.webp'; RES_IMG.lose.src = 'art/ui/result/lose.webp';
+function drawRouteResult(HW, HH, raw) {
+  const BRUSH = '"MaShanZheng","KaiTi","STKaiti","Kaiti SC",serif', F = '"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",sans-serif';
+  for (const id of ['bR', 'top']) { const e = document.getElementById(id); if (e) e.style.visibility = 'hidden'; }
+  const im = RES_IMG[result.win ? 'win' : 'lose'], fade = Math.min(1, raw / .6);
+  ctx.save(); ctx.fillStyle = '#0c0806'; ctx.fillRect(0, 0, HW, HH);
+  if (im.complete && im.naturalWidth) { const sc = Math.max(HW / im.naturalWidth, HH / im.naturalHeight) * (1.06 - .06 * Math.min(1, raw / 4)); const dw = im.naturalWidth * sc, dh = im.naturalHeight * sc; ctx.globalAlpha = fade; ctx.drawImage(im, (HW - dw) * .25, (HH - dh) / 2, dw, dh); }
+  const gr = ctx.createLinearGradient(HW * .4, 0, HW, 0); gr.addColorStop(0, 'rgba(10,6,4,0)'); gr.addColorStop(.45, 'rgba(10,6,4,.55)'); gr.addColorStop(1, 'rgba(10,6,4,.78)'); ctx.fillStyle = gr; ctx.fillRect(0, 0, HW, HH);
+  const k = Math.max(.7, Math.min(1.5, Math.min(HW / 1280, HH / 720))), cx = HW * .74, a2 = Math.min(1, Math.max(0, (raw - .4) / .5));
+  ctx.globalAlpha = a2; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+  ctx.font = Math.round(110 * k) + 'px ' + BRUSH; ctx.lineWidth = 8 * k; ctx.strokeStyle = 'rgba(0,0,0,.7)'; ctx.strokeText(result.win ? '平 乱' : '倒 下', cx, HH * .3);
+  ctx.fillStyle = result.win ? '#ffd27a' : '#e8dccb'; ctx.fillText(result.win ? '平 乱' : '倒 下', cx, HH * .3);
+  ctx.font = '600 ' + Math.round(18 * k) + 'px ' + F; ctx.fillStyle = 'rgba(255,240,215,.85)';
+  ctx.fillText(result.win ? '张角伏诛，黄巾之乱平定' : '黄巾未平，壮志未酬', cx, HH * .3 + 40 * k);
+  const st = window.SURV && SURV.status ? SURV.status() : null, rr = window.ROUTE && ROUTE.debug && ROUTE.debug(), layer = rr && rr.cur ? rr.cur.layer : 0;
+  const rows = [['击倒', result.kills + ' 名'], ['用时', fmtTime(result.time)], ['修为', 'LV.' + (st ? st.lv : 1)], ['抵达', result.win ? '张角祭坛' : '倒在第 ' + Math.max(1, layer + 1) + ' / ' + ROUTE.layers() + ' 层']];
+  ctx.font = '600 ' + Math.round(20 * k) + 'px ' + F;
+  rows.forEach(([a, b], i) => { const y = HH * .46 + i * 38 * k; ctx.textAlign = 'right'; ctx.fillStyle = 'rgba(230,210,170,.75)'; ctx.fillText(a, cx - 14 * k, y); ctx.textAlign = 'left'; ctx.fillStyle = '#fff3dc'; ctx.fillText(b, cx + 14 * k, y); });
+  ctx.globalAlpha = Math.min(1, Math.max(0, (raw - .8) / .4));
+  const bw = 170 * k, bh = 50 * k, by = HH * .46 + rows.length * 38 * k + 26 * k;
+  [['返回首页', 'home'], ['再来一局', 'restart']].forEach(([t, act], i) => {
+    const x = cx - bw - 8 * k + i * (bw + 16 * k), sel = result.sel === act;
+    ctx.fillStyle = i ? 'rgba(140,40,28,.92)' : 'rgba(30,20,12,.88)'; ctx.fillRect(x, by, bw, bh);
+    ctx.strokeStyle = sel ? '#fff1b8' : '#c9a24a'; ctx.lineWidth = sel ? 3 : 1.5; ctx.strokeRect(x + .5, by + .5, bw - 1, bh - 1);
+    ctx.textAlign = 'center'; ctx.font = Math.round(24 * k) + 'px ' + BRUSH; ctx.fillStyle = '#f6e6c4'; ctx.fillText(t, x + bw / 2, by + bh * .66);
+    uiBtns.push({ x, y: by, w: bw, h: bh, act });
+  });
+  ctx.restore(); ctx.textAlign = 'left'; ctx.globalAlpha = 1;
+}
 function drawResult(HW, HH) {
   if (!result || gameT < result.born) return;
   const raw = gameT - result.born;
   uiBtns = [];
+  if (window.ROUTE && ROUTE.on()) return drawRouteResult(HW, HH, raw);
   const BRUSH = '"MaShanZheng","KaiTi","STKaiti","Kaiti SC",serif';
   const F = '"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",sans-serif';
 

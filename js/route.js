@@ -19,6 +19,7 @@
   ];
   const FONT = '"MaShanZheng","STKaiti","KaiTi","Songti SC",serif';
   const UI = '"PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif';   // 小字用黑体加粗，毛笔字只用在标题和节点名（11/11：字太小太细）
+  const BGH = new Image(), BGV = new Image(); BGH.src = 'art/route/bg_h.webp'; BGV.src = 'art/route/bg_v.webp'; BGH.onload = BGV.onload = () => { bgKey = ''; };
   const FONT_Q = FONT.replace(/"/g, "'"), UI_Q = UI.replace(/"/g, "'");
   const KS = () => Math.max(1, Math.min(1.45, Math.min(W / 1280, H / 720)));
   const INK = '#2a211a', CINNABAR = '#b3281e', PAPER = '#eadcc0';
@@ -335,11 +336,16 @@
       bgKey = key; if (bgC.width !== cv.width || bgC.height !== cv.height) { bgC.width = cv.width; bgC.height = cv.height; }
       const gMain = g; g = bgC.getContext('2d'); g.setTransform(DPR, 0, 0, DPR, 0, 0);
       g.fillStyle = PAPER; g.fillRect(0, 0, W, H);
-    g.fillStyle = paperNoise(); g.fillRect(0, 0, W, H);
+    const bgI = port() ? BGV : BGH, bgOk = bgI.complete && bgI.naturalWidth;
+    if (bgOk) {   // 11/11 Gemini 水墨长卷：随长卷慢慢平移（视差），从涿郡一路到张角祭坛
+      const iw = bgI.naturalWidth, ih = bgI.naturalHeight, ms = Math.max(1, maxScroll()), t = Math.min(1, scroll / ms);
+      if (port()) { const sc = Math.max(W / iw, H * 1.35 / ih), dw = iw * sc, dh = ih * sc; g.drawImage(bgI, (W - dw) / 2, -(dh - H) * (1 - t), dw, dh); }
+      else { const sc = Math.max(H / ih, W * 1.35 / iw), dw = iw * sc, dh = ih * sc; g.drawImage(bgI, -(dw - W) * t, (H - dh) / 2, dw, dh); }
+    } else { g.fillStyle = paperNoise(); g.fillRect(0, 0, W, H); }
     const wash = g.createRadialGradient(W * .5, H * .45, Math.min(W, H) * .2, W * .5, H * .5, Math.max(W, H) * .75);
     wash.addColorStop(0, 'rgba(255,248,230,.35)'); wash.addColorStop(1, 'rgba(120,90,50,.28)'); g.fillStyle = wash; g.fillRect(0, 0, W, H);
     tint();
-    hills(.12, .07, H * .16, 1.3); hills(.25, .11, H * .1, 4.1); hills(.45, .16, H * .045, 7.7);
+    if (!bgOk) { hills(.12, .07, H * .16, 1.3); hills(.25, .11, H * .1, 4.1); hills(.45, .16, H * .045, 7.7); }
     // 路线
     for (const n of run.nodes) for (const m of n.next) {
       const a = pos(n), b = pos(m), seedE = n.id * 13 + m.id;

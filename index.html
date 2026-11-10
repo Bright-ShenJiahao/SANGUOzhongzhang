@@ -61,7 +61,7 @@ body.szz-pro #help{display:none}
 .x-back{min-height:34px!important}
 }
 #rot small{display:block;margin-top:10px;font-size:14px;font-weight:600;color:#c9b691;line-height:1.6}
-</style><link rel="preload" href="pack/fonts/result.woff2?v=7ef25bc42f" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=7ef25bc42f)format("woff2");font-display:swap}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
+</style><link rel="preload" href="pack/fonts/result.woff2?v=ce961b499d" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=ce961b499d)format("woff2");font-display:swap}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
 </head><body>
 <style>
 #bootSplash{position:fixed;inset:0;z-index:99999;background:radial-gradient(ellipse at 50% 45%,#f3e4cf 0%,#ecd9c0 55%,#d9c09f 100%);transition:opacity .45s ease-out}
@@ -100,7 +100,7 @@ if(location.protocol==='https:'&&!/[?&]debug(?:=|&|$)/.test(location.search)&&'s
 })();
 // 自动更新：打开游戏、或从后台切回来时，查一下线上有没有新版本；有就在标题/整备页自动刷新（战斗中不打扰）
 (function(){
-var BUILD='cd4d6509ce25',busy=false;
+var BUILD='89e270235006',busy=false;
 if(location.protocol!=='https:'||/[?&]debug(?:=|&|$)/.test(location.search))return;
 function check(){
   if(busy)return;
@@ -3939,10 +3939,41 @@ function drawCoinRain(HW, HH, raw) {
   ctx.restore();
   R.rain = R.rain.filter(c => c.y < HH + 20);
 }
+// 三国终章路线模式结算（11/11）：整屏插画（胜利晨光 / 战败雨夜）+ 右侧战绩 + 两个按钮；不再出现旧系统的金币、长戟、复活
+const RES_IMG = { win: new Image(), lose: new Image() }; RES_IMG.win.src = 'pack/ui/result/win.webp?v=dd7e5883a0'; RES_IMG.lose.src = 'pack/ui/result/lose.webp?v=37ff1388e4';
+function drawRouteResult(HW, HH, raw) {
+  const BRUSH = '"MaShanZheng","KaiTi","STKaiti","Kaiti SC",serif', F = '"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",sans-serif';
+  for (const id of ['bR', 'top']) { const e = document.getElementById(id); if (e) e.style.visibility = 'hidden'; }
+  const im = RES_IMG[result.win ? 'win' : 'lose'], fade = Math.min(1, raw / .6);
+  ctx.save(); ctx.fillStyle = '#0c0806'; ctx.fillRect(0, 0, HW, HH);
+  if (im.complete && im.naturalWidth) { const sc = Math.max(HW / im.naturalWidth, HH / im.naturalHeight) * (1.06 - .06 * Math.min(1, raw / 4)); const dw = im.naturalWidth * sc, dh = im.naturalHeight * sc; ctx.globalAlpha = fade; ctx.drawImage(im, (HW - dw) * .25, (HH - dh) / 2, dw, dh); }
+  const gr = ctx.createLinearGradient(HW * .4, 0, HW, 0); gr.addColorStop(0, 'rgba(10,6,4,0)'); gr.addColorStop(.45, 'rgba(10,6,4,.55)'); gr.addColorStop(1, 'rgba(10,6,4,.78)'); ctx.fillStyle = gr; ctx.fillRect(0, 0, HW, HH);
+  const k = Math.max(.7, Math.min(1.5, Math.min(HW / 1280, HH / 720))), cx = HW * .74, a2 = Math.min(1, Math.max(0, (raw - .4) / .5));
+  ctx.globalAlpha = a2; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+  ctx.font = Math.round(110 * k) + 'px ' + BRUSH; ctx.lineWidth = 8 * k; ctx.strokeStyle = 'rgba(0,0,0,.7)'; ctx.strokeText(result.win ? '平 乱' : '倒 下', cx, HH * .3);
+  ctx.fillStyle = result.win ? '#ffd27a' : '#e8dccb'; ctx.fillText(result.win ? '平 乱' : '倒 下', cx, HH * .3);
+  ctx.font = '600 ' + Math.round(18 * k) + 'px ' + F; ctx.fillStyle = 'rgba(255,240,215,.85)';
+  ctx.fillText(result.win ? '张角伏诛，黄巾之乱平定' : '黄巾未平，壮志未酬', cx, HH * .3 + 40 * k);
+  const st = window.SURV && SURV.status ? SURV.status() : null, rr = window.ROUTE && ROUTE.debug && ROUTE.debug(), layer = rr && rr.cur ? rr.cur.layer : 0;
+  const rows = [['击倒', result.kills + ' 名'], ['用时', fmtTime(result.time)], ['修为', 'LV.' + (st ? st.lv : 1)], ['抵达', result.win ? '张角祭坛' : '倒在第 ' + Math.max(1, layer + 1) + ' / ' + ROUTE.layers() + ' 层']];
+  ctx.font = '600 ' + Math.round(20 * k) + 'px ' + F;
+  rows.forEach(([a, b], i) => { const y = HH * .46 + i * 38 * k; ctx.textAlign = 'right'; ctx.fillStyle = 'rgba(230,210,170,.75)'; ctx.fillText(a, cx - 14 * k, y); ctx.textAlign = 'left'; ctx.fillStyle = '#fff3dc'; ctx.fillText(b, cx + 14 * k, y); });
+  ctx.globalAlpha = Math.min(1, Math.max(0, (raw - .8) / .4));
+  const bw = 170 * k, bh = 50 * k, by = HH * .46 + rows.length * 38 * k + 26 * k;
+  [['返回首页', 'home'], ['再来一局', 'restart']].forEach(([t, act], i) => {
+    const x = cx - bw - 8 * k + i * (bw + 16 * k), sel = result.sel === act;
+    ctx.fillStyle = i ? 'rgba(140,40,28,.92)' : 'rgba(30,20,12,.88)'; ctx.fillRect(x, by, bw, bh);
+    ctx.strokeStyle = sel ? '#fff1b8' : '#c9a24a'; ctx.lineWidth = sel ? 3 : 1.5; ctx.strokeRect(x + .5, by + .5, bw - 1, bh - 1);
+    ctx.textAlign = 'center'; ctx.font = Math.round(24 * k) + 'px ' + BRUSH; ctx.fillStyle = '#f6e6c4'; ctx.fillText(t, x + bw / 2, by + bh * .66);
+    uiBtns.push({ x, y: by, w: bw, h: bh, act });
+  });
+  ctx.restore(); ctx.textAlign = 'left'; ctx.globalAlpha = 1;
+}
 function drawResult(HW, HH) {
   if (!result || gameT < result.born) return;
   const raw = gameT - result.born;
   uiBtns = [];
+  if (window.ROUTE && ROUTE.on()) return drawRouteResult(HW, HH, raw);
   const BRUSH = '"MaShanZheng","KaiTi","STKaiti","Kaiti SC",serif';
   const F = '"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",sans-serif';
 
@@ -4616,6 +4647,7 @@ function resultKey(e) {
   ];
   const FONT = '"MaShanZheng","STKaiti","KaiTi","Songti SC",serif';
   const UI = '"PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif';   // 小字用黑体加粗，毛笔字只用在标题和节点名（11/11：字太小太细）
+  const BGH = new Image(), BGV = new Image(); BGH.src = 'pack/route/bg_h.webp?v=a762864146'; BGV.src = 'pack/route/bg_v.webp?v=8802bc71a2'; BGH.onload = BGV.onload = () => { bgKey = ''; };
   const FONT_Q = FONT.replace(/"/g, "'"), UI_Q = UI.replace(/"/g, "'");
   const KS = () => Math.max(1, Math.min(1.45, Math.min(W / 1280, H / 720)));
   const INK = '#2a211a', CINNABAR = '#b3281e', PAPER = '#eadcc0';
@@ -4932,11 +4964,16 @@ function resultKey(e) {
       bgKey = key; if (bgC.width !== cv.width || bgC.height !== cv.height) { bgC.width = cv.width; bgC.height = cv.height; }
       const gMain = g; g = bgC.getContext('2d'); g.setTransform(DPR, 0, 0, DPR, 0, 0);
       g.fillStyle = PAPER; g.fillRect(0, 0, W, H);
-    g.fillStyle = paperNoise(); g.fillRect(0, 0, W, H);
+    const bgI = port() ? BGV : BGH, bgOk = bgI.complete && bgI.naturalWidth;
+    if (bgOk) {   // 11/11 Gemini 水墨长卷：随长卷慢慢平移（视差），从涿郡一路到张角祭坛
+      const iw = bgI.naturalWidth, ih = bgI.naturalHeight, ms = Math.max(1, maxScroll()), t = Math.min(1, scroll / ms);
+      if (port()) { const sc = Math.max(W / iw, H * 1.35 / ih), dw = iw * sc, dh = ih * sc; g.drawImage(bgI, (W - dw) / 2, -(dh - H) * (1 - t), dw, dh); }
+      else { const sc = Math.max(H / ih, W * 1.35 / iw), dw = iw * sc, dh = ih * sc; g.drawImage(bgI, -(dw - W) * t, (H - dh) / 2, dw, dh); }
+    } else { g.fillStyle = paperNoise(); g.fillRect(0, 0, W, H); }
     const wash = g.createRadialGradient(W * .5, H * .45, Math.min(W, H) * .2, W * .5, H * .5, Math.max(W, H) * .75);
     wash.addColorStop(0, 'rgba(255,248,230,.35)'); wash.addColorStop(1, 'rgba(120,90,50,.28)'); g.fillStyle = wash; g.fillRect(0, 0, W, H);
     tint();
-    hills(.12, .07, H * .16, 1.3); hills(.25, .11, H * .1, 4.1); hills(.45, .16, H * .045, 7.7);
+    if (!bgOk) { hills(.12, .07, H * .16, 1.3); hills(.25, .11, H * .1, 4.1); hills(.45, .16, H * .045, 7.7); }
     // 路线
     for (const n of run.nodes) for (const m of n.next) {
       const a = pos(n), b = pos(m), seedE = n.id * 13 + m.id;
@@ -5740,7 +5777,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     opts = opts || rollXiu();
     const old = document.getElementById('survPick'); if (old) old.remove();
     const box = document.createElement('div'); box.id = 'survPick';
-    box.innerHTML = `<div class="p"><h3>修 炼${n > 1 ? ' · 第 ' + i + '/' + n + ' 次' : ''} · 三选一</h3><div class="row">${opts.map((o, j) => `<button data-j="${j}" style="border-color:${RAR[o.q][1]}"><i style="font-style:normal;font-size:12px;color:${RAR[o.q][1]}">${RAR[o.q][0]}</i><b style="color:${RAR[o.q][1]};font-size:24px">${o.adds.map(([a]) => ATN[a]).join(' · ')}</b><span>${o.adds.map(([a, v]) => ATN[a] + ' +' + v).join('，')}</span><small>${o.adds.map(([a]) => AT()[a] + ' → ' + (AT()[a] + o.adds.filter(x => x[0] === a).reduce((t, x) => t + x[1], 0))).join('，')}</small></button>`).join('')}</div>`
+    box.innerHTML = `<div class="p"><h3>修 炼${n > 1 ? ' · 第 ' + i + '/' + n + ' 次' : ''} · 三选一</h3><div class="row">${opts.map((o, j) => `<button data-j="${j}" class="q${o.q}"><i style="font-style:normal;font-size:12px;color:${RAR[o.q][1]}">${RAR[o.q][0]}</i><b style="color:${RAR[o.q][1]};font-size:24px">${o.adds.map(([a]) => ATN[a]).join(' · ')}</b><span>${o.adds.map(([a, v]) => ATN[a] + ' +' + v).join('，')}</span><small>${o.adds.map(([a]) => AT()[a] + ' → ' + (AT()[a] + o.adds.filter(x => x[0] === a).reduce((t, x) => t + x[1], 0))).join('，')}</small></button>`).join('')}</div>`
       + `<div style="margin-top:10px;font-size:12px;color:#cdb98e">修为 LV.${S.lv}　运气越高越容易出高品阶　${rerolled ? '' : '<a href="#" class="rr" style="color:#ffd86e;margin-left:8px">刷新一次</a>'}</div></div>`;
     box.querySelectorAll('button').forEach(b => b.onclick = () => { const o = opts[+b.dataset.j]; for (const [a, v] of o.adds) S.atAdd[a] += v; S.bank--; box.remove(); cultivate(cb, i + 1, n); });
     const rr = box.querySelector('.rr'); if (rr) rr.onclick = e => { e.preventDefault(); box.remove(); cultivate(cb, i, n, true); };
@@ -5922,9 +5959,9 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   // ---------- 节点结算：连选 n 次（招式 / 强化 三选一）----------
   function rewardOptions(kind) {
     const owned = S.slots.filter(Boolean), free = S.slots.indexOf('') >= 0;
-    const sk = (free ? Object.keys(SK).filter(k => !owned.includes(k) && tierOk(k) && (!ONLY_DAO || wepOf(k) === 0)) : []).sort(() => Math.random() - .5).slice(0, kind === 'skill' ? 3 : 2).map(k => ({ kind: 'skill', k, name: SK[k].name, icon: SK[k].icon, color: SK[k].color, desc: (SK[k].tier ? TIERN[SK[k].tier] + '阶 · ' : '') + SK[k].desc }));
-    const gp = Object.keys(GF).filter(id => { const g = GF[id]; return !g.off && !S.gf.includes(id) && S.qg !== id && W.n >= TMIN[g.t + 1] && (g.qg || S.gf.includes('')); });
-    const pk = gp.sort(() => Math.random() - .5).map(id => { const g = GF[id]; return { kind: 'gf', id, name: g.n, icon: g.qg ? '轻' : g.n[0], color: GTC[g.t], desc: GTN[g.t] + '阶 · ' + (g.qg ? '轻功 · ' : g.c >= 0 ? g.cn + '心法 · ' : '内功 · ') + gfText(g) }; });
+    const sk = (free ? Object.keys(SK).filter(k => !owned.includes(k) && tierOk(k) && (!ONLY_DAO || wepOf(k) === 0)) : []).sort(() => Math.random() - .5).slice(0, kind === 'skill' ? 3 : 2).map(k => ({ kind: 'skill', k, q: Math.min(3, SK[k].tier || 0), name: SK[k].name, icon: SK[k].icon, color: SK[k].color, desc: (SK[k].tier ? TIERN[SK[k].tier] + '阶 · ' : '') + SK[k].desc }));
+    const gp = Object.keys(GF).filter(id => { const g = GF[id]; return !g.off && (!ONLY_DAO || g.c < 1) && !S.gf.includes(id) && S.qg !== id && W.n >= TMIN[g.t + 1] && (g.qg || S.gf.includes('')); });
+    const pk = gp.sort(() => Math.random() - .5).map(id => { const g = GF[id]; return { kind: 'gf', id, q: g.t, name: g.n, icon: g.qg ? '轻' : g.n[0], color: GTC[g.t], desc: GTN[g.t] + '阶 · ' + (g.qg ? '轻功 · ' : g.c >= 0 ? g.cn + '心法 · ' : '内功 · ') + gfText(g) }; });
     if (pk.length < 3) pk.push({ kind: 'heal', name: '回春', icon: '春', color: '#ff9a9a', desc: '立刻回复 40% 血量' });
     if (kind === 'perk') return pk.slice(0, 3);
     return sk.concat(pk).slice(0, 3).sort(() => Math.random() - .5);
@@ -5934,7 +5971,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     const kind = kinds && kinds[Math.min(i, kinds.length) - 1], opts = rewardOptions(kind); W.pick = true;
     const old = document.getElementById('survPick'); if (old) old.remove();
     const box = document.createElement('div'); box.id = 'survPick';
-    box.innerHTML = `<div class="p"><h3>战利 · ${kind === 'skill' ? '招式 · ' : kind === 'perk' ? '功法 · ' : ''}${n > 1 ? '第 ' + i + '/' + n + ' 次 · ' : ''}三选一</h3><div class="row">${opts.map((o, j) => `<button data-j="${j}"><i style="font-style:normal;font-size:11px;opacity:.7">${o.kind === 'skill' ? '新招式' : '强化'}</i><b style="color:${o.color}">${o.icon}</b><span>${o.name}</span><small>${o.desc}</small></button>`).join('')}</div>${S.slots.indexOf('') >= 0 ? '<p>新招式放进空着的格子，按 1→5 顺序轮流放</p>' : ''}</div>`;
+    box.innerHTML = `<div class="p"><h3>战利 · ${kind === 'skill' ? '招式 · ' : kind === 'perk' ? '功法 · ' : ''}${n > 1 ? '第 ' + i + '/' + n + ' 次 · ' : ''}三选一</h3><div class="row">${opts.map((o, j) => `<button data-j="${j}" class="q${o.q || 0}"><i style="font-style:normal;font-size:11px;opacity:.7">${o.kind === 'skill' ? '新招式' : '强化'}</i>${iconUrl(o.kind, o.k || o.id) ? `<em class="ic" style="background-image:url('${iconUrl(o.kind, o.k || o.id)}')"></em>` : `<b style="color:${o.color}">${o.icon}</b>`}<span>${o.name}</span><small>${o.desc}</small></button>`).join('')}</div>${S.slots.indexOf('') >= 0 ? '<p>新招式放进空着的格子，按 1→5 顺序轮流放</p>' : ''}</div>`;
     box.querySelectorAll('button').forEach(b => b.onclick = () => {
       const o = opts[+b.dataset.j];
       if (o.kind === 'skill') { const f = S.slots.indexOf(''); if (f >= 0) S.slots[f] = o.k; } else if (o.kind === 'gf') { if (GF[o.id].qg) S.qg = o.id; else { const f = S.gf.indexOf(''); if (f >= 0) S.gf[f] = o.id; } } else heal(maxHp() * .4);
@@ -6090,6 +6127,9 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   himg('empty', 'pack/ui/hud/empty.webp?v=1ff90ff6f0'); himg('waigong', 'pack/ui/hud/waigong.webp?v=46599d0712'); himg('neigong', 'pack/ui/hud/neigong.webp?v=d64ca46cd2'); himg('qinggong', 'pack/ui/hud/qinggong.webp?v=63c88bd340');
   himg('taiji', 'pack/ui/hud/taiji.webp?v=b56fd73675'); himg('blood', 'pack/ui/hud/blood.webp?v=386ce79fa3');
   himg('hengsao', 'pack/ui/kaiju/sk_hengsao.webp?v=dc67bef9b0'); himg('daobo', 'pack/ui/kaiju/sk_daobo.webp?v=902b4ea16f'); himg('huima', 'pack/ui/kaiju/sk_huima.webp?v=6943b2ffa3'); himg('daolun', 'pack/ui/kaiju/sk_daolun.webp?v=57f7c46e21');
+  ['tuna','yangqi','tieyi','tayun','guanxing','taiping','hunyuan','gf00','gf01','gf02','gf03','gf30','gf31','gf32','gf33','qingshen','juqi','shixue','beishui','lhj','caoshang','xingyun','taxue','tiesha','yufeng'].forEach(id => himg('gf_' + id, 'art/ui/gf/' + id + '.webp'));
+  const IMGU = { hengsao: 'pack/ui/kaiju/sk_hengsao.webp?v=dc67bef9b0', daobo: 'pack/ui/kaiju/sk_daobo.webp?v=902b4ea16f', huima: 'pack/ui/kaiju/sk_huima.webp?v=6943b2ffa3', daolun: 'pack/ui/kaiju/sk_daolun.webp?v=57f7c46e21' };
+  const iconUrl = (kind, id) => kind === 'skill' ? IMGU[id] : kind === 'gf' && HIMG['gf_' + id] ? 'art/ui/gf/' + id + '.webp' : '';
   const hok = k => HIMG[k] && HIMG[k].complete && HIMG[k].naturalWidth;
   function waveBanner(title, sub) {   // 每个节点开打时的卷轴横幅（照群侠幸存者「第 1 波 · 迎战」）
     const old = document.getElementById('waveBan'); if (old) old.remove();
@@ -6099,6 +6139,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   }
   function hud(HW) {
     hudT = performance.now(); buildUi();
+    for (const id of ['bR', 'top']) { const e = document.getElementById(id); if (e && e.style.visibility) e.style.visibility = ''; }
     const HH = ctx.canvas.height / DPR, fine = !(window.matchMedia && matchMedia('(pointer:coarse)').matches), n = 5, sz = fine ? 44 : 38, sz0 = sz, gap = 6, w = n * sz + (n - 1) * gap;
     const lab = fine ? sz * .8 : 0, x0 = fine ? 16 + lab + 6 : (HW - w) / 2, y0 = fine ? HH - 16 - sz * 2 - 8 : (RT.on ? 60 : 44), labY = (fine ? 54 : y0 + sz + 4 + 26 + 18) + (RT.on ? 16 : 0);
     ctx.save();
@@ -6117,7 +6158,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     ctx.fillStyle = 'rgba(14,9,6,.55)'; ctx.fillRect(x0 - 6 - (lab ? lab + 6 : 0), y0 - 6, w + 12 + (lab ? lab + 6 : 0), fine ? sz * 2 + 8 + 12 : sz + 26 + 4 + 12);
     if (lab && hok('waigong')) { ctx.drawImage(HIMG.waigong, 16, y0 + (sz - lab) / 2, lab, lab); if (hok('neigong')) ctx.drawImage(HIMG.neigong, 16, y0 + sz + 8 + (sz - lab) / 2, lab, lab); }
     for (let i = 0; i < n; i++) { const kk = S.slots[i], o = SK[kk]; if (o && !o.ik && HIMG[kk]) o.ik = kk; slot(x0 + i * (sz + gap), y0, o, i === S.qi, i); }
-    const gk = id => GF[id] ? { icon: GF[id].qg ? '轻' : GF[id].n[0], color: GTC[GF[id].t] } : null, sz2 = fine ? sz : 26, ry2 = y0 + sz + (fine ? 8 : 4);
+    const gk = id => GF[id] ? { icon: GF[id].qg ? '轻' : GF[id].n[0], color: GTC[GF[id].t], ik: HIMG['gf_' + id] ? 'gf_' + id : '' } : null, sz2 = fine ? sz : 26, ry2 = y0 + sz + (fine ? 8 : 4);
     for (let i = 0; i < 3; i++) slot(x0 + i * (sz2 + gap), ry2, gk(S.gf[i]), true, -1, S.gf[i] ? 'LV' + gfLv(S.gf[i]) : '', sz2);   // 内功：主修 + 2 辅修
     slot(x0 + 3 * (sz2 + gap) + 8, ry2, gk(S.qg), true, -1, '', sz2);   // 轻功
     if (lab && hok('qinggong') && !S.qg) { ctx.globalAlpha = .55; ctx.drawImage(HIMG.qinggong, x0 + 3 * (sz2 + gap) + 8, ry2, sz2, sz2); ctx.globalAlpha = 1; }
@@ -6176,6 +6217,11 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     + '#bR{background:#241812 url(pack/ui/hud/dodge.webp?v=8e661534e0) center/cover no-repeat!important;border-radius:8px!important;border:1px solid #c9a24a!important;font-size:0!important;width:60px!important;height:60px!important}'
     + '@media (pointer:fine){#bR:after{content:"空格";position:absolute;left:0;right:0;bottom:-18px;font:700 12px "PingFang SC",sans-serif;color:#f3dc9a;text-shadow:0 1px 2px #000}}'
     + '#bPause{background:url(pack/ui/hud/pause.webp?v=30263bc533) top center/100% auto no-repeat!important;border:0!important;width:44px!important;height:63px!important;box-shadow:none!important}#bPause .pause-icon-bar{display:none!important}'
+    + '#survPick button.q0,#survPick button.q1,#survPick button.q2,#survPick button.q3{background:center/100% 100% no-repeat!important;border:0!important;width:156px!important;min-height:222px;padding:22px 14px 18px!important;justify-content:center;gap:4px;border-radius:0!important}'
+    + '#survPick button.q0{background-image:url(pack/ui/card/q0.webp?v=58bdbb2708)!important}#survPick button.q1{background-image:url(pack/ui/card/q1.webp?v=b8ef655082)!important}#survPick button.q2{background-image:url(pack/ui/card/q2.webp?v=3b361b03ae)!important}#survPick button.q3{background-image:url(pack/ui/card/q3.webp?v=a2e509af73)!important}'
+    + '#survPick button.q0:hover,#survPick button.q1:hover,#survPick button.q2:hover,#survPick button.q3:hover{transform:translateY(-4px);filter:brightness(1.15)}'
+    + '#survPick em.ic{display:block;width:64px;height:64px;background:center/cover;border-radius:3px;box-shadow:0 0 0 1px rgba(216,176,96,.6);margin:4px 0}'
+    + '@media (max-height:520px){#survPick button.q0,#survPick button.q1,#survPick button.q2,#survPick button.q3{width:130px!important;min-height:180px;padding:16px 10px 12px!important}#survPick em.ic{width:48px;height:48px}}'
     + '#survPick{position:fixed;inset:0;z-index:10020;display:flex;align-items:center;justify-content:center;background:rgba(10,6,4,.6);font-family:"PingFang SC","Noto Sans CJK SC",sans-serif}'
     + '#survPick .p{background:linear-gradient(180deg,#2a1d13,#1a120c);border:2px solid #b08a4a;border-radius:10px;padding:14px 16px;color:#f2e4c8;text-align:center;max-width:94vw}'
     + '#survPick h3{margin:0 0 10px;color:#ffd86e;letter-spacing:4px}#survPick .row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}'
@@ -8971,7 +9017,7 @@ function reset() {
   if (window.WALLET) WALLET.startRun();
   M.W = 3600;
   const topTitle = document.querySelector('#top b');
-  if (topTitle) topTitle.textContent = '三国终章 · 序章：黄巾流寇';
+  if (topTitle) topTitle.textContent = '第一章 · 黄巾之乱';
   pendingWeapon = null;
   weapon = (window.TITLE && TITLE.preparedWeapon && TITLE.preparedWeapon()) || 'hammer';
   ui();
