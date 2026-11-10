@@ -6,8 +6,8 @@
     nongfu: [6, 4, 2, 2, 3, 2], xiaozu: [4, 3, 4, 3, 2, 2], liehu: [3, 3, 1, 5, 3, 2], shusheng: [2, 1, 1, 2, 3, 6],
   };
   const FIELDS = [
-    { name: '黄巾之乱', note: '从涿郡一路杀到张角祭坛：18 层、4 位段首领、终战张角。', open: true, pic: 'art/ui/kaiju/field1.webp' },
-    { name: '黄巾决战 · 祭台', note: '第二章，暂未开放。', open: false },
+    { name: '黄巾之乱', sub: '第一章 · 中平元年', note: '从涿郡一路杀到张角祭坛：18 层、4 位段首领、终战张角。', open: true, pic: 'art/ui/kaiju/field1.webp' },
+    { name: '董卓乱京', sub: '第二章 · 中平六年', note: '暂未开放，敬请期待。', open: false },   // 11/11 用户定：先放出来，但不能选
   ];
   const OGI = { nongfu: 'art/ui/kaiju/og_nongfu.webp', xiaozu: 'art/ui/kaiju/og_xiaozu.webp', liehu: 'art/ui/kaiju/og_liehu.webp', shusheng: 'art/ui/kaiju/og_shusheng.webp' };
   const SKI = { hengsao: 'art/ui/kaiju/sk_hengsao.webp', daobo: 'art/ui/kaiju/sk_daobo.webp', huima: 'art/ui/kaiju/sk_huima.webp', daolun: 'art/ui/kaiju/sk_daolun.webp' };   // 招式图标（11/11 Gemini）
@@ -19,9 +19,9 @@
     font-family:"Songti SC","STSong","Noto Serif SC","PingFang SC",serif;display:flex;flex-direction:column;
     padding:calc(8px + env(safe-area-inset-top)) calc(12px + env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left));box-sizing:border-box}
   #kaiju *{box-sizing:border-box}
-  #kaiju .top{display:flex;align-items:center;gap:10px;padding-bottom:6px;margin-bottom:8px;border-bottom:1px solid rgba(60,40,24,.35)}
+  #kaiju .top{display:flex;align-items:center;gap:12px;padding:7px 14px;margin:0 0 10px;align-self:flex-start;min-width:min(420px,100%);background:linear-gradient(90deg,rgba(22,15,10,.94) 0%,rgba(22,15,10,.88) 70%,rgba(22,15,10,0) 100%);border-bottom:1px solid #b08a4a;border-radius:3px 0 0 0}
   #kaiju .seal{width:34px;height:34px;background:#a8281e;color:#ffe9c0;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;border-radius:4px;transform:rotate(-4deg);box-shadow:0 2px 6px rgba(80,20,10,.35)}
-  #kaiju .top h1{margin:0;font-size:22px;letter-spacing:8px;color:#2a1c12}#kaiju .top small{color:#6b5232;font-size:12px;letter-spacing:3px}
+  #kaiju .top h1{margin:0;font-size:22px;letter-spacing:8px;color:#f5e2b8;text-shadow:0 1px 3px #000}#kaiju .top small{color:#c9b08a;font-size:12px;letter-spacing:3px}
   #kaiju .cols{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1.3fr 1fr;gap:12px}
   #kaiju .pan{position:relative;border:1px solid #b08a4a;border-radius:3px;background:linear-gradient(180deg,rgba(34,24,16,.94),rgba(22,15,10,.95));padding:12px 12px 10px;overflow:auto;min-height:0;
     box-shadow:inset 0 0 0 3px rgba(14,9,6,.9),inset 0 0 0 4px rgba(176,138,74,.45),0 8px 24px rgba(40,25,10,.35)}
@@ -49,6 +49,12 @@
   #kaiju .pic.lock{filter:grayscale(1) brightness(.5)}
   #kaiju .pic .ban{position:absolute;left:0;right:0;bottom:0;padding:26px 10px 10px;background:linear-gradient(180deg,transparent,rgba(12,8,5,.88) 55%);text-align:center}
   #kaiju .pic .arr{position:absolute;top:50%;transform:translateY(-50%);width:30px;height:46px;border:1px solid rgba(216,176,96,.6);border-radius:3px;background:rgba(12,8,5,.55);color:#f2e4c8;font-size:20px;cursor:pointer}
+  #kaiju .fl{display:flex;gap:8px;margin-top:8px}
+  #kaiju .fl button{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:7px 6px;border:1px solid #5a4226;border-radius:4px;background:rgba(36,25,16,.85);color:#e9cf98;font-family:inherit;cursor:pointer}
+  #kaiju .fl button b{font-size:15px;letter-spacing:4px;white-space:nowrap}#kaiju .fl button small{font-size:11px;color:#a8916c;white-space:nowrap}
+  #kaiju .fl button.on{border-color:#ffd86e;background:linear-gradient(180deg,rgba(90,62,30,.9),rgba(50,34,18,.9));box-shadow:0 0 0 1px #ffd86e,0 0 12px rgba(255,200,90,.4);color:#ffe9b8}
+  #kaiju .fl button.lock{opacity:.55;cursor:not-allowed;filter:grayscale(.6)}#kaiju .fl button.lock b:before{content:"🔒 ";font-size:12px;letter-spacing:0}
+  #kaiju .fl button.shake{animation:kjShake .3s}@keyframes kjShake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
   #kaiju .fname{font-size:20px;letter-spacing:8px;color:#ffe9b8;text-shadow:0 2px 6px #000}#kaiju .fnote{font-size:12px;color:#d8c39a;margin-top:2px}
   #kaiju .rows div{display:flex;justify-content:space-between;border-bottom:1px dotted #5a4226;padding:3px 0;font-size:13px}#kaiju .rows span{color:#a8916c}
   #kaiju .bar{display:grid;grid-template-columns:34px 1fr 16px;align-items:center;gap:6px;font-size:12px;margin:3px 0}
@@ -62,7 +68,7 @@
   @media (max-height:520px){#kaiju .top{padding-bottom:3px;margin-bottom:5px}#kaiju .top h1{font-size:16px}#kaiju .seal{width:28px;height:28px;font-size:15px}#kaiju .pan{padding:8px 9px 6px}#kaiju h4{margin:2px 0 5px;font-size:12px}
     #kaiju .hint{display:none}#kaiju .ico{width:32px;height:32px}#kaiju .card{padding:3px;gap:6px}#kaiju .card b{font-size:13px}#kaiju .card small{font-size:10px}#kaiju .namep{margin-bottom:4px}#kaiju .namep b{font-size:15px}
     #kaiju .bar{margin:1px 0;font-size:11px}#kaiju .rows div{padding:1px 0;font-size:12px}#kaiju select{padding:3px 6px;font-size:12px}#kaiju .sk div{max-width:34px}#kaiju .ogd{margin-top:5px;padding:5px 7px}#kaiju .ogd p{font-size:11px}
-    #kaiju .pic{min-height:60px}#kaiju .bot{margin-top:5px}#kaiju .bot button{padding:6px 14px;font-size:14px}#kaiju .bot .go{padding:7px 36px}#kaiju .fname{font-size:16px}}
+    #kaiju .pic{min-height:60px}#kaiju .bot{margin-top:5px}#kaiju .bot button{padding:6px 14px;font-size:14px}#kaiju .bot .go{padding:7px 36px}#kaiju .fname{font-size:16px}#kaiju .fl{margin-top:5px}#kaiju .fl button{padding:4px}#kaiju .fl button small{display:none}#kaiju .top{padding:4px 10px;margin-bottom:6px}}
   @media (max-width:700px) and (orientation:portrait){#kaiju .cols{display:flex;flex-direction:column;overflow-y:auto;gap:10px;-webkit-overflow-scrolling:touch}#kaiju .pan{overflow:visible;flex:none}#kaiju .field{order:-1;height:auto}#kaiju .pic{flex:none;height:min(56vw,240px)}#kaiju .bot button{letter-spacing:2px;padding:9px 12px;white-space:nowrap}#kaiju .bot .go{flex:1;padding:10px 0;letter-spacing:8px}}`;
   function render() {
     const O = window.SURV ? SURV.ORIGINS : {}, cur = SURV.origin(), o = O[cur], st = STAT[cur] || [], SK = SURV.SK, sk = SK[o.skill];
@@ -83,8 +89,9 @@
         </div>
         <div class="pan field">
           <h4>所选战场</h4>
-          <div class="pic ${F.open ? '' : 'lock'}" style="background-image:url('${F.pic || PIC.field1}')"><button class="arr" data-f="-1" style="left:6px">‹</button><button class="arr" data-f="1" style="right:6px">›</button>
+          <div class="pic" style="background-image:url('${F.pic}')">
             <div class="ban"><div class="fname">${F.name}</div><div class="fnote">${F.note}</div></div></div>
+          <div class="fl">${FIELDS.map((f, i) => `<button data-i="${i}" class="${i === field ? 'on' : ''} ${f.open ? '' : 'lock'}" title="${f.open ? '' : '暂未开放'}"><b>${f.name}</b><small>${f.open ? f.sub : '暂未开放'}</small></button>`).join('')}</div>
         </div>
         <div class="pan">
           <h4>兵籍牒</h4>
@@ -99,7 +106,7 @@
       <div class="bot"><button class="back">返回主菜单</button><button class="dice" title="随机出身">🎲</button><button class="go" ${F.open ? '' : 'disabled style="opacity:.5"'}>出　发</button></div>`;
     el.querySelectorAll('.og .card').forEach(b => b.onclick = () => { if (O[b.dataset.o].locked) return; SURV.setOrigin(b.dataset.o); render(); });
     el.querySelectorAll('.diff .card').forEach(b => b.onclick = () => { if (window.TITLE && TITLE.setHard) TITLE.setHard(b.dataset.h === '1'); render(); });
-    el.querySelectorAll('.arr').forEach(b => b.onclick = () => { field = (field + +b.dataset.f + FIELDS.length) % FIELDS.length; render(); });
+    el.querySelectorAll('.fl button').forEach(b => b.onclick = () => { const f = FIELDS[+b.dataset.i]; if (!f.open) { b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake'); return; } field = +b.dataset.i; render(); });
     el.querySelector('.dice').onclick = () => { const ks = Object.keys(O).filter(k => !O[k].locked); SURV.setOrigin(ks[Math.random() * ks.length | 0]); render(); };
     el.querySelector('.back').onclick = () => { close(); if (window.TITLE && TITLE.show) TITLE.show(); };
     el.querySelector('.go').onclick = () => { if (!FIELDS[field].open) return; close(); if (window.TITLE && TITLE.beginRun) TITLE.beginRun(); };
