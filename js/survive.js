@@ -90,6 +90,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   function startWave(n) {
     if (RT.on) {   // 路线模式：一个节点 = 一整场连续的仗（不分波、不鸣金）。难度从「本节点第 1 波」平滑爬到「最后一波」的级别
       const nd = RT.node, L = ROUTE.layers(), N0 = ROUTE.waves(nd);
+      if (n === 1) waveBanner(ROUTE.name(nd), nd.type === 'boss' ? '首领战 · 迎战' : nd.type === 'elite' ? '第 ' + nd.layer + ' 层 · 精锐 · 迎战' : '第 ' + nd.layer + ' 层 · 迎战');
       const lvOf = k => Math.max(1, Math.min(WAVES, 1 + Math.floor(((nd.layer - 1 + (k - 1) / N0) / L) * WAVES) + (nd.type === 'elite' ? 2 : 0) + (nd.type === 'boss' ? 2 : 0)));
       W.lv0 = lvOf(1); W.lv1 = lvOf(N0); W.tot = 0; for (let k = 1; k <= N0; k++) W.tot += (WAVE_T[lvOf(k) - 1] || 60) * ROUTE.TIME_K;
       W.tot = nd.type === 'boss' ? (nd.final ? 180 : 100) : nd.type === 'elite' ? 85 + 25 * nd.layer / L : 50 + 15 * nd.layer / L;   // 用户定 11/09：首领 3 分钟；精英约 1.5~2 分钟；普通战斗约 50~65 秒（18 层）
@@ -635,36 +636,52 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       ctx.restore();
     }
   }
+  // HUD 美术（11/11 Gemini）：招式图标、行标、空格、太极、血滴
+  const HIMG = {}; const himg = (k, u) => { const i = new Image(); i.src = u; HIMG[k] = i; };
+  himg('empty', 'art/ui/hud/empty.webp'); himg('waigong', 'art/ui/hud/waigong.webp'); himg('neigong', 'art/ui/hud/neigong.webp'); himg('qinggong', 'art/ui/hud/qinggong.webp');
+  himg('taiji', 'art/ui/hud/taiji.webp'); himg('blood', 'art/ui/hud/blood.webp');
+  himg('hengsao', 'art/ui/kaiju/sk_hengsao.webp'); himg('daobo', 'art/ui/kaiju/sk_daobo.webp'); himg('huima', 'art/ui/kaiju/sk_huima.webp'); himg('daolun', 'art/ui/kaiju/sk_daolun.webp');
+  const hok = k => HIMG[k] && HIMG[k].complete && HIMG[k].naturalWidth;
+  function waveBanner(title, sub) {   // 每个节点开打时的卷轴横幅（照群侠幸存者「第 1 波 · 迎战」）
+    const old = document.getElementById('waveBan'); if (old) old.remove();
+    const d = document.createElement('div'); d.id = 'waveBan';
+    d.innerHTML = '<div class="t">' + title + '</div><div class="s">' + sub + '</div>';
+    document.body.appendChild(d); setTimeout(() => d.classList.add('out'), 1700); setTimeout(() => d.remove(), 2300);
+  }
   function hud(HW) {
     hudT = performance.now(); buildUi();
     const HH = ctx.canvas.height / DPR, fine = !(window.matchMedia && matchMedia('(pointer:coarse)').matches), n = 5, sz = fine ? 44 : 38, sz0 = sz, gap = 6, w = n * sz + (n - 1) * gap;
-    const x0 = fine ? 16 : (HW - w) / 2, y0 = fine ? HH - 16 - sz * 2 - 8 : 44, labY = (fine ? 54 : y0 + sz + 4 + 26 + 18) + (RT.on ? 16 : 0);
+    const lab = fine ? sz * .8 : 0, x0 = fine ? 16 + lab + 6 : (HW - w) / 2, y0 = fine ? HH - 16 - sz * 2 - 8 : (RT.on ? 60 : 44), labY = (fine ? 54 : y0 + sz + 4 + 26 + 18) + (RT.on ? 16 : 0);
     ctx.save();
     const slot = (x, y, k, cur, i, lbl, sz = sz0) => {
       ctx.fillStyle = '#241812'; ctx.fillRect(x, y, sz, sz);
       if (k) {
         ctx.fillStyle = k.color; ctx.globalAlpha = .22 + (i >= 0 && S.flash[i] > 0 ? .5 : 0); ctx.fillRect(x, y, sz, sz); ctx.globalAlpha = 1;
         if (i >= 0 && S.wind && S.wind.i === i) { ctx.fillStyle = 'rgba(255,230,140,.45)'; ctx.fillRect(x, y + sz * (1 - S.wind.t / S.wind.dur), sz, sz * S.wind.t / S.wind.dur); }   // 前摇进度
-        ctx.font = 'bold 20px "PingFang SC",sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = k.color; ctx.fillText(k.icon, x + sz / 2, y + sz / 2 + 1);
+        if (k.ik && hok(k.ik)) ctx.drawImage(HIMG[k.ik], x, y, sz, sz); else { ctx.font = 'bold 20px "PingFang SC",sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = k.color; ctx.fillText(k.icon, x + sz / 2, y + sz / 2 + 1); }
         if (!cur) { ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fillRect(x, y, sz, sz); }   // 没轮到的格子压暗
         ctx.font = '10px "PingFang SC",sans-serif'; ctx.fillStyle = '#c9b58c'; ctx.textBaseline = 'alphabetic'; ctx.fillText(lbl != null ? lbl : 'LV' + lvOf(S.slots[i]), x + sz - 12, y + sz - 3);
-      } else { ctx.font = 'bold 18px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#4a3a2a'; ctx.fillText('+', x + sz / 2, y + sz / 2 + 1); }
+      } else if (hok('empty')) { ctx.globalAlpha = .85; ctx.drawImage(HIMG.empty, x, y, sz, sz); ctx.globalAlpha = 1; } else { ctx.font = 'bold 18px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#4a3a2a'; ctx.fillText('+', x + sz / 2, y + sz / 2 + 1); }
       if (i >= 0 && S.skip[i] > 0) { ctx.fillStyle = 'rgba(160,160,170,.5)'; ctx.fillRect(x, y, sz, sz); }
       ctx.strokeStyle = cur ? '#ffe27a' : 'rgba(176,138,74,.75)'; ctx.lineWidth = cur ? 2.5 : 1.2; ctx.strokeRect(x + .5, y + .5, sz - 1, sz - 1);
     };
-    ctx.fillStyle = 'rgba(14,9,6,.55)'; ctx.fillRect(x0 - 6, y0 - 6, w + 12, fine ? sz * 2 + 8 + 12 : sz + 26 + 4 + 12);
-    for (let i = 0; i < n; i++) slot(x0 + i * (sz + gap), y0, SK[S.slots[i]], i === S.qi, i);
+    ctx.fillStyle = 'rgba(14,9,6,.55)'; ctx.fillRect(x0 - 6 - (lab ? lab + 6 : 0), y0 - 6, w + 12 + (lab ? lab + 6 : 0), fine ? sz * 2 + 8 + 12 : sz + 26 + 4 + 12);
+    if (lab && hok('waigong')) { ctx.drawImage(HIMG.waigong, 16, y0 + (sz - lab) / 2, lab, lab); if (hok('neigong')) ctx.drawImage(HIMG.neigong, 16, y0 + sz + 8 + (sz - lab) / 2, lab, lab); }
+    for (let i = 0; i < n; i++) { const kk = S.slots[i], o = SK[kk]; if (o && !o.ik && HIMG[kk]) o.ik = kk; slot(x0 + i * (sz + gap), y0, o, i === S.qi, i); }
     const gk = id => GF[id] ? { icon: GF[id].qg ? '轻' : GF[id].n[0], color: GTC[GF[id].t] } : null, sz2 = fine ? sz : 26, ry2 = y0 + sz + (fine ? 8 : 4);
     for (let i = 0; i < 3; i++) slot(x0 + i * (sz2 + gap), ry2, gk(S.gf[i]), true, -1, S.gf[i] ? 'LV' + gfLv(S.gf[i]) : '', sz2);   // 内功：主修 + 2 辅修
     slot(x0 + 3 * (sz2 + gap) + 8, ry2, gk(S.qg), true, -1, '', sz2);   // 轻功
+    if (lab && hok('qinggong') && !S.qg) { ctx.globalAlpha = .55; ctx.drawImage(HIMG.qinggong, x0 + 3 * (sz2 + gap) + 8, ry2, sz2, sz2); ctx.globalAlpha = 1; }
     // 血条：屏幕底部正中（血量 ×10 显示成整数）
     const bw = fine ? Math.min(HW * .46, 520) : Math.min(HW * .44, 230), bh = fine ? 20 : 16, bx = (HW - bw) / 2, by = HH - (fine ? 18 : 12) - bh, mh = maxHp(), r = Math.max(0, Math.min(1, hero.hp / mh));
     ctx.fillStyle = 'rgba(14,9,6,.8)'; ctx.fillRect(bx - 3, by - 3, bw + 6, bh + 6); ctx.strokeStyle = '#8a6a3a'; ctx.lineWidth = 1.5; ctx.strokeRect(bx - 2.5, by - 2.5, bw + 5, bh + 5);
     const g = ctx.createLinearGradient(0, by, 0, by + bh); g.addColorStop(0, '#e0463a'); g.addColorStop(1, '#8c1c18'); ctx.fillStyle = g; ctx.fillRect(bx, by, bw * r, bh);
     ctx.font = 'bold ' + (fine ? 13 : 11) + 'px "PingFang SC",sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(20,8,6,.9)';
+    if (hok('blood')) { const s2 = bh + 14; ctx.drawImage(HIMG.blood, bx - s2 - 6, by + bh / 2 - s2 / 2, s2, s2); }
     const ht = Math.ceil(hero.hp * 10 - 1e-6) + ' / ' + Math.round(mh * 10); ctx.strokeText(ht, HW / 2, by + bh / 2 + 1); ctx.fillStyle = '#fff2d8'; ctx.fillText(ht, HW / 2, by + bh / 2 + 1);
     { const zh = fine ? 12 : 9, zy = by - 8 - zh, zr = Math.max(0, Math.min(1, S.zq / zqMax()));   // 真气：蓝条叠在血条上方
       ctx.fillStyle = 'rgba(14,9,6,.8)'; ctx.fillRect(bx - 3, zy - 2, bw + 6, zh + 4);
+      if (hok('taiji')) { const s3 = zh + 12; ctx.drawImage(HIMG.taiji, bx - s3 - 6, zy + zh / 2 - s3 / 2, s3, s3); }
       const g2 = ctx.createLinearGradient(0, zy, 0, zy + zh); g2.addColorStop(0, '#5cc0ff'); g2.addColorStop(1, '#1f5fa8'); ctx.fillStyle = g2; ctx.fillRect(bx, zy, bw * zr, zh);
       ctx.strokeStyle = '#4a7aa8'; ctx.lineWidth = 1; ctx.strokeRect(bx - 2.5, zy - 1.5, bw + 5, zh + 3);
       if (fine) { ctx.font = 'bold 10px "PingFang SC",sans-serif'; ctx.textBaseline = 'middle'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(8,16,30,.9)'; const zt = '真气 ' + Math.round(S.zq * 10) + ' / ' + Math.round(zqMax() * 10); ctx.strokeText(zt, HW / 2, zy + zh / 2 + 1); ctx.fillStyle = '#e2f4ff'; ctx.fillText(zt, HW / 2, zy + zh / 2 + 1); } }
@@ -703,6 +720,13 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const rooted = () => !!S.recov;
   // 隐藏普攻和换武器按钮
   const st = document.createElement('style'); st.textContent = '#bA,#bWeapon,#wp button[data-w]{display:none!important}'
+    + '#waveBan{position:fixed;left:50%;top:34%;transform:translate(-50%,-50%);width:min(70vw,620px);aspect-ratio:900/307;background:url(art/ui/hud/banner.webp) center/contain no-repeat;z-index:10010;pointer-events:none;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:3%;animation:wbIn .35s ease-out;transition:opacity .5s}'
+    + '#waveBan.out{opacity:0}#waveBan .t{font:900 clamp(24px,4.4vw,44px) "Songti SC","STSong","Noto Serif SC",serif;letter-spacing:.3em;text-indent:.3em;color:#f0c66a;text-shadow:0 2px 0 #3a2410,0 0 12px rgba(0,0,0,.8)}'
+    + '#waveBan .s{margin-top:0;padding:0 22px;font:700 clamp(13px,1.8vw,18px) "PingFang SC",sans-serif;letter-spacing:.4em;color:#fff2d8;background:radial-gradient(ellipse,rgba(200,200,200,.35),transparent 70%)}@keyframes wbIn{from{opacity:0;transform:translate(-50%,-50%) scale(.85)}}'
+    + '@media (pointer:fine){#joy{display:none!important}}'
+    + '#bR{background:#241812 url(art/ui/hud/dodge.webp) center/cover no-repeat!important;border-radius:8px!important;border:1px solid #c9a24a!important;font-size:0!important;width:60px!important;height:60px!important}'
+    + '@media (pointer:fine){#bR:after{content:"空格";position:absolute;left:0;right:0;bottom:-18px;font:700 12px "PingFang SC",sans-serif;color:#f3dc9a;text-shadow:0 1px 2px #000}}'
+    + '#bPause{background:url(art/ui/hud/pause.webp) top center/100% auto no-repeat!important;border:0!important;width:44px!important;height:63px!important;box-shadow:none!important}#bPause .pause-icon-bar{display:none!important}'
     + '#survPick{position:fixed;inset:0;z-index:10020;display:flex;align-items:center;justify-content:center;background:rgba(10,6,4,.6);font-family:"PingFang SC","Noto Sans CJK SC",sans-serif}'
     + '#survPick .p{background:linear-gradient(180deg,#2a1d13,#1a120c);border:2px solid #b08a4a;border-radius:10px;padding:14px 16px;color:#f2e4c8;text-align:center;max-width:94vw}'
     + '#survPick h3{margin:0 0 10px;color:#ffd86e;letter-spacing:4px}#survPick .row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}'

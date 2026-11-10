@@ -1114,12 +1114,13 @@ function draw() {
     ctx.save();
     ctx.font = 'bold 18px "PingFang SC","Noto Sans CJK SC",sans-serif';
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    const tw = ctx.measureText(tstr).width, bw2 = tw + 30, bx2 = HW / 2 - bw2 / 2, by2 = _left != null ? 24 : 8;   // 路线模式：让出最上面的修为条
+    const tw = ctx.measureText(tstr).width, bw2 = tw + 30 + (HUD_HG.complete && HUD_HG.naturalWidth ? 22 : 0), bx2 = HW / 2 - bw2 / 2, by2 = _left != null ? 24 : 8;   // 路线模式：让出最上面的修为条
     ctx.fillStyle = 'rgba(20,14,30,.62)';
     ctx.beginPath();
     if (ctx.roundRect) ctx.roundRect(bx2, by2, bw2, 26, 13); else ctx.rect(bx2, by2, bw2, 26);
     ctx.fill();
     ctx.fillStyle = '#ffe9a8';
+    if (HUD_HG.complete && HUD_HG.naturalWidth) { ctx.drawImage(HUD_HG, bx2 + 6, by2 + 1, 24, 24); ctx.fillText(tstr, HW / 2 + 11, by2 + 14); } else
     ctx.fillText(tstr, HW / 2, by2 + 14);
     ctx.restore();
   }
@@ -1149,6 +1150,7 @@ function draw() {
 }
 
 // ---------- 结算板（通关 / 倒下） ----------
+const HUD_HG = new Image(); HUD_HG.src = 'art/ui/hud/hourglass.webp';   // 顶部计时牌的沙漏（11/11）
 function fmtTime(t) { const m = Math.floor(t / 60), s = Math.floor(t % 60); return m + ':' + (s < 10 ? '0' : '') + s; }
 // 评价：无伤 SSS；被打 1~3 下 S；其余按用时 A~E（分数先这么定，实测后再调）
 // 倒下时随机说一句（按打到第几波分档），让每次都死得不太一样
