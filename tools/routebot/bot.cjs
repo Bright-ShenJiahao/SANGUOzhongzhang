@@ -6,7 +6,7 @@ fs.mkdirSync(OUT, { recursive: true });
 const BOT = () => {
   window.BOT = { log: [], t0: Date.now(), node: null, nodeT: 0, last: Date.now(), dead: false, won: false };
   const say = s => { BOT.log.push(Math.round((Date.now() - BOT.t0) / 1000) + 's ' + s); BOT.last = Date.now(); };
-  let home = null, rollCd = 0;
+  let home = null, rollCd = 0, lowHp = 1;
   setInterval(() => { try {
     if (BOT.dead || BOT.won) return;
     if (over) { const hp = SURV.routeHp(); say('死亡 于 ' + (BOT.node ? ROUTE.name(BOT.node) + ' 第' + BOT.node.layer + '层' : '?') + ' 本节点 ' + Math.round((Date.now() - BOT.nodeT) / 1000) + 's'); BOT.dead = true; return; }
@@ -20,13 +20,14 @@ const BOT = () => {
       const bs = [...rm.querySelectorAll('button')].filter(b => vis(b) && b.textContent !== '退出');
       if (bs.length) { const b = bs[0]; say('  弹窗选：' + b.textContent.replace(/\s+/g, ' ').slice(0, 30)); b.click(); return; }
       const r = ROUTE.debug(); if (r && r.cur.next.length) {
-        if (BOT.node) { const [h, m] = SURV.routeHp(); say('  完成，用时 ' + Math.round((Date.now() - BOT.nodeT) / 1000) + 's，血 ' + Math.round(h * 10) + '/' + Math.round(m * 10) + '，招式 ' + SURV.slots.filter(Boolean).join(',')); }
-        const n = r.cur.next[Math.floor(Math.random() * r.cur.next.length)]; BOT.node = n; BOT.nodeT = Date.now(); home = null;
+        if (BOT.node) { const [h, m] = SURV.routeHp(); say('  完成，用时 ' + Math.round((Date.now() - BOT.nodeT) / 1000) + 's，血 ' + Math.round(h * 10) + '/' + Math.round(m * 10) + '，本节点最低血 ' + Math.round(lowHp * 100) + '%，招式 ' + SURV.slots.filter(Boolean).join(',')); }
+        const n = r.cur.next[Math.floor(Math.random() * r.cur.next.length)]; BOT.node = n; BOT.nodeT = Date.now(); home = null; lowHp = 1;
         say('进入 第' + n.layer + '层 ' + ROUTE.name(n) + '（' + n.type + '）'); ROUTE.choose(n);
       }
       return;
     }
     if (!hero || hero.hp <= 0) return;
+    lowHp = Math.min(lowHp, hero.hp / SURV.routeHp()[1]);
     if (!home) home = { x: hero.x, y: hero.y };
     let vx = (home.x - hero.x) * .004, vy = (home.y - hero.y) * .006, near = 1e9;
     for (const z of zs || []) { if (z.dead || z.hp <= 0) continue; const dx = hero.x - z.x, dy = hero.y - z.y, d = Math.hypot(dx, dy) || 1; near = Math.min(near, d); if (d < 260) { vx += dx / d * (260 - d) / 260; vy += dy / d * (260 - d) / 260 * 1.4; } }
@@ -39,12 +40,14 @@ const BOT = () => {
   let run = 0, shot = 0;
   while (Date.now() < T_END) {
     run++; lines.push('', '===== 第 ' + run + ' 局 =====');
-    const vp = run % 2 ? { width: 1280, height: 720 } : { width: 390, height: 844 };   // 单数局电脑，双数局手机竖屏
+    const vp = run % 2 ? { width: 1280, height: 720 } : { width: 844, height: 390 };   // 单数局电脑，双数局手机横屏（竖屏会弹「请横屏」）
     lines.push('屏幕 ' + vp.width + 'x' + vp.height);
+    const save = () => fs.writeFileSync(OUT + '/report.txt', ['路线试玩报告（进行中）', '报错（' + errs.length + '）：', ...[...new Set(errs)].slice(0, 40), ...lines].join('\n'));
     const p = await b.newPage({ viewport: vp, hasTouch: vp.width < 600 });
     p.on('pageerror', e => errs.push('第' + run + '局: ' + e.message));
+    try {
     await p.goto('http://localhost:8765/index.html?debug&route'); await p.waitForTimeout(3000);
-    await p.fill('#tName', 'bot'); await p.click('#tStart'); await p.waitForTimeout(2500);
+    await p.fill('#tName', 'bot'); await p.evaluate(() => document.getElementById('tStart').click()); await p.waitForTimeout(2500);
     await p.evaluate(() => { const o = ['农', '卒', '猎', '书'][Math.floor(Math.random() * 4)]; [...document.querySelectorAll('button')].find(b => b.textContent === o).click(); }).catch(() => {});
     await p.waitForTimeout(500); await p.click('text=出 发').catch(e => errs.push('出发按钮: ' + e.message)); await p.waitForTimeout(2500);
     await p.evaluate(BOT);
@@ -57,7 +60,10 @@ const BOT = () => {
       if (Date.now() - lastShot > 120e3 && shot < 12) { lastShot = Date.now(); await p.screenshot({ path: `${OUT}/shot${String(++shot).padStart(2, '0')}_局${run}.png` }); }
       if (st.dead || st.won) { await p.screenshot({ path: `${OUT}/end_局${run}.png` }); break; }
       if (st.idle > 150e3) { lines.push('!! 卡住 150 秒没进展'); await p.screenshot({ path: `${OUT}/stuck_局${run}.png` }); break; }
+      save();
     }
+    } catch (e) { errs.push('第' + run + '局 机器人出错: ' + e.message.split('\n')[0]); await p.screenshot({ path: `${OUT}/crash_局${run}.png` }).catch(() => {}); }
+    save();
     await p.close();
   }
   await b.close();
