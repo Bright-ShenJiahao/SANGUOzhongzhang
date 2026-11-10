@@ -14,71 +14,75 @@
   // 11/11 改版（用户给了美术）：宣纸水墨背景 + 深色木框面板压在纸上；出身/难度做成「图标 + 名字 + 一句话」卡片
   const CSS = `
   #kaiju{position:fixed;inset:0;z-index:10005;background:#ecd9c0 url('${PIC.bg}') center/cover no-repeat;color:#f2e4c8;
-    font-family:"Songti SC","STSong","Noto Serif SC","PingFang SC",serif;display:flex;flex-direction:column;
+    font-family:"PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif;font-weight:500;--k:1;display:flex;flex-direction:column;
     padding:calc(8px + env(safe-area-inset-top)) calc(12px + env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left));box-sizing:border-box}
   #kaiju *{box-sizing:border-box}
+  #kaiju .top h1,#kaiju h4,#kaiju .card b,#kaiju .fname,#kaiju .fl button b,#kaiju .wp button,#kaiju .bot button,#kaiju .namep b,#kaiju .ogd b,#kaiju .skd b{font-family:"Songti SC","STSong","Noto Serif SC",serif;font-weight:900}
+  #kaiju .ico{width:calc(44px*var(--k));height:calc(44px*var(--k))}
+  @media (min-width:1400px) and (min-height:780px){#kaiju{--k:1.22}}
+  @media (min-width:1900px) and (min-height:1000px){#kaiju{--k:1.4}}
   #kaiju .top{display:flex;align-items:center;gap:12px;padding:7px 14px;margin:0 0 10px;align-self:flex-start;min-width:min(420px,100%);background:linear-gradient(90deg,rgba(22,15,10,.94) 0%,rgba(22,15,10,.88) 70%,rgba(22,15,10,0) 100%);border-bottom:1px solid #b08a4a;border-radius:3px 0 0 0}
-  #kaiju .seal{width:34px;height:34px;background:#a8281e;color:#ffe9c0;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;border-radius:4px;transform:rotate(-4deg);box-shadow:0 2px 6px rgba(80,20,10,.35)}
-  #kaiju .top h1{margin:0;font-size:22px;letter-spacing:8px;color:#f5e2b8;text-shadow:0 1px 3px #000}#kaiju .top small{color:#c9b08a;font-size:12px;letter-spacing:3px}
+  #kaiju .seal{width:34px;height:34px;background:#a8281e;color:#ffe9c0;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:calc(18px*var(--k));border-radius:4px;transform:rotate(-4deg);box-shadow:0 2px 6px rgba(80,20,10,.35)}
+  #kaiju .top h1{margin:0;font-size:calc(22px*var(--k));letter-spacing:8px;color:#f5e2b8;text-shadow:0 1px 3px #000}#kaiju .top small{color:#c9b08a;font-size:calc(12px*var(--k));letter-spacing:3px}
   #kaiju .cols{flex:1;min-height:0;display:grid;grid-template-columns:1.25fr 1fr 1fr;gap:12px}
   #kaiju .pan{position:relative;border:1px solid #b08a4a;border-radius:3px;background:linear-gradient(180deg,rgba(34,24,16,.94),rgba(22,15,10,.95));padding:12px 12px 10px;overflow:auto;min-height:0;
     box-shadow:inset 0 0 0 3px rgba(14,9,6,.9),inset 0 0 0 4px rgba(176,138,74,.45),0 8px 24px rgba(40,25,10,.35)}
   #kaiju .pan:before,#kaiju .pan:after{content:"";position:absolute;width:14px;height:14px;border:2px solid #d8b060;pointer-events:none}
   #kaiju .pan:before{left:3px;top:3px;border-right:0;border-bottom:0}#kaiju .pan:after{right:3px;bottom:3px;border-left:0;border-top:0}
-  #kaiju h4{margin:4px 0 8px;color:#e9cf98;font-size:14px;letter-spacing:6px;display:flex;align-items:center;gap:8px}
+  #kaiju h4{margin:4px 0 8px;color:#e9cf98;font-size:calc(14px*var(--k));letter-spacing:6px;display:flex;align-items:center;gap:8px}
   #kaiju h4:before{content:"";width:7px;height:7px;background:#d8b060;transform:rotate(45deg);flex:none}
   #kaiju h4:after{content:"";flex:1;height:1px;background:linear-gradient(90deg,#8a6a3a,transparent)}
-  #kaiju .ico{width:44px;height:44px;border-radius:3px;flex:none;background:#1c140d center/cover;box-shadow:0 0 0 1px #6b5230}
-  #kaiju .namep{display:flex;align-items:center;gap:10px;margin-bottom:8px}#kaiju .namep b{font-size:18px;color:#ffe9b8;letter-spacing:2px}#kaiju .namep small{display:block;font-size:11px;color:#a8916c}
-  #kaiju select{width:100%;background:#1c140d;color:#f2e4c8;border:1px solid #8a6a3a;border-radius:3px;padding:6px;font-size:13px;font-family:inherit}
-  #kaiju .hint{margin:6px 0 10px;padding:6px 8px;border-left:3px solid #b08a4a;background:rgba(0,0,0,.28);font-size:12px;color:#d8c39a}
+  #kaiju .ico{width:calc(44px*var(--k));height:calc(44px*var(--k));border-radius:3px;flex:none;background:#1c140d center/cover;box-shadow:0 0 0 1px #6b5230}
+  #kaiju .namep{display:flex;align-items:center;gap:10px;margin-bottom:8px}#kaiju .namep b{font-size:calc(18px*var(--k));color:#ffe9b8;letter-spacing:2px}#kaiju .namep small{display:block;font-size:calc(11px*var(--k));color:#a8916c}
+  #kaiju select{width:100%;background:#1c140d;color:#f2e4c8;border:1px solid #8a6a3a;border-radius:3px;padding:6px;font-size:calc(13px*var(--k));font-family:inherit}
+  #kaiju .hint{margin:6px 0 10px;padding:6px 8px;border-left:3px solid #b08a4a;background:rgba(0,0,0,.28);font-size:calc(12px*var(--k));color:#d8c39a}
   #kaiju .og{display:grid;grid-template-columns:1fr 1fr;gap:6px}
   #kaiju .card{display:flex;align-items:center;gap:8px;padding:5px;border:1px solid #5a4226;border-radius:4px;background:rgba(36,25,16,.85);color:#e9cf98;cursor:pointer;text-align:left;font-family:inherit;min-width:0}
-  #kaiju .card b{display:block;font-size:15px;letter-spacing:2px;white-space:nowrap}#kaiju .card small{display:block;font-size:11px;color:#a8916c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #kaiju .card b{display:block;font-size:calc(15px*var(--k));letter-spacing:2px;white-space:nowrap}#kaiju .card small{display:block;font-size:calc(11px*var(--k));color:#a8916c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   #kaiju .card span{min-width:0}
   #kaiju .card.on{border:1px solid #ffd86e;background:linear-gradient(180deg,rgba(90,62,30,.9),rgba(50,34,18,.9));box-shadow:0 0 0 1px #ffd86e,0 0 12px rgba(255,200,90,.45);color:#ffe9b8}
   #kaiju .card.lock{opacity:.4;cursor:not-allowed}
   #kaiju .ogd{margin-top:8px;padding:8px;border:1px solid rgba(176,138,74,.6);border-radius:4px;background:rgba(60,42,26,.45)}
-  #kaiju .ogd b{font-size:16px;color:#ffe9b8}#kaiju .tag{display:inline-block;margin-left:6px;padding:0 6px;border:1px solid #b08a4a;border-radius:3px;font-size:11px;color:#e9cf98}
-  #kaiju .ogd p{margin:4px 0 0;font-size:12px;color:#d8c39a}
+  #kaiju .ogd b{font-size:calc(16px*var(--k));color:#ffe9b8}#kaiju .tag{display:inline-block;margin-left:6px;padding:0 6px;border:1px solid #b08a4a;border-radius:3px;font-size:calc(11px*var(--k));color:#e9cf98}
+  #kaiju .ogd p{margin:4px 0 0;font-size:calc(12px*var(--k));color:#d8c39a}
   #kaiju .diff{display:grid;grid-template-columns:1fr 1fr;gap:6px}
   #kaiju .field{display:flex;flex-direction:column;height:100%}
   #kaiju .pic{flex:1;min-height:90px;border:1px solid #6b5230;border-radius:2px;background:#1c140d center/cover no-repeat;position:relative;overflow:hidden}
   #kaiju .pic.lock{filter:grayscale(1) brightness(.5)}
   #kaiju .pic .ban{position:absolute;left:0;right:0;bottom:0;padding:26px 10px 10px;background:linear-gradient(180deg,transparent,rgba(12,8,5,.88) 55%);text-align:center}
-  #kaiju .pic .arr{position:absolute;top:50%;transform:translateY(-50%);width:30px;height:46px;border:1px solid rgba(216,176,96,.6);border-radius:3px;background:rgba(12,8,5,.55);color:#f2e4c8;font-size:20px;cursor:pointer}
+  #kaiju .pic .arr{position:absolute;top:50%;transform:translateY(-50%);width:30px;height:46px;border:1px solid rgba(216,176,96,.6);border-radius:3px;background:rgba(12,8,5,.55);color:#f2e4c8;font-size:calc(20px*var(--k));cursor:pointer}
   #kaiju .fl{display:flex;gap:8px;margin-top:8px}
   #kaiju .fl button{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:7px 6px;border:1px solid #5a4226;border-radius:4px;background:rgba(36,25,16,.85);color:#e9cf98;font-family:inherit;cursor:pointer}
-  #kaiju .fl button b{font-size:15px;letter-spacing:4px;white-space:nowrap}#kaiju .fl button small{font-size:11px;color:#a8916c;white-space:nowrap}
+  #kaiju .fl button b{font-size:calc(15px*var(--k));letter-spacing:4px;white-space:nowrap}#kaiju .fl button small{font-size:calc(11px*var(--k));color:#a8916c;white-space:nowrap}
   #kaiju .fl button.on{border-color:#ffd86e;background:linear-gradient(180deg,rgba(90,62,30,.9),rgba(50,34,18,.9));box-shadow:0 0 0 1px #ffd86e,0 0 12px rgba(255,200,90,.4);color:#ffe9b8}
-  #kaiju .fl button.lock{opacity:.55;cursor:not-allowed;filter:grayscale(.6)}#kaiju .fl button.lock b:before{content:"🔒 ";font-size:12px;letter-spacing:0}
+  #kaiju .fl button.lock{opacity:.55;cursor:not-allowed;filter:grayscale(.6)}#kaiju .fl button.lock b:before{content:"🔒 ";font-size:calc(12px*var(--k));letter-spacing:0}
   #kaiju .fl button.shake{animation:kjShake .3s}@keyframes kjShake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
-  #kaiju .fname{font-size:20px;letter-spacing:8px;color:#ffe9b8;text-shadow:0 2px 6px #000}#kaiju .fnote{font-size:12px;color:#d8c39a;margin-top:2px}
+  #kaiju .fname{font-size:calc(20px*var(--k));letter-spacing:8px;color:#ffe9b8;text-shadow:0 2px 6px #000}#kaiju .fnote{font-size:calc(12px*var(--k));color:#d8c39a;margin-top:2px}
   #kaiju .wp{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
-  #kaiju .wp button{padding:6px 2px;border:1px solid #5a4226;border-radius:4px;background:rgba(36,25,16,.85);color:#e9cf98;font:700 15px inherit;font-family:inherit;letter-spacing:3px;cursor:pointer}
+  #kaiju .wp button{padding:6px 2px;border:1px solid #5a4226;border-radius:4px;background:rgba(36,25,16,.85);color:#e9cf98;font:700 calc(15px*var(--k)) inherit;font-family:inherit;letter-spacing:3px;cursor:pointer}
   #kaiju .wp button.on{border-color:#ffd86e;background:linear-gradient(180deg,rgba(90,62,30,.9),rgba(50,34,18,.9));box-shadow:0 0 0 1px #ffd86e,0 0 10px rgba(255,200,90,.4);color:#ffe9b8}
-  #kaiju .wp button.lock{opacity:.45;cursor:not-allowed;font-weight:400}#kaiju .wp button.lock:after{content:"🔒";font-size:10px;margin-left:2px}
+  #kaiju .wp button.lock{opacity:.45;cursor:not-allowed;font-weight:400}#kaiju .wp button.lock:after{content:"🔒";font-size:calc(10px*var(--k));margin-left:2px}
   #kaiju .wp button.shake,#kaiju .fl button.shake{animation:kjShake .3s}
-  #kaiju .skd{margin-top:6px;padding:7px 8px;border:1px solid rgba(176,138,74,.5);border-radius:4px;background:rgba(60,42,26,.4);font-size:12px;color:#d8c39a;line-height:1.6}
-  #kaiju .skd b{font-size:14px}
+  #kaiju .skd{margin-top:6px;padding:7px 8px;border:1px solid rgba(176,138,74,.5);border-radius:4px;background:rgba(60,42,26,.4);font-size:calc(12px*var(--k));color:#d8c39a;line-height:1.6}
+  #kaiju .skd b{font-size:calc(14px*var(--k))}
   #kaiju .bag{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-top:4px}#kaiju .bag div{aspect-ratio:1;max-width:48px;border:1px dashed #5a4226;border-radius:3px;background:rgba(20,14,9,.7) center/cover;position:relative}
-  #kaiju .bag div.has{border:1px solid #8a6a3a}#kaiju .bag div i{position:absolute;right:2px;bottom:1px;font-style:normal;font-size:10px;color:#ffe9b8;text-shadow:0 1px 2px #000}
-  #kaiju .ax{font-size:11px;color:#c9b08a;white-space:nowrap;text-align:right}
+  #kaiju .bag div.has{border:1px solid #8a6a3a}#kaiju .bag div i{position:absolute;right:2px;bottom:1px;font-style:normal;font-size:calc(10px*var(--k));color:#ffe9b8;text-shadow:0 1px 2px #000}
+  #kaiju .ax{font-size:calc(11px*var(--k));color:#c9b08a;white-space:nowrap;text-align:right}
   #kaiju .bar{cursor:help}#kaiju .bar.sel span:first-child{color:#ffd86e}
-  #kaiju .axd{min-height:1.5em;margin:4px 0 2px;font-size:11px;color:#a8916c}
-  #kaiju .rows div{display:flex;justify-content:space-between;border-bottom:1px dotted #5a4226;padding:3px 0;font-size:13px}#kaiju .rows span{color:#a8916c}
-  #kaiju .bar{display:grid;grid-template-columns:34px 1fr 14px 70px;align-items:center;gap:6px;font-size:12px;margin:3px 0}
+  #kaiju .axd{min-height:1.5em;margin:4px 0 2px;font-size:calc(11px*var(--k));color:#a8916c}
+  #kaiju .rows div{display:flex;justify-content:space-between;border-bottom:1px dotted #5a4226;padding:3px 0;font-size:calc(13px*var(--k))}#kaiju .rows span{color:#a8916c}
+  #kaiju .bar{display:grid;grid-template-columns:calc(36px*var(--k)) 1fr calc(14px*var(--k)) calc(78px*var(--k));align-items:center;gap:6px;font-size:calc(12px*var(--k));margin:3px 0}
   #kaiju .bar i{display:block;height:7px;background:#3a2a1c;border-radius:2px;overflow:hidden}#kaiju .bar i u{display:block;height:100%;background:linear-gradient(90deg,#8a2a1e,#e0804a)}
-  #kaiju .sk{display:flex;gap:6px;margin-top:4px}#kaiju .sk div{flex:1;aspect-ratio:1;max-width:48px;border:1px dashed #5a4226;border-radius:3px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;background:rgba(20,14,9,.7) center/cover;color:#5a4a36}
+  #kaiju .sk{display:flex;gap:6px;margin-top:4px}#kaiju .sk div{flex:1;aspect-ratio:1;max-width:calc(48px*var(--k));border:1px dashed #5a4226;border-radius:3px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:calc(18px*var(--k));background:rgba(20,14,9,.7) center/cover;color:#5a4a36}
   #kaiju .sk div.has{border:1px solid #ffd86e;color:#ffd86e;box-shadow:0 0 8px rgba(255,200,90,.35)}
   #kaiju .bot{display:flex;align-items:center;gap:10px;margin-top:8px}
-  #kaiju .bot button{white-space:nowrap;border:1px solid #b08a4a;border-radius:4px;background:linear-gradient(180deg,#3a2a1c,#1e150d);color:#f5e2b8;font-size:16px;letter-spacing:6px;padding:9px 18px;cursor:pointer;font-family:inherit;box-shadow:inset 0 0 0 2px rgba(14,9,6,.8),0 4px 10px rgba(40,25,10,.3)}
-  #kaiju .bot .go{margin-left:auto;padding:10px 52px;font-size:19px;border:2px solid #d8b060;background:linear-gradient(180deg,#6a4424,#2e1d10);color:#ffe9b8}
+  #kaiju .bot button{white-space:nowrap;border:1px solid #b08a4a;border-radius:4px;background:linear-gradient(180deg,#3a2a1c,#1e150d);color:#f5e2b8;font-size:calc(16px*var(--k));letter-spacing:6px;padding:9px 18px;cursor:pointer;font-family:inherit;box-shadow:inset 0 0 0 2px rgba(14,9,6,.8),0 4px 10px rgba(40,25,10,.3)}
+  #kaiju .bot .go{margin-left:auto;padding:10px 52px;font-size:calc(19px*var(--k));border:2px solid #d8b060;background:linear-gradient(180deg,#6a4424,#2e1d10);color:#ffe9b8}
   #kaiju .bot .dice{letter-spacing:0;padding:8px 12px}
-  @media (max-height:520px){#kaiju .top{padding-bottom:3px;margin-bottom:5px}#kaiju .top h1{font-size:16px}#kaiju .seal{width:28px;height:28px;font-size:15px}#kaiju .pan{padding:8px 9px 6px}#kaiju h4{margin:2px 0 5px;font-size:12px}
-    #kaiju .hint{display:none}#kaiju .ico{width:32px;height:32px}#kaiju .card{padding:3px;gap:6px}#kaiju .card b{font-size:13px}#kaiju .card small{font-size:10px}#kaiju .namep{margin-bottom:4px}#kaiju .namep b{font-size:15px}
-    #kaiju .bar{margin:1px 0;font-size:11px}#kaiju .rows div{padding:1px 0;font-size:12px}#kaiju select{padding:3px 6px;font-size:12px}#kaiju .sk div{max-width:34px}#kaiju .ogd{margin-top:5px;padding:5px 7px}#kaiju .ogd p{font-size:11px}
-    #kaiju .pic{min-height:60px}#kaiju .bot{margin-top:5px}#kaiju .bot button{padding:6px 14px;font-size:14px}#kaiju .bot .go{padding:7px 36px}#kaiju .fname{font-size:16px}#kaiju .fl{margin-top:5px}#kaiju .fl button{padding:4px}#kaiju .fl button small{display:none}#kaiju .top{padding:4px 10px;margin-bottom:6px}}
+  @media (max-height:520px){#kaiju .top{padding-bottom:3px;margin-bottom:5px}#kaiju .top h1{font-size:calc(16px*var(--k))}#kaiju .seal{width:28px;height:28px;font-size:calc(15px*var(--k))}#kaiju .pan{padding:8px 9px 6px}#kaiju h4{margin:2px 0 5px;font-size:calc(12px*var(--k))}
+    #kaiju .hint{display:none}#kaiju .ico{width:32px;height:32px}#kaiju .card{padding:3px;gap:6px}#kaiju .card b{font-size:calc(13px*var(--k))}#kaiju .card small{font-size:calc(10px*var(--k))}#kaiju .namep{margin-bottom:4px}#kaiju .namep b{font-size:calc(15px*var(--k))}
+    #kaiju .bar{margin:1px 0;font-size:calc(11px*var(--k))}#kaiju .rows div{padding:1px 0;font-size:calc(12px*var(--k))}#kaiju select{padding:3px 6px;font-size:calc(12px*var(--k))}#kaiju .sk div{max-width:34px}#kaiju .ogd{margin-top:5px;padding:5px 7px}#kaiju .ogd p{font-size:calc(11px*var(--k))}
+    #kaiju .pic{min-height:60px}#kaiju .bot{margin-top:5px}#kaiju .bot button{padding:6px 14px;font-size:calc(14px*var(--k))}#kaiju .bot .go{padding:7px 36px}#kaiju .fname{font-size:calc(16px*var(--k))}#kaiju .fl{margin-top:5px}#kaiju .fl button{padding:4px}#kaiju .fl button small{display:none}#kaiju .top{padding:4px 10px;margin-bottom:6px}}
   @media (max-width:700px) and (orientation:portrait){#kaiju .cols{display:flex;flex-direction:column;overflow-y:auto;gap:10px;-webkit-overflow-scrolling:touch}#kaiju .pan{overflow:visible;flex:none}#kaiju .field{order:-1;height:auto}#kaiju .pic{flex:none;height:min(56vw,240px)}#kaiju .bot button{letter-spacing:2px;padding:9px 12px;white-space:nowrap}#kaiju .bot .go{flex:1;padding:10px 0;letter-spacing:8px}}`;
   function render() {
     const O = window.SURV ? SURV.ORIGINS : {}, cur = SURV.origin(), o = O[cur], ai = SURV.attrInfo ? SURV.attrInfo(cur) : [], SK = SURV.SK, sk = SK[o.skill];
@@ -98,8 +102,8 @@
           <div class="namep"><div class="ico" ${ic(PIC.plate)}></div><div><b>${esc(name)}</b><small>称号：无（通关或达成条件后获得）</small></div></div>
           <h4>势力</h4><select disabled><option>普通乡勇　增：无；减：无</option></select>
           <h4 style="margin-top:10px">出身</h4>
-          <div class="og">${Object.keys(O).map(k => `<button data-o="${k}" class="card ${k === cur ? 'on' : ''} ${O[k].locked ? 'lock' : ''}"><div class="ico" ${ic(OGI[k] || '')}></div><span><b>${O[k].name}</b><small>${(O[k].desc || '').split('。')[0]}</small></span></button>`).join('')}</div>
-          <div class="ogd"><b>${o.name}</b><span class="tag">${o.tag}</span><p>${o.desc}</p><p>起手招式：<b style="font-size:13px;color:${sk ? sk.color : '#fff'}">${sk ? sk.name : '—'}</b>${sk ? '（' + sk.desc + '）' : ''}</p></div>
+          <div class="og">${Object.keys(O).map(k => `<button data-o="${k}" class="card ${k === cur ? 'on' : ''} ${O[k].locked ? 'lock' : ''}"><div class="ico" ${ic(OGI[k] || '')}></div><span><b>${O[k].name}</b><small>${O[k].locked ? '🔒 暂未开放' : (O[k].desc || '').split('。')[0]}</small></span></button>`).join('')}</div>
+          <div class="ogd"><b>${o.name}</b><span class="tag">${o.tag}</span><p>${o.desc}</p><p>起手招式：<b style="font-size:calc(13px*var(--k));color:${sk ? sk.color : '#fff'}">${sk ? sk.name : '—'}</b>${sk ? '（' + sk.desc + '）' : ''}</p></div>
           <h4 style="margin-top:10px">兵器路数</h4>
           <div class="wp">${WEP.map(w => `<button data-w="${w[0]}" class="${w[2] ? 'on' : 'lock'}" title="${w[2] ? '' : '暂未开放'}">${w[1]}</button>`).join('')}</div>
           <h4 style="margin-top:10px">难度</h4>

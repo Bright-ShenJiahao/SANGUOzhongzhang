@@ -227,9 +227,9 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   // ---------- 出身（开局配置里选；起手只有 1 个招式） ----------
   const ORIGINS = {
     nongfu: { name: '农夫', tag: '短兵器', skill: 'hengsao', desc: '庄稼汉，挨得住打。受到伤害 -20%', take: .8, oa: [5, 4, 2, 1, 1, 2, 1, 3], at: [6, 4, 2, 2, 3, 2] },
-    xiaozu: { name: '小卒', tag: '长兵器', skill: 'daolun', desc: '行伍出身，出手利落。招式前摇 -20%', wu: .8, oa: [4, 4, 5, 1, 1, 2, 1, 3], at: [4, 3, 4, 3, 2, 2] },
-    liehu: { name: '猎户', tag: '远程', skill: 'daobo', desc: '山里跑惯了。移动速度 +12%', move: 1.12, oa: [3, 4, 1, 5, 1, 4, 1, 3], at: [3, 3, 1, 5, 3, 2] },
-    shusheng: { name: '书生', tag: '术法', skill: 'huima', desc: '手无缚鸡之力，却通术法。术法招式最强，近战偏弱', oa: [2, 1, 1, 1, 1, 2, 6, 4], at: [2, 1, 1, 2, 3, 6] },
+    xiaozu: { locked: true, name: '小卒', tag: '长兵器', skill: 'daolun', desc: '行伍出身，出手利落。招式前摇 -20%', wu: .8, oa: [4, 4, 5, 1, 1, 2, 1, 3], at: [4, 3, 4, 3, 2, 2] },
+    liehu: { locked: true, name: '猎户', tag: '远程', skill: 'daobo', desc: '山里跑惯了。移动速度 +12%', move: 1.12, oa: [3, 4, 1, 5, 1, 4, 1, 3], at: [3, 3, 1, 5, 3, 2] },
+    shusheng: { locked: true, name: '书生', tag: '术法', skill: 'huima', desc: '手无缚鸡之力，却通术法。术法招式最强，近战偏弱', oa: [2, 1, 1, 1, 1, 2, 6, 4], at: [2, 1, 1, 2, 3, 6] },
   };
   let origin = 'nongfu';
   const OG = () => ORIGINS[origin] || ORIGINS.nongfu;
