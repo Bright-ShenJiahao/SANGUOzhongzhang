@@ -693,7 +693,7 @@
       #tStart:disabled { filter: grayscale(.5) brightness(.85); }
       #tCont { position: fixed; z-index: 7; font-family: inherit; font-weight: 700; background: linear-gradient(180deg,#f6ead2,#e6d2b0); border: 2px solid #8b6a35; border-radius: 6px;
         color: #3b2a1c; letter-spacing: .3em; text-indent: .3em; cursor: pointer; box-shadow: inset 0 1px 0 rgba(255,255,255,.6), 0 4px 0 #6b4f2a, 0 9px 16px rgba(40,25,10,.3);
-        animation: tInkUp .9s 1.5s ease-out both; }
+        animation: tInkUp 1.2s .8s ease-out both; }
       #tCont:active { transform: translateY(4px); box-shadow: 0 0 0 #6b4f2a, 0 3px 8px rgba(40,25,10,.3); }
       #tConfirm { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; background: rgba(30,20,12,.5); }
       #tConfirm .p { background: radial-gradient(ellipse at 50% 40%,#f6ead4,#e8d5b4); border: 2px solid #7a5a2c; border-radius: 8px; padding: 22px 26px 18px; width: min(88vw,420px);
@@ -713,7 +713,7 @@
       #tInkTitle { position: fixed; z-index: 6; pointer-events: none; opacity: 0; user-select: none; -webkit-user-drag: none;
         filter: drop-shadow(0 2px 5px rgba(60,40,20,.18)); animation: tInkIn 1.5s .7s cubic-bezier(.2,.7,.2,1) forwards; }
       @keyframes tInkIn { from { opacity: 0; transform: translateY(-16px) scale(1.05); filter: blur(7px); } to { opacity: 1; transform: none; filter: drop-shadow(0 2px 5px rgba(60,40,20,.18)); } }
-      #tStart, #tNovice, #tHintOff, #tBoard { animation: tInkUp .9s 1.5s ease-out both; }
+      #tName, #tStart, #tNovice, #tHintOff, #tBoard { animation: tInkUp 1.2s .8s ease-out both; }   /* 11/11 用户定：名字框、按钮和书法标题一起出现 */
       @keyframes tInkUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
     `;
     document.head.appendChild(st);
@@ -1424,7 +1424,7 @@
         const im = inkPortrait() ? INK.phone : INK.pc, ti = dom.inkTitle;
         if ((inkReady(im) && (!ti || (ti.complete && ti.naturalWidth))) || bootWait > 12) {
           S.booted = true; S.t = 1.3;   // 加载幕上图已经淡入了，揭幕时画布直接画满，不再从宣纸淡入
-          for (const e of [ti, dom.start, dom.novice, dom.hintOff, dom.board]) if (e) { e.style.animation = 'none'; void e.offsetWidth; e.style.animation = ''; }
+          for (const e of [ti, dom.name, dom.start, dom.cont, dom.novice, dom.hintOff, dom.board]) if (e) { e.style.animation = 'none'; void e.offsetWidth; e.style.animation = ''; }
           if (window.bootDone) window.bootDone();
         } else S.t = 0;
       }
