@@ -1383,10 +1383,19 @@
     if (window.visualViewport) visualViewport.addEventListener('resize', layout);
     addEventListener('pageshow', layout); addEventListener('load', layout);
     [100, 400, 1000, 2500].forEach(ms => setTimeout(layout, ms));
-    let last = performance.now();
+    let last = performance.now(), bootWait = 0;
     const tick = (t) => {
       const dt = Math.min(.05, (t - last) / 1000); last = t;
       S.t += dt;
+      if (!S.booted) {   // 加载幕（11/11）：首页背景图和书法标题都下载好才揭幕，揭幕时首页入场动画从头播
+        bootWait += dt;
+        const im = inkPortrait() ? INK.phone : INK.pc, ti = dom.inkTitle;
+        if ((inkReady(im) && (!ti || (ti.complete && ti.naturalWidth))) || bootWait > 12) {
+          S.booted = true; S.t = 0;
+          for (const e of [ti, dom.start, dom.novice, dom.hintOff, dom.board]) if (e) { e.style.animation = 'none'; void e.offsetWidth; e.style.animation = ''; }
+          if (window.bootDone) window.bootDone();
+        } else S.t = 0;
+      }
       if (S.msgT > 0) { S.msgT -= dt; if (S.msgT <= 0 && dom.tip) dom.tip.style.opacity = 0; }
       if (S.mode === 'title' || S.mode === 'intro') {
         demoStep(dt); demoRender();
