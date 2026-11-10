@@ -515,7 +515,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     if (window.SFX) SFX.play('j_win');
     R.xiu = nd.type === 'boss' ? 60 : nd.type === 'elite' ? 40 : 25; addXiu(R.xiu);
     if (nd.type === 'boss') heal(maxHp() * .3);
-    S.loot = rollLoot(nd); S.shop = rollShop(); S.bought = -1;
+    S.loot = rollLoot(nd); S.shop = rollShop(nd); S.bought = [];
     report(R);
     W.pick = true; setTimeout(() => prepOpen(nd), 1000);
   }
@@ -533,8 +533,8 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const PORTRAIT = new Image(); PORTRAIT.src = 'art/ui/npc/liubei_face.webp';
   function dropCoins(z) {   // 敌人倒下掉铜钱：普通 1，精锐 3，敌将 15
     if (z.T.thief) { const v = (z.loot || 0) + 4; z.loot = 0; for (let i = 0; i < Math.min(6, v); i++) S.coins.push({ x: z.x + R(-14, 14), y: z.y + R(-6, 6), z: 8 + R(0, 10), vz: R(60, 110), vx: R(-40, 40), v: Math.ceil(v / Math.min(6, v)), t: 0 }); floaters.push({ x: z.x, y: z.y - 44, t: 0, txt: '钱袋破了！', color: '#ffd86e' }); return; }   // 窃贼：偷的钱 + 4 全撒出来
-    if (z.survTier < 1) { S.money += 1; S.coinGot += 1; if (Math.random() > .07) return; }   // 11/11 用户定：普通杀敌直接入账，只有多出来的钱掉在地上要捡
-    const v = z.survTier >= 2 ? 15 : z.survTier === 1 ? 5 : 3 + (Math.random() * 3 | 0);
+    if (z.survTier < 1 || (z.survTier === 1 && !z.T.elite && z.type !== 'yellow-golem')) { S.money += 1; S.coinGot += 1; if (Math.random() > .07) return; }   // 11/11 用户定：普通杀敌直接入账，只有多出来的钱掉在地上要捡
+    const v = z.survTier >= 2 ? 15 : z.survTier === 1 && (z.T.elite || z.type === 'yellow-golem') ? 5 : 3 + (Math.random() * 3 | 0);
     const n = Math.min(5, v), each = Math.ceil(v / n);
     for (let i = 0; i < n; i++) S.coins.push({ x: z.x + R(-14, 14), y: z.y + R(-6, 6), z: 8 + R(0, 10), vz: R(60, 110), vx: R(-40, 40), v: each, t: 0 });
     tut('coin');
@@ -715,9 +715,10 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(900px,58v
     if (nd.type !== 'battle') { const ks = Object.keys(ITEMS).filter(k => !ITEMS[k].use); out.push(itemOf(ks[Math.random() * ks.length | 0])); }
     return out;
   }
-  function rollShop() {   // 行商：两件道具 + 一本秘籍，三选一只能买一件，不能刷新
+  function rollShop(nd) {   // 行商：两件道具 + 一本秘籍，三件都能买（11/11 用户定 C），不能刷新；价格随层数涨（B：第 1 层原价，每 8 层 +100%）
     const ks = Object.keys(ITEMS).sort(() => Math.random() - .5), out = [itemOf(ks[0]), itemOf(ks[1])], seen = new Set(ownedAll().concat(S.loot.map(it => it.k || it.id)));
     for (const o of rewardOptions(undefined).concat(rewardOptions('perk'))) { const it = itemFrom(o); const key = it && (it.k || it.id); if (it && !seen.has(key)) { out.push(it); break; } }
+    const m = 1 + ((nd && nd.layer || 1) - 1) / 8; for (const it of out) it.price = Math.round(it.price * m);
     return out.sort(() => Math.random() - .5);
   }
   function learn(it) {   // 格子满了也能学：先放进「掌握武学」，在武学页换上
@@ -782,8 +783,8 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(900px,58v
       else { S.xopts = S.xopts || rollXiu(); body = S.xopts.map((o, j) => { const [a0, v0] = o.adds[0]; return `<div class="pn cd"><em class="bi" style="background-image:url('${A(ATI[a0])}')"></em><h3>${ATN[a0]}修炼</h3><p style="color:${RAR[o.q][1]}">${['普通', '精良', '稀有', '绝世'][o.q]}</p><i class="dv"></i>${o.adds.map(([a, v]) => `<p class="up"><b>+${v}</b> ${ATN[a]}</p>`).join('')}<p class="sd">${ATD[a0]}</p><button class="bb" data-a="xiu" data-i="${j}">修 炼</button></div>`; }).join('');
         left = `<button class="bb rf" data-a="xrr" ${S.xrr ? 'disabled' : ''}>刷新<span>${S.xrr ? 0 : 1}/1</span></button>`; }
     } else if (prepTab === 'shang') {
-      body = S.shop.map((it, i) => `<div class="pn cd sh"><div class="dh"><em style="background-image:url('${icoOf(it)}')"></em><div><h3>${it.name}</h3><p style="color:${RQC[Math.min(3, it.q || 0)]}">${RQ[Math.min(3, it.q || 0)]}</p><div class="tg">${tagsOf(it).map(t => `<span>${t}</span>`).join('')}</div></div></div><h5>${it.kind === 'item' ? '道具属性' : it.kind === 'skill' ? '武艺效果' : '心法效果'}</h5><p class="ds">${it.desc}</p><button class="bb buy" data-a="buy" data-i="${i}" ${S.bought >= 0 || S.money < it.price ? 'disabled' : ''}>${S.bought === i ? '已买下' : `购买 <b>${it.price}</b><em style="background-image:url('${A('coin')}')"></em>`}</button></div>`).join('');
-      left = `<p class="shn">三件只能买一件 · 不能刷新</p>`;
+      body = S.shop.map((it, i) => `<div class="pn cd sh"><div class="dh"><em style="background-image:url('${icoOf(it)}')"></em><div><h3>${it.name}</h3><p style="color:${RQC[Math.min(3, it.q || 0)]}">${RQ[Math.min(3, it.q || 0)]}</p><div class="tg">${tagsOf(it).map(t => `<span>${t}</span>`).join('')}</div></div></div><h5>${it.kind === 'item' ? '道具属性' : it.kind === 'skill' ? '武艺效果' : '心法效果'}</h5><p class="ds">${it.desc}</p><button class="bb buy" data-a="buy" data-i="${i}" ${[].concat(S.bought ?? []).includes(i) || S.money < it.price ? 'disabled' : ''}>${[].concat(S.bought ?? []).includes(i) ? '已买下' : `购买 <b>${it.price}</b><em style="background-image:url('${A('coin')}')"></em>`}</button></div>`).join('');
+      left = `<p class="shn">三件都能买 · 不能刷新 · 越往后越贵</p>`;
     } else if (prepTab === 'wu') {
       const all = S.slots.filter(Boolean).concat(S.gf.filter(Boolean), S.qg ? [S.qg] : [], S.owned || []);
       if (!selWu || !all.includes(selWu)) selWu = S.slots[0];
@@ -811,7 +812,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(900px,58v
       else if (a === 'sort') { S.sortDn = S.sortDn === false; selLoot = 0; }
       else if (a === 'learn') { learn(S.loot[i]); S.loot.splice(i, 1); if (window.SFX) SFX.play('j_pick1'); }
       else if (a === 'sell') { S.money += S.loot[i].sell; S.loot.splice(i, 1); if (window.SFX) SFX.play('coin'); }
-      else if (a === 'buy') { const it = S.shop[i]; if (S.money >= it.price) { S.money -= it.price; learn(it); S.bought = i; if (window.SFX) SFX.play('j_shop'); } }
+      else if (a === 'buy') { const it = S.shop[i]; if (S.money >= it.price) { S.money -= it.price; learn(it); S.bought = [].concat(S.bought ?? [], i); if (window.SFX) SFX.play('j_shop'); } }
       else if (a === 'xiu') { const o = S.xopts[i]; if (window.SFX) SFX.play('j_pick' + o.q); for (const [q, v] of o.adds) S.atAdd[q] += v; S.bank--; S.xopts = null; S.xrr = false; }
       else if (a === 'xrr') { S.xopts = null; S.xrr = true; }
       else if (a === 'wsel') selWu = k;
@@ -833,7 +834,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(900px,58v
     prep: ['liu', '打完一仗先歇口气。从「结算」看起，再去「拾取」「修炼」「行商」，最后在「武学」排好出手顺序。'],
     loot: ['zhang', '这些都是从贼兵身上扒下来的！用得上就学，用不上就卖给行商换钱！'],
     xiu: ['liu', '你在阵上攒下的修为，每升一层就能修炼一次，三选一，挑你最缺的。'],
-    shop: ['zhang', '行商那里三件货只能买一件，想好了再掏钱！'],
+    shop: ['zhang', '行商的货不能换，钱够就都买下！越往后走，东西越贵！'],
     wu: ['guan', '武艺最多同使五路，照你排好的顺序循环出手。学会的武学都在右边，随时可以换上。'],
     learn: ['guan', '学会了新武艺。去「武学」页看看出手顺序。'],
   };
