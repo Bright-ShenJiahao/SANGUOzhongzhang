@@ -72,7 +72,45 @@
     [1, 2.76, 5.4, 8.93].forEach((m, i) => tone(out, t, { p0: base * m, p1: base * m * .995, gain: gain / (i + 1.3), a: .001, d: d / (1 + i * .5) }));
   }
 
+  // ---------- 短曲（11/11）：五声音阶 + 鼓、锣、磬、拨弦、笛，全部现场合成，不占文件 ----------
+  const m2f = m => 440 * Math.pow(2, (m - 69) / 12);
+  const J = {
+    drum(o, t, g = .5, f = 70) { tone(o, t, { type: 'sine', p0: f * 1.8, p1: f, gain: g, a: .003, d: .35 }); noise(o, t, { type: 'lowpass', f0: 900, f1: 200, gain: g * .35, a: .002, d: .12 }); },
+    gong(o, t, g = .3, f = 110, d = 2.4) { [1, 1.48, 2.02, 2.71, 3.6].forEach((r, i) => tone(o, t, { type: 'sine', p0: f * r, p1: f * r * .985, gain: g / (i + 1.2), a: .01, d: d / (1 + i * .35) })); noise(o, t, { type: 'bandpass', f0: 2600, f1: 900, q: .8, gain: g * .3, a: .005, d: .6 }); },
+    qing(o, t, m, g = .22, d = 1.2) { const f = m2f(m); tone(o, t, { type: 'sine', p0: f, gain: g, a: .002, d }); tone(o, t, { type: 'sine', p0: f * 2.76, gain: g * .35, a: .002, d: d * .45 }); tone(o, t, { type: 'sine', p0: f * 5.4, gain: g * .15, a: .002, d: d * .2 }); },
+    pluck(o, t, m, g = .24, d = .7) { const f = m2f(m); tone(o, t, { type: 'triangle', p0: f * 1.004, p1: f, gain: g, a: .002, d, lp: 2400 }); tone(o, t, { type: 'sine', p0: f * 2, gain: g * .3, a: .002, d: d * .4 }); noise(o, t, { type: 'highpass', f0: 3000, gain: g * .2, a: .001, d: .02 }); },
+    flute(o, t, m, g = .14, d = .5) { const f = m2f(m); tone(o, t, { type: 'sine', p0: f * .99, p1: f, gain: g, a: .06, d, lp: 3000 }); tone(o, t, { type: 'triangle', p0: f * 2, gain: g * .12, a: .08, d }); noise(o, t, { type: 'bandpass', f0: f * 2, q: 6, gain: g * .25, a: .05, d: d * .8 }); },
+  };
   const S = {
+    j_win(o, t) {        // 节点打完：三声鼓 + 五声上行 + 锣
+      J.drum(o, t, .5); J.drum(o, t + .14, .4); J.drum(o, t + .28, .55);
+      [67, 69, 71, 74, 76, 79].forEach((m, i) => J.pluck(o, t + .32 + i * .1, m, .2));
+      J.gong(o, t + .95, .22, 130, 1.4); J.flute(o, t + .95, 79, .1, .9);
+    },
+    j_clear(o, t) {      // 通关「平乱」：鼓滚、宽阔的上行、长音收尾
+      for (let i = 0; i < 8; i++) J.drum(o, t + i * .09, .25 + i * .04, 75);
+      J.drum(o, t + .8, .7, 60); J.gong(o, t + .8, .32, 98, 3.4);
+      [62, 64, 67, 69, 71, 74].forEach((m, i) => J.flute(o, t + .9 + i * .28, m, .13, .45));
+      [62, 67, 71, 74].forEach(m => J.flute(o, t + 2.6, m, .08, 2.2)); J.qing(o, t + 2.6, 86, .14, 2.2);
+    },
+    j_lose(o, t) {       // 倒下：低鼓、下行拨弦、低沉笛声
+      J.drum(o, t, .55, 55); J.gong(o, t + .05, .16, 73, 3);
+      [69, 67, 64, 62, 57].forEach((m, i) => J.pluck(o, t + .35 + i * .32, m, .2, 1));
+      J.flute(o, t + 2, 50, .12, 1.8);
+    },
+    j_event(o, t) {      // 奇遇：铃音 + 笛子短句
+      [88, 91, 93].forEach((m, i) => J.qing(o, t + i * .07, m, .12, .9));
+      [74, 76, 79, 76].forEach((m, i) => J.flute(o, t + .3 + i * .18, m, .12, i === 3 ? .6 : .2));
+    },
+    j_lvup(o, t) { [79, 81, 83, 86].forEach((m, i) => J.qing(o, t + i * .08, m, .16, i === 3 ? 1 : .4)); },   // 修为提升：一串上行的磬
+    j_pick0(o, t) { J.qing(o, t, 81, .18, .6); },
+    j_pick1(o, t) { J.qing(o, t, 81, .16, .5); J.qing(o, t + .08, 86, .16, .8); },
+    j_pick2(o, t) { [81, 86, 88].forEach((m, i) => J.qing(o, t + i * .08, m, .16, .9)); },
+    j_pick3(o, t) { [81, 86, 88, 93].forEach((m, i) => J.qing(o, t + i * .07, m, .17, 1.2)); J.gong(o, t + .3, .12, 196, 1.2); },
+    coin(o, t, k) { const f = 2100 * k; tone(o, t, { type: 'sine', p0: f, gain: .12, a: .001, d: .09 }); tone(o, t + .03, { type: 'sine', p0: f * 1.5, gain: .08, a: .001, d: .1 }); },   // 捡铜钱：pitch 越捡越高
+    j_banner(o, t) { J.drum(o, t, .7, 58); J.drum(o, t + .22, .75, 52); J.gong(o, t + .42, .26, 104, 1.6); },   // 开打横幅
+    j_shop(o, t) { for (let i = 0; i < 5; i++) noise(o, t + i * .06 + Math.random() * .02, { f0: 1800 + i * 200, q: 8, gain: .14, a: .001, d: .03 }); J.qing(o, t + .35, 88, .12, .8); },   // 行商：算盘 + 铜铃
+
     // —— 主角挥空 ——
     swing_staff(o, t, k) {   // 粗木棍：低沉、慢一点的"呼——"
       noise(o, t, { f0: 260 * k, f1: 900 * k, q: 1.4, gain: .55, a: .07, d: .16 });
@@ -280,8 +318,8 @@
       const now = ac.currentTime;
       if (lastAt[name] && now - lastAt[name] < .025) return;   // 同一帧重复触发只播一次
       lastAt[name] = now;
-      const o = bus(pan, (VOL[name] || .5) * R(.88, 1.05), WET[name] || .18);
-      S[name](o, now + .005, R(.94, 1.06) * pitch);
+      const o = bus(pan, (VOL[name] || (name[1] === '_' ? .7 : .5)) * R(.88, 1.05), WET[name] || (name[1] === '_' ? .35 : .18));
+      S[name](o, now + .005, (name[1] === '_' ? 1 : R(.94, 1.06)) * pitch);
     },
   };
 })();

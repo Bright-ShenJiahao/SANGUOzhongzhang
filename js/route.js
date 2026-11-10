@@ -176,6 +176,7 @@
     root.appendChild(box);
   }
   function happen(n) {
+    if (window.SFX) SFX.play('j_event');
     const ev = EVENTS[(n.id * 7 + n.layer) % EVENTS.length];
     popup(ev.t, '', ev.d, ev.o, k => SURV.event(k, () => done(n, true)));
   }

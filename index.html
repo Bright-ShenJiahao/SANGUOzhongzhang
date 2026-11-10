@@ -61,7 +61,7 @@ body.szz-pro #help{display:none}
 .x-back{min-height:34px!important}
 }
 #rot small{display:block;margin-top:10px;font-size:14px;font-weight:600;color:#c9b691;line-height:1.6}
-</style><link rel="preload" href="pack/fonts/result.woff2?v=3241eb41e1" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=3241eb41e1)format("woff2");font-display:swap}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
+</style><link rel="preload" href="pack/fonts/result.woff2?v=a874cecf5d" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=a874cecf5d)format("woff2");font-display:swap}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
 </head><body>
 <style>
 #bootSplash{position:fixed;inset:0;z-index:99999;background:radial-gradient(ellipse at 50% 45%,#f3e4cf 0%,#ecd9c0 55%,#d9c09f 100%);transition:opacity .45s ease-out}
@@ -100,7 +100,7 @@ if(location.protocol==='https:'&&!/[?&]debug(?:=|&|$)/.test(location.search)&&'s
 })();
 // 自动更新：打开游戏、或从后台切回来时，查一下线上有没有新版本；有就在标题/整备页自动刷新（战斗中不打扰）
 (function(){
-var BUILD='4f0d3f6bf290',busy=false;
+var BUILD='048b8721b1b9',busy=false;
 if(location.protocol!=='https:'||/[?&]debug(?:=|&|$)/.test(location.search))return;
 function check(){
   if(busy)return;
@@ -3945,6 +3945,7 @@ const RES_IMG = { win: new Image(), lose: new Image() }; RES_IMG.win.src = 'pack
 function drawRouteResult(HW, HH, raw) {
   const BRUSH = '"MaShanZheng","KaiTi","STKaiti","Kaiti SC",serif', F = '"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",sans-serif';
   for (const id of ['bR', 'top']) { const e = document.getElementById(id); if (e) e.style.visibility = 'hidden'; }
+  if (!result._jingle && window.SFX) { result._jingle = 1; SFX.play(result.win ? 'j_clear' : 'j_lose'); }
   const im = RES_IMG[result.win ? 'win' : 'lose'], fade = Math.min(1, raw / .6);
   ctx.save(); ctx.fillStyle = '#0c0806'; ctx.fillRect(0, 0, HW, HH);
   if (im.complete && im.naturalWidth) { const sc = Math.max(HW / im.naturalWidth, HH / im.naturalHeight) * (1.06 - .06 * Math.min(1, raw / 4)); const dw = im.naturalWidth * sc, dh = im.naturalHeight * sc; ctx.globalAlpha = fade; ctx.drawImage(im, (HW - dw) * .25, (HH - dh) / 2, dw, dh); }
@@ -4805,6 +4806,7 @@ function resultKey(e) {
     root.appendChild(box);
   }
   function happen(n) {
+    if (window.SFX) SFX.play('j_event');
     const ev = EVENTS[(n.id * 7 + n.layer) % EVENTS.length];
     popup(ev.t, '', ev.d, ev.o, k => SURV.event(k, () => done(n, true)));
   }
@@ -5110,7 +5112,45 @@ function resultKey(e) {
     [1, 2.76, 5.4, 8.93].forEach((m, i) => tone(out, t, { p0: base * m, p1: base * m * .995, gain: gain / (i + 1.3), a: .001, d: d / (1 + i * .5) }));
   }
 
+  // ---------- 短曲（11/11）：五声音阶 + 鼓、锣、磬、拨弦、笛，全部现场合成，不占文件 ----------
+  const m2f = m => 440 * Math.pow(2, (m - 69) / 12);
+  const J = {
+    drum(o, t, g = .5, f = 70) { tone(o, t, { type: 'sine', p0: f * 1.8, p1: f, gain: g, a: .003, d: .35 }); noise(o, t, { type: 'lowpass', f0: 900, f1: 200, gain: g * .35, a: .002, d: .12 }); },
+    gong(o, t, g = .3, f = 110, d = 2.4) { [1, 1.48, 2.02, 2.71, 3.6].forEach((r, i) => tone(o, t, { type: 'sine', p0: f * r, p1: f * r * .985, gain: g / (i + 1.2), a: .01, d: d / (1 + i * .35) })); noise(o, t, { type: 'bandpass', f0: 2600, f1: 900, q: .8, gain: g * .3, a: .005, d: .6 }); },
+    qing(o, t, m, g = .22, d = 1.2) { const f = m2f(m); tone(o, t, { type: 'sine', p0: f, gain: g, a: .002, d }); tone(o, t, { type: 'sine', p0: f * 2.76, gain: g * .35, a: .002, d: d * .45 }); tone(o, t, { type: 'sine', p0: f * 5.4, gain: g * .15, a: .002, d: d * .2 }); },
+    pluck(o, t, m, g = .24, d = .7) { const f = m2f(m); tone(o, t, { type: 'triangle', p0: f * 1.004, p1: f, gain: g, a: .002, d, lp: 2400 }); tone(o, t, { type: 'sine', p0: f * 2, gain: g * .3, a: .002, d: d * .4 }); noise(o, t, { type: 'highpass', f0: 3000, gain: g * .2, a: .001, d: .02 }); },
+    flute(o, t, m, g = .14, d = .5) { const f = m2f(m); tone(o, t, { type: 'sine', p0: f * .99, p1: f, gain: g, a: .06, d, lp: 3000 }); tone(o, t, { type: 'triangle', p0: f * 2, gain: g * .12, a: .08, d }); noise(o, t, { type: 'bandpass', f0: f * 2, q: 6, gain: g * .25, a: .05, d: d * .8 }); },
+  };
   const S = {
+    j_win(o, t) {        // 节点打完：三声鼓 + 五声上行 + 锣
+      J.drum(o, t, .5); J.drum(o, t + .14, .4); J.drum(o, t + .28, .55);
+      [67, 69, 71, 74, 76, 79].forEach((m, i) => J.pluck(o, t + .32 + i * .1, m, .2));
+      J.gong(o, t + .95, .22, 130, 1.4); J.flute(o, t + .95, 79, .1, .9);
+    },
+    j_clear(o, t) {      // 通关「平乱」：鼓滚、宽阔的上行、长音收尾
+      for (let i = 0; i < 8; i++) J.drum(o, t + i * .09, .25 + i * .04, 75);
+      J.drum(o, t + .8, .7, 60); J.gong(o, t + .8, .32, 98, 3.4);
+      [62, 64, 67, 69, 71, 74].forEach((m, i) => J.flute(o, t + .9 + i * .28, m, .13, .45));
+      [62, 67, 71, 74].forEach(m => J.flute(o, t + 2.6, m, .08, 2.2)); J.qing(o, t + 2.6, 86, .14, 2.2);
+    },
+    j_lose(o, t) {       // 倒下：低鼓、下行拨弦、低沉笛声
+      J.drum(o, t, .55, 55); J.gong(o, t + .05, .16, 73, 3);
+      [69, 67, 64, 62, 57].forEach((m, i) => J.pluck(o, t + .35 + i * .32, m, .2, 1));
+      J.flute(o, t + 2, 50, .12, 1.8);
+    },
+    j_event(o, t) {      // 奇遇：铃音 + 笛子短句
+      [88, 91, 93].forEach((m, i) => J.qing(o, t + i * .07, m, .12, .9));
+      [74, 76, 79, 76].forEach((m, i) => J.flute(o, t + .3 + i * .18, m, .12, i === 3 ? .6 : .2));
+    },
+    j_lvup(o, t) { [79, 81, 83, 86].forEach((m, i) => J.qing(o, t + i * .08, m, .16, i === 3 ? 1 : .4)); },   // 修为提升：一串上行的磬
+    j_pick0(o, t) { J.qing(o, t, 81, .18, .6); },
+    j_pick1(o, t) { J.qing(o, t, 81, .16, .5); J.qing(o, t + .08, 86, .16, .8); },
+    j_pick2(o, t) { [81, 86, 88].forEach((m, i) => J.qing(o, t + i * .08, m, .16, .9)); },
+    j_pick3(o, t) { [81, 86, 88, 93].forEach((m, i) => J.qing(o, t + i * .07, m, .17, 1.2)); J.gong(o, t + .3, .12, 196, 1.2); },
+    coin(o, t, k) { const f = 2100 * k; tone(o, t, { type: 'sine', p0: f, gain: .12, a: .001, d: .09 }); tone(o, t + .03, { type: 'sine', p0: f * 1.5, gain: .08, a: .001, d: .1 }); },   // 捡铜钱：pitch 越捡越高
+    j_banner(o, t) { J.drum(o, t, .7, 58); J.drum(o, t + .22, .75, 52); J.gong(o, t + .42, .26, 104, 1.6); },   // 开打横幅
+    j_shop(o, t) { for (let i = 0; i < 5; i++) noise(o, t + i * .06 + Math.random() * .02, { f0: 1800 + i * 200, q: 8, gain: .14, a: .001, d: .03 }); J.qing(o, t + .35, 88, .12, .8); },   // 行商：算盘 + 铜铃
+
     // —— 主角挥空 ——
     swing_staff(o, t, k) {   // 粗木棍：低沉、慢一点的"呼——"
       noise(o, t, { f0: 260 * k, f1: 900 * k, q: 1.4, gain: .55, a: .07, d: .16 });
@@ -5318,8 +5358,8 @@ function resultKey(e) {
       const now = ac.currentTime;
       if (lastAt[name] && now - lastAt[name] < .025) return;   // 同一帧重复触发只播一次
       lastAt[name] = now;
-      const o = bus(pan, (VOL[name] || .5) * R(.88, 1.05), WET[name] || .18);
-      S[name](o, now + .005, R(.94, 1.06) * pitch);
+      const o = bus(pan, (VOL[name] || (name[1] === '_' ? .7 : .5)) * R(.88, 1.05), WET[name] || (name[1] === '_' ? .35 : .18));
+      S[name](o, now + .005, (name[1] === '_' ? 1 : R(.94, 1.06)) * pitch);
     },
   };
 })();
@@ -5766,7 +5806,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   function addXiu(n) {
     if (!RT.on || !S.atAdd) return;
     S.xiu += n * AFX.xp();
-    while (S.xiu >= XIU_NEED(S.lv)) { S.xiu -= XIU_NEED(S.lv); S.lv++; S.bank++; S.lvFx = 1.6; if (hero) floaters.push({ x: hero.x, y: hero.y - 100, t: 0, txt: '修为提升 LV.' + S.lv, color: '#ffd86e' }); }
+    while (S.xiu >= XIU_NEED(S.lv)) { S.xiu -= XIU_NEED(S.lv); S.lv++; S.bank++; S.lvFx = 1.6; if (window.SFX) SFX.play('j_lvup'); if (hero) floaters.push({ x: hero.x, y: hero.y - 100, t: 0, txt: '修为提升 LV.' + S.lv, color: '#ffd86e' }); }
   }
   const RAR = [['白', '#e8e0d0', 1], ['蓝', '#5aa8ff', 2], ['紫', '#c07cff', 3], ['橙', '#ff9a3a', 2]];
   function rollXiu() {   // 三个不重复的属性选项；运气越高越容易出高品阶
@@ -5787,7 +5827,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     const box = document.createElement('div'); box.id = 'survPick';
     box.innerHTML = `<div class="p"><h3>修 炼${n > 1 ? ' · 第 ' + i + '/' + n + ' 次' : ''} · 三选一</h3><div class="row">${opts.map((o, j) => `<button data-j="${j}" class="q${o.q}"><i style="font-style:normal;font-size:12px;color:${RAR[o.q][1]}">${RAR[o.q][0]}</i><b style="color:${RAR[o.q][1]};font-size:24px">${o.adds.map(([a]) => ATN[a]).join(' · ')}</b><span>${o.adds.map(([a, v]) => ATN[a] + ' +' + v).join('，')}</span><small>${o.adds.map(([a]) => AT()[a] + ' → ' + (AT()[a] + o.adds.filter(x => x[0] === a).reduce((t, x) => t + x[1], 0))).join('，')}</small></button>`).join('')}</div>`
       + `<div style="margin-top:10px;font-size:12px;color:#cdb98e">修为 LV.${S.lv}　运气越高越容易出高品阶　${rerolled ? '' : '<a href="#" class="rr" style="color:#ffd86e;margin-left:8px">刷新一次</a>'}</div></div>`;
-    box.querySelectorAll('button').forEach(b => b.onclick = () => { const o = opts[+b.dataset.j]; for (const [a, v] of o.adds) S.atAdd[a] += v; S.bank--; box.remove(); cultivate(cb, i + 1, n); });
+    box.querySelectorAll('button').forEach(b => b.onclick = () => { const o = opts[+b.dataset.j]; if (window.SFX) SFX.play('j_pick' + o.q); for (const [a, v] of o.adds) S.atAdd[a] += v; S.bank--; box.remove(); cultivate(cb, i + 1, n); });
     const rr = box.querySelector('.rr'); if (rr) rr.onclick = e => { e.preventDefault(); box.remove(); cultivate(cb, i, n, true); };
     document.body.appendChild(box);
   }
@@ -6004,6 +6044,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     setTimeout(() => { zs.length = 0; }, 950);
     { const c = S.zq * .3; if (c > .05) { heal(c); floaters.push({ x: hero.x, y: hero.y - 60, t: 0, txt: '真气化血 +' + Math.round(c * 10), color: '#7fd0ff' }); } S.zq = 0; }   // 战后：剩余真气 30% 转成气血
     if (nd.type === 'boss' && nd.final) { won = true; return; }
+    if (window.SFX) SFX.play('j_win');
     const back = () => { W.pick = false; ROUTE.done(nd); };
     addXiu(nd.type === 'boss' ? 60 : nd.type === 'elite' ? 40 : 25);   // 节点结算修为
     W.pick = true; setTimeout(() => cultivate(() => loot(nd, back)), 900);
@@ -6145,6 +6186,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     const old = document.getElementById('waveBan'); if (old) old.remove();
     const d = document.createElement('div'); d.id = 'waveBan';
     d.innerHTML = '<div class="t">' + title + '</div><div class="s">' + sub + '</div>';
+    if (window.SFX) SFX.play('j_banner');
     document.body.appendChild(d); setTimeout(() => d.classList.add('out'), 1700); setTimeout(() => d.remove(), 2300);
   }
   function hud(HW) {

@@ -36,6 +36,7 @@ const RES_IMG = { win: new Image(), lose: new Image() }; RES_IMG.win.src = 'art/
 function drawRouteResult(HW, HH, raw) {
   const BRUSH = '"MaShanZheng","KaiTi","STKaiti","Kaiti SC",serif', F = '"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",sans-serif';
   for (const id of ['bR', 'top']) { const e = document.getElementById(id); if (e) e.style.visibility = 'hidden'; }
+  if (!result._jingle && window.SFX) { result._jingle = 1; SFX.play(result.win ? 'j_clear' : 'j_lose'); }
   const im = RES_IMG[result.win ? 'win' : 'lose'], fade = Math.min(1, raw / .6);
   ctx.save(); ctx.fillStyle = '#0c0806'; ctx.fillRect(0, 0, HW, HH);
   if (im.complete && im.naturalWidth) { const sc = Math.max(HW / im.naturalWidth, HH / im.naturalHeight) * (1.06 - .06 * Math.min(1, raw / 4)); const dw = im.naturalWidth * sc, dh = im.naturalHeight * sc; ctx.globalAlpha = fade; ctx.drawImage(im, (HW - dw) * .25, (HH - dh) / 2, dw, dh); }
