@@ -478,6 +478,22 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     zs.length = 0; eshots.length = 0; if (window.ARENA) ARENA.start(ROUTE.mapOf(nd));
     startWave(1);
   }
+  // ---------- 局内存档（11/11 用户定：回到长卷自动存；主界面「继续」读档） ----------
+  const RUN_KEY = 'szz-run';
+  const snap = () => ({ origin, slots: S.slots.slice(), held: S.held, mast: { ...S.mast }, gf: S.gf.slice(), qg: S.qg, gfExp: { ...S.gfExp }, xy: S.xy, rt: { dmg: RT.dmg, cd: RT.cd, move: RT.move, take: RT.take }, hp: hero ? hero.hp : null });
+  function restore(o) {
+    if (!o) return;
+    if (ORIGINS[o.origin]) origin = o.origin;
+    S.slots = o.slots || S.slots; S.held = o.held != null ? o.held : S.held; S.mast = o.mast || {}; S.gf = o.gf || ['', '', '']; S.qg = o.qg || ''; S.gfExp = o.gfExp || {}; S.xy = o.xy || 0;
+    Object.assign(RT, o.rt || {}); GM = gfCalc(); S.zq = zqMax();
+    if (hero && o.hp > 0) hero.hp = Math.min(o.hp, maxHp());
+  }
+  window.RUNSAVE = {
+    save() { try { const route = ROUTE.snap(); if (route) localStorage.setItem(RUN_KEY, JSON.stringify({ v: 1, t: Date.now(), name: window.TITLE && TITLE.playerName ? TITLE.playerName() : '', route, surv: snap() })); } catch (e) {} },
+    load() { try { const o = JSON.parse(localStorage.getItem(RUN_KEY) || 'null'); return o && o.v === 1 && o.route ? o : null; } catch (e) { return null; } },
+    has() { return !!this.load(); },
+    clear() { try { localStorage.removeItem(RUN_KEY); } catch (e) {} },
+  };
   // ---------- 对外接口 ----------
   function forceBlade() { weapon = 'blade'; pendingWeapon = null; try { if (window.GEAR && GEAR.switch) GEAR.switch(); } catch (e) {} if (typeof ui === 'function') ui(); }
   function startRun() {
@@ -488,7 +504,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     hero.x = arenaL + vw * .5; cam.x = arenaL;
     if (window.ARENA) ARENA.start();   // 竞技场试玩：重设边界、镜头和出生点
     RT.on = !!(window.ROUTE && ROUTE.on()); RT.dmg = 1; RT.cd = 1; RT.move = 1; RT.take = 1; RT.node = null;
-    if (RT.on) { W.started = false; ROUTE.start(); return; }
+    if (RT.on) { W.started = false; ROUTE.start(); const r = window.__RESUME; if (r) { window.__RESUME = null; ROUTE.resume(r.route); restore(r.surv); } return; }
     startWave(1);
   }
   function tick(dt) {

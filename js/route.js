@@ -186,6 +186,7 @@
   // 节点打完（或营地选完）：记下走过的路，回到长卷
   function done(n, keepOpen) {
     run.cur = n; run.visited.add(n);
+    if (window.RUNSAVE) RUNSAVE.save();   // 自动存档（11/11 用户定）：每打完一个节点、回到长卷时存一次；战斗中途不存
     ensureDom(); fit(); focus(false); shown = true; root.style.display = ''; t0 = performance.now();
     if (!raf) raf = requestAnimationFrame(frame);
   }
@@ -338,7 +339,7 @@
     edge();
   }
 
-  if (ON) { const poll = () => { if (pending && (!window.TITLE || TITLE.mode() === 'game')) { pending = false; open(); } requestAnimationFrame(poll); }; requestAnimationFrame(poll); }   // 真正进游戏（不是在标题页）才打开长卷
+  if (ON) { const poll = () => { if (window.RUNSAVE && ((typeof over !== 'undefined' && over) || (typeof won !== 'undefined' && won))) RUNSAVE.clear(); if (pending && (!window.TITLE || TITLE.mode() === 'game')) { pending = false; open(); if (window.RUNSAVE) RUNSAVE.save(); } requestAnimationFrame(poll); }; requestAnimationFrame(poll); }   // 真正进游戏（不是在标题页）才打开长卷
   const MAP_OF = l => l <= 4 ? 'field' : l <= 8 ? 'town' : l <= 12 ? 'forest' : l <= 16 ? 'camp' : 'altar';   // 第 1~4 层打谷场，5~8 县城，9~12 林间空地，13~17 营寨腹地，18 张角祭坛
   window.ROUTE = {
     mapOf: n => MAP_OF(n.layer),
@@ -349,6 +350,17 @@
     tagOf: n => n.tag,
     shown: () => shown || pending,
     start() { run = { ...gen(), visited: new Set() }; run.cur = run.start; run.visited.add(run.start); pending = true; if (shown) close(); },
+    snap() {   // 存档用：节点之间的连线存成编号
+      if (!run) return null;
+      return { nodes: run.nodes.map(n => ({ id: n.id, layer: n.layer, lane: n.lane, type: n.type, tag: n.tag, rw: n.rw, sec: n.sec, final: n.final, jx: n.jx, jy: n.jy, next: n.next.map(x => x.id) })), cur: run.cur.id, visited: [...run.visited].map(n => n.id) };
+    },
+    resume(o) {
+      const nodes = o.nodes.map(n => ({ ...n, next: [], prev: [] })), byLayer = [];
+      o.nodes.forEach((n, i) => n.next.forEach(j => { nodes[i].next.push(nodes[j]); nodes[j].prev.push(nodes[i]); }));
+      for (const n of nodes) (byLayer[n.layer] || (byLayer[n.layer] = [])).push(n);
+      run = { nodes, byLayer, start: nodes.find(n => n.type === 'start') || nodes[0], visited: new Set(o.visited.map(i => nodes[i])) };
+      run.cur = nodes[o.cur]; pending = true; if (shown) close();
+    },
     done, close, choose,
     debug: () => run,
   };

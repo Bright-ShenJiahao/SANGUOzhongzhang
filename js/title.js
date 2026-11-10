@@ -691,6 +691,20 @@
         box-shadow: inset 0 0 0 1px rgba(107,79,29,.9), inset 0 1px 0 rgba(255,235,170,.28), 0 4px 0 #1a110a, 0 9px 16px rgba(40,25,10,.38); }
       #tStart:active { transform: translateY(4px); box-shadow: inset 0 0 0 1px rgba(107,79,29,.9), 0 0 0 #1a110a, 0 3px 8px rgba(40,25,10,.4); }
       #tStart:disabled { filter: grayscale(.5) brightness(.85); }
+      #tCont { position: fixed; z-index: 7; font-family: inherit; font-weight: 700; background: linear-gradient(180deg,#f6ead2,#e6d2b0); border: 2px solid #8b6a35; border-radius: 6px;
+        color: #3b2a1c; letter-spacing: .3em; text-indent: .3em; cursor: pointer; box-shadow: inset 0 1px 0 rgba(255,255,255,.6), 0 4px 0 #6b4f2a, 0 9px 16px rgba(40,25,10,.3);
+        animation: tInkUp .9s 1.5s ease-out both; }
+      #tCont:active { transform: translateY(4px); box-shadow: 0 0 0 #6b4f2a, 0 3px 8px rgba(40,25,10,.3); }
+      #tConfirm { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; background: rgba(30,20,12,.5); }
+      #tConfirm .p { background: radial-gradient(ellipse at 50% 40%,#f6ead4,#e8d5b4); border: 2px solid #7a5a2c; border-radius: 8px; padding: 22px 26px 18px; width: min(88vw,420px);
+        text-align: center; color: #2a211a; font-family: "Songti SC","STSong","Noto Serif SC",serif; box-shadow: 0 14px 44px rgba(0,0,0,.45); }
+      #tConfirm h3 { margin: 0 0 12px; font-size: 22px; letter-spacing: .3em; }
+      #tConfirm p { margin: 0 0 6px; font-size: 15px; line-height: 1.7; }
+      #tConfirm small { display: block; margin: 8px 0 16px; font-size: 13px; opacity: .65; }
+      #tConfirm .r { display: flex; gap: 14px; justify-content: center; }
+      #tConfirm button { min-width: 120px; height: 44px; font: 700 17px "Songti SC","Noto Serif SC",serif; letter-spacing: .2em; border-radius: 6px; cursor: pointer; }
+      #tConfirm .no { background: #f3e6c8; color: #3b2a1c; border: 1px solid #7a5a2c; }
+      #tConfirm .yes { background: linear-gradient(180deg,#a8322a,#7c1f19); color: #fbe9d0; border: 1px solid #5a140f; }
       #tNovice, #tHintOff { color: #3b2e1d; text-shadow: none; justify-content: center; }
       #tNovice input { accent-color: #8b6a35; } #tHintOff input { accent-color: #8b6a35; }
       #tHelp { background: rgba(40,28,18,.72); border-color: #c9a24a; color: #f3dc9a; text-shadow: none; }
@@ -706,6 +720,12 @@
     dom.inkTitle = document.createElement('img'); dom.inkTitle.id = 'tInkTitle'; dom.inkTitle.alt = '三国终章：幸存者'; dom.inkTitle.draggable = false;
     document.body.appendChild(dom.inkTitle);
     dom.start.textContent = '新的旅途';
+    dom.cont = document.createElement('button'); dom.cont.id = 'tCont'; dom.cont.type = 'button'; dom.cont.textContent = '继续'; document.body.appendChild(dom.cont);
+    dom.cont.addEventListener('click', () => {   // 读档：回到上次的路线长卷（11/11）
+      const sv = window.RUNSAVE && RUNSAVE.load(); if (!sv || S.mode !== 'title') return;
+      if (sv.name) { S.name = sv.name; writeName(sv.name); }
+      window.__RESUME = sv; finish({ skipWake: true });
+    });
     for (let i = 0; i < 46; i++) MOTES.push({ x: Math.random(), y: Math.random(), v: .004 + Math.random() * .012, r: .6 + Math.random() * 1.8, a: .12 + Math.random() * .25, p: Math.random() * 6.28, ember: false });
     for (let i = 0; i < 10; i++) MOTES.push({ x: 0, y: 0, v: .02 + Math.random() * .03, r: .8 + Math.random() * 1.4, a: .5 + Math.random() * .4, p: Math.random() * 6.28, life: Math.random(), ember: true });
   }
@@ -735,9 +755,11 @@
     L.inY = nameTop;
     let s = dom.name.style;
     s.left = (cx - colW / 2) + 'px'; s.top = nameTop + 'px'; s.width = colW + 'px'; s.height = inH + 'px';
+    const hasRun = S.mode === 'title' && window.RUNSAVE && RUNSAVE.has(), gap = 10, wStart = hasRun ? Math.round((colW - gap) * .6) : colW;
     s = dom.start.style;
-    s.left = (cx - colW / 2) + 'px'; s.top = startTop + 'px'; s.width = colW + 'px'; s.height = btnH + 'px';
+    s.left = (cx - colW / 2) + 'px'; s.top = startTop + 'px'; s.width = wStart + 'px'; s.height = btnH + 'px';
     s.fontSize = Math.round(Math.max(16, Math.min(24, h * .045))) + 'px';
+    if (dom.cont) { const c = dom.cont.style; c.display = hasRun ? '' : 'none'; c.left = (cx - colW / 2 + wStart + gap) + 'px'; c.top = startTop + 'px'; c.width = (colW - wStart - gap) + 'px'; c.height = btnH + 'px'; c.fontSize = s.fontSize; }
     s = dom.novice.style;
     s.left = (cx - 112) + 'px'; s.right = ''; s.top = rowTop + 'px'; s.width = '104px'; s.height = rowH + 'px'; s.justifyContent = 'center';
     s = dom.hintOff.style;
@@ -927,6 +949,7 @@
   function setDomVisible(v) {
     const d = v ? '' : 'none';
     for (const k of ['name', 'start', 'help', 'novice', 'board', 'hintOff', 'inkTitle']) if (dom[k]) dom[k].style.display = d;
+    if (dom.cont) dom.cont.style.display = v && window.RUNSAVE && RUNSAVE.has() ? '' : 'none';
     if (!v && dom.modeTip) { dom.modeTip.style.opacity = '0'; }
     if (!v && dom.panel) { dom.panel.style.display = 'none'; helpOpen = false; }
   }
@@ -934,6 +957,14 @@
   let startPending = false;
   async function start() {
     if (S.mode !== 'title' || startPending) return;
+    if (window.RUNSAVE && RUNSAVE.has() && !S.okNew && !document.getElementById('tConfirm')) {   // 有未完成的一局：先确认（11/11）
+      const box = document.createElement('div'); box.id = 'tConfirm';
+      box.innerHTML = '<div class="p"><h3>开启新的旅途？</h3><p>还有一局没打完。<br>新局出发后会覆盖它，旧局将无法继续。</p><small>章节进度、设置不受影响</small><div class="r"><button class="no">取消</button><button class="yes">仍要新开</button></div></div>';
+      box.querySelector('.no').onclick = () => box.remove();
+      box.onclick = e => { if (e.target === box) box.remove(); };
+      box.querySelector('.yes').onclick = () => { box.remove(); S.okNew = true; start().finally(() => { S.okNew = false; }); };
+      document.body.appendChild(box); return;
+    }
     const n = (dom.name.value || '').trim().slice(0, 8);
     if (!n) {
       S.msg = '请输入名字'; S.msgT = 1.6;

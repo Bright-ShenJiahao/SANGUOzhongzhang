@@ -61,7 +61,7 @@ body.szz-pro #help{display:none}
 .x-back{min-height:34px!important}
 }
 #rot small{display:block;margin-top:10px;font-size:14px;font-weight:600;color:#c9b691;line-height:1.6}
-</style><link rel="preload" href="pack/fonts/result.woff2?v=a50214e8d6" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=a50214e8d6)format("woff2");font-display:swap}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
+</style><link rel="preload" href="pack/fonts/result.woff2?v=784f9f90ea" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=784f9f90ea)format("woff2");font-display:swap}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
 </head><body>
 <style>
 #bootSplash{position:fixed;inset:0;z-index:99999;background:radial-gradient(ellipse at 50% 45%,#f3e4cf 0%,#ecd9c0 55%,#d9c09f 100%);transition:opacity .45s ease-out}
@@ -100,7 +100,7 @@ if(location.protocol==='https:'&&!/[?&]debug(?:=|&|$)/.test(location.search)&&'s
 })();
 // 自动更新：打开游戏、或从后台切回来时，查一下线上有没有新版本；有就在标题/整备页自动刷新（战斗中不打扰）
 (function(){
-var BUILD='b084cab3b98b',busy=false;
+var BUILD='c8eaa81eaeda',busy=false;
 if(location.protocol!=='https:'||/[?&]debug(?:=|&|$)/.test(location.search))return;
 function check(){
   if(busy)return;
@@ -4732,6 +4732,7 @@ function resultKey(e) {
   // 节点打完（或营地选完）：记下走过的路，回到长卷
   function done(n, keepOpen) {
     run.cur = n; run.visited.add(n);
+    if (window.RUNSAVE) RUNSAVE.save();   // 自动存档（11/11 用户定）：每打完一个节点、回到长卷时存一次；战斗中途不存
     ensureDom(); fit(); focus(false); shown = true; root.style.display = ''; t0 = performance.now();
     if (!raf) raf = requestAnimationFrame(frame);
   }
@@ -4884,7 +4885,7 @@ function resultKey(e) {
     edge();
   }
 
-  if (ON) { const poll = () => { if (pending && (!window.TITLE || TITLE.mode() === 'game')) { pending = false; open(); } requestAnimationFrame(poll); }; requestAnimationFrame(poll); }   // 真正进游戏（不是在标题页）才打开长卷
+  if (ON) { const poll = () => { if (window.RUNSAVE && ((typeof over !== 'undefined' && over) || (typeof won !== 'undefined' && won))) RUNSAVE.clear(); if (pending && (!window.TITLE || TITLE.mode() === 'game')) { pending = false; open(); if (window.RUNSAVE) RUNSAVE.save(); } requestAnimationFrame(poll); }; requestAnimationFrame(poll); }   // 真正进游戏（不是在标题页）才打开长卷
   const MAP_OF = l => l <= 4 ? 'field' : l <= 8 ? 'town' : l <= 12 ? 'forest' : l <= 16 ? 'camp' : 'altar';   // 第 1~4 层打谷场，5~8 县城，9~12 林间空地，13~17 营寨腹地，18 张角祭坛
   window.ROUTE = {
     mapOf: n => MAP_OF(n.layer),
@@ -4895,6 +4896,17 @@ function resultKey(e) {
     tagOf: n => n.tag,
     shown: () => shown || pending,
     start() { run = { ...gen(), visited: new Set() }; run.cur = run.start; run.visited.add(run.start); pending = true; if (shown) close(); },
+    snap() {   // 存档用：节点之间的连线存成编号
+      if (!run) return null;
+      return { nodes: run.nodes.map(n => ({ id: n.id, layer: n.layer, lane: n.lane, type: n.type, tag: n.tag, rw: n.rw, sec: n.sec, final: n.final, jx: n.jx, jy: n.jy, next: n.next.map(x => x.id) })), cur: run.cur.id, visited: [...run.visited].map(n => n.id) };
+    },
+    resume(o) {
+      const nodes = o.nodes.map(n => ({ ...n, next: [], prev: [] })), byLayer = [];
+      o.nodes.forEach((n, i) => n.next.forEach(j => { nodes[i].next.push(nodes[j]); nodes[j].prev.push(nodes[i]); }));
+      for (const n of nodes) (byLayer[n.layer] || (byLayer[n.layer] = [])).push(n);
+      run = { nodes, byLayer, start: nodes.find(n => n.type === 'start') || nodes[0], visited: new Set(o.visited.map(i => nodes[i])) };
+      run.cur = nodes[o.cur]; pending = true; if (shown) close();
+    },
     done, close, choose,
     debug: () => run,
   };
@@ -5836,6 +5848,22 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     zs.length = 0; eshots.length = 0; if (window.ARENA) ARENA.start(ROUTE.mapOf(nd));
     startWave(1);
   }
+  // ---------- 局内存档（11/11 用户定：回到长卷自动存；主界面「继续」读档） ----------
+  const RUN_KEY = 'szz-run';
+  const snap = () => ({ origin, slots: S.slots.slice(), held: S.held, mast: { ...S.mast }, gf: S.gf.slice(), qg: S.qg, gfExp: { ...S.gfExp }, xy: S.xy, rt: { dmg: RT.dmg, cd: RT.cd, move: RT.move, take: RT.take }, hp: hero ? hero.hp : null });
+  function restore(o) {
+    if (!o) return;
+    if (ORIGINS[o.origin]) origin = o.origin;
+    S.slots = o.slots || S.slots; S.held = o.held != null ? o.held : S.held; S.mast = o.mast || {}; S.gf = o.gf || ['', '', '']; S.qg = o.qg || ''; S.gfExp = o.gfExp || {}; S.xy = o.xy || 0;
+    Object.assign(RT, o.rt || {}); GM = gfCalc(); S.zq = zqMax();
+    if (hero && o.hp > 0) hero.hp = Math.min(o.hp, maxHp());
+  }
+  window.RUNSAVE = {
+    save() { try { const route = ROUTE.snap(); if (route) localStorage.setItem(RUN_KEY, JSON.stringify({ v: 1, t: Date.now(), name: window.TITLE && TITLE.playerName ? TITLE.playerName() : '', route, surv: snap() })); } catch (e) {} },
+    load() { try { const o = JSON.parse(localStorage.getItem(RUN_KEY) || 'null'); return o && o.v === 1 && o.route ? o : null; } catch (e) { return null; } },
+    has() { return !!this.load(); },
+    clear() { try { localStorage.removeItem(RUN_KEY); } catch (e) {} },
+  };
   // ---------- 对外接口 ----------
   function forceBlade() { weapon = 'blade'; pendingWeapon = null; try { if (window.GEAR && GEAR.switch) GEAR.switch(); } catch (e) {} if (typeof ui === 'function') ui(); }
   function startRun() {
@@ -5846,7 +5874,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     hero.x = arenaL + vw * .5; cam.x = arenaL;
     if (window.ARENA) ARENA.start();   // 竞技场试玩：重设边界、镜头和出生点
     RT.on = !!(window.ROUTE && ROUTE.on()); RT.dmg = 1; RT.cd = 1; RT.move = 1; RT.take = 1; RT.node = null;
-    if (RT.on) { W.started = false; ROUTE.start(); return; }
+    if (RT.on) { W.started = false; ROUTE.start(); const r = window.__RESUME; if (r) { window.__RESUME = null; ROUTE.resume(r.route); restore(r.surv); } return; }
     startWave(1);
   }
   function tick(dt) {
@@ -6741,6 +6769,20 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
         box-shadow: inset 0 0 0 1px rgba(107,79,29,.9), inset 0 1px 0 rgba(255,235,170,.28), 0 4px 0 #1a110a, 0 9px 16px rgba(40,25,10,.38); }
       #tStart:active { transform: translateY(4px); box-shadow: inset 0 0 0 1px rgba(107,79,29,.9), 0 0 0 #1a110a, 0 3px 8px rgba(40,25,10,.4); }
       #tStart:disabled { filter: grayscale(.5) brightness(.85); }
+      #tCont { position: fixed; z-index: 7; font-family: inherit; font-weight: 700; background: linear-gradient(180deg,#f6ead2,#e6d2b0); border: 2px solid #8b6a35; border-radius: 6px;
+        color: #3b2a1c; letter-spacing: .3em; text-indent: .3em; cursor: pointer; box-shadow: inset 0 1px 0 rgba(255,255,255,.6), 0 4px 0 #6b4f2a, 0 9px 16px rgba(40,25,10,.3);
+        animation: tInkUp .9s 1.5s ease-out both; }
+      #tCont:active { transform: translateY(4px); box-shadow: 0 0 0 #6b4f2a, 0 3px 8px rgba(40,25,10,.3); }
+      #tConfirm { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; background: rgba(30,20,12,.5); }
+      #tConfirm .p { background: radial-gradient(ellipse at 50% 40%,#f6ead4,#e8d5b4); border: 2px solid #7a5a2c; border-radius: 8px; padding: 22px 26px 18px; width: min(88vw,420px);
+        text-align: center; color: #2a211a; font-family: "Songti SC","STSong","Noto Serif SC",serif; box-shadow: 0 14px 44px rgba(0,0,0,.45); }
+      #tConfirm h3 { margin: 0 0 12px; font-size: 22px; letter-spacing: .3em; }
+      #tConfirm p { margin: 0 0 6px; font-size: 15px; line-height: 1.7; }
+      #tConfirm small { display: block; margin: 8px 0 16px; font-size: 13px; opacity: .65; }
+      #tConfirm .r { display: flex; gap: 14px; justify-content: center; }
+      #tConfirm button { min-width: 120px; height: 44px; font: 700 17px "Songti SC","Noto Serif SC",serif; letter-spacing: .2em; border-radius: 6px; cursor: pointer; }
+      #tConfirm .no { background: #f3e6c8; color: #3b2a1c; border: 1px solid #7a5a2c; }
+      #tConfirm .yes { background: linear-gradient(180deg,#a8322a,#7c1f19); color: #fbe9d0; border: 1px solid #5a140f; }
       #tNovice, #tHintOff { color: #3b2e1d; text-shadow: none; justify-content: center; }
       #tNovice input { accent-color: #8b6a35; } #tHintOff input { accent-color: #8b6a35; }
       #tHelp { background: rgba(40,28,18,.72); border-color: #c9a24a; color: #f3dc9a; text-shadow: none; }
@@ -6756,6 +6798,12 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     dom.inkTitle = document.createElement('img'); dom.inkTitle.id = 'tInkTitle'; dom.inkTitle.alt = '三国终章：幸存者'; dom.inkTitle.draggable = false;
     document.body.appendChild(dom.inkTitle);
     dom.start.textContent = '新的旅途';
+    dom.cont = document.createElement('button'); dom.cont.id = 'tCont'; dom.cont.type = 'button'; dom.cont.textContent = '继续'; document.body.appendChild(dom.cont);
+    dom.cont.addEventListener('click', () => {   // 读档：回到上次的路线长卷（11/11）
+      const sv = window.RUNSAVE && RUNSAVE.load(); if (!sv || S.mode !== 'title') return;
+      if (sv.name) { S.name = sv.name; writeName(sv.name); }
+      window.__RESUME = sv; finish({ skipWake: true });
+    });
     for (let i = 0; i < 46; i++) MOTES.push({ x: Math.random(), y: Math.random(), v: .004 + Math.random() * .012, r: .6 + Math.random() * 1.8, a: .12 + Math.random() * .25, p: Math.random() * 6.28, ember: false });
     for (let i = 0; i < 10; i++) MOTES.push({ x: 0, y: 0, v: .02 + Math.random() * .03, r: .8 + Math.random() * 1.4, a: .5 + Math.random() * .4, p: Math.random() * 6.28, life: Math.random(), ember: true });
   }
@@ -6785,9 +6833,11 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     L.inY = nameTop;
     let s = dom.name.style;
     s.left = (cx - colW / 2) + 'px'; s.top = nameTop + 'px'; s.width = colW + 'px'; s.height = inH + 'px';
+    const hasRun = S.mode === 'title' && window.RUNSAVE && RUNSAVE.has(), gap = 10, wStart = hasRun ? Math.round((colW - gap) * .6) : colW;
     s = dom.start.style;
-    s.left = (cx - colW / 2) + 'px'; s.top = startTop + 'px'; s.width = colW + 'px'; s.height = btnH + 'px';
+    s.left = (cx - colW / 2) + 'px'; s.top = startTop + 'px'; s.width = wStart + 'px'; s.height = btnH + 'px';
     s.fontSize = Math.round(Math.max(16, Math.min(24, h * .045))) + 'px';
+    if (dom.cont) { const c = dom.cont.style; c.display = hasRun ? '' : 'none'; c.left = (cx - colW / 2 + wStart + gap) + 'px'; c.top = startTop + 'px'; c.width = (colW - wStart - gap) + 'px'; c.height = btnH + 'px'; c.fontSize = s.fontSize; }
     s = dom.novice.style;
     s.left = (cx - 112) + 'px'; s.right = ''; s.top = rowTop + 'px'; s.width = '104px'; s.height = rowH + 'px'; s.justifyContent = 'center';
     s = dom.hintOff.style;
@@ -6977,6 +7027,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   function setDomVisible(v) {
     const d = v ? '' : 'none';
     for (const k of ['name', 'start', 'help', 'novice', 'board', 'hintOff', 'inkTitle']) if (dom[k]) dom[k].style.display = d;
+    if (dom.cont) dom.cont.style.display = v && window.RUNSAVE && RUNSAVE.has() ? '' : 'none';
     if (!v && dom.modeTip) { dom.modeTip.style.opacity = '0'; }
     if (!v && dom.panel) { dom.panel.style.display = 'none'; helpOpen = false; }
   }
@@ -6984,6 +7035,14 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   let startPending = false;
   async function start() {
     if (S.mode !== 'title' || startPending) return;
+    if (window.RUNSAVE && RUNSAVE.has() && !S.okNew && !document.getElementById('tConfirm')) {   // 有未完成的一局：先确认（11/11）
+      const box = document.createElement('div'); box.id = 'tConfirm';
+      box.innerHTML = '<div class="p"><h3>开启新的旅途？</h3><p>还有一局没打完。<br>新局出发后会覆盖它，旧局将无法继续。</p><small>章节进度、设置不受影响</small><div class="r"><button class="no">取消</button><button class="yes">仍要新开</button></div></div>';
+      box.querySelector('.no').onclick = () => box.remove();
+      box.onclick = e => { if (e.target === box) box.remove(); };
+      box.querySelector('.yes').onclick = () => { box.remove(); S.okNew = true; start().finally(() => { S.okNew = false; }); };
+      document.body.appendChild(box); return;
+    }
     const n = (dom.name.value || '').trim().slice(0, 8);
     if (!n) {
       S.msg = '请输入名字'; S.msgT = 1.6;
