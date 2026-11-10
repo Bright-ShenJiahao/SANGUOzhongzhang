@@ -1391,7 +1391,7 @@
         bootWait += dt;
         const im = inkPortrait() ? INK.phone : INK.pc, ti = dom.inkTitle;
         if ((inkReady(im) && (!ti || (ti.complete && ti.naturalWidth))) || bootWait > 12) {
-          S.booted = true; S.t = 0;
+          S.booted = true; S.t = 1.3;   // 加载幕上图已经淡入了，揭幕时画布直接画满，不再从宣纸淡入
           for (const e of [ti, dom.start, dom.novice, dom.hintOff, dom.board]) if (e) { e.style.animation = 'none'; void e.offsetWidth; e.style.animation = ''; }
           if (window.bootDone) window.bootDone();
         } else S.t = 0;
