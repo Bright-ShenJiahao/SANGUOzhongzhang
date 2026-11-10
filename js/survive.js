@@ -256,7 +256,8 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const HELDP = { 0: 'wd_' };
   const heldPre = () => 'wd_';   // 目前只有刀的美术：主角始终拿刀
   // 出身六项属性（11/11 用户定 A：全部接上效果）：体魄 短兵 长兵 身法 运气 悟性
-  const AT = () => OG().at || [3, 3, 3, 3, 3, 3];
+  const AT0 = () => OG().at || [3, 3, 3, 3, 3, 3];
+  const AT = () => { const b = AT0(), d = S.atAdd || []; return b.map((v, i) => v + (d[i] || 0)); };   // 出身底子 + 本局修炼
   const profV = v => Math.max(.72, Math.min(1.35, .58 + .15 * v));
   const AFX = {
     hp: () => 1 + (AT()[0] - 3) * .07,          // 体魄：气血（以受伤减免折算）
@@ -264,6 +265,37 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     crit: () => (AT()[4] - 3) * .03,            // 运气：暴击率
     xp: () => Math.max(.5, 1 + (AT()[5] - 3) * .1),   // 悟性：招式/功法熟练度获取
   };
+  // ---------- 修为（11/11 用户定，照群侠幸存者）：杀敌和打完节点涨修为，满了升级攒一次「修炼」，节点打完后统一修炼（属性三选一），战斗中不打断 ----------
+  const ATN = ['体魄', '短兵', '长兵', '身法', '运气', '悟性'];
+  const XIU_NEED = lv => 70 + lv * 25;
+  function addXiu(n) {
+    if (!RT.on || !S.atAdd) return;
+    S.xiu += n * AFX.xp();
+    while (S.xiu >= XIU_NEED(S.lv)) { S.xiu -= XIU_NEED(S.lv); S.lv++; S.bank++; S.lvFx = 1.6; if (hero) floaters.push({ x: hero.x, y: hero.y - 100, t: 0, txt: '修为提升 LV.' + S.lv, color: '#ffd86e' }); }
+  }
+  const RAR = [['白', '#e8e0d0', 1], ['蓝', '#5aa8ff', 2], ['紫', '#c07cff', 3], ['橙', '#ff9a3a', 2]];
+  function rollXiu() {   // 三个不重复的属性选项；运气越高越容易出高品阶
+    const sh = (AT()[4] - 3) * .03, out = [], used = new Set();
+    while (out.length < 3) {
+      const r = Math.random(), q = r < .03 + sh / 3 ? 3 : r < .15 + sh * 2 / 3 ? 2 : r < .45 + sh ? 1 : 0;
+      let a = Math.random() * 6 | 0; while (used.has(a)) a = (a + 1) % 6; used.add(a);
+      const o = { q, adds: [[a, RAR[q][2]]] };
+      if (q === 3) { let b = Math.random() * 6 | 0; while (b === a) b = Math.random() * 6 | 0; o.adds.push([b, 2]); }
+      out.push(o);
+    }
+    return out;
+  }
+  function cultivate(cb, i = 1, n = S.bank, rerolled = false, opts = null) {
+    if (!S.bank) return cb();
+    opts = opts || rollXiu();
+    const old = document.getElementById('survPick'); if (old) old.remove();
+    const box = document.createElement('div'); box.id = 'survPick';
+    box.innerHTML = `<div class="p"><h3>修 炼${n > 1 ? ' · 第 ' + i + '/' + n + ' 次' : ''} · 三选一</h3><div class="row">${opts.map((o, j) => `<button data-j="${j}" style="border-color:${RAR[o.q][1]}"><i style="font-style:normal;font-size:12px;color:${RAR[o.q][1]}">${RAR[o.q][0]}</i><b style="color:${RAR[o.q][1]};font-size:24px">${o.adds.map(([a]) => ATN[a]).join(' · ')}</b><span>${o.adds.map(([a, v]) => ATN[a] + ' +' + v).join('，')}</span><small>${o.adds.map(([a]) => AT()[a] + ' → ' + (AT()[a] + o.adds.filter(x => x[0] === a).reduce((t, x) => t + x[1], 0))).join('，')}</small></button>`).join('')}</div>`
+      + `<div style="margin-top:10px;font-size:12px;color:#cdb98e">修为 LV.${S.lv}　运气越高越容易出高品阶　${rerolled ? '' : '<a href="#" class="rr" style="color:#ffd86e;margin-left:8px">刷新一次</a>'}</div></div>`;
+    box.querySelectorAll('button').forEach(b => b.onclick = () => { const o = opts[+b.dataset.j]; for (const [a, v] of o.adds) S.atAdd[a] += v; S.bank--; box.remove(); cultivate(cb, i + 1, n); });
+    const rr = box.querySelector('.rr'); if (rr) rr.onclick = e => { e.preventDefault(); box.remove(); cultivate(cb, i, n, true); };
+    document.body.appendChild(box);
+  }
   const profOf = c => c === 0 ? profV(AT()[1]) : c === 1 ? profV(AT()[2]) : profV((OG().oa || [3, 3, 3, 3, 3, 3, 3, 3])[CATA[c]]);   // 短兵/长兵：对应大类招式伤害
   const RESD = [0, 0, .08, .16, .26, .40];   // 同类别 n 件：该类别招式伤害加成
   function RES() {
@@ -374,6 +406,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
           S.gf.forEach(id => { if (id) { const l0 = gfLv(id); S.gfExp[id] = (S.gfExp[id] || 0) + d * AFX.xp() * (GF[id].c >= 0 ? XPM[Math.max(1, gfSame(GF[id].c))] : 1); if (gfLv(id) > l0) floaters.push({ x: hero.x, y: hero.y - 90, t: 0, txt: GF[id].n + ' LV' + gfLv(id), color: '#ffd86e' }); } });
           if (GM.kh) heal(maxHp() * GM.kh * d);
           S.zq = Math.min(zqMax(), S.zq + zqMax() * .006 * d);
+          addXiu(d);
         }
       }
       S.lk = kills;
@@ -475,6 +508,10 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     { const c = S.zq * .3; if (c > .05) { heal(c); floaters.push({ x: hero.x, y: hero.y - 60, t: 0, txt: '真气化血 +' + Math.round(c * 10), color: '#7fd0ff' }); } S.zq = 0; }   // 战后：剩余真气 30% 转成气血
     if (nd.type === 'boss' && nd.final) { won = true; return; }
     const back = () => { W.pick = false; ROUTE.done(nd); };
+    addXiu(nd.type === 'boss' ? 60 : nd.type === 'elite' ? 40 : 25);   // 节点结算修为
+    W.pick = true; cultivate(() => loot(nd, back));
+  }
+  function loot(nd, back) {
     if (nd.type === 'boss') { say('敌将已破！', 1.4); heal(maxHp() * .3); offerReward(2, back, 1, ['skill', 'perk']); }   // 血量是资源：只有首领、营地、疗伤奖励、奇遇才回血
     else if (nd.type === 'elite') { say('精锐已破！', 1.4); offerReward(2, back, 1, ['skill', 'perk']); }
     else if (nd.rw === 'heal') { say('包扎伤口', 1.2); heal(maxHp() * .35); back(); }
@@ -489,11 +526,12 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   }
   // ---------- 局内存档（11/11 用户定：回到长卷自动存；主界面「继续」读档） ----------
   const RUN_KEY = 'szz-run';
-  const snap = () => ({ origin, slots: S.slots.slice(), held: S.held, mast: { ...S.mast }, gf: S.gf.slice(), qg: S.qg, gfExp: { ...S.gfExp }, xy: S.xy, rt: { dmg: RT.dmg, cd: RT.cd, move: RT.move, take: RT.take }, hp: hero ? hero.hp : null });
+  const snap = () => ({ origin, slots: S.slots.slice(), held: S.held, mast: { ...S.mast }, gf: S.gf.slice(), qg: S.qg, gfExp: { ...S.gfExp }, xy: S.xy, rt: { dmg: RT.dmg, cd: RT.cd, move: RT.move, take: RT.take }, hp: hero ? hero.hp : null, lv: S.lv, xiu: S.xiu, bank: S.bank, atAdd: (S.atAdd || []).slice() });
   function restore(o) {
     if (!o) return;
     if (ORIGINS[o.origin]) origin = o.origin;
     S.slots = o.slots || S.slots; S.held = o.held != null ? o.held : S.held; S.mast = o.mast || {}; S.gf = o.gf || ['', '', '']; S.qg = o.qg || ''; S.gfExp = o.gfExp || {}; S.xy = o.xy || 0;
+    S.lv = o.lv || 1; S.xiu = o.xiu || 0; S.bank = o.bank || 0; S.atAdd = o.atAdd || [0, 0, 0, 0, 0, 0];
     Object.assign(RT, o.rt || {}); GM = gfCalc(); S.zq = zqMax();
     if (hero && o.hp > 0) hero.hp = Math.min(o.hp, maxHp());
   }
@@ -506,7 +544,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   // ---------- 对外接口 ----------
   function forceBlade() { weapon = 'blade'; pendingWeapon = null; try { if (window.GEAR && GEAR.switch) GEAR.switch(); } catch (e) {} if (typeof ui === 'function') ui(); }
   function startRun() {
-    S.slots = [OG().skill || 'hengsao', '', '', '', '']; S.held = wepOf(S.slots[0]) < 7 ? wepOf(S.slots[0]) : null; S.mast = {}; S.dps = {}; S.gf = ['', '', '']; S.qg = ''; S.gfExp = {}; S.xy = 0; S.lhjReady = false; S.lhjOn = false; GM = GM0(); S.zq = zqMax(); S.hp0 = hero.hp; S.combo = 0; S.lk = typeof kills === 'number' ? kills : 0; S.chain = 0; S.lastCat = -1; S.lastI = -9; W.pick = false; const old = document.getElementById('survPick'); if (old) old.remove();
+    S.lv = 1; S.xiu = 0; S.bank = 0; S.atAdd = [0, 0, 0, 0, 0, 0]; S.lvFx = 0; S.slots = [OG().skill || 'hengsao', '', '', '', '']; S.held = wepOf(S.slots[0]) < 7 ? wepOf(S.slots[0]) : null; S.mast = {}; S.dps = {}; S.gf = ['', '', '']; S.qg = ''; S.gfExp = {}; S.xy = 0; S.lhjReady = false; S.lhjOn = false; GM = GM0(); S.zq = zqMax(); S.hp0 = hero.hp; S.combo = 0; S.lk = typeof kills === 'number' ? kills : 0; S.chain = 0; S.lastCat = -1; S.lastI = -9; W.pick = false; const old = document.getElementById('survPick'); if (old) old.remove();
     W.started = true; W.between = 0; S.wind = null; S.recov = null; S.later = []; S.qi = 0; bolts.length = 0; zones.length = 0; S.cycles = 0; fx.length = 0;
     forceBlade();
     const vw = viewW(); arenaL = M.gates[0] + 10; lockR = arenaL + vw * 1.5; gateI = 0;
@@ -600,7 +638,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   function hud(HW) {
     hudT = performance.now(); buildUi();
     const HH = ctx.canvas.height / DPR, fine = !(window.matchMedia && matchMedia('(pointer:coarse)').matches), n = 5, sz = fine ? 44 : 38, sz0 = sz, gap = 6, w = n * sz + (n - 1) * gap;
-    const x0 = fine ? 16 : (HW - w) / 2, y0 = fine ? HH - 16 - sz * 2 - 8 : 44, labY = fine ? 54 : y0 + sz + 4 + 26 + 18;
+    const x0 = fine ? 16 : (HW - w) / 2, y0 = fine ? HH - 16 - sz * 2 - 8 : 44, labY = (fine ? 54 : y0 + sz + 4 + 26 + 18) + (RT.on ? 16 : 0);
     ctx.save();
     const slot = (x, y, k, cur, i, lbl, sz = sz0) => {
       ctx.fillStyle = '#241812'; ctx.fillRect(x, y, sz, sz);
@@ -635,6 +673,18 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     const big = (num, label, y, a) => { ctx.globalAlpha = a; ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.font = 'bold ' + nf + 'px "PingFang SC",sans-serif'; ctx.lineWidth = 6; ctx.strokeStyle = 'rgba(30,18,10,.85)'; ctx.strokeText(num, rx, y); ctx.fillStyle = '#f4ead0'; ctx.fillText(num, rx, y); ctx.font = 'bold ' + (fine ? 20 : 14) + 'px "PingFang SC",sans-serif'; ctx.lineWidth = 4; ctx.strokeText(label, rx, y + nf * .72); ctx.fillStyle = '#d9a84a'; ctx.fillText(label, rx, y + nf * .72); ctx.globalAlpha = 1; };
     big(String(typeof kills === 'number' ? kills : 0), '击杀', ry, 1);
     if (S.combo > 1) big(String(S.combo), '连击', ry + nf * 1.7, Math.min(1, S.comboT / .6));
+    // 修为条（11/11）：顶部正中，LV + 百分比；攒着的修炼次数写在右边
+    if (RT.on && RT.node && S.atAdd) {
+      const bw = Math.min(HW * .42, 460), bx = (HW - bw) / 2, by = 6, bh = 13, r = Math.min(1, S.xiu / XIU_NEED(S.lv));
+      ctx.save(); ctx.fillStyle = 'rgba(14,9,6,.82)'; ctx.fillRect(bx - 3, by - 2, bw + 6, bh + 4); ctx.strokeStyle = '#b08a4a'; ctx.lineWidth = 1; ctx.strokeRect(bx - 2.5, by - 1.5, bw + 5, bh + 3);
+      const gx = ctx.createLinearGradient(0, by, 0, by + bh); gx.addColorStop(0, '#ffe08a'); gx.addColorStop(1, '#b8801e'); ctx.fillStyle = gx; ctx.fillRect(bx, by, bw * r, bh);
+      if (S.lvFx > 0) { ctx.globalAlpha = Math.min(1, S.lvFx) * .6; ctx.fillStyle = '#fff6c8'; ctx.fillRect(bx, by, bw, bh); ctx.globalAlpha = 1; S.lvFx = Math.max(0, S.lvFx - 1 / 60); }
+      ctx.font = 'bold 11px "PingFang SC",sans-serif'; ctx.textBaseline = 'middle'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(20,10,4,.95)'; ctx.fillStyle = '#fff2d0';
+      ctx.textAlign = 'left'; ctx.strokeText('修为 LV.' + S.lv, bx + 6, by + bh / 2 + .5); ctx.fillText('修为 LV.' + S.lv, bx + 6, by + bh / 2 + .5);
+      ctx.textAlign = 'right'; const pc = Math.floor(r * 100) + '%'; ctx.strokeText(pc, bx + bw - 6, by + bh / 2 + .5); ctx.fillText(pc, bx + bw - 6, by + bh / 2 + .5);
+      if (S.bank > 0) { ctx.textAlign = 'left'; ctx.fillStyle = '#ffd86e'; const t = '待修炼 ×' + S.bank; ctx.strokeText(t, bx + bw + 10, by + bh / 2 + .5); ctx.fillText(t, bx + bw + 10, by + bh / 2 + .5); }
+      ctx.restore();
+    }
     // 波次与倒计时
     ctx.font = 'bold 14px "PingFang SC",sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#ffe9a0';
     const left = Math.max(0, Math.ceil(WT() - W.t));
@@ -706,11 +756,11 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   addEventListener('keydown', e => { if (e.key === 'Tab' && RT.on && (ROUTE.shown() || performance.now() - hudT < 800)) { e.preventDefault(); toggleBuild(); } });
   setInterval(buildUi, 400);
 
-  const attrInfo = k => { const o0 = origin; if (ORIGINS[k]) origin = k; const at = AT(), pct = x => (x >= 0 ? '+' : '') + Math.round(x * 100) + '%';
+  const attrInfo = k => { const o0 = origin, d0 = S.atAdd; if (ORIGINS[k]) origin = k; S.atAdd = null; const at = AT(), pct = x => (x >= 0 ? '+' : '') + Math.round(x * 100) + '%';
     const r = [['体魄', at[0], '气血 ' + pct(AFX.hp() - 1), '越高越扛打：受到的伤害按比例减少'], ['短兵', at[1], '刀剑招式 ' + pct(profV(at[1]) - 1), '刀、剑等短兵器招式的伤害'], ['长兵', at[2], '枪戟招式 ' + pct(profV(at[2]) - 1), '枪、关刀等长兵器招式的伤害'],
       ['身法', at[3], '移速 ' + pct(AFX.move() - 1), '移动速度'], ['运气', at[4], '暴击 ' + pct(AFX.crit()), '暴击率（基础 5%）'], ['悟性', at[5], '熟练 ' + pct(AFX.xp() - 1), '招式、功法熟练度涨得更快']];
-    origin = o0; return r; };
-  window.SURV = { attrInfo, heldPre: () => heldPre(), dbg: () => ({ gf: S.gf.slice(), qg: S.qg, zq: S.zq, zqMax: zqMax(), exp: S.gfExp, GM }), giveGf: id => { if (GF[id]) { if (GF[id].qg) S.qg = id; else { const f = S.gf.indexOf(""); if (f >= 0) S.gf[f] = id; } } }, newHud: () => RT.on && !!RT.node, stunGate, noStun: () => RT.on, get slots() { return S.slots; }, SK, beginNode, frozen: () => RT.on && (ROUTE.shown() || buildOpen), routeHp: () => [hero.hp, maxHp()], camp(k) { if (k === 'heal') heal(maxHp() * .3); else RT.dmg *= 1.1; }, ORIGINS, setOrigin(k) { if (ORIGINS[k] && !ORIGINS[k].locked) origin = k; }, origin: () => origin, takeMul: () => {
+    origin = o0; S.atAdd = d0; return r; };
+  window.SURV = { attrInfo, addXiu: n => addXiu(n), heldPre: () => heldPre(), dbg: () => ({ gf: S.gf.slice(), qg: S.qg, zq: S.zq, zqMax: zqMax(), exp: S.gfExp, GM }), giveGf: id => { if (GF[id]) { if (GF[id].qg) S.qg = id; else { const f = S.gf.indexOf(""); if (f >= 0) S.gf[f] = id; } } }, newHud: () => RT.on && !!RT.node, stunGate, noStun: () => RT.on, get slots() { return S.slots; }, SK, beginNode, frozen: () => RT.on && (ROUTE.shown() || buildOpen), routeHp: () => [hero.hp, maxHp()], camp(k) { if (k === 'heal') heal(maxHp() * .3); else RT.dmg *= 1.1; }, ORIGINS, setOrigin(k) { if (ORIGINS[k] && !ORIGINS[k].locked) origin = k; }, origin: () => origin, takeMul: () => {
       if (RT.on && GM.block && Math.random() < GM.block) { floaters.push({ x: hero.x, y: hero.y - 50, t: 0, txt: '格挡', color: '#bfe0ff' }); return 0; }
       const mv = Math.abs(hero.ix) > .1 || Math.abs(hero.iy) > .1, low = hero.hp / maxHp() < .3 ? 1 - .10 * GM.low : 1;
       return (OG().take || 1) / AFX.hp() * RT.take * RES().take * GM.take / GM.hp * low * (S.qg === 'taxue' && mv ? .85 : 1) * (GM.still && S.stillT > 1 ? 1 - GM.still : 1);

@@ -1114,7 +1114,7 @@ function draw() {
     ctx.save();
     ctx.font = 'bold 18px "PingFang SC","Noto Sans CJK SC",sans-serif';
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    const tw = ctx.measureText(tstr).width, bw2 = tw + 30, bx2 = HW / 2 - bw2 / 2, by2 = 8;
+    const tw = ctx.measureText(tstr).width, bw2 = tw + 30, bx2 = HW / 2 - bw2 / 2, by2 = _left != null ? 24 : 8;   // 路线模式：让出最上面的修为条
     ctx.fillStyle = 'rgba(20,14,30,.62)';
     ctx.beginPath();
     if (ctx.roundRect) ctx.roundRect(bx2, by2, bw2, 26, 13); else ctx.rect(bx2, by2, bw2, 26);
