@@ -745,6 +745,20 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(900px,58v
 @keyframes pfade{from{opacity:0;transform:translateY(calc(6px*var(--k)))}}
 #survPrep .bd.an{animation:pfade .2s ease-out}
 #survPrep .bd.an .sc{animation:pfade .25s ease-out backwards}#survPrep .bd.an .sc:nth-child(2){animation-delay:.04s}#survPrep .bd.an .sc:nth-child(3){animation-delay:.08s}#survPrep .bd.an .sc:nth-child(4){animation-delay:.12s}#survPrep .bd.an .sc:nth-child(5){animation-delay:.16s}
+/* 11/11：卡片详情直接写在卡上（照群侠行商），锁挂在卡片下方 */
+#survPrep .sc{width:calc(232px*var(--k));align-items:stretch;text-align:left;padding:calc(12px*var(--k)) calc(12px*var(--k)) calc(10px*var(--k));cursor:default;min-height:calc(300px*var(--k))}
+#survPrep .sc:hover{transform:none}
+#survPrep .sc .ch2{display:flex;gap:calc(10px*var(--k));align-items:center}
+#survPrep .sc .ci{height:auto;flex:none}#survPrep .sc .ci .bk{width:calc(66px*var(--k));height:calc(86px*var(--k))}#survPrep .sc .ci .bk span{font-size:calc(9px*var(--kt))}
+#survPrep .sc .ico{width:calc(70px*var(--k));height:calc(70px*var(--k))}
+#survPrep .sc h3{margin:0;font-size:calc(19px*var(--kt));white-space:normal}#survPrep .sc .rq{margin:calc(2px*var(--k)) 0 calc(4px*var(--k))}
+#survPrep .sc h5{margin:calc(12px*var(--k)) 0 calc(3px*var(--k));font-size:calc(13px*var(--kt));color:#8f7c5e}
+#survPrep .sc .ds{margin:0;font-size:calc(14px*var(--kt));line-height:1.5;color:#e6dccb;flex:1}
+#survPrep .sc .cb{justify-content:center;margin-top:calc(10px*var(--k))}
+#survPrep .sc .lkb{position:absolute;left:50%;top:auto;right:auto;bottom:calc(-38px*var(--k));transform:translateX(-50%);width:calc(30px*var(--k));height:calc(30px*var(--k))}
+#survPrep .sc .lkb.on{border-color:#e2c27a;background:rgba(80,56,20,.7)}#survPrep .sc i.lkb:empty{display:none}
+#survPrep .t-shang .srow{margin-bottom:calc(40px*var(--k))}
+@media (max-height:520px){#survPrep .sc{min-height:0;width:calc(250px*var(--k))}#survPrep .sc .ds{font-size:calc(12px*var(--kt))}#survPrep .sc h5{display:none}#survPrep .sc .tg{display:none}}
 /* 线装秘籍（CSS 版，等 Gemini 书封到了换图） */
 .bk{position:relative;width:calc(104px*var(--k,1));height:calc(138px*var(--k,1));box-sizing:border-box;border-radius:2px 4px 4px 2px;background-size:100% 100%;
   box-shadow:inset calc(16px*var(--k,1)) 0 0 rgba(0,0,0,.35),inset calc(17px*var(--k,1)) 0 0 var(--rc),inset 0 0 0 2px rgba(0,0,0,.45),inset 0 0 calc(18px*var(--k,1)) rgba(0,0,0,.55),3px 4px 8px rgba(0,0,0,.6)}
@@ -847,12 +861,13 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   function bookOf(it) {
     if (it.kind === 'item' || it.kind === 'heal') return `<em class="ico" style="background-image:url('${icoOf(it)}')"></em>`;
     const t = it.kind === 'skill' ? 'wy' : 'xf', q = Math.min(3, it.q || 0), im = BOOK_IMG[t + q];
-    return `<div class="bk ${t}${im ? ' im' : ''}" style="--rc:${RQC[q]}${im ? `;background-image:url('${im}')` : ''}"><em style="background-image:url('${icoOf(it)}')"></em><span>${it.name}</span></div>`;
+    const sym = it.kind === 'skill' ? 'art/ui/attr/duan.webp' : GF[it.id] && GF[it.id].qg ? 'art/ui/attr/shen.webp' : 'art/ui/attr/tiaoxi.webp';   // 11/11 用户定 B：照群侠，书上不画各招的图，武艺统一画兵器（现在只开刀），心法画打坐，轻功画身法
+    return `<div class="bk ${t}${im ? ' im' : ''}" style="--rc:${RQC[q]}${im ? `;background-image:url('${im}')` : ''}"><em style="background-image:url('${sym}')"></em><span>${it.name}</span></div>`;
   }
   function card(it, i, mode, onI, btns, extra) {   // 一张竖卡：秘籍/道具图 + 名字 + 品质 + 按钮；鼠标移上去（手机点一下）浮出详情
     const q = Math.min(3, it.q || 0), right = i >= 3;
-    return `<div class="sc${i === onI ? ' on' : ''}${extra || ''}" data-a="${mode}" data-i="${i}" style="--rc:${RQC[q]}"><div class="ci">${bookOf(it)}</div><h3>${it.name}</h3><p class="rq" style="color:${RQC[q]}">${RQ[q]} · ${tagsOf(it)[0]}</p><div class="cb">${btns}</div>
-      <div class="tip${right ? ' r' : ''}"><h3>${it.name}</h3><p style="color:${RQC[q]}">${RQ[q]}</p><div class="tg">${tagsOf(it).map(t => `<span>${t}</span>`).join('')}</div><h5>${it.kind === 'item' ? '道具属性' : it.kind === 'skill' ? '武艺效果' : '心法效果'}</h5><p class="ds">${it.desc}</p></div></div>`;
+    return `<div class="sc${extra || ''}" style="--rc:${RQC[q]}"><div class="ch2"><div class="ci">${bookOf(it)}</div><div><h3>${it.name}</h3><p class="rq" style="color:${RQC[q]}">${RQ[q]}</p><div class="tg">${tagsOf(it).map(t => `<span>${t}</span>`).join('')}</div></div></div>
+      <h5>${it.kind === 'item' ? '道具属性' : it.kind === 'skill' ? '武艺效果' : '心法效果'}</h5><p class="ds">${it.desc}</p><div class="cb">${btns}</div></div>`;   // 11/11：照群侠，属性直接写在卡上，不用移上去看
   }
   function detail(it, btns) {
     if (!it) return '<p class="em2">选择一件战利品</p>';
@@ -882,8 +897,8 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       const L = S.shop, bt = [].concat(S.bought ?? []);
       body = `<div class="pn wide sw"><h4>行商<small>可买多件 · 不刷新 · 越往后越贵</small></h4><div class="srow">${L.map((it, i) => { const sb = bt.includes(i);
         return card(it, i, 'ssel', selShop, sb ? '<button class="cbb" disabled>已买下</button>' : `<button class="cbb buy" data-a="buy" data-i="${i}" ${S.money < it.price ? 'disabled' : ''}><b>${it.price}</b><em style="background-image:url('${A('coin')}')"></em></button>`, (sb ? ' sold' : '') + (S.shopLock === it || it.kept ? ' lkd' : ''))
-          .replace('<div class="tip', (sb ? '' : it.kept ? '<i class="lki" title="上一关锁定的货，原价保留">🔒</i>' : `<button class="lkb" data-a="lock" data-i="${i}" title="锁定：这一关买不起就锁上，下一关原价还在（只留一关）">${S.shopLock === it ? '🔒' : '🔓'}</button>`) + '<div class="tip'); }).join('')}</div>
-        <p class="em2 lkh">买不起的货点右上角小锁锁定一件，下一关原价还在（只留一关）</p></div>`;
+          .replace(/<\/div>$/, '') + (sb ? '<i class="lkb lki"></i>' : it.kept ? '<i class="lkb lki on" title="上一关锁定的货，原价保留">🔒</i>' : `<button class="lkb${S.shopLock === it ? ' on' : ''}" data-a="lock" data-i="${i}" title="锁定：这一关买不起就锁上，下一关原价还在（只留一关）">${S.shopLock === it ? '🔒' : '🔓'}</button>`) + '</div>'; }).join('')}</div>
+        <p class="em2 lkh">买不起的货点下面的小锁锁定一件，下一关原价还在（只留一关）</p></div>`;
     } else if (prepTab === 'wu') {
       const all = S.slots.filter(Boolean).concat(S.gf.filter(Boolean), S.qg ? [S.qg] : [], S.owned || []);
       if (!selWu || !all.includes(selWu)) selWu = S.slots[0];
