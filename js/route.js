@@ -176,11 +176,16 @@
     + '.rtEv .op{display:flex;gap:clamp(10px,1.6vw,18px);justify-content:center;flex-wrap:wrap}'
     + '.rtEv button{min-width:clamp(150px,22vw,230px);padding:clamp(6px,1.4vh,12px) 14px;border:14px solid transparent;border-image:url(art/ui/prep/btn.webp) 40 fill stretch;background:none;color:#f3d08a;cursor:pointer;font:900 clamp(18px,3.2vh,24px) ' + FONT_Q + ';letter-spacing:.15em;transition:transform .12s,filter .12s}'
     + '.rtEv button:hover{transform:translateY(-3px);filter:brightness(1.25)}.rtEv button small{display:block;margin-top:.25em;font:700 clamp(12px,2.2vh,15px) ' + UI_Q + ';letter-spacing:0;color:#efe2c6}';
-  { const st = document.createElement('style'); st.textContent = EV_CSS; document.head.appendChild(st); }
+  const EV_THIN = '.rtEv .pn{padding:clamp(30px,6vh,48px) clamp(24px,3.4vw,44px) clamp(18px,3.4vh,30px)}'   // 11/11：跟整备屏一起换成细线暗底
+    + '.rtEv .tt{border:1px solid rgba(184,149,90,.6);border-image:none;background:#140f0b;height:clamp(32px,6vh,44px);color:#e6c98a}'
+    + '.rtEv .pf{border:1px solid rgba(184,149,90,.6);border-image:none}'
+    + '.rtEv button{border:1px solid rgba(184,149,90,.6);border-image:none;background:linear-gradient(180deg,rgba(44,36,27,.95),rgba(18,15,12,.95));box-shadow:inset 0 0 0 1px rgba(0,0,0,.6);color:#e3cf9f;border-radius:2px}'
+    + '.rtEv button:hover{filter:none;border-color:#e2c27a;color:#fff0cc}';
+  { const st = document.createElement('style'); st.textContent = EV_CSS + EV_THIN; document.head.appendChild(st); }
   function popup(title, sub, desc, opts, pick, npc) {   // 通用选择弹窗（奇遇用）
     const box = campBox = document.createElement('div'); box.className = 'rtEv';
     const hp = window.SURV && SURV.routeHp ? SURV.routeHp() : null;
-    box.innerHTML = '<div class="pn"><div class="tt">' + title + '</div><div class="bd">'
+    box.innerHTML = '<div class="pn thinp"><div class="tt">' + title + '</div><div class="bd">'
       + (npc ? '<div class="pf" style="background-image:url(' + npc[1] + ')"></div>' : '')
       + '<div><div class="ds">' + desc + '</div>' + (npc ? '<div class="sy"><b>' + npc[0] + '</b>' + npc[2] + '</div>' : '')
       + (hp ? '<div class="hp">当前气血 ' + Math.ceil(hp[0] * 10) + ' / ' + Math.round(hp[1] * 10) + '</div>' : '') + '</div></div>'

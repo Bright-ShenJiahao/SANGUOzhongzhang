@@ -61,7 +61,7 @@ body.szz-pro #help{display:none}
 .x-back{min-height:34px!important}
 }
 #rot small{display:block;margin-top:10px;font-size:14px;font-weight:600;color:#c9b691;line-height:1.6}
-</style><link rel="preload" href="pack/fonts/result.woff2?v=24dfd3aee8" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=24dfd3aee8)format("woff2");font-display:swap}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
+</style><link rel="preload" href="pack/fonts/result.woff2?v=9b195e6c3d" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=9b195e6c3d)format("woff2");font-display:swap}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
 </head><body>
 <style>
 #bootSplash{position:fixed;inset:0;z-index:99999;background:radial-gradient(ellipse at 50% 45%,#f3e4cf 0%,#ecd9c0 55%,#d9c09f 100%);transition:opacity .45s ease-out}
@@ -100,7 +100,7 @@ if(location.protocol==='https:'&&!/[?&]debug(?:=|&|$)/.test(location.search)&&'s
 })();
 // 自动更新：打开游戏、或从后台切回来时，查一下线上有没有新版本；有就在标题/整备页自动刷新（战斗中不打扰）
 (function(){
-var BUILD='a5d31ad02b30',busy=false;
+var BUILD='c3a734cda040',busy=false;
 if(location.protocol!=='https:'||/[?&]debug(?:=|&|$)/.test(location.search))return;
 function check(){
   if(busy)return;
@@ -4842,11 +4842,16 @@ function resultKey(e) {
     + '.rtEv .op{display:flex;gap:clamp(10px,1.6vw,18px);justify-content:center;flex-wrap:wrap}'
     + '.rtEv button{min-width:clamp(150px,22vw,230px);padding:clamp(6px,1.4vh,12px) 14px;border:14px solid transparent;border-image:url(pack/ui/prep/btn.webp?v=f850bb7611) 40 fill stretch;background:none;color:#f3d08a;cursor:pointer;font:900 clamp(18px,3.2vh,24px) ' + FONT_Q + ';letter-spacing:.15em;transition:transform .12s,filter .12s}'
     + '.rtEv button:hover{transform:translateY(-3px);filter:brightness(1.25)}.rtEv button small{display:block;margin-top:.25em;font:700 clamp(12px,2.2vh,15px) ' + UI_Q + ';letter-spacing:0;color:#efe2c6}';
-  { const st = document.createElement('style'); st.textContent = EV_CSS; document.head.appendChild(st); }
+  const EV_THIN = '.rtEv .pn{padding:clamp(30px,6vh,48px) clamp(24px,3.4vw,44px) clamp(18px,3.4vh,30px)}'   // 11/11：跟整备屏一起换成细线暗底
+    + '.rtEv .tt{border:1px solid rgba(184,149,90,.6);border-image:none;background:#140f0b;height:clamp(32px,6vh,44px);color:#e6c98a}'
+    + '.rtEv .pf{border:1px solid rgba(184,149,90,.6);border-image:none}'
+    + '.rtEv button{border:1px solid rgba(184,149,90,.6);border-image:none;background:linear-gradient(180deg,rgba(44,36,27,.95),rgba(18,15,12,.95));box-shadow:inset 0 0 0 1px rgba(0,0,0,.6);color:#e3cf9f;border-radius:2px}'
+    + '.rtEv button:hover{filter:none;border-color:#e2c27a;color:#fff0cc}';
+  { const st = document.createElement('style'); st.textContent = EV_CSS + EV_THIN; document.head.appendChild(st); }
   function popup(title, sub, desc, opts, pick, npc) {   // 通用选择弹窗（奇遇用）
     const box = campBox = document.createElement('div'); box.className = 'rtEv';
     const hp = window.SURV && SURV.routeHp ? SURV.routeHp() : null;
-    box.innerHTML = '<div class="pn"><div class="tt">' + title + '</div><div class="bd">'
+    box.innerHTML = '<div class="pn thinp"><div class="tt">' + title + '</div><div class="bd">'
       + (npc ? '<div class="pf" style="background-image:url(' + npc[1] + ')"></div>' : '')
       + '<div><div class="ds">' + desc + '</div>' + (npc ? '<div class="sy"><b>' + npc[0] + '</b>' + npc[2] + '</div>' : '')
       + (hp ? '<div class="hp">当前气血 ' + Math.ceil(hp[0] * 10) + ' / ' + Math.round(hp[1] * 10) + '</div>' : '') + '</div></div>'
@@ -6070,7 +6075,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     const kind = kinds && kinds[Math.min(i, kinds.length) - 1], opts = rewardOptions(kind); W.pick = true;
     const old = document.getElementById('survPick'); if (old) old.remove();
     const box = document.createElement('div'); box.id = 'survPick';
-    box.innerHTML = `<div class="p"><h3>战利 · ${kind === 'skill' ? '武艺 · ' : kind === 'perk' ? '心法 · ' : ''}${n > 1 ? '第 ' + i + '/' + n + ' 次 · ' : ''}三选一</h3><div class="row">${opts.map((o, j) => `<button data-j="${j}" class="q${o.q || 0}"><i style="font-style:normal;font-size:11px;opacity:.7">${o.kind === 'skill' ? '新武艺 · 主动' : o.kind === 'gf' ? '心法 · 被动' : '回血'}</i>${iconUrl(o.kind, o.k || o.id) ? `<em class="ic" style="background-image:url('${iconUrl(o.kind, o.k || o.id)}')"></em>` : `<b style="color:${o.color}">${o.icon}</b>`}<span>${o.name}</span><small>${o.desc}</small></button>`).join('')}</div>${S.slots.indexOf('') >= 0 ? '<p>新武艺放进空着的格子；格子满了就收进「掌握武学」，到整备屏「武学」页换上</p>' : ''}</div>`;
+    box.innerHTML = `<div class="p"><h3>战利 · ${kind === 'skill' ? '武艺 · ' : kind === 'perk' ? '心法 · ' : ''}${n > 1 ? '第 ' + i + '/' + n + ' 次 · ' : ''}三选一</h3><div class="row">${opts.map((o, j) => `<button data-j="${j}" class="q${o.q || 0}"><i style="font-style:normal;font-size:11px;opacity:.7">${o.kind === 'skill' ? '新武艺 · 主动' : o.kind === 'gf' ? '心法 · 被动' : '回血'}</i>${o.kind === 'skill' || o.kind === 'gf' ? `<div class="pkb">${bookOf(o)}</div>` : iconUrl(o.kind, o.k || o.id) ? `<em class="ic" style="background-image:url('${iconUrl(o.kind, o.k || o.id)}')"></em>` : `<b style="color:${o.color}">${o.icon}</b>`}<span>${o.name}</span><small>${o.desc}</small></button>`).join('')}</div>${S.slots.indexOf('') >= 0 ? '<p>新武艺放进空着的格子；格子满了就收进「掌握武学」，到整备屏「武学」页换上</p>' : ''}</div>`;
     box.querySelectorAll('button').forEach(b => b.onclick = () => {
       const o = opts[+b.dataset.j];
       if (o.kind === 'skill' || o.kind === 'gf') learn(o); else heal(maxHp() * .4);   // 11/11：格子满了以前会白选（学不进去），改走 learn：满了就进「掌握武学」
@@ -6270,6 +6275,79 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
 #survTut.big{left:0;right:0;bottom:3vh;width:auto;padding-left:22vw}#survTut.big .bx{min-height:calc(170px*var(--k))}#survTut .lh{position:fixed;left:0;bottom:0;width:34vw;height:88vh;background:left bottom/contain no-repeat;pointer-events:none;filter:drop-shadow(0 0 20px rgba(0,0,0,.6))}
 body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(900px,58vw)}
 @media (max-height:520px){#survTut{bottom:calc(30vh);width:min(620px,70vw)}#survTut.big{padding-left:26vw}}
+/* ===== 11/11 质感重做：照群侠 —— 近黑半透明底 + 1px 暗金细线 + 四角小角花，暗金低饱和，字米白 ===== */
+#survPrep{background:radial-gradient(ellipse at 50% 40%,rgba(8,7,6,.62),rgba(3,3,3,.86));backdrop-filter:blur(3px) saturate(.7);-webkit-backdrop-filter:blur(3px) saturate(.7);color:#e6dccb}
+#survPrep .pn,#survPick .p,.thinp{border:1px solid rgba(184,149,90,.5)!important;border-image:none!important;box-shadow:inset 0 0 0 1px rgba(0,0,0,.7),inset 0 0 calc(40px*var(--k,1)) rgba(0,0,0,.6),0 calc(10px*var(--k,1)) calc(30px*var(--k,1)) rgba(0,0,0,.55);
+  background:linear-gradient(#d2b072,#d2b072) left 4px top 4px/14px 1px,linear-gradient(#d2b072,#d2b072) left 4px top 4px/1px 14px,linear-gradient(#d2b072,#d2b072) right 4px top 4px/14px 1px,linear-gradient(#d2b072,#d2b072) right 4px top 4px/1px 14px,
+  linear-gradient(#d2b072,#d2b072) left 4px bottom 4px/14px 1px,linear-gradient(#d2b072,#d2b072) left 4px bottom 4px/1px 14px,linear-gradient(#d2b072,#d2b072) right 4px bottom 4px/14px 1px,linear-gradient(#d2b072,#d2b072) right 4px bottom 4px/1px 14px,
+  linear-gradient(180deg,rgba(22,19,16,.9),rgba(10,9,8,.92))!important;background-repeat:no-repeat!important;border-radius:2px}
+#survPrep .pn{padding:calc(16px*var(--k)) calc(22px*var(--k))}
+#survPrep h4{border-bottom:0;background:linear-gradient(90deg,rgba(184,149,90,0),rgba(184,149,90,.55) 8%,rgba(184,149,90,.55) 92%,rgba(184,149,90,0)) left bottom/100% 1px no-repeat;color:#cdb68a;font-weight:600}
+#survPrep .tb button{filter:saturate(.55) brightness(.78);color:#bfae8e}#survPrep .tb button.on{filter:saturate(.7) brightness(.95) drop-shadow(0 0 calc(6px*var(--k)) rgba(220,170,90,.35));color:#2a1606}
+#survPrep .tl{background:linear-gradient(90deg,transparent,rgba(184,149,90,.6) 15%,rgba(184,149,90,.6) 85%,transparent)}
+#survPrep .mo,#survPrep .db button,#survPrep .bb,#survPrep h4 .so,#survPrep .cbb{border:1px solid rgba(184,149,90,.6)!important;border-image:none!important;background:linear-gradient(180deg,rgba(44,36,27,.95),rgba(18,15,12,.95))!important;box-shadow:inset 0 0 0 1px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,230,180,.08);color:#e3cf9f;border-radius:2px}
+#survPrep .bb,#survPrep .db button{padding:calc(8px*var(--k)) calc(24px*var(--k))}
+#survPrep .db button:hover:not(:disabled),#survPrep .bb:hover:not(:disabled),#survPrep .cbb:hover:not(:disabled){filter:none;border-color:#e2c27a!important;color:#fff0cc;box-shadow:inset 0 0 0 1px rgba(0,0,0,.6),0 0 calc(10px*var(--k)) rgba(226,194,122,.3)}
+#survPrep .go{border-color:#c9a35a!important}
+#survPrep .pbf,#survPrep .vf{border:1px solid rgba(184,149,90,.45)!important;border-image:none!important;background:rgba(0,0,0,.55);height:calc(18px*var(--k));padding:0 calc(8px*var(--k))}
+#survPrep .vf{height:calc(20px*var(--k))}
+#survPrep .pbf u{background:linear-gradient(90deg,#5a4320,#a8823e 70%,#e6c98a);opacity:.95}
+#survPrep .pbf b,#survPrep .pbf i{font-size:calc(12px*var(--kt))}#survPrep .vf b{font-size:calc(13px*var(--kt))}
+#survPrep .vf.hp u{background:linear-gradient(180deg,#c8473b,#7a1c16)}#survPrep .vf.zq u{background:linear-gradient(180deg,#5aa8e0,#1d4f86)}
+#survPrep .ar,#survPrep .ab .md{filter:saturate(.6) brightness(.8)}#survPrep .ac b{color:#e6c98a}
+#survPrep .sl{background:rgba(0,0,0,.45);border:1px solid rgba(184,149,90,.35);box-shadow:inset 0 0 calc(12px*var(--k)) rgba(0,0,0,.8)}
+#survPrep .sl.on{border-color:#e2c27a;filter:none;box-shadow:inset 0 0 calc(12px*var(--k)) rgba(0,0,0,.8),0 0 calc(10px*var(--k)) rgba(226,194,122,.45)}
+#survPrep .cd .bi{border:1px solid rgba(184,149,90,.5);border-image:none}#survPrep .dh>em{border:1px solid rgba(184,149,90,.5)}
+#survPrep .tg span{border-color:rgba(184,149,90,.5);color:#cdb68a}
+#survPrep .dh h3,#survPrep .cd h3{color:#efe4cc}
+/* 一排竖卡（拾取 / 行商） */
+#survPrep .pn.sw{display:block;overflow:visible;max-width:none}
+#survPrep .srow{display:flex;gap:calc(18px*var(--k));justify-content:center;flex-wrap:wrap;margin-top:calc(14px*var(--k))}
+#survPrep .sc{position:relative;width:calc(186px*var(--k));padding:calc(14px*var(--k)) calc(10px*var(--k)) calc(12px*var(--k));box-sizing:border-box;display:flex;flex-direction:column;align-items:center;text-align:center;cursor:pointer;
+  background:linear-gradient(180deg,rgba(30,26,21,.95),rgba(12,11,9,.95));border:1px solid rgba(184,149,90,.4);border-top:2px solid var(--rc);box-shadow:inset 0 0 calc(20px*var(--k)) rgba(0,0,0,.7);transition:transform .12s,border-color .12s}
+#survPrep .sc:hover,#survPrep .sc.on{transform:translateY(calc(-4px*var(--k)));border-color:#e2c27a;z-index:5}
+#survPrep .sc.sold{opacity:.45}#survPrep .sc.lkd{box-shadow:inset 0 0 calc(20px*var(--k)) rgba(0,0,0,.7),0 0 0 1px #e2c27a}
+#survPrep .sc .ci{height:calc(150px*var(--k));display:flex;align-items:center;justify-content:center}
+#survPrep .sc .ico{width:calc(118px*var(--k));height:calc(118px*var(--k));background-size:cover;border:1px solid rgba(184,149,90,.4);box-shadow:0 0 0 2px rgba(0,0,0,.6)}
+#survPrep .sc h3{margin:calc(8px*var(--k)) 0 0;font:700 calc(20px*var(--kt)) "Songti SC","Noto Serif SC",serif;color:#efe4cc;white-space:nowrap}
+#survPrep .sc .rq{margin:calc(2px*var(--k)) 0 calc(8px*var(--k));font-size:calc(13px*var(--kt))}
+#survPrep .sc .cb{display:flex;gap:calc(6px*var(--k));margin-top:auto}
+#survPrep .cbb{padding:calc(4px*var(--k)) calc(12px*var(--k));font:700 calc(15px*var(--kt)) "PingFang SC",sans-serif;cursor:pointer;display:inline-flex;align-items:center;gap:calc(4px*var(--k));white-space:nowrap}
+#survPrep .cbb em{width:calc(18px*var(--k));height:calc(18px*var(--k))}#survPrep .cbb.buy b{font:900 calc(17px*var(--kt)) "Arial Black",Impact,sans-serif;color:#ffe3a0}
+#survPrep .sc .lkb,#survPrep .sc .lki{position:absolute;right:calc(6px*var(--k));top:calc(6px*var(--k));bottom:auto;padding:0;width:calc(28px*var(--k));height:calc(28px*var(--k));border:1px solid rgba(184,149,90,.4);border-radius:2px;background:rgba(0,0,0,.5);font-size:calc(15px*var(--kt));font-style:normal;display:flex;align-items:center;justify-content:center;cursor:pointer}
+#survPrep .sc .tip{display:none;position:absolute;left:calc(100% + 10px*var(--k));top:0;width:calc(270px*var(--k));padding:calc(12px*var(--k)) calc(14px*var(--k));text-align:left;cursor:default;z-index:9;pointer-events:none;
+  background:rgba(8,7,6,.97);border:1px solid rgba(184,149,90,.6);box-shadow:0 calc(8px*var(--k)) calc(24px*var(--k)) rgba(0,0,0,.7)}
+#survPrep .sc .tip.r{left:auto;right:calc(100% + 10px*var(--k))}
+#survPrep .sc .tip h3{margin:0;font-size:calc(22px*var(--kt))}#survPrep .sc .tip>p{margin:calc(2px*var(--k)) 0 calc(6px*var(--k));font-size:calc(14px*var(--kt))}#survPrep .sc .tip h5{margin:calc(10px*var(--k)) 0 calc(2px*var(--k))}#survPrep .sc .tip .ds{font-size:calc(16px*var(--kt))}
+@media (pointer:fine){#survPrep .sc:hover .tip{display:block}}
+@media (pointer:coarse){#survPrep .sc.on .tip{display:block}}
+#survPrep .lkh{margin-top:calc(16px*var(--k));font-size:calc(14px*var(--kt))}
+@media (max-height:520px){#survPrep .srow{flex-wrap:nowrap;gap:calc(12px*var(--k))}#survPrep .sc .ci{height:calc(120px*var(--k))}#survPrep .lkh{display:none}}
+/* 线装秘籍（CSS 版，等 Gemini 书封到了换图） */
+.bk{position:relative;width:calc(104px*var(--k,1));height:calc(138px*var(--k,1));box-sizing:border-box;border-radius:2px 4px 4px 2px;background-size:100% 100%;
+  box-shadow:inset calc(16px*var(--k,1)) 0 0 rgba(0,0,0,.35),inset calc(17px*var(--k,1)) 0 0 var(--rc),inset 0 0 0 2px rgba(0,0,0,.45),inset 0 0 calc(18px*var(--k,1)) rgba(0,0,0,.55),3px 4px 8px rgba(0,0,0,.6)}
+.bk.wy{background-color:#5e1d17;background-image:radial-gradient(ellipse at 60% 30%,rgba(255,200,160,.10),transparent 60%),repeating-linear-gradient(45deg,rgba(0,0,0,.06) 0 2px,transparent 2px 5px)}
+.bk.xf{background-color:#17393a;background-image:radial-gradient(ellipse at 60% 30%,rgba(180,240,230,.10),transparent 60%),repeating-linear-gradient(45deg,rgba(0,0,0,.06) 0 2px,transparent 2px 5px)}
+.bk::before{content:'';position:absolute;left:calc(5px*var(--k,1));top:12%;bottom:12%;width:calc(3px*var(--k,1));background:repeating-linear-gradient(180deg,#e8dcc0 0 3px,transparent 3px 22%)}
+.bk::after{content:'';position:absolute;right:0;top:0;width:22%;height:16%;background:linear-gradient(225deg,var(--rc) 0 45%,transparent 46%);opacity:.85}
+.bk em{position:absolute;left:28%;top:14%;width:44%;aspect-ratio:1;background:#e9dcbc center/88% no-repeat;border:1px solid rgba(0,0,0,.5);box-shadow:0 0 0 2px rgba(233,220,188,.25)}
+.bk span{position:absolute;right:9%;top:13%;width:16%;min-height:44%;padding:3px 0;box-sizing:border-box;background:#efe4c8;color:#2a1a10;writing-mode:vertical-rl;font:700 calc(11px*var(--kt,1)) "Songti SC","Noto Serif SC",serif;letter-spacing:1px;display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 0 0 1px rgba(0,0,0,.4)}
+#survPick h3{border:1px solid rgba(184,149,90,.6)!important;border-image:none!important;background:#140f0b!important;color:#e6c98a!important}
+/* 书封贴图：小窗 / 题签位置按原图量好的比例 */
+.bk.im{background-color:transparent!important;background-size:100% 100%!important;box-shadow:none;height:calc(134px*var(--k,1));filter:drop-shadow(2px 4px 5px rgba(0,0,0,.6))}.bk.im::before,.bk.im::after{display:none}
+.bk.im em{left:29.5%;top:20.3%;width:40.5%;height:31.7%;aspect-ratio:auto;background-color:transparent;background-size:92%;border:0;box-shadow:none;mix-blend-mode:multiply}
+.bk.im span{left:73%;right:auto;top:21%;width:15.2%;height:46%;min-height:0;background:transparent;box-shadow:none;padding:0}
+#survPick .pkb{display:flex;justify-content:center;margin:4px 0}#survPick .pkb .bk{--k:.62}
+@media (max-height:520px){#survPick .pkb .bk{--k:.46}}
+/* 人物提醒：缩成右下角小框（不再放全身像），细线暗底 */
+#survTut{right:1.2vw;bottom:calc(14vh + 40px);width:min(560px,44vw)}
+#survTut .bx{border:1px solid rgba(184,149,90,.55);border-image:none;background:linear-gradient(180deg,rgba(20,17,14,.94),rgba(8,7,6,.95));box-shadow:inset 0 0 0 1px rgba(0,0,0,.7),0 calc(8px*var(--k)) calc(24px*var(--k)) rgba(0,0,0,.6);padding:calc(10px*var(--k)) calc(16px*var(--k))}
+#survTut .nm{top:calc(-15px*var(--k));left:calc(12px*var(--k));padding:calc(1px*var(--k)) calc(14px*var(--k));border:1px solid rgba(184,149,90,.6);border-image:none;background:#140f0b;font-size:calc(17px*var(--kt));color:#e6c98a}
+#survTut p{font-size:calc(17px*var(--kt));margin:calc(8px*var(--k)) 0 calc(2px*var(--k))}
+#survTut>em{width:calc(96px*var(--k));border:1px solid rgba(184,149,90,.55);border-image:none;margin-left:-1px}
+#survTut.big{left:auto;right:1.2vw;bottom:calc(80px*var(--k));width:min(560px,44vw);padding-left:0}#survTut.big .bx{min-height:0}#survTut .lh{display:none}
+body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44vw)}
+@media (max-height:520px){#survTut,#survTut.big,body.prep-open #survTut:not(.big){width:min(470px,58vw);bottom:calc(24vh)}body.prep-open #survTut,body.prep-open #survTut.big{bottom:4px}}
 `;
   // ---- 道具（11/11 用户定，照群侠幸存者：行商主要卖永久道具）----
   const ITEMS = {
@@ -6342,6 +6420,18 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(900px,58v
     const mh = maxHp(), zr = Math.max(0, S.zq / zqMax()), hr = hero.hp / mh;
     return `<div class="vt"><div class="vb"><em style="background-image:url('${A('zq')}')"></em><div class="vf zq"><u style="width:${zr * 100}%"></u><b>${Math.round(S.zq * 10)} / ${Math.round(zqMax() * 10)}</b></div></div><div class="vb"><em style="background-image:url('${A('hp')}')"></em><div class="vf hp"><u style="width:${hr * 100}%"></u><b>${Math.ceil(hero.hp * 10)} / ${Math.round(mh * 10)}</b></div></div></div>`;
   }
+  // 武艺/心法一律画成线装秘籍（11/11 用户定：一眼和道具分开）：武艺红封面、心法青封面，包角/书脊是品质色，封面小窗放图标，右边竖题签写名字
+  const BOOK_IMG = { wy0: 'pack/ui/book/wy0.webp?v=13b82ca18c', wy1: 'pack/ui/book/wy1.webp?v=7482b33456', wy2: 'pack/ui/book/wy2.webp?v=36bb1f335a', wy3: 'pack/ui/book/wy3.webp?v=343c9faec7', xf0: 'pack/ui/book/xf0.webp?v=7847caa358', xf1: 'pack/ui/book/xf1.webp?v=acb9dacbd6', xf2: 'pack/ui/book/xf2.webp?v=6b27eefc41', xf3: 'pack/ui/book/xf3.webp?v=9705138de4' };   // 用户的 Gemini 书封（art/gemini/秘籍书封.png 按连通区域切）：武艺红 / 心法青 × 白蓝紫橙
+  function bookOf(it) {
+    if (it.kind === 'item' || it.kind === 'heal') return `<em class="ico" style="background-image:url('${icoOf(it)}')"></em>`;
+    const t = it.kind === 'skill' ? 'wy' : 'xf', q = Math.min(3, it.q || 0), im = BOOK_IMG[t + q];
+    return `<div class="bk ${t}${im ? ' im' : ''}" style="--rc:${RQC[q]}${im ? `;background-image:url('${im}')` : ''}"><em style="background-image:url('${icoOf(it)}')"></em><span>${it.name}</span></div>`;
+  }
+  function card(it, i, mode, onI, btns, extra) {   // 一张竖卡：秘籍/道具图 + 名字 + 品质 + 按钮；鼠标移上去（手机点一下）浮出详情
+    const q = Math.min(3, it.q || 0), right = i >= 3;
+    return `<div class="sc${i === onI ? ' on' : ''}${extra || ''}" data-a="${mode}" data-i="${i}" style="--rc:${RQC[q]}"><div class="ci">${bookOf(it)}</div><h3>${it.name}</h3><p class="rq" style="color:${RQC[q]}">${RQ[q]} · ${tagsOf(it)[0]}</p><div class="cb">${btns}</div>
+      <div class="tip${right ? ' r' : ''}"><h3>${it.name}</h3><p style="color:${RQC[q]}">${RQ[q]}</p><div class="tg">${tagsOf(it).map(t => `<span>${t}</span>`).join('')}</div><h5>${it.kind === 'item' ? '道具属性' : it.kind === 'skill' ? '武艺效果' : '心法效果'}</h5><p class="ds">${it.desc}</p></div></div>`;
+  }
   function detail(it, btns) {
     if (!it) return '<p class="em2">选择一件战利品</p>';
     return `<div class="dt"><div class="dh"><em style="background-image:url('${icoOf(it)}')"></em><div><h3>${it.name}</h3><p style="color:${RQC[Math.min(3, it.q || 0)]}">${RQ[Math.min(3, it.q || 0)]}</p><div class="tg">${tagsOf(it).map(t => `<span>${t}</span>`).join('')}</div></div></div><h5>${it.kind === 'item' ? '道具属性' : it.kind === 'skill' ? '武艺效果' : '心法效果'}</h5><p class="ds">${it.desc}</p><div class="db">${btns}</div></div>`;
@@ -6359,21 +6449,19 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(900px,58v
           <h4>输出统计</h4>${outs}
           <h4>调息</h4><p class="ln">剩余 <em style="background-image:url('${A('zq')}')"></em> 真气 <b class="c1">${R.zqLeft || 0}</b> 点</p><p class="ln">转换为 <b class="c2">${R.tiao}</b> 点 <em style="background-image:url('${A('hp')}')"></em> 气血</p><p class="ln"><em style="background-image:url('${A('huti')}')"></em> 护体 总共免除了 <b>${Math.round((S.hutiSum || 0) * 10)}</b> 点伤害</p></div>
         <div class="pn"><h4>修为</h4>${bar(S.lv, Math.min(1, S.xiu / XIU_NEED(S.lv)), A('xiu'))}<h4>武艺</h4>${S.slots.filter(Boolean).map(k => bar(lvOf(k), mastR(k), IMGU[k])).join('')}<h4>心法</h4>${S.gf.concat([S.qg]).filter(Boolean).map(id => bar(gfLv(id), gfR(id), `art/ui/gf/${id}.webp`)).join('') || '<p class="em2" style="padding:6px 0">还没有心法</p>'}</div>`;
-    } else if (prepTab === 'shi') {
+    } else if (prepTab === 'shi') {   // 11/11：照群侠，一排竖卡，移上去看详情；按钮直接在卡上
       const L = S.loot.slice().sort((a, b) => S.sortDn === false ? (a.q || 0) - (b.q || 0) : (b.q || 0) - (a.q || 0)); S.loot = L; selLoot = Math.min(selLoot, L.length - 1);
-      const sel = L[selLoot];
-      body = `<div class="pn"><h4>战利品<button class="so" data-a="sort">稀有度 ${S.sortDn === false ? '▲' : '▼'}</button></h4><div class="gd">${Array.from({ length: 16 }, (_, i) => L[i] ? `<div class="sl ${i === selLoot ? 'on' : ''}" data-a="sel" data-i="${i}" style="--rc:${RQC[Math.min(3, L[i].q || 0)]}"><em style="background-image:url('${icoOf(L[i])}')"></em></div>` : '<div class="sl"></div>').join('')}</div>${L.length ? '' : '<p class="em2 ov">暂无战利品</p>'}</div>
-        <div class="pn">${sel ? detail(sel, `<button data-a="learn" data-i="${selLoot}">${sel.kind === 'item' ? '收下' : '学会'}</button><button data-a="sell" data-i="${selLoot}">卖掉 ${sel.sell}<em style="background-image:url('${A('coin')}')"></em></button>`) : detail(null)}</div>`;
+      body = `<div class="pn wide sw"><h4>战利品<button class="so" data-a="sort">稀有度 ${S.sortDn === false ? '▲' : '▼'}</button></h4><div class="srow">${L.map((it, i) => card(it, i, 'sel', selLoot, `<button class="cbb" data-a="learn" data-i="${i}">${it.kind === 'item' ? '收下' : '学会'}</button><button class="cbb" data-a="sell" data-i="${i}">卖 ${it.sell}<em style="background-image:url('${A('coin')}')"></em></button>`)).join('')}</div>${L.length ? '<p class="em2 lkh">没处理的战利品，出发时自动按卖价换成铜钱</p>' : '<p class="em2" style="margin-top:12%">暂无战利品</p>'}</div>`;
     } else if (prepTab === 'xiu') {
       if (!S.bank) body = `<div class="pn wide"><p class="em2">修为 LV.${S.lv} · 暂无修炼机会<br><small>斩敌、打完仗都会攒修为，每升一层得一次修炼</small></p></div>`;
       else { S.xopts = S.xopts || rollXiu(); body = S.xopts.map((o, j) => { const [a0, v0] = o.adds[0]; return `<div class="pn cd"><em class="bi" style="background-image:url('${A(ATI[a0])}')"></em><h3>${ATN[a0]}修炼</h3><p style="color:${RAR[o.q][1]}">${['普通', '精良', '稀有', '绝世'][o.q]}</p><i class="dv"></i>${o.adds.map(([a, v]) => `<p class="up"><b>+${v}</b> ${ATN[a]}</p>`).join('')}<p class="sd">${ATD[a0]}</p><button class="bb" data-a="xiu" data-i="${j}">修 炼</button></div>`; }).join('');
         left = `<button class="bb rf" data-a="xrr" ${S.xrr ? 'disabled' : ''}>刷新<span>${S.xrr ? 0 : 1}/1</span></button>`; }
-    } else if (prepTab === 'shang') {   // 11/11：5 件货，排成「拾取」页那样：左边货架，右边详情（购买 / 锁定）
-      const L = S.shop, bt = [].concat(S.bought ?? []); selShop = Math.max(0, Math.min(selShop, L.length - 1)); const sel = L[selShop], sb = bt.includes(selShop);
-      body = `<div class="pn"><h4>行商货架<span class="shn2">可买多件 · 不刷新 · 越往后越贵</span></h4><div class="gd sg">${L.map((it, i) => `<div class="sl ${i === selShop ? 'on' : ''}${bt.includes(i) ? ' sold' : ''}" data-a="ssel" data-i="${i}" style="--rc:${RQC[Math.min(3, it.q || 0)]}"><em style="background-image:url('${icoOf(it)}')"></em>${bt.includes(i) ? '<i class="pr">已买</i>' : `<i class="pr">${it.price}</i>`}${S.shopLock === it || it.kept ? '<i class="lki">🔒</i>' : ''}</div>`).join('')}</div>
-        <p class="em2 lkh">买不起的货可以锁定一件，下一关原价还在（只留一关）</p></div>
-        <div class="pn">${sel ? detail(sel, (sb ? '<button disabled>已买下</button>' : `<button data-a="buy" data-i="${selShop}" ${S.money < sel.price ? 'disabled' : ''}>购买 ${sel.price}<em style="background-image:url('${A('coin')}')"></em></button>`)
-          + (sb ? '' : sel.kept ? '<button disabled>🔒 上关锁定</button>' : `<button data-a="lock" data-i="${selShop}">${S.shopLock === sel ? '🔒 取消锁定' : '🔓 锁定到下一关'}</button>`)) : detail(null)}</div>`;
+    } else if (prepTab === 'shang') {   // 11/11：照群侠，5 件货一排排开，移上去看详情；购买、锁定在卡上
+      const L = S.shop, bt = [].concat(S.bought ?? []);
+      body = `<div class="pn wide sw"><h4>行商<small>可买多件 · 不刷新 · 越往后越贵</small></h4><div class="srow">${L.map((it, i) => { const sb = bt.includes(i);
+        return card(it, i, 'ssel', selShop, sb ? '<button class="cbb" disabled>已买下</button>' : `<button class="cbb buy" data-a="buy" data-i="${i}" ${S.money < it.price ? 'disabled' : ''}><b>${it.price}</b><em style="background-image:url('${A('coin')}')"></em></button>`, (sb ? ' sold' : '') + (S.shopLock === it || it.kept ? ' lkd' : ''))
+          .replace('<div class="tip', (sb ? '' : it.kept ? '<i class="lki" title="上一关锁定的货，原价保留">🔒</i>' : `<button class="lkb" data-a="lock" data-i="${i}" title="锁定：这一关买不起就锁上，下一关原价还在（只留一关）">${S.shopLock === it ? '🔒' : '🔓'}</button>`) + '<div class="tip'); }).join('')}</div>
+        <p class="em2 lkh">买不起的货点右上角小锁锁定一件，下一关原价还在（只留一关）</p></div>`;
     } else if (prepTab === 'wu') {
       const all = S.slots.filter(Boolean).concat(S.gf.filter(Boolean), S.qg ? [S.qg] : [], S.owned || []);
       if (!selWu || !all.includes(selWu)) selWu = S.slots[0];
@@ -6396,7 +6484,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(900px,58v
     el.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { prepTab = b.dataset.t; if (window.SFX) SFX.play('tick'); prepRender(); tut({ shi: 'loot', xiu: 'xiu', shang: 'shop', wu: 'wu' }[prepTab]); });
     el.querySelector('.go').onclick = () => { const i = TABS.findIndex(t => t[0] === prepTab); if (i < TABS.length - 1) { prepTab = TABS[i + 1][0]; prepRender(); tut({ shi: 'loot', xiu: 'xiu', shang: 'shop', wu: 'wu' }[prepTab]); } else prepClose(); };   // 照原作：继续 = 下一页，最后一页「出发」
     el.querySelectorAll('[data-a]').forEach(b => b.onclick = e => {
-      e.preventDefault(); if (b.disabled) return; const a = b.dataset.a, i = +b.dataset.i, k = b.dataset.k;
+      e.preventDefault(); e.stopPropagation(); if (b.disabled) return; const a = b.dataset.a, i = +b.dataset.i, k = b.dataset.k;
       if (a === 'sel') selLoot = i;
       else if (a === 'ssel') selShop = i;
       else if (a === 'sort') { S.sortDn = S.sortDn === false; selLoot = 0; }
@@ -6588,7 +6676,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(900px,58v
   // HUD 美术（11/11 Gemini）：武艺图标、行标、空格、太极、血滴
   const HIMG = {}; const himg = (k, u) => { const i = new Image(); i.src = u; HIMG[k] = i; };
   himg('empty', 'pack/ui/hud/empty.webp?v=1ff90ff6f0'); himg('waigong', 'pack/ui/hud/waigong.webp?v=46599d0712'); himg('neigong', 'pack/ui/hud/neigong.webp?v=d64ca46cd2'); himg('qinggong', 'pack/ui/hud/qinggong.webp?v=63c88bd340');
-  himg('taiji', 'pack/ui/hud/taiji.webp?v=b56fd73675'); himg('blood', 'pack/ui/hud/blood.webp?v=386ce79fa3');
+  himg('taiji', 'pack/ui/hud/taiji.webp?v=b56fd73675'); himg('hourglass', 'pack/ui/hud/hourglass.webp?v=462736b05c'); himg('blood', 'pack/ui/hud/blood.webp?v=386ce79fa3');
   himg('hengsao', 'pack/ui/kaiju/sk_hengsao.webp?v=dc67bef9b0'); himg('daobo', 'pack/ui/kaiju/sk_daobo.webp?v=902b4ea16f'); himg('huima', 'pack/ui/kaiju/sk_huima.webp?v=6943b2ffa3'); himg('daolun', 'pack/ui/kaiju/sk_daolun.webp?v=57f7c46e21');
   ['tuna','yangqi','tieyi','tayun','guanxing','taiping','hunyuan','gf00','gf01','gf02','gf03','gf30','gf31','gf32','gf33','qingshen','juqi','shixue','beishui','lhj','caoshang','xingyun','taxue','tiesha','yufeng'].forEach(id => himg('gf_' + id, 'art/ui/gf/' + id + '.webp'));
   const IMGU = { hengsao: 'pack/ui/kaiju/sk_hengsao.webp?v=dc67bef9b0', daobo: 'pack/ui/kaiju/sk_daobo.webp?v=902b4ea16f', huima: 'pack/ui/kaiju/sk_huima.webp?v=6943b2ffa3', daolun: 'pack/ui/kaiju/sk_daolun.webp?v=57f7c46e21' };
@@ -6665,7 +6753,16 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(900px,58v
       ctx.font = 'bold 11px "PingFang SC",sans-serif'; ctx.textBaseline = 'middle'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(20,10,4,.95)'; ctx.fillStyle = '#fff2d0';
       ctx.textAlign = 'left'; ctx.strokeText('修为 LV.' + S.lv, bx + 6, by + bh / 2 + .5); ctx.fillText('修为 LV.' + S.lv, bx + 6, by + bh / 2 + .5);
       ctx.textAlign = 'right'; const pc = Math.floor(r * 100) + '%'; ctx.strokeText(pc, bx + bw - 6, by + bh / 2 + .5); ctx.fillText(pc, bx + bw - 6, by + bh / 2 + .5);
-      if (S.bank > 0) { ctx.textAlign = 'left'; ctx.fillStyle = '#ffd86e'; const t = '待修炼 ×' + S.bank; ctx.strokeText(t, bx + bw + 10, by + bh / 2 + .5); ctx.fillText(t, bx + bw + 10, by + bh / 2 + .5); }
+      if (S.bank > 0) { ctx.textAlign = 'left'; ctx.fillStyle = '#ffd86e'; const t = '待修炼 ×' + S.bank; ctx.strokeText(t, bx + bw + (fine ? 10 : 10), by + bh / 2 + .5); ctx.fillText(t, bx + bw + 10, by + bh / 2 + .5); }
+      // 倒计时（11/11 用户：这关没有倒计时）：沙漏 + 分:秒。电脑放修为条正下方，手机放修为条左边（下面是武艺格）
+      if (W.started && !W.pick) {
+        const left = Math.max(0, Math.ceil(WT() - W.t)), tt = String(left / 60 | 0).padStart(2, '0') + ':' + String(left % 60).padStart(2, '0'), urg = left <= 10;
+        const fs = fine ? 18 : 13, tx = fine ? HW / 2 : bx - (fine ? 0 : 44), ty = fine ? by + bh + 15 : by + bh / 2 + .5, ih = fs + 6;
+        ctx.font = '900 ' + fs + 'px "Arial Black",Impact,sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; const tw = ctx.measureText(tt).width, x0 = tx - (tw + ih + 4) / 2;
+        if (hok('hourglass')) ctx.drawImage(HIMG.hourglass, x0, ty - ih / 2, ih, ih);
+        ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(14,8,4,.95)'; ctx.fillStyle = urg && (performance.now() / 300 | 0) % 2 ? '#ff6a4a' : '#f3e6c8';
+        ctx.strokeText(tt, x0 + ih + 4, ty + 1); ctx.fillText(tt, x0 + ih + 4, ty + 1);
+      }
       ctx.restore();
     }
     // 敌将名牌血条（11/11 用户定，照群侠：屏幕上方正中，名字牌 + 宽红条 + 剩余血量；两个敌将上下叠，手机左右并排）
@@ -6680,7 +6777,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(900px,58v
       bosses.slice(0, 2).forEach((z, i) => {
         const lite = !z.survBoss; ctx.globalAlpha = lite ? .88 : 1;
         if (lite && z.maxHp == null) z.maxHp = z.hp;
-        const cx = side ? HW / 2 + (i ? 1 : -1) * (bw / 2 + 6) : HW / 2, bx = cx - bw / 2, ny = (fine ? 26 : 22) + (side ? 0 : i * (nh + bh + 8)), by = ny + nh - 3;
+        const cx = side ? HW / 2 + (i ? 1 : -1) * (bw / 2 + 6) : HW / 2, bx = cx - bw / 2, ny = (fine ? 50 : 22) + (side ? 0 : i * (nh + bh + 8)), by = ny + nh - 3;
         const mx = z.maxHp || z.hp, r = Math.max(0, Math.min(1, z.hp / mx));
         z.hpLag = z.hpLag == null ? r : Math.max(r, z.hpLag - .5 / 60);   // 掉血后橙色残影慢慢追上
         if (BIMG.f.complete && BIMG.f.naturalWidth) bar3(BIMG.f, 60, bx, by, bw, bh); else { ctx.fillStyle = 'rgba(14,9,6,.85)'; ctx.fillRect(bx, by, bw, bh); }
