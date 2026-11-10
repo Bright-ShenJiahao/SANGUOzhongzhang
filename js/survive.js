@@ -505,12 +505,14 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     else done();
   }
   function nodeClear() {   // 一个节点打完：发奖励，回长卷
-    const nd = RT.node; W.started = false; zs.length = 0; eshots.length = 0;
+    const nd = RT.node; W.started = false; eshots.length = 0;
+    for (const z of zs) if (!z.dead) { z.endFade = .9; z.st = 'idle'; z.t = 0; z.enemySkill = null; z.air = false; z.stun = 0; z.daze = 0; }   // 站定淡出，弹窗出来时已经消失
+    setTimeout(() => { zs.length = 0; }, 950);
     { const c = S.zq * .3; if (c > .05) { heal(c); floaters.push({ x: hero.x, y: hero.y - 60, t: 0, txt: '真气化血 +' + Math.round(c * 10), color: '#7fd0ff' }); } S.zq = 0; }   // 战后：剩余真气 30% 转成气血
     if (nd.type === 'boss' && nd.final) { won = true; return; }
     const back = () => { W.pick = false; ROUTE.done(nd); };
     addXiu(nd.type === 'boss' ? 60 : nd.type === 'elite' ? 40 : 25);   // 节点结算修为
-    W.pick = true; cultivate(() => loot(nd, back));
+    W.pick = true; setTimeout(() => cultivate(() => loot(nd, back)), 900);
   }
   function loot(nd, back) {
     if (nd.type === 'boss') { say('敌将已破！', 1.4); heal(maxHp() * .3); offerReward(2, back, 1, ['skill', 'perk']); }   // 血量是资源：只有首领、营地、疗伤奖励、奇遇才回血

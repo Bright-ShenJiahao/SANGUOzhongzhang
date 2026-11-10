@@ -33,7 +33,7 @@
   // 第 17 层单个营地，第 18 层最终首领。段内节奏：第 1 层纯近战；第 2 层加远程/盾枪；第 3 层精锐或小营地；第 4 层段首领。
   const SEGS = 4, SEGLEN = 4;
   const TAGN = { melee: '流民群', raid: '刀盾队', range: '弓手阵', shield: '盾枪阵', patrol: '精锐巡逻' };
-  const RWN = { skill: '招式', perk: '功法', heal: '疗伤', both: '招式+功法' };
+  const RWN = { skill: '学一个新招式', perk: '学一门功法', heal: '包扎回血', both: '招式 + 功法' };
   const SECBOSS = [['程远志', '邓茂'], ['波才', '何仪'], ['管亥', '张曼成'], ['张梁', '张宝']];
   function gen() {
     const nodes = [], byLayer = [], cells = {};
@@ -294,7 +294,8 @@
     if ((reach && !port()) || cur || n.type === 'boss' || hov.n === n) tag(p, R, n, hov.n === n || cur || n.type === 'boss');
   }
   function tag(p, R, n, full) {
-    const l1 = n.type === 'start' ? '涿郡' : nlabel(n), l2 = n.type === 'start' || !full ? '' : MAPN[MAP_OF(n.layer)] + (n.type === 'camp' ? ' · 歇息' : n.rw ? ' · 奖励 ' + RWN[n.rw] : '');
+    const RWS = { skill: '新招式', perk: '功法', heal: '回血', both: '招式+功法' }, sh = !full && n.rw && n.type !== 'boss';   // 没悬停时一行写完（相邻节点挤不下两行）
+    const l1 = n.type === 'start' ? '涿郡' : nlabel(n) + (sh ? ' · ' + RWS[n.rw] : ''), l2 = sh ? '' : n.type === 'start' ? '' : n.type === 'camp' ? '歇息回血 / 磨刀' : n.type === 'chest' ? '开箱：三选一' : n.type === 'event' ? '奇遇：做个选择' : n.rw ? '打赢：' + RWN[n.rw] : full ? MAPN[MAP_OF(n.layer)] : '';
     const k = KS(), f1 = `bold ${Math.round(18 * k)}px ${FONT}`, f2 = `600 ${Math.round(13 * k)}px ${UI}`;
     g.save(); g.font = f1; const w1 = g.measureText(l1).width; g.font = f2; const w2 = l2 ? g.measureText(l2).width : 0;
     const bw = Math.max(w1, w2) + 20 * k, bh = (l2 ? 44 : 28) * k; let x = p.x - bw / 2, y = p.y + R + 10;
@@ -370,6 +371,12 @@
     const lg = [['battle', '普通'], ['elite', '精英'], ['camp', '营地'], ['boss', '首领']]; g.font = `bold ${Math.round(14 * k)}px ${UI}`; g.fillStyle = INK; g.textAlign = 'left'; g.textBaseline = 'middle';
     let lx = 30; const ly = H - 36 * k;
     lg.forEach(([ty, t]) => { g.save(); g.translate(lx + 14 * k, ly); icon(ty, 32 * k); g.restore(); g.globalAlpha = .9; g.fillText(t, lx + 34 * k, ly + 1); g.globalAlpha = 1; lx += (port() ? 70 : 90) * k; });
+    if (!port()) {   // 奖励角标说明（11/11：玩家看不懂「招/功/疗/双」）
+      lx += 16 * k; const bc = [['招', '#3b6ea8', '新招式'], ['功', '#a8662a', '功法'], ['疗', '#3f8a4a', '回血'], ['双', '#7a3a8a', '招式+功法']];
+      g.globalAlpha = .9; g.fillText('奖励：', lx, ly + 1); lx += g.measureText('奖励：').width + 6;
+      for (const [c, col, t] of bc) { g.beginPath(); g.arc(lx + 9 * k, ly, 9 * k, 0, 7); g.fillStyle = col; g.fill(); g.fillStyle = '#fff'; g.font = `bold ${Math.round(11 * k)}px ${UI}`; g.textAlign = 'center'; g.fillText(c, lx + 9 * k, ly + 1); g.textAlign = 'left'; g.fillStyle = INK; g.font = `bold ${Math.round(14 * k)}px ${UI}`; g.fillText(t, lx + 22 * k, ly + 1); lx += 22 * k + g.measureText(t).width + 14 * k; }
+      g.globalAlpha = 1;
+    }
     edge();
   }
 

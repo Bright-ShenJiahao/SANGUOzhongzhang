@@ -61,7 +61,7 @@ body.szz-pro #help{display:none}
 .x-back{min-height:34px!important}
 }
 #rot small{display:block;margin-top:10px;font-size:14px;font-weight:600;color:#c9b691;line-height:1.6}
-</style><link rel="preload" href="pack/fonts/result.woff2?v=ce961b499d" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=ce961b499d)format("woff2");font-display:swap}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
+</style><link rel="preload" href="pack/fonts/result.woff2?v=3241eb41e1" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=3241eb41e1)format("woff2");font-display:swap}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
 </head><body>
 <style>
 #bootSplash{position:fixed;inset:0;z-index:99999;background:radial-gradient(ellipse at 50% 45%,#f3e4cf 0%,#ecd9c0 55%,#d9c09f 100%);transition:opacity .45s ease-out}
@@ -100,7 +100,7 @@ if(location.protocol==='https:'&&!/[?&]debug(?:=|&|$)/.test(location.search)&&'s
 })();
 // 自动更新：打开游戏、或从后台切回来时，查一下线上有没有新版本；有就在标题/整备页自动刷新（战斗中不打扰）
 (function(){
-var BUILD='89e270235006',busy=false;
+var BUILD='4f0d3f6bf290',busy=false;
 if(location.protocol!=='https:'||/[?&]debug(?:=|&|$)/.test(location.search))return;
 function check(){
   if(busy)return;
@@ -1703,6 +1703,7 @@ function separateEnemies(dt) {
   }
 }
 function zUpdate(z, dt) {
+  if (z.endFade != null) { z.endFade -= dt; z.vx = 0; z.moving = false; return; }   // 节点打完：敌人原地站定、淡出（11/11 用户定）
   if (window.GEAR && !z.dead) { dt = GEAR.enemyTime(z, dt); if (!dt) return; }
   if (z.T.boss) return Boss.update(z, dt);
   if (z.T.mirror) { if (window.XINMO) XINMO.update(z, dt); return; }   // 心魔试炼
@@ -4661,7 +4662,7 @@ function resultKey(e) {
   // 第 17 层单个营地，第 18 层最终首领。段内节奏：第 1 层纯近战；第 2 层加远程/盾枪；第 3 层精锐或小营地；第 4 层段首领。
   const SEGS = 4, SEGLEN = 4;
   const TAGN = { melee: '流民群', raid: '刀盾队', range: '弓手阵', shield: '盾枪阵', patrol: '精锐巡逻' };
-  const RWN = { skill: '招式', perk: '功法', heal: '疗伤', both: '招式+功法' };
+  const RWN = { skill: '学一个新招式', perk: '学一门功法', heal: '包扎回血', both: '招式 + 功法' };
   const SECBOSS = [['程远志', '邓茂'], ['波才', '何仪'], ['管亥', '张曼成'], ['张梁', '张宝']];
   function gen() {
     const nodes = [], byLayer = [], cells = {};
@@ -4922,7 +4923,8 @@ function resultKey(e) {
     if ((reach && !port()) || cur || n.type === 'boss' || hov.n === n) tag(p, R, n, hov.n === n || cur || n.type === 'boss');
   }
   function tag(p, R, n, full) {
-    const l1 = n.type === 'start' ? '涿郡' : nlabel(n), l2 = n.type === 'start' || !full ? '' : MAPN[MAP_OF(n.layer)] + (n.type === 'camp' ? ' · 歇息' : n.rw ? ' · 奖励 ' + RWN[n.rw] : '');
+    const RWS = { skill: '新招式', perk: '功法', heal: '回血', both: '招式+功法' }, sh = !full && n.rw && n.type !== 'boss';   // 没悬停时一行写完（相邻节点挤不下两行）
+    const l1 = n.type === 'start' ? '涿郡' : nlabel(n) + (sh ? ' · ' + RWS[n.rw] : ''), l2 = sh ? '' : n.type === 'start' ? '' : n.type === 'camp' ? '歇息回血 / 磨刀' : n.type === 'chest' ? '开箱：三选一' : n.type === 'event' ? '奇遇：做个选择' : n.rw ? '打赢：' + RWN[n.rw] : full ? MAPN[MAP_OF(n.layer)] : '';
     const k = KS(), f1 = `bold ${Math.round(18 * k)}px ${FONT}`, f2 = `600 ${Math.round(13 * k)}px ${UI}`;
     g.save(); g.font = f1; const w1 = g.measureText(l1).width; g.font = f2; const w2 = l2 ? g.measureText(l2).width : 0;
     const bw = Math.max(w1, w2) + 20 * k, bh = (l2 ? 44 : 28) * k; let x = p.x - bw / 2, y = p.y + R + 10;
@@ -4998,6 +5000,12 @@ function resultKey(e) {
     const lg = [['battle', '普通'], ['elite', '精英'], ['camp', '营地'], ['boss', '首领']]; g.font = `bold ${Math.round(14 * k)}px ${UI}`; g.fillStyle = INK; g.textAlign = 'left'; g.textBaseline = 'middle';
     let lx = 30; const ly = H - 36 * k;
     lg.forEach(([ty, t]) => { g.save(); g.translate(lx + 14 * k, ly); icon(ty, 32 * k); g.restore(); g.globalAlpha = .9; g.fillText(t, lx + 34 * k, ly + 1); g.globalAlpha = 1; lx += (port() ? 70 : 90) * k; });
+    if (!port()) {   // 奖励角标说明（11/11：玩家看不懂「招/功/疗/双」）
+      lx += 16 * k; const bc = [['招', '#3b6ea8', '新招式'], ['功', '#a8662a', '功法'], ['疗', '#3f8a4a', '回血'], ['双', '#7a3a8a', '招式+功法']];
+      g.globalAlpha = .9; g.fillText('奖励：', lx, ly + 1); lx += g.measureText('奖励：').width + 6;
+      for (const [c, col, t] of bc) { g.beginPath(); g.arc(lx + 9 * k, ly, 9 * k, 0, 7); g.fillStyle = col; g.fill(); g.fillStyle = '#fff'; g.font = `bold ${Math.round(11 * k)}px ${UI}`; g.textAlign = 'center'; g.fillText(c, lx + 9 * k, ly + 1); g.textAlign = 'left'; g.fillStyle = INK; g.font = `bold ${Math.round(14 * k)}px ${UI}`; g.fillText(t, lx + 22 * k, ly + 1); lx += 22 * k + g.measureText(t).width + 14 * k; }
+      g.globalAlpha = 1;
+    }
     edge();
   }
 
@@ -5991,12 +5999,14 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     else done();
   }
   function nodeClear() {   // 一个节点打完：发奖励，回长卷
-    const nd = RT.node; W.started = false; zs.length = 0; eshots.length = 0;
+    const nd = RT.node; W.started = false; eshots.length = 0;
+    for (const z of zs) if (!z.dead) { z.endFade = .9; z.st = 'idle'; z.t = 0; z.enemySkill = null; z.air = false; z.stun = 0; z.daze = 0; }   // 站定淡出，弹窗出来时已经消失
+    setTimeout(() => { zs.length = 0; }, 950);
     { const c = S.zq * .3; if (c > .05) { heal(c); floaters.push({ x: hero.x, y: hero.y - 60, t: 0, txt: '真气化血 +' + Math.round(c * 10), color: '#7fd0ff' }); } S.zq = 0; }   // 战后：剩余真气 30% 转成气血
     if (nd.type === 'boss' && nd.final) { won = true; return; }
     const back = () => { W.pick = false; ROUTE.done(nd); };
     addXiu(nd.type === 'boss' ? 60 : nd.type === 'elite' ? 40 : 25);   // 节点结算修为
-    W.pick = true; cultivate(() => loot(nd, back));
+    W.pick = true; setTimeout(() => cultivate(() => loot(nd, back)), 900);
   }
   function loot(nd, back) {
     if (nd.type === 'boss') { say('敌将已破！', 1.4); heal(maxHp() * .3); offerReward(2, back, 1, ['skill', 'perk']); }   // 血量是资源：只有首领、营地、疗伤奖励、奇遇才回血
@@ -9844,7 +9854,7 @@ function draw() {
   if (catapults.length || allyShots.length || allyFires.length) list.push({ y: M.bot - 1, d: () => drawCatapults() });
   for (const d of drops) list.push({ y: d.y, d: () => drawDrop(d) });
   for (const v of villagers) list.push({ y: v.y, d: () => drawVillager(v) });
-  for (const z of zs) list.push({ y: z.y, d: () => { if (window.XIAOCHANG) XIAOCHANG.drawAffix(z); drawZ(z); } });
+  for (const z of zs) list.push({ y: z.y, d: () => { if (z.endFade != null) { if (z.endFade <= 0) return; ctx.save(); ctx.globalAlpha *= Math.min(1, z.endFade / .7); drawZ(z); ctx.restore(); return; } if (window.XIAOCHANG) XIAOCHANG.drawAffix(z); drawZ(z); } });
   list.push({ y: hero.y, d: drawHero });
   for (const s of shots) list.push({ y: s.y + .1, d: () => drawShot(s) });
   for (const g of gearSpins) list.push({ y: g.y + 12.2, d: () => {   // 回旋：绕一圈的淡青光箭/石子 + 拖尾

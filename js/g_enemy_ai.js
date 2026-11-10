@@ -147,6 +147,7 @@ function separateEnemies(dt) {
   }
 }
 function zUpdate(z, dt) {
+  if (z.endFade != null) { z.endFade -= dt; z.vx = 0; z.moving = false; return; }   // 节点打完：敌人原地站定、淡出（11/11 用户定）
   if (window.GEAR && !z.dead) { dt = GEAR.enemyTime(z, dt); if (!dt) return; }
   if (z.T.boss) return Boss.update(z, dt);
   if (z.T.mirror) { if (window.XINMO) XINMO.update(z, dt); return; }   // 心魔试炼
