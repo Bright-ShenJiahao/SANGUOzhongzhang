@@ -61,7 +61,7 @@ body.szz-pro #help{display:none}
 .x-back{min-height:34px!important}
 }
 #rot small{display:block;margin-top:10px;font-size:14px;font-weight:600;color:#c9b691;line-height:1.6}
-</style><link rel="preload" href="pack/fonts/result.woff2?v=886c60f0b5" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=886c60f0b5)format("woff2");font-display:swap}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
+</style><link rel="preload" href="pack/fonts/result.woff2?v=26465479c9" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=26465479c9)format("woff2");font-display:swap}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
 </head><body>
 <style>
 #bootSplash{position:fixed;inset:0;z-index:99999;background:radial-gradient(ellipse at 50% 45%,#f3e4cf 0%,#ecd9c0 55%,#d9c09f 100%);transition:opacity .45s ease-out}
@@ -100,7 +100,7 @@ if(location.protocol==='https:'&&!/[?&]debug(?:=|&|$)/.test(location.search)&&'s
 })();
 // 自动更新：打开游戏、或从后台切回来时，查一下线上有没有新版本；有就在标题/整备页自动刷新（战斗中不打扰）
 (function(){
-var BUILD='d8ef028af2b7',busy=false;
+var BUILD='f705b1c01bdd',busy=false;
 if(location.protocol!=='https:'||/[?&]debug(?:=|&|$)/.test(location.search))return;
 function check(){
   if(busy)return;
@@ -6240,7 +6240,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
 #survPrep .cd h3{margin:calc(10px*var(--k)) 0 0;font:900 calc(32px*var(--kt)) "Songti SC","Noto Serif SC",serif;color:#fff2d4}#survPrep .cd>p{margin:calc(2px*var(--k)) 0;font-size:calc(18px*var(--kt))}
 #survPrep .dv{display:block;width:60%;height:1px;margin:calc(10px*var(--k)) 0;background:linear-gradient(90deg,transparent,#b08a4a,transparent)}#survPrep .up{font-size:calc(24px*var(--kt))!important;color:#efe2c6}#survPrep .up b{color:#ffd86e;margin-right:6px}
 #survPrep .sd{flex:1;font-size:calc(16px*var(--kt))!important;color:#bfa98a}#survPrep .cd .bb{margin-top:auto;font-size:calc(26px*var(--kt))}
-#survPrep .cd.sh{align-items:stretch;text-align:left}#survPrep .cd.sh .buy{align-self:center;font-family:"PingFang SC",sans-serif}#survPrep .cd.sh .buy b{font-size:calc(26px*var(--kt));color:#fff}
+#survPrep .cd.sh{align-items:stretch;text-align:left}#survPrep .cd.sh{position:relative}#survPrep .lkb,#survPrep .lk{position:absolute;right:calc(10px*var(--k));bottom:calc(14px*var(--k));display:flex;flex-direction:column;align-items:center;line-height:1.1}#survPrep .lkb i,#survPrep .lk i{font-style:normal;font-size:.8em}#survPrep .lkb{padding:calc(4px*var(--k)) calc(14px*var(--k));border:1px solid #6a5232;border-radius:calc(6px*var(--k));background:rgba(20,14,9,.7);color:#bfa98a;font:700 calc(14px*var(--kt)) "PingFang SC",sans-serif;cursor:pointer}#survPrep .lkb:hover{color:#f3d08a;border-color:#b08a4a}#survPrep .lkb.on{color:#ffd86e;border-color:#d8b060;background:rgba(80,56,20,.6)}#survPrep .lk{margin:0;font:700 calc(14px*var(--kt)) "PingFang SC",sans-serif;color:#e8c47a}#survPrep .cd.sh .buy{align-self:center;font-family:"PingFang SC",sans-serif}#survPrep .cd.sh .buy b{font-size:calc(26px*var(--kt));color:#fff}
 #survPrep .ch{display:flex;align-items:center;gap:calc(4px*var(--k))}#survPrep .ch .sl{width:calc(78px*var(--k))}#survPrep .ar2{width:calc(14px*var(--k));height:calc(18px*var(--k));background:url(pack/ui/prep/arrow.webp?v=120753ecd2) center/contain no-repeat;flex:none}
 #survPrep .two{display:grid;grid-template-columns:3fr 1fr;gap:calc(16px*var(--k))}#survPrep .rw{display:flex;gap:calc(8px*var(--k))}#survPrep .rw .sl{width:calc(70px*var(--k))}
 #survPrep .t-wu .pn:first-child{flex:1.35;max-width:calc(820px*var(--k))}
@@ -6303,7 +6303,8 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(900px,58v
   function rollShop(nd) {   // 行商：两件道具 + 一本秘籍，三件都能买（11/11 用户定 C），不能刷新；价格随层数涨（B：第 1 层原价，每 8 层 +100%）
     const ks = Object.keys(ITEMS).sort(() => Math.random() - .5), out = [itemOf(ks[0]), itemOf(ks[1])], seen = new Set(ownedAll().concat(S.loot.map(it => it.k || it.id)));
     for (const o of rewardOptions(undefined).concat(rewardOptions('perk'))) { const it = itemFrom(o); const key = it && (it.k || it.id); if (it && !seen.has(key)) { out.push(it); break; } }
-    const m = 1 + ((nd && nd.layer || 1) - 1) / 8; for (const it of out) it.price = Math.round(it.price * m);
+    const m = 2 * (1 + ((nd && nd.layer || 1) - 1) / 8); for (const it of out) it.price = Math.round(it.price * m);   // 11/11 用户定：整体 ×2，平均每关只买得起三件里的两件左右
+    if (S.shopLock) { const L = S.shopLock; S.shopLock = null; const k = L.k || L.id; const j = out.findIndex(o => (o.k || o.id) === k); out.splice(j >= 0 ? j : 0, 1, Object.assign({}, L, { kept: 1 })); }   // 上一关锁定的货：原价留到这一关（只留一关）
     return out.sort(() => Math.random() - .5);
   }
   function learn(it) {   // 格子满了也能学：先放进「掌握武学」，在武学页换上
@@ -6368,8 +6369,8 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(900px,58v
       else { S.xopts = S.xopts || rollXiu(); body = S.xopts.map((o, j) => { const [a0, v0] = o.adds[0]; return `<div class="pn cd"><em class="bi" style="background-image:url('${A(ATI[a0])}')"></em><h3>${ATN[a0]}修炼</h3><p style="color:${RAR[o.q][1]}">${['普通', '精良', '稀有', '绝世'][o.q]}</p><i class="dv"></i>${o.adds.map(([a, v]) => `<p class="up"><b>+${v}</b> ${ATN[a]}</p>`).join('')}<p class="sd">${ATD[a0]}</p><button class="bb" data-a="xiu" data-i="${j}">修 炼</button></div>`; }).join('');
         left = `<button class="bb rf" data-a="xrr" ${S.xrr ? 'disabled' : ''}>刷新<span>${S.xrr ? 0 : 1}/1</span></button>`; }
     } else if (prepTab === 'shang') {
-      body = S.shop.map((it, i) => `<div class="pn cd sh"><div class="dh"><em style="background-image:url('${icoOf(it)}')"></em><div><h3>${it.name}</h3><p style="color:${RQC[Math.min(3, it.q || 0)]}">${RQ[Math.min(3, it.q || 0)]}</p><div class="tg">${tagsOf(it).map(t => `<span>${t}</span>`).join('')}</div></div></div><h5>${it.kind === 'item' ? '道具属性' : it.kind === 'skill' ? '武艺效果' : '心法效果'}</h5><p class="ds">${it.desc}</p><button class="bb buy" data-a="buy" data-i="${i}" ${[].concat(S.bought ?? []).includes(i) || S.money < it.price ? 'disabled' : ''}>${[].concat(S.bought ?? []).includes(i) ? '已买下' : `购买 <b>${it.price}</b><em style="background-image:url('${A('coin')}')"></em>`}</button></div>`).join('');
-      left = `<p class="shn">三件都能买 · 不能刷新 · 越往后越贵</p>`;
+      body = S.shop.map((it, i) => `<div class="pn cd sh"><div class="dh"><em style="background-image:url('${icoOf(it)}')"></em><div><h3>${it.name}</h3><p style="color:${RQC[Math.min(3, it.q || 0)]}">${RQ[Math.min(3, it.q || 0)]}</p><div class="tg">${tagsOf(it).map(t => `<span>${t}</span>`).join('')}</div></div></div><h5>${it.kind === 'item' ? '道具属性' : it.kind === 'skill' ? '武艺效果' : '心法效果'}</h5><p class="ds">${it.desc}</p><button class="bb buy" data-a="buy" data-i="${i}" ${[].concat(S.bought ?? []).includes(i) || S.money < it.price ? 'disabled' : ''}>${[].concat(S.bought ?? []).includes(i) ? '已买下' : `购买 <b>${it.price}</b><em style="background-image:url('${A('coin')}')"></em>`}</button>${[].concat(S.bought ?? []).includes(i) ? '' : it.kept ? '<p class="lk" title="上一关锁定的货，原价保留">🔒<i>留</i></p>' : `<button class="lkb${S.shopLock === it ? ' on' : ''}" data-a="lock" data-i="${i}" title="锁定：这一关买不起就锁上，下一关原价还在（只留一关）">${S.shopLock === it ? '🔒<i>已锁</i>' : '🔓<i>锁定</i>'}</button>`}</div>`).join('');
+      left = `<p class="shn">可买多件 · 不刷新 · 越后越贵 · 可锁一件留到下关</p>`;
     } else if (prepTab === 'wu') {
       const all = S.slots.filter(Boolean).concat(S.gf.filter(Boolean), S.qg ? [S.qg] : [], S.owned || []);
       if (!selWu || !all.includes(selWu)) selWu = S.slots[0];
@@ -6397,7 +6398,8 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(900px,58v
       else if (a === 'sort') { S.sortDn = S.sortDn === false; selLoot = 0; }
       else if (a === 'learn') { learn(S.loot[i]); S.loot.splice(i, 1); if (window.SFX) SFX.play('j_pick1'); }
       else if (a === 'sell') { S.money += S.loot[i].sell; S.loot.splice(i, 1); if (window.SFX) SFX.play('coin'); }
-      else if (a === 'buy') { const it = S.shop[i]; if (S.money >= it.price) { S.money -= it.price; learn(it); S.bought = [].concat(S.bought ?? [], i); if (window.SFX) SFX.play('j_shop'); } }
+      else if (a === 'lock') { const it = S.shop[i]; S.shopLock = S.shopLock && S.shopLock === it ? null : it; if (window.SFX) SFX.play('j_pick0'); }
+      else if (a === 'buy') { const it = S.shop[i]; if (S.money >= it.price) { S.money -= it.price; learn(it); S.bought = [].concat(S.bought ?? [], i); if (S.shopLock === it) S.shopLock = null; if (window.SFX) SFX.play('j_shop'); } }
       else if (a === 'xiu') { const o = S.xopts[i]; if (window.SFX) SFX.play('j_pick' + o.q); for (const [q, v] of o.adds) S.atAdd[q] += v; S.bank--; S.xopts = null; S.xrr = false; }
       else if (a === 'xrr') { S.xopts = null; S.xrr = true; }
       else if (a === 'wsel') selWu = k;
@@ -6447,12 +6449,12 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(900px,58v
   }
   // ---------- 局内存档（11/11 用户定：回到长卷自动存；主界面「继续」读档） ----------
   const RUN_KEY = 'szz-run';
-  const snap = () => ({ origin, slots: S.slots.slice(), held: S.held, mast: { ...S.mast }, gf: S.gf.slice(), qg: S.qg, gfExp: { ...S.gfExp }, xy: S.xy, rt: { dmg: RT.dmg, cd: RT.cd, move: RT.move, take: RT.take }, hp: hero ? hero.hp : null, lv: S.lv, xiu: S.xiu, bank: S.bank, atAdd: (S.atAdd || []).slice(), money: S.money || 0, items: (S.items || []).slice(), owned: (S.owned || []).slice() });
+  const snap = () => ({ shopLock: S.shopLock || null, origin, slots: S.slots.slice(), held: S.held, mast: { ...S.mast }, gf: S.gf.slice(), qg: S.qg, gfExp: { ...S.gfExp }, xy: S.xy, rt: { dmg: RT.dmg, cd: RT.cd, move: RT.move, take: RT.take }, hp: hero ? hero.hp : null, lv: S.lv, xiu: S.xiu, bank: S.bank, atAdd: (S.atAdd || []).slice(), money: S.money || 0, items: (S.items || []).slice(), owned: (S.owned || []).slice() });
   function restore(o) {
     if (!o) return;
     if (ORIGINS[o.origin]) origin = o.origin;
     S.slots = o.slots || S.slots; S.held = o.held != null ? o.held : S.held; S.mast = o.mast || {}; S.gf = o.gf || ['', '', '']; S.qg = o.qg || ''; S.gfExp = o.gfExp || {}; S.xy = o.xy || 0;
-    S.money = o.money || 0; S.coins = []; S.loot = []; S.shop = []; S.items = o.items || []; S.owned = o.owned || [];
+    S.money = o.money || 0; S.coins = []; S.loot = []; S.shop = []; S.items = o.items || []; S.owned = o.owned || []; S.shopLock = o.shopLock || null;
     S.lv = o.lv || 1; S.xiu = o.xiu || 0; S.bank = o.bank || 0; S.atAdd = o.atAdd || [0, 0, 0, 0, 0, 0];
     Object.assign(RT, o.rt || {}); GM = gfCalc(); S.zq = zqMax();
     if (hero && o.hp > 0) hero.hp = Math.min(o.hp, maxHp());
@@ -6466,7 +6468,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(900px,58v
   // ---------- 对外接口 ----------
   function forceBlade() { weapon = 'blade'; pendingWeapon = null; try { if (window.GEAR && GEAR.switch) GEAR.switch(); } catch (e) {} if (typeof ui === 'function') ui(); }
   function startRun() {
-    S.lv = 1; S.xiu = 0; S.bank = 0; S.atAdd = [0, 0, 0, 0, 0, 0]; S.lvFx = 0; S.money = 0; S.coins = []; S.loot = []; S.shop = []; S.items = []; S.owned = []; S.hutiSum = 0; S.slots = [OG().skill || 'hengsao', '', '', '', '']; S.held = wepOf(S.slots[0]) < 7 ? wepOf(S.slots[0]) : null; S.mast = {}; S.dps = {}; S.gf = ['', '', '']; S.qg = ''; S.gfExp = {}; S.xy = 0; S.lhjReady = false; S.lhjOn = false; GM = GM0(); S.zq = zqMax(); S.hp0 = hero.hp; S.combo = 0; S.lk = typeof kills === 'number' ? kills : 0; S.chain = 0; S.lastCat = -1; S.lastI = -9; W.pick = false; const old = document.getElementById('survPick'); if (old) old.remove();
+    S.lv = 1; S.shopLock = null; S.xiu = 0; S.bank = 0; S.atAdd = [0, 0, 0, 0, 0, 0]; S.lvFx = 0; S.money = 0; S.coins = []; S.loot = []; S.shop = []; S.items = []; S.owned = []; S.hutiSum = 0; S.slots = [OG().skill || 'hengsao', '', '', '', '']; S.held = wepOf(S.slots[0]) < 7 ? wepOf(S.slots[0]) : null; S.mast = {}; S.dps = {}; S.gf = ['', '', '']; S.qg = ''; S.gfExp = {}; S.xy = 0; S.lhjReady = false; S.lhjOn = false; GM = GM0(); S.zq = zqMax(); S.hp0 = hero.hp; S.combo = 0; S.lk = typeof kills === 'number' ? kills : 0; S.chain = 0; S.lastCat = -1; S.lastI = -9; W.pick = false; const old = document.getElementById('survPick'); if (old) old.remove();
     W.started = true; W.between = 0; S.wind = null; S.recov = null; S.later = []; S.qi = 0; bolts.length = 0; zones.length = 0; S.cycles = 0; fx.length = 0;
     forceBlade();
     const vw = viewW(); arenaL = M.gates[0] + 10; lockR = arenaL + vw * 1.5; gateI = 0;
