@@ -18,6 +18,8 @@
     { t: '溪边磨石', d: '溪水边有一块平整的磨刀石。', o: [['磨刀', '招式伤害 +10%', 'sharpen'], ['歇脚', '回复 30% 血量', 'rest']] },
   ];
   const FONT = '"MaShanZheng","STKaiti","KaiTi","Songti SC",serif';
+  const UI = '"PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif';   // 小字用黑体加粗，毛笔字只用在标题和节点名（11/11：字太小太细）
+  const KS = () => Math.max(1, Math.min(1.45, Math.min(W / 1280, H / 720)));
   const INK = '#2a211a', CINNABAR = '#b3281e', PAPER = '#eadcc0';
 
   let run = null, pending = false, shown = false, root = null, cv = null, g = null, W = 0, H = 0, DPR = 1, scroll = 0, tScroll = 0, raf = 0, t0 = 0, drag = null, noise = null, campBox = null, bgC = null, bgKey = '';
@@ -110,7 +112,7 @@
     cv = document.createElement('canvas'); cv.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;display:block';
     root.appendChild(cv); document.body.appendChild(root); g = cv.getContext('2d');
     const exit = document.createElement('button'); exit.textContent = '退出';
-    exit.style.cssText = 'position:absolute;right:14px;top:12px;padding:6px 14px;font:700 14px ' + FONT + ';letter-spacing:2px;color:#f3dc9a;background:rgba(40,28,18,.8);border:1px solid #c9a24a;border-radius:6px;cursor:pointer;z-index:2';
+    exit.style.cssText = 'position:absolute;right:14px;top:12px;padding:6px 14px;font:700 ' + Math.round(16 * Math.max(1, Math.min(1.45, Math.min(innerWidth / 1280, innerHeight / 720)))) + 'px ' + UI + ';letter-spacing:2px;color:#f3dc9a;background:rgba(40,28,18,.8);border:1px solid #c9a24a;border-radius:6px;cursor:pointer;z-index:2';
     exit.onclick = () => { if (!confirm('退出本局，回到主界面？')) return; close(); if (typeof returnFromPausedGame === 'function') returnFromPausedGame(true); else if (window.TITLE && TITLE.show) TITLE.show(); };
     root.appendChild(exit);
     cv.addEventListener('pointerdown', e => { drag = { x: e.clientX, y: e.clientY, s: scroll, moved: false, id: e.pointerId }; try { cv.setPointerCapture(e.pointerId); } catch (_) {} });
@@ -260,19 +262,20 @@
     icon(n.type, R * 2.0, vis || (!reach && !cur));
     g.globalAlpha = 1; g.shadowBlur = 0; g.shadowColor = 'transparent'; g.shadowOffsetY = 0;
     if (vis && !cur) { g.beginPath(); g.arc(R * .62, -R * .62, 7, 0, 7); g.fillStyle = CINNABAR; g.fill(); g.strokeStyle = PAPER; g.lineWidth = 1.6; g.beginPath(); g.moveTo(R * .62 - 3, -R * .62); g.lineTo(R * .62 - .8, -R * .62 + 2.6); g.lineTo(R * .62 + 3.4, -R * .62 - 2.6); g.stroke(); }
-    if (n.rw && !vis) { const bc = { skill: ['招', '#3b6ea8'], perk: ['功', '#a8662a'], heal: ['疗', '#3f8a4a'], both: ['双', '#7a3a8a'] }[n.rw]; g.beginPath(); g.arc(R * .7, R * .7, 9, 0, 7); g.fillStyle = bc[1]; g.fill(); g.strokeStyle = PAPER; g.lineWidth = 1.5; g.stroke(); g.fillStyle = '#fff'; g.font = `bold 11px ${FONT}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(bc[0], R * .7, R * .7 + 1); }
+    if (n.rw && !vis) { const bc = { skill: ['招', '#3b6ea8'], perk: ['功', '#a8662a'], heal: ['疗', '#3f8a4a'], both: ['双', '#7a3a8a'] }[n.rw]; g.beginPath(); g.arc(R * .7, R * .7, 9, 0, 7); g.fillStyle = bc[1]; g.fill(); g.strokeStyle = PAPER; g.lineWidth = 1.5; g.stroke(); g.fillStyle = '#fff'; g.font = `bold 11px ${UI}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(bc[0], R * .7, R * .7 + 1); }
     g.restore();
     // 名字：可走的节点、当前、Boss 常显；其他鼠标悬停才显
     if ((reach && !port()) || cur || n.type === 'boss' || hov.n === n) tag(p, R, n, hov.n === n || cur || n.type === 'boss');
   }
   function tag(p, R, n, full) {
     const l1 = n.type === 'start' ? '涿郡' : nlabel(n), l2 = n.type === 'start' || !full ? '' : MAPN[MAP_OF(n.layer)] + (n.type === 'camp' ? ' · 歇息' : n.rw ? ' · 奖励 ' + RWN[n.rw] : '');
-    g.save(); g.font = `bold 15px ${FONT}`; const w1 = g.measureText(l1).width; g.font = `12px ${FONT}`; const w2 = l2 ? g.measureText(l2).width : 0;
-    const bw = Math.max(w1, w2) + 18, bh = l2 ? 38 : 24; let x = p.x - bw / 2, y = p.y + R + 10;
+    const k = KS(), f1 = `bold ${Math.round(18 * k)}px ${FONT}`, f2 = `600 ${Math.round(13 * k)}px ${UI}`;
+    g.save(); g.font = f1; const w1 = g.measureText(l1).width; g.font = f2; const w2 = l2 ? g.measureText(l2).width : 0;
+    const bw = Math.max(w1, w2) + 20 * k, bh = (l2 ? 44 : 28) * k; let x = p.x - bw / 2, y = p.y + R + 10;
     if (y + bh > H - 6) y = p.y - R - 10 - bh; x = Math.max(6, Math.min(W - bw - 6, x));
     g.fillStyle = 'rgba(40,28,18,.82)'; g.beginPath(); g.roundRect ? g.roundRect(x, y, bw, bh, 5) : g.rect(x, y, bw, bh); g.fill();
-    g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#f3dc9a'; g.font = `bold 15px ${FONT}`; g.fillText(l1, x + bw / 2, y + (l2 ? 13 : 12));
-    if (l2) { g.fillStyle = 'rgba(243,220,154,.75)'; g.font = `12px ${FONT}`; g.fillText(l2, x + bw / 2, y + 28); }
+    g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#f3dc9a'; g.font = f1; g.fillText(l1, x + bw / 2, y + (l2 ? 15 : 14) * k);
+    if (l2) { g.fillStyle = 'rgba(243,220,154,.85)'; g.font = f2; g.fillText(l2, x + bw / 2, y + 33 * k); }
     g.restore();
   }
   function tint() {   // 每一段（打谷场/县城/营寨/祭坛）一档淡墨色调，段名用大字淡淡写在背景上
@@ -325,17 +328,17 @@
     // 抬头：章节、血量、提示（手机竖屏先垫一层纸色渐隐，免得节点叠在字上）
     if (port()) { const hb = g.createLinearGradient(0, 0, 0, 132); hb.addColorStop(0, 'rgba(234,220,192,.97)'); hb.addColorStop(.75, 'rgba(234,220,192,.9)'); hb.addColorStop(1, 'rgba(234,220,192,0)'); g.fillStyle = hb; g.fillRect(0, 0, W, 132); }
     g.textAlign = 'left'; g.textBaseline = 'alphabetic'; g.fillStyle = INK;
-    g.font = `${port() ? 30 : 38}px ${FONT}`; g.fillText('第一章 · 黄巾之乱', 22, 54);
-    g.font = `15px ${FONT}`; g.globalAlpha = .7; g.fillText(port() ? '点选发亮的节点前进' : '涿郡 → 张角祭坛　点选发亮的节点前进，可拖动长卷', 24, 78); g.globalAlpha = 1;
+    const k = KS(); g.font = `bold ${Math.round((port() ? 32 : 42) * k)}px ${FONT}`; g.fillText('第一章 · 黄巾之乱', 22, 56 * k);
+    g.font = `600 ${Math.round(15 * k)}px ${UI}`; g.globalAlpha = .78; g.fillText(port() ? '点选发亮的节点前进' : '涿郡 → 张角祭坛　点选发亮的节点前进，可拖动长卷', 24, 84 * k); g.globalAlpha = 1;
     if (window.SURV && SURV.routeHp) {
-      const [hp, mx] = SURV.routeHp(), bw = Math.min(190, W * .34), x = 24, y = 96;
-      g.fillStyle = 'rgba(40,28,18,.55)'; g.fillRect(x, y, bw + 4, 14); g.fillStyle = CINNABAR; g.fillRect(x + 2, y + 2, bw * Math.max(0, Math.min(1, hp / mx)), 10);
-      g.fillStyle = INK; g.font = `13px ${FONT}`; g.fillText('血 ' + Math.ceil(hp) + '/' + mx, x + bw + 12, y + 12);
+      const [hp, mx] = SURV.routeHp(), bw = Math.min(220 * k, W * .34), x = 24, y = 100 * k, bh = 16 * k;
+      g.fillStyle = 'rgba(40,28,18,.6)'; g.fillRect(x, y, bw + 4, bh); g.fillStyle = CINNABAR; g.fillRect(x + 2, y + 2, bw * Math.max(0, Math.min(1, hp / mx)), bh - 4);
+      g.fillStyle = INK; g.font = `bold ${Math.round(14 * k)}px ${UI}`; g.textBaseline = 'middle'; g.fillText('气血 ' + Math.ceil(hp * 10) + ' / ' + Math.round(mx * 10), x + bw + 12, y + bh / 2); g.textBaseline = 'alphabetic';
     }
     // 图例（手机竖屏放右上，避开右下印章）
-    const lg = [['battle', '普通'], ['elite', '精英'], ['camp', '营地'], ['boss', '首领']]; g.font = `13px ${FONT}`; g.fillStyle = INK; g.textAlign = 'left'; g.textBaseline = 'middle';
-    let lx = 30; const ly = H - 34;
-    lg.forEach(([ty, t]) => { g.save(); g.translate(lx + 12, ly); icon(ty, 28); g.restore(); g.globalAlpha = .8; g.fillText(t, lx + 30, ly + 1); g.globalAlpha = 1; lx += port() ? 68 : 82; });
+    const lg = [['battle', '普通'], ['elite', '精英'], ['camp', '营地'], ['boss', '首领']]; g.font = `bold ${Math.round(14 * k)}px ${UI}`; g.fillStyle = INK; g.textAlign = 'left'; g.textBaseline = 'middle';
+    let lx = 30; const ly = H - 36 * k;
+    lg.forEach(([ty, t]) => { g.save(); g.translate(lx + 14 * k, ly); icon(ty, 32 * k); g.restore(); g.globalAlpha = .9; g.fillText(t, lx + 34 * k, ly + 1); g.globalAlpha = 1; lx += (port() ? 70 : 90) * k; });
     edge();
   }
 
