@@ -149,6 +149,7 @@ function separateEnemies(dt) {
 function zUpdate(z, dt) {
   if (z.endFade != null) { z.endFade -= dt; z.vx = 0; z.moving = false; return; }   // 节点打完：敌人原地站定、淡出（11/11 用户定）
   if (window.GEAR && !z.dead) { dt = GEAR.enemyTime(z, dt); if (!dt) return; }
+  if (z.drumT > 0 && !z.dead) { z.drumT -= dt; dt *= 1.3; }   /* 11/12 鼓手的战鼓：附近黄巾 4 秒内动作快 30% */
   if (z.T.boss) return Boss.update(z, dt);
   if (z.T.mirror) { if (window.XINMO) XINMO.update(z, dt); return; }   // 心魔试炼
   const T = z.T;
@@ -229,7 +230,8 @@ function zUpdate(z, dt) {
     return;
   }
   if (z.st === 'wake') { if (z.t > (z.T.elite ? 1.0 : .55)) set(z, 'move'); else return; }
-  if (T.thief && window.SURV && SURV.thief) { SURV.thief(z, dt); return; }   // 窃贼：AI 在 survive.js（要用到地上的铜钱）
+  if (T.thief && window.SURV && SURV.thief) { SURV.thief(z, dt); return; }
+  if (T.unit && window.SURV && SURV.unitAI) { SURV.unitAI(z, dt); return; }   /* 11/12 新兵种：火罐手/鼓手/骑兵/狂信徒/弩手 */   // 窃贼：AI 在 survive.js（要用到地上的铜钱）
   if (T.priest) {                        // 方士：远离玩家 → 念咒 → 回血/火球，念咒可被打断
     if (z.daze > 0) { z.daze -= dt; z.stun = Math.max(0, z.stun - dt); moveEnt(z, z.vx * dt, 0); z.vx *= .85; return; }
     if (z.stun > 0) { z.stun -= dt; moveEnt(z, z.vx * dt, 0); z.vx *= .85; if (z.stun <= 0) set(z, 'idle'); return; }

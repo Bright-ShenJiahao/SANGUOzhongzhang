@@ -32,13 +32,13 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const targetN = () => RT.on ? Math.min(CNT_MAX, Math.round((CNT_BASE + CNT_STEP * ((W.lvF || 1) - 1)) * (RT.node ? [1, .55, .75, .9][RT.node.layer] || 1 : 1))) : Math.max(8, Math.round((WAVE_N[W.n - 1] || 100) * N_SCALE));
   // ---------- 路线模式：按「段」和「节点标签」出兵 ----------
   // 单位简写：g 喽啰 b 刀手 s 投石 a 弓箭 p 方士 e 老卒 | 第二章兵（贴图没加载完时用刀手/老卒顶替）：h 大刀 d 盾 q 枪 l 力士
-  const U = { g: ['grunt'], b: ['blade'], s: ['slinger'], a: ['archer'], p: ['priest'], e: ['elite'], h: ['yellow-heavy', 'blade'], d: ['yellow-shield', 'blade'], q: ['yellow-spear', 'blade'], l: ['yellow-golem', 'elite'] };
+  const U = { g: ['grunt'], b: ['blade'], s: ['slinger'], a: ['archer'], p: ['priest'], e: ['elite'], h: ['yellow-heavy', 'blade'], d: ['yellow-shield', 'blade'], q: ['yellow-spear', 'blade'], l: ['yellow-golem', 'elite'], f: ['fire-jar'], m: ['drummer'], c: ['cavalry'], k: ['fanatic'] };   /* 11/12 新兵种：f 火罐手 m 鼓手 c 骑兵 k 狂信徒 */
   const POOL = [   // [段][标签] = 单位:权重
     { melee: { g: 100, b: 20 }, raid: { b: 70, g: 40 }, range: { g: 50, s: 50 }, shield: { b: 50, g: 40, s: 15 }, patrol: { g: 60, b: 40, e: 5 } },
-    { melee: { g: 60, b: 50, h: 20 }, raid: { b: 50, h: 50, g: 20 }, range: { b: 30, s: 40, a: 30 }, shield: { d: 50, h: 30, s: 20 }, patrol: { b: 50, h: 40, e: 8 } },
-    { melee: { q: 60, b: 40, g: 30 }, raid: { b: 40, h: 40, q: 30 }, range: { q: 30, a: 60, s: 30 }, shield: { d: 40, q: 50, a: 20 }, patrol: { q: 50, h: 40, e: 8, l: 4 } },
-    { melee: { h: 50, q: 50, g: 20 }, raid: { h: 60, q: 40, b: 20 }, range: { h: 25, a: 50, s: 30, p: 10 }, shield: { d: 50, q: 40, a: 20, p: 10 }, patrol: { h: 50, q: 40, e: 10, l: 6 } },
-    { melee: { h: 50, q: 50, g: 20 }, raid: { h: 60, q: 40, b: 20 }, range: { h: 25, a: 50, s: 30, p: 10 }, shield: { d: 50, q: 40, a: 20, p: 10 }, patrol: { h: 50, q: 40, e: 10, l: 6 } },
+    { melee: { g: 60, b: 50, h: 20 }, raid: { b: 50, h: 50, g: 20 }, range: { b: 30, s: 40, a: 30, f: 30 }, shield: { d: 50, h: 30, s: 20, f: 20 }, patrol: { b: 50, h: 40, e: 8, f: 15 } },
+    { melee: { q: 60, b: 40, g: 30, c: 25 }, raid: { b: 40, h: 40, q: 30, c: 40 }, range: { q: 30, a: 60, s: 30, f: 30 }, shield: { d: 40, q: 50, a: 20, m: 12 }, patrol: { q: 50, h: 40, e: 8, l: 4, c: 20, m: 12 } },
+    { melee: { h: 50, q: 50, g: 20, k: 45 }, raid: { h: 60, q: 40, b: 20, c: 40, k: 50 }, range: { h: 25, a: 50, s: 30, p: 10, f: 35 }, shield: { d: 50, q: 40, a: 20, p: 10, m: 15 }, patrol: { h: 50, q: 40, e: 10, l: 6, c: 25, m: 15, k: 30 } },
+    { melee: { h: 50, q: 50, g: 20, k: 50 }, raid: { h: 60, q: 40, b: 20, c: 45, k: 60 }, range: { h: 25, a: 50, s: 30, p: 10, f: 40 }, shield: { d: 50, q: 40, a: 20, p: 10, m: 18 }, patrol: { h: 50, q: 40, e: 10, l: 6, c: 30, m: 18, k: 35 } },
   ];
   let c2ok = false;
   const unit = k => { const u = U[k]; return c2ok || !u[1] ? u[0] : u[1]; };
@@ -164,6 +164,12 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       } else if (o.kind === 'whirl') {   // 张梁双刀旋风
         ctx.translate(o.x, o.y); ctx.scale(1, YS); ctx.globalCompositeOperation = 'lighter';
         for (let k = 0; k < 3; k++) { ctx.strokeStyle = `rgba(255,200,120,${.45 - k * .12})`; ctx.lineWidth = 6 - k * 1.5; ctx.beginPath(); ctx.arc(0, 0, o.r - k * 10, o.t * 14 + k, o.t * 14 + k + 2.4); ctx.stroke(); }
+      } else if (o.kind === 'fire') {   // 火油罐烧出的一片火
+        const fade = Math.min(1, (o.T - o.t) / .5); ctx.translate(o.x, o.y); ctx.scale(1, YS); ctx.globalCompositeOperation = 'lighter';
+        const g = ctx.createRadialGradient(0, 0, 0, 0, 0, o.r); g.addColorStop(0, `rgba(255,170,60,${.55 * fade})`); g.addColorStop(.7, `rgba(230,80,20,${.35 * fade})`); g.addColorStop(1, 'rgba(160,30,10,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, o.r, 0, 7); ctx.fill();
+        for (let k = 0; k < 6; k++) { const a = k * 1.05 + o.t * 2, rr = o.r * (.35 + .4 * ((k * 37) % 10) / 10), fl = 6 + 4 * Math.sin(o.t * 14 + k * 2); ctx.fillStyle = `rgba(255,${150 + k * 12},60,${.6 * fade})`; ctx.beginPath(); ctx.ellipse(Math.cos(a) * rr, Math.sin(a) * rr, 4, fl, 0, 0, 7); ctx.fill(); }
+      } else if (o.kind === 'drum') {   // 战鼓声浪：一圈往外扩的红环
+        ctx.translate(o.x, o.y); ctx.scale(1, YS); const q = o.t / o.T; ctx.strokeStyle = `rgba(255,90,60,${.7 * (1 - q)})`; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(0, 0, 20 + q * 110, 0, 7); ctx.stroke();
       } else if (o.kind === 'stuck') {   // 插在地上的长戟
         ctx.strokeStyle = '#2a1a10'; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(o.x, o.y); ctx.lineTo(o.x + 10, o.y - 46); ctx.stroke();
         ctx.strokeStyle = '#8a6040'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(o.x, o.y); ctx.lineTo(o.x + 10, o.y - 46); ctx.stroke();
@@ -335,7 +341,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     spawn(type, x, y);
     const z = zs[zs.length - 1]; z.f = -side; z.survMul = 1 + HP_SCALE * (W.n - 1);
     z.survTier = 0;
-    if (!boss && (z.T.elite || ['yellow-heavy', 'yellow-shield', 'yellow-golem'].includes(type))) { z.survTier = 1; z.hp = 7.5; z.maxHp = z.hp * z.survMul; }   // 四档：杂兵 ×1（3）、精英 ×2.5（7.5）
+    if (!boss && (z.T.elite || ['yellow-heavy', 'yellow-shield', 'yellow-golem', 'cavalry'].includes(type))) { z.survTier = 1; z.hp = 7.5; z.maxHp = z.hp * z.survMul; }   // 四档：杂兵 ×1（3）、精英 ×2.5（7.5）
     z.hp *= z.survMul;
     if (boss && boss !== true) { z.survTier = boss.tier || 2; const hb = boss.hp || 21; z.hp = hb * z.survMul; z.maxHp = z.hp; z.sc = (z.sc || 1) * (boss.sc || 1); z.survBoss = true; z.bossLabel = boss.name; floaters.push({ x: z.x, y: z.y - 60, t: 0, txt: boss.name + ' 出阵！', color: '#ff6a4a' }); }
     else if (boss) { z.hp *= 4; z.maxHp = z.hp; z.sc = (z.sc || 1) * 1.25; z.survBoss = true; floaters.push({ x: z.x, y: z.y - 60, t: 0, txt: '敌将出阵！', color: '#ff6a4a' }); }
@@ -807,6 +813,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const COIN_IMG = new Image(); COIN_IMG.src = 'art/ui/hud/coin.webp';
   const PORTRAIT = new Image(); PORTRAIT.src = 'art/ui/npc/liubei_face.webp';
   function dropCoins(z) {   // 敌人倒下掉铜钱：普通 1，精锐 3，敌将 15
+    if (z.T.unit === 'fan' && !z.fanBoom) { z.fanBoom = 1; teleAdd({ k: 'circle', x: z.x, y: z.y, r: 42, T: .45, dmg: 1.2, c: 3, snd: 'land' }); }   /* 11/12 狂信徒：倒下 0.45 秒后炸一小圈（不挂 src，人死了也照炸） */
     if (z.T.siege) { for (let i = 0; i < 5; i++) S.coins.push({ x: z.x + R(-16, 16), y: z.y + R(-6, 6), z: 8 + R(0, 10), vz: R(60, 110), vx: R(-40, 40), v: 1, t: 0 }); return; }   // 拆了投石车：地上掉 5 文
     if (z.T.thief) { const v = (z.loot || 0) + 4; z.loot = 0; for (let i = 0; i < Math.min(6, v); i++) S.coins.push({ x: z.x + R(-14, 14), y: z.y + R(-6, 6), z: 8 + R(0, 10), vz: R(60, 110), vx: R(-40, 40), v: Math.ceil(v / Math.min(6, v)), t: 0 }); floaters.push({ x: z.x, y: z.y - 44, t: 0, txt: '钱袋破了！', color: '#ffd86e' }); return; }   // 窃贼：偷的钱 + 4 全撒出来
     if (z.survTier < 1 || (z.survTier === 1 && !z.T.elite && z.type !== 'yellow-golem')) { S.money += 1; S.coinGot += 1; if (Math.random() > .07) return; }   // 11/11 用户定：普通杀敌直接入账，只有多出来的钱掉在地上要捡
@@ -816,6 +823,44 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     tut('coin');
   }
   // 窃贼（11/11 用户定）：跑去捡地上的铜钱，捡够了或没钱可捡就逃跑；打死会把偷的钱连本带利吐出来，跑掉了战报里记一笔
+  // ================= 11/12 新兵种 AI =================
+  function unitAI(z, dt) {
+    if (z.daze > 0) { z.daze -= dt; z.stun = Math.max(0, z.stun - dt); moveEnt(z, z.vx * dt, 0); z.vx *= .85; z.moving = false; return; }
+    if (z.stun > 0) { z.stun -= dt; moveEnt(z, z.vx * dt, 0); z.vx *= .85; z.moving = false; z.cdash = null; if (z.stun <= 0) set(z, 'move'); return; }
+    if (z.st === 'hurt' || z.st === 'idle') set(z, 'move');
+    const T = z.T, dx = hero.x - z.x, dy = hero.y - z.y, d = Math.hypot(dx, dy / YS) || 1, sp = T.spd * (z.survSlow > 0 ? .5 : 1) * dt;
+    z.ucd = (z.ucd == null ? R(1, 2.5) : z.ucd) - dt;
+    const go = (tx, ty, k = 1) => { const ex = tx - z.x, ey = ty - z.y, e = Math.hypot(ex, ey) || 1; z.moving = true; z.f = Math.sign(ex) || z.f; moveEnt(z, ex / e * sp * k, ey / e * sp * k * .8); };
+    const keep = (lo, hi) => { if (d < lo) go(z.x - dx, z.y - dy); else if (d > hi) go(hero.x, hero.y); else { z.moving = false; z.f = Math.sign(dx) || z.f; } };
+    if (T.unit === 'fire') {   // 火罐手：保持 140~210 的距离，扔火油罐，落地留一片烧 3 秒的火
+      if (z.st === 'wind') { z.moving = false; if (z.t > .6) { set(z, 'strike'); const tx = hero.x + R(-14, 14), ty = hero.y + R(-8, 8);
+        teleAdd({ k: 'circle', x: tx, y: ty, r: 40, T: .75, dmg: 1.2, c: 3, snd: 'land', then: () => hzAdd({ kind: 'fire', x: tx, y: ty, r: 38, dmg: .8, T: 3 }) }); if (window.SFX) SFX.play('bow', 0, .6); } return; }
+      if (z.st === 'strike') { z.moving = false; if (z.t > .35) set(z, 'move'); return; }
+      keep(140, 210); if (z.ucd <= 0 && d < 260) { z.ucd = R(3.2, 4.2); z.f = Math.sign(dx) || z.f; set(z, 'wind'); }
+      return;
+    }
+    if (T.unit === 'drum') {   // 鼓手：躲在后排敲鼓，130 范围内的黄巾 4 秒内动作快 30%
+      if (z.st === 'wind') { z.moving = false; if (z.t > .4) { set(z, 'strike'); for (const o of zs) if (o !== z && !o.dead && !o.survBoss && Math.hypot(o.x - z.x, (o.y - z.y) / YS) < 130) o.drumT = 4;
+        hzAdd({ kind: 'drum', x: z.x, y: z.y, T: .6 }); floaters.push({ x: z.x, y: z.y - 50, t: 0, txt: '咚！咚！', color: '#ff7a5a' }); if (window.SFX) SFX.play('crack', 0, .5); } return; }
+      if (z.st === 'strike') { z.moving = false; if (z.t > .55) set(z, 'move'); return; }
+      keep(170, 240); if (z.ucd <= 0) { z.ucd = R(3.6, 4.6); set(z, 'wind'); }
+      return;
+    }
+    if (T.unit === 'cav') {   // 骑兵：绕着主角兜圈，冷却好了就停下、出一条冲锋预警线，然后直线冲过去
+      if (z.cdash) { const c = z.cdash; c.t += dt; const q = Math.min(1, c.t / .42); z.x = c.x0 + (c.x1 - c.x0) * q; z.y = Math.max(M.top + 6, Math.min(M.bot - 6, c.y0 + (c.y1 - c.y0) * q)); z.st = 'strike'; z.moving = true; if (q >= 1) { z.cdash = null; set(z, 'move'); } return; }
+      if (z.st === 'wind') { z.moving = false; return; }
+      if (z.ucd <= 0 && d < 280) { z.ucd = R(3.5, 4.5); const a = ang(z, hero.x, hero.y), L = 330, x0 = z.x, y0 = z.y; z.f = Math.cos(a) < 0 ? -1 : 1; set(z, 'wind');
+        teleAdd({ k: 'line', x: x0, y: y0, a, len: L, w: 40, T: .7, dmg: 2, src: z, snd: '', then: () => { if (z.dead || z.air) return; z.cdash = { x0: z.x, y0: z.y, x1: z.x + Math.cos(a) * L, y1: z.y + Math.sin(a) * L * YS, t: 0 }; if (window.SFX) SFX.play('enemySwing', 0, .8); } }); return; }
+      const oa = Math.atan2((z.y - hero.y) / YS, z.x - hero.x) + .9 * dt * (z.orb || (z.orb = Math.random() < .5 ? -1 : 1));
+      go(hero.x + Math.cos(oa) * 210, hero.y + Math.sin(oa) * 210 * YS, 1); return;
+    }
+    if (T.unit === 'fan') {   // 狂信徒：直冲主角，贴身扑一下；死的时候炸一小圈（dropCoins 里）
+      if (z.st === 'wind') { z.moving = false; if (z.t > .3) { set(z, 'strike'); if (Math.hypot(hero.x - z.x, (hero.y - z.y) / YS) < 34 && typeof dmgHero === 'function') dmgHero(T.dmg, z); } return; }
+      if (z.st === 'strike') { if (z.t > .35) set(z, 'move'); return; }
+      if (d < 28 && z.ucd <= 0) { z.ucd = 1.1; set(z, 'wind'); return; }
+      go(hero.x, hero.y); return;
+    }
+  }
   function thiefAI(z, dt) {
     z.t += dt; z.flash = Math.max(0, z.flash - dt);
     if (z.daze > 0) { z.daze -= dt; z.stun = Math.max(0, z.stun - dt); moveEnt(z, z.vx * dt, 0); z.vx *= .85; z.moving = false; return; }
@@ -1332,6 +1377,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     ctx.drawImage(img, 0, 0, cap, H, x, y, c, h); ctx.drawImage(img, cap, 0, W2 - cap * 2, H, x + c, y, w - c * 2, h); ctx.drawImage(img, W2 - cap, 0, cap, H, x + w - c, y, c, h);
   }
   function drawWorld() {
+    for (const z of zs) if (z.drumT > 0 && !z.dead) { ctx.save(); ctx.translate(z.x, z.y); ctx.scale(1, YS); ctx.fillStyle = `rgba(255,70,40,${.18 + .1 * Math.sin(gameT * 12)})`; ctx.beginPath(); ctx.arc(0, 0, 16, 0, 7); ctx.fill(); ctx.restore(); }   /* 被战鼓鼓舞 */
     teleDraw();
     // 敌将气焰（11/11）：脚下一圈黄巾土红光 + 身上往上窜的火苗，人堆里一眼认出来
     if (RT.on) for (const z of zs) if (z.survBoss && !z.dead && z.endFade == null) {
@@ -1639,5 +1685,5 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       return (OG().take || 1) / AFX.hp() * (1 - IT('take')) * RT.take * RES().take * GM.take / GM.hp * low * (S.qg === 'taxue' && mv ? .85 : 1) * (GM.still && S.stillT > 1 ? 1 - GM.still : 1);
     },
     absorb: n => { if (!RT.on || S.zq <= 0) return n; const a = Math.min(S.zq, n * (.3 + IT('huti'))); S.zq -= a; S.hutiSum = (S.hutiSum || 0) + a; return n - a; },   // 护体（11/11 用户定，照群侠幸存者）：真气只挡 30% 伤害，其余直接扣血；真气空了全扣血
-     moveMul: () => (OG().move || 1) * AFX.move() * (1 + IT('move')) * RT.move * GM.spd, left: () => RT.on && RT.node && W.started ? Math.max(0, WT() - W.t) : null, reward: (n, cb) => offerReward(n, cb), event(k, cb) { eventDo(k, cb); }, SK, tick, drawWorld, hud, thief: thiefAI, startRun, waveFlow, pose, rooted, onRoll, skipWave() { if (W.retreat <= 0 && W.between <= 0 && W.started) endWave(); }, state: () => ({ wave: W.n, t: W.t, slots: S.slots.slice() }) };
+     moveMul: () => (OG().move || 1) * AFX.move() * (1 + IT('move')) * RT.move * GM.spd, left: () => RT.on && RT.node && W.started ? Math.max(0, WT() - W.t) : null, reward: (n, cb) => offerReward(n, cb), event(k, cb) { eventDo(k, cb); }, SK, tick, drawWorld, hud, thief: thiefAI, unitAI: (z, dt) => unitAI(z, dt), startRun, waveFlow, pose, rooted, onRoll, skipWave() { if (W.retreat <= 0 && W.between <= 0 && W.started) endWave(); }, state: () => ({ wave: W.n, t: W.t, slots: S.slots.slice() }) };
 })();

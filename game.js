@@ -141,6 +141,11 @@ const TYPES = {
   'yellow-heavy': { name: '黄巾大刀兵', hp: 7, spd: 25, wind: .9, reach: 31, dmg: 2, heavy: true, sprite: 'yellow_heavy', scale: 1.02 },
   'yellow-shield': { name: '黄巾盾兵', hp: 8, spd: 24, wind: .8, reach: 25, dmg: 1.5, heavy: true, shield: true, rangedResist: .7, blocksPierce: true, sprite: 'yellow_shield', scale: 1 },
   'yellow-spear': { name: '黄巾枪兵', hp: 5, spd: 31, wind: .7, reach: 37, dmg: 1.5, sprite: 'yellow_spear', scale: .98 },
+  /* 11/12 新兵种（用户 GPT 出图，按屏幕大小切成最高像素）：行为写在 survive.js 的 unitAI */
+  'fire-jar': { name: '火罐手', hp: 3, spd: 32, wind: .6, reach: 22, dmg: 1, unit: 'fire', w: 10, sprite: 'fire_jar', scale: .86 },
+  'drummer': { name: '鼓手', hp: 5, spd: 30, wind: .6, reach: 22, dmg: 1, unit: 'drum', w: 11, sprite: 'drummer', scale: .86 },
+  'cavalry': { name: '黄巾骑兵', hp: 7, spd: 50, wind: .7, reach: 30, dmg: 2, unit: 'cav', w: 22, heavy: true, sprite: 'cavalry', scale: .86 },
+  'fanatic': { name: '狂信徒', hp: 2, spd: 66, wind: .3, reach: 22, dmg: 1, unit: 'fan', w: 10, sprite: 'fanatic', scale: .86 },
   'yellow-catapult': { name: '投石车', hp: 9, spd: 0, siege: true, w: 28, sprite: 'yellow_catapult', scale: 1.05 },
   zhang_liang: { name: '人公将军·张梁', hp: 54, spd: 26, wind: .9, reach: 46, dmg: 3, heavy: true, noLaunch: true, w: 16, sprite: 'zhang_liang_q', scale: .88 },   /* 11/12 重画 Q 版：双长刀；旧图 zhang_liang 留着没删 */
   'yellow-golem': { name: '黄巾力士', hp: 16, spd: 22, wind: 1, reach: 34, dmg: 3, heavy: true, noLaunch: true, w: 14, sprite: 'yellow_golem', scale: 1 },
