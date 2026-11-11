@@ -9,6 +9,13 @@
   const m = /[?&]debug(?:=([a-z0-9]+))?/.exec(location.search);
   if (!m) return;
   const auto = m[1] || '';
+  // 点击诊断（11/11：iPhone 横屏点不了按钮）：每次手指按下/抬起/点击，顶部显示事件、手指坐标、点到的元素、该坐标最上层的元素
+  { const box = document.createElement('div');
+    box.style.cssText = 'position:fixed;left:50%;top:2px;transform:translateX(-50%);z-index:2147483647;max-width:96vw;padding:4px 8px;background:rgba(0,0,0,.82);color:#7f7;font:11px/1.35 monospace;pointer-events:none;white-space:pre;border:1px solid #3a3';
+    const lines = [], nm = e => !e ? '∅' : (e.id ? '#' + e.id : e.tagName.toLowerCase() + (e.className && typeof e.className === 'string' ? '.' + e.className.split(' ').filter(Boolean).slice(0, 2).join('.') : ''));
+    const log = (t, x, y, tg) => { const top = document.elementFromPoint(x, y); lines.push(`${t} ${x|0},${y|0} 点到:${nm(tg)} 最上层:${nm(top)} ${innerWidth}x${innerHeight} vv:${window.visualViewport ? (visualViewport.offsetTop|0) + '/' + (visualViewport.height|0) : '-'} sy:${scrollY|0}`); while (lines.length > 5) lines.shift(); box.textContent = lines.join('\n'); if (!box.parentNode) document.body.appendChild(box); };
+    for (const ev of ['touchstart', 'touchend', 'pointerdown', 'pointerup', 'click']) addEventListener(ev, e => { const p = e.changedTouches ? e.changedTouches[0] : e; log(ev + (e.defaultPrevented ? '(已拦)' : ''), p.clientX, p.clientY, e.target); }, { capture: true, passive: true });
+  }
   let panel = null, god = false, fps = 60, last = performance.now(), frames = 0, acc = 0;
   let groupState = {};
   try { groupState = JSON.parse(localStorage.getItem('szz-dbg-groups') || '{}') || {}; } catch (e) { groupState = {}; }

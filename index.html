@@ -62,7 +62,7 @@ body.szz-pro #help{display:none}
 .x-back{min-height:34px!important}
 }
 #rot small{display:block;margin-top:10px;font-size:14px;font-weight:600;color:#c9b691;line-height:1.6}
-</style><link rel="preload" href="pack/fonts/result.woff2?v=160af028ae" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=160af028ae)format("woff2");font-display:swap}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
+</style><link rel="preload" href="pack/fonts/result.woff2?v=ac987dac61" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=ac987dac61)format("woff2");font-display:swap}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
 </head><body>
 <style>
 #bootSplash{position:fixed;inset:0;z-index:99999;background:radial-gradient(ellipse at 50% 45%,#f3e4cf 0%,#ecd9c0 55%,#d9c09f 100%);transition:opacity .45s ease-out}
@@ -101,7 +101,7 @@ if(location.protocol==='https:'&&!/[?&]debug(?:=|&|$)/.test(location.search)&&'s
 })();
 // 自动更新：打开游戏、或从后台切回来时，查一下线上有没有新版本；有就在标题/整备页自动刷新（战斗中不打扰）
 (function(){
-var BUILD='da9d96fb0296',busy=false;
+var BUILD='15d301a067d0',busy=false;
 if(location.protocol!=='https:'||/[?&]debug(?:=|&|$)/.test(location.search))return;
 function check(){
   if(busy)return;
@@ -953,6 +953,13 @@ const XIAOCHANG = { drawBackground() {}, state: () => null, start() {}, on: () =
   const m = /[?&]debug(?:=([a-z0-9]+))?/.exec(location.search);
   if (!m) return;
   const auto = m[1] || '';
+  // 点击诊断（11/11：iPhone 横屏点不了按钮）：每次手指按下/抬起/点击，顶部显示事件、手指坐标、点到的元素、该坐标最上层的元素
+  { const box = document.createElement('div');
+    box.style.cssText = 'position:fixed;left:50%;top:2px;transform:translateX(-50%);z-index:2147483647;max-width:96vw;padding:4px 8px;background:rgba(0,0,0,.82);color:#7f7;font:11px/1.35 monospace;pointer-events:none;white-space:pre;border:1px solid #3a3';
+    const lines = [], nm = e => !e ? '∅' : (e.id ? '#' + e.id : e.tagName.toLowerCase() + (e.className && typeof e.className === 'string' ? '.' + e.className.split(' ').filter(Boolean).slice(0, 2).join('.') : ''));
+    const log = (t, x, y, tg) => { const top = document.elementFromPoint(x, y); lines.push(`${t} ${x|0},${y|0} 点到:${nm(tg)} 最上层:${nm(top)} ${innerWidth}x${innerHeight} vv:${window.visualViewport ? (visualViewport.offsetTop|0) + '/' + (visualViewport.height|0) : '-'} sy:${scrollY|0}`); while (lines.length > 5) lines.shift(); box.textContent = lines.join('\n'); if (!box.parentNode) document.body.appendChild(box); };
+    for (const ev of ['touchstart', 'touchend', 'pointerdown', 'pointerup', 'click']) addEventListener(ev, e => { const p = e.changedTouches ? e.changedTouches[0] : e; log(ev + (e.defaultPrevented ? '(已拦)' : ''), p.clientX, p.clientY, e.target); }, { capture: true, passive: true });
+  }
   let panel = null, god = false, fps = 60, last = performance.now(), frames = 0, acc = 0;
   let groupState = {};
   try { groupState = JSON.parse(localStorage.getItem('szz-dbg-groups') || '{}') || {}; } catch (e) { groupState = {}; }
