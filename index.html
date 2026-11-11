@@ -62,7 +62,7 @@ body.szz-pro #help{display:none}
 .x-back{min-height:34px!important}
 }
 #rot small{display:block;margin-top:10px;font-size:14px;font-weight:600;color:#c9b691;line-height:1.6}
-</style><link rel="preload" href="pack/fonts/result.woff2?v=90b0a31f67" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=90b0a31f67)format("woff2");font-display:swap}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
+</style><link rel="preload" href="pack/fonts/result.woff2?v=05fe17d794" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=05fe17d794)format("woff2");font-display:swap}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
 </head><body>
 <style>
 #bootSplash{position:fixed;inset:0;z-index:99999;background:radial-gradient(ellipse at 50% 45%,#f3e4cf 0%,#ecd9c0 55%,#d9c09f 100%);transition:opacity .45s ease-out}
@@ -108,7 +108,7 @@ if(location.protocol==='https:'&&!/[?&]debug(?:=|&|$)/.test(location.search)&&'s
 })();
 // 自动更新：打开游戏、或从后台切回来时，查一下线上有没有新版本；有就在标题/整备页自动刷新（战斗中不打扰）
 (function(){
-var BUILD='2a3ded6f7d46',busy=false;
+var BUILD='6df1bf93b8ad',busy=false;
 if(location.protocol!=='https:'||/[?&]debug(?:=|&|$)/.test(location.search))return;
 function check(){
   if(busy)return;
@@ -4778,11 +4778,47 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   // ===== 首领招式（11/11 用户定 1）：地上先亮红色预警（圈 / 直线），过一会儿才砸下来；翻滚无敌能躲 =====
   const TELE = [], BOOM = [], YS = .55;   // 俯视战场地面压扁系数：圆画成椭圆，判定也按压扁后的距离
   function teleAdd(o) { o.t = 0; TELE.push(o); return o; }
+  /* 11/12 首领专属技能：预警颜色按属性分 0 暗红（兵器）1 白（雷）2 土黄（土）3 橙（符火）；ring = 圆环带缺口 */
+  const TC = [['200,40,20', '255,90,50', '#ff5a2a', '#ffb060'], ['230,230,255', '240,240,255', '#e8e8ff', '#f4f4ff'], ['170,120,50', '225,175,95', '#c89850', '#e8c888'], ['230,110,20', '255,160,60', '#ff8a2a', '#ffc070']];
+  const angDiff = (a, b) => Math.abs((((a - b + Math.PI) % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI) - Math.PI);
   function teleHit(o) {
     const dx = hero.x - o.x, dy = (hero.y - o.y) / YS;
     if (o.k === 'circle') return dx * dx + dy * dy <= o.r * o.r;
+    if (o.k === 'ring') { const d = Math.hypot(dx, dy); return d >= o.r0 && d <= o.r1 && angDiff(Math.atan2(dy, dx), o.ga) > o.gw; }
     const ca = Math.cos(o.a), sa = Math.sin(o.a), along = dx * ca + dy * sa, perp = Math.abs(-dx * sa + dy * ca);
     return along >= -10 && along <= o.len && perp <= o.w / 2;
+  }
+  // 会动的危险物（飞出去的大刀、流星锤、追人的符、旋风）：碰到主角就伤，同一个东西 0.7 秒内只伤一次
+  const HZ = [];
+  function hzAdd(o) { o.t = 0; o.hitT = 0; HZ.push(o); return o; }
+  function hzTick(dt) {
+    for (let i = HZ.length - 1; i >= 0; i--) {
+      const o = HZ[i]; o.t += dt; o.hitT -= dt;
+      if (o.src && (o.src.dead || o.src.hp <= 0 || o.src.endFade != null)) { HZ.splice(i, 1); continue; }
+      if (o.upd) o.upd(o, dt);
+      if (o.r && o.dmg && o.hitT <= 0 && Math.hypot(hero.x - o.x, (hero.y - o.y) / YS) < o.r && typeof dmgHero === 'function') { dmgHero(o.dmg, o.src || null, 'skill'); o.hitT = .7; }
+      if (o.t >= o.T) { HZ.splice(i, 1); if (o.end) o.end(o); }
+    }
+  }
+  // 张宝的土墙（会挡主角的路）、波才的令旗（插着就不停冒兵，主角站在旗边 0.8 秒就拔掉）
+  const WALLS = [], FLAGS = [];
+  function fieldTick(dt) {
+    for (let i = WALLS.length - 1; i >= 0; i--) {
+      const w = WALLS[i], p = w.p; w.t += dt;
+      if (w.t > 5 || (w.src && w.src.dead)) { p.solid = false; p.fadeAt = gameT; WALLS.splice(i, 1); continue; }
+      const hw = p.w / 2 + 6, x0 = p.x - hw, x1 = p.x + hw, y0 = p.y - 12, y1 = p.y + 4;
+      if (hero.x > x0 && hero.x < x1 && hero.y > y0 && hero.y < y1) {   // 推到最近的一边
+        const opts = [[hero.x - x0, 'x', x0], [x1 - hero.x, 'x', x1], [hero.y - y0, 'y', y0], [y1 - hero.y, 'y', y1]].sort((a, b) => a[0] - b[0])[0];
+        hero[opts[1]] = opts[2];
+      }
+    }
+    for (let i = FLAGS.length - 1; i >= 0; i--) {
+      const f = FLAGS[i], p = f.p; f.t += dt; f.sp -= dt;
+      const near = Math.hypot(hero.x - p.x, (hero.y - p.y) / YS) < 40;
+      f.pull = near ? f.pull + dt : Math.max(0, f.pull - dt);
+      if (f.pull > .8 || f.t > 10 || (f.src && f.src.dead)) { p.fadeAt = gameT; FLAGS.splice(i, 1); if (f.pull > .8) { floaters.push({ x: p.x, y: p.y - 60, t: 0, txt: '拔旗！', color: '#ffe08a', big: 1 }); if (window.SFX) SFX.play('crack'); } continue; }
+      if (f.sp <= 0) { f.sp = 1.7; for (let k = 0; k < 2; k++) { const e = edgeSpawn(pickType()); if (e) { e.x = p.x + R(-30, 30); e.y = Math.max(M.top + 6, Math.min(M.bot - 6, p.y + R(-16, 16))); } } }
+    }
   }
   function teleTick(dt) {
     for (let i = TELE.length - 1; i >= 0; i--) {
@@ -4790,60 +4826,151 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       if (o.src && (o.src.dead || o.src.endFade != null)) { TELE.splice(i, 1); continue; }   // 放招的人倒了，招也散了
       if (o.t < o.T) continue;
       TELE.splice(i, 1);
-      if (teleHit(o) && typeof dmgHero === 'function') dmgHero(o.dmg, o.src || null, 'skill');
-      shake = Math.max(shake, o.k === 'circle' && o.r > 80 ? .3 : .18); if (window.SFX) SFX.play(o.snd || 'crack', 0, .8);
-      BOOM.push({ k: o.k, x: o.x, y: o.y, r: o.r, a: o.a, len: o.len, w: o.w, t: 0, c: o.c || 0 });
+      if (o.dmg && teleHit(o) && typeof dmgHero === 'function') dmgHero(o.dmg, o.src || null, 'skill');
+      shake = Math.max(shake, o.k !== 'line' && (o.r || o.r1) > 80 ? .3 : .18); if (window.SFX && o.snd !== '') SFX.play(o.snd || 'crack', 0, .8);
+      BOOM.push({ k: o.k, x: o.x, y: o.y, r: o.r, r0: o.r0, r1: o.r1, ga: o.ga, gw: o.gw, a: o.a, len: o.len, w: o.w, t: 0, c: o.c || 0 });
       if (o.then) o.then();
     }
     for (let i = BOOM.length - 1; i >= 0; i--) if ((BOOM[i].t += dt) > .4) BOOM.splice(i, 1);
+    hzTick(dt); fieldTick(dt);
   }
   function teleDraw() {
-    const shape = o => { ctx.beginPath(); if (o.k === 'circle') ctx.arc(0, 0, o.r, 0, 7); else { ctx.rotate(o.a); ctx.rect(0, -o.w / 2, o.len, o.w); } };
+    const shape = (o, k = 1) => { ctx.beginPath(); if (o.k === 'circle') ctx.arc(0, 0, o.r * k, 0, 7); else if (o.k === 'ring') { ctx.arc(0, 0, o.r1, o.ga + o.gw, o.ga + 2 * Math.PI - o.gw); ctx.arc(0, 0, o.r0, o.ga + 2 * Math.PI - o.gw, o.ga + o.gw, true); ctx.closePath(); } else { ctx.rotate(o.a); ctx.rect(0, -o.w / 2, o.len, o.w); } };
     for (const o of TELE) {
-      const p = Math.min(1, o.t / o.T), blink = p > .75 ? .5 + .5 * Math.sin(o.t * 40) : 1;
+      const p = Math.min(1, o.t / o.T), blink = p > .75 ? .5 + .5 * Math.sin(o.t * 40) : 1, C = TC[o.c || 0];
       ctx.save(); ctx.translate(o.x, o.y); ctx.scale(1, YS);
-      ctx.fillStyle = `rgba(${o.c ? '230,230,255' : '200,40,20'},${.16 * blink})`; shape(o); ctx.fill();
-      ctx.lineWidth = 2; ctx.strokeStyle = `rgba(${o.c ? '240,240,255' : '255,90,50'},${.75 * blink})`; ctx.stroke();
+      ctx.fillStyle = `rgba(${C[0]},${.16 * blink})`; shape(o); ctx.fill();
+      ctx.lineWidth = 2; ctx.strokeStyle = `rgba(${C[1]},${.75 * blink})`; ctx.stroke();
       ctx.restore();
-      ctx.save(); ctx.translate(o.x, o.y); ctx.scale(1, YS); ctx.globalAlpha = .38 * blink; ctx.fillStyle = o.c ? '#e8e8ff' : '#ff5a2a';   // 里面一层随时间涨满 = 还剩多久
-      if (o.k === 'circle') { ctx.beginPath(); ctx.arc(0, 0, o.r * p, 0, 7); ctx.fill(); } else { ctx.rotate(o.a); ctx.fillRect(0, -o.w / 2, o.len * p, o.w); }
+      ctx.save(); ctx.translate(o.x, o.y); ctx.scale(1, YS); ctx.globalAlpha = .38 * blink; ctx.fillStyle = C[2];   // 里面一层随时间涨满 = 还剩多久
+      if (o.k === 'circle') { ctx.beginPath(); ctx.arc(0, 0, o.r * p, 0, 7); ctx.fill(); } else if (o.k === 'ring') { ctx.globalAlpha = .38 * blink * p; shape(o); ctx.fill(); } else { ctx.rotate(o.a); ctx.fillRect(0, -o.w / 2, o.len * p, o.w); }
       ctx.restore();
     }
     for (const b of BOOM) {
       const q = b.t / .4; ctx.save(); ctx.translate(b.x, b.y); ctx.scale(1, YS); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = (1 - q) * .7;
-      ctx.fillStyle = b.c ? '#f4f4ff' : '#ffb060';
-      if (b.k === 'circle') { ctx.beginPath(); ctx.arc(0, 0, b.r * (1 + q * .15), 0, 7); ctx.fill(); } else { ctx.rotate(b.a); ctx.fillRect(0, -b.w / 2 * (1 + q * .3), b.len, b.w * (1 + q * .3)); }
+      ctx.fillStyle = TC[b.c || 0][3];
+      if (b.k === 'circle') { ctx.beginPath(); ctx.arc(0, 0, b.r * (1 + q * .15), 0, 7); ctx.fill(); } else if (b.k === 'ring') { shape(b); ctx.fill(); } else { ctx.rotate(b.a); ctx.fillRect(0, -b.w / 2 * (1 + q * .3), b.len, b.w * (1 + q * .3)); }
+      ctx.restore();
+    }
+    for (const o of HZ) {
+      ctx.save();
+      if (o.kind === 'blade') {   // 飞旋的大刀：转着的月牙
+        ctx.translate(o.x, o.y - 14); ctx.rotate(o.t * 20); ctx.lineCap = 'round';
+        ctx.strokeStyle = '#2a1a10'; ctx.lineWidth = 9; ctx.beginPath(); ctx.arc(0, 0, 18, -1.2, 1.9); ctx.stroke();
+        ctx.strokeStyle = '#e4e0d4'; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(0, 0, 18, -1.2, 1.9); ctx.stroke();
+        ctx.strokeStyle = '#7a5030'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(-20, -8); ctx.stroke();
+      } else if (o.kind === 'ball') {   // 流星锤：铁链 + 铁球
+        const sx = o.src.x, sy = o.src.y - 30;
+        ctx.strokeStyle = '#2a2a2a'; ctx.lineWidth = 3; ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(o.x, o.y - 12); ctx.stroke(); ctx.setLineDash([]);
+        ctx.fillStyle = '#3a3a3a'; ctx.strokeStyle = '#111'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(o.x, o.y - 12, 11, 0, 7); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.beginPath(); ctx.arc(o.x - 3, o.y - 15, 4, 0, 7); ctx.fill();
+      } else if (o.kind === 'fu') {   // 追人的黄符
+        ctx.translate(o.x, o.y - 18); ctx.rotate(Math.sin(o.t * 9) * .4); ctx.fillStyle = '#f2d24a'; ctx.strokeStyle = '#b02a18'; ctx.lineWidth = 1.5; ctx.fillRect(-5, -8, 10, 16); ctx.strokeRect(-5, -8, 10, 16);
+        ctx.beginPath(); ctx.moveTo(-2, -5); ctx.lineTo(2, -1); ctx.lineTo(-2, 3); ctx.lineTo(2, 6); ctx.stroke();
+      } else if (o.kind === 'whirl') {   // 张梁双刀旋风
+        ctx.translate(o.x, o.y); ctx.scale(1, YS); ctx.globalCompositeOperation = 'lighter';
+        for (let k = 0; k < 3; k++) { ctx.strokeStyle = `rgba(255,200,120,${.45 - k * .12})`; ctx.lineWidth = 6 - k * 1.5; ctx.beginPath(); ctx.arc(0, 0, o.r - k * 10, o.t * 14 + k, o.t * 14 + k + 2.4); ctx.stroke(); }
+      } else if (o.kind === 'stuck') {   // 插在地上的长戟
+        ctx.strokeStyle = '#2a1a10'; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(o.x, o.y); ctx.lineTo(o.x + 10, o.y - 46); ctx.stroke();
+        ctx.strokeStyle = '#8a6040'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(o.x, o.y); ctx.lineTo(o.x + 10, o.y - 46); ctx.stroke();
+        ctx.fillStyle = '#d8d8d0'; ctx.beginPath(); ctx.moveTo(o.x - 2, o.y + 2); ctx.lineTo(o.x + 4, o.y - 4); ctx.lineTo(o.x - 4, o.y - 6); ctx.fill();
+      }
       ctx.restore();
     }
   }
   const ang = (z, tx, ty) => Math.atan2((ty - z.y) / YS, tx - z.x);
-  // 每个首领的招：返回预警时长（这段时间首领原地蓄力不动）
+  // 每个首领的招：返回蓄力时长（这段时间首领原地不动）。11/12 用户：参考无名之辈，每个首领一招专属技能，招式之间不喘息；破绽来自招式本身（空手、刀卡地、头晕）
+  const dirU = (z, tx, ty) => { const a = ang(z, tx, ty); return [Math.cos(a), Math.sin(a), a]; };
+  const clampY = y => Math.max(M.top + 6, Math.min(M.bot - 6, y));
+  const gap = (z, t, txt) => { z.stun = Math.max(z.stun || 0, t); floaters.push({ x: z.x, y: z.y - 70, t: 0, txt, color: '#9fe08a' }); };
   const BSK = {
-    sweep: (z, d) => { teleAdd({ k: 'circle', x: z.x, y: z.y, r: 105, T: 1.0, dmg: 2.5, src: z }); say(z, '横扫千军！'); return 1.0; },
-    cleave: (z, d) => { teleAdd({ k: 'line', x: z.x, y: z.y, a: ang(z, hero.x, hero.y), len: 230, w: 46, T: .85, dmg: 2.8, src: z }); say(z, '开山劈！'); return .85; },
-    charge: (z, d) => { const a = ang(z, hero.x, hero.y), L = 300, x0 = z.x, y0 = z.y;
-      teleAdd({ k: 'line', x: x0, y: y0, a, len: L, w: 56, T: .8, dmg: 2.8, src: z, then: () => { z.dash = { x0, y0, x1: x0 + Math.cos(a) * L, y1: y0 + Math.sin(a) * L * YS, t: 0 }; } }); say(z, '冲啊！'); return .8; },
-    spin: (z, d) => { teleAdd({ k: 'circle', x: z.x, y: z.y, r: 120, T: 1.0, dmg: 2.5, src: z }); say(z, '旋戟！'); return 1.0; },
-    firerain: (z, d) => { for (let i = 0; i < (z.rage ? 7 : 5); i++) teleAdd({ k: 'circle', x: hero.x + R(-110, 110), y: hero.y + R(-55, 55), r: 42, T: 1.0 + i * .14, dmg: 2, src: z, snd: 'land' }); say(z, '火来！'); return .7; },
-    thunder: (z, d) => { for (let i = 0; i < (z.rage ? 8 : 6); i++) teleAdd({ k: 'circle', x: hero.x + (i ? R(-120, 120) : 0), y: hero.y + (i ? R(-60, 60) : 0), r: 46, T: 1.15 + i * .12, dmg: 2.5, src: z, c: 1, snd: 'crack' }); say(z, '天雷！'); return .8; },
+    sweep: z => { teleAdd({ k: 'circle', x: z.x, y: z.y, r: 105, T: 1.0, dmg: 2.5, src: z }); say(z, '横扫千军！'); return 1.0; },
+    cleave: z => { teleAdd({ k: 'line', x: z.x, y: z.y, a: ang(z, hero.x, hero.y), len: 230, w: 46, T: .85, dmg: 2.8, src: z }); say(z, '开山劈！'); return .85; },
+    charge: z => { const a = ang(z, hero.x, hero.y), L = 300, x0 = z.x, y0 = z.y;
+      teleAdd({ k: 'line', x: x0, y: y0, a, len: L, w: 56, T: .8, dmg: 2.8, src: z, then: () => { z.dash = { x0, y0, x1: x0 + Math.cos(a) * L, y1: clampY(y0 + Math.sin(a) * L * YS), t: 0 }; } }); say(z, '冲啊！'); return .8; },
+    spin: z => { teleAdd({ k: 'circle', x: z.x, y: z.y, r: 120, T: 1.0, dmg: 2.5, src: z }); say(z, '旋戟！'); return 1.0; },
+    firerain: z => { for (let i = 0; i < (z.rage ? 7 : 5); i++) teleAdd({ k: 'circle', x: hero.x + R(-110, 110), y: hero.y + R(-55, 55), r: 42, T: 1.0 + i * .14, dmg: 2, src: z, snd: 'land', c: 3 }); say(z, '火来！'); return .7; },
+    thunder: z => { for (let i = 0; i < (z.rage ? 8 : 6); i++) teleAdd({ k: 'circle', x: hero.x + (i ? R(-120, 120) : 0), y: hero.y + (i ? R(-60, 60) : 0), r: 46, T: 1.15 + i * .12, dmg: 2.5, src: z, c: 1, snd: 'crack' }); say(z, '天雷！'); return .8; },
+    // 程远志：长柄大刀脱手飞出，画一道直线飞到远处再飞回来，去回都伤人；刀没回来前空手站着（破绽）
+    boomerang: z => { const [ux, uy, a] = dirU(z, hero.x, hero.y), L = 280;
+      teleAdd({ k: 'line', x: z.x, y: z.y, a, len: L, w: 40, T: .5, src: z, snd: '', then: () => {
+        const x0 = z.x, y0 = z.y, fx = x0 + ux * L, fy = y0 + uy * L * YS;
+        hzAdd({ kind: 'blade', src: z, x: x0, y: y0, r: 28, dmg: 2.6, T: 1.15, upd: o => { const q = o.t / 1.15, e = Math.sin(q * Math.PI), bx = q < .5 ? x0 : z.x, by = q < .5 ? y0 : z.y; o.x = bx + (fx - bx) * e; o.y = by + (fy - by) * e; if (q >= .5 && !o.back) { o.back = 1; o.hitT = 0; } } });
+      } }); say(z, '大刀回旋！'); return 1.65; },
+    // 邓茂：九环刀劈地，三道裂地波扇形冲出；劈完刀卡在地里 1 秒
+    quake3: z => { const a = ang(z, hero.x, hero.y);
+      [-.42, 0, .42].forEach((d, i) => teleAdd({ k: 'line', x: z.x, y: z.y, a: a + d, len: 270, w: 38, T: .9, dmg: 2.6, src: z, c: 2, snd: i ? '' : 'land', then: i === 2 ? () => gap(z, 1, '刀卡住了！') : null }));
+      say(z, '九环震地！'); return .9; },
+    // 波才：插下令旗，旗边不停冒兵；主角站到旗边 0.8 秒就能拔掉
+    flag: z => { const x = z.x + (hero.x > z.x ? -26 : 26), y = clampY(z.y + 4);
+      teleAdd({ k: 'circle', x, y, r: 30, T: .6, src: z, c: 2, snd: 'land', then: () => { const p = { g: 'flag_huang', x, y, solid: false, broken: false, hp: 0, hitT: 0, sc: .75 }; props.push(p); FLAGS.push({ p, t: 0, sp: .3, pull: 0, src: z }); } });
+      say(z, '令旗点兵！'); return .6; },
+    // 何仪：双戟连突，三段短冲刺，每段重新瞄准；第三段后喘口气
+    dash3: z => { const step = k => { const a = ang(z, hero.x, hero.y), L = 175, x0 = z.x, y0 = z.y;
+        z.castT = .42; z.cx = x0; z.cy = y0;
+        teleAdd({ k: 'line', x: x0, y: y0, a, len: L, w: 44, T: .42, dmg: 2.2, src: z, snd: 'enemySwing', then: () => { z.dash = { x0, y0, x1: x0 + Math.cos(a) * L, y1: clampY(y0 + Math.sin(a) * L * YS), t: 0 }; z.dashThen = k < 2 ? () => step(k + 1) : () => gap(z, .8, '喘气！'); } }); };
+      step(0); say(z, '双戟连突！'); return .42; },
+    // 管亥（马上）：跃马踏下，砸在主角现在的位置
+    stomp: z => { const x = hero.x, y = hero.y; teleAdd({ k: 'circle', x, y, r: 72, T: .95, dmg: 3, src: z, snd: 'land', then: () => { z.x = x; z.y = y; z.cx = x; z.cy = y; } }); say(z, '马踏飞燕！'); return .95; },
+    // 管亥（步战）：掷戟（照无名之辈）：长戟飞出插在地上，空手发愣 1.2 秒，再冲过去捡
+    throwj: z => { const [ux, uy, a] = dirU(z, hero.x, hero.y), L = 310;
+      teleAdd({ k: 'line', x: z.x, y: z.y, a, len: L, w: 34, T: .7, dmg: 3, src: z, then: () => { const px = z.x + ux * L, py = clampY(z.y + uy * L * YS); gap(z, 1.2, '空手！');
+        hzAdd({ kind: 'stuck', src: z, x: px, y: py, T: 1.3, end: () => { z.dash = { x0: z.x, y0: z.y, x1: px, y1: py, t: 0 }; } }); } });
+      say(z, '看戟！'); return .7; },
+    // 张曼成：在主角周围画一圈符火，1.4 秒后整圈烧起，只留一个缺口
+    firering: z => { teleAdd({ k: 'ring', x: hero.x, y: hero.y, r0: 62, r1: 118, ga: R(0, 6.28), gw: .5, T: 1.4, dmg: 3, src: z, c: 3, snd: 'land' }); say(z, '符火阵！'); return .8; },
+    // 马元义：流星锤甩出去再拉回来，去回都伤人；拉回后硬直
+    flail: z => { const [ux, uy, a] = dirU(z, hero.x, hero.y), L = 270;
+      teleAdd({ k: 'line', x: z.x, y: z.y, a, len: L, w: 30, T: .5, src: z, snd: '', then: () => {
+        const fx = z.x + ux * L, fy = z.y + uy * L * YS;
+        hzAdd({ kind: 'ball', src: z, x: z.x, y: z.y, r: 22, dmg: 2.6, T: .95, upd: o => { const q = o.t / .95, e = Math.sin(q * Math.PI); o.x = z.x + (fx - z.x) * e; o.y = z.y + (fy - z.y) * e; if (q > .5 && !o.back) { o.back = 1; o.hitT = 0; } }, end: () => gap(z, .6, '收锤！') });
+      } }); say(z, '流星锤！'); return 1.45; },
+    // 张梁：双刀旋风，边转边追 2.2 秒，转完头晕
+    whirl: z => { z.chase = { t: 0, T: 2.2, spd: z.rage ? 70 : 58 }; hzAdd({ kind: 'whirl', src: z, x: z.x, y: z.y, r: 60, dmg: 2.2, T: 2.2, upd: o => { o.x = z.x; o.y = z.y; }, end: () => gap(z, 1.2, '头晕！') }); say(z, '旋风斩！'); return 0; },
+    // 张宝：地裂（照无名之辈）：一道裂缝从脚下朝主角一段段冒出来
+    crack: z => { const [ux, uy] = dirU(z, hero.x, hero.y); for (let i = 0; i < 9; i++) teleAdd({ k: 'circle', x: z.x + ux * (34 + i * 30), y: clampY(z.y + uy * (34 + i * 30) * YS), r: 26, T: .55 + i * .07, dmg: 2.4, src: z, c: 2, snd: i % 3 ? '' : 'land' }); say(z, '地裂！'); return .6; },
+    // 张宝：土墙（照无名之辈）：在主角身后升起一排土墙堵退路，留一个缺口，5 秒后崩塌
+    wall: z => { const [ux, uy] = dirU(z, hero.x, hero.y), bx = hero.x + ux * 58, by = hero.y + uy * 58 * YS, px = -uy, py = ux, skip = (Math.random() * 5) | 0;
+      for (let k = 0; k < 5; k++) { if (k === skip) continue; const x = bx + px * (k - 2) * 46, y = clampY(by + py * (k - 2) * 46 * YS);
+        teleAdd({ k: 'circle', x, y, r: 24, T: .6, src: z, c: 2, snd: k ? '' : 'land', then: () => { const p = { g: 'zb_wall', x, y, solid: true, broken: false, hp: 0, hitT: 0, sc: 1, w: 56, h: 18.7 }; props.push(p); WALLS.push({ p, t: 0, src: z }); } }); }
+      say(z, '土墙，起！'); return .6; },
+    // 张角：雷符：三张符追着主角飘，1.3 秒后在主角脚下落雷
+    leifu: z => { for (let k = 0; k < 3; k++) { const o = hzAdd({ kind: 'fu', src: z, x: z.x + (k - 1) * 16, y: z.y - 4, r: 14, dmg: 1.5, T: 1.3, upd: (o, dt) => { const d = Math.hypot(hero.x - o.x, hero.y - o.y) || 1; o.x += (hero.x - o.x) / d * 85 * dt; o.y += (hero.y - o.y) / d * 85 * dt * YS; } });
+        if (!k) o.end = () => { teleAdd({ k: 'circle', x: hero.x, y: hero.y, r: 56, T: .7, dmg: 3, src: z, c: 1, snd: 'crack' }); if (z.rage) for (let j = 0; j < 2; j++) teleAdd({ k: 'circle', x: hero.x + R(-70, 70), y: hero.y + R(-35, 35), r: 44, T: .85, dmg: 2.5, src: z, c: 1, snd: '' }); }; }
+      say(z, '符来！'); return .6; },
+    // 张角：天雷滚滚：全场随机大范围落雷（11/12 用户：八卦雷阵改成随机大范围落雷）
+    storm: z => { const n = z.rage ? 22 : 15; for (let i = 0; i < n; i++) { const mid = i === (n >> 1);
+        teleAdd({ k: 'circle', x: mid ? hero.x : hero.x + R(-330, 330), y: mid ? hero.y : clampY(hero.y + R(-160, 160)), r: R(42, 64), T: 1.0 + i * .11, dmg: 2.6, src: z, c: 1, snd: i % 2 ? '' : 'crack' }); }
+      say(z, '天雷滚滚！'); return 1.0; },
   };
-  const BMOVES = { cheng_yuanzhi: ['sweep', 'cleave'], deng_mao: ['cleave', 'cleave'], bo_cai: ['spin', 'sweep'], he_yi: ['charge', 'cleave'], zhang_mancheng: ['firerain', 'cleave'], ma_yuanyi: ['spin', 'cleave'], guanhai_m: ['charge', 'charge'], guanhai_b: ['spin', 'cleave'], zhang_liang: ['spin', 'charge'], zhang_bao: ['cleave', 'firerain'], zhang_jiao: ['thunder', 'firerain'] };
+  const BMOVES = { cheng_yuanzhi: ['boomerang', 'sweep'], deng_mao: ['quake3', 'cleave'], bo_cai: ['flag', 'spin'], he_yi: ['dash3', 'cleave'], zhang_mancheng: ['firering', 'firerain'], ma_yuanyi: ['flail', 'spin'],
+    guanhai_m: ['charge', 'stomp'], guanhai_b: ['throwj', 'spin'], zhang_liang: ['whirl', 'charge'], zhang_bao: ['crack', 'wall', 'firerain'], zhang_jiao: ['leifu', 'storm'] };
   function say(z, t) { floaters.push({ x: z.x, y: z.y - 64, t: 0, txt: t, color: '#ffcf6a' }); }
   function bossSkills(dt) {
     for (const z of zs) {
       if (!z.survBoss || z.dead || z.hp <= 0 || z.endFade != null) continue;
-      if (z.dash) {   // 冲锋：沿预警线冲过去
+      if (z.dash) {   // 冲刺：沿预警线冲过去
         const d = z.dash; d.t += dt; const q = Math.min(1, d.t / .3); z.x = d.x0 + (d.x1 - d.x0) * q; z.y = d.y0 + (d.y1 - d.y0) * q; z.st = 'move'; z.moving = true;
-        if (q >= 1) z.dash = null; continue;
+        if (q >= 1) { z.dash = null; if (z.dashThen) { const f = z.dashThen; z.dashThen = null; f(); } }
+        continue;
+      }
+      if (z.chase) {   // 旋风：边转边追
+        const c = z.chase; c.t += dt; const dx = hero.x - z.x, dy = (hero.y - z.y) / YS, d = Math.hypot(dx, dy) || 1;
+        z.x += dx / d * c.spd * dt; z.y = clampY(z.y + dy / d * c.spd * dt * YS); z.st = 'strike'; z.t = .1; z.f = dx < 0 ? -1 : 1;
+        if (c.t >= c.T) z.chase = null; continue;
       }
       if (z.castT > 0) { z.castT -= dt; z.x = z.cx; z.y = z.cy; z.st = 'wind'; z.t = Math.min(z.t, .2); z.vx = 0; continue; }   // 蓄力：原地不动、举刀
-      if (z.skCd == null) z.skCd = 3;
-      if ((z.skCd -= dt) > 0) continue;
-      const big = z.survTier >= 3, list = BMOVES[z.type] || (big ? ['sweep', 'cleave'] : ['cleave']);
-      if (!big && Math.random() < .5) { z.skCd = 4; continue; }   // 小头目：只会开山劈，出得也少
-      z.skI = (z.skI || 0) + 1; const T = BSK[list[z.skI % list.length]](z);
-      z.castT = T; z.cx = z.x; z.cy = z.y; z.st = 'wind'; z.t = 0;
-      z.skCd = big ? (z.rage ? 4.5 : 6.5) : 9;
+      if (z.stun > 0) continue;
+      if (z.skCd == null) z.skCd = 2.5;
+      const big = z.survTier >= 3, list = z.clone ? ['crack'] : (BMOVES[z.type] || (big ? ['sweep', 'cleave'] : ['cleave']));
+      if (!z.seq || !z.seq.length) {
+        if ((z.skCd -= dt) > 0) continue;
+        z.skI = (z.skI || 0); z.seq = big ? [list[z.skI % list.length], list[(z.skI + 1) % list.length]] : [list[z.skI % list.length]]; z.skI += big ? 2 : 1;
+        z.skCd = big ? (z.rage ? 3.5 : 5) : 8;   // 首领两招连放，然后隔 5 秒（暴怒 3.5 秒）；小头目一招，隔 8 秒
+      }
+      const T = BSK[z.seq.shift()](z);
+      if (T > 0 && !(z.castT > 0)) { z.castT = T; z.cx = z.x; z.cy = z.y; }
+      if (T > 0) { z.st = 'wind'; z.t = 0; }
     }
   }
   function bossTick(dt) {
