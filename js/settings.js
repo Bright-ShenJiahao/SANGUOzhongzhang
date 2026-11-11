@@ -51,7 +51,7 @@
   const mount = () => { document.body.append(box, btn); };
   if (document.body) mount(); else addEventListener('DOMContentLoaded', mount);
   // 主界面才显示右上角齿轮（「新的旅途」按钮看得见 = 在主界面）
-  setInterval(() => { const s = document.getElementById('tStart'); const cs = s && getComputedStyle(s); btn.style.display = s && s.getClientRects().length && cs.display !== 'none' && cs.visibility !== 'hidden' && +cs.opacity > .05 ? 'block' : 'none'; /* tStart 是 fixed 定位，offsetParent 永远是 null，不能用 */ }, 400);
+  setInterval(() => { const s = document.getElementById('tStart'); const cs = s && getComputedStyle(s); const onT = !!(s && s.getClientRects().length && cs.display !== 'none' && cs.visibility !== 'hidden' && +cs.opacity > .05); btn.style.display = onT ? 'block' : 'none'; document.body.classList.toggle('ontitle', onT); /* tStart 是 fixed 定位，offsetParent 永远是 null，不能用 */ }, 250);
 
   window.SZZSET = { get: k => v[k], open, close };
 })();
