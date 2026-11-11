@@ -14,7 +14,7 @@
     ac = new A();
     const comp = ac.createDynamicsCompressor();
     comp.threshold.value = -16; comp.knee.value = 10; comp.ratio.value = 4; comp.attack.value = .003; comp.release.value = .15;
-    master = ac.createGain(); master.gain.value = .8;
+    master = ac.createGain(); master.gain.value = .8 * (window.SZZSET ? SZZSET.get('sfx') : 1);
     master.connect(comp).connect(ac.destination);
     // 短混响：户外村庄，空间感很轻
     const len = Math.floor(ac.sampleRate * .7), ir = ac.createBuffer(2, len, ac.sampleRate);
@@ -249,7 +249,7 @@
     const t = ac.currentTime;
     master.gain.cancelScheduledValues(t);
     master.gain.setValueAtTime(master.gain.value, t);
-    master.gain.linearRampToValueAtTime(muted ? 0 : pauseDucked ? .24 : .8, t + .1);
+    const vv = window.SZZSET ? SZZSET.get('sfx') : 1; master.gain.linearRampToValueAtTime(muted ? 0 : (pauseDucked ? .24 : .8) * vv, t + .1);   // 设置里的音效音量
   }
   function updateButton() {
     const b = document.getElementById('bMute'); if (!b) return;
@@ -306,6 +306,7 @@
     }
   }
   window.SFX = {
+    refreshVol: () => applyMute(),
     voice, preloadVoices,
     // 只读：当前是否静音（js/bgm.js 用它同步背景音乐）
     isMuted: () => muted,

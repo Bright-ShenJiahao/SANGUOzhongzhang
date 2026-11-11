@@ -67,7 +67,79 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   ];
   function bossBuff(z, dm) { if (!z) return; z.T = Object.assign({}, z.T, { dmg: (z.T.dmg || 1) * dm, heavy: true }); z.bossT = 6; }   // 首领/头目：伤害加成、出手不被打断（眩晕另有 stunGate 冷却）
   // 首领战机制（11/11）：每 13 秒喊人，从四周涌来一圈喽啰；血量过半「暴怒」：移速 +30%、抬手更快，脚下气焰变红
+  // ===== 首领招式（11/11 用户定 1）：地上先亮红色预警（圈 / 直线），过一会儿才砸下来；翻滚无敌能躲 =====
+  const TELE = [], BOOM = [], YS = .55;   // 俯视战场地面压扁系数：圆画成椭圆，判定也按压扁后的距离
+  function teleAdd(o) { o.t = 0; TELE.push(o); return o; }
+  function teleHit(o) {
+    const dx = hero.x - o.x, dy = (hero.y - o.y) / YS;
+    if (o.k === 'circle') return dx * dx + dy * dy <= o.r * o.r;
+    const ca = Math.cos(o.a), sa = Math.sin(o.a), along = dx * ca + dy * sa, perp = Math.abs(-dx * sa + dy * ca);
+    return along >= -10 && along <= o.len && perp <= o.w / 2;
+  }
+  function teleTick(dt) {
+    for (let i = TELE.length - 1; i >= 0; i--) {
+      const o = TELE[i]; o.t += dt;
+      if (o.src && (o.src.dead || o.src.endFade != null)) { TELE.splice(i, 1); continue; }   // 放招的人倒了，招也散了
+      if (o.t < o.T) continue;
+      TELE.splice(i, 1);
+      if (teleHit(o) && typeof dmgHero === 'function') dmgHero(o.dmg, o.src || null, 'skill');
+      shake = Math.max(shake, o.k === 'circle' && o.r > 80 ? .3 : .18); if (window.SFX) SFX.play(o.snd || 'crack', 0, .8);
+      BOOM.push({ k: o.k, x: o.x, y: o.y, r: o.r, a: o.a, len: o.len, w: o.w, t: 0, c: o.c || 0 });
+      if (o.then) o.then();
+    }
+    for (let i = BOOM.length - 1; i >= 0; i--) if ((BOOM[i].t += dt) > .4) BOOM.splice(i, 1);
+  }
+  function teleDraw() {
+    const shape = o => { ctx.beginPath(); if (o.k === 'circle') ctx.arc(0, 0, o.r, 0, 7); else { ctx.rotate(o.a); ctx.rect(0, -o.w / 2, o.len, o.w); } };
+    for (const o of TELE) {
+      const p = Math.min(1, o.t / o.T), blink = p > .75 ? .5 + .5 * Math.sin(o.t * 40) : 1;
+      ctx.save(); ctx.translate(o.x, o.y); ctx.scale(1, YS);
+      ctx.fillStyle = `rgba(${o.c ? '230,230,255' : '200,40,20'},${.16 * blink})`; shape(o); ctx.fill();
+      ctx.lineWidth = 2; ctx.strokeStyle = `rgba(${o.c ? '240,240,255' : '255,90,50'},${.75 * blink})`; ctx.stroke();
+      ctx.restore();
+      ctx.save(); ctx.translate(o.x, o.y); ctx.scale(1, YS); ctx.globalAlpha = .38 * blink; ctx.fillStyle = o.c ? '#e8e8ff' : '#ff5a2a';   // 里面一层随时间涨满 = 还剩多久
+      if (o.k === 'circle') { ctx.beginPath(); ctx.arc(0, 0, o.r * p, 0, 7); ctx.fill(); } else { ctx.rotate(o.a); ctx.fillRect(0, -o.w / 2, o.len * p, o.w); }
+      ctx.restore();
+    }
+    for (const b of BOOM) {
+      const q = b.t / .4; ctx.save(); ctx.translate(b.x, b.y); ctx.scale(1, YS); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = (1 - q) * .7;
+      ctx.fillStyle = b.c ? '#f4f4ff' : '#ffb060';
+      if (b.k === 'circle') { ctx.beginPath(); ctx.arc(0, 0, b.r * (1 + q * .15), 0, 7); ctx.fill(); } else { ctx.rotate(b.a); ctx.fillRect(0, -b.w / 2 * (1 + q * .3), b.len, b.w * (1 + q * .3)); }
+      ctx.restore();
+    }
+  }
+  const ang = (z, tx, ty) => Math.atan2((ty - z.y) / YS, tx - z.x);
+  // 每个首领的招：返回预警时长（这段时间首领原地蓄力不动）
+  const BSK = {
+    sweep: (z, d) => { teleAdd({ k: 'circle', x: z.x, y: z.y, r: 105, T: 1.0, dmg: 2.5, src: z }); say(z, '横扫千军！'); return 1.0; },
+    cleave: (z, d) => { teleAdd({ k: 'line', x: z.x, y: z.y, a: ang(z, hero.x, hero.y), len: 230, w: 46, T: .85, dmg: 2.8, src: z }); say(z, '开山劈！'); return .85; },
+    charge: (z, d) => { const a = ang(z, hero.x, hero.y), L = 300, x0 = z.x, y0 = z.y;
+      teleAdd({ k: 'line', x: x0, y: y0, a, len: L, w: 56, T: .8, dmg: 2.8, src: z, then: () => { z.dash = { x0, y0, x1: x0 + Math.cos(a) * L, y1: y0 + Math.sin(a) * L * YS, t: 0 }; } }); say(z, '冲啊！'); return .8; },
+    spin: (z, d) => { teleAdd({ k: 'circle', x: z.x, y: z.y, r: 120, T: 1.0, dmg: 2.5, src: z }); say(z, '旋戟！'); return 1.0; },
+    firerain: (z, d) => { for (let i = 0; i < (z.rage ? 7 : 5); i++) teleAdd({ k: 'circle', x: hero.x + R(-110, 110), y: hero.y + R(-55, 55), r: 42, T: 1.0 + i * .14, dmg: 2, src: z, snd: 'land' }); say(z, '火来！'); return .7; },
+    thunder: (z, d) => { for (let i = 0; i < (z.rage ? 8 : 6); i++) teleAdd({ k: 'circle', x: hero.x + (i ? R(-120, 120) : 0), y: hero.y + (i ? R(-60, 60) : 0), r: 46, T: 1.15 + i * .12, dmg: 2.5, src: z, c: 1, snd: 'crack' }); say(z, '天雷！'); return .8; },
+  };
+  const BMOVES = { cheng_yuanzhi: ['sweep', 'cleave'], guanhai_m: ['charge', 'charge'], guanhai_b: ['spin', 'cleave'], zhang_liang: ['spin', 'charge'], zhang_bao: ['firerain', 'cleave'], zhang_jiao: ['thunder', 'thunder'] };
+  function say(z, t) { floaters.push({ x: z.x, y: z.y - 64, t: 0, txt: t, color: '#ffcf6a' }); }
+  function bossSkills(dt) {
+    for (const z of zs) {
+      if (!z.survBoss || z.dead || z.hp <= 0 || z.endFade != null) continue;
+      if (z.dash) {   // 冲锋：沿预警线冲过去
+        const d = z.dash; d.t += dt; const q = Math.min(1, d.t / .3); z.x = d.x0 + (d.x1 - d.x0) * q; z.y = d.y0 + (d.y1 - d.y0) * q; z.st = 'move'; z.moving = true;
+        if (q >= 1) z.dash = null; continue;
+      }
+      if (z.castT > 0) { z.castT -= dt; z.x = z.cx; z.y = z.cy; z.st = 'wind'; z.t = Math.min(z.t, .2); z.vx = 0; continue; }   // 蓄力：原地不动、举刀
+      if (z.skCd == null) z.skCd = 3;
+      if ((z.skCd -= dt) > 0) continue;
+      const big = z.survTier >= 3, list = BMOVES[z.type] || (big ? ['sweep', 'cleave'] : ['cleave']);
+      if (!big && Math.random() < .5) { z.skCd = 4; continue; }   // 小头目：只会开山劈，出得也少
+      z.skI = (z.skI || 0) + 1; const T = BSK[list[z.skI % list.length]](z);
+      z.castT = T; z.cx = z.x; z.cy = z.y; z.st = 'wind'; z.t = 0;
+      z.skCd = big ? (z.rage ? 4.5 : 6.5) : 9;
+    }
+  }
   function bossTick(dt) {
+    teleTick(dt); if (RT.on && RT.node && W.started && !W.pick) bossSkills(dt);
     if (!RT.on || !RT.node || !W.started || W.pick) return;
     for (const z of zs) {
       if (!z.survBoss || z.dead || z.hp <= 0 || z.endFade != null || !(z.survTier >= 3)) continue;
@@ -545,7 +617,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     else done();
   }
   function nodeClear() {   // 一个节点打完：敌人站定淡出 → 左下战报 → 整备屏（结算/拾取/修炼/行商/武艺）→ 回长卷
-    const nd = RT.node; W.started = false; eshots.length = 0;
+    const nd = RT.node; W.started = false; eshots.length = 0; TELE.length = 0;
     for (const z of zs) if (!z.dead) { z.endFade = .9; z.st = 'idle'; z.t = 0; z.enemySkill = null; z.air = false; z.stun = 0; z.daze = 0; }
     setTimeout(() => { zs.length = 0; }, 950);
     const R = S.rep = { stolen: S.stolen || 0, kills: (typeof kills === 'number' ? kills : 0) - (S.k0 || 0), got: S.coinGot || 0, left: 0, taken: Math.round((S.taken || 0) * 10), tiao: 0, lv0: S.lvAt0 || S.lv, xiu: 0 };
@@ -562,7 +634,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   function beginNode(nd) {
     if (!c2ok && typeof ensureAssets === 'function') ensureAssets('chapter2', { silent: true }).then(() => { c2ok = true; });
     GM = gfCalc(); S.zq = zqMax(); S.hp0 = hero.hp; S.noHitT = 0; S.xy = 0;
-    S.k0 = typeof kills === 'number' ? kills : 0; S.coinGot = 0; S.taken = 0; S.hutiSum = 0; S.dps = {}; S.lastHp = hero.hp; S.coins = []; S.lvAt0 = S.lv; S.tutT = 0; S.stolen = 0; S.thiefCd = 8; S.catDone = false;
+    S.k0 = typeof kills === 'number' ? kills : 0; S.coinGot = 0; S.taken = 0; S.hutiSum = 0; S.dps = {}; S.lastHp = hero.hp; S.coins = []; S.lvAt0 = S.lv; S.tutT = 0; S.stolen = 0; S.thiefCd = 8; S.catDone = false; TELE.length = 0; BOOM.length = 0;
     RT.node = nd; W.N = ROUTE.waves(nd); W.started = true; W.between = 0; W.pick = false; S.wind = null; S.recov = null; S.later = []; bolts.length = 0; zones.length = 0; fx.length = 0;
     zs.length = 0; eshots.length = 0; if (window.ARENA) ARENA.start(ROUTE.mapOf(nd));
     startWave(1);
@@ -1083,6 +1155,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     ctx.drawImage(img, 0, 0, cap, H, x, y, c, h); ctx.drawImage(img, cap, 0, W2 - cap * 2, H, x + c, y, w - c * 2, h); ctx.drawImage(img, W2 - cap, 0, cap, H, x + w - c, y, c, h);
   }
   function drawWorld() {
+    teleDraw();
     // 敌将气焰（11/11）：脚下一圈黄巾土红光 + 身上往上窜的火苗，人堆里一眼认出来
     if (RT.on) for (const z of zs) if (z.survBoss && !z.dead && z.endFade == null) {
       const t = performance.now() / 1000, sc = z.sc || 1, pr = .5 + .5 * Math.sin(t * (z.rage ? 9 : 4) + z.x);

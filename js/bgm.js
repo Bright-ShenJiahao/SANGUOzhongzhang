@@ -605,7 +605,7 @@
     const want = scene(), muted = !!(window.SFX && SFX.isMuted && SFX.isMuted()), duck = document.getElementById('pauseScreen') && !document.getElementById('pauseScreen').hidden ? .35 : 1;
     if (want !== cur) { if (want) { const a = get(want); if (a.paused) { try { a.currentTime = 0; } catch (e) {} a.play().catch(() => {}); } } cur = want; }
     for (const k in el) {
-      const a = el[k], target = k === cur && !muted ? LV[k] * duck : 0;
+      const a = el[k], target = k === cur && !muted ? LV[k] * duck * (window.SZZSET ? SZZSET.get('bgm') : 1) : 0;   // 设置里的音乐音量
       a.volume = Math.max(0, Math.min(1, a.volume + Math.sign(target - a.volume) * Math.min(Math.abs(target - a.volume), .04)));   // 约 1.3 秒交叉淡入淡出
       if (a.volume === 0 && k !== cur && !a.paused) a.pause();
     }

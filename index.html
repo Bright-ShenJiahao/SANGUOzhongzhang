@@ -50,7 +50,7 @@ body.szz-rogue #bSkill,body.szz-rogue #bCatapult{display:none!important}
   #bA,#bR,#bSkill,#bCatapult,#bWeapon{touch-action:none;-webkit-user-select:none}
 }
 body.szz-pro #help{display:none}
-#rot{display:none;position:fixed;inset:0;z-index:2147483000;background:#1a1020;color:#ffd86e;font-size:20px;font-weight:800;flex-direction:column;align-items:center;justify-content:center;text-align:center;line-height:1.8;padding:0 24px}
+#rot{display:none;position:fixed;inset:0;z-index:2147483000;background:radial-gradient(ellipse at 50% 45%,#221a13,#0c0907);color:#e6c98a;font-family:"Songti SC","Noto Serif SC",serif;font-size:20px;font-weight:800;flex-direction:column;align-items:center;justify-content:center;text-align:center;line-height:1.8;padding:0 24px}
 @media (pointer:coarse){#help{display:none}}
 @media (pointer:coarse) and (orientation:portrait){#rot{display:flex}}
 @media (pointer:coarse){
@@ -61,7 +61,7 @@ body.szz-pro #help{display:none}
 .x-back{min-height:34px!important}
 }
 #rot small{display:block;margin-top:10px;font-size:14px;font-weight:600;color:#c9b691;line-height:1.6}
-</style><link rel="preload" href="pack/fonts/result.woff2?v=db33c66709" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=db33c66709)format("woff2");font-display:swap}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
+</style><link rel="preload" href="pack/fonts/result.woff2?v=3cd4198247" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=3cd4198247)format("woff2");font-display:swap}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
 </head><body>
 <style>
 #bootSplash{position:fixed;inset:0;z-index:99999;background:radial-gradient(ellipse at 50% 45%,#f3e4cf 0%,#ecd9c0 55%,#d9c09f 100%);transition:opacity .45s ease-out}
@@ -100,7 +100,7 @@ if(location.protocol==='https:'&&!/[?&]debug(?:=|&|$)/.test(location.search)&&'s
 })();
 // 自动更新：打开游戏、或从后台切回来时，查一下线上有没有新版本；有就在标题/整备页自动刷新（战斗中不打扰）
 (function(){
-var BUILD='7b45540486fa',busy=false;
+var BUILD='e1b0fb0c37d1',busy=false;
 if(location.protocol!=='https:'||/[?&]debug(?:=|&|$)/.test(location.search))return;
 function check(){
   if(busy)return;
@@ -931,7 +931,7 @@ const XIAOCHANG = { drawBackground() {}, state: () => null, start() {}, on: () =
     const want = scene(), muted = !!(window.SFX && SFX.isMuted && SFX.isMuted()), duck = document.getElementById('pauseScreen') && !document.getElementById('pauseScreen').hidden ? .35 : 1;
     if (want !== cur) { if (want) { const a = get(want); if (a.paused) { try { a.currentTime = 0; } catch (e) {} a.play().catch(() => {}); } } cur = want; }
     for (const k in el) {
-      const a = el[k], target = k === cur && !muted ? LV[k] * duck : 0;
+      const a = el[k], target = k === cur && !muted ? LV[k] * duck * (window.SZZSET ? SZZSET.get('bgm') : 1) : 0;   // 设置里的音乐音量
       a.volume = Math.max(0, Math.min(1, a.volume + Math.sign(target - a.volume) * Math.min(Math.abs(target - a.volume), .04)));   // 约 1.3 秒交叉淡入淡出
       if (a.volume === 0 && k !== cur && !a.paused) a.pause();
     }
@@ -3419,7 +3419,7 @@ let blessFx = []; // 方士施法成功的黄圈
   const scroll = typeof ASSETS !== 'undefined' && ASSETS.ui && ASSETS.ui.scroll;
   const btn = typeof ASSETS !== 'undefined' && ASSETS.ui && ASSETS.ui.btn;
   if (scroll) { menu.style.backgroundImage = `url("${scroll}")`; }
-  menu.innerHTML = '<h2 id="pauseTitle">暂停</h2><div class="pause-actions"><button class="pause-action" data-pause="resume">继续</button><button class="pause-action" data-pause="restart">重新开始</button><button class="pause-action" data-pause="preparation">返回整备</button><button class="pause-action" data-pause="home">返回主界面</button><button class="pause-action" data-pause="reload">重新载入游戏</button></div>';
+  menu.innerHTML = '<h2 id="pauseTitle">暂停</h2><div class="pause-actions"><button class="pause-action" data-pause="resume">继续</button><button class="pause-action" data-pause="restart">重新开始</button><button class="pause-action" data-pause="settings">设置</button><button class="pause-action" data-pause="preparation">返回整备</button><button class="pause-action" data-pause="home">返回主界面</button><button class="pause-action" data-pause="reload">重新载入游戏</button></div>';
   menu.querySelectorAll('.pause-action').forEach(b => { b.type = 'button'; if (btn) b.style.backgroundImage = `url("${btn}")`; });
   const volumeButton = menu.querySelector('[data-pause="volume"]');
   confirm.innerHTML = '<section class="pause-paper"><h2>确认退出</h2><p>确定退出这一局？已拾取的装备会保留。</p><div class="pause-confirm-actions"><button class="pause-action" data-confirm="yes">确定</button><button class="pause-action" data-confirm="no">取消</button></div></section>';
@@ -3469,6 +3469,7 @@ let blessFx = []; // 方士施法成功的黄圈
     const action = e.target.closest('[data-pause]')?.dataset.pause;
     if (action === 'resume') setPaused(false);
     else if (action === 'restart' || action === 'preparation' || action === 'home' || action === 'reload') ask(action);
+    else if (action === 'settings') { if (window.SZZSET) SZZSET.open(); }
     else if (action === 'volume') {
       if (window.SFX && SFX.toggleMute) SFX.toggleMute(); else if (muteButton) muteButton.click();
       syncVolume();
@@ -4243,6 +4244,64 @@ function resultKey(e) {
   };
 })();
 
+// 设置（11/11 用户要）：音乐音量、音效音量、震屏开关。存在 localStorage，主界面右上角 ⚙ 和暂停菜单都能打开。
+(() => {
+  const KEY = 'szz-set';
+  const DEF = { bgm: .8, sfx: .8, shake: true };
+  let v = Object.assign({}, DEF);
+  try { Object.assign(v, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) {}
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch (e) {} };
+
+  const st = document.createElement('style');
+  st.textContent = `
+#szzSetBtn{position:fixed;right:88px;top:8px;z-index:30;width:36px;height:36px;border:1px solid rgba(139,106,53,.7);border-radius:4px;background:rgba(246,234,210,.85);color:#4a3218;font:20px sans-serif;cursor:pointer;display:none;box-shadow:0 2px 6px rgba(40,25,10,.25)}
+#szzSetBtn:hover{background:#fff4dc}
+#szzSet{position:fixed;inset:0;z-index:12000;display:flex;align-items:center;justify-content:center;background:rgba(4,3,2,.62);font-family:"PingFang SC","Microsoft YaHei",sans-serif;color:#e6dccb}
+#szzSet[hidden]{display:none}
+#szzSet .p{position:relative;width:min(420px,90vw);box-sizing:border-box;padding:34px 28px 22px;border:1px solid rgba(184,149,90,.6);background:linear-gradient(180deg,rgba(22,19,16,.97),rgba(10,9,8,.97));box-shadow:inset 0 0 0 1px rgba(0,0,0,.7),0 10px 30px rgba(0,0,0,.6)}
+#szzSet h3{position:absolute;left:50%;top:-17px;transform:translateX(-50%);margin:0;padding:3px 26px;border:1px solid rgba(184,149,90,.6);background:#140f0b;color:#e6c98a;font:700 19px "Songti SC","Noto Serif SC",serif;letter-spacing:.4em;text-indent:.4em;white-space:nowrap}
+#szzSet .row{display:flex;align-items:center;gap:14px;margin:14px 0}
+#szzSet .row label{flex:none;width:64px;font-weight:700;color:#cdb68a}
+#szzSet input[type=range]{flex:1;accent-color:#c9a35a;height:28px}
+#szzSet .row b{width:42px;text-align:right;font:900 15px "Arial Black",Impact,sans-serif;color:#efe4cc}
+#szzSet .tg{flex:1;display:flex;gap:8px}
+#szzSet .tg button,#szzSet .ok{flex:1;min-height:38px;border:1px solid rgba(184,149,90,.5);border-radius:2px;background:linear-gradient(180deg,rgba(44,36,27,.95),rgba(18,15,12,.95));color:#a8977a;font:700 15px inherit;cursor:pointer}
+#szzSet .tg button.on{border-color:#e2c27a;color:#f6e6bd;background:linear-gradient(180deg,rgba(84,64,34,.95),rgba(36,27,16,.95))}
+#szzSet .ok{display:block;width:60%;margin:20px auto 0;color:#e3cf9f;font-size:17px}
+#szzSet small{display:block;margin-top:10px;color:#8f7c5e;font-size:12px;text-align:center}
+`;
+  document.head.appendChild(st);
+
+  const box = document.createElement('div'); box.id = 'szzSet'; box.hidden = true;
+  const pct = x => Math.round(x * 100);
+  function render() {
+    box.innerHTML = `<div class="p"><h3>设置</h3>
+      <div class="row"><label>音乐</label><input type="range" min="0" max="100" step="5" value="${pct(v.bgm)}" data-k="bgm"><b>${pct(v.bgm)}</b></div>
+      <div class="row"><label>音效</label><input type="range" min="0" max="100" step="5" value="${pct(v.sfx)}" data-k="sfx"><b>${pct(v.sfx)}</b></div>
+      <div class="row"><label>震屏</label><div class="tg"><button data-s="1" class="${v.shake ? 'on' : ''}">开</button><button data-s="0" class="${v.shake ? '' : 'on'}">关</button></div></div>
+      <button class="ok">关闭</button><small>设置会自动保存</small></div>`;
+    box.querySelectorAll('input[type=range]').forEach(r => r.addEventListener('input', () => {
+      v[r.dataset.k] = +r.value / 100; r.nextElementSibling.textContent = r.value; save();
+      if (r.dataset.k === 'sfx' && window.SFX && SFX.refreshVol) SFX.refreshVol();
+      if (r.dataset.k === 'sfx' && window.SFX) SFX.play('j_pick0');
+    }));
+    box.querySelectorAll('.tg button').forEach(b => b.addEventListener('click', () => { v.shake = b.dataset.s === '1'; save(); render(); }));
+    box.querySelector('.ok').addEventListener('click', close);
+  }
+  function open() { render(); box.hidden = false; }
+  function close() { box.hidden = true; }
+  box.addEventListener('pointerdown', e => { if (e.target === box) close(); });
+
+  const btn = document.createElement('button'); btn.id = 'szzSetBtn'; btn.type = 'button'; btn.title = '设置'; btn.textContent = '⚙';
+  btn.addEventListener('click', open);
+  const mount = () => { document.body.append(box, btn); };
+  if (document.body) mount(); else addEventListener('DOMContentLoaded', mount);
+  // 主界面才显示右上角齿轮（「新的旅途」按钮看得见 = 在主界面）
+  setInterval(() => { const s = document.getElementById('tStart'); const cs = s && getComputedStyle(s); btn.style.display = s && s.getClientRects().length && cs.display !== 'none' && cs.visibility !== 'hidden' && +cs.opacity > .05 ? 'block' : 'none'; /* tStart 是 fixed 定位，offsetParent 永远是 null，不能用 */ }, 400);
+
+  window.SZZSET = { get: k => v[k], open, close };
+})();
+
 // 音效：Web Audio 实时合成，不需要外部音频文件。
 // 设计思路：每个音效由几层组成（瞬态 + 主体 + 尾音），用滤波后的噪声做挥风、布料、泥土，
 // 用正弦/三角波做身体闷响和木头敲击，用不和谐泛音做金属声；每次播放带一点随机音高和音量，
@@ -4259,7 +4318,7 @@ function resultKey(e) {
     ac = new A();
     const comp = ac.createDynamicsCompressor();
     comp.threshold.value = -16; comp.knee.value = 10; comp.ratio.value = 4; comp.attack.value = .003; comp.release.value = .15;
-    master = ac.createGain(); master.gain.value = .8;
+    master = ac.createGain(); master.gain.value = .8 * (window.SZZSET ? SZZSET.get('sfx') : 1);
     master.connect(comp).connect(ac.destination);
     // 短混响：户外村庄，空间感很轻
     const len = Math.floor(ac.sampleRate * .7), ir = ac.createBuffer(2, len, ac.sampleRate);
@@ -4494,7 +4553,7 @@ function resultKey(e) {
     const t = ac.currentTime;
     master.gain.cancelScheduledValues(t);
     master.gain.setValueAtTime(master.gain.value, t);
-    master.gain.linearRampToValueAtTime(muted ? 0 : pauseDucked ? .24 : .8, t + .1);
+    const vv = window.SZZSET ? SZZSET.get('sfx') : 1; master.gain.linearRampToValueAtTime(muted ? 0 : (pauseDucked ? .24 : .8) * vv, t + .1);   // 设置里的音效音量
   }
   function updateButton() {
     const b = document.getElementById('bMute'); if (!b) return;
@@ -4551,6 +4610,7 @@ function resultKey(e) {
     }
   }
   window.SFX = {
+    refreshVol: () => applyMute(),
     voice, preloadVoices,
     // 只读：当前是否静音（js/bgm.js 用它同步背景音乐）
     isMuted: () => muted,
@@ -4683,7 +4743,79 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   ];
   function bossBuff(z, dm) { if (!z) return; z.T = Object.assign({}, z.T, { dmg: (z.T.dmg || 1) * dm, heavy: true }); z.bossT = 6; }   // 首领/头目：伤害加成、出手不被打断（眩晕另有 stunGate 冷却）
   // 首领战机制（11/11）：每 13 秒喊人，从四周涌来一圈喽啰；血量过半「暴怒」：移速 +30%、抬手更快，脚下气焰变红
+  // ===== 首领招式（11/11 用户定 1）：地上先亮红色预警（圈 / 直线），过一会儿才砸下来；翻滚无敌能躲 =====
+  const TELE = [], BOOM = [], YS = .55;   // 俯视战场地面压扁系数：圆画成椭圆，判定也按压扁后的距离
+  function teleAdd(o) { o.t = 0; TELE.push(o); return o; }
+  function teleHit(o) {
+    const dx = hero.x - o.x, dy = (hero.y - o.y) / YS;
+    if (o.k === 'circle') return dx * dx + dy * dy <= o.r * o.r;
+    const ca = Math.cos(o.a), sa = Math.sin(o.a), along = dx * ca + dy * sa, perp = Math.abs(-dx * sa + dy * ca);
+    return along >= -10 && along <= o.len && perp <= o.w / 2;
+  }
+  function teleTick(dt) {
+    for (let i = TELE.length - 1; i >= 0; i--) {
+      const o = TELE[i]; o.t += dt;
+      if (o.src && (o.src.dead || o.src.endFade != null)) { TELE.splice(i, 1); continue; }   // 放招的人倒了，招也散了
+      if (o.t < o.T) continue;
+      TELE.splice(i, 1);
+      if (teleHit(o) && typeof dmgHero === 'function') dmgHero(o.dmg, o.src || null, 'skill');
+      shake = Math.max(shake, o.k === 'circle' && o.r > 80 ? .3 : .18); if (window.SFX) SFX.play(o.snd || 'crack', 0, .8);
+      BOOM.push({ k: o.k, x: o.x, y: o.y, r: o.r, a: o.a, len: o.len, w: o.w, t: 0, c: o.c || 0 });
+      if (o.then) o.then();
+    }
+    for (let i = BOOM.length - 1; i >= 0; i--) if ((BOOM[i].t += dt) > .4) BOOM.splice(i, 1);
+  }
+  function teleDraw() {
+    const shape = o => { ctx.beginPath(); if (o.k === 'circle') ctx.arc(0, 0, o.r, 0, 7); else { ctx.rotate(o.a); ctx.rect(0, -o.w / 2, o.len, o.w); } };
+    for (const o of TELE) {
+      const p = Math.min(1, o.t / o.T), blink = p > .75 ? .5 + .5 * Math.sin(o.t * 40) : 1;
+      ctx.save(); ctx.translate(o.x, o.y); ctx.scale(1, YS);
+      ctx.fillStyle = `rgba(${o.c ? '230,230,255' : '200,40,20'},${.16 * blink})`; shape(o); ctx.fill();
+      ctx.lineWidth = 2; ctx.strokeStyle = `rgba(${o.c ? '240,240,255' : '255,90,50'},${.75 * blink})`; ctx.stroke();
+      ctx.restore();
+      ctx.save(); ctx.translate(o.x, o.y); ctx.scale(1, YS); ctx.globalAlpha = .38 * blink; ctx.fillStyle = o.c ? '#e8e8ff' : '#ff5a2a';   // 里面一层随时间涨满 = 还剩多久
+      if (o.k === 'circle') { ctx.beginPath(); ctx.arc(0, 0, o.r * p, 0, 7); ctx.fill(); } else { ctx.rotate(o.a); ctx.fillRect(0, -o.w / 2, o.len * p, o.w); }
+      ctx.restore();
+    }
+    for (const b of BOOM) {
+      const q = b.t / .4; ctx.save(); ctx.translate(b.x, b.y); ctx.scale(1, YS); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = (1 - q) * .7;
+      ctx.fillStyle = b.c ? '#f4f4ff' : '#ffb060';
+      if (b.k === 'circle') { ctx.beginPath(); ctx.arc(0, 0, b.r * (1 + q * .15), 0, 7); ctx.fill(); } else { ctx.rotate(b.a); ctx.fillRect(0, -b.w / 2 * (1 + q * .3), b.len, b.w * (1 + q * .3)); }
+      ctx.restore();
+    }
+  }
+  const ang = (z, tx, ty) => Math.atan2((ty - z.y) / YS, tx - z.x);
+  // 每个首领的招：返回预警时长（这段时间首领原地蓄力不动）
+  const BSK = {
+    sweep: (z, d) => { teleAdd({ k: 'circle', x: z.x, y: z.y, r: 105, T: 1.0, dmg: 2.5, src: z }); say(z, '横扫千军！'); return 1.0; },
+    cleave: (z, d) => { teleAdd({ k: 'line', x: z.x, y: z.y, a: ang(z, hero.x, hero.y), len: 230, w: 46, T: .85, dmg: 2.8, src: z }); say(z, '开山劈！'); return .85; },
+    charge: (z, d) => { const a = ang(z, hero.x, hero.y), L = 300, x0 = z.x, y0 = z.y;
+      teleAdd({ k: 'line', x: x0, y: y0, a, len: L, w: 56, T: .8, dmg: 2.8, src: z, then: () => { z.dash = { x0, y0, x1: x0 + Math.cos(a) * L, y1: y0 + Math.sin(a) * L * YS, t: 0 }; } }); say(z, '冲啊！'); return .8; },
+    spin: (z, d) => { teleAdd({ k: 'circle', x: z.x, y: z.y, r: 120, T: 1.0, dmg: 2.5, src: z }); say(z, '旋戟！'); return 1.0; },
+    firerain: (z, d) => { for (let i = 0; i < (z.rage ? 7 : 5); i++) teleAdd({ k: 'circle', x: hero.x + R(-110, 110), y: hero.y + R(-55, 55), r: 42, T: 1.0 + i * .14, dmg: 2, src: z, snd: 'land' }); say(z, '火来！'); return .7; },
+    thunder: (z, d) => { for (let i = 0; i < (z.rage ? 8 : 6); i++) teleAdd({ k: 'circle', x: hero.x + (i ? R(-120, 120) : 0), y: hero.y + (i ? R(-60, 60) : 0), r: 46, T: 1.15 + i * .12, dmg: 2.5, src: z, c: 1, snd: 'crack' }); say(z, '天雷！'); return .8; },
+  };
+  const BMOVES = { cheng_yuanzhi: ['sweep', 'cleave'], guanhai_m: ['charge', 'charge'], guanhai_b: ['spin', 'cleave'], zhang_liang: ['spin', 'charge'], zhang_bao: ['firerain', 'cleave'], zhang_jiao: ['thunder', 'thunder'] };
+  function say(z, t) { floaters.push({ x: z.x, y: z.y - 64, t: 0, txt: t, color: '#ffcf6a' }); }
+  function bossSkills(dt) {
+    for (const z of zs) {
+      if (!z.survBoss || z.dead || z.hp <= 0 || z.endFade != null) continue;
+      if (z.dash) {   // 冲锋：沿预警线冲过去
+        const d = z.dash; d.t += dt; const q = Math.min(1, d.t / .3); z.x = d.x0 + (d.x1 - d.x0) * q; z.y = d.y0 + (d.y1 - d.y0) * q; z.st = 'move'; z.moving = true;
+        if (q >= 1) z.dash = null; continue;
+      }
+      if (z.castT > 0) { z.castT -= dt; z.x = z.cx; z.y = z.cy; z.st = 'wind'; z.t = Math.min(z.t, .2); z.vx = 0; continue; }   // 蓄力：原地不动、举刀
+      if (z.skCd == null) z.skCd = 3;
+      if ((z.skCd -= dt) > 0) continue;
+      const big = z.survTier >= 3, list = BMOVES[z.type] || (big ? ['sweep', 'cleave'] : ['cleave']);
+      if (!big && Math.random() < .5) { z.skCd = 4; continue; }   // 小头目：只会开山劈，出得也少
+      z.skI = (z.skI || 0) + 1; const T = BSK[list[z.skI % list.length]](z);
+      z.castT = T; z.cx = z.x; z.cy = z.y; z.st = 'wind'; z.t = 0;
+      z.skCd = big ? (z.rage ? 4.5 : 6.5) : 9;
+    }
+  }
   function bossTick(dt) {
+    teleTick(dt); if (RT.on && RT.node && W.started && !W.pick) bossSkills(dt);
     if (!RT.on || !RT.node || !W.started || W.pick) return;
     for (const z of zs) {
       if (!z.survBoss || z.dead || z.hp <= 0 || z.endFade != null || !(z.survTier >= 3)) continue;
@@ -5161,7 +5293,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     else done();
   }
   function nodeClear() {   // 一个节点打完：敌人站定淡出 → 左下战报 → 整备屏（结算/拾取/修炼/行商/武艺）→ 回长卷
-    const nd = RT.node; W.started = false; eshots.length = 0;
+    const nd = RT.node; W.started = false; eshots.length = 0; TELE.length = 0;
     for (const z of zs) if (!z.dead) { z.endFade = .9; z.st = 'idle'; z.t = 0; z.enemySkill = null; z.air = false; z.stun = 0; z.daze = 0; }
     setTimeout(() => { zs.length = 0; }, 950);
     const R = S.rep = { stolen: S.stolen || 0, kills: (typeof kills === 'number' ? kills : 0) - (S.k0 || 0), got: S.coinGot || 0, left: 0, taken: Math.round((S.taken || 0) * 10), tiao: 0, lv0: S.lvAt0 || S.lv, xiu: 0 };
@@ -5178,7 +5310,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   function beginNode(nd) {
     if (!c2ok && typeof ensureAssets === 'function') ensureAssets('chapter2', { silent: true }).then(() => { c2ok = true; });
     GM = gfCalc(); S.zq = zqMax(); S.hp0 = hero.hp; S.noHitT = 0; S.xy = 0;
-    S.k0 = typeof kills === 'number' ? kills : 0; S.coinGot = 0; S.taken = 0; S.hutiSum = 0; S.dps = {}; S.lastHp = hero.hp; S.coins = []; S.lvAt0 = S.lv; S.tutT = 0; S.stolen = 0; S.thiefCd = 8; S.catDone = false;
+    S.k0 = typeof kills === 'number' ? kills : 0; S.coinGot = 0; S.taken = 0; S.hutiSum = 0; S.dps = {}; S.lastHp = hero.hp; S.coins = []; S.lvAt0 = S.lv; S.tutT = 0; S.stolen = 0; S.thiefCd = 8; S.catDone = false; TELE.length = 0; BOOM.length = 0;
     RT.node = nd; W.N = ROUTE.waves(nd); W.started = true; W.between = 0; W.pick = false; S.wind = null; S.recov = null; S.later = []; bolts.length = 0; zones.length = 0; fx.length = 0;
     zs.length = 0; eshots.length = 0; if (window.ARENA) ARENA.start(ROUTE.mapOf(nd));
     startWave(1);
@@ -5699,6 +5831,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     ctx.drawImage(img, 0, 0, cap, H, x, y, c, h); ctx.drawImage(img, cap, 0, W2 - cap * 2, H, x + c, y, w - c * 2, h); ctx.drawImage(img, W2 - cap, 0, cap, H, x + w - c, y, c, h);
   }
   function drawWorld() {
+    teleDraw();
     // 敌将气焰（11/11）：脚下一圈黄巾土红光 + 身上往上窜的火苗，人堆里一眼认出来
     if (RT.on) for (const z of zs) if (z.survBoss && !z.dead && z.endFade == null) {
       const t = performance.now() / 1000, sc = z.sc || 1, pr = .5 + .5 * Math.sin(t * (z.rage ? 9 : 4) + z.x);
@@ -8296,7 +8429,7 @@ function draw() {
   if (window.ROOM && ROOM.draw()) return;     // 开场农房
   if (window.ROUTE && ROUTE.shown()) { ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = '#eadcc0'; ctx.fillRect(0, 0, cv.width, cv.height); return; }   // 路线长卷（或正等着打开）时不画战斗场景，免得进游戏时先闪一下
   const W = cv.width, H = cv.height; SC = H / M.viewH;
-  const sk = shake > 0 ? rnd(-2, 2) : 0;
+  const sk = shake > 0 && !(window.SZZSET && SZZSET.get('shake') === false) ? rnd(-2, 2) : 0;   // 设置里可关震屏
   OXs = Math.round(-cam.x * SC + sk);
   OYs = window.ARENA ? Math.round(-ARENA.camY() * SC) : 0;
   ctx.setTransform(SC, 0, 0, SC, OXs, OYs); ctx.imageSmoothingEnabled = true;
