@@ -112,7 +112,7 @@
   }
   const nlabel = n => !n ? '' : n.type === 'boss' ? (n.final ? '张角祭坛' : SECBOSS[n.sec - 1][0] + ' 营垒') : (n.tag && (TAGNS[Math.min(3, ((n.layer - 1) / 4) | 0)] || TAGNS[0])[n.tag] + (n.cat ? '·投石车' : '')) || LABEL[n.type];
   const radius = n => n.type === 'boss' ? 42 : n.type === 'elite' ? 30 : n.type === 'start' ? 28 : 26;
-  const reachable = n => !!run && run.cur.next.includes(n);
+  const reachable = n => !!run && (window.ROUTE_ALL ? n !== run.cur : run.cur.next.includes(n));   /* 11/12 开发者模式「解锁全部关卡」：任意节点都能点进去 */
   const visited = n => !!run && run.visited.has(n);
 
   function ensureDom() {
