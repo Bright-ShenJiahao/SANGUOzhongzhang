@@ -119,7 +119,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     firerain: (z, d) => { for (let i = 0; i < (z.rage ? 7 : 5); i++) teleAdd({ k: 'circle', x: hero.x + R(-110, 110), y: hero.y + R(-55, 55), r: 42, T: 1.0 + i * .14, dmg: 2, src: z, snd: 'land' }); say(z, '火来！'); return .7; },
     thunder: (z, d) => { for (let i = 0; i < (z.rage ? 8 : 6); i++) teleAdd({ k: 'circle', x: hero.x + (i ? R(-120, 120) : 0), y: hero.y + (i ? R(-60, 60) : 0), r: 46, T: 1.15 + i * .12, dmg: 2.5, src: z, c: 1, snd: 'crack' }); say(z, '天雷！'); return .8; },
   };
-  const BMOVES = { cheng_yuanzhi: ['sweep', 'cleave'], deng_mao: ['cleave', 'cleave'], bo_cai: ['spin', 'sweep'], he_yi: ['charge', 'cleave'], zhang_mancheng: ['firerain', 'cleave'], ma_yuanyi: ['spin', 'cleave'], guanhai_m: ['charge', 'charge'], guanhai_b: ['spin', 'cleave'], zhang_liang: ['spin', 'charge'], zhang_bao: ['firerain', 'cleave'], zhang_jiao: ['thunder', 'thunder'] };
+  const BMOVES = { cheng_yuanzhi: ['sweep', 'cleave'], deng_mao: ['cleave', 'cleave'], bo_cai: ['spin', 'sweep'], he_yi: ['charge', 'cleave'], zhang_mancheng: ['firerain', 'cleave'], ma_yuanyi: ['spin', 'cleave'], guanhai_m: ['charge', 'charge'], guanhai_b: ['spin', 'cleave'], zhang_liang: ['spin', 'charge'], zhang_bao: ['cleave', 'firerain'], zhang_jiao: ['thunder', 'thunder'] };
   function say(z, t) { floaters.push({ x: z.x, y: z.y - 64, t: 0, txt: t, color: '#ffcf6a' }); }
   function bossSkills(dt) {
     for (const z of zs) {
@@ -147,6 +147,14 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
         z.dismount = 1; z.type = 'guanhai_b'; z.sprite = 'guanhai_b'; z.T = Object.assign({}, TYPES.guanhai_b, { dmg: TYPES.guanhai_b.dmg * 1.6, heavy: true }); z.stun = 1.2; z.st = 'hurt'; z.t = 0;
         floaters.push({ x: z.x, y: z.y - 70, t: 0, txt: '管亥 落马！', color: '#ffcf6a', big: 1 }); shake = Math.max(shake, .35); if (window.SFX) SFX.play('crack');
         z.rage = 0;
+      }
+      if (!z.rage && z.hp < (z.maxHp || z.hp) * .5 && z.type === 'zhang_liang') {   /* 11/12 张梁二阶段：卸甲狂怒，比普通暴怒更快、出招几乎不停 */
+        z.T = Object.assign({}, z.T, { spd: (z.T.spd || 30) * 1.2, wind: (z.T.wind || .8) * .7 }); z.bossT = 0;
+        floaters.push({ x: z.x, y: z.y - 84, t: 0, txt: '张梁 狂怒！', color: '#ff4a2a', big: 1 }); shake = Math.max(shake, .4); if (window.SFX) SFX.play('crack');
+      }
+      if (!z.rage && z.hp < (z.maxHp || z.hp) * .5 && z.type === 'zhang_bao') {   /* 11/12 张宝二阶段：召出两个分身（血少、伤害低，打掉就散） */
+        for (const s of [-1, 1]) { const c = edgeSpawn('zhang_bao', { name: '张宝·分身', hp: 18, sc: 1, tier: 2 }); if (c) { c.x = z.x + s * 70; c.y = Math.max(M.top + 6, Math.min(M.bot - 6, z.y + s * 30)); c.T = Object.assign({}, c.T, { dmg: (c.T.dmg || 1) * .6 }); c.clone = 1; } }
+        floaters.push({ x: z.x, y: z.y - 84, t: 0, txt: '张宝：分身之术！', color: '#c9a0ff', big: 1 }); if (window.SFX) SFX.play('j_banner');
       }
       if (!z.rage && z.hp < (z.maxHp || z.hp) * .5) { z.rage = 1; z.T = Object.assign({}, z.T, { spd: (z.T.spd || 30) * 1.3, wind: (z.T.wind || .8) * .75 }); floaters.push({ x: z.x, y: z.y - (z.dismount ? 96 : 64), t: 0, txt: (z.bossLabel || '敌将') + ' 暴怒！', color: '#ff4a2a' }); shake = Math.max(shake, .3); if (window.SFX) SFX.play('j_banner'); }
       if ((z.bossT -= dt) <= 0) {
