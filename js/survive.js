@@ -156,6 +156,31 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       }
     }
   }
+  // 首领战开打：刘关张中一人的立绘从左侧滑进来喊一句，约 2.6 秒后滑出（11/11 用户定 1）；不暂停战斗、不挡点击
+  const INTRO = [
+    ['liubei', '刘备', n => `贼首${n}就在前面，随我破阵！`],
+    ['guanyu', '关羽', n => `${n}？插标卖首之辈，某去去便回。`],
+    ['zhangfei', '张飞', n => `${n}！吃俺老张一矛！`],
+    ['liubei', '刘备', n => `${n}占城为祸，今日便替百姓讨个公道！`],
+  ];
+  const LIHUI = { liubei: 'art/ui/npc/liubei_lihui.webp', guanyu: 'art/ui/npc/guanyu_lihui.webp', zhangfei: 'art/ui/npc/zhangfei_lihui.webp' };   // 写死字面路径，打包时才会换成 pack/ 网址
+  function bossIntro(sec, name, fin) {
+    if (!document.getElementById('bossIntroCss')) { const st = document.createElement('style'); st.id = 'bossIntroCss'; st.textContent = `
+#bossIntro{position:fixed;left:0;bottom:0;z-index:10030;pointer-events:none;display:flex;align-items:flex-end;animation:biIn .45s cubic-bezier(.2,.9,.3,1.1) both}
+#bossIntro.out{animation:biOut .4s ease-in both}
+#bossIntro img{height:min(62vh,520px);image-rendering:pixelated;filter:drop-shadow(0 0 14px rgba(0,0,0,.7))}
+#bossIntro .bx{margin:0 0 9vh -2vw;padding:10px 18px 12px;min-width:min(380px,40vw);border:1px solid rgba(184,149,90,.6);background:linear-gradient(180deg,rgba(20,17,14,.95),rgba(8,7,6,.95));box-shadow:0 8px 24px rgba(0,0,0,.6)}
+#bossIntro b{display:inline-block;margin-bottom:4px;padding:1px 12px;border:1px solid rgba(184,149,90,.6);background:#140f0b;color:#e6c98a;font:700 17px "Songti SC","Noto Serif SC",serif;letter-spacing:.2em}
+#bossIntro p{margin:0;color:#efe4cc;font:700 clamp(15px,2.4vh,21px)/1.5 "PingFang SC","Microsoft YaHei",sans-serif}
+@keyframes biIn{from{transform:translateX(-60%);opacity:0}}@keyframes biOut{to{transform:translateX(-60%);opacity:0}}
+@media (max-height:520px){#bossIntro img{height:58vh}#bossIntro .bx{margin-bottom:6vh}}`; document.head.appendChild(st); }
+    const old = document.getElementById('bossIntro'); if (old) old.remove();
+    const [k, nm, line] = fin ? ['liubei', '刘备', n => `${n}就在祭坛之上！三弟、二弟，随我杀上去！`] : INTRO[Math.min(3, sec)];
+    const d = document.createElement('div'); d.id = 'bossIntro';
+    d.innerHTML = `<img src="${LIHUI[k]}" alt=""><div class="bx"><b>${nm}</b><p>${line(name)}</p></div>`;
+    document.body.appendChild(d); if (window.SFX) SFX.play('j_banner');
+    setTimeout(() => d.classList.add('out'), 2600); setTimeout(() => d.remove(), 3050);
+  }
   function spawnNamed() {
     const nd = RT.node;
     if (nd.type === 'elite') {
@@ -163,6 +188,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       bossBuff(edgeSpawn(t, { name: '精锐头目', hp: 30, sc: 1.2, tier: 2 }), 1.25); return;
     }
     const list = BOSSES[nd.final ? 4 : secOf(nd)];
+    bossIntro(nd.final ? 0 : secOf(nd), list[0].name, !!nd.final);
     list.forEach((b, i) => { const z = edgeSpawn(c2ok || !b.fb ? b.t : b.fb, Object.assign({}, b, { tier: i === 0 ? 3 : 2, hp: i === 0 ? 130 : 40 })); bossBuff(z, i === 0 ? 1.6 : 1.3); });   // 11/11 用户：BOSS 太简单 → 首领血 54→130、小头目 21→40，伤害 ×1.6 / ×1.3   // 四档：小头目 ×7（21）、首领 ×18（54）
   }
   function edgeSpawn(type, boss) {   // boss：true = 老卒式 ×4 血；对象 = 命名首领 {name, hp 或 m, sc}
@@ -900,7 +926,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(900px,58v
 #survTut .nm{top:calc(-15px*var(--k));left:calc(12px*var(--k));padding:calc(1px*var(--k)) calc(14px*var(--k));border:1px solid rgba(184,149,90,.6);border-image:none;background:#140f0b;font-size:calc(17px*var(--kt));color:#e6c98a}
 #survTut p{font-size:calc(17px*var(--kt));margin:calc(8px*var(--k)) 0 calc(2px*var(--k))}
 #survTut>em{width:calc(96px*var(--k));border:1px solid rgba(184,149,90,.55);border-image:none;margin-left:-1px}
-#survTut.big{left:auto;right:1.2vw;bottom:calc(80px*var(--k));width:min(560px,44vw);padding-left:0}#survTut.big .bx{min-height:0}#survTut .lh{display:none}
+#survTut.big{left:auto;right:1.2vw;bottom:calc(80px*var(--k));width:min(560px,44vw);padding-left:0}#survTut.big .bx{min-height:0}#survTut .lh{display:block;left:0;bottom:0;width:auto;height:min(58vh,480px);aspect-ratio:481/552;background:left bottom/contain no-repeat;image-rendering:pixelated;filter:drop-shadow(0 0 14px rgba(0,0,0,.7));animation:biIn .45s cubic-bezier(.2,.9,.3,1.1) both}   /* 11/11 用户定 2：第一次进整备屏，刘备像素立绘站左下角讲解（比以前的全身像小，不挡中间面板） */@keyframes biIn{from{transform:translateX(-60%);opacity:0}}
 body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44vw)}
 @media (max-height:520px){#survTut,#survTut.big,body.prep-open #survTut:not(.big){width:min(470px,58vw);bottom:calc(24vh)}body.prep-open #survTut,body.prep-open #survTut.big{bottom:4px}}
 `;
@@ -1086,7 +1112,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     const k = tutQ.shift(); if (!k) return;
     const [who, txt] = TUT[k], [nm, face] = NPC[who], big = k === 'prep';
     const d = document.createElement('div'); d.id = 'survTut'; if (big) d.className = 'big'; setK(d);
-    d.innerHTML = (big ? `<div class="lh" style="background-image:url('art/ui/npc/liubei_full.webp')"></div>` : '') + `<div class="bx"><b class="nm">${nm}</b><p>${txt}</p><small>${document.getElementById('survPrep') ? '按 <b>空格键</b> 或点一下 继续' : '点一下关闭'}</small></div>${big ? '' : `<em style="background-image:url('${face}')"></em>`}`;
+    d.innerHTML = (big ? `<div class="lh" style="background-image:url('art/ui/npc/liubei_lihui.webp')"></div>` : '') + `<div class="bx"><b class="nm">${nm}</b><p>${txt}</p><small>${document.getElementById('survPrep') ? '按 <b>空格键</b> 或点一下 继续' : '点一下关闭'}</small></div>${big ? '' : `<em style="background-image:url('${face}')"></em>`}`;
     const go = () => { removeEventListener('keydown', key, true); if (!d.parentNode) return; d.remove(); tutNext(); };
     let holdT = 0; const up = e => { if (e.code === 'Space') clearTimeout(holdT); };
     const key = e => { if (!document.getElementById('survPrep')) return;   // 战斗中空格是翻滚，不拿来关提醒（11/11 用户报冲突）
