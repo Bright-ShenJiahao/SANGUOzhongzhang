@@ -611,7 +611,10 @@
     }
   }
   try { get('title'); } catch (e) {}   /* 一加载就开始下主界面曲，玩家第一次点下去时已缓冲好 */
-  const go = () => { if (started) return; started = true; setInterval(tick, 50); tick(); };
-  ['pointerdown', 'keydown', 'touchend'].forEach(ev => addEventListener(ev, go, { capture: true, passive: true }));
+  /* 11/12 修：手机上第一下 pointerdown 不算「用户手势」，play() 被拒后再也不重试 → 主界面没声音。
+     现在每次点击/抬手/按键都检查：该放的曲子还停着就再 play() 一次（必须在手势回调里同步调用才算数） */
+  const kick = () => { const a = cur && el[cur]; if (a && a.paused && !(window.SFX && SFX.isMuted && SFX.isMuted())) a.play().catch(() => {}); };
+  const go = () => { if (!started) { started = true; setInterval(tick, 50); tick(); } kick(); };
+  ['pointerdown', 'pointerup', 'touchend', 'click', 'keydown'].forEach(ev => addEventListener(ev, go, { capture: true, passive: true }));
   document.addEventListener('visibilitychange', () => { if (document.hidden) for (const k in el) el[k].pause(); else if (cur && el[cur]) el[cur].play().catch(() => {}); });
 })();
