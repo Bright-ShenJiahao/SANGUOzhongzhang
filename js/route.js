@@ -3,7 +3,7 @@
 // - 节点：战（普通战斗）/ 精（精英）/ 营（营地：回血或磨刀）/ 帅（Boss，暂用第 18~20 级敌人顶替）。
 // - 战斗由 survive.js 负责：SURV.beginNode(节点) 开打，打完回到这里 ROUTE.done(节点)。
 (() => {
-  const ON = /[?&]route(?:=|&|$)/.test(location.search);
+  const ON = true;   // 11/11：路线图是唯一玩法
   const LAYERS = 18, LANES = 5;
   const WAVES_OF = { battle: 3, elite: 4, boss: 3 };   // 每种节点打几波（可调）
   const TIME_K = 1.1;                                   // 路线模式下每波时间缩放（20 波表 ≈21 分钟，12 层约合 30 分钟）

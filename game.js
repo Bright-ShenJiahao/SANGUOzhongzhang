@@ -33,15 +33,13 @@ function ensureAssets(group, { silent = false, label = '' } = {}) {
   return LAZY_DONE[group].finally(()=>{clearTimeout(show);clearTimeout(refresh);clearInterval(progress);if(overlay)overlay.remove();});
 }
 window.ensureAssets = ensureAssets;
-load('far', BG.far); load('mid', BG.mid); load('gnd', BG.gnd);
 // 第一章水墨背景（远景 1 + 近景 1，和第二章同一套两层画法）；网址带 ?bg=old 可切回旧背景对比
-window.INK_BG = !!(BG.inkFar && BG.inkNear) && !/[?&]bg=old(?:&|$)/.test(location.search);
-if (BG.inkFar && BG.inkNear) { load('inkfar', BG.inkFar); load('inknear', BG.inkNear); }
-if (BG.arena && /[?&]bg=arena2?(?:&|$)/.test(location.search)) load('arena', BG.arena);
+window.INK_BG = false;   // 11/11：旧横版水墨背景已删
+if (BG.arena) load('arena', BG.arena);
 if (BG.field && /[?&]bg=field(?:&|$)/.test(location.search)) load('arena', BG.field);
 if (BG.town && /[?&]bg=town(?:&|$)/.test(location.search)) load('arena', BG.town);
 if (BG.altar && /[?&]bg=altar(?:&|$)/.test(location.search)) load('arena', BG.altar);   // 张角祭坛
-if (/[?&]route(?:=|&|$)/.test(location.search)) { load('map_field', BG.field); load('map_town', BG.town); load('map_altar', BG.altar); load('map_yz', BG.arena); load('map_forest', BG.forest); load('map_camp', BG.camp); }   // 路线图：四张战斗地图都先载入（测试用，以后改成按需）   // 县城街巷   // 打谷场：不规则可走区域 + 高台（用同一个 IMG.arena 槽位）   // 俯视竞技场（js/arena.js，试玩对比）
+{ load('map_field', BG.field); load('map_town', BG.town); load('map_altar', BG.altar); load('map_yz', BG.arena); load('map_forest', BG.forest); load('map_camp', BG.camp); }   // 路线图：四张战斗地图都先载入（测试用，以后改成按需）   // 县城街巷   // 打谷场：不规则可走区域 + 高台（用同一个 IMG.arena 槽位）   // 俯视竞技场（js/arena.js，试玩对比）
 Object.entries(ASSETS.props).forEach(([k, v]) => load('p_' + k, v[0]));
 Object.entries(ASSETS.food || {}).forEach(([k, v]) => load('food_' + k, v[0]));
 
@@ -52,8 +50,6 @@ if (ASSETS.chapter2) {
   if (ASSETS.chapter2.zj) Object.entries(ASSETS.chapter2.zj).forEach(([k, v]) => lazyLoad('chapter2', 'zj_' + k, v));   // 张角法术特效
   if (ASSETS.chapter2.altarFar) lazyLoad('chapter2', 'chapter2_altar_far', ASSETS.chapter2.altarFar);   // 祭台远景：雷云
 }
-if (ASSETS.xiaochang) lazyLoad('xiaochang', 'xiaochang', ASSETS.xiaochang);
-if (ASSETS.chapter2Intro) lazyLoad('chapter2', 'chapter2_intro', ASSETS.chapter2Intro);
 Object.entries(ASSETS.ui || {}).forEach(([k, v]) => load('ui_' + k, v));
 Object.entries(ASSETS.dialogPortraits || {}).forEach(([k, v]) => lazyLoad('chapter2', 'dialog_' + k, v));   // 立绘目前只在第二章开场用
 document.querySelectorAll('[data-weapon-icon]').forEach(img => {
@@ -1113,7 +1109,7 @@ function draw() {
   }
   }
   // 用时：顶部正中的小牌子（原来那一行"击倒/武器/用时"已去掉）
-  if (!(window.XIAOCHANG && XIAOCHANG.active())) {
+  if (false) {   // 11/11：旧的顶部用时牌子不用了（改用修为条下面的沙漏倒计时）
     const _left = window.SURV && SURV.left ? SURV.left() : null, tstr = _left != null ? fmtTime(Math.ceil(_left)) : fmtTime(runT);   // 路线模式：顶部牌子改成本节点倒计时
     ctx.save();
     ctx.font = 'bold 18px "PingFang SC","Noto Sans CJK SC",sans-serif';

@@ -586,7 +586,7 @@
 // 主界面/开局 = atlas china（vadim_makes_sound）；路线长卷/整备 = chinese（kulakovka）；普通战斗 = bamboo forest taiko drums trailer（vasilyatsevich）；
 // 精英 = action drums 6（ashenrise）；首领 = serpents of war（epicaist）。结算时停，交给 SFX 的合成短曲。
 (() => {
-  if (!/[?&]route(?:=|&|$)/.test(location.search) || typeof ASSETS === 'undefined' || !ASSETS.bgm) return;
+  if (typeof ASSETS === 'undefined' || !ASSETS.bgm) return;
   const LV = { title: .55, route: .5, battle: .5, elite: .55, boss: .55 };
   const el = {}; let cur = null, started = false;
   const get = k => { if (!el[k]) { const a = new Audio(); a.src = ASSETS.bgm[k]; a.loop = true; a.preload = 'auto'; a.volume = 0; el[k] = a; } return el[k]; };

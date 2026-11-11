@@ -1,7 +1,7 @@
 # 协作规则（给所有参与本仓库的 AI：Claude、ChatGPT/Codex 等）
 
 ## 项目
-SANGUOzhongzhang：从《无名之辈》（仓库 wumingzhibei）复制出来的新项目，方向是「手打 + 半自动招式（群侠传式周天）+ 杀戮尖塔路线图」；原版无名之辈保持不动。网址（待建）https://sanguozhongzhang.netlify.app ，推送到 `main` 后 Netlify 自动发布（约 1 分钟）。不区分 DEMO 和正式版。
+SANGUOzhongzhang：（11/11 起旧的横版玩法和旧系统已全部删除，打开网址默认就是俯视战场 + 路线图；首领/士兵相关的旧代码 boss.js、zhangjiao.js、ch2bosses.js、boss_block.js 留着备用、不打包）从《无名之辈》（仓库 wumingzhibei）复制出来的新项目，方向是「手打 + 半自动招式（群侠传式周天）+ 杀戮尖塔路线图」；原版无名之辈保持不动。网址 https://sanguozhongzhang.netlify.app（需在 Netlify 后台连上本仓库 main 分支才存在） ，推送到 `main` 后 Netlify 自动发布（约 1 分钟）。不区分 DEMO 和正式版。
 
 ## 文件
 - `game.js`：游戏全部逻辑（原生 JS + Canvas，无框架、无构建工具）。

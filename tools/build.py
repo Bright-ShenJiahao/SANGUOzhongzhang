@@ -126,7 +126,6 @@ _src = open(P('game.js'), encoding='utf-8').read() + ''.join(open(f, encoding='u
 assets['props'] = {k: [uri(P('art', 'props', k + '.png'))] + v for k, v in pm.items() if f"'{k}'" in _src}
 # 配音：art/voice/*.mp3 → ASSETS.voice[名字]
 assets['title'] = uri(P('art', 'title', 'home.webp'))
-assets['room'] = uri(P('art', 'room', 'wake_outside.webp'))   # 农房内景
 assets['tvMask'] = uri(P('art', 'title', 'tv_mask.png'))
 # 水墨标题页：横屏/竖屏背景 + 竖排/横排毛笔标题（透明底）
 assets['ink'] = {k: uri(P('art', 'title', 'ink_' + k + '.webp')) for k in ('pc', 'phone', 'title_v', 'title_h')}
@@ -180,31 +179,21 @@ if os.path.exists(FONT_OUT):
     FONT_FACE = '<link rel="preload" href="' + _font_url + '" as="font" type="font/' + ('woff2' if _fmt == 'woff2' else 'ttf') + '" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(' + _font_url + ')format("' + _fmt + '");font-display:swap}</style>'
 assets['voice'] = {os.path.splitext(os.path.basename(f))[0]: file_uri(f)
                    for f in sorted(__import__('glob').glob(P('art', 'voice', '*.mp3')))}
-bg = {'mid': uri(P('art', 'bg', 'village_mid.webp')), 'far': uri(P('art', 'bg', 'village_far.jpg')),
-      'gnd': uri(P('art', 'bg', 'village_ground.jpg')),
-      'inkFar': uri(P('art', 'bg', 'village_ink_far.webp')), 'inkNear': uri(P('art', 'bg', 'village_ink_near.webp')),
-      'arena': uri(P('art', 'bg', 'arena.webp')),
+bg = {'arena': uri(P('art', 'bg', 'arena.webp')),
       'field': uri(P('art', 'bg', 'field.webp')),
       'town': uri(P('art', 'bg', 'town.webp')),
       'forest': uri(P('art', 'bg', 'forest.webp')),
       'camp': uri(P('art', 'bg', 'camp.webp')),
       'altar': uri(P('art', 'bg', 'altar.webp'))}
 assets['chapter2'] = {
-    'far': uri(P('art', 'bg', 'chapter2_far.webp')),
-    'battlefield': uri(P('art', 'bg', 'chapter2_battlefield.webp')),
     'altar': uri(P('art', 'bg', 'chapter2_altar.webp')),
     'altarFar': uri(P('art', 'bg', 'chapter2_altar_far.webp')),
 }
 assets['chapter2']['zj'] = {os.path.basename(f)[3:-5]: uri(f) for f in sorted(glob.glob(P('art', 'ui', 'zj_*.webp')))}
-assets['xiaochang'] = uri(P('art', 'bg', 'xiaochang.webp'))
-assets['chapter2Intro'] = uri(P('art', 'bg', 'chapter2_intro.webp'))
 # js/ 里的模块（按文件名排序）先于 game.js 载入，供 game.js 调用
 import glob
 # 三国终章暂时拿掉的旧功能（文件都保留，以后要用就从这里删掉对应名字）。_stubs.js 给 game.js 里没有判空保护的调用补空壳。
-DISABLED = {'rogue', 'meridian', 'artifact', 'shop', 'shop_goods', 'board', 'dmgtest', 'xiaochang',
-            'chapter2', 'chapter2_intro', 'ch2bosses', 'ch2opening', 'g_chapter2_flow', 'zhangjiao', 'boss', 'boss_block',
-            # 旧武器系统（装备仓库/词条/属性结算/熟练度/汉弓箭数/锦囊）：三国终章改用招式+功法+新武器系统，伤害速度不再由旧装备算
-            'armory', 'affix_data', 'gear_combat', 'equipment_rules', 'equipment_detail', 'equipment_tooltip', 'mastery', 'bowammo', 'tipbag'}
+DISABLED = {'boss', 'boss_block', 'zhangjiao', 'ch2bosses'}   # 11/11：旧无名之辈模块已删除；首领相关（管亥/张梁张宝/张角的旧战斗逻辑）留着备用，不打包
 mods = [f for f in sorted(glob.glob(P('js', '*.js'))) if os.path.basename(f)[:-3] not in DISABLED]
 game = '\n'.join(open(f, encoding='utf-8').read() for f in mods) + '\n' + open(P('game.js'), encoding='utf-8').read()
 

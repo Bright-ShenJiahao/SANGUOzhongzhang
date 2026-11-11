@@ -1403,9 +1403,9 @@
       maskCv.getContext('2d').drawImage(tvMask, bx, by, bw, bh, 0, 0, bw, bh);
     };
     tvMask.src = (typeof ASSETS !== 'undefined' && ASSETS.tvMask) || '';   // 首页背景图
-    bgFar = new Image(); bgFar.src = BG.far;   // 电视里的演示仍用村景三层
-    bgMid = new Image(); bgMid.src = BG.mid;
-    bgGnd = new Image(); bgGnd.src = BG.gnd;
+    bgFar = new Image(); if (BG.far) bgFar.src = BG.far;   // 电视里的演示仍用村景三层
+    bgMid = new Image(); if (BG.mid) bgMid.src = BG.mid;
+    bgGnd = new Image(); if (BG.gnd) bgGnd.src = BG.gnd;
     demoCv = document.createElement('canvas'); demoCv.width = 480; demoCv.height = 270;
     dctx = demoCv.getContext('2d');
     demoReset();

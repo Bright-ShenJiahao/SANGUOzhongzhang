@@ -3,8 +3,8 @@
 // 场地图在世界里放在 AX 附近，地面范围用图内比例 FL 量出来；改图后只需要改 FL。
 (() => {
   // 每张地图都是一份「可走区域」配置（MAPS）；网址 ?bg=field|town|altar|arena2 试玩单张，?route 路线图里每个节点用 ARENA.start(地图名) 切换
-  let MSEL = (location.search.match(/[?&]bg=(field|town|altar)(?:&|$)/) || [])[1] || (/[?&]bg=arena2?(?:&|$)/.test(location.search) ? 'yz' : undefined);
-  const ROUTE_ON = /[?&]route(?:=|&|$)/.test(location.search);
+  let MSEL = (location.search.match(/[?&]bg=(field|town|altar)(?:&|$)/) || [])[1] || 'yz';   // 11/11：俯视战场 + 路线图是唯一玩法（旧横版已删），默认黄巾营寨
+  const ROUTE_ON = true;
   const FIELD = !!MSEL || ROUTE_ON;
   const ON_URL = FIELD;
   const Z = FIELD && !/[?&]bg=arena(?:&|$)/.test(location.search) ? 1.25 : 1;
