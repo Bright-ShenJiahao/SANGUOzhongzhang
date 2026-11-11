@@ -405,6 +405,27 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const busy = () => hero.st === 'roll' || hero.air || ['down', 'bounce', 'getup', 'hurt'].includes(hero.st) || hero.dazeT > 0;
   // 眩晕：每个目标有冷却（杂兵 4 秒 0.75 秒；精英 6 秒 0.5；小头目 10 秒 0.3；首领 16 秒 0.2，且不击倒）
   const STUN = [[4, .75], [6, .5], [10, .3], [16, .2]];
+  // 打击感（11/11）：连击里程碑大字 + 一刀多杀定格 + 连击数字弹跳
+  const CMB = [[10, '十人斩'], [25, '二十五人斩'], [50, '五十人斩！'], [100, '百人斩！'], [200, '二百人斩！'], [300, '三百人斩！！'], [500, '五百人斩！！'], [1000, '千人斩！！！']];
+  function comboFx(c0, d) {
+    S.cPop = 1;
+    for (const [n, t] of CMB) if (c0 < n && c0 + d >= n) { S.cmb = { txt: t, t: 0, big: n >= 100 }; shake = Math.max(shake, n >= 100 ? .35 : .2); if (window.SFX) SFX.play(n >= 100 ? 'finisher' : 'j_banner'); }
+    if (d >= 4) {   // 一下砍倒 4 个以上：短暂定格 + 「N 杀！」
+      freeze = Math.max(freeze || 0, Math.min(.09, .03 + d * .008)); shake = Math.max(shake, .12);
+      floaters.push({ x: hero.x, y: hero.y - 70, t: 0, txt: d + ' 杀！', color: d >= 8 ? '#ff7a3a' : '#ffd86e', big: 1 });
+      if (window.SFX) SFX.play('crack', 0, .9);
+    }
+  }
+  function cmbDraw(HW, HH, fine, dt) {
+    if (S.cPop > 0) S.cPop = Math.max(0, S.cPop - dt * 4);
+    const c = S.cmb; if (!c) return; c.t += dt; if (c.t > 1.4) { S.cmb = null; return; }
+    const a = c.t < 1 ? 1 : 1 - (c.t - 1) / .4, sc = c.t < .12 ? .6 + c.t / .12 * .55 : c.t < .22 ? 1.15 - (c.t - .12) / .1 * .15 : 1, fs = (fine ? 54 : 34) * (c.big ? 1.25 : 1);
+    ctx.save(); ctx.globalAlpha = a; ctx.translate(HW / 2, HH * .27); ctx.scale(sc, sc);
+    ctx.font = '900 ' + fs + 'px "Songti SC","STSong","Noto Serif SC",serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
+    ctx.lineWidth = fs * .16; ctx.strokeStyle = 'rgba(10,6,3,.9)'; ctx.strokeText(c.txt, 0, 0);
+    const g = ctx.createLinearGradient(0, -fs / 2, 0, fs / 2); g.addColorStop(0, '#fff3c8'); g.addColorStop(.5, c.big ? '#ff9a3a' : '#e8c070'); g.addColorStop(1, c.big ? '#b02a12' : '#8a5a20'); ctx.fillStyle = g; ctx.fillText(c.txt, 0, 0);
+    ctx.restore();
+  }
   function stunGate(z, stun, knock) {
     if (!RT.on || !(stun > .05 || knock)) return null;
     if (z.stunCd > 0) return { stun: 0, knock: false };
@@ -416,7 +437,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     if (typeof kills === 'number') {
       if (kills < S.lk) S.lk = kills;
       if (kills > S.lk) {
-        const d = kills - S.lk; S.combo += d; S.comboT = 3;
+        const d = kills - S.lk; const c0 = S.combo; S.combo += d; S.comboT = 3; if (RT.on) comboFx(c0, d);
         if (RT.on) {
           S.gf.forEach(id => { if (id) { const l0 = gfLv(id); S.gfExp[id] = (S.gfExp[id] || 0) + d * AFX.xp() * (GF[id].c >= 0 ? XPM[Math.max(1, gfSame(GF[id].c))] : 1); if (gfLv(id) > l0) floaters.push({ x: hero.x, y: hero.y - 90, t: 0, txt: GF[id].n + ' LV' + gfLv(id), color: '#ffd86e' }); } });
           if (GM.kh) heal(maxHp() * GM.kh * d);
@@ -1195,7 +1216,8 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     const nf = fine ? 46 : 30, rx = HW - (fine ? 22 : 12), ry = HH * (fine ? .36 : .3);
     const big = (num, label, y, a) => { ctx.globalAlpha = a * .92; ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round'; ctx.font = '900 ' + nf + 'px "Arial Black",Impact,sans-serif'; ctx.lineWidth = 6; ctx.strokeStyle = 'rgba(8,6,4,.85)'; ctx.strokeText(num, rx, y); ctx.fillStyle = '#efe4cc'; ctx.fillText(num, rx, y); ctx.font = 'bold ' + (fine ? 17 : 12) + 'px "Songti SC","STSong","Noto Serif SC",serif'; ctx.lineWidth = 4; ctx.strokeText(label, rx, y + nf * .7); ctx.fillStyle = '#b8955a'; ctx.fillText(label, rx, y + nf * .7); ctx.globalAlpha = 1; };   // 11/11：游戏数字字体 + 暗金小标签
     big(String(typeof kills === 'number' ? kills : 0), '击杀', ry, 1);
-    if (S.combo > 1) big(String(S.combo), '连击', ry + nf * 1.7, Math.min(1, S.comboT / .6));
+    if (S.combo > 1) { const pp = 1 + .3 * (S.cPop || 0); ctx.save(); ctx.translate(rx, ry + nf * 1.7); ctx.scale(pp, pp); ctx.translate(-rx, -(ry + nf * 1.7)); big(String(S.combo), '连击', ry + nf * 1.7, Math.min(1, S.comboT / .6)); ctx.restore(); }
+    cmbDraw(HW, HH, fine, 1 / 60);
     // 修为条（11/11）：顶部正中，LV + 百分比；攒着的修炼次数写在右边
     if (RT.on && RT.node && S.atAdd) {
       const bw = Math.min(HW * .42, 460), bx = (HW - bw) / 2, by = 6, bh = 13, r = Math.min(1, S.xiu / XIU_NEED(S.lv));
