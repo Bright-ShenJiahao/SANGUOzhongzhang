@@ -1304,6 +1304,7 @@
     S.mode = 'game';
     document.body.classList.remove('szz-title');   // 这时候才把游戏 UI（摇杆/攻击/血条）露出来
     document.body.classList.remove('szz-intro');
+    setDomVisible(false);   /* 11/12 修：首页点「继续」直接读档进游戏，不经过整备页，首页的书法标题/名字框/按钮没藏起来，一直盖在战场上 */
     if (options.skipWake || window.SURV) {   // 三国终章：不要开头醒来捡东西，直接开打
      if (window.ROOM) ROOM.skip(); if (typeof reset === 'function') reset(); }
     else if (window.ROOM) ROOM.begin(); else if (typeof reset === 'function') reset();

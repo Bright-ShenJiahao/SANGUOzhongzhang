@@ -59,12 +59,13 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   }
   // 段首领 / 最终首领 / 精锐小首领：t 兵种、fb 贴图没加载时的替身、hp 基础血量（0 = 用兵种自带 × m）、sc 放大
   /* 11/12 用户：管亥太大、小头目太小；首领画质差 → 首领按显示大小重新像素化（像素密度和小兵一致），这里的放大倍数都改回 1，大小由贴图本身决定；管亥 .85 写在 TYPES */
+  /* 11/12 修：首领都换了专属贴图（不在第二章延迟加载包里），去掉 fb 替身——以前第二章图没下完时会用老卒顶替，邓茂/程远志变回老兵 */
   const BOSSES = [
-    [{ t: 'cheng_yuanzhi', fb: 'elite', name: '程远志', hp: 70, sc: 1 }, { t: 'deng_mao', fb: 'elite', name: '邓茂', hp: 40, sc: 1 }],
-    [{ t: 'bo_cai', fb: 'elite', name: '波才', hp: 80, sc: 1 }, { t: 'he_yi', fb: 'elite', name: '何仪', hp: 50, sc: 1 }],
-    [{ t: 'guanhai_m', fb: 'elite', name: '管亥', hp: 95, sc: 1 }, { t: 'zhang_mancheng', fb: 'elite', name: '张曼成', hp: 55, sc: 1 }],
-    [{ t: 'zhang_liang', fb: 'elite', name: '张梁', m: 1.4, sc: 1 }, { t: 'zhang_bao', fb: 'elite', name: '张宝', m: 1.5, sc: 1 }],
-    [{ t: 'zhang_jiao', fb: 'elite', name: '张角', m: 1.0, sc: 1 }, { t: 'ma_yuanyi', fb: 'elite', name: '马元义', hp: 90, sc: 1 }],
+    [{ t: 'cheng_yuanzhi', name: '程远志', hp: 70, sc: 1 }, { t: 'deng_mao', name: '邓茂', hp: 40, sc: 1 }],
+    [{ t: 'bo_cai', name: '波才', hp: 80, sc: 1 }, { t: 'he_yi', name: '何仪', hp: 50, sc: 1 }],
+    [{ t: 'guanhai_m', name: '管亥', hp: 95, sc: 1 }, { t: 'zhang_mancheng', name: '张曼成', hp: 55, sc: 1 }],
+    [{ t: 'zhang_liang', name: '张梁', m: 1.4, sc: 1 }, { t: 'zhang_bao', name: '张宝', m: 1.5, sc: 1 }],
+    [{ t: 'zhang_jiao', name: '张角', m: 1.0, sc: 1 }, { t: 'ma_yuanyi', name: '马元义', hp: 90, sc: 1 }],
   ];
   function bossBuff(z, dm) { if (!z) return; z.T = Object.assign({}, z.T, { dmg: (z.T.dmg || 1) * dm, heavy: true }); z.bossT = 6; }   // 首领/头目：伤害加成、出手不被打断（眩晕另有 stunGate 冷却）
   // 首领战机制（11/11）：每 13 秒喊人，从四周涌来一圈喽啰；血量过半「暴怒」：移速 +30%、抬手更快，脚下气焰变红
