@@ -61,7 +61,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const BOSSES = [
     [{ t: 'cheng_yuanzhi', fb: 'elite', name: '程远志', hp: 70, sc: 1.05 }, { t: 'elite', name: '邓茂', hp: 40, sc: 1.15 }],
     [{ t: 'yellow-heavy', fb: 'elite', name: '波才', hp: 80, sc: 1.35 }, { t: 'yellow-spear', fb: 'elite', name: '何仪', hp: 50, sc: 1.15 }],
-    [{ t: 'guanhai_b', fb: 'elite', name: '管亥', hp: 95, sc: 1.1 }, { t: 'yellow-spear', fb: 'elite', name: '张曼成', hp: 55, sc: 1.2 }],
+    [{ t: 'guanhai_m', fb: 'elite', name: '管亥', hp: 95, sc: 1.1 }, { t: 'yellow-spear', fb: 'elite', name: '张曼成', hp: 55, sc: 1.2 }],
     [{ t: 'zhang_liang', fb: 'elite', name: '张梁', m: 1.4 }, { t: 'zhang_bao', fb: 'elite', name: '张宝', m: 1.5 }],
     [{ t: 'zhang_jiao', fb: 'elite', name: '张角', m: 1.0 }, { t: 'yellow-heavy', fb: 'elite', name: '马元义', hp: 90, sc: 1.4 }],
   ];
@@ -71,7 +71,12 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     if (!RT.on || !RT.node || !W.started || W.pick) return;
     for (const z of zs) {
       if (!z.survBoss || z.dead || z.hp <= 0 || z.endFade != null || !(z.survTier >= 3)) continue;
-      if (!z.rage && z.hp < (z.maxHp || z.hp) * .5) { z.rage = 1; z.T = Object.assign({}, z.T, { spd: (z.T.spd || 30) * 1.3, wind: (z.T.wind || .8) * .75 }); floaters.push({ x: z.x, y: z.y - 64, t: 0, txt: (z.bossLabel || '敌将') + ' 暴怒！', color: '#ff4a2a' }); shake = Math.max(shake, .3); if (window.SFX) SFX.play('j_banner'); }
+      if (z.type === 'guanhai_m' && !z.dismount && z.hp < (z.maxHp || z.hp) * .5) {   // 管亥二阶段：被打下马，换步战长戟，摔倒僵直 1.2 秒
+        z.dismount = 1; z.type = 'guanhai_b'; z.sprite = 'guanhai_b'; z.T = Object.assign({}, TYPES.guanhai_b, { dmg: TYPES.guanhai_b.dmg * 1.6, heavy: true }); z.stun = 1.2; z.st = 'hurt'; z.t = 0;
+        floaters.push({ x: z.x, y: z.y - 70, t: 0, txt: '管亥 落马！', color: '#ffcf6a', big: 1 }); shake = Math.max(shake, .35); if (window.SFX) SFX.play('crack');
+        z.rage = 0;
+      }
+      if (!z.rage && z.hp < (z.maxHp || z.hp) * .5) { z.rage = 1; z.T = Object.assign({}, z.T, { spd: (z.T.spd || 30) * 1.3, wind: (z.T.wind || .8) * .75 }); floaters.push({ x: z.x, y: z.y - (z.dismount ? 96 : 64), t: 0, txt: (z.bossLabel || '敌将') + ' 暴怒！', color: '#ff4a2a' }); shake = Math.max(shake, .3); if (window.SFX) SFX.play('j_banner'); }
       if ((z.bossT -= dt) <= 0) {
         z.bossT = z.rage ? 10 : 13; const n = 5 + (z.rage ? 2 : 0);
         floaters.push({ x: z.x, y: z.y - 60, t: 0, txt: (z.bossLabel || '敌将') + '：给我上！', color: '#ffcf6a' });

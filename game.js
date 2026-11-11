@@ -150,6 +150,7 @@ const TYPES = {
   'yellow-golem': { name: '黄巾力士', hp: 16, spd: 22, wind: 1, reach: 34, dmg: 3, heavy: true, noLaunch: true, w: 14, sprite: 'yellow_golem', scale: 1 },
   zhang_jiao: { name: '天公将军·张角', hp: 135, spd: 42, wind: .5, reach: 34, dmg: 3, chapterBoss: true, sprite: 'zhang_jiao', scale: 0.7105 },
   'cheng_yuanzhi': { name: '程远志', hp: 16, spd: 24, wind: 1, reach: 40, dmg: 3, heavy: true, noLaunch: true, w: 14, sprite: 'cheng_yuanzhi', scale: 1 },   // 11/11 用户 Gemini 新画（art/gemini/黄巾_程远志.png），长柄大刀
+  'guanhai_m': { name: '管亥', hp: 16, spd: 40, wind: 1.1, reach: 54, dmg: 3, heavy: true, noLaunch: true, w: 22, sprite: 'guanhai_m', scale: 1 },   // 11/11 用户：管亥双阶段——一阶段骑马（无名之辈的骑马帧），血过半落马换 guanhai_b 步战
   'guanhai_b': { name: '管亥', hp: 16, spd: 24, wind: 1, reach: 42, dmg: 3, heavy: true, noLaunch: true, w: 14, sprite: 'guanhai_b', scale: 1 },   // 11/11 用户：管亥从无名之辈拿（步战长戟那套帧，换成通用敌人帧名）
   thief: { name: '黄巾窃贼', hp: 3, spd: 72, thief: true, sprite: 'thief', scale: .86 },   // 11/11 用户定：背麻袋的小偷，专捡地上的铜钱，捡够就跑（贴图 art/gemini/黄巾_窃贼.png）
   zhang_bao: { name: '地公将军·张宝', hp: 48, spd: 28, wind: .68, reach: 31, dmg: 2, chapterBoss: true, sprite: 'zhang_bao', scale: 1.15 },
