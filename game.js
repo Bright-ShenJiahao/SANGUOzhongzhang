@@ -148,6 +148,8 @@ const TYPES = {
   'cheng_yuanzhi': { name: '程远志', hp: 16, spd: 24, wind: 1, reach: 40, dmg: 3, heavy: true, noLaunch: true, w: 14, sprite: 'cheng_yuanzhi', scale: 1 },   // 11/11 用户 Gemini 新画（art/gemini/黄巾_程远志.png），长柄大刀
   'deng_mao': { name: '邓茂', hp: 16, spd: 26, wind: 1, reach: 44, dmg: 3, heavy: true, noLaunch: true, w: 14, sprite: 'deng_mao', scale: 1 },   /* 11/12 用户 GPT 新画：九环大刀 */
   'bo_cai': { name: '波才', hp: 16, spd: 22, wind: 1.1, reach: 46, dmg: 3, heavy: true, noLaunch: true, w: 14, sprite: 'bo_cai', scale: 1 },   /* 11/12：长柄开山大斧、背插令旗 */
+  'he_yi': { name: '何仪', hp: 16, spd: 32, wind: .8, reach: 40, dmg: 3, heavy: true, noLaunch: true, w: 13, sprite: 'he_yi', scale: 1 },   /* 11/12：双短戟，身法快 */
+  'zhang_mancheng': { name: '张曼成', hp: 16, spd: 24, wind: 1, reach: 40, dmg: 3, heavy: true, noLaunch: true, w: 13, sprite: 'zhang_mancheng', scale: 1 },   /* 11/12：神上使，铁剑+符纸 */
   'guanhai_m': { name: '管亥', hp: 16, spd: 40, wind: 1.1, reach: 54, dmg: 3, heavy: true, noLaunch: true, w: 22, sprite: 'guanhai_m', scale: 1 },   // 11/11 用户：管亥双阶段——一阶段骑马（无名之辈的骑马帧），血过半落马换 guanhai_b 步战
   'guanhai_b': { name: '管亥', hp: 16, spd: 24, wind: 1, reach: 42, dmg: 3, heavy: true, noLaunch: true, w: 14, sprite: 'guanhai_b', scale: 1 },   // 11/11 用户：管亥从无名之辈拿（步战长戟那套帧，换成通用敌人帧名）
   thief: { name: '黄巾窃贼', hp: 3, spd: 72, thief: true, sprite: 'thief', scale: .86 },   // 11/11 用户定：背麻袋的小偷，专捡地上的铜钱，捡够就跑（贴图 art/gemini/黄巾_窃贼.png）
