@@ -146,6 +146,7 @@ const TYPES = {
   'drummer': { name: '鼓手', hp: 5, spd: 30, wind: .6, reach: 22, dmg: 1, unit: 'drum', w: 11, sprite: 'drummer', scale: .86 },
   'cavalry': { name: '黄巾骑兵', hp: 7, spd: 50, wind: .7, reach: 30, dmg: 2, unit: 'cav', w: 22, heavy: true, sprite: 'cavalry', scale: .86 },
   'fanatic': { name: '狂信徒', hp: 2, spd: 66, wind: .3, reach: 22, dmg: 1, unit: 'fan', w: 10, sprite: 'fanatic', scale: .86 },
+  'crossbow': { name: '黄巾弩手', hp: 4, spd: 28, wind: .8, reach: 22, dmg: 1.6, unit: 'xbow', w: 11, sprite: 'crossbow', scale: .86 },
   'yellow-catapult': { name: '投石车', hp: 9, spd: 0, siege: true, w: 28, sprite: 'yellow_catapult', scale: 1.05 },
   zhang_liang: { name: '人公将军·张梁', hp: 54, spd: 26, wind: .9, reach: 46, dmg: 3, heavy: true, noLaunch: true, w: 16, sprite: 'zhang_liang_q', scale: .88 },   /* 11/12 重画 Q 版：双长刀；旧图 zhang_liang 留着没删 */
   'yellow-golem': { name: '黄巾力士', hp: 16, spd: 22, wind: 1, reach: 34, dmg: 3, heavy: true, noLaunch: true, w: 14, sprite: 'yellow_golem', scale: 1 },
@@ -504,6 +505,7 @@ function summonArchers(bz) {
 }
 
 function spawn(type, x, y, sleeping = false) {
+  if (window.CODEX) CODEX.see(type);   // 11/12 图鉴：第一次遇到就解锁
   const base = TYPES[type];
   const legacy = inChapter2Context() && CH2_LEGACY_STATS[type];
   const T = legacy ? { ...base, ...legacy } : base;

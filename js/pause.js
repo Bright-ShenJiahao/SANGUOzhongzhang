@@ -39,7 +39,7 @@
   const scroll = typeof ASSETS !== 'undefined' && ASSETS.ui && ASSETS.ui.scroll;
   const btn = typeof ASSETS !== 'undefined' && ASSETS.ui && ASSETS.ui.btn;
   if (scroll) { menu.style.backgroundImage = `url("${scroll}")`; }
-  menu.innerHTML = '<h2 id="pauseTitle">暂停</h2><div class="pause-actions"><button class="pause-action" data-pause="resume">继续</button><button class="pause-action" data-pause="restart">重新开始</button><button class="pause-action" data-pause="settings">设置</button><button class="pause-action" data-pause="preparation">返回整备</button><button class="pause-action" data-pause="home">返回主界面</button><button class="pause-action" data-pause="reload">重新载入游戏</button></div>';
+  menu.innerHTML = '<h2 id="pauseTitle">暂停</h2><div class="pause-actions"><button class="pause-action" data-pause="resume">继续</button><button class="pause-action" data-pause="restart">重新开始</button><button class="pause-action" data-pause="settings">设置</button><button class="pause-action" data-pause="codex">图鉴</button><button class="pause-action" data-pause="preparation">返回整备</button><button class="pause-action" data-pause="home">返回主界面</button><button class="pause-action" data-pause="reload">重新载入游戏</button></div>';
   menu.querySelectorAll('.pause-action').forEach(b => { b.type = 'button'; if (btn) b.style.backgroundImage = `url("${btn}")`; });
   const volumeButton = menu.querySelector('[data-pause="volume"]');
   confirm.innerHTML = '<section class="pause-paper"><h2>确认退出</h2><p>确定退出这一局？已拾取的装备会保留。</p><div class="pause-confirm-actions"><button class="pause-action" data-confirm="yes">确定</button><button class="pause-action" data-confirm="no">取消</button></div></section>';
@@ -90,6 +90,7 @@
     if (action === 'resume') setPaused(false);
     else if (action === 'restart' || action === 'preparation' || action === 'home' || action === 'reload') ask(action);
     else if (action === 'settings') { if (window.SZZSET) SZZSET.open(); }
+    else if (action === 'codex') { if (window.CODEX) CODEX.open(); }
     else if (action === 'volume') {
       if (window.SFX && SFX.toggleMute) SFX.toggleMute(); else if (muteButton) muteButton.click();
       syncVolume();

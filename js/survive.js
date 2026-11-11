@@ -32,13 +32,13 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const targetN = () => RT.on ? Math.min(CNT_MAX, Math.round((CNT_BASE + CNT_STEP * ((W.lvF || 1) - 1)) * (RT.node ? [1, .55, .75, .9][RT.node.layer] || 1 : 1))) : Math.max(8, Math.round((WAVE_N[W.n - 1] || 100) * N_SCALE));
   // ---------- 路线模式：按「段」和「节点标签」出兵 ----------
   // 单位简写：g 喽啰 b 刀手 s 投石 a 弓箭 p 方士 e 老卒 | 第二章兵（贴图没加载完时用刀手/老卒顶替）：h 大刀 d 盾 q 枪 l 力士
-  const U = { g: ['grunt'], b: ['blade'], s: ['slinger'], a: ['archer'], p: ['priest'], e: ['elite'], h: ['yellow-heavy', 'blade'], d: ['yellow-shield', 'blade'], q: ['yellow-spear', 'blade'], l: ['yellow-golem', 'elite'], f: ['fire-jar'], m: ['drummer'], c: ['cavalry'], k: ['fanatic'] };   /* 11/12 新兵种：f 火罐手 m 鼓手 c 骑兵 k 狂信徒 */
+  const U = { g: ['grunt'], b: ['blade'], s: ['slinger'], a: ['archer'], p: ['priest'], e: ['elite'], h: ['yellow-heavy', 'blade'], d: ['yellow-shield', 'blade'], q: ['yellow-spear', 'blade'], l: ['yellow-golem', 'elite'], f: ['fire-jar'], m: ['drummer'], c: ['cavalry'], k: ['fanatic'], x: ['crossbow'] };   /* 11/12 新兵种：f 火罐手 m 鼓手 c 骑兵 k 狂信徒 */
   const POOL = [   // [段][标签] = 单位:权重
     { melee: { g: 100, b: 20 }, raid: { b: 70, g: 40 }, range: { g: 50, s: 50 }, shield: { b: 50, g: 40, s: 15 }, patrol: { g: 60, b: 40, e: 5 } },
     { melee: { g: 60, b: 50, h: 20 }, raid: { b: 50, h: 50, g: 20 }, range: { b: 30, s: 40, a: 30, f: 30 }, shield: { d: 50, h: 30, s: 20, f: 20 }, patrol: { b: 50, h: 40, e: 8, f: 15 } },
-    { melee: { q: 60, b: 40, g: 30, c: 25 }, raid: { b: 40, h: 40, q: 30, c: 40 }, range: { q: 30, a: 60, s: 30, f: 30 }, shield: { d: 40, q: 50, a: 20, m: 12 }, patrol: { q: 50, h: 40, e: 8, l: 4, c: 20, m: 12 } },
-    { melee: { h: 50, q: 50, g: 20, k: 45 }, raid: { h: 60, q: 40, b: 20, c: 40, k: 50 }, range: { h: 25, a: 50, s: 30, p: 10, f: 35 }, shield: { d: 50, q: 40, a: 20, p: 10, m: 15 }, patrol: { h: 50, q: 40, e: 10, l: 6, c: 25, m: 15, k: 30 } },
-    { melee: { h: 50, q: 50, g: 20, k: 50 }, raid: { h: 60, q: 40, b: 20, c: 45, k: 60 }, range: { h: 25, a: 50, s: 30, p: 10, f: 40 }, shield: { d: 50, q: 40, a: 20, p: 10, m: 18 }, patrol: { h: 50, q: 40, e: 10, l: 6, c: 30, m: 18, k: 35 } },
+    { melee: { q: 60, b: 40, g: 30, c: 25 }, raid: { b: 40, h: 40, q: 30, c: 40 }, range: { x: 35, q: 30, a: 60, s: 30, f: 30 }, shield: { d: 40, q: 50, a: 20, m: 12 }, patrol: { x: 15, q: 50, h: 40, e: 8, l: 4, c: 20, m: 12 } },
+    { melee: { h: 50, q: 50, g: 20, k: 45 }, raid: { h: 60, q: 40, b: 20, c: 40, k: 50 }, range: { x: 35, h: 25, a: 50, s: 30, p: 10, f: 35 }, shield: { d: 50, q: 40, a: 20, p: 10, m: 15 }, patrol: { x: 15, h: 50, q: 40, e: 10, l: 6, c: 25, m: 15, k: 30 } },
+    { melee: { h: 50, q: 50, g: 20, k: 50 }, raid: { h: 60, q: 40, b: 20, c: 45, k: 60 }, range: { x: 35, h: 25, a: 50, s: 30, p: 10, f: 40 }, shield: { d: 50, q: 40, a: 20, p: 10, m: 18 }, patrol: { x: 15, h: 50, q: 40, e: 10, l: 6, c: 30, m: 18, k: 35 } },
   ];
   let c2ok = false;
   const unit = k => { const u = U[k]; return c2ok || !u[1] ? u[0] : u[1]; };
@@ -853,6 +853,14 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
         teleAdd({ k: 'line', x: x0, y: y0, a, len: L, w: 40, T: .7, dmg: 2, src: z, snd: '', then: () => { if (z.dead || z.air) return; z.cdash = { x0: z.x, y0: z.y, x1: z.x + Math.cos(a) * L, y1: z.y + Math.sin(a) * L * YS, t: 0 }; if (window.SFX) SFX.play('enemySwing', 0, .8); } }); return; }
       const oa = Math.atan2((z.y - hero.y) / YS, z.x - hero.x) + .9 * dt * (z.orb || (z.orb = Math.random() < .5 ? -1 : 1));
       go(hero.x + Math.cos(oa) * 210, hero.y + Math.sin(oa) * 210 * YS, 1); return;
+    }
+    if (T.unit === 'xbow') {   // 弩手：保持远距离，半蹲瞄准（地上一条细红线）0.8 秒后平射一支穿透弩箭
+      if (z.st === 'wind') { z.moving = false; return; }
+      if (z.st === 'strike') { z.moving = false; if (z.t > .35) set(z, 'move'); return; }
+      keep(180, 260);
+      if (z.ucd <= 0 && d < 330) { z.ucd = R(3.8, 4.8); const a = ang(z, hero.x, hero.y); z.f = Math.cos(a) < 0 ? -1 : 1; set(z, 'wind');
+        teleAdd({ k: 'line', x: z.x, y: z.y, a, len: 440, w: 16, T: .8, dmg: 1.6, src: z, snd: '', then: () => { set(z, 'strike'); if (window.SFX) SFX.play('bow', 0, .9); } }); }
+      return;
     }
     if (T.unit === 'fan') {   // 狂信徒：直冲主角，贴身扑一下；死的时候炸一小圈（dropCoins 里）
       if (z.st === 'wind') { z.moving = false; if (z.t > .3) { set(z, 'strike'); if (Math.hypot(hero.x - z.x, (hero.y - z.y) / YS) < 34 && typeof dmgHero === 'function') dmgHero(T.dmg, z); } return; }
