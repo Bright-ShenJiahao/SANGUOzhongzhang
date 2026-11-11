@@ -562,7 +562,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   function beginNode(nd) {
     if (!c2ok && typeof ensureAssets === 'function') ensureAssets('chapter2', { silent: true }).then(() => { c2ok = true; });
     GM = gfCalc(); S.zq = zqMax(); S.hp0 = hero.hp; S.noHitT = 0; S.xy = 0;
-    S.k0 = typeof kills === 'number' ? kills : 0; S.coinGot = 0; S.taken = 0; S.hutiSum = 0; S.dps = {}; S.lastHp = hero.hp; S.coins = []; S.lvAt0 = S.lv; S.tutT = 0; S.stolen = 0; S.thiefCd = 8;
+    S.k0 = typeof kills === 'number' ? kills : 0; S.coinGot = 0; S.taken = 0; S.hutiSum = 0; S.dps = {}; S.lastHp = hero.hp; S.coins = []; S.lvAt0 = S.lv; S.tutT = 0; S.stolen = 0; S.thiefCd = 8; S.catDone = false;
     RT.node = nd; W.N = ROUTE.waves(nd); W.started = true; W.between = 0; W.pick = false; S.wind = null; S.recov = null; S.later = []; bolts.length = 0; zones.length = 0; fx.length = 0;
     zs.length = 0; eshots.length = 0; if (window.ARENA) ARENA.start(ROUTE.mapOf(nd));
     startWave(1);
@@ -572,6 +572,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const COIN_IMG = new Image(); COIN_IMG.src = 'art/ui/hud/coin.webp';
   const PORTRAIT = new Image(); PORTRAIT.src = 'art/ui/npc/liubei_face.webp';
   function dropCoins(z) {   // 敌人倒下掉铜钱：普通 1，精锐 3，敌将 15
+    if (z.T.siege) { for (let i = 0; i < 5; i++) S.coins.push({ x: z.x + R(-16, 16), y: z.y + R(-6, 6), z: 8 + R(0, 10), vz: R(60, 110), vx: R(-40, 40), v: 1, t: 0 }); return; }   // 拆了投石车：地上掉 5 文
     if (z.T.thief) { const v = (z.loot || 0) + 4; z.loot = 0; for (let i = 0; i < Math.min(6, v); i++) S.coins.push({ x: z.x + R(-14, 14), y: z.y + R(-6, 6), z: 8 + R(0, 10), vz: R(60, 110), vx: R(-40, 40), v: Math.ceil(v / Math.min(6, v)), t: 0 }); floaters.push({ x: z.x, y: z.y - 44, t: 0, txt: '钱袋破了！', color: '#ffd86e' }); return; }   // 窃贼：偷的钱 + 4 全撒出来
     if (z.survTier < 1 || (z.survTier === 1 && !z.T.elite && z.type !== 'yellow-golem')) { S.money += 1; S.coinGot += 1; if (Math.random() > .07) return; }   // 11/11 用户定：普通杀敌直接入账，只有多出来的钱掉在地上要捡
     const v = z.survTier >= 2 ? 15 : z.survTier === 1 && (z.T.elite || z.type === 'yellow-golem') ? 5 : 3 + (Math.random() * 3 | 0);
@@ -612,6 +613,11 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     }
   }
   function coinTick(dt) {
+    if (RT.node && RT.node.cat && !S.catDone && W.started && W.t > 2.5 && c2ok) {   // 投石车（11/11 用户要）：节点开打后从场边推上来，原地不动一直往主角一带砸，拆掉掉 5 文
+      S.catDone = true;
+      for (let i = 0; i < RT.node.cat; i++) { const z = edgeSpawn('yellow-catapult'); if (z) { z.catapultIndex = i; z.cd = 3 + i * 2; z.survMul *= 1.5; z.hp *= 1.5; z.maxHp = z.hp; floaters.push({ x: z.x, y: z.y - 50, t: 0, txt: '投石车！', color: '#ffcf6a', big: 1 }); } }
+      tut('catapult');
+    }
     for (const z of zs) if (z.thiefGone && z.endFade <= 0 && z.st !== 'gone') { z.st = 'gone'; z.t = 1; }
     if (RT.node && W.started && !W.pick && (S.thiefCd = (S.thiefCd == null ? 8 : S.thiefCd) - dt) <= 0 && S.coins.length >= 2 && !zs.some(z => z.T.thief && !z.dead && !z.thiefGone)) {
       S.thiefCd = R(14, 22); const z = edgeSpawn('thief'); floaters.push({ x: z.x, y: z.y - 50, t: 0, txt: '有贼！', color: '#ffcf6a' }); tut('thief');
@@ -987,6 +993,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     roll: ['guan', matchMedia('(pointer:coarse)').matches ? '被围了就点右下角翻滚，滚的时候刀枪不入。' : '被围了就按空格翻滚，滚的时候刀枪不入。'],
     zq: ['guan', '血条上面的蓝条是真气：挨打时替你挡下三成伤害，过半时出手更重。'],
     coin: ['zhang', '哈哈！这袋钱掉地上了，走过去捡！不捡的话，打完只能收回九成！'],
+    catapult: ['guan', '远处那台投石车会一直往你这边砸。石头落地前地上有影子，躲开，再绕过去把它拆了！'],
     thief: ['zhang', '有个背麻袋的贼在偷地上的钱！快去砍他，打死了钱袋会破，连本带利吐出来！'],
     prep: ['liu', '打完一仗先歇口气。从「结算」看起，再去「拾取」「修炼」「行商」，最后在「武学」排好出手顺序。'],
     loot: ['zhang', '这些都是从贼兵身上扒下来的！用得上就学，用不上就卖给行商换钱！'],

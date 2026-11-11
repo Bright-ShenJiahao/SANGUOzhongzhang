@@ -61,7 +61,7 @@ body.szz-pro #help{display:none}
 .x-back{min-height:34px!important}
 }
 #rot small{display:block;margin-top:10px;font-size:14px;font-weight:600;color:#c9b691;line-height:1.6}
-</style><link rel="preload" href="pack/fonts/result.woff2?v=931b34504e" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=931b34504e)format("woff2");font-display:swap}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
+</style><link rel="preload" href="pack/fonts/result.woff2?v=a0fa3b0496" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=a0fa3b0496)format("woff2");font-display:swap}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
 </head><body>
 <style>
 #bootSplash{position:fixed;inset:0;z-index:99999;background:radial-gradient(ellipse at 50% 45%,#f3e4cf 0%,#ecd9c0 55%,#d9c09f 100%);transition:opacity .45s ease-out}
@@ -100,7 +100,7 @@ if(location.protocol==='https:'&&!/[?&]debug(?:=|&|$)/.test(location.search)&&'s
 })();
 // 自动更新：打开游戏、或从后台切回来时，查一下线上有没有新版本；有就在标题/整备页自动刷新（战斗中不打扰）
 (function(){
-var BUILD='91f54ef3060e',busy=false;
+var BUILD='66d10ff19731',busy=false;
 if(location.protocol!=='https:'||/[?&]debug(?:=|&|$)/.test(location.search))return;
 function check(){
   if(busy)return;
@@ -1722,7 +1722,7 @@ function updateChapter2Catapult(z, dt) {
   if (z.st === 'wind' && z.t >= .72) {
     // 用户定：投石车集中砸主角一带，但不是同一点——按主角移动方向提前量，各车错开一点
     const lead = 1.15 * rnd(.6, 1.1), off = [[-22, -14], [0, 0], [22, 14], [-12, 16], [14, -16]][(z.catapultIndex || 0) % 5];
-    const tx = Math.min(z.x - 70, hero.x + (hero.mvx || 0) * lead + off[0] + rnd(-8, 8));
+    const tx0 = hero.x + (hero.mvx || 0) * lead + off[0] + rnd(-8, 8), tx = window.ARENA && ARENA.on() ? tx0 : Math.min(z.x - 70, tx0);   // 俯视战场：车可能在任何一边，不再假设车在右边
     const ty = Math.max(M.top + 5, Math.min(M.bot - 5, hero.y + (hero.mvy || 0) * lead + off[1] + rnd(-5, 5)));
     eshots.push({ k: 'catapult', x0: z.x - 18, y0: z.y - 12, tx, ty, t: 0, T: 1.15, short: 3 });
     z.st = 'recoil'; z.t = 0; z.cd = 7; sfx('sling', z.x); return;   // 用户嫌弱：冷却 10→7
@@ -3839,7 +3839,14 @@ function resultKey(e) {
   // 结构（用户定 11/09，仿杀戮尖塔 + 群侠传）：4 段 × 4 层。每段：3 层岔路（4 条路径）→ 汇聚到该段唯一的首领节点 → 下一段从首领再散开。
   // 第 17 层单个营地，第 18 层最终首领。段内节奏：第 1 层纯近战；第 2 层加远程/盾枪；第 3 层精锐或小营地；第 4 层段首领。
   const SEGS = 4, SEGLEN = 4;
-  const TAGN = { melee: '流民群', raid: '刀盾队', range: '弓手阵', shield: '盾枪阵', patrol: '精锐巡逻' };
+  // 节点名按「这一段里这种仗实际出什么兵」来取（11/11 用户：前期叫刀盾队却没有盾兵，名不副实）——和 survive.js 的 POOL 一一对应
+  const TAGNS = [
+    { melee: '流民群', raid: '刀手队', range: '投石队', shield: '乱兵营', patrol: '老卒巡逻' },
+    { melee: '流民群', raid: '大刀队', range: '弓手阵', shield: '盾兵阵', patrol: '老卒巡逻' },
+    { melee: '枪兵队', raid: '大刀队', range: '弓手阵', shield: '盾枪阵', patrol: '力士巡逻' },
+    { melee: '刀枪队', raid: '大刀队', range: '弓手阵', shield: '盾枪阵', patrol: '力士巡逻' },
+  ];
+  const TAGN = new Proxy({}, { get: () => undefined });   // 旧表不再用
   const RWN = { skill: '学一个新武艺', perk: '学一门心法', heal: '包扎回血', both: '武艺 + 心法' };
   const SECBOSS = [['程远志', '邓茂'], ['波才', '何仪'], ['管亥', '张曼成'], ['张梁', '张宝']];
   function gen() {
@@ -3892,6 +3899,7 @@ function resultKey(e) {
       const opt = k === 1 ? ['melee', 'raid'] : ['range', 'shield'];
       bat.forEach((n, i) => { n.tag = opt[(i + (rnd() < .5 ? 1 : 0)) % 2]; if (bat.length >= 2 && i > 0 && n.tag === bat[i - 1].tag) n.tag = opt.find(x => x !== n.tag); });
       for (const n of lay) { if (n.type === 'elite') { n.tag = 'patrol'; } }
+      for (const n of lay) if (sg >= 1 && (n.type === 'elite' || n.tag === 'range' || n.tag === 'shield') && rnd() < .55) n.cat = sg >= 3 ? 2 : 1;   // 第二段起：部分远程/盾阵/精锐节点带投石车
     }
     return { nodes, byLayer, start };
   }
@@ -3909,7 +3917,7 @@ function resultKey(e) {
     const c = lo + (n.lane + n.jx * .35) / (LANES - 1) * (hi - lo) + n.jy * 10;
     return port() ? { x: c, y: H - m } : { x: m, y: c };
   }
-  const nlabel = n => !n ? '' : n.type === 'boss' ? (n.final ? '张角祭坛' : SECBOSS[n.sec - 1][0] + ' 营垒') : (n.tag && TAGN[n.tag]) || LABEL[n.type];
+  const nlabel = n => !n ? '' : n.type === 'boss' ? (n.final ? '张角祭坛' : SECBOSS[n.sec - 1][0] + ' 营垒') : (n.tag && (TAGNS[Math.min(3, ((n.layer - 1) / 4) | 0)] || TAGNS[0])[n.tag] + (n.cat ? '·投石车' : '')) || LABEL[n.type];
   const radius = n => n.type === 'boss' ? 42 : n.type === 'elite' ? 30 : n.type === 'start' ? 28 : 26;
   const reachable = n => !!run && run.cur.next.includes(n);
   const visited = n => !!run && run.visited.has(n);
@@ -4221,7 +4229,7 @@ function resultKey(e) {
     start() { run = { ...gen(), visited: new Set() }; run.cur = run.start; run.visited.add(run.start); pending = true; if (shown) close(); },
     snap() {   // 存档用：节点之间的连线存成编号
       if (!run) return null;
-      return { nodes: run.nodes.map(n => ({ id: n.id, layer: n.layer, lane: n.lane, type: n.type, tag: n.tag, rw: n.rw, sec: n.sec, final: n.final, jx: n.jx, jy: n.jy, next: n.next.map(x => x.id) })), cur: run.cur.id, visited: [...run.visited].map(n => n.id) };
+      return { nodes: run.nodes.map(n => ({ id: n.id, layer: n.layer, lane: n.lane, type: n.type, tag: n.tag, cat: n.cat, rw: n.rw, sec: n.sec, final: n.final, jx: n.jx, jy: n.jy, next: n.next.map(x => x.id) })), cur: run.cur.id, visited: [...run.visited].map(n => n.id) };
     },
     resume(o) {
       const nodes = o.nodes.map(n => ({ ...n, next: [], prev: [] })), byLayer = [];
@@ -5170,7 +5178,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   function beginNode(nd) {
     if (!c2ok && typeof ensureAssets === 'function') ensureAssets('chapter2', { silent: true }).then(() => { c2ok = true; });
     GM = gfCalc(); S.zq = zqMax(); S.hp0 = hero.hp; S.noHitT = 0; S.xy = 0;
-    S.k0 = typeof kills === 'number' ? kills : 0; S.coinGot = 0; S.taken = 0; S.hutiSum = 0; S.dps = {}; S.lastHp = hero.hp; S.coins = []; S.lvAt0 = S.lv; S.tutT = 0; S.stolen = 0; S.thiefCd = 8;
+    S.k0 = typeof kills === 'number' ? kills : 0; S.coinGot = 0; S.taken = 0; S.hutiSum = 0; S.dps = {}; S.lastHp = hero.hp; S.coins = []; S.lvAt0 = S.lv; S.tutT = 0; S.stolen = 0; S.thiefCd = 8; S.catDone = false;
     RT.node = nd; W.N = ROUTE.waves(nd); W.started = true; W.between = 0; W.pick = false; S.wind = null; S.recov = null; S.later = []; bolts.length = 0; zones.length = 0; fx.length = 0;
     zs.length = 0; eshots.length = 0; if (window.ARENA) ARENA.start(ROUTE.mapOf(nd));
     startWave(1);
@@ -5180,6 +5188,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const COIN_IMG = new Image(); COIN_IMG.src = 'pack/ui/hud/coin.webp?v=ce7d335478';
   const PORTRAIT = new Image(); PORTRAIT.src = 'pack/ui/npc/liubei_face.webp?v=b9acab2204';
   function dropCoins(z) {   // 敌人倒下掉铜钱：普通 1，精锐 3，敌将 15
+    if (z.T.siege) { for (let i = 0; i < 5; i++) S.coins.push({ x: z.x + R(-16, 16), y: z.y + R(-6, 6), z: 8 + R(0, 10), vz: R(60, 110), vx: R(-40, 40), v: 1, t: 0 }); return; }   // 拆了投石车：地上掉 5 文
     if (z.T.thief) { const v = (z.loot || 0) + 4; z.loot = 0; for (let i = 0; i < Math.min(6, v); i++) S.coins.push({ x: z.x + R(-14, 14), y: z.y + R(-6, 6), z: 8 + R(0, 10), vz: R(60, 110), vx: R(-40, 40), v: Math.ceil(v / Math.min(6, v)), t: 0 }); floaters.push({ x: z.x, y: z.y - 44, t: 0, txt: '钱袋破了！', color: '#ffd86e' }); return; }   // 窃贼：偷的钱 + 4 全撒出来
     if (z.survTier < 1 || (z.survTier === 1 && !z.T.elite && z.type !== 'yellow-golem')) { S.money += 1; S.coinGot += 1; if (Math.random() > .07) return; }   // 11/11 用户定：普通杀敌直接入账，只有多出来的钱掉在地上要捡
     const v = z.survTier >= 2 ? 15 : z.survTier === 1 && (z.T.elite || z.type === 'yellow-golem') ? 5 : 3 + (Math.random() * 3 | 0);
@@ -5220,6 +5229,11 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     }
   }
   function coinTick(dt) {
+    if (RT.node && RT.node.cat && !S.catDone && W.started && W.t > 2.5 && c2ok) {   // 投石车（11/11 用户要）：节点开打后从场边推上来，原地不动一直往主角一带砸，拆掉掉 5 文
+      S.catDone = true;
+      for (let i = 0; i < RT.node.cat; i++) { const z = edgeSpawn('yellow-catapult'); if (z) { z.catapultIndex = i; z.cd = 3 + i * 2; z.survMul *= 1.5; z.hp *= 1.5; z.maxHp = z.hp; floaters.push({ x: z.x, y: z.y - 50, t: 0, txt: '投石车！', color: '#ffcf6a', big: 1 }); } }
+      tut('catapult');
+    }
     for (const z of zs) if (z.thiefGone && z.endFade <= 0 && z.st !== 'gone') { z.st = 'gone'; z.t = 1; }
     if (RT.node && W.started && !W.pick && (S.thiefCd = (S.thiefCd == null ? 8 : S.thiefCd) - dt) <= 0 && S.coins.length >= 2 && !zs.some(z => z.T.thief && !z.dead && !z.thiefGone)) {
       S.thiefCd = R(14, 22); const z = edgeSpawn('thief'); floaters.push({ x: z.x, y: z.y - 50, t: 0, txt: '有贼！', color: '#ffcf6a' }); tut('thief');
@@ -5595,6 +5609,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     roll: ['guan', matchMedia('(pointer:coarse)').matches ? '被围了就点右下角翻滚，滚的时候刀枪不入。' : '被围了就按空格翻滚，滚的时候刀枪不入。'],
     zq: ['guan', '血条上面的蓝条是真气：挨打时替你挡下三成伤害，过半时出手更重。'],
     coin: ['zhang', '哈哈！这袋钱掉地上了，走过去捡！不捡的话，打完只能收回九成！'],
+    catapult: ['guan', '远处那台投石车会一直往你这边砸。石头落地前地上有影子，躲开，再绕过去把它拆了！'],
     thief: ['zhang', '有个背麻袋的贼在偷地上的钱！快去砍他，打死了钱袋会破，连本带利吐出来！'],
     prep: ['liu', '打完一仗先歇口气。从「结算」看起，再去「拾取」「修炼」「行商」，最后在「武学」排好出手顺序。'],
     loot: ['zhang', '这些都是从贼兵身上扒下来的！用得上就学，用不上就卖给行商换钱！'],

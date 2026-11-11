@@ -32,7 +32,14 @@
   // 结构（用户定 11/09，仿杀戮尖塔 + 群侠传）：4 段 × 4 层。每段：3 层岔路（4 条路径）→ 汇聚到该段唯一的首领节点 → 下一段从首领再散开。
   // 第 17 层单个营地，第 18 层最终首领。段内节奏：第 1 层纯近战；第 2 层加远程/盾枪；第 3 层精锐或小营地；第 4 层段首领。
   const SEGS = 4, SEGLEN = 4;
-  const TAGN = { melee: '流民群', raid: '刀盾队', range: '弓手阵', shield: '盾枪阵', patrol: '精锐巡逻' };
+  // 节点名按「这一段里这种仗实际出什么兵」来取（11/11 用户：前期叫刀盾队却没有盾兵，名不副实）——和 survive.js 的 POOL 一一对应
+  const TAGNS = [
+    { melee: '流民群', raid: '刀手队', range: '投石队', shield: '乱兵营', patrol: '老卒巡逻' },
+    { melee: '流民群', raid: '大刀队', range: '弓手阵', shield: '盾兵阵', patrol: '老卒巡逻' },
+    { melee: '枪兵队', raid: '大刀队', range: '弓手阵', shield: '盾枪阵', patrol: '力士巡逻' },
+    { melee: '刀枪队', raid: '大刀队', range: '弓手阵', shield: '盾枪阵', patrol: '力士巡逻' },
+  ];
+  const TAGN = new Proxy({}, { get: () => undefined });   // 旧表不再用
   const RWN = { skill: '学一个新武艺', perk: '学一门心法', heal: '包扎回血', both: '武艺 + 心法' };
   const SECBOSS = [['程远志', '邓茂'], ['波才', '何仪'], ['管亥', '张曼成'], ['张梁', '张宝']];
   function gen() {
@@ -85,6 +92,7 @@
       const opt = k === 1 ? ['melee', 'raid'] : ['range', 'shield'];
       bat.forEach((n, i) => { n.tag = opt[(i + (rnd() < .5 ? 1 : 0)) % 2]; if (bat.length >= 2 && i > 0 && n.tag === bat[i - 1].tag) n.tag = opt.find(x => x !== n.tag); });
       for (const n of lay) { if (n.type === 'elite') { n.tag = 'patrol'; } }
+      for (const n of lay) if (sg >= 1 && (n.type === 'elite' || n.tag === 'range' || n.tag === 'shield') && rnd() < .55) n.cat = sg >= 3 ? 2 : 1;   // 第二段起：部分远程/盾阵/精锐节点带投石车
     }
     return { nodes, byLayer, start };
   }
@@ -102,7 +110,7 @@
     const c = lo + (n.lane + n.jx * .35) / (LANES - 1) * (hi - lo) + n.jy * 10;
     return port() ? { x: c, y: H - m } : { x: m, y: c };
   }
-  const nlabel = n => !n ? '' : n.type === 'boss' ? (n.final ? '张角祭坛' : SECBOSS[n.sec - 1][0] + ' 营垒') : (n.tag && TAGN[n.tag]) || LABEL[n.type];
+  const nlabel = n => !n ? '' : n.type === 'boss' ? (n.final ? '张角祭坛' : SECBOSS[n.sec - 1][0] + ' 营垒') : (n.tag && (TAGNS[Math.min(3, ((n.layer - 1) / 4) | 0)] || TAGNS[0])[n.tag] + (n.cat ? '·投石车' : '')) || LABEL[n.type];
   const radius = n => n.type === 'boss' ? 42 : n.type === 'elite' ? 30 : n.type === 'start' ? 28 : 26;
   const reachable = n => !!run && run.cur.next.includes(n);
   const visited = n => !!run && run.visited.has(n);
@@ -414,7 +422,7 @@
     start() { run = { ...gen(), visited: new Set() }; run.cur = run.start; run.visited.add(run.start); pending = true; if (shown) close(); },
     snap() {   // 存档用：节点之间的连线存成编号
       if (!run) return null;
-      return { nodes: run.nodes.map(n => ({ id: n.id, layer: n.layer, lane: n.lane, type: n.type, tag: n.tag, rw: n.rw, sec: n.sec, final: n.final, jx: n.jx, jy: n.jy, next: n.next.map(x => x.id) })), cur: run.cur.id, visited: [...run.visited].map(n => n.id) };
+      return { nodes: run.nodes.map(n => ({ id: n.id, layer: n.layer, lane: n.lane, type: n.type, tag: n.tag, cat: n.cat, rw: n.rw, sec: n.sec, final: n.final, jx: n.jx, jy: n.jy, next: n.next.map(x => x.id) })), cur: run.cur.id, visited: [...run.visited].map(n => n.id) };
     },
     resume(o) {
       const nodes = o.nodes.map(n => ({ ...n, next: [], prev: [] })), byLayer = [];

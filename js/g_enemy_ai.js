@@ -370,7 +370,7 @@ function updateChapter2Catapult(z, dt) {
   if (z.st === 'wind' && z.t >= .72) {
     // 用户定：投石车集中砸主角一带，但不是同一点——按主角移动方向提前量，各车错开一点
     const lead = 1.15 * rnd(.6, 1.1), off = [[-22, -14], [0, 0], [22, 14], [-12, 16], [14, -16]][(z.catapultIndex || 0) % 5];
-    const tx = Math.min(z.x - 70, hero.x + (hero.mvx || 0) * lead + off[0] + rnd(-8, 8));
+    const tx0 = hero.x + (hero.mvx || 0) * lead + off[0] + rnd(-8, 8), tx = window.ARENA && ARENA.on() ? tx0 : Math.min(z.x - 70, tx0);   // 俯视战场：车可能在任何一边，不再假设车在右边
     const ty = Math.max(M.top + 5, Math.min(M.bot - 5, hero.y + (hero.mvy || 0) * lead + off[1] + rnd(-5, 5)));
     eshots.push({ k: 'catapult', x0: z.x - 18, y0: z.y - 12, tx, ty, t: 0, T: 1.15, short: 3 });
     z.st = 'recoil'; z.t = 0; z.cd = 7; sfx('sling', z.x); return;   // 用户嫌弱：冷却 10→7
