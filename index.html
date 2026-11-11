@@ -61,7 +61,7 @@ body.szz-pro #help{display:none}
 .x-back{min-height:34px!important}
 }
 #rot small{display:block;margin-top:10px;font-size:14px;font-weight:600;color:#c9b691;line-height:1.6}
-</style><link rel="preload" href="pack/fonts/result.woff2?v=a0fa3b0496" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=a0fa3b0496)format("woff2");font-display:swap}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
+</style><link rel="preload" href="pack/fonts/result.woff2?v=db33c66709" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=db33c66709)format("woff2");font-display:swap}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
 </head><body>
 <style>
 #bootSplash{position:fixed;inset:0;z-index:99999;background:radial-gradient(ellipse at 50% 45%,#f3e4cf 0%,#ecd9c0 55%,#d9c09f 100%);transition:opacity .45s ease-out}
@@ -100,7 +100,7 @@ if(location.protocol==='https:'&&!/[?&]debug(?:=|&|$)/.test(location.search)&&'s
 })();
 // 自动更新：打开游戏、或从后台切回来时，查一下线上有没有新版本；有就在标题/整备页自动刷新（战斗中不打扰）
 (function(){
-var BUILD='66d10ff19731',busy=false;
+var BUILD='7b45540486fa',busy=false;
 if(location.protocol!=='https:'||/[?&]debug(?:=|&|$)/.test(location.search))return;
 function check(){
   if(busy)return;
@@ -3815,7 +3815,7 @@ function resultKey(e) {
   const WAVES_OF = { battle: 3, elite: 4, boss: 3 };   // 每种节点打几波（可调）
   const TIME_K = 1.1;                                   // 路线模式下每波时间缩放（20 波表 ≈21 分钟，12 层约合 30 分钟）
   const ICON = { battle: 0, elite: 1, camp: 2, boss: 3, start: 4, shop: 5, event: 6, chest: 7 };   // 图标表（art/ui/route_icons.webp，4×2，每格 256）
-  const MAPN = { field: '打谷场', town: '县城街巷', yz: '黄巾营寨', forest: '林间空地', camp: '营寨腹地', altar: '张角祭坛' };
+  const MAPN = { field: '村口', town: '县城街巷', yz: '黄巾营寨', forest: '林间空地', camp: '营寨腹地', altar: '张角祭坛' };
   const SECT = [['field', 1, 4, '120,140,80', .13], ['town', 5, 8, '160,115,70', .13], ['forest', 9, 12, '110,130,70', .12], ['camp', 13, 16, '165,70,45', .12], ['altar', 17, 18, '70,55,95', .2]];   // 分段：地图、起止层、淡墨色调
   const hov = { n: null };
   const LABEL = { battle: '黄巾游兵', elite: '黄巾精锐', camp: '营地', boss: '张角祭坛', start: '涿郡', event: '奇遇', chest: '宝箱' };
