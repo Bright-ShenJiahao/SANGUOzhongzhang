@@ -900,12 +900,12 @@
     c.lineJoin = 'round'; c.lineWidth = Math.max(4, fs * .12); c.strokeStyle = 'rgba(10,6,16,.9)';
     c.fillStyle = '#ffd86e';
     const y = pad + fs * 1.02;
-    c.strokeText('无名之辈', pad, y); c.fillText('无名之辈', pad, y);
+    c.strokeText('三国终章', pad, y); c.fillText('三国终章', pad, y);
     // 副标题
     c.font = `700 ${L.sub}px "PingFang SC","Noto Sans CJK SC",sans-serif`;
     c.lineWidth = Math.max(3, L.sub * .35); c.strokeStyle = 'rgba(10,6,16,.9)'; c.fillStyle = '#f2e6c9';
-    c.strokeText('序章 · 幻想三国录', pad + 4, y + L.sub * 1.9);
-    c.fillText('序章 · 幻想三国录', pad + 4, y + L.sub * 1.9);
+    c.strokeText('黄巾之乱', pad + 4, y + L.sub * 1.9);
+    c.fillText('黄巾之乱', pad + 4, y + L.sub * 1.9);
     // 角落的小字：操作提示（电脑/手机自适应）
     const coarse = matchMedia('(pointer: coarse)').matches || (navigator.maxTouchPoints || 0) > 0;
     if (true) {   // 角落操作提示始终显示

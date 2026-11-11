@@ -7,15 +7,15 @@
 
   // 文案随机挑一条，每次分享不完全一样
   const WIN = [
-    r => `我在《无名之辈》里放倒了黄巾头目管亥：击倒 ${r.kills} 人，用时 ${fmt(r.time)}，评价 ${r.rank}。`,
-    r => `《无名之辈》序章通关 —— ${r.kills} 杀 · ${fmt(r.time)} · ${r.rank} 评价。这成绩你敢比？`,
+    r => `我在《三国终章》里放倒了黄巾头目管亥：击倒 ${r.kills} 人，用时 ${fmt(r.time)}，评价 ${r.rank}。`,
+    r => `《三国终章》通关 —— ${r.kills} 杀 · ${fmt(r.time)} · ${r.rank} 评价。这成绩你敢比？`,
     r => `黄巾贼清完了。${fmt(r.time)} 打完序章，评价 ${r.rank}，${r.kills} 个人头。`,
     r => `东汉末年不好混，但我把管亥放倒了：${fmt(r.time)}，评价 ${r.rank}。`,
   ];
   const LOSE = [
-    r => `我在《无名之辈》里被黄巾贼放倒了，只击倒 ${r.kills} 人……你来试试？`,
-    r => `《无名之辈》：倒在半路，${r.kills} 杀。这黄巾贼比想象中难打。`,
-    r => `刚在《无名之辈》里倒下，${r.kills} 杀。不服，再来。`,
+    r => `我在《三国终章》里被黄巾贼放倒了，只击倒 ${r.kills} 人……你来试试？`,
+    r => `《三国终章》：倒在半路，${r.kills} 杀。这黄巾贼比想象中难打。`,
+    r => `刚在《三国终章》里倒下，${r.kills} 杀。不服，再来。`,
   ];
 
   async function copy(text) {
@@ -34,7 +34,7 @@
     const line = pool[Math.floor(Math.random() * pool.length)](r);
     if (isWeChat()) return 'wechat';   // 微信内置浏览器调不起分享面板
     if (navigator.share) {
-      try { await navigator.share({ title: '无名之辈', text: line, url: url() }); return 'shared'; }
+      try { await navigator.share({ title: '三国终章', text: line, url: url() }); return 'shared'; }
       catch (e) { if (e && e.name === 'AbortError') return 'cancel'; }
     }
     return (await copy(line + ' ' + url())) ? 'copied' : 'fail';
