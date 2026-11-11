@@ -59,9 +59,9 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   }
   // 段首领 / 最终首领 / 精锐小首领：t 兵种、fb 贴图没加载时的替身、hp 基础血量（0 = 用兵种自带 × m）、sc 放大
   const BOSSES = [
-    [{ t: 'yellow-golem', fb: 'elite', name: '程远志', hp: 70, sc: 1.3 }, { t: 'elite', name: '邓茂', hp: 40, sc: 1.15 }],
+    [{ t: 'cheng_yuanzhi', fb: 'elite', name: '程远志', hp: 70, sc: 1.05 }, { t: 'elite', name: '邓茂', hp: 40, sc: 1.15 }],
     [{ t: 'yellow-heavy', fb: 'elite', name: '波才', hp: 80, sc: 1.35 }, { t: 'yellow-spear', fb: 'elite', name: '何仪', hp: 50, sc: 1.15 }],
-    [{ t: 'yellow-heavy', fb: 'elite', name: '管亥', hp: 95, sc: 1.4 }, { t: 'yellow-spear', fb: 'elite', name: '张曼成', hp: 55, sc: 1.2 }],
+    [{ t: 'guanhai_b', fb: 'elite', name: '管亥', hp: 95, sc: 1.1 }, { t: 'yellow-spear', fb: 'elite', name: '张曼成', hp: 55, sc: 1.2 }],
     [{ t: 'zhang_liang', fb: 'elite', name: '张梁', m: 1.4 }, { t: 'zhang_bao', fb: 'elite', name: '张宝', m: 1.5 }],
     [{ t: 'zhang_jiao', fb: 'elite', name: '张角', m: 1.0 }, { t: 'yellow-heavy', fb: 'elite', name: '马元义', hp: 90, sc: 1.4 }],
   ];
