@@ -58,13 +58,13 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     return 'grunt';
   }
   // 段首领 / 最终首领 / 精锐小首领：t 兵种、fb 贴图没加载时的替身、hp 基础血量（0 = 用兵种自带 × m）、sc 放大
-  /* 11/12 用户：管亥太大、小头目太小 → 管亥 1.1→.85，其余首领 1.25、小头目 1.2 */
+  /* 11/12 用户：管亥太大、小头目太小；首领画质差 → 首领按显示大小重新像素化（像素密度和小兵一致），这里的放大倍数都改回 1，大小由贴图本身决定；管亥 .85 写在 TYPES */
   const BOSSES = [
-    [{ t: 'cheng_yuanzhi', fb: 'elite', name: '程远志', hp: 70, sc: 1.25 }, { t: 'deng_mao', fb: 'elite', name: '邓茂', hp: 40, sc: 1.2 }],
-    [{ t: 'bo_cai', fb: 'elite', name: '波才', hp: 80, sc: 1.25 }, { t: 'he_yi', fb: 'elite', name: '何仪', hp: 50, sc: 1.2 }],
-    [{ t: 'guanhai_m', fb: 'elite', name: '管亥', hp: 95, sc: .85 }, { t: 'zhang_mancheng', fb: 'elite', name: '张曼成', hp: 55, sc: 1.2 }],
-    [{ t: 'zhang_liang', fb: 'elite', name: '张梁', m: 1.4, sc: 1.25 }, { t: 'zhang_bao', fb: 'elite', name: '张宝', m: 1.5, sc: 1.25 }],
-    [{ t: 'zhang_jiao', fb: 'elite', name: '张角', m: 1.0, sc: 1.4 }, { t: 'ma_yuanyi', fb: 'elite', name: '马元义', hp: 90, sc: 1.25 }],
+    [{ t: 'cheng_yuanzhi', fb: 'elite', name: '程远志', hp: 70, sc: 1 }, { t: 'deng_mao', fb: 'elite', name: '邓茂', hp: 40, sc: 1 }],
+    [{ t: 'bo_cai', fb: 'elite', name: '波才', hp: 80, sc: 1 }, { t: 'he_yi', fb: 'elite', name: '何仪', hp: 50, sc: 1 }],
+    [{ t: 'guanhai_m', fb: 'elite', name: '管亥', hp: 95, sc: 1 }, { t: 'zhang_mancheng', fb: 'elite', name: '张曼成', hp: 55, sc: 1 }],
+    [{ t: 'zhang_liang', fb: 'elite', name: '张梁', m: 1.4, sc: 1 }, { t: 'zhang_bao', fb: 'elite', name: '张宝', m: 1.5, sc: 1 }],
+    [{ t: 'zhang_jiao', fb: 'elite', name: '张角', m: 1.0, sc: 1 }, { t: 'ma_yuanyi', fb: 'elite', name: '马元义', hp: 90, sc: 1 }],
   ];
   function bossBuff(z, dm) { if (!z) return; z.T = Object.assign({}, z.T, { dmg: (z.T.dmg || 1) * dm, heavy: true }); z.bossT = 6; }   // 首领/头目：伤害加成、出手不被打断（眩晕另有 stunGate 冷却）
   // 首领战机制（11/11）：每 13 秒喊人，从四周涌来一圈喽啰；血量过半「暴怒」：移速 +30%、抬手更快，脚下气焰变红
@@ -154,7 +154,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
         floaters.push({ x: z.x, y: z.y - 84, t: 0, txt: '张梁 狂怒！', color: '#ff4a2a', big: 1 }); shake = Math.max(shake, .4); if (window.SFX) SFX.play('crack');
       }
       if (!z.rage && z.hp < (z.maxHp || z.hp) * .5 && z.type === 'zhang_bao') {   /* 11/12 张宝二阶段：召出两个分身（血少、伤害低，打掉就散） */
-        for (const s of [-1, 1]) { const c = edgeSpawn('zhang_bao', { name: '张宝·分身', hp: 18, sc: 1.25, tier: 2 }); if (c) { c.x = z.x + s * 70; c.y = Math.max(M.top + 6, Math.min(M.bot - 6, z.y + s * 30)); c.T = Object.assign({}, c.T, { dmg: (c.T.dmg || 1) * .6 }); c.clone = 1; } }
+        for (const s of [-1, 1]) { const c = edgeSpawn('zhang_bao', { name: '张宝·分身', hp: 18, sc: 1, tier: 2 }); if (c) { c.x = z.x + s * 70; c.y = Math.max(M.top + 6, Math.min(M.bot - 6, z.y + s * 30)); c.T = Object.assign({}, c.T, { dmg: (c.T.dmg || 1) * .6 }); c.clone = 1; } }
         floaters.push({ x: z.x, y: z.y - 84, t: 0, txt: '张宝：分身之术！', color: '#c9a0ff', big: 1 }); if (window.SFX) SFX.play('j_banner');
       }
       if (!z.rage && z.hp < (z.maxHp || z.hp) * .5) { z.rage = 1; z.T = Object.assign({}, z.T, { spd: (z.T.spd || 30) * 1.3, wind: (z.T.wind || .8) * .75 }); floaters.push({ x: z.x, y: z.y - (z.dismount ? 96 : 64), t: 0, txt: (z.bossLabel || '敌将') + ' 暴怒！', color: '#ff4a2a' }); shake = Math.max(shake, .3); if (window.SFX) SFX.play('j_banner'); }

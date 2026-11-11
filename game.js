@@ -142,19 +142,19 @@ const TYPES = {
   'yellow-shield': { name: '黄巾盾兵', hp: 8, spd: 24, wind: .8, reach: 25, dmg: 1.5, heavy: true, shield: true, rangedResist: .7, blocksPierce: true, sprite: 'yellow_shield', scale: 1 },
   'yellow-spear': { name: '黄巾枪兵', hp: 5, spd: 31, wind: .7, reach: 37, dmg: 1.5, sprite: 'yellow_spear', scale: .98 },
   'yellow-catapult': { name: '投石车', hp: 9, spd: 0, siege: true, w: 28, sprite: 'yellow_catapult', scale: 1.05 },
-  zhang_liang: { name: '人公将军·张梁', hp: 54, spd: 26, wind: .9, reach: 46, dmg: 3, heavy: true, noLaunch: true, w: 16, sprite: 'zhang_liang_q', scale: 1 },   /* 11/12 重画 Q 版：双长刀；旧图 zhang_liang 留着没删 */
+  zhang_liang: { name: '人公将军·张梁', hp: 54, spd: 26, wind: .9, reach: 46, dmg: 3, heavy: true, noLaunch: true, w: 16, sprite: 'zhang_liang_q', scale: .88 },   /* 11/12 重画 Q 版：双长刀；旧图 zhang_liang 留着没删 */
   'yellow-golem': { name: '黄巾力士', hp: 16, spd: 22, wind: 1, reach: 34, dmg: 3, heavy: true, noLaunch: true, w: 14, sprite: 'yellow_golem', scale: 1 },
-  zhang_jiao: { name: '天公将军·张角', hp: 135, spd: 24, wind: 1, reach: 46, dmg: 3, heavy: true, noLaunch: true, w: 14, sprite: 'zhang_jiao_q', scale: 1 },   /* 11/12 重画 Q 版：九节杖+太平要术；旧图 zhang_jiao 留着没删 */
-  'cheng_yuanzhi': { name: '程远志', hp: 16, spd: 24, wind: 1, reach: 40, dmg: 3, heavy: true, noLaunch: true, w: 14, sprite: 'cheng_yuanzhi', scale: 1 },   // 11/11 用户 Gemini 新画（art/gemini/黄巾_程远志.png），长柄大刀
-  'deng_mao': { name: '邓茂', hp: 16, spd: 26, wind: 1, reach: 44, dmg: 3, heavy: true, noLaunch: true, w: 14, sprite: 'deng_mao', scale: 1 },   /* 11/12 用户 GPT 新画：九环大刀 */
-  'bo_cai': { name: '波才', hp: 16, spd: 22, wind: 1.1, reach: 46, dmg: 3, heavy: true, noLaunch: true, w: 14, sprite: 'bo_cai', scale: 1 },   /* 11/12：长柄开山大斧、背插令旗 */
-  'he_yi': { name: '何仪', hp: 16, spd: 32, wind: .8, reach: 40, dmg: 3, heavy: true, noLaunch: true, w: 13, sprite: 'he_yi', scale: 1 },   /* 11/12：双短戟，身法快 */
-  'zhang_mancheng': { name: '张曼成', hp: 16, spd: 24, wind: 1, reach: 40, dmg: 3, heavy: true, noLaunch: true, w: 13, sprite: 'zhang_mancheng', scale: 1 },   /* 11/12：神上使，铁剑+符纸 */
-  'ma_yuanyi': { name: '马元义', hp: 16, spd: 24, wind: 1.1, reach: 50, dmg: 3, heavy: true, noLaunch: true, w: 14, sprite: 'ma_yuanyi', scale: 1 },   /* 11/12：斗笠黑衣，铁链流星锤 */
-  'guanhai_m': { name: '管亥', hp: 16, spd: 40, wind: 1.1, reach: 54, dmg: 3, heavy: true, noLaunch: true, w: 22, sprite: 'guanhai_m', scale: 1 },   // 11/11 用户：管亥双阶段——一阶段骑马（无名之辈的骑马帧），血过半落马换 guanhai_b 步战
-  'guanhai_b': { name: '管亥', hp: 16, spd: 24, wind: 1, reach: 42, dmg: 3, heavy: true, noLaunch: true, w: 14, sprite: 'guanhai_b', scale: 1 },   // 11/11 用户：管亥从无名之辈拿（步战长戟那套帧，换成通用敌人帧名）
+  zhang_jiao: { name: '天公将军·张角', hp: 135, spd: 24, wind: 1, reach: 46, dmg: 3, heavy: true, noLaunch: true, w: 14, sprite: 'zhang_jiao_q', scale: .88 },   /* 11/12 重画 Q 版：九节杖+太平要术；旧图 zhang_jiao 留着没删 */
+  'cheng_yuanzhi': { name: '程远志', hp: 16, spd: 24, wind: 1, reach: 40, dmg: 3, heavy: true, noLaunch: true, w: 14, sprite: 'cheng_yuanzhi', scale: .88 },   // 11/11 用户 Gemini 新画（art/gemini/黄巾_程远志.png），长柄大刀
+  'deng_mao': { name: '邓茂', hp: 16, spd: 26, wind: 1, reach: 44, dmg: 3, heavy: true, noLaunch: true, w: 14, sprite: 'deng_mao', scale: .88 },   /* 11/12 用户 GPT 新画：九环大刀 */
+  'bo_cai': { name: '波才', hp: 16, spd: 22, wind: 1.1, reach: 46, dmg: 3, heavy: true, noLaunch: true, w: 14, sprite: 'bo_cai', scale: .88 },   /* 11/12：长柄开山大斧、背插令旗 */
+  'he_yi': { name: '何仪', hp: 16, spd: 32, wind: .8, reach: 40, dmg: 3, heavy: true, noLaunch: true, w: 13, sprite: 'he_yi', scale: .88 },   /* 11/12：双短戟，身法快 */
+  'zhang_mancheng': { name: '张曼成', hp: 16, spd: 24, wind: 1, reach: 40, dmg: 3, heavy: true, noLaunch: true, w: 13, sprite: 'zhang_mancheng', scale: .88 },   /* 11/12：神上使，铁剑+符纸 */
+  'ma_yuanyi': { name: '马元义', hp: 16, spd: 24, wind: 1.1, reach: 50, dmg: 3, heavy: true, noLaunch: true, w: 14, sprite: 'ma_yuanyi', scale: .88 },   /* 11/12：斗笠黑衣，铁链流星锤 */
+  'guanhai_m': { name: '管亥', hp: 16, spd: 40, wind: 1.1, reach: 54, dmg: 3, heavy: true, noLaunch: true, w: 22, sprite: 'guanhai_m', scale: .85 },   // 11/11 用户：管亥双阶段——一阶段骑马（无名之辈的骑马帧），血过半落马换 guanhai_b 步战
+  'guanhai_b': { name: '管亥', hp: 16, spd: 24, wind: 1, reach: 42, dmg: 3, heavy: true, noLaunch: true, w: 14, sprite: 'guanhai_b', scale: .85 },   // 11/11 用户：管亥从无名之辈拿（步战长戟那套帧，换成通用敌人帧名）
   thief: { name: '黄巾窃贼', hp: 3, spd: 72, thief: true, sprite: 'thief', scale: .86 },   // 11/11 用户定：背麻袋的小偷，专捡地上的铜钱，捡够就跑（贴图 art/gemini/黄巾_窃贼.png）
-  zhang_bao: { name: '地公将军·张宝', hp: 48, spd: 26, wind: 1, reach: 44, dmg: 3, heavy: true, noLaunch: true, w: 13, sprite: 'zhang_bao_q', scale: 1 },   /* 11/12 重画 Q 版：长剑+剑指；旧图 zhang_bao 留着没删 */
+  zhang_bao: { name: '地公将军·张宝', hp: 48, spd: 26, wind: 1, reach: 44, dmg: 3, heavy: true, noLaunch: true, w: 13, sprite: 'zhang_bao_q', scale: .88 },   /* 11/12 重画 Q 版：长剑+剑指；旧图 zhang_bao 留着没删 */
 };
 const WAVES = [
   // 区域 1：纯教学，不随机

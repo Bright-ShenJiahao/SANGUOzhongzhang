@@ -35,8 +35,11 @@ for i in small:   # 小碎块并入水平距离最近、垂直有重叠的大块
     best, bd = None, 1e9
     for j in big:
         jy, jx = objs[j]
-        if not (jy.start - 10 < cy < jy.stop + 10): continue
-        dist = max(0, jx.start - sx.stop, sx.start - jx.stop)   # 用碎块边缘到人物边界的距离
+        if os.environ.get('NEAR2D'):   # 11/12：倒地帧掉在身体下方的兵器——按上下左右的边缘距离找最近的人物（旧规则要求竖直重叠，会被分给同一行更高的被击飞帧）
+            dist = float(np.hypot(max(0, jx.start - sx.stop, sx.start - jx.stop), max(0, jy.start - sy.stop, sy.start - jy.stop)))
+        else:
+            if not (jy.start - 10 < cy < jy.stop + 10): continue
+            dist = max(0, jx.start - sx.stop, sx.start - jx.stop)   # 用碎块边缘到人物边界的距离
         if dist < bd: best, bd = j, dist
     # 很小又离得远的碎块（飞出去的石子、箭）直接丢弃，游戏里用代码画投射物
     tiny = sizes[i] < .04 * np.median(sorted(sizes)[-8:])
