@@ -59,8 +59,8 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   }
   // 段首领 / 最终首领 / 精锐小首领：t 兵种、fb 贴图没加载时的替身、hp 基础血量（0 = 用兵种自带 × m）、sc 放大
   const BOSSES = [
-    [{ t: 'cheng_yuanzhi', fb: 'elite', name: '程远志', hp: 70, sc: 1.05 }, { t: 'elite', name: '邓茂', hp: 40, sc: 1.15 }],
-    [{ t: 'yellow-heavy', fb: 'elite', name: '波才', hp: 80, sc: 1.35 }, { t: 'yellow-spear', fb: 'elite', name: '何仪', hp: 50, sc: 1.15 }],
+    [{ t: 'cheng_yuanzhi', fb: 'elite', name: '程远志', hp: 70, sc: 1.05 }, { t: 'deng_mao', fb: 'elite', name: '邓茂', hp: 40, sc: 1 }],
+    [{ t: 'bo_cai', fb: 'elite', name: '波才', hp: 80, sc: 1.05 }, { t: 'yellow-spear', fb: 'elite', name: '何仪', hp: 50, sc: 1.15 }],
     [{ t: 'guanhai_m', fb: 'elite', name: '管亥', hp: 95, sc: 1.1 }, { t: 'yellow-spear', fb: 'elite', name: '张曼成', hp: 55, sc: 1.2 }],
     [{ t: 'zhang_liang', fb: 'elite', name: '张梁', m: 1.4 }, { t: 'zhang_bao', fb: 'elite', name: '张宝', m: 1.5 }],
     [{ t: 'zhang_jiao', fb: 'elite', name: '张角', m: 1.0 }, { t: 'yellow-heavy', fb: 'elite', name: '马元义', hp: 90, sc: 1.4 }],
@@ -119,7 +119,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     firerain: (z, d) => { for (let i = 0; i < (z.rage ? 7 : 5); i++) teleAdd({ k: 'circle', x: hero.x + R(-110, 110), y: hero.y + R(-55, 55), r: 42, T: 1.0 + i * .14, dmg: 2, src: z, snd: 'land' }); say(z, '火来！'); return .7; },
     thunder: (z, d) => { for (let i = 0; i < (z.rage ? 8 : 6); i++) teleAdd({ k: 'circle', x: hero.x + (i ? R(-120, 120) : 0), y: hero.y + (i ? R(-60, 60) : 0), r: 46, T: 1.15 + i * .12, dmg: 2.5, src: z, c: 1, snd: 'crack' }); say(z, '天雷！'); return .8; },
   };
-  const BMOVES = { cheng_yuanzhi: ['sweep', 'cleave'], guanhai_m: ['charge', 'charge'], guanhai_b: ['spin', 'cleave'], zhang_liang: ['spin', 'charge'], zhang_bao: ['firerain', 'cleave'], zhang_jiao: ['thunder', 'thunder'] };
+  const BMOVES = { cheng_yuanzhi: ['sweep', 'cleave'], deng_mao: ['cleave', 'cleave'], bo_cai: ['spin', 'sweep'], guanhai_m: ['charge', 'charge'], guanhai_b: ['spin', 'cleave'], zhang_liang: ['spin', 'charge'], zhang_bao: ['firerain', 'cleave'], zhang_jiao: ['thunder', 'thunder'] };
   function say(z, t) { floaters.push({ x: z.x, y: z.y - 64, t: 0, txt: t, color: '#ffcf6a' }); }
   function bossSkills(dt) {
     for (const z of zs) {
