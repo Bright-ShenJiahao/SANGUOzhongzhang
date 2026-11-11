@@ -132,8 +132,12 @@
     el.querySelectorAll('.diff .card').forEach(b => b.onclick = () => { if (window.TITLE && TITLE.setHard) TITLE.setHard(b.dataset.h === '1'); render(); });
     el.querySelectorAll('.fl button').forEach(b => b.onclick = () => { field = +b.dataset.i; render(); });   // 上锁的章节也能点开预览（灰图），但「出发」不可用
     el.querySelector('.dice').onclick = () => { const ks = Object.keys(O).filter(k => !O[k].locked); SURV.setOrigin(ks[Math.random() * ks.length | 0]); render(); };
-    el.querySelector('.back').onclick = () => { close(); if (window.TITLE && TITLE.show) TITLE.show(); };
-    el.querySelector('.go').onclick = () => { if (!FIELDS[field].open) return; close(); if (window.TITLE && TITLE.beginRun) TITLE.beginRun(); };
+    const tapBind = (b, fn) => {   // 手机：抬手就触发（不等 click，iOS 内置浏览器有时吞掉 click）；电脑照常 click
+      let t = 0; b.addEventListener('pointerup', e => { if (e.pointerType === 'mouse') return; t = Date.now(); fn(); });
+      b.onclick = () => { if (Date.now() - t > 700) fn(); };
+    };
+    tapBind(el.querySelector('.back'), () => { if (!el || !el.parentNode) return; close(); if (window.TITLE && TITLE.show) TITLE.show(); });
+    tapBind(el.querySelector('.go'), () => { if (!el || !el.parentNode || !FIELDS[field].open) return; close(); if (window.TITLE && TITLE.beginRun) TITLE.beginRun(); });
   }
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   function open(n) {

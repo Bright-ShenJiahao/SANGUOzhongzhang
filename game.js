@@ -1301,7 +1301,8 @@ fit();
 ['gesturestart', 'gesturechange', 'dblclick'].forEach(ev => document.addEventListener(ev, e => e.preventDefault(), { passive: false }));
 document.addEventListener('touchmove', e => { if (e.target && e.target.closest && e.target.closest('#xResult article')) return; e.preventDefault(); }, { passive: false });   // 结算卷轴里允许手指上下滑
 let lastTouchEnd = 0;
-document.addEventListener('touchend', e => { const n = Date.now(); if (n - lastTouchEnd < 350) e.preventDefault(); lastTouchEnd = n; }, { passive: false });
+document.addEventListener('touchend', e => { if (e.target && e.target.closest && e.target.closest('button, input, #kaiju, #survPrep, #survPick, .rtEv, #szzSet, #pauseScreen')) return; const n = Date.now(); if (n - lastTouchEnd < 350) e.preventDefault(); lastTouchEnd = n; }, { passive: false });   // 防双击放大：界面按钮不拦（11/11 用户：手机横屏点不了出发/返回）
+{ const fixScroll = () => { if (window.scrollX || window.scrollY) window.scrollTo(0, 0); }; addEventListener('resize', fixScroll); addEventListener('orientationchange', () => setTimeout(fixScroll, 300)); if (window.visualViewport) visualViewport.addEventListener('scroll', fixScroll); }   // iOS 转屏后页面会被偷偷卷动，按钮看得见却点不中
 let last = performance.now();
 function canPauseGame() {
   if (over || won || result || !hero || hero.hp <= 0) return false;
