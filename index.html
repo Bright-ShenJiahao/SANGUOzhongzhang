@@ -62,7 +62,7 @@ body.szz-pro #help{display:none}
 .x-back{min-height:34px!important}
 }
 #rot small{display:block;margin-top:10px;font-size:14px;font-weight:600;color:#c9b691;line-height:1.6}
-</style><link rel="preload" href="pack/fonts/result.woff2?v=73ef367eb3" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=73ef367eb3)format("woff2");font-display:swap}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
+</style><link rel="preload" href="pack/fonts/result.woff2?v=c2d8ba97e5" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=c2d8ba97e5)format("woff2");font-display:swap}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
 </head><body>
 <style>
 #bootSplash{position:fixed;inset:0;z-index:99999;background:radial-gradient(ellipse at 50% 45%,#f3e4cf 0%,#ecd9c0 55%,#d9c09f 100%);transition:opacity .45s ease-out}
@@ -77,7 +77,7 @@ body.szz-pro #help{display:none}
 #bootInk{position:relative;width:100%;height:12px}
 #bootInk i{position:absolute;left:0;top:0;height:100%;width:0;background:linear-gradient(90deg,rgba(30,20,12,.95),rgba(30,20,12,.88) 85%,rgba(30,20,12,.35));border-radius:2px 60% 60% 6px/2px 50% 50% 6px;transition:width .35s ease-out;box-shadow:0 0 3px rgba(30,20,12,.35)}
 #bootInk::before{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:rgba(60,40,24,.18)}
-#bootText{font-size:16px;letter-spacing:.3em;font-weight:600;min-height:1.2em}
+#bootText{font-size:16px;letter-spacing:.3em;font-weight:600;min-height:1.2em}#bootText.tap{font-size:19px;animation:bootTap 1.5s ease-in-out infinite}@keyframes bootTap{50%{opacity:.3}}
 #bootRefresh{font:600 15px "Songti SC","Noto Serif SC",serif;letter-spacing:.2em;padding:10px 22px;color:#f1e2c6;background:#2e2016;border:1px solid #7a5a3a;border-radius:4px}
 #bootError{font-size:12px;opacity:.7;overflow-wrap:anywhere;max-width:90vw;text-align:center}
 </style>
@@ -95,13 +95,20 @@ window.addEventListener('error',function(e){if(e.message)error(e.message);});
 window.addEventListener('unhandledrejection',function(e){error(e.reason&&e.reason.message||e.reason);});
 // 脚本跑完只算「代码好了」；等首页背景图和书法标题也下载好，title.js 再调 bootDone 揭幕（11/11 用户定：加载提示放在登录框的位置）
 window.finishBoot=function(){if(failed)return;ready=true;clearTimeout(timer);};
-window.bootDone=function(){if(failed)return;ready=true;clearTimeout(timer);clearInterval(tick);clearInterval(say);el('bootBar').style.width='100%';el('bootText').textContent='出 征';
- setTimeout(function(){var s=el('bootSplash');if(!s)return;s.classList.add('out');setTimeout(function(){s.remove();},500);},250);};
+// 11/12：「点击任意处开始」和加载结合——图好了再等主界面曲缓冲（最多 5 秒）；浏览器允许自动放音就直接揭幕，不允许就在进度条位置提示点一下，点的这一下音乐和首页一起出来
+window.bootDone=function(){if(failed)return;ready=true;clearTimeout(timer);clearInterval(say);el('bootText').textContent='调 弦……';
+ var t0=Date.now(),wait=setInterval(function(){var B=window.BGM_TITLE,a=B&&B.audio;if(a&&a.readyState<3&&Date.now()-t0<5000)return;clearInterval(wait);clearInterval(tick);el('bootBar').style.width='100%';
+  if(B&&B.auto){reveal();return;}
+  var s=el('bootSplash');el('bootText').textContent='点击任意处开始';el('bootText').className='tap';s.style.cursor='pointer';
+  var go=function(e){if(e&&e.type==='keydown'&&e.key==='Escape')return;if(e){e.preventDefault();e.stopPropagation();}window.removeEventListener('keydown',go,true);s.removeEventListener('click',go);s.removeEventListener('pointerup',up);if(B&&B.start)B.start();reveal();},
+   up=function(e){if(e.pointerType!=='mouse')go(e);};
+  s.addEventListener('click',go);s.addEventListener('pointerup',up);window.addEventListener('keydown',go,true);},100);};
+function reveal(){el('bootText').className='';el('bootText').textContent='出 征';window.bootRevealed=true;setTimeout(function(){var s=el('bootSplash');if(!s)return;s.classList.add('out');setTimeout(function(){s.remove();},500);},250);}
 if(location.protocol==='https:'&&!/[?&]debug(?:=|&|$)/.test(location.search)&&'serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(function(){});}
 })();
 // 自动更新：打开游戏、或从后台切回来时，查一下线上有没有新版本；有就在标题/整备页自动刷新（战斗中不打扰）
 (function(){
-var BUILD='4643e790fc55',busy=false;
+var BUILD='0255df78effe',busy=false;
 if(location.protocol!=='https:'||/[?&]debug(?:=|&|$)/.test(location.search))return;
 function check(){
   if(busy)return;
@@ -943,6 +950,11 @@ const XIAOCHANG = { drawBackground() {}, state: () => null, start() {}, on: () =
   const kick = () => { const a = cur && el[cur]; if (a && a.paused && !(window.SFX && SFX.isMuted && SFX.isMuted())) a.play().catch(() => {}); };
   const go = () => { if (!started) { started = true; setInterval(tick, 50); tick(); } kick(); };
   ['pointerdown', 'pointerup', 'touchend', 'click', 'keydown'].forEach(ev => addEventListener(ev, go, { capture: true, passive: true }));
+  /* 11/12 用户：开局不点也要有音乐，「点击任意处开始」和加载有机结合 →
+     脚本一跑就先试着放主界面曲（浏览器允许时直接出声，比如常来的 Chrome、装到桌面的版本）；
+     加载幕（index.src.html 的 bootDone）会等主界面曲缓冲好，再看 auto：放出来了就直接揭幕，没放出来就在进度条位置显示「点击任意处开始」，点一下音乐和首页一起出来 */
+  const T = window.BGM_TITLE = { audio: get('title'), auto: false, start: go };
+  T.audio.play().then(() => { T.auto = true; if (!started) { started = true; setInterval(tick, 50); tick(); } }).catch(() => {});
   document.addEventListener('visibilitychange', () => { if (document.hidden) for (const k in el) el[k].pause(); else if (cur && el[cur]) el[cur].play().catch(() => {}); });
 })();
 
@@ -7632,9 +7644,11 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
         bootWait += dt;
         const im = inkPortrait() ? INK.phone : INK.pc, ti = dom.inkTitle;
         if ((inkReady(im) && (!ti || (ti.complete && ti.naturalWidth))) || bootWait > 12) {
-          S.booted = true; S.t = 1.3;   // 加载幕上图已经淡入了，揭幕时画布直接画满，不再从宣纸淡入
-          for (const e of [ti, dom.name, dom.start, dom.cont, dom.novice, dom.hintOff, dom.board]) if (e) { e.style.animation = 'none'; void e.offsetWidth; e.style.animation = ''; }
-          if (window.bootDone) window.bootDone();
+          if (!S.bootAsked) { S.bootAsked = true; if (window.bootDone) window.bootDone(); }   // 11/12：加载幕可能还要等音乐、等玩家点「点击任意处开始」，真正揭幕时才放首页入场动画
+          if (!window.bootDone || window.bootRevealed) {
+            S.booted = true; S.t = 1.3;   // 加载幕上图已经淡入了，揭幕时画布直接画满，不再从宣纸淡入
+            for (const e of [ti, dom.name, dom.start, dom.cont, dom.novice, dom.hintOff, dom.board]) if (e) { e.style.animation = 'none'; void e.offsetWidth; e.style.animation = ''; }
+          } else S.t = 0;
         } else S.t = 0;
       }
       if (S.msgT > 0) { S.msgT -= dt; if (S.msgT <= 0 && dom.tip) dom.tip.style.opacity = 0; }

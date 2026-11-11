@@ -616,5 +616,10 @@
   const kick = () => { const a = cur && el[cur]; if (a && a.paused && !(window.SFX && SFX.isMuted && SFX.isMuted())) a.play().catch(() => {}); };
   const go = () => { if (!started) { started = true; setInterval(tick, 50); tick(); } kick(); };
   ['pointerdown', 'pointerup', 'touchend', 'click', 'keydown'].forEach(ev => addEventListener(ev, go, { capture: true, passive: true }));
+  /* 11/12 用户：开局不点也要有音乐，「点击任意处开始」和加载有机结合 →
+     脚本一跑就先试着放主界面曲（浏览器允许时直接出声，比如常来的 Chrome、装到桌面的版本）；
+     加载幕（index.src.html 的 bootDone）会等主界面曲缓冲好，再看 auto：放出来了就直接揭幕，没放出来就在进度条位置显示「点击任意处开始」，点一下音乐和首页一起出来 */
+  const T = window.BGM_TITLE = { audio: get('title'), auto: false, start: go };
+  T.audio.play().then(() => { T.auto = true; if (!started) { started = true; setInterval(tick, 50); tick(); } }).catch(() => {});
   document.addEventListener('visibilitychange', () => { if (document.hidden) for (const k in el) el[k].pause(); else if (cur && el[cur]) el[cur].play().catch(() => {}); });
 })();

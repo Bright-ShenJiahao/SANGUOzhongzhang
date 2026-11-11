@@ -1423,9 +1423,11 @@
         bootWait += dt;
         const im = inkPortrait() ? INK.phone : INK.pc, ti = dom.inkTitle;
         if ((inkReady(im) && (!ti || (ti.complete && ti.naturalWidth))) || bootWait > 12) {
-          S.booted = true; S.t = 1.3;   // 加载幕上图已经淡入了，揭幕时画布直接画满，不再从宣纸淡入
-          for (const e of [ti, dom.name, dom.start, dom.cont, dom.novice, dom.hintOff, dom.board]) if (e) { e.style.animation = 'none'; void e.offsetWidth; e.style.animation = ''; }
-          if (window.bootDone) window.bootDone();
+          if (!S.bootAsked) { S.bootAsked = true; if (window.bootDone) window.bootDone(); }   // 11/12：加载幕可能还要等音乐、等玩家点「点击任意处开始」，真正揭幕时才放首页入场动画
+          if (!window.bootDone || window.bootRevealed) {
+            S.booted = true; S.t = 1.3;   // 加载幕上图已经淡入了，揭幕时画布直接画满，不再从宣纸淡入
+            for (const e of [ti, dom.name, dom.start, dom.cont, dom.novice, dom.hintOff, dom.board]) if (e) { e.style.animation = 'none'; void e.offsetWidth; e.style.animation = ''; }
+          } else S.t = 0;
         } else S.t = 0;
       }
       if (S.msgT > 0) { S.msgT -= dt; if (S.msgT <= 0 && dom.tip) dom.tip.style.opacity = 0; }
