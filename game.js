@@ -1302,6 +1302,9 @@ fit();
 document.addEventListener('touchmove', e => { if (e.target && e.target.closest && e.target.closest('#xResult article')) return; e.preventDefault(); }, { passive: false });   // 结算卷轴里允许手指上下滑
 let lastTouchEnd = 0;
 document.addEventListener('touchend', e => { if (e.target && e.target.closest && e.target.closest('button, input, #kaiju, #survPrep, #survPick, .rtEv, #szzSet, #pauseScreen')) return; const n = Date.now(); if (n - lastTouchEnd < 350) e.preventDefault(); lastTouchEnd = n; }, { passive: false });   // 防双击放大：界面按钮不拦（11/11 用户：手机横屏点不了出发/返回）
+{ let pend = null;   // iPhone 有时只给 pointerdown/up、吞掉 click（11/11 点击诊断确认）：手指抬起 0.35 秒内没等到 click，就替它补一下；等到了就不补，不会重复
+  addEventListener('pointerup', e => { if (e.pointerType === 'mouse') return; const b = e.target && e.target.closest && e.target.closest('button, [data-a], [data-t], .card, .bar, label, a'); if (!b || b.disabled || b.closest('#kaiju .bot')) return; const me = pend = { b }; setTimeout(() => { if (pend === me && !me.got && document.contains(b)) { pend = null; b.click(); } }, 350); }, true);
+  addEventListener('click', e => { if (pend && e.isTrusted) pend.got = true; }, true); }
 { const fixScroll = () => { if (window.scrollX || window.scrollY) window.scrollTo(0, 0); }; addEventListener('resize', fixScroll); addEventListener('orientationchange', () => setTimeout(fixScroll, 300)); if (window.visualViewport) visualViewport.addEventListener('scroll', fixScroll); }   // iOS 转屏后页面会被偷偷卷动，按钮看得见却点不中
 let last = performance.now();
 function canPauseGame() {

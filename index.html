@@ -62,7 +62,7 @@ body.szz-pro #help{display:none}
 .x-back{min-height:34px!important}
 }
 #rot small{display:block;margin-top:10px;font-size:14px;font-weight:600;color:#c9b691;line-height:1.6}
-</style><link rel="preload" href="pack/fonts/result.woff2?v=ac987dac61" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=ac987dac61)format("woff2");font-display:swap}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
+</style><link rel="preload" href="pack/fonts/result.woff2?v=678e740322" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=678e740322)format("woff2");font-display:swap}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
 </head><body>
 <style>
 #bootSplash{position:fixed;inset:0;z-index:99999;background:radial-gradient(ellipse at 50% 45%,#f3e4cf 0%,#ecd9c0 55%,#d9c09f 100%);transition:opacity .45s ease-out}
@@ -101,7 +101,7 @@ if(location.protocol==='https:'&&!/[?&]debug(?:=|&|$)/.test(location.search)&&'s
 })();
 // 自动更新：打开游戏、或从后台切回来时，查一下线上有没有新版本；有就在标题/整备页自动刷新（战斗中不打扰）
 (function(){
-var BUILD='15d301a067d0',busy=false;
+var BUILD='5da42db3db3f',busy=false;
 if(location.protocol!=='https:'||/[?&]debug(?:=|&|$)/.test(location.search))return;
 function check(){
   if(busy)return;
@@ -957,7 +957,7 @@ const XIAOCHANG = { drawBackground() {}, state: () => null, start() {}, on: () =
   { const box = document.createElement('div');
     box.style.cssText = 'position:fixed;left:50%;top:2px;transform:translateX(-50%);z-index:2147483647;max-width:96vw;padding:4px 8px;background:rgba(0,0,0,.82);color:#7f7;font:11px/1.35 monospace;pointer-events:none;white-space:pre;border:1px solid #3a3';
     const lines = [], nm = e => !e ? '∅' : (e.id ? '#' + e.id : e.tagName.toLowerCase() + (e.className && typeof e.className === 'string' ? '.' + e.className.split(' ').filter(Boolean).slice(0, 2).join('.') : ''));
-    const log = (t, x, y, tg) => { const top = document.elementFromPoint(x, y); lines.push(`${t} ${x|0},${y|0} 点到:${nm(tg)} 最上层:${nm(top)} ${innerWidth}x${innerHeight} vv:${window.visualViewport ? (visualViewport.offsetTop|0) + '/' + (visualViewport.height|0) : '-'} sy:${scrollY|0}`); while (lines.length > 5) lines.shift(); box.textContent = lines.join('\n'); if (!box.parentNode) document.body.appendChild(box); };
+    const log = (t, x, y, tg) => { const top = document.elementFromPoint(x, y); lines.push(`${t} ${x|0},${y|0} 点到:${nm(tg)} 最上层:${nm(top)} ${innerWidth}x${innerHeight} vv:${window.visualViewport ? (visualViewport.offsetTop|0) + '/' + (visualViewport.height|0) : '-'} sy:${scrollY|0}`); while (lines.length > 5) lines.shift(); box.textContent = lines.join('\n'); if (!box.parentNode) document.body.appendChild(box); box.style.display = 'block'; clearTimeout(box._h); box._h = setTimeout(() => { box.style.display = 'none'; lines.length = 0; }, 3000); };   // 3 秒没动静就收起
     for (const ev of ['touchstart', 'touchend', 'pointerdown', 'pointerup', 'click']) addEventListener(ev, e => { const p = e.changedTouches ? e.changedTouches[0] : e; log(ev + (e.defaultPrevented ? '(已拦)' : ''), p.clientX, p.clientY, e.target); }, { capture: true, passive: true });
   }
   let panel = null, god = false, fps = 60, last = performance.now(), frames = 0, acc = 0;
@@ -8902,6 +8902,9 @@ fit();
 document.addEventListener('touchmove', e => { if (e.target && e.target.closest && e.target.closest('#xResult article')) return; e.preventDefault(); }, { passive: false });   // 结算卷轴里允许手指上下滑
 let lastTouchEnd = 0;
 document.addEventListener('touchend', e => { if (e.target && e.target.closest && e.target.closest('button, input, #kaiju, #survPrep, #survPick, .rtEv, #szzSet, #pauseScreen')) return; const n = Date.now(); if (n - lastTouchEnd < 350) e.preventDefault(); lastTouchEnd = n; }, { passive: false });   // 防双击放大：界面按钮不拦（11/11 用户：手机横屏点不了出发/返回）
+{ let pend = null;   // iPhone 有时只给 pointerdown/up、吞掉 click（11/11 点击诊断确认）：手指抬起 0.35 秒内没等到 click，就替它补一下；等到了就不补，不会重复
+  addEventListener('pointerup', e => { if (e.pointerType === 'mouse') return; const b = e.target && e.target.closest && e.target.closest('button, [data-a], [data-t], .card, .bar, label, a'); if (!b || b.disabled || b.closest('#kaiju .bot')) return; const me = pend = { b }; setTimeout(() => { if (pend === me && !me.got && document.contains(b)) { pend = null; b.click(); } }, 350); }, true);
+  addEventListener('click', e => { if (pend && e.isTrusted) pend.got = true; }, true); }
 { const fixScroll = () => { if (window.scrollX || window.scrollY) window.scrollTo(0, 0); }; addEventListener('resize', fixScroll); addEventListener('orientationchange', () => setTimeout(fixScroll, 300)); if (window.visualViewport) visualViewport.addEventListener('scroll', fixScroll); }   // iOS 转屏后页面会被偷偷卷动，按钮看得见却点不中
 let last = performance.now();
 function canPauseGame() {
