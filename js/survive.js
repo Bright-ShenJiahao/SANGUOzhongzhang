@@ -64,7 +64,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     [{ t: 'bo_cai', fb: 'elite', name: '波才', hp: 80, sc: 1.25 }, { t: 'he_yi', fb: 'elite', name: '何仪', hp: 50, sc: 1.2 }],
     [{ t: 'guanhai_m', fb: 'elite', name: '管亥', hp: 95, sc: .85 }, { t: 'zhang_mancheng', fb: 'elite', name: '张曼成', hp: 55, sc: 1.2 }],
     [{ t: 'zhang_liang', fb: 'elite', name: '张梁', m: 1.4, sc: 1.25 }, { t: 'zhang_bao', fb: 'elite', name: '张宝', m: 1.5, sc: 1.25 }],
-    [{ t: 'zhang_jiao', fb: 'elite', name: '张角', m: 1.0 }, { t: 'ma_yuanyi', fb: 'elite', name: '马元义', hp: 90, sc: 1.25 }],
+    [{ t: 'zhang_jiao', fb: 'elite', name: '张角', m: 1.0, sc: 1.4 }, { t: 'ma_yuanyi', fb: 'elite', name: '马元义', hp: 90, sc: 1.25 }],
   ];
   function bossBuff(z, dm) { if (!z) return; z.T = Object.assign({}, z.T, { dmg: (z.T.dmg || 1) * dm, heavy: true }); z.bossT = 6; }   // 首领/头目：伤害加成、出手不被打断（眩晕另有 stunGate 冷却）
   // 首领战机制（11/11）：每 13 秒喊人，从四周涌来一圈喽啰；血量过半「暴怒」：移速 +30%、抬手更快，脚下气焰变红
@@ -120,7 +120,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     firerain: (z, d) => { for (let i = 0; i < (z.rage ? 7 : 5); i++) teleAdd({ k: 'circle', x: hero.x + R(-110, 110), y: hero.y + R(-55, 55), r: 42, T: 1.0 + i * .14, dmg: 2, src: z, snd: 'land' }); say(z, '火来！'); return .7; },
     thunder: (z, d) => { for (let i = 0; i < (z.rage ? 8 : 6); i++) teleAdd({ k: 'circle', x: hero.x + (i ? R(-120, 120) : 0), y: hero.y + (i ? R(-60, 60) : 0), r: 46, T: 1.15 + i * .12, dmg: 2.5, src: z, c: 1, snd: 'crack' }); say(z, '天雷！'); return .8; },
   };
-  const BMOVES = { cheng_yuanzhi: ['sweep', 'cleave'], deng_mao: ['cleave', 'cleave'], bo_cai: ['spin', 'sweep'], he_yi: ['charge', 'cleave'], zhang_mancheng: ['firerain', 'cleave'], ma_yuanyi: ['spin', 'cleave'], guanhai_m: ['charge', 'charge'], guanhai_b: ['spin', 'cleave'], zhang_liang: ['spin', 'charge'], zhang_bao: ['cleave', 'firerain'], zhang_jiao: ['thunder', 'thunder'] };
+  const BMOVES = { cheng_yuanzhi: ['sweep', 'cleave'], deng_mao: ['cleave', 'cleave'], bo_cai: ['spin', 'sweep'], he_yi: ['charge', 'cleave'], zhang_mancheng: ['firerain', 'cleave'], ma_yuanyi: ['spin', 'cleave'], guanhai_m: ['charge', 'charge'], guanhai_b: ['spin', 'cleave'], zhang_liang: ['spin', 'charge'], zhang_bao: ['cleave', 'firerain'], zhang_jiao: ['thunder', 'firerain'] };
   function say(z, t) { floaters.push({ x: z.x, y: z.y - 64, t: 0, txt: t, color: '#ffcf6a' }); }
   function bossSkills(dt) {
     for (const z of zs) {

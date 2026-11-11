@@ -144,7 +144,7 @@ const TYPES = {
   'yellow-catapult': { name: '投石车', hp: 9, spd: 0, siege: true, w: 28, sprite: 'yellow_catapult', scale: 1.05 },
   zhang_liang: { name: '人公将军·张梁', hp: 54, spd: 26, wind: .9, reach: 46, dmg: 3, heavy: true, noLaunch: true, w: 16, sprite: 'zhang_liang_q', scale: 1 },   /* 11/12 重画 Q 版：双长刀；旧图 zhang_liang 留着没删 */
   'yellow-golem': { name: '黄巾力士', hp: 16, spd: 22, wind: 1, reach: 34, dmg: 3, heavy: true, noLaunch: true, w: 14, sprite: 'yellow_golem', scale: 1 },
-  zhang_jiao: { name: '天公将军·张角', hp: 135, spd: 42, wind: .5, reach: 34, dmg: 3, chapterBoss: true, sprite: 'zhang_jiao', scale: 0.7105 },
+  zhang_jiao: { name: '天公将军·张角', hp: 135, spd: 24, wind: 1, reach: 46, dmg: 3, heavy: true, noLaunch: true, w: 14, sprite: 'zhang_jiao_q', scale: 1 },   /* 11/12 重画 Q 版：九节杖+太平要术；旧图 zhang_jiao 留着没删 */
   'cheng_yuanzhi': { name: '程远志', hp: 16, spd: 24, wind: 1, reach: 40, dmg: 3, heavy: true, noLaunch: true, w: 14, sprite: 'cheng_yuanzhi', scale: 1 },   // 11/11 用户 Gemini 新画（art/gemini/黄巾_程远志.png），长柄大刀
   'deng_mao': { name: '邓茂', hp: 16, spd: 26, wind: 1, reach: 44, dmg: 3, heavy: true, noLaunch: true, w: 14, sprite: 'deng_mao', scale: 1 },   /* 11/12 用户 GPT 新画：九环大刀 */
   'bo_cai': { name: '波才', hp: 16, spd: 22, wind: 1.1, reach: 46, dmg: 3, heavy: true, noLaunch: true, w: 14, sprite: 'bo_cai', scale: 1 },   /* 11/12：长柄开山大斧、背插令旗 */
@@ -818,10 +818,10 @@ function zFrame(z) {
   if (z.air) return z.vz > 0 ? 'fly1' : 'fly2';
   if (z.cbFrame && !z.dead) return z.cbFrame;   // 第二章首领技能帧
   if (z.zjDizzy > 0) return 'dizzy';
-  if (z.type === 'zhang_jiao' && z.stun > 0) return 'hurt';
-  if (z.type === 'zhang_jiao' && z.throwT > 0) return 'throw';
-  if (z.type === 'zhang_jiao' && z.push && !z.push.go) return 'push';
-  if (z.type === 'zhang_jiao' && z.castT > 0) return 'thunder';
+  if (z.sprite === 'zhang_jiao' && z.stun > 0) return 'hurt';
+  if (z.sprite === 'zhang_jiao' && z.throwT > 0) return 'throw';
+  if (z.sprite === 'zhang_jiao' && z.push && !z.push.go) return 'push';
+  if (z.sprite === 'zhang_jiao' && z.castT > 0) return 'thunder';
   if (z.type === 'yellow-golem' && z.grab) return 'grab';
   if (z.type === 'yellow-golem' && z.hurlT > 0) return 'hurl';
   if (z.type === 'yellow-golem' && z.pantT > 0 && !z.dead) return 'pant';
@@ -839,7 +839,7 @@ function zFrame(z) {
   if (z.st === 'addvolley') return z.t < .34 ? 'strike' : 'idle';
   if (z.st === 'strike') return 'strike';
   if (z.st === 'rec') return z.T.ranged ? 'idle' : 'strike';
-  if (z.type === 'zhang_jiao') return z.st === 'rest' ? 'rest' : 'float';   // 张角飘着走，不走路
+  if (z.sprite === 'zhang_jiao') return z.st === 'rest' ? 'rest' : 'float';   // 张角飘着走，不走路
   return z.moving ? (Math.floor(z.t * 6) % 2 ? 'walk1' : 'walk2') : 'idle';
 }
 function draw() {
