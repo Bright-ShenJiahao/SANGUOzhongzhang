@@ -610,6 +610,7 @@
       if (a.volume === 0 && k !== cur && !a.paused) a.pause();
     }
   }
+  try { get('title'); } catch (e) {}   /* 一加载就开始下主界面曲，玩家第一次点下去时已缓冲好 */
   const go = () => { if (started) return; started = true; setInterval(tick, 50); tick(); };
   ['pointerdown', 'keydown', 'touchend'].forEach(ev => addEventListener(ev, go, { capture: true, passive: true }));
   document.addEventListener('visibilitychange', () => { if (document.hidden) for (const k in el) el[k].pause(); else if (cur && el[cur]) el[cur].play().catch(() => {}); });
