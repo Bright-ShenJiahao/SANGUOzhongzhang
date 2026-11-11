@@ -131,22 +131,23 @@ WEAP.halberd = Object.assign({}, WEAP.staff, {
   ],
 });
 // 黄巾兵
+/* 11/12 用户：小兵大小高低统一——普通兵身高约 64、重甲兵约 70、老卒 72、窃贼偏小 58（以前 64~78 参差不齐） */
 const TYPES = {
-  grunt:   { name: '喽啰', hp: 3, spd: 38, wind: .45, reach: 22, dmg: 1, scale: .86 },
-  blade:   { name: '刀手', hp: 5, spd: 30, wind: .7, reach: 27, dmg: 1.5, heavy: true, scale: .92 },
-  slinger: { name: '投石手', hp: 2, spd: 40, wind: .6, ranged: 'stone', range: [64, 104], cd: 2.4, scale: .88 },
-  archer:  { name: '弓箭手', hp: 2, spd: 34, wind: .85, ranged: 'fire', range: [120, 190], cd: 3.2, scale: .92 },
-  elite:   { name: '老卒', hp: 10, spd: 26, wind: 1.05, reach: 30, dmg: 3, heavy: true, elite: true, w: 12, sprite: 'elite', scale: 1.05 },   // 精英：血厚、出手慢、打不断
-  priest:  { name: '黄巾方士', hp: 4, spd: 40, priest: true, w: 10, sprite: 'priest', scale: .9 },   // 不打人，念咒奶人+加速，跑位躲后排
-  'yellow-heavy': { name: '黄巾大刀兵', hp: 7, spd: 25, wind: .9, reach: 31, dmg: 2, heavy: true, sprite: 'yellow_heavy', scale: 1.02 },
-  'yellow-shield': { name: '黄巾盾兵', hp: 8, spd: 24, wind: .8, reach: 25, dmg: 1.5, heavy: true, shield: true, rangedResist: .7, blocksPierce: true, sprite: 'yellow_shield', scale: 1 },
-  'yellow-spear': { name: '黄巾枪兵', hp: 5, spd: 31, wind: .7, reach: 37, dmg: 1.5, sprite: 'yellow_spear', scale: .98 },
+  grunt:   { name: '喽啰', hp: 3, spd: 38, wind: .45, reach: 22, dmg: 1, scale: 0.86 },
+  blade:   { name: '刀手', hp: 5, spd: 30, wind: .7, reach: 27, dmg: 1.5, heavy: true, scale: 0.88 },
+  slinger: { name: '投石手', hp: 2, spd: 40, wind: .6, ranged: 'stone', range: [64, 104], cd: 2.4, scale: 0.86 },
+  archer:  { name: '弓箭手', hp: 2, spd: 34, wind: .85, ranged: 'fire', range: [120, 190], cd: 3.2, scale: 0.88 },
+  elite:   { name: '老卒', hp: 10, spd: 26, wind: 1.05, reach: 30, dmg: 3, heavy: true, elite: true, w: 12, sprite: 'elite', scale: 0.97 },   // 精英：血厚、出手慢、打不断
+  priest:  { name: '黄巾方士', hp: 4, spd: 40, priest: true, w: 10, sprite: 'priest', scale: 0.86 },   // 不打人，念咒奶人+加速，跑位躲后排
+  'yellow-heavy': { name: '黄巾大刀兵', hp: 7, spd: 25, wind: .9, reach: 31, dmg: 2, heavy: true, sprite: 'yellow_heavy', scale: 0.95 },
+  'yellow-shield': { name: '黄巾盾兵', hp: 8, spd: 24, wind: .8, reach: 25, dmg: 1.5, heavy: true, shield: true, rangedResist: .7, blocksPierce: true, sprite: 'yellow_shield', scale: 0.99 },
+  'yellow-spear': { name: '黄巾枪兵', hp: 5, spd: 31, wind: .7, reach: 37, dmg: 1.5, sprite: 'yellow_spear', scale: 0.91 },
   /* 11/12 新兵种（用户 GPT 出图，按屏幕大小切成最高像素）：行为写在 survive.js 的 unitAI */
-  'fire-jar': { name: '火罐手', hp: 3, spd: 32, wind: .6, reach: 22, dmg: 1, unit: 'fire', w: 10, sprite: 'fire_jar', scale: .86 },
-  'drummer': { name: '鼓手', hp: 5, spd: 30, wind: .6, reach: 22, dmg: 1, unit: 'drum', w: 11, sprite: 'drummer', scale: .86 },
+  'fire-jar': { name: '火罐手', hp: 3, spd: 32, wind: .6, reach: 22, dmg: 1, unit: 'fire', w: 10, sprite: 'fire_jar', scale: 0.84 },
+  'drummer': { name: '鼓手', hp: 5, spd: 30, wind: .6, reach: 22, dmg: 1, unit: 'drum', w: 11, sprite: 'drummer', scale: 0.84 },
   'cavalry': { name: '黄巾骑兵', hp: 7, spd: 50, wind: .7, reach: 30, dmg: 2, unit: 'cav', w: 22, heavy: true, sprite: 'cavalry', scale: .86 },
-  'fanatic': { name: '狂信徒', hp: 2, spd: 66, wind: .3, reach: 22, dmg: 1, unit: 'fan', w: 10, sprite: 'fanatic', scale: .86 },
-  'crossbow': { name: '黄巾弩手', hp: 4, spd: 28, wind: .8, reach: 22, dmg: 1.6, unit: 'xbow', w: 11, sprite: 'crossbow', scale: .86 },
+  'fanatic': { name: '狂信徒', hp: 2, spd: 66, wind: .3, reach: 22, dmg: 1, unit: 'fan', w: 10, sprite: 'fanatic', scale: 0.84 },
+  'crossbow': { name: '黄巾弩手', hp: 4, spd: 28, wind: .8, reach: 22, dmg: 1.6, unit: 'xbow', w: 11, sprite: 'crossbow', scale: 0.8 },
   'yellow-catapult': { name: '投石车', hp: 9, spd: 0, siege: true, w: 28, sprite: 'yellow_catapult', scale: 1.05 },
   zhang_liang: { name: '人公将军·张梁', hp: 54, spd: 26, wind: .9, reach: 46, dmg: 3, heavy: true, noLaunch: true, w: 16, sprite: 'zhang_liang_q', scale: .88 },   /* 11/12 重画 Q 版：双长刀；旧图 zhang_liang 留着没删 */
   'yellow-golem': { name: '黄巾力士', hp: 16, spd: 22, wind: 1, reach: 34, dmg: 3, heavy: true, noLaunch: true, w: 14, sprite: 'yellow_golem', scale: 1 },
@@ -159,7 +160,7 @@ const TYPES = {
   'ma_yuanyi': { name: '马元义', hp: 16, spd: 24, wind: 1.1, reach: 50, dmg: 3, heavy: true, noLaunch: true, w: 14, sprite: 'ma_yuanyi', scale: .88 },   /* 11/12：斗笠黑衣，铁链流星锤 */
   'guanhai_m': { name: '管亥', hp: 16, spd: 40, wind: 1.1, reach: 54, dmg: 3, heavy: true, noLaunch: true, w: 22, sprite: 'guanhai_m', scale: .85 },   // 11/11 用户：管亥双阶段——一阶段骑马（无名之辈的骑马帧），血过半落马换 guanhai_b 步战
   'guanhai_b': { name: '管亥', hp: 16, spd: 24, wind: 1, reach: 42, dmg: 3, heavy: true, noLaunch: true, w: 14, sprite: 'guanhai_b', scale: .85 },   // 11/11 用户：管亥从无名之辈拿（步战长戟那套帧，换成通用敌人帧名）
-  thief: { name: '黄巾窃贼', hp: 3, spd: 72, thief: true, sprite: 'thief', scale: .86 },   // 11/11 用户定：背麻袋的小偷，专捡地上的铜钱，捡够就跑（贴图 art/gemini/黄巾_窃贼.png）
+  thief: { name: '黄巾窃贼', hp: 3, spd: 72, thief: true, sprite: 'thief', scale: 0.77 },   // 11/11 用户定：背麻袋的小偷，专捡地上的铜钱，捡够就跑（贴图 art/gemini/黄巾_窃贼.png）
   zhang_bao: { name: '地公将军·张宝', hp: 48, spd: 26, wind: 1, reach: 44, dmg: 3, heavy: true, noLaunch: true, w: 13, sprite: 'zhang_bao_q', scale: .88 },   /* 11/12 重画 Q 版：长剑+剑指；旧图 zhang_bao 留着没删 */
 };
 const WAVES = [
