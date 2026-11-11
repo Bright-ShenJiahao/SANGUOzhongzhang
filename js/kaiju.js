@@ -17,6 +17,7 @@
     font-family:"PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif;font-weight:500;--k:1;display:flex;flex-direction:column;
     padding:calc(8px + env(safe-area-inset-top)) calc(12px + env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left));box-sizing:border-box}
   #kaiju *{box-sizing:border-box}
+  @media (pointer:coarse) and (orientation:landscape) and (max-height:520px){#kaiju{padding-bottom:calc(30px + env(safe-area-inset-bottom))}}   /* 11/11：iPhone 横屏点屏幕最下面一条会先弹出浏览器工具栏、按钮收不到，最下面一排整体抬高 */
   #kaiju .top h1,#kaiju h4,#kaiju .card b,#kaiju .fname,#kaiju .fl button b,#kaiju .wp button,#kaiju .bot button,#kaiju .namep b,#kaiju .ogd b,#kaiju .skd b{font-family:"Songti SC","STSong","Noto Serif SC",serif;font-weight:900}
   #kaiju .ico{width:calc(44px*var(--k));height:calc(44px*var(--k))}
   @media (min-width:1400px) and (min-height:780px){#kaiju{--k:1.22}}

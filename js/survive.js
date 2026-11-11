@@ -737,6 +737,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   addEventListener('resize', () => { for (const id of ['survPrep', 'survTut']) { const e = document.getElementById(id); if (e) setK(e); } });
   const PREP_CSS = `
 #survPrep{position:fixed;inset:0;z-index:10025;background:radial-gradient(ellipse at 50% 40%,rgba(14,10,8,.72),rgba(6,4,3,.9));font-family:"PingFang SC","Microsoft YaHei",sans-serif;color:#efe2c6;user-select:none}
+@media (pointer:coarse) and (orientation:landscape) and (max-height:520px){#survPrep{bottom:30px;box-shadow:0 30px 0 #060403}}   /* iPhone 横屏：最下面一条留给浏览器工具栏，整备屏整体抬高，「出发」等按钮才点得到 */
 #survPrep em{display:inline-block;background:center/contain no-repeat;vertical-align:middle;font-style:normal}
 #survPrep .mo{position:absolute;left:1.2vw;top:1.6vh;height:calc(56px*var(--k));min-width:calc(200px*var(--k));display:flex;align-items:center;gap:calc(14px*var(--k));padding:0 calc(22px*var(--k));border:calc(14px*var(--k)) solid transparent;border-image:url(art/ui/prep/btn.webp) 40 fill stretch;box-sizing:border-box}
 #survPrep .mo em{width:calc(40px*var(--k));height:calc(40px*var(--k))}#survPrep .mo b{font:900 calc(30px*var(--kt)) "PingFang SC",sans-serif;color:#fff2d4}

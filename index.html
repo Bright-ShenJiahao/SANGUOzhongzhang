@@ -62,7 +62,7 @@ body.szz-pro #help{display:none}
 .x-back{min-height:34px!important}
 }
 #rot small{display:block;margin-top:10px;font-size:14px;font-weight:600;color:#c9b691;line-height:1.6}
-</style><link rel="preload" href="pack/fonts/result.woff2?v=0aed993a1a" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=0aed993a1a)format("woff2");font-display:swap}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
+</style><link rel="preload" href="pack/fonts/result.woff2?v=160af028ae" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=160af028ae)format("woff2");font-display:swap}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
 </head><body>
 <style>
 #bootSplash{position:fixed;inset:0;z-index:99999;background:radial-gradient(ellipse at 50% 45%,#f3e4cf 0%,#ecd9c0 55%,#d9c09f 100%);transition:opacity .45s ease-out}
@@ -101,7 +101,7 @@ if(location.protocol==='https:'&&!/[?&]debug(?:=|&|$)/.test(location.search)&&'s
 })();
 // 自动更新：打开游戏、或从后台切回来时，查一下线上有没有新版本；有就在标题/整备页自动刷新（战斗中不打扰）
 (function(){
-var BUILD='4b61203f6010',busy=false;
+var BUILD='da9d96fb0296',busy=false;
 if(location.protocol!=='https:'||/[?&]debug(?:=|&|$)/.test(location.search))return;
 function check(){
   if(busy)return;
@@ -3250,6 +3250,7 @@ let blessFx = []; // 方士施法成功的黄圈
     font-family:"PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif;font-weight:500;--k:1;display:flex;flex-direction:column;
     padding:calc(8px + env(safe-area-inset-top)) calc(12px + env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left));box-sizing:border-box}
   #kaiju *{box-sizing:border-box}
+  @media (pointer:coarse) and (orientation:landscape) and (max-height:520px){#kaiju{padding-bottom:calc(30px + env(safe-area-inset-bottom))}}   /* 11/11：iPhone 横屏点屏幕最下面一条会先弹出浏览器工具栏、按钮收不到，最下面一排整体抬高 */
   #kaiju .top h1,#kaiju h4,#kaiju .card b,#kaiju .fname,#kaiju .fl button b,#kaiju .wp button,#kaiju .bot button,#kaiju .namep b,#kaiju .ogd b,#kaiju .skd b{font-family:"Songti SC","STSong","Noto Serif SC",serif;font-weight:900}
   #kaiju .ico{width:calc(44px*var(--k));height:calc(44px*var(--k))}
   @media (min-width:1400px) and (min-height:780px){#kaiju{--k:1.22}}
@@ -5418,6 +5419,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   addEventListener('resize', () => { for (const id of ['survPrep', 'survTut']) { const e = document.getElementById(id); if (e) setK(e); } });
   const PREP_CSS = `
 #survPrep{position:fixed;inset:0;z-index:10025;background:radial-gradient(ellipse at 50% 40%,rgba(14,10,8,.72),rgba(6,4,3,.9));font-family:"PingFang SC","Microsoft YaHei",sans-serif;color:#efe2c6;user-select:none}
+@media (pointer:coarse) and (orientation:landscape) and (max-height:520px){#survPrep{bottom:30px;box-shadow:0 30px 0 #060403}}   /* iPhone 横屏：最下面一条留给浏览器工具栏，整备屏整体抬高，「出发」等按钮才点得到 */
 #survPrep em{display:inline-block;background:center/contain no-repeat;vertical-align:middle;font-style:normal}
 #survPrep .mo{position:absolute;left:1.2vw;top:1.6vh;height:calc(56px*var(--k));min-width:calc(200px*var(--k));display:flex;align-items:center;gap:calc(14px*var(--k));padding:0 calc(22px*var(--k));border:calc(14px*var(--k)) solid transparent;border-image:url(pack/ui/prep/btn.webp?v=f850bb7611) 40 fill stretch;box-sizing:border-box}
 #survPrep .mo em{width:calc(40px*var(--k));height:calc(40px*var(--k))}#survPrep .mo b{font:900 calc(30px*var(--kt)) "PingFang SC",sans-serif;color:#fff2d4}
@@ -6860,7 +6862,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       #tBoard_ { background: rgba(40,28,18,.78); border-color: #c9a24a; color: #f3dc9a; text-shadow: none; padding: 0 10px; letter-spacing: .16em; }
       #tInkTitle { position: fixed; z-index: 6; pointer-events: none; opacity: 0; user-select: none; -webkit-user-drag: none;
         filter: drop-shadow(0 2px 5px rgba(60,40,20,.18)); animation: tInkIn 1.5s .7s cubic-bezier(.2,.7,.2,1) forwards; }
-      @keyframes tInkIn { from { opacity: 0; transform: translateY(-16px) scale(1.05); filter: blur(7px); } to { opacity: 1; transform: none; filter: drop-shadow(0 2px 5px rgba(60,40,20,.18)); } }
+      @keyframes tInkIn { from { opacity: 0; transform: translateY(-16px) scale(1.05); filter: blur(7px) drop-shadow(0 2px 5px rgba(60,40,20,0)); } to { opacity: 1; transform: none; filter: blur(0) drop-shadow(0 2px 5px rgba(60,40,20,.18)); } }   /* 11/11：iPhone 上 blur→drop-shadow 两种滤镜不能过渡，标题会一直糊着；改成同一组滤镜从 blur(7px) 过渡到 blur(0) */
       #tName, #tStart, #tNovice, #tHintOff, #tBoard { animation: tInkUp 1.2s .8s ease-out both; }   /* 11/11 用户定：名字框、按钮和书法标题一起出现 */
       @keyframes tInkUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
     `;

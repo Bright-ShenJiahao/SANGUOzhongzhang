@@ -712,7 +712,7 @@
       #tBoard_ { background: rgba(40,28,18,.78); border-color: #c9a24a; color: #f3dc9a; text-shadow: none; padding: 0 10px; letter-spacing: .16em; }
       #tInkTitle { position: fixed; z-index: 6; pointer-events: none; opacity: 0; user-select: none; -webkit-user-drag: none;
         filter: drop-shadow(0 2px 5px rgba(60,40,20,.18)); animation: tInkIn 1.5s .7s cubic-bezier(.2,.7,.2,1) forwards; }
-      @keyframes tInkIn { from { opacity: 0; transform: translateY(-16px) scale(1.05); filter: blur(7px); } to { opacity: 1; transform: none; filter: drop-shadow(0 2px 5px rgba(60,40,20,.18)); } }
+      @keyframes tInkIn { from { opacity: 0; transform: translateY(-16px) scale(1.05); filter: blur(7px) drop-shadow(0 2px 5px rgba(60,40,20,0)); } to { opacity: 1; transform: none; filter: blur(0) drop-shadow(0 2px 5px rgba(60,40,20,.18)); } }   /* 11/11：iPhone 上 blur→drop-shadow 两种滤镜不能过渡，标题会一直糊着；改成同一组滤镜从 blur(7px) 过渡到 blur(0) */
       #tName, #tStart, #tNovice, #tHintOff, #tBoard { animation: tInkUp 1.2s .8s ease-out both; }   /* 11/11 用户定：名字框、按钮和书法标题一起出现 */
       @keyframes tInkUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
     `;
