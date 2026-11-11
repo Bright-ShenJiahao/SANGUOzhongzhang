@@ -887,6 +887,11 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(900px,58v
 #survPrep .ab{height:calc(110px*var(--k))}#survPrep .ab .md{width:calc(110px*var(--k));height:calc(110px*var(--k));filter:saturate(.55) brightness(.8)!important}
 #survPrep .ar .sp{background:linear-gradient(transparent,rgba(184,149,90,.6),transparent)}
 #survPrep .ac span{color:#a8977a;font-weight:600}
+#survPrep .ac{position:relative;cursor:help}#survPrep .ac .at{display:none;position:absolute;left:50%;bottom:calc(100% + 10px*var(--k));transform:translateX(-50%);width:calc(300px*var(--k));padding:calc(10px*var(--k)) calc(14px*var(--k));text-align:left;z-index:20;pointer-events:none;background:rgba(8,7,6,.97);border:1px solid rgba(184,149,90,.6);box-shadow:0 calc(8px*var(--k)) calc(24px*var(--k)) rgba(0,0,0,.7)}
+#survPrep .ac .at h5{margin:0 0 calc(4px*var(--k));font:700 calc(18px*var(--kt)) "Songti SC","Noto Serif SC",serif;color:#e6c98a}#survPrep .ac .at p{margin:0;font:500 calc(14px*var(--kt))/1.55 "PingFang SC",sans-serif;color:#e6dccb;white-space:normal}#survPrep .ac .at p.cur{margin-top:calc(6px*var(--k));color:#ffd86e;font-weight:700}
+#survPrep .ac:first-child .at{left:0;transform:none}#survPrep .ac:last-child .at{left:auto;right:0;transform:none}
+@media (pointer:fine){#survPrep .ac:hover .at{display:block}#survPrep .ac:hover b{color:#fff3c8}}
+#survPrep .ac.on .at{display:block}
 @keyframes pfade{from{opacity:0;transform:translateY(calc(6px*var(--k)))}}
 #survPrep .bd.an{animation:pfade .2s ease-out}
 #survPrep .bd.an .sc{animation:pfade .25s ease-out backwards}#survPrep .bd.an .sc:nth-child(2){animation-delay:.04s}#survPrep .bd.an .sc:nth-child(3){animation-delay:.08s}#survPrep .bd.an .sc:nth-child(4){animation-delay:.12s}#survPrep .bd.an .sc:nth-child(5){animation-delay:.16s}
@@ -994,8 +999,15 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   const gfR = id => { const e = S.gfExp[id] || 0, l = gfLv(id); return l >= 3 ? 1 : Math.min(1, (e - (l === 1 ? 0 : GFTH[0])) / (GFTH[l - 1] - (l === 1 ? 0 : GFTH[0]))); };
   function attrBar() {   // 底部常驻属性栏
     const ai = attrInfo(origin, true), mh = maxHp(), cr = .05 + AFX.crit() + GM.crit + IT('crit');
-    const col = (lab, ic, v, tip) => `<div class="ac" title="${tip}"><span>${lab}</span><em style="background-image:url('${A(ic)}')"></em><b>${v}</b></div>`;
-    return `<div class="ab"><div class="md"><em style="background-image:url('${A('bag')}')"></em></div><div class="ar">${ai.map((r, i) => col(r[0], ATI[i], r[1], r[0] + '：' + ATD[i] + '（' + r[2] + '）')).join('')}<i class="sp"></i>${col('气血', 'hp', Math.round(mh * 10), '最大气血')}${col('真气', 'zq', Math.round(zqMax() * 10), '护体挡三成伤害；过半自动发劲')}${col('会心', 'crit', Math.round(cr * 100) + '%', '暴击率')}${col('修为', 'xiu', 'LV' + S.lv, '修为等级')}</div><div class="md"><em style="background-image:url('${A('wuxue')}')"></em></div></div>`;
+    const col = (lab, ic, v, tip) => `<div class="ac"><span>${lab}</span><em style="background-image:url('${A(ic)}')"></em><b>${v}</b><div class="at">${tip}</div></div>`;   // 11/11 用户：移上去（手机点一下）有解释
+    const T = (h, a, b) => `<h5>${h}</h5><p>${a}</p>${b ? `<p class="cur">${b}</p>` : ''}`;
+    const need = XIU_NEED(S.lv);
+    return `<div class="ab"><div class="md"><em style="background-image:url('${A('bag')}')"></em></div><div class="ar">${ai.map((r, i) => col(r[0], ATI[i], r[1], T(r[0], ATD[i] + '。3 为常人水平，修炼和道具可以提高。', '当前效果：' + r[2]))).join('')}<i class="sp"></i>`
+      + col('气血', 'hp', Math.round(mh * 10), T('气血', '归零就倒下。打完一关不会自动回满，靠「调息」（剩余真气换成气血）和道具回血。', `当前 ${Math.ceil(hero.hp * 10)} / ${Math.round(mh * 10)}`))
+      + col('真气', 'zq', Math.round(zqMax() * 10), T('真气', '护体：挨打时先扣真气，替你挡掉三成伤害。发劲：真气过半时出手自动加力，伤害 +30%。战斗中会慢慢回复，打完一关剩下的真气用来调息回血。', `当前 ${Math.round(S.zq * 10)} / ${Math.round(zqMax() * 10)}`))
+      + col('会心', 'crit', Math.round(cr * 100) + '%', T('会心', '出手有几率打出会心一击，造成加倍伤害。运气、道具和心法都能提高。', `当前会心几率 ${Math.round(cr * 100)}%`))
+      + col('修为', 'xiu', 'LV' + S.lv, T('修为', '杀敌和过关都会涨修为，每升一级攒一次「修炼」机会，在整备屏「修炼」页三选一提升属性。', `LV${S.lv}${need ? '，本级进度 ' + Math.round(S.xiu / need * 100) + '%' : ''}，待修炼 ${S.bank || 0} 次`))
+      + `</div><div class="md"><em style="background-image:url('${A('wuxue')}')"></em></div></div>`;
   }
   function vitals() {
     const mh = maxHp(), zr = Math.max(0, S.zq / zqMax()), hr = hero.hp / mh;
@@ -1064,6 +1076,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       <div class="bd t-${prepTab}${prepTab !== prepLastTab ? ' an' : ''}">${body}</div>
       ${attrBar()}${vitals()}<div class="lf">${left}</div><button class="bb go">${prepTab === 'wu' ? '出 发' : '继 续'}</button>`;
     prepLastTab = prepTab;
+    el.querySelectorAll('.ac').forEach(a => a.onclick = () => { const on = a.classList.contains('on'); el.querySelectorAll('.ac.on').forEach(x => x.classList.remove('on')); if (!on) a.classList.add('on'); });   // 手机：点属性看解释，再点收起
     el.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { prepTab = b.dataset.t; if (window.SFX) SFX.play('tick'); prepRender(); tut({ shi: 'loot', xiu: 'xiu', shang: 'shop', wu: 'wu' }[prepTab]); });
     el.querySelector('.go').onclick = () => { const i = TABS.findIndex(t => t[0] === prepTab); if (i < TABS.length - 1) { prepTab = TABS[i + 1][0]; prepRender(); tut({ shi: 'loot', xiu: 'xiu', shang: 'shop', wu: 'wu' }[prepTab]); } else prepClose(); };   // 照原作：继续 = 下一页，最后一页「出发」
     el.querySelectorAll('[data-a]').forEach(b => b.onclick = e => {
