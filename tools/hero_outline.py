@@ -7,7 +7,9 @@ def fix(a):
     D=ndimage.distance_transform_cdt(np.pad(on,1),metric='taxicab')[1:-1,1:-1]
     lum=a[...,:3].astype(float)@[.3,.59,.11]; dark=(lum<60)&on
     # 1) 外两圈都是黑的 → 削掉最外一圈
-    kill=(D==1)&dark&ndimage.binary_dilation(dark&(D==2),K)
+    # 只削「粗物体」的外圈：附近 3 格内要有不黑的内部（D>=3）。细的黑色东西（关刀的黑杆、锤柄）整个都是黑的，不能削
+    thick=ndimage.binary_dilation((D>=3)&on&~dark,K,iterations=3)
+    kill=(D==1)&dark&ndimage.binary_dilation(dark&(D==2),K)&thick
     a[kill,3]=0; on=a[...,3]>0
     D=ndimage.distance_transform_cdt(np.pad(on,1),metric='taxicab')[1:-1,1:-1]
     lum=a[...,:3].astype(float)@[.3,.59,.11]
