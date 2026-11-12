@@ -330,7 +330,10 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       const sec = secOf(nd), t = sec >= 2 && c2ok ? 'yellow-golem' : 'elite';
       bossBuff(edgeSpawn(t, { name: '精锐头目', hp: 30, sc: 1.2, tier: 2 }), 1.25); return;
     }
-    const list = BOSSES[nd.final ? 4 : secOf(nd)];
+    // 11/12 张梁/张宝二选一：第 4 段走哪边就打谁（副将马元义）；没打的那个到最后张角战里当小头目
+    const BR = { liang: { t: 'zhang_liang', name: '张梁', m: 1.4, sc: 1 }, bao: { t: 'zhang_bao', name: '张宝', m: 1.5, sc: 1 } };
+    const took = window.ROUTE && ROUTE.branch ? ROUTE.branch() : null;
+    const list = nd.br ? [BR[nd.br], BOSSES[4][1]] : nd.final ? [BOSSES[4][0], BR[took === 'bao' ? 'liang' : 'bao']] : BOSSES[secOf(nd)];
     bossIntro(nd.final ? 0 : secOf(nd), list[0].name, !!nd.final);
     list.forEach((b, i) => { const z = edgeSpawn(c2ok || !b.fb ? b.t : b.fb, Object.assign({}, b, { tier: i === 0 ? 3 : 2, hp: i === 0 ? 130 : 40 })); bossBuff(z, i === 0 ? 1.6 : 1.3); });   // 11/11 用户：BOSS 太简单 → 首领血 54→130、小头目 21→40，伤害 ×1.6 / ×1.3   // 四档：小头目 ×7（21）、首领 ×18（54）
   }

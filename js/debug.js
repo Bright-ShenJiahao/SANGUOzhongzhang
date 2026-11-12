@@ -22,7 +22,7 @@
 
   const css = document.createElement('style');
   css.textContent = `
-    #dbg { position:fixed; right:8px; top:64px; z-index:10002; width:220px; box-sizing:border-box;
+    #dbg { position:fixed; right:8px; top:64px; z-index:10050; width:220px; box-sizing:border-box;
       background:rgba(10,8,16,.9); border:1px solid rgba(255,216,110,.5); border-radius:8px;
       padding:6px; font:600 11px/1.35 "Consolas","PingFang SC",monospace; color:#ffd86e;
       box-shadow:0 6px 24px rgba(0,0,0,.5); max-height:calc(100vh - 80px); max-height:calc(100dvh - 72px); overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; touch-action:pan-y; }
@@ -115,7 +115,7 @@
     btn(heroGroup, '给 7 颗通脉丹', '', () => { if (window.MERIDIAN) { ['ch1','ch2','ch3','xc1','xc2','xc3','tg'].forEach(k => MERIDIAN.award(k)); tipLine('通脉丹 7/7：整军备战 → 经脉'); try { if (window.TITLE && TITLE.refreshPreparation) TITLE.refreshPreparation(); } catch (e) {} } });
     btn(heroGroup, '跳过这一波', '', () => { if (window.SURV) SURV.skipWave(); });
     btn(heroGroup, '图鉴全开', '', () => { if (window.CODEX) { CODEX.unlockAll(); CODEX.open(); } });
-    const allBtn = btn(heroGroup, '解锁全部关卡：关', 'off', () => { window.ROUTE_ALL = !window.ROUTE_ALL; allBtn.textContent = '解锁全部关卡：' + (window.ROUTE_ALL ? '开' : '关'); allBtn.className = window.ROUTE_ALL ? '' : 'off'; tipLine(window.ROUTE_ALL ? '路线长卷上任意节点都能直接点进去（首领、精英、奇遇、商店）' : '恢复正常路线'); });   /* 11/12 用户：随便进去看 */
+    const allBtn = btn(heroGroup, '解锁关卡：关', 'off', () => { window.ROUTE_ALL = !window.ROUTE_ALL; allBtn.textContent = '解锁关卡：' + (window.ROUTE_ALL ? '开' : '关'); allBtn.className = window.ROUTE_ALL ? '' : 'off'; tipLine(window.ROUTE_ALL ? '路线长卷上任意节点都能直接点进去（首领、精英、奇遇、商店）' : '恢复正常路线'); });   /* 11/12 用户：随便进去看 */
     btn(heroGroup, '给太平飞剑', '', () => { if (window.ARTIFACT) { ARTIFACT.grant('feijian'); ARTIFACT.equip('feijian'); ARTIFACT.startRun(); if (typeof say === 'function') say('已获得并装备太平飞剑', 2); try { if (window.TITLE && TITLE.refreshPreparation) TITLE.refreshPreparation(); } catch (e) {} } });
     // 预览结算动画（数字滚动 + 铜钱雨）：直接判本局通关，结算显示 37 击倒、180 金币
     btn(heroGroup, '看结算动画', '', () => {
@@ -222,7 +222,7 @@
 
   // 三国终章：老游戏的按钮先藏起来（锦囊、经脉、神器、校场、第二章、Boss 等已拿掉），只留测试要用的几个
   function trimPanel() {
-    const keep = ['回到主界面', '武艺：刀', '武艺：剑', '回满血', '无敌', '跳过这一波', '恢复存档', '跳到第', '修为'];
+    const keep = ['回到主界面', '武艺：刀', '武艺：剑', '回满血', '无敌', '跳过这一波', '恢复存档', '跳到第', '修为', '图鉴全开', '解锁关卡'];   /* 11/12：图鉴、解锁关卡也留着 */
     panel.querySelectorAll('button').forEach(b => { if (!keep.some(k => b.textContent.startsWith(k))) b.style.display = 'none'; });
     panel.querySelectorAll('.dbgTrial,.dbgFloors').forEach(e => { e.style.display = 'none'; });
     panel.querySelectorAll('.dbgGroup').forEach(g => { if (![...g.querySelectorAll('button')].some(b => b.style.display !== 'none')) g.style.display = 'none'; });

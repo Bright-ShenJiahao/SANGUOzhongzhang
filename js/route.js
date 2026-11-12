@@ -50,9 +50,12 @@
     const link = (a, b) => { if (!a.next.includes(b)) { a.next.push(b); b.prev.push(a); } };
     const crosses = (a, b) => nodes.some(o => o.layer === a.layer && o !== a && o.next.some(p => p !== b && p.layer === b.layer && (o.lane - a.lane) * (p.lane - b.lane) < 0));
     let from = start;
+    const byLane = l => nodes.filter(n => n.layer === l && n.type !== 'boss');
     for (let s = 0; s < SEGS; s++) {
       const l0 = s * SEGLEN + 1, lb = l0 + SEGLEN - 1;
-      const bossN = mk(lb, 2, 'boss'); bossN.sec = s + 1;
+      const bossN = mk(lb, s === SEGS - 1 ? 1 : 2, 'boss'); bossN.sec = s + 1;
+      // 11/12 用户定：第 4 段是二选一的分岔——左边打张梁、右边打张宝，两条路不能都走；没打的那个会出现在最后的张角战里当小头目
+      const bossB = s === SEGS - 1 ? mk(lb, 3, 'boss') : null; if (bossB) { bossN.br = 'liang'; bossB.br = 'bao'; bossB.sec = s + 1; }
       const lanes = [0, 1, 2, 3, 4].sort(() => rnd() - .5).slice(0, 4);
       for (const ln of lanes) {
         let cur = cell(l0, ln); link(from, cur);
@@ -63,11 +66,13 @@
           if (!nx) nx = cell(l, cur.lane);
           link(cur, nx); cur = nx;
         }
-        link(cur, bossN);
+        link(cur, !bossB || cur.lane < 2 ? bossN : cur.lane > 2 ? bossB : (bossN.prev.length <= bossB.prev.length ? bossN : bossB));
       }
-      from = bossN;
+      if (bossB && !bossB.prev.length) { const c = byLane(lb - 1).sort((a, b2) => b2.lane - a.lane)[0]; if (c) { c.next = c.next.filter(x => x !== bossN); bossN.prev = bossN.prev.filter(x => x !== c); link(c, bossB); } }
+      if (bossB && !bossN.prev.length) { const c = byLane(lb - 1).sort((a, b2) => a.lane - b2.lane)[0]; if (c) { c.next = c.next.filter(x => x !== bossB); bossB.prev = bossB.prev.filter(x => x !== c); link(c, bossN); } }
+      from = bossB ? [bossN, bossB] : bossN;
     }
-    const camp = mk(LAYERS - 1, 2, 'event'); link(from, camp);
+    const camp = mk(LAYERS - 1, 2, 'event'); [].concat(from).forEach(f => link(f, camp));
     const fin = mk(LAYERS, 2, 'boss'); fin.final = true; fin.sec = 5; link(camp, fin);
     // 节点类型：按「段内第几层」定节奏
     const pickRw = () => { const r = rnd(); return r < .4 ? 'skill' : r < .72 ? 'perk' : 'heal'; };
@@ -110,10 +115,11 @@
     const c = lo + (n.lane + n.jx * .35) / (LANES - 1) * (hi - lo) + n.jy * 10;
     return port() ? { x: c, y: H - m } : { x: m, y: c };
   }
-  const nlabel = n => !n ? '' : n.type === 'boss' ? (n.final ? '张角祭坛' : SECBOSS[n.sec - 1][0] + ' 营垒') : (n.tag && (TAGNS[Math.min(3, ((n.layer - 1) / 4) | 0)] || TAGNS[0])[n.tag] + (n.cat ? '·投石车' : '')) || LABEL[n.type];
+  const nlabel = n => !n ? '' : n.type === 'boss' ? (n.final ? '张角祭坛' : (n.br === 'bao' ? '张宝' : n.br === 'liang' ? '张梁' : SECBOSS[n.sec - 1][0]) + ' 营垒') : (n.tag && (TAGNS[Math.min(3, ((n.layer - 1) / 4) | 0)] || TAGNS[0])[n.tag] + (n.cat ? '·投石车' : '')) || LABEL[n.type];
   const radius = n => n.type === 'boss' ? 42 : n.type === 'elite' ? 30 : n.type === 'start' ? 28 : 26;
   const reachable = n => !!run && (window.ROUTE_ALL ? n !== run.cur : run.cur.next.includes(n));   /* 11/12 开发者模式「解锁全部关卡」：任意节点都能点进去 */
   const visited = n => !!run && run.visited.has(n);
+  const branch = () => { if (!run) return null; for (const n of run.visited) if (n.br) return n.br; return null; };
 
   function ensureDom() {
     if (root) return;
@@ -416,7 +422,8 @@
     on: () => ON, TIME_K, layers: () => LAYERS,
     waves: n => WAVES_OF[n.type] || 3,
     name: n => nlabel(n),
-    secBoss: n => n && n.final ? [['张角', 'zhang_jiao'], ['马元义', '']] : n && n.sec ? SECBOSS[n.sec - 1] : [],
+    secBoss: n => n && n.final ? [['张角', 'zhang_jiao'], [branch() === 'bao' ? '张梁' : '张宝', '']] : n && n.br ? [[n.br === 'bao' ? '张宝' : '张梁', ''], ['马元义', '']] : n && n.sec ? SECBOSS[n.sec - 1] : [],
+    branch: () => branch(),   // 第 4 段走了哪边：'liang' / 'bao' / null
     tagOf: n => n.tag,
     shown: () => shown || pending,
     start() { run = { ...gen(), visited: new Set() }; run.cur = run.start; run.visited.add(run.start); pending = true; if (shown) close(); },

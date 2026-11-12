@@ -62,7 +62,7 @@ body.szz-pro #help{display:none}
 .x-back{min-height:34px!important}
 }
 #rot small{display:block;margin-top:10px;font-size:14px;font-weight:600;color:#c9b691;line-height:1.6}
-</style><link rel="preload" href="pack/fonts/result.woff2?v=f26aa95d5b" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=f26aa95d5b)format("woff2");font-display:swap}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
+</style><link rel="preload" href="pack/fonts/result.woff2?v=55bfe48b55" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=55bfe48b55)format("woff2");font-display:swap}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
 </head><body>
 <style>
 #bootSplash{position:fixed;inset:0;z-index:99999;background:radial-gradient(ellipse at 50% 45%,#f3e4cf 0%,#ecd9c0 55%,#d9c09f 100%);transition:opacity .45s ease-out}
@@ -108,7 +108,7 @@ if(location.protocol==='https:'&&!/[?&]debug(?:=|&|$)/.test(location.search)&&'s
 })();
 // 自动更新：打开游戏、或从后台切回来时，查一下线上有没有新版本；有就在标题/整备页自动刷新（战斗中不打扰）
 (function(){
-var BUILD='157bd253174c',busy=false;
+var BUILD='d77cf2545512',busy=false;
 if(location.protocol!=='https:'||/[?&]debug(?:=|&|$)/.test(location.search))return;
 function check(){
   if(busy)return;
@@ -1105,7 +1105,7 @@ const XIAOCHANG = { drawBackground() {}, state: () => null, start() {}, on: () =
 
   const css = document.createElement('style');
   css.textContent = `
-    #dbg { position:fixed; right:8px; top:64px; z-index:10002; width:220px; box-sizing:border-box;
+    #dbg { position:fixed; right:8px; top:64px; z-index:10050; width:220px; box-sizing:border-box;
       background:rgba(10,8,16,.9); border:1px solid rgba(255,216,110,.5); border-radius:8px;
       padding:6px; font:600 11px/1.35 "Consolas","PingFang SC",monospace; color:#ffd86e;
       box-shadow:0 6px 24px rgba(0,0,0,.5); max-height:calc(100vh - 80px); max-height:calc(100dvh - 72px); overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; touch-action:pan-y; }
@@ -1198,7 +1198,7 @@ const XIAOCHANG = { drawBackground() {}, state: () => null, start() {}, on: () =
     btn(heroGroup, '给 7 颗通脉丹', '', () => { if (window.MERIDIAN) { ['ch1','ch2','ch3','xc1','xc2','xc3','tg'].forEach(k => MERIDIAN.award(k)); tipLine('通脉丹 7/7：整军备战 → 经脉'); try { if (window.TITLE && TITLE.refreshPreparation) TITLE.refreshPreparation(); } catch (e) {} } });
     btn(heroGroup, '跳过这一波', '', () => { if (window.SURV) SURV.skipWave(); });
     btn(heroGroup, '图鉴全开', '', () => { if (window.CODEX) { CODEX.unlockAll(); CODEX.open(); } });
-    const allBtn = btn(heroGroup, '解锁全部关卡：关', 'off', () => { window.ROUTE_ALL = !window.ROUTE_ALL; allBtn.textContent = '解锁全部关卡：' + (window.ROUTE_ALL ? '开' : '关'); allBtn.className = window.ROUTE_ALL ? '' : 'off'; tipLine(window.ROUTE_ALL ? '路线长卷上任意节点都能直接点进去（首领、精英、奇遇、商店）' : '恢复正常路线'); });   /* 11/12 用户：随便进去看 */
+    const allBtn = btn(heroGroup, '解锁关卡：关', 'off', () => { window.ROUTE_ALL = !window.ROUTE_ALL; allBtn.textContent = '解锁关卡：' + (window.ROUTE_ALL ? '开' : '关'); allBtn.className = window.ROUTE_ALL ? '' : 'off'; tipLine(window.ROUTE_ALL ? '路线长卷上任意节点都能直接点进去（首领、精英、奇遇、商店）' : '恢复正常路线'); });   /* 11/12 用户：随便进去看 */
     btn(heroGroup, '给太平飞剑', '', () => { if (window.ARTIFACT) { ARTIFACT.grant('feijian'); ARTIFACT.equip('feijian'); ARTIFACT.startRun(); if (typeof say === 'function') say('已获得并装备太平飞剑', 2); try { if (window.TITLE && TITLE.refreshPreparation) TITLE.refreshPreparation(); } catch (e) {} } });
     // 预览结算动画（数字滚动 + 铜钱雨）：直接判本局通关，结算显示 37 击倒、180 金币
     btn(heroGroup, '看结算动画', '', () => {
@@ -1305,7 +1305,7 @@ const XIAOCHANG = { drawBackground() {}, state: () => null, start() {}, on: () =
 
   // 三国终章：老游戏的按钮先藏起来（锦囊、经脉、神器、校场、第二章、Boss 等已拿掉），只留测试要用的几个
   function trimPanel() {
-    const keep = ['回到主界面', '武艺：刀', '武艺：剑', '回满血', '无敌', '跳过这一波', '恢复存档', '跳到第', '修为'];
+    const keep = ['回到主界面', '武艺：刀', '武艺：剑', '回满血', '无敌', '跳过这一波', '恢复存档', '跳到第', '修为', '图鉴全开', '解锁关卡'];   /* 11/12：图鉴、解锁关卡也留着 */
     panel.querySelectorAll('button').forEach(b => { if (!keep.some(k => b.textContent.startsWith(k))) b.style.display = 'none'; });
     panel.querySelectorAll('.dbgTrial,.dbgFloors').forEach(e => { e.style.display = 'none'; });
     panel.querySelectorAll('.dbgGroup').forEach(g => { if (![...g.querySelectorAll('button')].some(b => b.style.display !== 'none')) g.style.display = 'none'; });
@@ -4015,9 +4015,12 @@ function resultKey(e) {
     const link = (a, b) => { if (!a.next.includes(b)) { a.next.push(b); b.prev.push(a); } };
     const crosses = (a, b) => nodes.some(o => o.layer === a.layer && o !== a && o.next.some(p => p !== b && p.layer === b.layer && (o.lane - a.lane) * (p.lane - b.lane) < 0));
     let from = start;
+    const byLane = l => nodes.filter(n => n.layer === l && n.type !== 'boss');
     for (let s = 0; s < SEGS; s++) {
       const l0 = s * SEGLEN + 1, lb = l0 + SEGLEN - 1;
-      const bossN = mk(lb, 2, 'boss'); bossN.sec = s + 1;
+      const bossN = mk(lb, s === SEGS - 1 ? 1 : 2, 'boss'); bossN.sec = s + 1;
+      // 11/12 用户定：第 4 段是二选一的分岔——左边打张梁、右边打张宝，两条路不能都走；没打的那个会出现在最后的张角战里当小头目
+      const bossB = s === SEGS - 1 ? mk(lb, 3, 'boss') : null; if (bossB) { bossN.br = 'liang'; bossB.br = 'bao'; bossB.sec = s + 1; }
       const lanes = [0, 1, 2, 3, 4].sort(() => rnd() - .5).slice(0, 4);
       for (const ln of lanes) {
         let cur = cell(l0, ln); link(from, cur);
@@ -4028,11 +4031,13 @@ function resultKey(e) {
           if (!nx) nx = cell(l, cur.lane);
           link(cur, nx); cur = nx;
         }
-        link(cur, bossN);
+        link(cur, !bossB || cur.lane < 2 ? bossN : cur.lane > 2 ? bossB : (bossN.prev.length <= bossB.prev.length ? bossN : bossB));
       }
-      from = bossN;
+      if (bossB && !bossB.prev.length) { const c = byLane(lb - 1).sort((a, b2) => b2.lane - a.lane)[0]; if (c) { c.next = c.next.filter(x => x !== bossN); bossN.prev = bossN.prev.filter(x => x !== c); link(c, bossB); } }
+      if (bossB && !bossN.prev.length) { const c = byLane(lb - 1).sort((a, b2) => a.lane - b2.lane)[0]; if (c) { c.next = c.next.filter(x => x !== bossB); bossB.prev = bossB.prev.filter(x => x !== c); link(c, bossN); } }
+      from = bossB ? [bossN, bossB] : bossN;
     }
-    const camp = mk(LAYERS - 1, 2, 'event'); link(from, camp);
+    const camp = mk(LAYERS - 1, 2, 'event'); [].concat(from).forEach(f => link(f, camp));
     const fin = mk(LAYERS, 2, 'boss'); fin.final = true; fin.sec = 5; link(camp, fin);
     // 节点类型：按「段内第几层」定节奏
     const pickRw = () => { const r = rnd(); return r < .4 ? 'skill' : r < .72 ? 'perk' : 'heal'; };
@@ -4075,10 +4080,11 @@ function resultKey(e) {
     const c = lo + (n.lane + n.jx * .35) / (LANES - 1) * (hi - lo) + n.jy * 10;
     return port() ? { x: c, y: H - m } : { x: m, y: c };
   }
-  const nlabel = n => !n ? '' : n.type === 'boss' ? (n.final ? '张角祭坛' : SECBOSS[n.sec - 1][0] + ' 营垒') : (n.tag && (TAGNS[Math.min(3, ((n.layer - 1) / 4) | 0)] || TAGNS[0])[n.tag] + (n.cat ? '·投石车' : '')) || LABEL[n.type];
+  const nlabel = n => !n ? '' : n.type === 'boss' ? (n.final ? '张角祭坛' : (n.br === 'bao' ? '张宝' : n.br === 'liang' ? '张梁' : SECBOSS[n.sec - 1][0]) + ' 营垒') : (n.tag && (TAGNS[Math.min(3, ((n.layer - 1) / 4) | 0)] || TAGNS[0])[n.tag] + (n.cat ? '·投石车' : '')) || LABEL[n.type];
   const radius = n => n.type === 'boss' ? 42 : n.type === 'elite' ? 30 : n.type === 'start' ? 28 : 26;
   const reachable = n => !!run && (window.ROUTE_ALL ? n !== run.cur : run.cur.next.includes(n));   /* 11/12 开发者模式「解锁全部关卡」：任意节点都能点进去 */
   const visited = n => !!run && run.visited.has(n);
+  const branch = () => { if (!run) return null; for (const n of run.visited) if (n.br) return n.br; return null; };
 
   function ensureDom() {
     if (root) return;
@@ -4381,7 +4387,8 @@ function resultKey(e) {
     on: () => ON, TIME_K, layers: () => LAYERS,
     waves: n => WAVES_OF[n.type] || 3,
     name: n => nlabel(n),
-    secBoss: n => n && n.final ? [['张角', 'zhang_jiao'], ['马元义', '']] : n && n.sec ? SECBOSS[n.sec - 1] : [],
+    secBoss: n => n && n.final ? [['张角', 'zhang_jiao'], [branch() === 'bao' ? '张梁' : '张宝', '']] : n && n.br ? [[n.br === 'bao' ? '张宝' : '张梁', ''], ['马元义', '']] : n && n.sec ? SECBOSS[n.sec - 1] : [],
+    branch: () => branch(),   // 第 4 段走了哪边：'liang' / 'bao' / null
     tagOf: n => n.tag,
     shown: () => shown || pending,
     start() { run = { ...gen(), visited: new Set() }; run.cur = run.start; run.visited.add(run.start); pending = true; if (shown) close(); },
@@ -5163,7 +5170,10 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       const sec = secOf(nd), t = sec >= 2 && c2ok ? 'yellow-golem' : 'elite';
       bossBuff(edgeSpawn(t, { name: '精锐头目', hp: 30, sc: 1.2, tier: 2 }), 1.25); return;
     }
-    const list = BOSSES[nd.final ? 4 : secOf(nd)];
+    // 11/12 张梁/张宝二选一：第 4 段走哪边就打谁（副将马元义）；没打的那个到最后张角战里当小头目
+    const BR = { liang: { t: 'zhang_liang', name: '张梁', m: 1.4, sc: 1 }, bao: { t: 'zhang_bao', name: '张宝', m: 1.5, sc: 1 } };
+    const took = window.ROUTE && ROUTE.branch ? ROUTE.branch() : null;
+    const list = nd.br ? [BR[nd.br], BOSSES[4][1]] : nd.final ? [BOSSES[4][0], BR[took === 'bao' ? 'liang' : 'bao']] : BOSSES[secOf(nd)];
     bossIntro(nd.final ? 0 : secOf(nd), list[0].name, !!nd.final);
     list.forEach((b, i) => { const z = edgeSpawn(c2ok || !b.fb ? b.t : b.fb, Object.assign({}, b, { tier: i === 0 ? 3 : 2, hp: i === 0 ? 130 : 40 })); bossBuff(z, i === 0 ? 1.6 : 1.3); });   // 11/11 用户：BOSS 太简单 → 首领血 54→130、小头目 21→40，伤害 ×1.6 / ×1.3   // 四档：小头目 ×7（21）、首领 ×18（54）
   }
