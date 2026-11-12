@@ -56,7 +56,7 @@
       const bossN = mk(lb, s === SEGS - 1 ? 1 : 2, 'boss'); bossN.sec = s + 1;
       // 11/12 用户定：第 4 段是二选一的分岔——左边打张梁、右边打张宝，两条路不能都走；没打的那个会出现在最后的张角战里当小头目
       const bossB = s === SEGS - 1 ? mk(lb, 3, 'boss') : null; if (bossB) { bossN.br = 'liang'; bossB.br = 'bao'; bossB.sec = s + 1; }
-      const lanes = [0, 1, 2, 3, 4].sort(() => rnd() - .5).slice(0, 4);
+      const lanes = [0, 1, 2, 3, 4];   /* 11/12 用户：分支多一些 → 5 条路全开，下面再加横向岔路 */
       for (const ln of lanes) {
         let cur = cell(l0, ln); link(from, cur);
         for (let l = l0 + 1; l < lb; l++) {
@@ -67,6 +67,10 @@
           link(cur, nx); cur = nx;
         }
         link(cur, !bossB || cur.lane < 2 ? bossN : cur.lane > 2 ? bossB : (bossN.prev.length <= bossB.prev.length ? bossN : bossB));
+      }
+      for (let l = l0; l < lb - 1; l++) for (const n of nodes.filter(x => x.layer === l && x.type !== 'boss')) {   // 横向岔路：每个节点约一半机率多连一条到隔壁路
+        if (rnd() > .55) continue; const c = n.lane + (rnd() < .5 ? -1 : 1), m = cells[(l + 1) + ':' + c];
+        if (m && !n.next.includes(m) && !crosses(n, m)) link(n, m);
       }
       if (bossB && !bossB.prev.length) { const c = byLane(lb - 1).sort((a, b2) => b2.lane - a.lane)[0]; if (c) { c.next = c.next.filter(x => x !== bossN); bossN.prev = bossN.prev.filter(x => x !== c); link(c, bossB); } }
       if (bossB && !bossN.prev.length) { const c = byLane(lb - 1).sort((a, b2) => a.lane - b2.lane)[0]; if (c) { c.next = c.next.filter(x => x !== bossB); bossB.prev = bossB.prev.filter(x => x !== c); link(c, bossN); } }
