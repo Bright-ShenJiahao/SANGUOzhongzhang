@@ -990,7 +990,7 @@
   // ---------- 状态切换 ----------
   function setDomVisible(v) {
     const d = v ? '' : 'none';
-    for (const k of ['name', 'start', 'help', 'novice', 'board', 'hintOff', 'inkTitle', 'seal', 'sub']) if (dom[k]) dom[k].style.display = d;
+    for (const k of ['name', 'start', 'help', 'novice', 'board', 'hintOff', 'inkTitle', 'seal', 'sub']) if (dom[k]) { if (v) dom[k].style.removeProperty('display'); else dom[k].style.setProperty('display', 'none', 'important'); }   // 11/13：套件按钮的 display 带 !important，藏的时候也得带，不然进了战斗「新的开始」还在
     if (dom.cont) dom.cont.style.setProperty('display', v && window.RUNSAVE && RUNSAVE.has() ? 'inline-flex' : 'none', 'important');   // 套件里 display 带 !important，这里也要带
     if (!v && dom.modeTip) { dom.modeTip.style.opacity = '0'; }
     if (!v && dom.panel) { dom.panel.style.display = 'none'; helpOpen = false; }
