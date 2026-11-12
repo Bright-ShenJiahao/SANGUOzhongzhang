@@ -46,7 +46,7 @@
   function close() { box.hidden = true; }
   box.addEventListener('pointerdown', e => { if (e.target === box) close(); });
 
-  const btn = document.createElement('button'); btn.id = 'szzSetBtn'; btn.type = 'button'; btn.title = '设置'; btn.textContent = '⚙';
+  const btn = document.createElement('button'); btn.id = 'szzSetBtn'; btn.type = 'button'; btn.title = '设置'; btn.textContent = '设置';
   btn.addEventListener('click', open);
   const mount = () => { document.body.append(box, btn); };
   if (document.body) mount(); else addEventListener('DOMContentLoaded', mount);

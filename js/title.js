@@ -521,7 +521,7 @@
       dom.novice.addEventListener('click', () => showModeTip('敌人更强，积分 1.25 倍', dom.novice));
       dom.hintOff.addEventListener('click', () => showModeTip('勾选后不再显示手机全屏提示', dom.hintOff));
     }
-    dom.help = mk('button', 'tHelp', '?');
+    dom.help = mk('button', 'tHelp', '帮助');
     dom.help.title = '操作说明'; dom.help.setAttribute('aria-label', '操作说明');
     dom.tip = mk('div', 'tTip', '请输入名字');
     dom.panel = document.createElement('div'); dom.panel.id = 'tHelpPanel';

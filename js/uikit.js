@@ -17,6 +17,12 @@ ${sel}:active{transform:translateY(2px);filter:brightness(.92)}${sel}:hover{filt
     `#tConfirm .p p{color:#efe2c4!important}#tConfirm .p small{color:#d8b878!important}`,
     `#tName{border:10px solid transparent!important;border-image:url(${INPUT}) 18 fill stretch!important;background:none!important;border-radius:0!important;box-shadow:none!important;color:#3a2410!important}#tName::placeholder{color:rgba(90,60,30,.55)!important}`,
     `#tNovice input,#tHintOff input,#szzHintOff input{appearance:none;-webkit-appearance:none;width:20px!important;height:20px!important;margin:0 6px 0 0;background:url(${CK0}) center/100% 100% no-repeat;border:0;vertical-align:middle;cursor:pointer}#tNovice input:checked,#tHintOff input:checked,#szzHintOff input:checked{background-image:url(${CK1})}`,
+    // 11/13 用户：右上角 图鉴 / 设置 / 帮助 / 声音 都用文字 + 短款墨色按钮（只在主界面）
+    `body.ontitle #szzCodexBtn,body.ontitle #szzSetBtn,body.ontitle #tHelp,body.ontitle #bMute{position:fixed!important;top:8px!important;width:var(--tb-w)!important;height:var(--tb-h)!important;min-width:0!important;padding:0!important;margin:0!important;background:url(${IMG.darkS[0]}) center/100% 100% no-repeat!important;border:0!important;border-radius:0!important;box-shadow:none!important;color:#fff6e0!important;font:400 var(--tb-f) Pixel12,sans-serif!important;letter-spacing:.06em!important;text-shadow:1px 0 #2a1608,-1px 0 #2a1608,0 1px #2a1608,0 -1px #2a1608!important;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:31}`,
+    `:root{--tb-h:34px;--tb-w:90px;--tb-f:15px;--tb-g:6px}@media (max-width:600px){:root{--tb-h:30px;--tb-w:78px;--tb-f:13px;--tb-g:4px}}`,
+    `body.ontitle #bMute{right:8px!important;left:auto!important;bottom:auto!important}body.ontitle #tHelp{right:calc(8px + var(--tb-w) + var(--tb-g))!important}body.ontitle #szzSetBtn{right:calc(8px + 2 * (var(--tb-w) + var(--tb-g)))!important}body.ontitle #szzCodexBtn{right:calc(8px + 3 * (var(--tb-w) + var(--tb-g)))!important}`,
+    `body.ontitle #bMute{font-size:0!important}body.ontitle #bMute::after{content:"声音";font:400 var(--tb-f) Pixel12,sans-serif}body.ontitle #bMute.on::after{content:"静音"}`,
+    `body.ontitle #szzCodexBtn:hover,body.ontitle #szzSetBtn:hover,body.ontitle #tHelp:hover,body.ontitle #bMute:hover{filter:brightness(1.12)}`,
   ].join('\n');
   void PAPER;
   const st = document.createElement('style'); st.id = 'uikit'; st.textContent = css;
