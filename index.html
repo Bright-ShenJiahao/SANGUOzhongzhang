@@ -3,7 +3,7 @@
 <link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#1a140f">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png"><meta name="apple-mobile-web-app-title" content="三国终章">
 <title>三国终章</title><style>
-html,body{margin:0;position:fixed;inset:0;overflow:hidden;overscroll-behavior:none;background:#0c0907;font-family:system-ui,"PingFang SC","Noto Sans CJK SC",sans-serif;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;position:fixed;inset:0;overflow:hidden;overscroll-behavior:none;background:#0c0907;font-family:Pixel12,system-ui,"PingFang SC","Noto Sans CJK SC",Pixel12,sans-serif;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
 canvas{display:block;position:fixed;left:0;top:0;width:100vw;height:100vh;height:100dvh}
 #top{position:fixed;left:0;right:0;top:0;display:flex;gap:6px;padding:8px calc(10px + env(safe-area-inset-left));align-items:center;flex-wrap:wrap;z-index:2;pointer-events:none}
 button{font:inherit;font-size:13px;font-weight:700;border:1.5px solid rgba(255,255,255,.55);background:rgba(20,14,30,.35);color:#fff;text-shadow:0 1px 2px #000;border-radius:7px;padding:4px 8px;touch-action:none}
@@ -32,7 +32,7 @@ button.on{background:rgba(255,216,110,.85);color:#2a2234;text-shadow:none;border
 #bSkill{display:none;right:calc(18px + env(safe-area-inset-right));bottom:calc(98px + env(safe-area-inset-bottom));width:96px;height:44px;border-radius:18px;font-size:12px;background:rgba(174,126,45,.82);border-color:rgba(255,226,151,.85)}
 body.szz-summon #bSkill{display:flex}
 #bCatapult{display:none;position:fixed;right:calc(18px + env(safe-area-inset-right));bottom:calc(146px + env(safe-area-inset-bottom));width:96px;height:42px;border-radius:16px;z-index:6;
-  background:rgba(96,60,26,.92);border:2px solid #c9971f;color:#f3d37b;font:700 14px "PingFang SC",sans-serif}
+  background:rgba(96,60,26,.92);border:2px solid #c9971f;color:#f3d37b;font:700 14px "PingFang SC",Pixel12,sans-serif}
 body.szz-catapult #bCatapult{display:block}
 body.szz-summon #bSkill:disabled{filter:saturate(.6)}
 #help{position:fixed;left:10px;bottom:8px;font-size:12px;color:#ddd;text-shadow:0 1px 2px #000;z-index:2;pointer-events:none}
@@ -50,7 +50,7 @@ body.szz-rogue #bSkill,body.szz-rogue #bCatapult{display:none!important}
   #bA,#bR,#bSkill,#bCatapult,#bWeapon{touch-action:none;-webkit-user-select:none}
 }
 body.szz-pro #help{display:none}
-#rot{display:none;position:fixed;inset:0;z-index:2147483000;background:radial-gradient(ellipse at 50% 45%,#221a13,#0c0907);color:#e6c98a;font-family:"Songti SC","Noto Serif SC",serif;font-size:20px;font-weight:800;flex-direction:column;align-items:center;justify-content:center;text-align:center;line-height:1.8;padding:0 24px}
+#rot{display:none;position:fixed;inset:0;z-index:2147483000;background:radial-gradient(ellipse at 50% 45%,#221a13,#0c0907);color:#e6c98a;font-family:"Songti SC","Noto Serif SC",Pixel12,serif;font-size:20px;font-weight:800;flex-direction:column;align-items:center;justify-content:center;text-align:center;line-height:1.8;padding:0 24px}
 @media (pointer:coarse){#help{display:none}}
 @media (pointer:coarse) and (orientation:portrait){#rot{display:flex}}
 @media (pointer:coarse) and (orientation:portrait){body.ontitle #rot{display:none}}   /* 11/11：竖屏也能看主界面（竖幅水墨），点「新的旅途/继续」进游戏后才提示横过来 */
@@ -62,8 +62,8 @@ body.szz-pro #help{display:none}
 .x-back{min-height:34px!important}
 }
 #rot small{display:block;margin-top:10px;font-size:14px;font-weight:600;color:#c9b691;line-height:1.6}
-</style><link rel="preload" href="pack/fonts/result.woff2?v=09ba7b44e7" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=09ba7b44e7)format("woff2");font-display:swap}</style><link rel="preload" href="pack/fonts/pixel.woff2?v=ed5f53e3c1" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"Pixel12";src:url(pack/fonts/pixel.woff2?v=ed5f53e3c1)format("woff2");font-display:swap}@font-face{font-family:"Songti SC";src:url(pack/fonts/pixel.woff2?v=ed5f53e3c1)format("woff2");font-display:swap}@font-face{font-family:"STSong";src:url(pack/fonts/pixel.woff2?v=ed5f53e3c1)format("woff2");font-display:swap}@font-face{font-family:"Noto Serif SC";src:url(pack/fonts/pixel.woff2?v=ed5f53e3c1)format("woff2");font-display:swap}@font-face{font-family:"SimSun";src:url(pack/fonts/pixel.woff2?v=ed5f53e3c1)format("woff2");font-display:swap}@font-face{font-family:"PingFang SC";src:url(pack/fonts/pixel.woff2?v=ed5f53e3c1)format("woff2");font-display:swap}@font-face{font-family:"Microsoft YaHei";src:url(pack/fonts/pixel.woff2?v=ed5f53e3c1)format("woff2");font-display:swap}@font-face{font-family:"Noto Sans CJK SC";src:url(pack/fonts/pixel.woff2?v=ed5f53e3c1)format("woff2");font-display:swap}@font-face{font-family:"STKaiti";src:url(pack/fonts/pixel.woff2?v=ed5f53e3c1)format("woff2");font-display:swap}@font-face{font-family:"KaiTi";src:url(pack/fonts/pixel.woff2?v=ed5f53e3c1)format("woff2");font-display:swap}*{font-synthesis:none}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
-</head><body>
+</style><link rel="preload" href="pack/fonts/result.woff2?v=6b60d81126" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=6b60d81126)format("woff2");font-display:swap}</style><link rel="preload" href="pack/fonts/pixel.woff2?v=24cf21b63c" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"Pixel12";src:url(pack/fonts/pixel.woff2?v=24cf21b63c)format("woff2");font-display:swap}@font-face{font-family:"Songti SC";src:url(pack/fonts/pixel.woff2?v=24cf21b63c)format("woff2");font-display:swap}@font-face{font-family:"STSong";src:url(pack/fonts/pixel.woff2?v=24cf21b63c)format("woff2");font-display:swap}@font-face{font-family:"Noto Serif SC";src:url(pack/fonts/pixel.woff2?v=24cf21b63c)format("woff2");font-display:swap}@font-face{font-family:"SimSun";src:url(pack/fonts/pixel.woff2?v=24cf21b63c)format("woff2");font-display:swap}@font-face{font-family:"PingFang SC";src:url(pack/fonts/pixel.woff2?v=24cf21b63c)format("woff2");font-display:swap}@font-face{font-family:"Microsoft YaHei";src:url(pack/fonts/pixel.woff2?v=24cf21b63c)format("woff2");font-display:swap}@font-face{font-family:"Noto Sans CJK SC";src:url(pack/fonts/pixel.woff2?v=24cf21b63c)format("woff2");font-display:swap}@font-face{font-family:"STKaiti";src:url(pack/fonts/pixel.woff2?v=24cf21b63c)format("woff2");font-display:swap}@font-face{font-family:"KaiTi";src:url(pack/fonts/pixel.woff2?v=24cf21b63c)format("woff2");font-display:swap}*{font-synthesis:none}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
+<style>button{letter-spacing:.04em!important}</style></head><body>
 <style>
 #bootSplash{position:fixed;inset:0;z-index:99999;background:radial-gradient(ellipse at 50% 45%,#f3e4cf 0%,#ecd9c0 55%,#d9c09f 100%);transition:opacity .45s ease-out}
 #bootSplash.out{opacity:0;pointer-events:none}
@@ -72,13 +72,13 @@ body.szz-pro #help{display:none}
 #bootArt{background-image:url("pack/title/ink_pc.webp?v=38462b4eba");opacity:0;transition:opacity .6s ease-out}
 #bootArt.on{opacity:1}
 @media (max-aspect-ratio:9/10){#bootLq,#bootArt{background-position:72% 0}#bootLq{background-image:url("data:image/webp;base64,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")}#bootArt{background-image:url("pack/title/ink_phone.webp?v=8a66a9820b")}}
-#bootSlot{position:absolute;left:75.5%;top:72%;transform:translate(-50%,-50%);width:min(30vw,300px);min-width:180px;display:flex;flex-direction:column;align-items:center;gap:12px;font-family:"Songti SC","STSong","Noto Serif SC","SimSun",serif;color:#3b2a1c}
+#bootSlot{position:absolute;left:75.5%;top:72%;transform:translate(-50%,-50%);width:min(30vw,300px);min-width:180px;display:flex;flex-direction:column;align-items:center;gap:12px;font-family:"Songti SC","STSong","Noto Serif SC","SimSun",Pixel12,serif;color:#3b2a1c}
 @media (max-aspect-ratio:9/10){#bootSlot{left:50%;top:auto;bottom:9%;transform:translateX(-50%);width:72vw;max-width:300px}}
 #bootInk{position:relative;width:100%;height:12px}
 #bootInk i{position:absolute;left:0;top:0;height:100%;width:0;background:linear-gradient(90deg,rgba(30,20,12,.95),rgba(30,20,12,.88) 85%,rgba(30,20,12,.35));border-radius:2px 60% 60% 6px/2px 50% 50% 6px;transition:width .35s ease-out;box-shadow:0 0 3px rgba(30,20,12,.35)}
 #bootInk::before{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:rgba(60,40,24,.18)}
 #bootText{font-size:16px;letter-spacing:.3em;font-weight:600;min-height:1.2em}#bootText.tap{font-size:19px;animation:bootTap 1.5s ease-in-out infinite}@keyframes bootTap{50%{opacity:.3}}
-#bootRefresh{font:600 15px "Songti SC","Noto Serif SC",serif;letter-spacing:.2em;padding:10px 22px;color:#f1e2c6;background:#2e2016;border:1px solid #7a5a3a;border-radius:4px}
+#bootRefresh{font:600 15px "Songti SC","Noto Serif SC",Pixel12,serif;letter-spacing:.2em;padding:10px 22px;color:#f1e2c6;background:#2e2016;border:1px solid #7a5a3a;border-radius:4px}
 #bootError{font-size:12px;opacity:.7;overflow-wrap:anywhere;max-width:90vw;text-align:center}
 </style>
 <div id="bootSplash"><div id="bootLq"></div><div id="bootArt"></div><div id="bootSlot"><div id="bootInk"><i id="bootBar"></i></div><strong id="bootText">整军备马……</strong><button id="bootRefresh" hidden onclick="location.reload()">网络较慢，点此刷新</button><small id="bootError"></small></div></div>
@@ -108,7 +108,7 @@ if(location.protocol==='https:'&&!/[?&]debug(?:=|&|$)/.test(location.search)&&'s
 })();
 // 自动更新：打开游戏、或从后台切回来时，查一下线上有没有新版本；有就在标题/整备页自动刷新（战斗中不打扰）
 (function(){
-var BUILD='1568b175d156',busy=false;
+var BUILD='d84c95e34353',busy=false;
 if(location.protocol!=='https:'||/[?&]debug(?:=|&|$)/.test(location.search))return;
 function check(){
   if(busy)return;
@@ -1013,13 +1013,13 @@ const XIAOCHANG = { drawBackground() {}, state: () => null, start() {}, on: () =
   const img = (e) => PIC[e[0]] || (typeof ASSETS !== 'undefined' && ASSETS.chars && ASSETS.chars[e[2]] && ASSETS.chars[e[2]].idle ? ASSETS.chars[e[2]].idle[0] : '');
 
   const css = document.createElement('style'); css.textContent = `
-#szzCodexBtn{position:fixed;right:132px;top:8px;z-index:30;height:36px;padding:0 12px;border:1px solid rgba(139,106,53,.7);border-radius:4px;background:rgba(246,234,210,.85);color:#4a3218;font:700 15px "Songti SC","Noto Serif SC",serif;letter-spacing:.15em;cursor:pointer;display:none;box-shadow:0 2px 6px rgba(40,25,10,.25)}
+#szzCodexBtn{position:fixed;right:132px;top:8px;z-index:30;height:36px;padding:0 12px;border:1px solid rgba(139,106,53,.7);border-radius:4px;background:rgba(246,234,210,.85);color:#4a3218;font:700 15px "Songti SC","Noto Serif SC",Pixel12,serif;letter-spacing:.15em;cursor:pointer;display:none;box-shadow:0 2px 6px rgba(40,25,10,.25)}
 #szzCodexBtn:hover{background:#fff4dc}
 #szzCodex{position:fixed;inset:0;z-index:10060;display:flex;align-items:center;justify-content:center;background:rgba(6,5,4,.78)}
 #szzCodex[hidden]{display:none}
-#szzCodex .cx{width:min(1100px,96vw);height:min(680px,92vh);display:flex;flex-direction:column;background:linear-gradient(180deg,rgba(22,18,14,.98),rgba(10,8,6,.98));border:1px solid rgba(184,149,90,.55);box-shadow:0 10px 40px rgba(0,0,0,.7);color:#efe4cc;font-family:"PingFang SC","Microsoft YaHei",sans-serif}
+#szzCodex .cx{width:min(1100px,96vw);height:min(680px,92vh);display:flex;flex-direction:column;background:linear-gradient(180deg,rgba(22,18,14,.98),rgba(10,8,6,.98));border:1px solid rgba(184,149,90,.55);box-shadow:0 10px 40px rgba(0,0,0,.7);color:#efe4cc;font-family:"PingFang SC","Microsoft YaHei",Pixel12,sans-serif}
 #szzCodex .hd{display:flex;align-items:center;gap:14px;padding:10px 16px;border-bottom:1px solid rgba(184,149,90,.35)}
-#szzCodex .hd h2{margin:0;font:700 22px "Songti SC","Noto Serif SC",serif;letter-spacing:.3em;color:#e6c98a}
+#szzCodex .hd h2{margin:0;font:700 22px "Songti SC","Noto Serif SC",Pixel12,serif;letter-spacing:.3em;color:#e6c98a}
 #szzCodex .tb{padding:4px 14px;border:1px solid rgba(184,149,90,.4);background:transparent;color:#c9b48a;font:600 14px inherit;cursor:pointer;letter-spacing:.15em}
 #szzCodex .tb.on{background:rgba(184,149,90,.22);color:#ffe2a0;border-color:rgba(230,190,110,.8)}
 #szzCodex .ct{margin-left:auto;font-size:13px;color:#a8977a}
@@ -1035,7 +1035,7 @@ const XIAOCHANG = { drawBackground() {}, state: () => null, start() {}, on: () =
 #szzCodex .dt{width:min(360px,40%);border-left:1px solid rgba(184,149,90,.3);padding:16px 18px;overflow:auto}
 #szzCodex .dt .pic{height:190px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;background:radial-gradient(ellipse at 50% 60%,rgba(184,149,90,.18),rgba(0,0,0,0) 70%)}
 #szzCodex .dt .pic img{max-width:100%;max-height:100%;object-fit:contain;image-rendering:pixelated}
-#szzCodex .dt h3{margin:0 0 4px;font:700 22px "Songti SC","Noto Serif SC",serif;letter-spacing:.2em;color:#ffe2a0}
+#szzCodex .dt h3{margin:0 0 4px;font:700 22px "Songti SC","Noto Serif SC",Pixel12,serif;letter-spacing:.2em;color:#ffe2a0}
 #szzCodex .dt .tg{display:inline-block;margin-bottom:10px;padding:1px 8px;border:1px solid rgba(184,149,90,.5);font-size:12px;color:#c9b48a}
 #szzCodex .dt p{margin:0 0 12px;line-height:1.6;color:#e8dcc0;font-size:14px}
 #szzCodex .dt h4{margin:0 0 6px;font-size:13px;color:#c9a560;letter-spacing:.2em}
@@ -1119,11 +1119,11 @@ const XIAOCHANG = { drawBackground() {}, state: () => null, start() {}, on: () =
     #dbg.collapsed>.dbgBody{display:none!important}
     #dbg .dbgGroup{border-top:1px solid rgba(255,216,110,.16); padding-top:4px; margin-top:4px}
     #dbg .dbgGroup:first-child{border-top:0}
-    #dbg .dbgGroup>h3{margin:0 0 3px; color:#f0c96b; font:700 12px "PingFang SC",sans-serif; cursor:pointer; user-select:none}
+    #dbg .dbgGroup>h3{margin:0 0 3px; color:#f0c96b; font:700 12px "PingFang SC",Pixel12,sans-serif; cursor:pointer; user-select:none}
     #dbg .dbgGroup.closed>.dbgItems{display:none!important}
     #dbg .dbgItems{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:3px}
     #dbg button{display:block; width:100%; min-width:0; height:26px; margin:0; padding:2px 4px;
-      font:700 12px/1.1 "PingFang SC",sans-serif; color:#2b1a06;
+      font:700 12px/1.1 "PingFang SC",Pixel12,sans-serif; color:#2b1a06;
       background:linear-gradient(180deg,#f7dd8a,#d9a93c); border:1px solid #8a5f12; border-radius:5px;
       cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     #dbg button:active{transform:translateY(1px)}
@@ -1131,10 +1131,10 @@ const XIAOCHANG = { drawBackground() {}, state: () => null, start() {}, on: () =
     #dbg button.off{background:#4a4a52; color:#ddd; border-color:#333}
     #dbg .dbgWide{grid-column:1/-1}
     #dbg .dbgTrial{grid-column:1/-1; display:flex; gap:3px; align-items:center}
-    #dbg .dbgTrial>span{flex:none; color:#cdb98e; font:12px "PingFang SC",sans-serif}
+    #dbg .dbgTrial>span{flex:none; color:#cdb98e; font:12px "PingFang SC",Pixel12,sans-serif}
     #dbg .dbgTrial button{flex:1 1 0}
     #dbg .dbgFloors{grid-column:1/-1; display:grid; grid-template-columns:auto repeat(6,minmax(0,1fr)); gap:2px; align-items:center}
-    #dbg .dbgFloors>span{color:#cdb98e;font:12px "PingFang SC",sans-serif;white-space:nowrap}
+    #dbg .dbgFloors>span{color:#cdb98e;font:12px "PingFang SC",Pixel12,sans-serif;white-space:nowrap}
     #dbg .dbgFloors button{padding:1px; font-size:11px}
     #dbg i{display:block; color:#9bb0c9; font-style:normal; font-size:10px; line-height:1.35; margin-top:5px; white-space:pre-line}
   `;
@@ -1629,7 +1629,7 @@ function drawEnemySheet(key,x,y,f,width,time,duration){
 }
 function ch2Telegraph(z){
   if(!ch2Troops()||!z.enemySkill||z.enemySkill.phase!=='wind'||z.dead)return;
-  ctx.save();ctx.fillStyle='#b64c2b';ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.fillText('!',z.x,z.y-42);
+  ctx.save();ctx.fillStyle='#b64c2b';ctx.font='bold 13px Pixel12,sans-serif';ctx.textAlign='center';ctx.fillText('!',z.x,z.y-42);
   if(z.type==='yellow-spear'){ctx.fillStyle='rgba(130,42,29,.3)';ctx.fillRect(z.f>0?z.x:z.x-90,z.y-5,90,10);}
   ctx.restore();
 }
@@ -2957,7 +2957,7 @@ function drawZ(z) {
     const w = 34, y = z.y - 49;
     ctx.fillStyle = '#211510'; ctx.fillRect(z.x - w / 2, y, w, 4);
     ctx.fillStyle = '#c93420'; ctx.fillRect(z.x - w / 2 + 1, y + 1, (w - 2) * Math.max(0, z.hp / z.T.hp), 2);
-    ctx.font = 'bold 8px sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 2; ctx.strokeStyle = '#2a160f'; ctx.fillStyle = '#ffe4ad';
+    ctx.font = 'bold 8px Pixel12,sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 2; ctx.strokeStyle = '#2a160f'; ctx.fillStyle = '#ffe4ad';
     ctx.strokeText(z.T.name, z.x, y - 3); ctx.fillText(z.T.name, z.x, y - 3); ctx.textAlign = 'left';
     return;
   }
@@ -2971,13 +2971,13 @@ function drawZ(z) {
   const top = z.y - 34;
   if (z.st === 'sleep') {
     const bob = Math.sin(performance.now() / 300) * 2;
-    ctx.font = 'bold 9px sans-serif'; ctx.textAlign = 'center'; ctx.lineJoin = 'round'; ctx.lineWidth = 2;
+    ctx.font = 'bold 9px Pixel12,sans-serif'; ctx.textAlign = 'center'; ctx.lineJoin = 'round'; ctx.lineWidth = 2;
     ctx.strokeStyle = '#34231b'; ctx.fillStyle = '#fff0a8';
     ctx.strokeText('Z', z.x + 9, z.y - 20 + bob); ctx.fillText('Z', z.x + 9, z.y - 20 + bob);
     ctx.textAlign = 'left'; return;
   }
   if (z.st === 'wake') {
-    ctx.font = 'bold 13px sans-serif'; ctx.textAlign = 'center'; ctx.lineJoin = 'round'; ctx.lineWidth = 3;
+    ctx.font = 'bold 13px Pixel12,sans-serif'; ctx.textAlign = 'center'; ctx.lineJoin = 'round'; ctx.lineWidth = 3;
     ctx.strokeStyle = '#34231b'; ctx.fillStyle = '#ff4a32';
     ctx.strokeText('!', z.x, top - 4); ctx.fillText('!', z.x, top - 4); ctx.textAlign = 'left';
   }
@@ -3182,7 +3182,7 @@ function drawFloaters() {
   for (const f of floaters) {
     const emph = f.big || f.dodge || f.gold;
     ctx.globalAlpha = Math.max(0, 1 - f.t / 1.1);
-    ctx.font = 'bold ' + (emph ? 17 : 13) + 'px "PingFang SC","Noto Sans CJK SC",sans-serif';
+    ctx.font = 'bold ' + (emph ? 17 : 13) + 'px "PingFang SC","Noto Sans CJK SC",Pixel12,sans-serif';
     ctx.textAlign = 'center';
     if(f.color){ctx.fillStyle=f.color;} else if (f.red) {
       ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(45,8,8,.9)'; ctx.lineJoin = 'round';
@@ -3341,7 +3341,7 @@ let blessFx = []; // 方士施法成功的黄圈
   const CSS = `
   #wzbHint{display:none;position:fixed;left:0;right:0;top:0;z-index:26;
     padding:0 calc(12px + env(safe-area-inset-right)) 0 calc(12px + env(safe-area-inset-left));
-    font-family:"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",sans-serif;pointer-events:none}
+    font-family:"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",Pixel12,sans-serif;pointer-events:none}
   body.szz-title #wzbHint.on{display:flex}
   #wzbHint .box{flex:1;max-width:640px;margin:0 auto;background:rgba(30,20,34,.92);
     border:1.5px solid #c9971f;border-radius:12px;padding:9px 13px;box-shadow:0 6px 18px rgba(0,0,0,.45)}
@@ -3402,11 +3402,11 @@ let blessFx = []; // 方士施法成功的黄圈
   // 11/11 改版（用户给了美术）：宣纸水墨背景 + 深色木框面板压在纸上；出身/难度做成「图标 + 名字 + 一句话」卡片
   const CSS = `
   #kaiju{position:fixed;inset:0;z-index:10005;background:#ecd9c0 url('${PIC.bg}') center/cover no-repeat;color:#f2e4c8;
-    font-family:"PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif;font-weight:500;--k:1;display:flex;flex-direction:column;
+    font-family:"PingFang SC","Microsoft YaHei","Noto Sans CJK SC",Pixel12,sans-serif;font-weight:500;--k:1;display:flex;flex-direction:column;
     padding:calc(8px + env(safe-area-inset-top)) calc(12px + env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left));box-sizing:border-box}
   #kaiju *{box-sizing:border-box}
   @media (pointer:coarse) and (orientation:landscape) and (max-height:520px){#kaiju{padding-bottom:calc(30px + env(safe-area-inset-bottom))}}   /* 11/11：iPhone 横屏点屏幕最下面一条会先弹出浏览器工具栏、按钮收不到，最下面一排整体抬高 */
-  #kaiju .top h1,#kaiju h4,#kaiju .card b,#kaiju .fname,#kaiju .fl button b,#kaiju .wp button,#kaiju .bot button,#kaiju .namep b,#kaiju .ogd b,#kaiju .skd b{font-family:"Songti SC","STSong","Noto Serif SC",serif;font-weight:900}
+  #kaiju .top h1,#kaiju h4,#kaiju .card b,#kaiju .fname,#kaiju .fl button b,#kaiju .wp button,#kaiju .bot button,#kaiju .namep b,#kaiju .ogd b,#kaiju .skd b{font-family:"Songti SC","STSong","Noto Serif SC",Pixel12,serif;font-weight:900}
   #kaiju .ico{width:calc(44px*var(--k));height:calc(44px*var(--k))}
   @media (min-width:1400px) and (min-height:780px){#kaiju{--k:1.22}}
   @media (min-width:1900px) and (min-height:1000px){#kaiju{--k:1.4}}
@@ -3438,7 +3438,7 @@ let blessFx = []; // 方士施法成功的黄圈
   #kaiju .field{display:flex;flex-direction:column;height:100%}
   #kaiju .pic{flex:1;min-height:90px;border:1px solid #6b5230;border-radius:2px;background:#1c140d center/cover no-repeat;position:relative;overflow:hidden}
   #kaiju .pic.lock{filter:grayscale(.85) brightness(.62)}
-  #kaiju .pic .lk{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);padding:8px 22px;border:1px solid #d8b060;background:rgba(12,8,5,.75);color:#ffe9b8;font-size:calc(18px*var(--k));letter-spacing:6px;font-family:"Songti SC","Noto Serif SC",serif;font-weight:900}
+  #kaiju .pic .lk{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);padding:8px 22px;border:1px solid #d8b060;background:rgba(12,8,5,.75);color:#ffe9b8;font-size:calc(18px*var(--k));letter-spacing:6px;font-family:"Songti SC","Noto Serif SC",Pixel12,serif;font-weight:900}
   #kaiju .pic .ban{position:absolute;left:0;right:0;bottom:0;padding:26px 10px 10px;background:linear-gradient(180deg,transparent,rgba(12,8,5,.88) 55%);text-align:center}
   #kaiju .pic .arr{position:absolute;top:50%;transform:translateY(-50%);width:30px;height:46px;border:1px solid rgba(216,176,96,.6);border-radius:3px;background:rgba(12,8,5,.55);color:#f2e4c8;font-size:calc(20px*var(--k));cursor:pointer}
   #kaiju .fl{display:flex;gap:8px;margin-top:8px}
@@ -3548,12 +3548,12 @@ let blessFx = []; // 方士施法成功的黄圈
     #bPause{width:40px;height:42px;min-width:40px;padding:0;display:flex;align-items:center;justify-content:center;gap:3px}
     #bPause .pause-icon-bar{display:block;width:4px;height:16px;border-radius:2px;background:currentColor}
     #bPause[hidden]{display:none!important}
-    #pauseScreen{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;padding:12px;box-sizing:border-box;background:rgba(8,6,5,.76);color:#f2dfb9;font-family:"PingFang SC","Microsoft YaHei",sans-serif}
+    #pauseScreen{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;padding:12px;box-sizing:border-box;background:rgba(8,6,5,.76);color:#f2dfb9;font-family:"PingFang SC","Microsoft YaHei",Pixel12,sans-serif}
     #pauseScreen[hidden],#pauseMenu[hidden],#pauseConfirm[hidden]{display:none!important}
     .pause-paper{box-sizing:border-box;width:min(390px,92vw);max-height:94dvh;overflow:auto;padding:clamp(22px,5vh,42px) clamp(26px,6vw,54px);background-position:center;background-size:100% 100%;filter:drop-shadow(0 12px 28px #000b);text-align:center}
-    .pause-paper h2{margin:8px 0 18px;color:#583b20;font:700 clamp(25px,5vh,34px) MaShanZheng,"STKaiti",serif;text-shadow:0 1px #f5e2b4}
+    .pause-paper h2{margin:8px 0 18px;color:#583b20;font:700 clamp(25px,5vh,34px) MaShanZheng,"STKaiti",Pixel12,serif;text-shadow:0 1px #f5e2b4}
     .pause-actions{display:grid;gap:9px}
-    .pause-action{box-sizing:border-box;width:100%;min-height:48px;padding:8px 14px;border:1px solid #9e7541;border-radius:6px;background-position:center;background-size:100% 100%;color:#f7e5bd;font:700 17px MaShanZheng,"STKaiti",serif;text-shadow:0 1px 2px #2d1b0e;cursor:pointer;touch-action:manipulation}
+    .pause-action{box-sizing:border-box;width:100%;min-height:48px;padding:8px 14px;border:1px solid #9e7541;border-radius:6px;background-position:center;background-size:100% 100%;color:#f7e5bd;font:700 17px MaShanZheng,"STKaiti",Pixel12,serif;text-shadow:0 1px 2px #2d1b0e;cursor:pointer;touch-action:manipulation}
 .pause-action.kb-sel{outline:2px solid #ffd86e;outline-offset:2px;filter:brightness(1.18)}
     .pause-action:active{transform:translateY(1px);filter:brightness(1.12)}
     .pause-volume{margin:13px 0 0;color:#593c21;font-size:14px}
@@ -3713,7 +3713,7 @@ function drawCoinRain(HW, HH, raw) {
 // 三国终章路线模式结算（11/11）：整屏插画（胜利晨光 / 战败雨夜）+ 右侧战绩 + 两个按钮；不再出现旧系统的金币、长戟、复活
 const RES_IMG = { win: new Image(), lose: new Image() }; RES_IMG.win.src = 'pack/ui/result/win.webp?v=dd7e5883a0'; RES_IMG.lose.src = 'pack/ui/result/lose.webp?v=37ff1388e4';
 function drawRouteResult(HW, HH, raw) {
-  const BRUSH = '"MaShanZheng","KaiTi","STKaiti","Kaiti SC",serif', F = '"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",sans-serif';
+  const BRUSH = '"MaShanZheng","KaiTi","STKaiti","Kaiti SC",Pixel12,serif', F = '"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",Pixel12,sans-serif';
   for (const id of ['bR', 'top']) { const e = document.getElementById(id); if (e) e.style.visibility = 'hidden'; }
   if (!result._jingle && window.SFX) { result._jingle = 1; SFX.play(result.win ? 'j_clear' : 'j_lose'); }
   const im = RES_IMG[result.win ? 'win' : 'lose'], fade = Math.min(1, raw / .6);
@@ -3746,8 +3746,8 @@ function drawResult(HW, HH) {
   const raw = gameT - result.born;
   uiBtns = [];
   if (window.ROUTE && ROUTE.on()) return drawRouteResult(HW, HH, raw);
-  const BRUSH = '"MaShanZheng","KaiTi","STKaiti","Kaiti SC",serif';
-  const F = '"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",sans-serif';
+  const BRUSH = '"MaShanZheng","KaiTi","STKaiti","Kaiti SC",Pixel12,serif';
+  const F = '"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",Pixel12,sans-serif';
 
   // 背景压暗 + 四角暗角
   ctx.fillStyle = 'rgba(8,5,10,.74)'; ctx.fillRect(0, 0, HW, HH);
@@ -3924,7 +3924,7 @@ function drawResult(HW, HH) {
   if (/[?&]debug/.test(location.search) && window.ROGUE && ROGUE.stats) {
     const st = Object.entries(ROGUE.stats()).sort((a, b) => b[1].dmg - a[1].dmg);
     if (st.length) {
-      ctx.save(); ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
+      ctx.save(); ctx.font = '12px Pixel12,sans-serif'; ctx.textAlign = 'left';
       ctx.fillStyle = 'rgba(15,10,6,.82)'; ctx.fillRect(8, 40, 220, 22 + st.length * 16);
       ctx.fillStyle = '#f1d58f'; ctx.fillText('锦囊统计（调试）', 16, 56);
       st.forEach(([n, o], i) => { ctx.fillStyle = '#ecdcbc'; ctx.fillText(`${n}  触发 ${o.trig}  伤害 ${o.dmg.toFixed(1)}${o.heal ? '  回血 ' + o.heal.toFixed(1) : ''}`, 16, 74 + i * 16); });
@@ -3987,8 +3987,8 @@ function resultKey(e) {
     { t: '路边老兵', npc: ['关羽', 'pack/ui/npc/guanyu_face.webp?v=3279d75958', '老卒阅阵无数，一碗酒换他一句话，不亏。'], d: '一个断了腿的老兵坐在树下，招呼你过去。', o: [['请他喝酒', '武艺伤害 +8%', 'wine'], ['向他求教', '一次战利三选一', 'learn']] },
     { t: '溪边磨石', npc: ['张飞', 'pack/ui/npc/zhangfei_face.webp?v=ec3ea6cc08', '磨快了刀，砍起贼来才痛快！不过歇歇脚也行。'], d: '溪水边有一块平整的磨刀石。', o: [['磨刀', '武艺伤害 +10%', 'sharpen'], ['歇脚', '回复 30% 血量', 'rest']] },
   ];
-  const FONT = '"MaShanZheng","STKaiti","KaiTi","Songti SC",serif';
-  const UI = '"PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif';   // 小字用黑体加粗，毛笔字只用在标题和节点名（11/11：字太小太细）
+  const FONT = '"MaShanZheng","STKaiti","KaiTi","Songti SC",Pixel12,serif';
+  const UI = '"PingFang SC","Microsoft YaHei","Noto Sans CJK SC",Pixel12,sans-serif';   // 小字用黑体加粗，毛笔字只用在标题和节点名（11/11：字太小太细）
   const BGH = new Image(), BGV = new Image(); BGH.src = 'pack/route/bg_h.webp?v=a762864146'; BGV.src = 'pack/route/bg_v.webp?v=8802bc71a2'; BGH.onload = BGV.onload = () => { bgKey = ''; };
   const FONT_Q = FONT.replace(/"/g, "'"), UI_Q = UI.replace(/"/g, "'");
   const KS = () => Math.max(1, Math.min(1.45, Math.min(W / 1280, H / 720)));
@@ -4194,8 +4194,8 @@ function resultKey(e) {
     box.innerHTML = '<div style="background:' + PAPER + ';border:2px solid #7a5a2c;border-radius:10px;padding:18px 22px;max-width:92vw;text-align:center;font-family:' + FONT + ';color:' + INK + ';box-shadow:0 10px 40px rgba(0,0,0,.45)">'
       + '<div style="font-size:26px;letter-spacing:6px;margin-bottom:6px">营 地</div><div style="font-size:14px;opacity:.75;margin-bottom:14px">血量 ' + Math.ceil(hp[0]) + ' / ' + hp[1] + '</div>'
       + '<div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">'
-      + '<button data-k="heal" style="width:150px;padding:12px 8px;font:700 18px ' + FONT + ';color:' + INK + ';background:#f3e6c8;border:1px solid #7a5a2c;border-radius:8px;cursor:pointer">歇息<br><small style="font:12px sans-serif;opacity:.8">回复 30% 血量</small></button>'
-      + '<button data-k="up" style="width:150px;padding:12px 8px;font:700 18px ' + FONT + ';color:' + INK + ';background:#f3e6c8;border:1px solid #7a5a2c;border-radius:8px;cursor:pointer">磨刀<br><small style="font:12px sans-serif;opacity:.8">武艺伤害 +10%</small></button></div></div>';
+      + '<button data-k="heal" style="width:150px;padding:12px 8px;font:700 18px ' + FONT + ';color:' + INK + ';background:#f3e6c8;border:1px solid #7a5a2c;border-radius:8px;cursor:pointer">歇息<br><small style="font:12px Pixel12,sans-serif;opacity:.8">回复 30% 血量</small></button>'
+      + '<button data-k="up" style="width:150px;padding:12px 8px;font:700 18px ' + FONT + ';color:' + INK + ';background:#f3e6c8;border:1px solid #7a5a2c;border-radius:8px;cursor:pointer">磨刀<br><small style="font:12px Pixel12,sans-serif;opacity:.8">武艺伤害 +10%</small></button></div></div>';
     box.querySelectorAll('button').forEach(b => b.onclick = () => { SURV.camp(b.dataset.k); box.remove(); campBox = null; done(n, true); });
     root.appendChild(box);
   }
@@ -4427,16 +4427,16 @@ function resultKey(e) {
 
   const st = document.createElement('style');
   st.textContent = `
-#szzSetBtn{position:fixed;right:88px;top:8px;z-index:30;width:36px;height:36px;border:1px solid rgba(139,106,53,.7);border-radius:4px;background:rgba(246,234,210,.85);color:#4a3218;font:20px sans-serif;cursor:pointer;display:none;box-shadow:0 2px 6px rgba(40,25,10,.25)}
+#szzSetBtn{position:fixed;right:88px;top:8px;z-index:30;width:36px;height:36px;border:1px solid rgba(139,106,53,.7);border-radius:4px;background:rgba(246,234,210,.85);color:#4a3218;font:20px Pixel12,sans-serif;cursor:pointer;display:none;box-shadow:0 2px 6px rgba(40,25,10,.25)}
 #szzSetBtn:hover{background:#fff4dc}
-#szzSet{position:fixed;inset:0;z-index:12000;display:flex;align-items:center;justify-content:center;background:rgba(4,3,2,.62);font-family:"PingFang SC","Microsoft YaHei",sans-serif;color:#e6dccb}
+#szzSet{position:fixed;inset:0;z-index:12000;display:flex;align-items:center;justify-content:center;background:rgba(4,3,2,.62);font-family:"PingFang SC","Microsoft YaHei",Pixel12,sans-serif;color:#e6dccb}
 #szzSet[hidden]{display:none}
 #szzSet .p{position:relative;width:min(420px,90vw);box-sizing:border-box;padding:34px 28px 22px;border:1px solid rgba(184,149,90,.6);background:linear-gradient(180deg,rgba(22,19,16,.97),rgba(10,9,8,.97));box-shadow:inset 0 0 0 1px rgba(0,0,0,.7),0 10px 30px rgba(0,0,0,.6)}
-#szzSet h3{position:absolute;left:50%;top:-17px;transform:translateX(-50%);margin:0;padding:3px 26px;border:1px solid rgba(184,149,90,.6);background:#140f0b;color:#e6c98a;font:700 19px "Songti SC","Noto Serif SC",serif;letter-spacing:.4em;text-indent:.4em;white-space:nowrap}
+#szzSet h3{position:absolute;left:50%;top:-17px;transform:translateX(-50%);margin:0;padding:3px 26px;border:1px solid rgba(184,149,90,.6);background:#140f0b;color:#e6c98a;font:700 19px "Songti SC","Noto Serif SC",Pixel12,serif;letter-spacing:.4em;text-indent:.4em;white-space:nowrap}
 #szzSet .row{display:flex;align-items:center;gap:14px;margin:14px 0}
 #szzSet .row label{flex:none;width:64px;font-weight:700;color:#cdb68a}
 #szzSet input[type=range]{flex:1;accent-color:#c9a35a;height:28px}
-#szzSet .row b{width:42px;text-align:right;font:900 15px "Arial Black",Impact,sans-serif;color:#efe4cc}
+#szzSet .row b{width:42px;text-align:right;font:900 15px "Arial Black",Impact,Pixel12,sans-serif;color:#efe4cc}
 #szzSet .tg{flex:1;display:flex;gap:8px}
 #szzSet .tg button,#szzSet .ok{flex:1;min-height:38px;border:1px solid rgba(184,149,90,.5);border-radius:2px;background:linear-gradient(180deg,rgba(44,36,27,.95),rgba(18,15,12,.95));color:#a8977a;font:700 15px inherit;cursor:pointer}
 #szzSet .tg button.on{border-color:#e2c27a;color:#f6e6bd;background:linear-gradient(180deg,rgba(84,64,34,.95),rgba(36,27,16,.95))}
@@ -5164,8 +5164,8 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
 #bossIntro.out{animation:biOut .4s ease-in both}
 #bossIntro img{height:min(62vh,520px);image-rendering:pixelated;filter:drop-shadow(0 0 14px rgba(0,0,0,.7))}
 #bossIntro .bx{margin:0 0 9vh -2vw;padding:10px 18px 12px;min-width:min(380px,40vw);border:1px solid rgba(184,149,90,.6);background:linear-gradient(180deg,rgba(20,17,14,.95),rgba(8,7,6,.95));box-shadow:0 8px 24px rgba(0,0,0,.6)}
-#bossIntro b{display:inline-block;margin-bottom:4px;padding:1px 12px;border:1px solid rgba(184,149,90,.6);background:#140f0b;color:#e6c98a;font:700 17px "Songti SC","Noto Serif SC",serif;letter-spacing:.2em}
-#bossIntro p{margin:0;color:#efe4cc;font:700 clamp(15px,2.4vh,21px)/1.5 "PingFang SC","Microsoft YaHei",sans-serif}
+#bossIntro b{display:inline-block;margin-bottom:4px;padding:1px 12px;border:1px solid rgba(184,149,90,.6);background:#140f0b;color:#e6c98a;font:700 17px "Songti SC","Noto Serif SC",Pixel12,serif;letter-spacing:.2em}
+#bossIntro p{margin:0;color:#efe4cc;font:700 clamp(15px,2.4vh,21px)/1.5 "PingFang SC","Microsoft YaHei",Pixel12,sans-serif}
 @keyframes biIn{from{transform:translateX(-60%);opacity:0}}@keyframes biOut{to{transform:translateX(-60%);opacity:0}}
 @media (max-height:520px){#bossIntro img{height:58vh}#bossIntro .bx{margin-bottom:6vh}}`; document.head.appendChild(st); }
     const old = document.getElementById('bossIntro'); if (old) old.remove();
@@ -5865,7 +5865,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     const c = S.cmb; if (!c) return; c.t += dt; if (c.t > 1.4) { S.cmb = null; return; }
     const a = c.t < 1 ? 1 : 1 - (c.t - 1) / .4, sc = c.t < .12 ? .6 + c.t / .12 * .55 : c.t < .22 ? 1.15 - (c.t - .12) / .1 * .15 : 1, fs = (fine ? 54 : 34) * (c.big ? 1.25 : 1);
     ctx.save(); ctx.globalAlpha = a; ctx.translate(HW / 2, HH * .27); ctx.scale(sc, sc);
-    ctx.font = '900 ' + fs + 'px "Songti SC","STSong","Noto Serif SC",serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
+    ctx.font = '900 ' + fs + 'px "Songti SC","STSong","Noto Serif SC",Pixel12,serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
     ctx.lineWidth = fs * .16; ctx.strokeStyle = 'rgba(10,6,3,.9)'; ctx.strokeText(c.txt, 0, 0);
     const g = ctx.createLinearGradient(0, -fs / 2, 0, fs / 2); g.addColorStop(0, '#fff3c8'); g.addColorStop(.5, c.big ? '#ff9a3a' : '#e8c070'); g.addColorStop(1, c.big ? '#b02a12' : '#8a5a20'); ctx.fillStyle = g; ctx.fillText(c.txt, 0, 0);
     ctx.restore();
@@ -6163,7 +6163,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     const x = 10, y = 30, w = 104, h = 30;
     ctx.save(); ctx.fillStyle = 'rgba(16,10,6,.82)'; ctx.fillRect(x, y, w, h); ctx.strokeStyle = '#b08a4a'; ctx.lineWidth = 1.2; ctx.strokeRect(x + .5, y + .5, w - 1, h - 1);
     if (COIN_IMG.complete && COIN_IMG.naturalWidth) ctx.drawImage(COIN_IMG, x + 3, y + 2, 26, 26);
-    ctx.font = 'bold 17px "PingFang SC",sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#ffe9a8'; ctx.fillText(String(S.money), x + 36, y + h / 2 + 1);
+    ctx.font = 'bold 17px "PingFang SC",Pixel12,sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#ffe9a8'; ctx.fillText(String(S.money), x + 36, y + h / 2 + 1);
     ctx.restore();
   }
   function report(R) {   // 左下角战报，2.6 秒后淡出
@@ -6179,70 +6179,70 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const setK = e => { e.style.setProperty('--k', uiK()); e.style.setProperty('--kt', uiKt()); };   // 整备屏/提醒框的缩放系数（CSS 里 calc 不能把长度除成纯数字，只能 JS 算）
   addEventListener('resize', () => { for (const id of ['survPrep', 'survTut']) { const e = document.getElementById(id); if (e) setK(e); } });
   const PREP_CSS = `
-#survPrep{position:fixed;inset:0;z-index:10025;background:radial-gradient(ellipse at 50% 40%,rgba(14,10,8,.72),rgba(6,4,3,.9));font-family:"PingFang SC","Microsoft YaHei",sans-serif;color:#efe2c6;user-select:none}
+#survPrep{position:fixed;inset:0;z-index:10025;background:radial-gradient(ellipse at 50% 40%,rgba(14,10,8,.72),rgba(6,4,3,.9));font-family:"PingFang SC","Microsoft YaHei",Pixel12,sans-serif;color:#efe2c6;user-select:none}
 @media (pointer:coarse) and (orientation:landscape) and (max-height:520px){#survPrep{bottom:30px;box-shadow:0 30px 0 #060403}}   /* iPhone 横屏：最下面一条留给浏览器工具栏，整备屏整体抬高，「出发」等按钮才点得到 */
 #survPrep em{display:inline-block;background:center/contain no-repeat;vertical-align:middle;font-style:normal}
 #survPrep .mo{position:absolute;left:1.2vw;top:1.6vh;height:calc(56px*var(--k));min-width:calc(200px*var(--k));display:flex;align-items:center;gap:calc(14px*var(--k));padding:0 calc(22px*var(--k));border:calc(14px*var(--k)) solid transparent;border-image:url(pack/ui/prep/btn.webp?v=f850bb7611) 40 fill stretch;box-sizing:border-box}
-#survPrep .mo em{width:calc(40px*var(--k));height:calc(40px*var(--k))}#survPrep .mo b{font:900 calc(30px*var(--kt)) "PingFang SC",sans-serif;color:#fff2d4}
+#survPrep .mo em{width:calc(40px*var(--k));height:calc(40px*var(--k))}#survPrep .mo b{font:900 calc(30px*var(--kt)) "PingFang SC",Pixel12,sans-serif;color:#fff2d4}
 #survPrep .tb{position:absolute;left:50%;transform:translateX(-50%);top:1.5vh;display:flex;gap:calc(4px*var(--k))}
-#survPrep .tb button{position:relative;width:calc(180px*var(--k));height:calc(66px*var(--k));border:0;background:url(pack/ui/prep/tab.webp?v=31b0afb157) center/100% 100% no-repeat;color:#cbb894;font:900 calc(26px*var(--kt)) "Songti SC","STSong","Noto Serif SC",serif;letter-spacing:.3em;text-indent:.3em;cursor:pointer}
+#survPrep .tb button{position:relative;width:calc(180px*var(--k));height:calc(66px*var(--k));border:0;background:url(pack/ui/prep/tab.webp?v=31b0afb157) center/100% 100% no-repeat;color:#cbb894;font:900 calc(26px*var(--kt)) "Songti SC","STSong","Noto Serif SC",Pixel12,serif;letter-spacing:.3em;text-indent:.3em;cursor:pointer}
 #survPrep .tb button.on{background-image:url(pack/ui/prep/tab_on.webp?v=cabbff5276);color:#3a1e08;text-shadow:0 1px 0 rgba(255,240,200,.6);filter:drop-shadow(0 0 calc(10px*var(--k)) rgba(255,190,80,.55))}
-#survPrep .tb button i{position:absolute;right:calc(10px*var(--k));top:calc(-4px*var(--k));min-width:calc(22px*var(--k));height:calc(22px*var(--k));border-radius:11px;background:#b8281e;color:#fff;font:700 calc(13px*var(--kt))/calc(22px*var(--kt)) sans-serif;font-style:normal;letter-spacing:0;text-indent:0}
+#survPrep .tb button i{position:absolute;right:calc(10px*var(--k));top:calc(-4px*var(--k));min-width:calc(22px*var(--k));height:calc(22px*var(--k));border-radius:11px;background:#b8281e;color:#fff;font:700 calc(13px*var(--kt))/calc(22px*var(--kt)) Pixel12,sans-serif;font-style:normal;letter-spacing:0;text-indent:0}
 #survPrep .tl{position:absolute;left:30vw;right:30vw;top:calc(1.5vh + 74px*var(--k));height:1px;background:linear-gradient(90deg,transparent,#b08a4a 15%,#b08a4a 85%,transparent)}
 #survPrep .bd{position:absolute;left:3vw;right:3vw;top:calc(1.5vh + 92px*var(--k));bottom:calc(250px*var(--k));display:flex;gap:calc(18px*var(--k));justify-content:center}
 #survPrep .pn{position:relative;flex:1;max-width:calc(660px*var(--k));border:calc(34px*var(--k)) solid transparent;border-image:url(pack/ui/prep/panel.webp?v=d3bfe0890e) 90 fill stretch;padding:calc(4px*var(--k)) calc(8px*var(--k));overflow:auto;box-sizing:border-box;scrollbar-width:thin}
 #survPrep .pn.wide{max-width:none;display:flex;align-items:center;justify-content:center}
-#survPrep h4{margin:calc(4px*var(--k)) 0 calc(8px*var(--k));padding-bottom:calc(5px*var(--k));border-bottom:1px solid rgba(176,138,74,.5);font:700 calc(19px*var(--kt)) "Songti SC","Noto Serif SC",serif;color:#cbb894;letter-spacing:.15em;display:flex;justify-content:space-between;align-items:flex-end}
-#survPrep h4 small{font:400 calc(13px*var(--kt)) sans-serif;color:#8f7c5e;letter-spacing:0}
-#survPrep .sm{display:grid;grid-template-columns:auto 1fr auto 1fr;gap:calc(10px*var(--k));align-items:center;font-size:calc(19px*var(--kt));color:#bfa98a}#survPrep .sm span{display:flex;align-items:center;gap:6px}#survPrep .sm em{width:calc(30px*var(--k));height:calc(30px*var(--k))}#survPrep .sm b{font:900 calc(26px*var(--kt)) sans-serif;color:#fff2d4}
+#survPrep h4{margin:calc(4px*var(--k)) 0 calc(8px*var(--k));padding-bottom:calc(5px*var(--k));border-bottom:1px solid rgba(176,138,74,.5);font:700 calc(19px*var(--kt)) "Songti SC","Noto Serif SC",Pixel12,serif;color:#cbb894;letter-spacing:.15em;display:flex;justify-content:space-between;align-items:flex-end}
+#survPrep h4 small{font:400 calc(13px*var(--kt)) Pixel12,sans-serif;color:#8f7c5e;letter-spacing:0}
+#survPrep .sm{display:grid;grid-template-columns:auto 1fr auto 1fr;gap:calc(10px*var(--k));align-items:center;font-size:calc(19px*var(--kt));color:#bfa98a}#survPrep .sm span{display:flex;align-items:center;gap:6px}#survPrep .sm em{width:calc(30px*var(--k));height:calc(30px*var(--k))}#survPrep .sm b{font:900 calc(26px*var(--kt)) Pixel12,sans-serif;color:#fff2d4}
 #survPrep .nt{margin:calc(6px*var(--k)) 0 0;font-size:calc(14px*var(--kt));color:#8f7c5e}
 #survPrep .ln{margin:calc(6px*var(--k)) 0;font-size:calc(18px*var(--kt));color:#cbb894;display:flex;align-items:center;gap:calc(8px*var(--k))}#survPrep .ln em{width:calc(28px*var(--k));height:calc(28px*var(--k))}#survPrep .ln b{color:#fff;font-size:calc(21px*var(--kt))}#survPrep .c1{color:#5cc8ff!important}#survPrep .c2{color:#ff5a5a!important}
 #survPrep .pb{display:flex;align-items:center;gap:calc(10px*var(--k));margin:calc(6px*var(--k)) 0}#survPrep .pb>em{width:calc(42px*var(--k));height:calc(42px*var(--k));flex:none;border:1px solid #8a6a3a;background-size:cover}
 #survPrep .pbf{position:relative;flex:1;height:calc(30px*var(--k));border:calc(10px*var(--k)) solid transparent;border-image:url(pack/ui/prep/pbar.webp?v=88f796ee7a) 40 60 fill stretch;box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;padding:0 calc(10px*var(--k));overflow:hidden}
-#survPrep .pbf u{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#8a5a14,#e8b040 80%,#fff0a8);opacity:.9}#survPrep .pbf b,#survPrep .pbf i{position:relative;font:900 calc(15px*var(--kt)) sans-serif;font-style:normal;color:#fff6dc;text-shadow:0 1px 2px #000}
+#survPrep .pbf u{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#8a5a14,#e8b040 80%,#fff0a8);opacity:.9}#survPrep .pbf b,#survPrep .pbf i{position:relative;font:900 calc(15px*var(--kt)) Pixel12,sans-serif;font-style:normal;color:#fff6dc;text-shadow:0 1px 2px #000}
 #survPrep .em2{text-align:center;color:#8f7c5e;font-size:calc(20px*var(--kt));line-height:1.8}#survPrep .em2 small{font-size:.7em}#survPrep .ov{position:absolute;left:0;right:0;top:45%}
-#survPrep .gd{display:grid;grid-template-columns:repeat(4,1fr);gap:calc(10px*var(--k))}#survPrep .gd.sg{grid-template-columns:repeat(3,1fr);gap:calc(16px*var(--k)) calc(14px*var(--k))}@media (max-height:520px){#survPrep .gd.sg{grid-template-columns:repeat(5,1fr)}}#survPrep .sl .pr{position:absolute;left:50%;bottom:calc(-10px*var(--k));transform:translateX(-50%);padding:0 calc(8px*var(--k));background:rgba(10,6,4,.9);border:1px solid #8a6a3a;font:900 calc(15px*var(--kt)) "Arial Black",Impact,sans-serif;font-style:normal;color:#ffe08a;white-space:nowrap}#survPrep .sl.sold{filter:grayscale(.8) brightness(.6)}#survPrep .sl .lki{position:absolute;right:2px;top:2px;font-style:normal;font-size:calc(16px*var(--kt))}#survPrep .shn2{margin-left:auto;font:700 calc(13px*var(--kt)) "PingFang SC",sans-serif;color:#9e8a6a}#survPrep .lkh{margin-top:calc(18px*var(--k));font-size:calc(13px*var(--kt))}
+#survPrep .gd{display:grid;grid-template-columns:repeat(4,1fr);gap:calc(10px*var(--k))}#survPrep .gd.sg{grid-template-columns:repeat(3,1fr);gap:calc(16px*var(--k)) calc(14px*var(--k))}@media (max-height:520px){#survPrep .gd.sg{grid-template-columns:repeat(5,1fr)}}#survPrep .sl .pr{position:absolute;left:50%;bottom:calc(-10px*var(--k));transform:translateX(-50%);padding:0 calc(8px*var(--k));background:rgba(10,6,4,.9);border:1px solid #8a6a3a;font:900 calc(15px*var(--kt)) "Arial Black",Impact,Pixel12,sans-serif;font-style:normal;color:#ffe08a;white-space:nowrap}#survPrep .sl.sold{filter:grayscale(.8) brightness(.6)}#survPrep .sl .lki{position:absolute;right:2px;top:2px;font-style:normal;font-size:calc(16px*var(--kt))}#survPrep .shn2{margin-left:auto;font:700 calc(13px*var(--kt)) "PingFang SC",Pixel12,sans-serif;color:#9e8a6a}#survPrep .lkh{margin-top:calc(18px*var(--k));font-size:calc(13px*var(--kt))}
 #survPrep .sl{position:relative;aspect-ratio:1;background:url(pack/ui/prep/slot.webp?v=1be34d014d) center/100% 100% no-repeat;display:flex;align-items:center;justify-content:center;cursor:default}#survPrep .sl[data-a]{cursor:pointer}
 #survPrep .sl em{width:80%;height:80%;background-size:cover}#survPrep .sl em.ghost{opacity:.5;background-size:contain}
 #survPrep .sl.on{filter:drop-shadow(0 0 calc(8px*var(--k)) rgba(255,210,110,.9))}#survPrep .sl[style*="--rc"]{box-shadow:inset 0 0 0 2px var(--rc)}
-#survPrep .sl .eq{position:absolute;right:2px;bottom:2px;padding:0 4px;background:rgba(10,6,4,.85);border:1px solid #b08a4a;font:700 calc(12px*var(--kt)) sans-serif;font-style:normal;color:#ffe9b8}
+#survPrep .sl .eq{position:absolute;right:2px;bottom:2px;padding:0 4px;background:rgba(10,6,4,.85);border:1px solid #b08a4a;font:700 calc(12px*var(--kt)) Pixel12,sans-serif;font-style:normal;color:#ffe9b8}
 #survPrep .dt{display:flex;flex-direction:column;height:100%}#survPrep .dh{display:flex;gap:calc(14px*var(--k));align-items:center}#survPrep .dh>em{width:calc(96px*var(--k));height:calc(96px*var(--k));flex:none;border:2px solid #8a6a3a;background-size:cover}
-#survPrep .dh h3{margin:0;font:900 calc(30px*var(--kt)) "Songti SC","Noto Serif SC",serif;color:#fff2d4}#survPrep .dh p{margin:calc(2px*var(--k)) 0;font-size:calc(17px*var(--kt))}
+#survPrep .dh h3{margin:0;font:900 calc(30px*var(--kt)) "Songti SC","Noto Serif SC",Pixel12,serif;color:#fff2d4}#survPrep .dh p{margin:calc(2px*var(--k)) 0;font-size:calc(17px*var(--kt))}
 #survPrep .tg{display:flex;gap:calc(5px*var(--k));flex-wrap:wrap}#survPrep .tg span{padding:0 calc(6px*var(--k));border:1px solid #b08a4a;border-radius:3px;font-size:calc(14px*var(--kt));color:#e9cf98}
-#survPrep h5{margin:calc(14px*var(--k)) 0 calc(4px*var(--k));font:400 calc(17px*var(--kt)) sans-serif;color:#8f7c5e}#survPrep .ds{margin:0;font-size:calc(18px*var(--kt));line-height:1.6;color:#efe2c6;flex:1}#survPrep .ds2{margin:calc(4px*var(--k)) 0;font-size:calc(14px*var(--kt));color:#8f7c5e}
+#survPrep h5{margin:calc(14px*var(--k)) 0 calc(4px*var(--k));font:400 calc(17px*var(--kt)) Pixel12,sans-serif;color:#8f7c5e}#survPrep .ds{margin:0;font-size:calc(18px*var(--kt));line-height:1.6;color:#efe2c6;flex:1}#survPrep .ds2{margin:calc(4px*var(--k)) 0;font-size:calc(14px*var(--kt));color:#8f7c5e}
 #survPrep .db{display:flex;gap:calc(10px*var(--k));justify-content:center;margin-top:calc(8px*var(--k));flex-wrap:wrap}
-#survPrep .db button,#survPrep .bb{border:calc(12px*var(--k)) solid transparent;border-image:url(pack/ui/prep/btn.webp?v=f850bb7611) 40 fill stretch;background:none;color:#f6e6c4;font:900 calc(20px*var(--kt)) "Songti SC","Noto Serif SC",serif;letter-spacing:.15em;padding:calc(2px*var(--k)) calc(18px*var(--k));cursor:pointer;display:inline-flex;align-items:center;gap:calc(6px*var(--k))}
+#survPrep .db button,#survPrep .bb{border:calc(12px*var(--k)) solid transparent;border-image:url(pack/ui/prep/btn.webp?v=f850bb7611) 40 fill stretch;background:none;color:#f6e6c4;font:900 calc(20px*var(--kt)) "Songti SC","Noto Serif SC",Pixel12,serif;letter-spacing:.15em;padding:calc(2px*var(--k)) calc(18px*var(--k));cursor:pointer;display:inline-flex;align-items:center;gap:calc(6px*var(--k))}
 #survPrep .db button em,#survPrep .bb em{width:calc(26px*var(--k));height:calc(26px*var(--k))}#survPrep button:disabled{opacity:.45;cursor:not-allowed}#survPrep .db button:hover:not(:disabled),#survPrep .bb:hover:not(:disabled){filter:brightness(1.25)}
 #survPrep .cd{display:flex;flex-direction:column;align-items:center;text-align:center;max-width:calc(420px*var(--k))}#survPrep .cd .bi{width:calc(120px*var(--k));height:calc(120px*var(--k));padding:calc(12px*var(--k));box-sizing:border-box;background-color:rgba(0,0,0,.35);background-origin:content-box;border:calc(10px*var(--k)) solid transparent;border-image:url(pack/ui/prep/pframe.webp?v=b4a9bc8ee1) 50 stretch}
-#survPrep .cd h3{margin:calc(10px*var(--k)) 0 0;font:900 calc(32px*var(--kt)) "Songti SC","Noto Serif SC",serif;color:#fff2d4}#survPrep .cd>p{margin:calc(2px*var(--k)) 0;font-size:calc(18px*var(--kt))}
+#survPrep .cd h3{margin:calc(10px*var(--k)) 0 0;font:900 calc(32px*var(--kt)) "Songti SC","Noto Serif SC",Pixel12,serif;color:#fff2d4}#survPrep .cd>p{margin:calc(2px*var(--k)) 0;font-size:calc(18px*var(--kt))}
 #survPrep .dv{display:block;width:60%;height:1px;margin:calc(10px*var(--k)) 0;background:linear-gradient(90deg,transparent,#b08a4a,transparent)}#survPrep .up{font-size:calc(24px*var(--kt))!important;color:#efe2c6}#survPrep .up b{color:#ffd86e;margin-right:6px}
 #survPrep .sd{flex:1;font-size:calc(16px*var(--kt))!important;color:#bfa98a}#survPrep .cd .bb{margin-top:auto;font-size:calc(26px*var(--kt))}
-#survPrep .cd.sh{align-items:stretch;text-align:left}#survPrep .cd.sh{position:relative}#survPrep .lkb,#survPrep .lk{position:absolute;right:calc(10px*var(--k));bottom:calc(14px*var(--k));display:flex;flex-direction:column;align-items:center;line-height:1.1}#survPrep .lkb i,#survPrep .lk i{font-style:normal;font-size:.8em}#survPrep .lkb{padding:calc(4px*var(--k)) calc(14px*var(--k));border:1px solid #6a5232;border-radius:calc(6px*var(--k));background:rgba(20,14,9,.7);color:#bfa98a;font:700 calc(14px*var(--kt)) "PingFang SC",sans-serif;cursor:pointer}#survPrep .lkb:hover{color:#f3d08a;border-color:#b08a4a}#survPrep .lkb.on{color:#ffd86e;border-color:#d8b060;background:rgba(80,56,20,.6)}#survPrep .lk{margin:0;font:700 calc(14px*var(--kt)) "PingFang SC",sans-serif;color:#e8c47a}#survPrep .cd.sh .buy{align-self:center;font-family:"PingFang SC",sans-serif}#survPrep .cd.sh .buy b{font-size:calc(26px*var(--kt));color:#fff}
+#survPrep .cd.sh{align-items:stretch;text-align:left}#survPrep .cd.sh{position:relative}#survPrep .lkb,#survPrep .lk{position:absolute;right:calc(10px*var(--k));bottom:calc(14px*var(--k));display:flex;flex-direction:column;align-items:center;line-height:1.1}#survPrep .lkb i,#survPrep .lk i{font-style:normal;font-size:.8em}#survPrep .lkb{padding:calc(4px*var(--k)) calc(14px*var(--k));border:1px solid #6a5232;border-radius:calc(6px*var(--k));background:rgba(20,14,9,.7);color:#bfa98a;font:700 calc(14px*var(--kt)) "PingFang SC",Pixel12,sans-serif;cursor:pointer}#survPrep .lkb:hover{color:#f3d08a;border-color:#b08a4a}#survPrep .lkb.on{color:#ffd86e;border-color:#d8b060;background:rgba(80,56,20,.6)}#survPrep .lk{margin:0;font:700 calc(14px*var(--kt)) "PingFang SC",Pixel12,sans-serif;color:#e8c47a}#survPrep .cd.sh .buy{align-self:center;font-family:"PingFang SC",Pixel12,sans-serif}#survPrep .cd.sh .buy b{font-size:calc(26px*var(--kt));color:#fff}
 #survPrep .ch{display:flex;align-items:center;gap:calc(4px*var(--k))}#survPrep .ch .sl{width:calc(78px*var(--k))}#survPrep .ar2{width:calc(14px*var(--k));height:calc(18px*var(--k));background:url(pack/ui/prep/arrow.webp?v=120753ecd2) center/contain no-repeat;flex:none}
 #survPrep .two{display:grid;grid-template-columns:3fr 1fr;gap:calc(16px*var(--k))}#survPrep .rw{display:flex;gap:calc(8px*var(--k))}#survPrep .rw .sl{width:calc(70px*var(--k))}
 #survPrep .t-wu .pn:first-child{flex:1.35;max-width:calc(820px*var(--k))}
 #survPrep .ab{position:absolute;left:1.5vw;right:1.5vw;bottom:calc(84px*var(--k));height:calc(140px*var(--k));display:flex;align-items:center}
 #survPrep .ab .md{width:calc(150px*var(--k));height:calc(150px*var(--k));flex:none;background:url(pack/ui/prep/medal.webp?v=fc3d23b555) center/contain no-repeat;display:flex;align-items:center;justify-content:center;z-index:1}#survPrep .ab .md em{width:58%;height:58%}
 #survPrep .ar{flex:1;height:calc(124px*var(--k));margin:0 calc(-20px*var(--k));border:calc(22px*var(--k)) solid transparent;border-image:url(pack/ui/prep/bar.webp?v=ae9ba6d4d4) 60 90 fill stretch;display:flex;align-items:center;justify-content:space-around;padding:0 calc(26px*var(--k));box-sizing:border-box}
-#survPrep .ac{display:flex;flex-direction:column;align-items:center;gap:calc(2px*var(--k));cursor:help}#survPrep .ac span{font:700 calc(17px*var(--kt)) "Songti SC","Noto Serif SC",serif;color:#bfa98a}#survPrep .ac em{width:calc(36px*var(--k));height:calc(36px*var(--k))}#survPrep .ac b{font:900 calc(20px*var(--kt)) sans-serif;color:#ffcf6a}
+#survPrep .ac{display:flex;flex-direction:column;align-items:center;gap:calc(2px*var(--k));cursor:help}#survPrep .ac span{font:700 calc(17px*var(--kt)) "Songti SC","Noto Serif SC",Pixel12,serif;color:#bfa98a}#survPrep .ac em{width:calc(36px*var(--k));height:calc(36px*var(--k))}#survPrep .ac b{font:900 calc(20px*var(--kt)) Pixel12,sans-serif;color:#ffcf6a}
 #survPrep .ar .sp{width:1px;align-self:stretch;margin:calc(8px*var(--k)) 0;background:linear-gradient(transparent,#b08a4a,transparent)}
 #survPrep .vt{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(8px*var(--k));width:min(46vw,calc(760px*var(--k)));display:flex;flex-direction:column;gap:calc(4px*var(--k))}
 #survPrep .vb{display:flex;align-items:center;gap:calc(6px*var(--k))}#survPrep .vb>em{width:calc(34px*var(--k));height:calc(34px*var(--k))}
 #survPrep .vf{position:relative;flex:1;height:calc(32px*var(--k));border:calc(10px*var(--k)) solid transparent;border-image:url(pack/ui/prep/pbar.webp?v=88f796ee7a) 40 60 fill stretch;box-sizing:border-box;display:flex;align-items:center;justify-content:center;overflow:hidden}
-#survPrep .vf u{position:absolute;left:0;top:0;bottom:0}#survPrep .vf.zq u{background:linear-gradient(180deg,#5cc0ff,#1f5fa8)}#survPrep .vf.hp u{background:linear-gradient(180deg,#e0463a,#8c1c18)}#survPrep .vf b{position:relative;font:900 calc(16px*var(--kt)) sans-serif;color:#fff;text-shadow:0 1px 2px #000}
-#survPrep .lf{position:absolute;left:1.5vw;bottom:calc(14px*var(--k))}#survPrep .rf{font-size:calc(24px*var(--kt))!important;padding:calc(4px*var(--k)) calc(30px*var(--k))!important}#survPrep .rf span{margin-left:calc(20px*var(--k));font-family:sans-serif;color:#fff}
+#survPrep .vf u{position:absolute;left:0;top:0;bottom:0}#survPrep .vf.zq u{background:linear-gradient(180deg,#5cc0ff,#1f5fa8)}#survPrep .vf.hp u{background:linear-gradient(180deg,#e0463a,#8c1c18)}#survPrep .vf b{position:relative;font:900 calc(16px*var(--kt)) Pixel12,sans-serif;color:#fff;text-shadow:0 1px 2px #000}
+#survPrep .lf{position:absolute;left:1.5vw;bottom:calc(14px*var(--k))}#survPrep .rf{font-size:calc(24px*var(--kt))!important;padding:calc(4px*var(--k)) calc(30px*var(--k))!important}#survPrep .rf span{margin-left:calc(20px*var(--k));font-family:Pixel12,sans-serif;color:#fff}
 #survPrep .shn{margin:0;color:#8f7c5e;font-size:calc(15px*var(--kt))}
 #survPrep .go{position:absolute;right:1.5vw;bottom:calc(10px*var(--k));min-width:calc(250px*var(--k));justify-content:center;font-size:calc(30px*var(--kt))!important;padding:calc(6px*var(--k)) calc(30px*var(--k))!important;letter-spacing:.4em!important}
-#survPrep .ac b,#survPrep .mo b,#survPrep .sm b,#survPrep .pbf b,#survPrep .pbf i,#survPrep .vf b,#survPrep .ln b,#survPrep .rf span,#survPrep .buy b{font-family:"Arial Black","Impact","PingFang SC",sans-serif;letter-spacing:.04em;-webkit-text-stroke:calc(1px*var(--k)) rgba(20,10,4,.9);paint-order:stroke fill}
+#survPrep .ac b,#survPrep .mo b,#survPrep .sm b,#survPrep .pbf b,#survPrep .pbf i,#survPrep .vf b,#survPrep .ln b,#survPrep .rf span,#survPrep .buy b{font-family:"Arial Black","Impact","PingFang SC",Pixel12,sans-serif;letter-spacing:.04em;-webkit-text-stroke:calc(1px*var(--k)) rgba(20,10,4,.9);paint-order:stroke fill}
 #survPrep .pn::-webkit-scrollbar{width:calc(8px*var(--k))}#survPrep .pn::-webkit-scrollbar-track{background:rgba(0,0,0,.35);border:1px solid #5a4226}#survPrep .pn::-webkit-scrollbar-thumb{background:linear-gradient(90deg,#8a6a3a,#d8b060,#8a6a3a);border-radius:4px}#survPrep .pn{scrollbar-color:#b08a4a rgba(0,0,0,.35)}
-#survPrep h4 .so{padding:0 calc(10px*var(--k));height:calc(26px*var(--k));border:calc(6px*var(--k)) solid transparent;border-image:url(pack/ui/prep/sbtn.webp?v=e344f1bf61) 30 fill stretch;background:none;color:#cbb894;font:600 calc(14px*var(--kt)) sans-serif;letter-spacing:0;cursor:pointer;line-height:1}
-#survTut .tskip{position:fixed;right:calc(20px*var(--k));top:calc(18px*var(--k));padding:calc(4px*var(--k)) calc(14px*var(--k));background:linear-gradient(90deg,transparent,rgba(0,0,0,.7) 30%);font:600 calc(22px*var(--kt)) "PingFang SC",sans-serif;color:#9a8a70}#survTut .tskip b{color:#efe2c6}
+#survPrep h4 .so{padding:0 calc(10px*var(--k));height:calc(26px*var(--k));border:calc(6px*var(--k)) solid transparent;border-image:url(pack/ui/prep/sbtn.webp?v=e344f1bf61) 30 fill stretch;background:none;color:#cbb894;font:600 calc(14px*var(--kt)) Pixel12,sans-serif;letter-spacing:0;cursor:pointer;line-height:1}
+#survTut .tskip{position:fixed;right:calc(20px*var(--k));top:calc(18px*var(--k));padding:calc(4px*var(--k)) calc(14px*var(--k));background:linear-gradient(90deg,transparent,rgba(0,0,0,.7) 30%);font:600 calc(22px*var(--kt)) "PingFang SC",Pixel12,sans-serif;color:#9a8a70}#survTut .tskip b{color:#efe2c6}
 @media (max-height:520px){#survPrep .ac span{display:none}}
 #survTut{position:fixed;right:1vw;bottom:calc(16vh + 60px);z-index:10040;display:flex;align-items:stretch;width:min(820px,60vw);cursor:pointer;animation:tutIn .3s ease-out}
 @keyframes tutIn{from{transform:translateY(16px);opacity:0}}
 #survTut .bx{position:relative;flex:1;border:calc(18px*var(--k)) solid transparent;border-image:url(pack/ui/prep/dialog.webp?v=85a6668724) 40 fill stretch;padding:calc(6px*var(--k)) calc(18px*var(--k));color:#f6ecd6;display:flex;flex-direction:column;justify-content:center}
-#survTut .nm{position:absolute;left:calc(14px*var(--k));top:calc(-34px*var(--k));padding:calc(2px*var(--k)) calc(22px*var(--k));border:calc(10px*var(--k)) solid transparent;border-image:url(pack/ui/prep/tab.webp?v=31b0afb157) 30 fill stretch;font:900 calc(22px*var(--kt)) "Songti SC","Noto Serif SC",serif;letter-spacing:.2em;color:#ffe9b8}
-#survTut p{margin:calc(6px*var(--k)) 0;font:600 calc(21px*var(--kt))/1.55 "PingFang SC",sans-serif}#survTut small{align-self:flex-end;font-size:calc(13px*var(--kt));color:#8f7c5e}#survTut small b{color:#e9dcc0}
+#survTut .nm{position:absolute;left:calc(14px*var(--k));top:calc(-34px*var(--k));padding:calc(2px*var(--k)) calc(22px*var(--k));border:calc(10px*var(--k)) solid transparent;border-image:url(pack/ui/prep/tab.webp?v=31b0afb157) 30 fill stretch;font:900 calc(22px*var(--kt)) "Songti SC","Noto Serif SC",Pixel12,serif;letter-spacing:.2em;color:#ffe9b8}
+#survTut p{margin:calc(6px*var(--k)) 0;font:600 calc(21px*var(--kt))/1.55 "PingFang SC",Pixel12,sans-serif}#survTut small{align-self:flex-end;font-size:calc(13px*var(--kt));color:#8f7c5e}#survTut small b{color:#e9dcc0}
 #survTut>em{width:calc(150px*var(--k));flex:none;background:center/cover no-repeat;border:calc(14px*var(--k)) solid transparent;border-image:url(pack/ui/prep/pframe.webp?v=b4a9bc8ee1) 50 stretch;background-clip:padding-box}
 #survTut.big{left:0;right:0;bottom:3vh;width:auto;padding-left:22vw}#survTut.big .bx{min-height:calc(170px*var(--k))}#survTut .lh{position:fixed;left:0;bottom:0;width:34vw;height:88vh;background:left bottom/contain no-repeat;pointer-events:none;filter:drop-shadow(0 0 20px rgba(0,0,0,.6))}
 body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(900px,58vw)}
@@ -6281,11 +6281,11 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(900px,58v
 #survPrep .sc.sold{opacity:.45}#survPrep .sc.lkd{box-shadow:inset 0 0 calc(20px*var(--k)) rgba(0,0,0,.7),0 0 0 1px #e2c27a}
 #survPrep .sc .ci{height:calc(150px*var(--k));display:flex;align-items:center;justify-content:center}
 #survPrep .sc .ico{width:calc(118px*var(--k));height:calc(118px*var(--k));background-size:cover;border:1px solid rgba(184,149,90,.4);box-shadow:0 0 0 2px rgba(0,0,0,.6)}
-#survPrep .sc h3{margin:calc(8px*var(--k)) 0 0;font:700 calc(20px*var(--kt)) "Songti SC","Noto Serif SC",serif;color:#efe4cc;white-space:nowrap}
+#survPrep .sc h3{margin:calc(8px*var(--k)) 0 0;font:700 calc(20px*var(--kt)) "Songti SC","Noto Serif SC",Pixel12,serif;color:#efe4cc;white-space:nowrap}
 #survPrep .sc .rq{margin:calc(2px*var(--k)) 0 calc(8px*var(--k));font-size:calc(13px*var(--kt))}
 #survPrep .sc .cb{display:flex;gap:calc(6px*var(--k));margin-top:auto}
-#survPrep .cbb{padding:calc(4px*var(--k)) calc(12px*var(--k));font:700 calc(15px*var(--kt)) "PingFang SC",sans-serif;cursor:pointer;display:inline-flex;align-items:center;gap:calc(4px*var(--k));white-space:nowrap}
-#survPrep .cbb em{width:calc(18px*var(--k));height:calc(18px*var(--k))}#survPrep .cbb.buy b{font:900 calc(17px*var(--kt)) "Arial Black",Impact,sans-serif;color:#ffe3a0}
+#survPrep .cbb{padding:calc(4px*var(--k)) calc(12px*var(--k));font:700 calc(15px*var(--kt)) "PingFang SC",Pixel12,sans-serif;cursor:pointer;display:inline-flex;align-items:center;gap:calc(4px*var(--k));white-space:nowrap}
+#survPrep .cbb em{width:calc(18px*var(--k));height:calc(18px*var(--k))}#survPrep .cbb.buy b{font:900 calc(17px*var(--kt)) "Arial Black",Impact,Pixel12,sans-serif;color:#ffe3a0}
 #survPrep .sc .lkb,#survPrep .sc .lki{position:absolute;right:calc(6px*var(--k));top:calc(6px*var(--k));bottom:auto;padding:0;width:calc(28px*var(--k));height:calc(28px*var(--k));border:1px solid rgba(184,149,90,.4);border-radius:2px;background:rgba(0,0,0,.5);font-size:calc(15px*var(--kt));font-style:normal;display:flex;align-items:center;justify-content:center;cursor:pointer}
 #survPrep .sc .tip{display:none;position:absolute;left:calc(100% + 10px*var(--k));top:0;width:calc(270px*var(--k));padding:calc(12px*var(--k)) calc(14px*var(--k));text-align:left;cursor:default;z-index:9;pointer-events:none;
   background:rgba(8,7,6,.97);border:1px solid rgba(184,149,90,.6);box-shadow:0 calc(8px*var(--k)) calc(24px*var(--k)) rgba(0,0,0,.7)}
@@ -6305,7 +6305,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(900px,58v
 #survPrep .ar .sp{background:linear-gradient(transparent,rgba(184,149,90,.6),transparent)}
 #survPrep .ac span{color:#a8977a;font-weight:600}
 #survPrep .ac{position:relative;cursor:help}#survPrep .ac .at{display:none;position:absolute;left:50%;bottom:calc(100% + 10px*var(--k));transform:translateX(-50%);width:calc(300px*var(--k));padding:calc(10px*var(--k)) calc(14px*var(--k));text-align:left;z-index:20;pointer-events:none;background:rgba(8,7,6,.97);border:1px solid rgba(184,149,90,.6);box-shadow:0 calc(8px*var(--k)) calc(24px*var(--k)) rgba(0,0,0,.7)}
-#survPrep .ac .at h5{margin:0 0 calc(4px*var(--k));font:700 calc(18px*var(--kt)) "Songti SC","Noto Serif SC",serif;color:#e6c98a}#survPrep .ac .at p{margin:0;font:500 calc(14px*var(--kt))/1.55 "PingFang SC",sans-serif;color:#e6dccb;white-space:normal}#survPrep .ac .at p.cur{margin-top:calc(6px*var(--k));color:#ffd86e;font-weight:700}
+#survPrep .ac .at h5{margin:0 0 calc(4px*var(--k));font:700 calc(18px*var(--kt)) "Songti SC","Noto Serif SC",Pixel12,serif;color:#e6c98a}#survPrep .ac .at p{margin:0;font:500 calc(14px*var(--kt))/1.55 "PingFang SC",Pixel12,sans-serif;color:#e6dccb;white-space:normal}#survPrep .ac .at p.cur{margin-top:calc(6px*var(--k));color:#ffd86e;font-weight:700}
 #survPrep .ac:first-child .at{left:0;transform:none}#survPrep .ac:last-child .at{left:auto;right:0;transform:none}
 @media (pointer:fine){#survPrep .ac:hover .at{display:block}#survPrep .ac:hover b{color:#fff3c8}}
 #survPrep .ac.on .at{display:block}
@@ -6334,7 +6334,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(900px,58v
 .bk::before{content:'';position:absolute;left:calc(5px*var(--k,1));top:12%;bottom:12%;width:calc(3px*var(--k,1));background:repeating-linear-gradient(180deg,#e8dcc0 0 3px,transparent 3px 22%)}
 .bk::after{content:'';position:absolute;right:0;top:0;width:22%;height:16%;background:linear-gradient(225deg,var(--rc) 0 45%,transparent 46%);opacity:.85}
 .bk em{position:absolute;left:28%;top:14%;width:44%;aspect-ratio:1;background:#e9dcbc center/88% no-repeat;border:1px solid rgba(0,0,0,.5);box-shadow:0 0 0 2px rgba(233,220,188,.25)}
-.bk span{position:absolute;right:9%;top:13%;width:16%;min-height:44%;padding:3px 0;box-sizing:border-box;background:#efe4c8;color:#2a1a10;writing-mode:vertical-rl;font:700 calc(11px*var(--kt,1)) "Songti SC","Noto Serif SC",serif;letter-spacing:1px;display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 0 0 1px rgba(0,0,0,.4)}
+.bk span{position:absolute;right:9%;top:13%;width:16%;min-height:44%;padding:3px 0;box-sizing:border-box;background:#efe4c8;color:#2a1a10;writing-mode:vertical-rl;font:700 calc(11px*var(--kt,1)) "Songti SC","Noto Serif SC",Pixel12,serif;letter-spacing:1px;display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 0 0 1px rgba(0,0,0,.4)}
 #survPick h3{border:1px solid rgba(184,149,90,.6)!important;border-image:none!important;background:#140f0b!important;color:#e6c98a!important}
 /* 书封贴图：小窗 / 题签位置按原图量好的比例 */
 .bk.im{background-color:transparent!important;background-size:100% 100%!important;box-shadow:none;height:calc(134px*var(--k,1));filter:drop-shadow(2px 4px 5px rgba(0,0,0,.6))}.bk.im::before,.bk.im::after{display:none}
@@ -6773,10 +6773,10 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       if (k) {
         if (i >= 0 && S.flash[i] > 0) { ctx.fillStyle = k.color; ctx.globalAlpha = .45; ctx.fillRect(x, y, sz, sz); ctx.globalAlpha = 1; }
         if (i >= 0 && S.wind && S.wind.i === i) { ctx.fillStyle = 'rgba(255,230,140,.45)'; ctx.fillRect(x, y + sz * (1 - S.wind.t / S.wind.dur), sz, sz * S.wind.t / S.wind.dur); }   // 前摇进度
-        if (k.ik && hok(k.ik)) ctx.drawImage(HIMG[k.ik], x, y, sz, sz); else { ctx.font = 'bold 20px "PingFang SC",sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = k.color; ctx.fillText(k.icon, x + sz / 2, y + sz / 2 + 1); }
+        if (k.ik && hok(k.ik)) ctx.drawImage(HIMG[k.ik], x, y, sz, sz); else { ctx.font = 'bold 20px "PingFang SC",Pixel12,sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = k.color; ctx.fillText(k.icon, x + sz / 2, y + sz / 2 + 1); }
         if (!cur) { ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fillRect(x, y, sz, sz); }   // 没轮到的格子压暗
-        { const t = lbl != null ? lbl : 'LV' + lvOf(S.slots[i]); if (t) { ctx.font = '900 ' + (sz > 30 ? 9 : 8) + 'px "Arial Black",Impact,sans-serif'; ctx.textAlign = 'right'; ctx.textBaseline = 'alphabetic'; ctx.lineWidth = 2.5; ctx.lineJoin = 'round'; ctx.strokeStyle = 'rgba(8,6,4,.95)'; ctx.strokeText(t, x + sz - 2, y + sz - 2); ctx.fillStyle = '#e6d3a4'; ctx.fillText(t, x + sz - 2, y + sz - 2); ctx.textAlign = 'left'; } }
-      } else if (hok('empty')) { ctx.fillStyle = '#0b0705'; ctx.fillRect(x, y, sz, sz); ctx.globalAlpha = .3; ctx.drawImage(HIMG.empty, x, y, sz, sz); ctx.globalAlpha = 1; }   // 空格压暗，和有图标的格子拉开 else { ctx.font = 'bold 18px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#4a3a2a'; ctx.fillText('+', x + sz / 2, y + sz / 2 + 1); }
+        { const t = lbl != null ? lbl : 'LV' + lvOf(S.slots[i]); if (t) { ctx.font = '900 ' + (sz > 30 ? 9 : 8) + 'px "Arial Black",Impact,Pixel12,sans-serif'; ctx.textAlign = 'right'; ctx.textBaseline = 'alphabetic'; ctx.lineWidth = 2.5; ctx.lineJoin = 'round'; ctx.strokeStyle = 'rgba(8,6,4,.95)'; ctx.strokeText(t, x + sz - 2, y + sz - 2); ctx.fillStyle = '#e6d3a4'; ctx.fillText(t, x + sz - 2, y + sz - 2); ctx.textAlign = 'left'; } }
+      } else if (hok('empty')) { ctx.fillStyle = '#0b0705'; ctx.fillRect(x, y, sz, sz); ctx.globalAlpha = .3; ctx.drawImage(HIMG.empty, x, y, sz, sz); ctx.globalAlpha = 1; }   // 空格压暗，和有图标的格子拉开 else { ctx.font = 'bold 18px Pixel12,sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#4a3a2a'; ctx.fillText('+', x + sz / 2, y + sz / 2 + 1); }
       if (i >= 0 && S.skip[i] > 0) { ctx.fillStyle = 'rgba(160,160,170,.5)'; ctx.fillRect(x, y, sz, sz); }
       if (!k) { ctx.strokeStyle = 'rgba(184,149,90,.28)'; ctx.lineWidth = 1; ctx.strokeRect(x + .5, y + .5, sz - 1, sz - 1); }
       else {   // 有东西的格子：细暗金边；轮到出手的那格换亮金边 + 柔光
@@ -6804,16 +6804,16 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     };
     S.hpLag = S.hpLag == null ? r : Math.max(r, S.hpLag - .4 / 60);
     const capW = frameBar(by, bh, r, S.hpLag, '#f05a44', '#c02a22', '#6c1210');
-    ctx.font = '900 ' + (fine ? 13 : 11) + 'px "Arial Black",Impact,"PingFang SC",sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(20,8,6,.9)';
+    ctx.font = '900 ' + (fine ? 13 : 11) + 'px "Arial Black",Impact,"PingFang SC",Pixel12,sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(20,8,6,.9)';
     if (hok('blood')) { const s2 = bh + 14; ctx.drawImage(HIMG.blood, bx - capW - s2 * .55, by + bh / 2 - s2 / 2, s2, s2); }
     const ht = Math.ceil(hero.hp * 10 - 1e-6) + ' / ' + Math.round(mh * 10); ctx.strokeText(ht, HW / 2, by + bh / 2 + 1); ctx.fillStyle = '#fff2d8'; ctx.fillText(ht, HW / 2, by + bh / 2 + 1);
     { const zh = fine ? 12 : 9, zy = by - (fine ? 15 : 13) - zh, zr = Math.max(0, Math.min(1, S.zq / zqMax()));   // 真气：蓝条叠在血条上方
       const capZ = frameBar(zy, zh, zr, 0, '#7ad0ff', '#2f86d8', '#164a8a');
       if (hok('taiji')) { const s3 = zh + 14; ctx.drawImage(HIMG.taiji, bx - capZ - s3 * .55, zy + zh / 2 - s3 / 2, s3, s3); }
-      if (fine) { ctx.font = '900 10px "Arial Black",Impact,"PingFang SC",sans-serif'; ctx.textBaseline = 'middle'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(8,16,30,.9)'; const zt = '真气 ' + Math.round(S.zq * 10) + ' / ' + Math.round(zqMax() * 10); ctx.strokeText(zt, HW / 2, zy + zh / 2 + 1); ctx.fillStyle = '#e2f4ff'; ctx.fillText(zt, HW / 2, zy + zh / 2 + 1); } }
+      if (fine) { ctx.font = '900 10px "Arial Black",Impact,"PingFang SC",Pixel12,sans-serif'; ctx.textBaseline = 'middle'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(8,16,30,.9)'; const zt = '真气 ' + Math.round(S.zq * 10) + ' / ' + Math.round(zqMax() * 10); ctx.strokeText(zt, HW / 2, zy + zh / 2 + 1); ctx.fillStyle = '#e2f4ff'; ctx.fillText(zt, HW / 2, zy + zh / 2 + 1); } }
     // 右侧大字：击杀、连击
     const nf = fine ? 46 : 30, rx = HW - (fine ? 22 : 12), ry = HH * (fine ? .36 : .3);
-    const big = (num, label, y, a) => { ctx.globalAlpha = a * .92; ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round'; ctx.font = '900 ' + nf + 'px "Arial Black",Impact,sans-serif'; ctx.lineWidth = 6; ctx.strokeStyle = 'rgba(8,6,4,.85)'; ctx.strokeText(num, rx, y); ctx.fillStyle = '#efe4cc'; ctx.fillText(num, rx, y); ctx.font = 'bold ' + (fine ? 17 : 12) + 'px "Songti SC","STSong","Noto Serif SC",serif'; ctx.lineWidth = 4; ctx.strokeText(label, rx, y + nf * .7); ctx.fillStyle = '#b8955a'; ctx.fillText(label, rx, y + nf * .7); ctx.globalAlpha = 1; };   // 11/11：游戏数字字体 + 暗金小标签
+    const big = (num, label, y, a) => { ctx.globalAlpha = a * .92; ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round'; ctx.font = '900 ' + nf + 'px "Arial Black",Impact,Pixel12,sans-serif'; ctx.lineWidth = 6; ctx.strokeStyle = 'rgba(8,6,4,.85)'; ctx.strokeText(num, rx, y); ctx.fillStyle = '#efe4cc'; ctx.fillText(num, rx, y); ctx.font = 'bold ' + (fine ? 17 : 12) + 'px "Songti SC","STSong","Noto Serif SC",Pixel12,serif'; ctx.lineWidth = 4; ctx.strokeText(label, rx, y + nf * .7); ctx.fillStyle = '#b8955a'; ctx.fillText(label, rx, y + nf * .7); ctx.globalAlpha = 1; };   // 11/11：游戏数字字体 + 暗金小标签
     big(String(typeof kills === 'number' ? kills : 0), '击杀', ry, 1);
     if (S.combo > 1) { const pp = 1 + .3 * (S.cPop || 0); ctx.save(); ctx.translate(rx, ry + nf * 1.7); ctx.scale(pp, pp); ctx.translate(-rx, -(ry + nf * 1.7)); big(String(S.combo), '连击', ry + nf * 1.7, Math.min(1, S.comboT / .6)); ctx.restore(); }
     cmbDraw(HW, HH, fine, 1 / 60);
@@ -6823,7 +6823,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       ctx.save(); ctx.fillStyle = 'rgba(14,9,6,.82)'; ctx.fillRect(bx - 3, by - 2, bw + 6, bh + 4); ctx.strokeStyle = '#b08a4a'; ctx.lineWidth = 1; ctx.strokeRect(bx - 2.5, by - 1.5, bw + 5, bh + 3);
       const gx = ctx.createLinearGradient(0, by, 0, by + bh); gx.addColorStop(0, '#ffe08a'); gx.addColorStop(1, '#b8801e'); ctx.fillStyle = gx; ctx.fillRect(bx, by, bw * r, bh);
       if (S.lvFx > 0) { ctx.globalAlpha = Math.min(1, S.lvFx) * .6; ctx.fillStyle = '#fff6c8'; ctx.fillRect(bx, by, bw, bh); ctx.globalAlpha = 1; S.lvFx = Math.max(0, S.lvFx - 1 / 60); }
-      ctx.font = 'bold 11px "PingFang SC",sans-serif'; ctx.textBaseline = 'middle'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(20,10,4,.95)'; ctx.fillStyle = '#fff2d0';
+      ctx.font = 'bold 11px "PingFang SC",Pixel12,sans-serif'; ctx.textBaseline = 'middle'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(20,10,4,.95)'; ctx.fillStyle = '#fff2d0';
       ctx.textAlign = 'left'; ctx.strokeText('修为 LV.' + S.lv, bx + 6, by + bh / 2 + .5); ctx.fillText('修为 LV.' + S.lv, bx + 6, by + bh / 2 + .5);
       ctx.textAlign = 'right'; const pc = Math.floor(r * 100) + '%'; ctx.strokeText(pc, bx + bw - 6, by + bh / 2 + .5); ctx.fillText(pc, bx + bw - 6, by + bh / 2 + .5);
       if (S.bank > 0) { ctx.textAlign = 'left'; ctx.fillStyle = '#ffd86e'; const t = '待修炼 ×' + S.bank; ctx.strokeText(t, bx + bw + (fine ? 10 : 10), by + bh / 2 + .5); ctx.fillText(t, bx + bw + 10, by + bh / 2 + .5); }
@@ -6831,7 +6831,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       if (W.started && !W.pick) {
         const left = Math.max(0, Math.ceil(WT() - W.t)), tt = String(left / 60 | 0).padStart(2, '0') + ':' + String(left % 60).padStart(2, '0'), urg = left <= 10;
         const fs = fine ? 18 : 13, tx = fine ? HW / 2 : bx - (fine ? 0 : 44), ty = fine ? by + bh + 15 : by + bh / 2 + .5, ih = fs + 6;
-        ctx.font = '900 ' + fs + 'px "Arial Black",Impact,sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; const tw = ctx.measureText(tt).width, x0 = tx - (tw + ih + 4) / 2;
+        ctx.font = '900 ' + fs + 'px "Arial Black",Impact,Pixel12,sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; const tw = ctx.measureText(tt).width, x0 = tx - (tw + ih + 4) / 2;
         if (hok('hourglass')) ctx.drawImage(HIMG.hourglass, x0, ty - ih / 2, ih, ih);
         ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(14,8,4,.95)'; ctx.fillStyle = urg && (performance.now() / 300 | 0) % 2 ? '#ff6a4a' : '#f3e6c8';
         ctx.strokeText(tt, x0 + ih + 4, ty + 1); ctx.fillText(tt, x0 + ih + 4, ty + 1);
@@ -6868,15 +6868,15 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
         const g = ctx.createLinearGradient(0, iy, 0, iy + ih); g.addColorStop(0, '#f05a44'); g.addColorStop(.5, '#c02a22'); g.addColorStop(1, '#6c1210'); ctx.fillStyle = g; ctx.fillRect(ix, iy, iw * r, ih);
         ctx.fillStyle = 'rgba(255,255,255,.18)'; ctx.fillRect(ix, iy, iw * r, ih * .35);
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(20,6,4,.95)'; ctx.fillStyle = '#fff2d8';
-        ctx.font = '900 ' + D.fh + 'px Arial Black,Impact,sans-serif'; const ht = String(Math.ceil(z.hp * 10)); ctx.strokeText(ht, cx, by + bh / 2 + .5); ctx.fillText(ht, cx, by + bh / 2 + .5);
-        ctx.font = 'bold ' + D.fn + 'px "Songti SC","STSong","Noto Serif SC",serif'; const nm = (lite ? '精锐 · ' : '') + (z.bossLabel || z.T.name || '敌将'), nw = ctx.measureText(nm).width + D.fn * 2.6;
+        ctx.font = '900 ' + D.fh + 'px Arial Black,Impact,Pixel12,sans-serif'; const ht = String(Math.ceil(z.hp * 10)); ctx.strokeText(ht, cx, by + bh / 2 + .5); ctx.fillText(ht, cx, by + bh / 2 + .5);
+        ctx.font = 'bold ' + D.fn + 'px "Songti SC","STSong","Noto Serif SC",Pixel12,serif'; const nm = (lite ? '精锐 · ' : '') + (z.bossLabel || z.T.name || '敌将'), nw = ctx.measureText(nm).width + D.fn * 2.6;
         if (BIMG.n.complete && BIMG.n.naturalWidth) bar3(BIMG.n, 40, cx - nw / 2, ny, nw, nh); else { ctx.fillStyle = 'rgba(30,18,10,.9)'; ctx.fillRect(cx - nw / 2, ny, nw, nh); }
         ctx.fillStyle = D === BG ? '#f3d08a' : '#d9cfb4'; ctx.strokeText(nm, cx, ny + nh / 2 + .5); ctx.fillText(nm, cx, ny + nh / 2 + .5);
       }
       ctx.globalAlpha = 1; ctx.restore(); ctx.restore(); return;   // 有敌将名牌时不再写节点名
     }
     // 波次与倒计时
-    ctx.font = 'bold 14px "PingFang SC",sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#ffe9a0';
+    ctx.font = 'bold 14px "PingFang SC",Pixel12,sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#ffe9a0';
     const left = Math.max(0, Math.ceil(WT() - W.t));
     ctx.textBaseline = 'alphabetic';
     if (RT.on && !RT.node) { ctx.restore(); return; }   // 路线图还没选节点：不画波次文字
@@ -6894,22 +6894,22 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   // 隐藏普攻和换武器按钮
   const st = document.createElement('style'); st.textContent = '#bA,#bWeapon,#wp button[data-w]{display:none!important}'
     + '#waveBan{position:fixed;left:50%;top:34%;transform:translate(-50%,-50%);width:min(70vw,620px);aspect-ratio:900/307;background:url(pack/ui/hud/banner.webp?v=2d3e7a4842) center/contain no-repeat;z-index:10010;pointer-events:none;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:3%;animation:wbIn .35s ease-out;transition:opacity .5s}'
-    + '#waveBan.out{opacity:0}#waveBan .t{font:900 clamp(24px,4.4vw,44px) "Songti SC","STSong","Noto Serif SC",serif;letter-spacing:.3em;text-indent:.3em;color:#f0c66a;text-shadow:0 2px 0 #3a2410,0 0 12px rgba(0,0,0,.8)}'
-    + '#waveBan .s{margin-top:0;padding:0 22px;font:700 clamp(13px,1.8vw,18px) "PingFang SC",sans-serif;letter-spacing:.4em;color:#fff2d8;background:radial-gradient(ellipse,rgba(200,200,200,.35),transparent 70%)}@keyframes wbIn{from{opacity:0;transform:translate(-50%,-50%) scale(.85)}}'
+    + '#waveBan.out{opacity:0}#waveBan .t{font:900 clamp(24px,4.4vw,44px) "Songti SC","STSong","Noto Serif SC",Pixel12,serif;letter-spacing:.3em;text-indent:.3em;color:#f0c66a;text-shadow:0 2px 0 #3a2410,0 0 12px rgba(0,0,0,.8)}'
+    + '#waveBan .s{margin-top:0;padding:0 22px;font:700 clamp(13px,1.8vw,18px) "PingFang SC",Pixel12,sans-serif;letter-spacing:.4em;color:#fff2d8;background:radial-gradient(ellipse,rgba(200,200,200,.35),transparent 70%)}@keyframes wbIn{from{opacity:0;transform:translate(-50%,-50%) scale(.85)}}'
     + '@media (pointer:fine){#joy{display:none!important}}'
     + '#bR{background:#241812 url(pack/ui/hud/dodge.webp?v=8e661534e0) center/cover no-repeat!important;border-radius:8px!important;border:1px solid #c9a24a!important;font-size:0!important;width:60px!important;height:60px!important}'
-    + '@media (pointer:fine){#bR:after{content:"空格";position:absolute;left:0;right:0;bottom:-18px;font:700 12px "PingFang SC",sans-serif;color:#f3dc9a;text-shadow:0 1px 2px #000}}'
+    + '@media (pointer:fine){#bR:after{content:"空格";position:absolute;left:0;right:0;bottom:-18px;font:700 12px "PingFang SC",Pixel12,sans-serif;color:#f3dc9a;text-shadow:0 1px 2px #000}}'
     + '#bPause{background:url(pack/ui/hud/pause.webp?v=30263bc533) top center/100% auto no-repeat!important;border:0!important;width:44px!important;height:63px!important;box-shadow:none!important}#bPause .pause-icon-bar{display:none!important}'
     + '#survPick button.q0,#survPick button.q1,#survPick button.q2,#survPick button.q3{background:center/100% 100% no-repeat!important;border:0!important;width:156px!important;min-height:222px;padding:22px 14px 18px!important;justify-content:center;gap:4px;border-radius:0!important}'
     + '#survPick button.q0{background-image:url(pack/ui/card/q0.webp?v=58bdbb2708)!important}#survPick button.q1{background-image:url(pack/ui/card/q1.webp?v=b8ef655082)!important}#survPick button.q2{background-image:url(pack/ui/card/q2.webp?v=3b361b03ae)!important}#survPick button.q3{background-image:url(pack/ui/card/q3.webp?v=a2e509af73)!important}'
     + '#survPick button.q0:hover,#survPick button.q1:hover,#survPick button.q2:hover,#survPick button.q3:hover{transform:translateY(-4px);filter:brightness(1.15)}'
     + '#survPick em.ic{display:block;width:64px;height:64px;background:center/cover;border-radius:3px;box-shadow:0 0 0 1px rgba(216,176,96,.6);margin:4px 0}'
     + '@media (max-height:520px){#survPick button.q0,#survPick button.q1,#survPick button.q2,#survPick button.q3{width:130px!important;min-height:180px;padding:16px 10px 12px!important}#survPick em.ic{width:48px;height:48px}}'
-    + '#survRep{position:fixed;left:14px;bottom:calc(120px + env(safe-area-inset-bottom));z-index:10011;display:flex;gap:12px;align-items:center;padding:8px 16px;background:linear-gradient(90deg,rgba(16,10,6,.92),rgba(16,10,6,.6));border-left:3px solid #d8b060;color:#f6e6c4;font:700 15px "PingFang SC",sans-serif;animation:repIn .35s ease-out;transition:opacity .5s;pointer-events:none}#survRep b{color:#ffd86e;font-family:"Songti SC","Noto Serif SC",serif;letter-spacing:.2em}#survRep.out{opacity:0}@keyframes repIn{from{transform:translateX(-30px);opacity:0}}'
+    + '#survRep{position:fixed;left:14px;bottom:calc(120px + env(safe-area-inset-bottom));z-index:10011;display:flex;gap:12px;align-items:center;padding:8px 16px;background:linear-gradient(90deg,rgba(16,10,6,.92),rgba(16,10,6,.6));border-left:3px solid #d8b060;color:#f6e6c4;font:700 15px "PingFang SC",Pixel12,sans-serif;animation:repIn .35s ease-out;transition:opacity .5s;pointer-events:none}#survRep b{color:#ffd86e;font-family:"Songti SC","Noto Serif SC",Pixel12,serif;letter-spacing:.2em}#survRep.out{opacity:0}@keyframes repIn{from{transform:translateX(-30px);opacity:0}}'
     + PREP_CSS
-    + '#survPick{position:fixed;inset:0;z-index:10020;display:flex;align-items:center;justify-content:center;background:rgba(10,6,4,.6);font-family:"PingFang SC","Noto Sans CJK SC",sans-serif}'
+    + '#survPick{position:fixed;inset:0;z-index:10020;display:flex;align-items:center;justify-content:center;background:rgba(10,6,4,.6);font-family:"PingFang SC","Noto Sans CJK SC",Pixel12,sans-serif}'
     + '#survPick .p{position:relative;box-sizing:border-box;border:clamp(24px,5vh,40px) solid transparent;border-image:url(pack/ui/prep/panel.webp?v=d3bfe0890e) 90 fill stretch;padding:clamp(22px,4.5vh,40px) clamp(14px,2vw,26px) clamp(10px,2vh,20px);color:#f2e4c8;text-align:center;max-width:96vw}'
-    + '#survPick h3{position:absolute;left:50%;top:clamp(-30px,-4.5vh,-18px);transform:translateX(-50%);margin:0;height:clamp(34px,6.5vh,48px);padding:0 clamp(24px,3vw,40px);display:flex;align-items:center;white-space:nowrap;border:12px solid transparent;border-image:url(pack/ui/prep/btn.webp?v=f850bb7611) 40 fill stretch;color:#f3d08a;letter-spacing:4px;font:900 clamp(16px,3vh,24px) "Songti SC","STSong","Noto Serif SC",serif;text-shadow:0 2px 0 #2a1608}#survPick .row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}'
+    + '#survPick h3{position:absolute;left:50%;top:clamp(-30px,-4.5vh,-18px);transform:translateX(-50%);margin:0;height:clamp(34px,6.5vh,48px);padding:0 clamp(24px,3vw,40px);display:flex;align-items:center;white-space:nowrap;border:12px solid transparent;border-image:url(pack/ui/prep/btn.webp?v=f850bb7611) 40 fill stretch;color:#f3d08a;letter-spacing:4px;font:900 clamp(16px,3vh,24px) "Songti SC","STSong","Noto Serif SC",Pixel12,serif;text-shadow:0 2px 0 #2a1608}#survPick .row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}'
     + '#survPick button{width:140px;padding:12px 8px;background:#2e2118;border:1px solid #8a6a3a;border-radius:8px;color:#f2e4c8;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px}'
     + '#survPick button:hover{border-color:#ffd86e;background:#3a2a1c}#survPick b{font-size:30px}#survPick span{font-size:16px;font-weight:700}#survPick small{color:#cdb98e;font-size:12px}#survPick p{margin:10px 0 0;color:#a08d70;font-size:12px}'; document.head.appendChild(st);
   // ---------- 构筑总览（TAB / 右上「构」按钮；路线图和战斗里都能开，开着时战斗暂停） ----------
@@ -6937,7 +6937,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     let box = document.getElementById('survBuild');
     if (!buildOpen) { if (box) box.remove(); return; }
     if (!box) {
-      if (!document.getElementById('survBuildCss')) { const st = document.createElement('style'); st.id = 'survBuildCss'; st.textContent = '#survBuild{position:fixed;inset:0;z-index:10030;display:flex;align-items:center;justify-content:center;background:rgba(10,6,4,.62);font-family:"PingFang SC","Noto Sans CJK SC",sans-serif;color:#eee}#survBuild .bp{width:min(92vw,520px);max-height:86vh;overflow:auto;background:#1c140e;border:2px solid #8a6a3a;border-radius:8px;padding:10px 14px}#survBuild h3{margin:0 0 4px;font-size:16px;display:flex;justify-content:space-between;color:#ffd27a}#survBuild h4{margin:10px 0 3px;font-size:13px;color:#d8b070;border-bottom:1px solid #4a3820}#survBuild .r{display:flex;gap:8px;align-items:baseline;font-size:13px;padding:2px 0}#survBuild .gd{font-size:11px;opacity:.7;margin:0 0 3px 8px}#survBuild .t{opacity:.6;font-size:11px}#survBuild .v{margin-left:auto;white-space:nowrap;font-size:12px;opacity:.85}#survBuild .mv{display:flex;gap:3px;margin-left:6px}#survBuild .mv button{background:#2e2118;border:1px solid #8a6a3a;color:#ddd;border-radius:4px;font-size:12px;padding:2px 8px}#survBuild .mv button:disabled{opacity:.25}#survBuild .x{background:none;border:1px solid #8a6a3a;color:#ddd;border-radius:4px;font-size:14px;padding:0 8px}#survBuildBtn{position:fixed;top:10px;right:104px;z-index:10025;width:34px;height:34px;border-radius:6px;border:2px solid #8a6a3a;background:rgba(28,20,14,.85);color:#ffd27a;font-size:15px;display:none}'; document.head.appendChild(st); }
+      if (!document.getElementById('survBuildCss')) { const st = document.createElement('style'); st.id = 'survBuildCss'; st.textContent = '#survBuild{position:fixed;inset:0;z-index:10030;display:flex;align-items:center;justify-content:center;background:rgba(10,6,4,.62);font-family:"PingFang SC","Noto Sans CJK SC",Pixel12,sans-serif;color:#eee}#survBuild .bp{width:min(92vw,520px);max-height:86vh;overflow:auto;background:#1c140e;border:2px solid #8a6a3a;border-radius:8px;padding:10px 14px}#survBuild h3{margin:0 0 4px;font-size:16px;display:flex;justify-content:space-between;color:#ffd27a}#survBuild h4{margin:10px 0 3px;font-size:13px;color:#d8b070;border-bottom:1px solid #4a3820}#survBuild .r{display:flex;gap:8px;align-items:baseline;font-size:13px;padding:2px 0}#survBuild .gd{font-size:11px;opacity:.7;margin:0 0 3px 8px}#survBuild .t{opacity:.6;font-size:11px}#survBuild .v{margin-left:auto;white-space:nowrap;font-size:12px;opacity:.85}#survBuild .mv{display:flex;gap:3px;margin-left:6px}#survBuild .mv button{background:#2e2118;border:1px solid #8a6a3a;color:#ddd;border-radius:4px;font-size:12px;padding:2px 8px}#survBuild .mv button:disabled{opacity:.25}#survBuild .x{background:none;border:1px solid #8a6a3a;color:#ddd;border-radius:4px;font-size:14px;padding:0 8px}#survBuildBtn{position:fixed;top:10px;right:104px;z-index:10025;width:34px;height:34px;border-radius:6px;border:2px solid #8a6a3a;background:rgba(28,20,14,.85);color:#ffd27a;font-size:15px;display:none}'; document.head.appendChild(st); }
       box = document.createElement('div'); box.id = 'survBuild'; document.body.appendChild(box);
       box.onclick = e => {
         if (e.target === box || e.target.classList.contains('x')) { toggleBuild(false); return; }
@@ -7218,7 +7218,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       body.szz-intro #wp, body.szz-intro #bMute, body.szz-intro #bWeapon { display: none !important; }
       #tStyle0 { display: none; }
       #tName, #tStart, #tHelp, #tNovice, #tBoard, #tHintOff {
-        position: fixed; z-index: 7; font-family: "PingFang SC","Noto Sans CJK SC","Microsoft YaHei",sans-serif;
+        position: fixed; z-index: 7; font-family: "PingFang SC","Noto Sans CJK SC","Microsoft YaHei",Pixel12,sans-serif;
         box-sizing: border-box; -webkit-tap-highlight-color: transparent;
       }
       #tName {
@@ -7263,18 +7263,18 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       #tModeTip {
         position: fixed; z-index: 8; transform: translate(-50%, 0); pointer-events: none;
         background: rgba(18,12,26,.94); border: 1.5px solid #c9971f; border-radius: 8px;
-        color: #f2e6c9; font: 700 13px/1.5 "PingFang SC",sans-serif; padding: 5px 10px;
+        color: #f2e6c9; font: 700 13px/1.5 "PingFang SC",Pixel12,sans-serif; padding: 5px 10px;
         opacity: 0; transition: opacity .18s; white-space: nowrap;
       }
       #tTip {
-        position: fixed; z-index: 8; color: #ff8f7a; font: 700 14px/1.4 "PingFang SC",sans-serif;
+        position: fixed; z-index: 8; color: #ff8f7a; font: 700 14px/1.4 "PingFang SC",Pixel12,sans-serif;
         text-shadow: 0 1px 3px #000; transform: translate(-50%,0); pointer-events: none; opacity: 0;
         transition: opacity .2s;
       }
       #tHelpPanel {
         position: fixed; z-index: 9; left: 50%; top: 50%; transform: translate(-50%,-50%);
         background: rgba(18,12,26,.94); border: 2px solid #c9971f; border-radius: 14px; padding: 18px 22px;
-        color: #f2e6c9; font: 600 14px/1.9 "PingFang SC","Noto Sans CJK SC",sans-serif;
+        color: #f2e6c9; font: 600 14px/1.9 "PingFang SC","Noto Sans CJK SC",Pixel12,sans-serif;
         box-shadow: 0 12px 40px rgba(0,0,0,.6); display: none; max-width: 86vw; text-align: left;
       }
       #tHelpPanel b { color: #ffd86e; }
@@ -7287,7 +7287,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
         position:fixed; inset:0; z-index:9; display:none; box-sizing:border-box; padding:20px;
         align-items:center; justify-content:center; overflow:auto;
         background:rgba(8,6,5,.5); -webkit-backdrop-filter:blur(2px); backdrop-filter:blur(2px);
-        color:#ead9b8; font-family:"PingFang SC","Microsoft YaHei",sans-serif;
+        color:#ead9b8; font-family:"PingFang SC","Microsoft YaHei",Pixel12,sans-serif;
       }
       #tChapter.open { display:flex; }
       #tChapter [hidden] { display:none !important; }
@@ -7296,7 +7296,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       #tChapterPick { display:flex; flex-direction:column; border-right:2px solid #8b693c; background:linear-gradient(90deg,rgba(26,20,16,.3),rgba(15,12,10,.12)); }
       #tChapterPanel { display:flex; flex-direction:column; gap:clamp(7px,1.2vh,13px); overflow:hidden; }
       #tPrepScroll { min-height:0; flex:1 1 auto; display:flex; flex-direction:column; gap:clamp(7px,1.2vh,13px); overflow-y:auto; overscroll-behavior:contain; padding-bottom:82px; box-sizing:border-box; }
-      #tChapter h2 { margin:0; color:#f0d58f; font:700 clamp(19px,2.4vw,29px)/1.2 "PingFang SC","Microsoft YaHei",sans-serif; letter-spacing:.08em; }
+      #tChapter h2 { margin:0; color:#f0d58f; font:700 clamp(19px,2.4vw,29px)/1.2 "PingFang SC","Microsoft YaHei",Pixel12,sans-serif; letter-spacing:.08em; }
       #tChapter p { margin:3px 0 0; color:#c4b18e; font-size:clamp(11px,1.2vw,14px); }
       #tChapterNotice { margin:8px 0 0 !important; color:#d7b579 !important; font-size:clamp(10px,1.05vw,12px) !important; line-height:1.5; text-align:left; }
       .tChapterCard { width:100%; min-height:clamp(91px,17vh,150px); margin-top:clamp(8px,1.5vh,15px); padding:clamp(11px,1.5vw,18px); box-sizing:border-box; border:1px solid #9d7845; border-radius:9px; color:#e9d8b7; text-align:left; background:repeating-linear-gradient(4deg,rgba(225,187,121,.035) 0 2px,transparent 2px 12px),linear-gradient(145deg,#62462c,#382a20); cursor:pointer; touch-action:manipulation; }
@@ -7311,7 +7311,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       #tPrepHeader { display:flex; align-items:center; justify-content:space-between; gap:8px; flex:none; }
       #tPrepHeader p { margin:0; }
       #tPrepTarget { text-align:right; white-space:nowrap; }
-      #tMastery,#tTipBag{padding:4px 12px;border:1px solid #9c7843;border-radius:6px;background:linear-gradient(#62482d,#34261b);color:#f1d58f;font:700 14px sans-serif;cursor:pointer;text-shadow:none}#tMastery small{font-weight:400;color:#d8c393;margin-left:4px}
+      #tMastery,#tTipBag{padding:4px 12px;border:1px solid #9c7843;border-radius:6px;background:linear-gradient(#62482d,#34261b);color:#f1d58f;font:700 14px Pixel12,sans-serif;cursor:pointer;text-shadow:none}#tMastery small{font-weight:400;color:#d8c393;margin-left:4px}
       #tPrepMain { min-height:0; flex:none; display:grid; grid-template-columns:160px minmax(0,1fr); gap:clamp(8px,1.2vw,16px); }
       #tPrepPreview { width:160px; height:180px; position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; overflow:hidden; box-sizing:border-box; border:1px solid #a78049; border-radius:8px; background:radial-gradient(ellipse at 50% 68%,rgba(161,112,48,.23),transparent 70%),linear-gradient(145deg,#38291e,#201a15); color:#cbb894; cursor:pointer; touch-action:manipulation; }
       #tPrepPreview canvas { position:static; inset:auto; width:100%; height:calc(100% - 20px); image-rendering:pixelated; }
@@ -7407,7 +7407,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       #tPrepBag{grid-template-columns:repeat(auto-fill,minmax(78px,1fr));grid-auto-rows:auto;justify-content:start;gap:6px;padding:1px 10px 2px 1px;box-sizing:border-box}
       #aTools{padding:2px 10px 8px 0;flex:none}#aTools details{margin:0}#aTools summary{cursor:pointer;color:#ddb96f;padding:4px 2px}#aTools p{margin:5px 2px;line-height:1.45}
       #tPrepFooter{position:relative;min-height:72px;padding:7px 9px;gap:8px;align-items:center;background:#241a13f5;border-top:1px solid #8c663c;box-shadow:0 -6px 14px #1a100e88}
-      #aFooterTools{min-width:0;flex:1;display:flex;align-items:center;gap:6px}#aFooterTools button{box-sizing:border-box;min-width:52px;height:49px;padding:5px 8px;border:1px solid #9b7445;border-radius:6px;background:linear-gradient(#60472c,#38281b);color:#e8d2a8;font:700 13px sans-serif;cursor:pointer;white-space:nowrap}#aFooterTools button:disabled{opacity:.4;cursor:default}
+      #aFooterTools{min-width:0;flex:1;display:flex;align-items:center;gap:6px}#aFooterTools button{box-sizing:border-box;min-width:52px;height:49px;padding:5px 8px;border:1px solid #9b7445;border-radius:6px;background:linear-gradient(#60472c,#38281b);color:#e8d2a8;font:700 13px Pixel12,sans-serif;cursor:pointer;white-space:nowrap}#aFooterTools button:disabled{opacity:.4;cursor:default}
       #aFooterTools .aForgeButton{min-width:0;flex:1;height:58px;display:flex;align-items:center;justify-content:space-between;gap:7px;padding:6px 10px;border:2px solid #f2c36a;background:linear-gradient(135deg,#b8742a,#7a4416);color:#fff0c9;box-shadow:0 0 10px #e1a23a88,inset 0 0 0 1px #713914;font-size:17px}
       #aForgeTag{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:4px 6px;border:1px solid #f4cf83aa;border-radius:4px;background:#321e0eb8;color:#ffe8bb;font-size:10px;font-weight:600}
       #aFooterTools #aLock{min-width:64px}#aFooterTools #aDiscard{min-width:58px;border-color:#9c4c43;color:#e7a59a;background:linear-gradient(#4b2822,#2d1916)}
@@ -7680,12 +7680,12 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       #tCont:active { transform: translateY(4px); box-shadow: 0 0 0 #6b4f2a, 0 3px 8px rgba(40,25,10,.3); }
       #tConfirm { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; background: rgba(30,20,12,.5); }
       #tConfirm .p { background: radial-gradient(ellipse at 50% 40%,#f6ead4,#e8d5b4); border: 2px solid #7a5a2c; border-radius: 8px; padding: 22px 26px 18px; width: min(88vw,420px);
-        text-align: center; color: #2a211a; font-family: "Songti SC","STSong","Noto Serif SC",serif; box-shadow: 0 14px 44px rgba(0,0,0,.45); }
+        text-align: center; color: #2a211a; font-family: "Songti SC","STSong","Noto Serif SC",Pixel12,serif; box-shadow: 0 14px 44px rgba(0,0,0,.45); }
       #tConfirm h3 { margin: 0 0 12px; font-size: 22px; letter-spacing: .3em; }
       #tConfirm p { margin: 0 0 6px; font-size: 15px; line-height: 1.7; }
       #tConfirm small { display: block; margin: 8px 0 16px; font-size: 13px; opacity: .65; }
       #tConfirm .r { display: flex; gap: 14px; justify-content: center; }
-      #tConfirm button { min-width: 120px; height: 44px; font: 700 17px "Songti SC","Noto Serif SC",serif; letter-spacing: .2em; border-radius: 6px; cursor: pointer; }
+      #tConfirm button { min-width: 120px; height: 44px; font: 700 17px "Songti SC","Noto Serif SC",Pixel12,serif; letter-spacing: .2em; border-radius: 6px; cursor: pointer; }
       #tConfirm .no { background: #f3e6c8; color: #3b2a1c; border: 1px solid #7a5a2c; }
       #tConfirm .yes { background: linear-gradient(180deg,#a8322a,#7c1f19); color: #fbe9d0; border: 1px solid #5a140f; }
       #tNovice, #tHintOff { color: #3b2e1d; text-shadow: none; justify-content: center; }
@@ -7879,20 +7879,20 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     c.save();
     c.textAlign = 'left'; c.textBaseline = 'alphabetic';
     const fs = L.title;
-    c.font = `900 ${fs}px "KaiTi","STKaiti","Kaiti SC","楷体","Noto Serif CJK SC",serif`;
+    c.font = `900 ${fs}px "KaiTi","STKaiti","Kaiti SC","楷体","Noto Serif CJK SC",Pixel12,serif`;
     c.lineJoin = 'round'; c.lineWidth = Math.max(4, fs * .12); c.strokeStyle = 'rgba(10,6,16,.9)';
     c.fillStyle = '#ffd86e';
     const y = pad + fs * 1.02;
     c.strokeText('三国终章', pad, y); c.fillText('三国终章', pad, y);
     // 副标题
-    c.font = `700 ${L.sub}px "PingFang SC","Noto Sans CJK SC",sans-serif`;
+    c.font = `700 ${L.sub}px "PingFang SC","Noto Sans CJK SC",Pixel12,sans-serif`;
     c.lineWidth = Math.max(3, L.sub * .35); c.strokeStyle = 'rgba(10,6,16,.9)'; c.fillStyle = '#f2e6c9';
     c.strokeText('黄巾之乱', pad + 4, y + L.sub * 1.9);
     c.fillText('黄巾之乱', pad + 4, y + L.sub * 1.9);
     // 角落的小字：操作提示（电脑/手机自适应）
     const coarse = matchMedia('(pointer: coarse)').matches || (navigator.maxTouchPoints || 0) > 0;
     if (true) {   // 角落操作提示始终显示
-      c.font = '600 12px "PingFang SC",sans-serif'; c.fillStyle = 'rgba(242,230,201,.5)';
+      c.font = '600 12px "PingFang SC",Pixel12,sans-serif'; c.fillStyle = 'rgba(242,230,201,.5)';
       c.fillText(coarse ? '手机：左下摇杆移动 · 右下攻击/翻滚' : 'WASD 移动 · J 攻击 · K 翻滚 · 1/2/3 换武器', pad, L.h - 10);
     }
     c.restore();
@@ -7966,7 +7966,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       try {
         const finished=await Promise.race([CLOUD_SAVE.sync(n).then(()=>true),new Promise(ok=>{deadline=setTimeout(()=>ok(false),5000);})]);
         if(CLOUD_SAVE.waitPin)await CLOUD_SAVE.waitPin();
-        if(!finished){const notice=document.createElement('div');notice.textContent='网络较慢，已先用本机存档进入，稍后自动同步';notice.style.cssText='position:fixed;bottom:12px;left:10%;right:10%;z-index:80;padding:12px;background:#302017ee;color:#ffe0a0;text-align:center;font:14px sans-serif';document.body.append(notice);setTimeout(()=>notice.remove(),6500);}
+        if(!finished){const notice=document.createElement('div');notice.textContent='网络较慢，已先用本机存档进入，稍后自动同步';notice.style.cssText='position:fixed;bottom:12px;left:10%;right:10%;z-index:80;padding:12px;background:#302017ee;color:#ffe0a0;text-align:center;font:14px Pixel12,sans-serif';document.body.append(notice);setTimeout(()=>notice.remove(),6500);}
       } finally {clearTimeout(deadline);clearTimeout(stuck);refresh.remove();startPending=false;dom.start.disabled=false;dom.name.disabled=false;dom.start.textContent=savedLabel;}
     }
     if (window.KAIJU) { openChapterSelect(); return; }   // 三国终章：不放开场动画，直接进开局配置
@@ -8454,7 +8454,7 @@ function ensureAssets(group, { silent = false, label = '' } = {}) {
   let overlay=null,progress;
   const show=setTimeout(()=>{
     overlay=document.createElement('div');overlay.id='wzbLoading';
-    overlay.style.cssText='position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:#120c08e8;color:#f1d58f;font:16px sans-serif;letter-spacing:2px';
+    overlay.style.cssText='position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:#120c08e8;color:#f1d58f;font:16px Pixel12,sans-serif;letter-spacing:2px';
     const title=document.createElement('span');title.textContent=label||'加载中';const percent=document.createElement('b');overlay.append(title,percent);document.body.append(overlay);
     const tick=()=>{percent.textContent=Math.round(list.filter(([im])=>im.complete&&im.src).length/Math.max(1,list.length)*100)+'%';};tick();progress=setInterval(tick,200);
   },120);
@@ -9544,7 +9544,7 @@ function draw() {
   // 血条旁边显示玩家名字（标题页输入的）
   const pnm = (window.TITLE && TITLE.playerName && TITLE.playerName()) || '';
   if (pnm) {
-    ctx.font = 'bold 14px "PingFang SC","Noto Sans CJK SC",sans-serif';
+    ctx.font = 'bold 14px "PingFang SC","Noto Sans CJK SC",Pixel12,sans-serif';
     const nw = ctx.measureText(pnm).width;
     ctx.fillStyle = 'rgba(20,14,30,.7)'; ctx.fillRect(14 + bw + 6, 64, nw + 14, 18);
     ctx.fillStyle = '#ffd86e'; ctx.fillText(pnm, 14 + bw + 13, 78);
@@ -9554,7 +9554,7 @@ function draw() {
   if (false) {   // 11/11：旧的顶部用时牌子不用了（改用修为条下面的沙漏倒计时）
     const _left = window.SURV && SURV.left ? SURV.left() : null, tstr = _left != null ? fmtTime(Math.ceil(_left)) : fmtTime(runT);   // 路线模式：顶部牌子改成本节点倒计时
     ctx.save();
-    ctx.font = 'bold 18px "PingFang SC","Noto Sans CJK SC",sans-serif';
+    ctx.font = 'bold 18px "PingFang SC","Noto Sans CJK SC",Pixel12,sans-serif';
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     const tw = ctx.measureText(tstr).width, bw2 = tw + 30 + (HUD_HG.complete && HUD_HG.naturalWidth ? 22 : 0), bx2 = HW / 2 - bw2 / 2, by2 = _left != null ? 24 : 8;   // 路线模式：让出最上面的修为条
     ctx.fillStyle = 'rgba(20,14,30,.62)';
@@ -9568,7 +9568,7 @@ function draw() {
   }
   if (lockR < Infinity && !window.SURV) { const n = zs.filter(z => !z.dead).length; ctx.fillStyle = 'rgba(200,40,30,.85)'; ctx.fillRect(14, 110, 200, 22); ctx.fillStyle = '#fff'; ctx.fillText(`本区域剩余敌人：${n}`, 20, 126); }
   if (!over && lockR === Infinity && gateI > 0 && gateI < M.gates.length && Math.floor(performance.now() / 500) % 2 === 0) {
-    ctx.save(); ctx.font = 'bold 46px sans-serif'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round'; ctx.lineWidth = 6; ctx.strokeStyle = '#34231b'; ctx.fillStyle = '#ffd23f';
+    ctx.save(); ctx.font = 'bold 46px Pixel12,sans-serif'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round'; ctx.lineWidth = 6; ctx.strokeStyle = '#34231b'; ctx.fillStyle = '#ffd23f';
     ctx.strokeText('GO →', HW - 28, HH / 2); ctx.fillText('GO →', HW - 28, HH / 2); ctx.restore();
   }
   // 左侧后退边界：镜头贴到边界时，屏幕左缘压暗并画一道红色虚线，一看就知道到头了
@@ -9581,7 +9581,7 @@ function draw() {
   drawCombo(HW);
   if (window.SURV && !result) SURV.hud(HW);
   if (msgT > 0) {
-    const lines = String(msg).split('|'); ctx.font = 'bold 18px sans-serif'; ctx.textAlign = 'center';
+    const lines = String(msg).split('|'); ctx.font = 'bold 18px Pixel12,sans-serif'; ctx.textAlign = 'center';
     const tw = Math.max(...lines.map(line => ctx.measureText(line).width)), bh = lines.length * 23 + 10, by = 108 - (bh - 32) / 2;
     ctx.fillStyle = 'rgba(20,14,30,.78)'; ctx.fillRect(HW / 2 - tw / 2 - 12, by, tw + 24, bh);
     ctx.fillStyle = '#ffd86e'; lines.forEach((line, i) => ctx.fillText(line, HW / 2, by + 22 + i * 23)); ctx.textAlign = 'left';
@@ -9638,7 +9638,7 @@ function drawCombo(HW) {   // 屏幕坐标绘制（在 HUD 里调用）
     const rise = Math.min(1, age / .12) * 5;
     const y = headY - (visible.length - 1 - i) * 16 - rise;
     ctx.globalAlpha = .72 * fade;
-    ctx.font = 'bold 14px sans-serif'; ctx.lineWidth = 2;
+    ctx.font = 'bold 14px Pixel12,sans-serif'; ctx.lineWidth = 2;
     ctx.strokeStyle = 'rgba(45,32,23,.62)'; ctx.fillStyle = 'rgba(245,231,198,.82)';
     const label = String(n.count) + ' HIT';
     ctx.strokeText(label, x, y); ctx.fillText(label, x, y);
@@ -9649,7 +9649,7 @@ function drawCombo(HW) {   // 屏幕坐标绘制（在 HUD 里调用）
 function drawChapter2Choice(HW, HH) {
   // 选路面板：和开场对白同一套样式（深色底、金色双边框、金框头像、PingFang 粗体）
   uiBtns = [];
-  const F = '"PingFang SC","Microsoft YaHei",sans-serif', small = HH < 520 || HW < 760;
+  const F = '"PingFang SC","Microsoft YaHei",Pixel12,sans-serif', small = HH < 520 || HW < 760;
   const rr = (x, y, w, h, r) => { ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(x, y, w, h, r); else ctx.rect(x, y, w, h); };
   ctx.save(); ctx.globalAlpha = 1; ctx.fillStyle = 'rgba(15,10,10,.55)'; ctx.fillRect(0, 0, HW, HH);
   const pw = Math.min(640, HW - 24), ph = small ? 200 : 236, x = (HW - pw) / 2, y = (HH - ph) / 2;

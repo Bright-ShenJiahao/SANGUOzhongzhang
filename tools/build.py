@@ -228,6 +228,10 @@ h = open(P('index.src.html'), encoding='utf-8').read()
 h = re.sub(_ART_RE, _art_literal, h)
 h = h.replace('__FONT_FACE__', FONT_FACE)
 h = h.replace('__ASSETS__', json.dumps(assets)).replace('__BG__', json.dumps(bg)).replace('__GAME__', game)
+if os.path.exists(PIX_SRC):   # 11/13：只写了 sans-serif / serif / system-ui 的地方也走像素字体（毛笔字在字体栈最前，不受影响）
+    import re as _re
+    h = _re.sub(r'(?<![\w"\'-])(sans-serif|serif|system-ui)\b', r'Pixel12,\1', h)
+    h = h.replace('</head>', '<style>button{letter-spacing:.04em!important}</style></head>', 1)
 # 版本号：首页内容指纹，写进首页和 version.json，页面据此判断线上有没有新版本（自动更新）
 _build_id = __import__('hashlib').sha256(h.encode('utf-8')).hexdigest()[:12]
 h = h.replace('__BUILD__', _build_id)
