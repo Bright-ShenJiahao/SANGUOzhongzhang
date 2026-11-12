@@ -736,13 +736,13 @@
     const rowH = 26, g1 = 12, g2 = 10;
     let cx, titleW, titleH, top;
     if (portrait) {
-      titleW = Math.min(w * .9, 520); titleH = titleW * 465 / 1089;
+      titleW = Math.min(w * .96, 600); titleH = titleW * 465 / 1089;
       cx = w / 2;
       const below = inH + g2 + btnH + g2 + rowH;
       top = Math.max(h * .5, h - 14 - below - g1 - titleH);
       if (dom.inkTitle.dataset.k !== 'h') { dom.inkTitle.src = ASSETS.ink.title_h; dom.inkTitle.dataset.k = 'h'; }
     } else {
-      titleH = Math.min(h * .56, 640); titleW = titleH * 364 / 995;
+      titleH = Math.min(h * .68, 920, h - 200); titleW = titleH * 364 / 995;   /* 11/13 用户：标题字太小 → 放大 */
       cx = w * .755;
       const total = titleH + g1 + inH + g2 + btnH + g2 + rowH;
       top = Math.max(6, (h - total) / 2);
@@ -759,7 +759,8 @@
     // 11/13：按钮是像素图，按原图比例排：新的开始 4.34:1、继续 2.66:1；整排宽度不超过名字框
     let bh = btnH * 1.25, wStart = Math.round(bh * 4.34), wCont = hasRun ? Math.round(bh * 2.66) : 0;
     const k0 = Math.min(1, Math.min(w * .94, colW * 1.35) / (wStart + (hasRun ? gap + wCont : 0))); bh *= k0; wStart = Math.round(wStart * k0); wCont = Math.round(wCont * k0);
-    const rowL = cx - (wStart + (hasRun ? gap + wCont : 0)) / 2;
+    const rowW = wStart + (hasRun ? gap + wCont : 0), rowL = cx - rowW / 2;
+    { const n = dom.name.style; n.left = rowL + 'px'; n.width = rowW + 'px'; }   // 11/13 用户：名字框和下面一排按钮一样宽
     s = dom.start.style;
     s.left = rowL + 'px'; s.top = (startTop + (btnH - bh) / 2) + 'px'; s.width = wStart + 'px'; s.height = Math.round(bh) + 'px';
     s.fontSize = Math.round(Math.max(15, Math.min(24, bh * .4))) + 'px';

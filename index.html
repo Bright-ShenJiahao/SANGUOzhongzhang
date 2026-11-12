@@ -62,7 +62,7 @@ body.szz-pro #help{display:none}
 .x-back{min-height:34px!important}
 }
 #rot small{display:block;margin-top:10px;font-size:14px;font-weight:600;color:#c9b691;line-height:1.6}
-</style><link rel="preload" href="pack/fonts/result.woff2?v=5eaf60bce8" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=5eaf60bce8)format("woff2");font-display:swap}</style><link rel="preload" href="pack/fonts/pixel.woff2?v=e7506ba678" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"Pixel12";src:url(pack/fonts/pixel.woff2?v=e7506ba678)format("woff2");font-display:swap}@font-face{font-family:"Songti SC";src:url(pack/fonts/pixel.woff2?v=e7506ba678)format("woff2");font-display:swap}@font-face{font-family:"STSong";src:url(pack/fonts/pixel.woff2?v=e7506ba678)format("woff2");font-display:swap}@font-face{font-family:"Noto Serif SC";src:url(pack/fonts/pixel.woff2?v=e7506ba678)format("woff2");font-display:swap}@font-face{font-family:"SimSun";src:url(pack/fonts/pixel.woff2?v=e7506ba678)format("woff2");font-display:swap}@font-face{font-family:"PingFang SC";src:url(pack/fonts/pixel.woff2?v=e7506ba678)format("woff2");font-display:swap}@font-face{font-family:"Microsoft YaHei";src:url(pack/fonts/pixel.woff2?v=e7506ba678)format("woff2");font-display:swap}@font-face{font-family:"Noto Sans CJK SC";src:url(pack/fonts/pixel.woff2?v=e7506ba678)format("woff2");font-display:swap}@font-face{font-family:"STKaiti";src:url(pack/fonts/pixel.woff2?v=e7506ba678)format("woff2");font-display:swap}@font-face{font-family:"KaiTi";src:url(pack/fonts/pixel.woff2?v=e7506ba678)format("woff2");font-display:swap}*{font-synthesis:none}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
+</style><link rel="preload" href="pack/fonts/result.woff2?v=1da3ffed35" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=1da3ffed35)format("woff2");font-display:swap}</style><link rel="preload" href="pack/fonts/pixel.woff2?v=0ec8c9153b" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"Pixel12";src:url(pack/fonts/pixel.woff2?v=0ec8c9153b)format("woff2");font-display:swap}@font-face{font-family:"Songti SC";src:url(pack/fonts/pixel.woff2?v=0ec8c9153b)format("woff2");font-display:swap}@font-face{font-family:"STSong";src:url(pack/fonts/pixel.woff2?v=0ec8c9153b)format("woff2");font-display:swap}@font-face{font-family:"Noto Serif SC";src:url(pack/fonts/pixel.woff2?v=0ec8c9153b)format("woff2");font-display:swap}@font-face{font-family:"SimSun";src:url(pack/fonts/pixel.woff2?v=0ec8c9153b)format("woff2");font-display:swap}@font-face{font-family:"PingFang SC";src:url(pack/fonts/pixel.woff2?v=0ec8c9153b)format("woff2");font-display:swap}@font-face{font-family:"Microsoft YaHei";src:url(pack/fonts/pixel.woff2?v=0ec8c9153b)format("woff2");font-display:swap}@font-face{font-family:"Noto Sans CJK SC";src:url(pack/fonts/pixel.woff2?v=0ec8c9153b)format("woff2");font-display:swap}@font-face{font-family:"STKaiti";src:url(pack/fonts/pixel.woff2?v=0ec8c9153b)format("woff2");font-display:swap}@font-face{font-family:"KaiTi";src:url(pack/fonts/pixel.woff2?v=0ec8c9153b)format("woff2");font-display:swap}*{font-synthesis:none}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
 <style>button{letter-spacing:.04em!important}</style></head><body>
 <style>
 #bootSplash{position:fixed;inset:0;z-index:99999;background:radial-gradient(ellipse at 50% 45%,#f3e4cf 0%,#ecd9c0 55%,#d9c09f 100%);transition:opacity .45s ease-out}
@@ -111,7 +111,7 @@ if(location.protocol==='https:'&&!/[?&]debug(?:=|&|$)/.test(location.search)&&'s
 })();
 // 自动更新：打开游戏、或从后台切回来时，查一下线上有没有新版本；有就在标题/整备页自动刷新（战斗中不打扰）
 (function(){
-var BUILD='f47485d9aa5f',busy=false;
+var BUILD='81cd8194320f',busy=false;
 if(location.protocol!=='https:'||/[?&]debug(?:=|&|$)/.test(location.search))return;
 function check(){
   if(busy)return;
@@ -7726,13 +7726,13 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     const rowH = 26, g1 = 12, g2 = 10;
     let cx, titleW, titleH, top;
     if (portrait) {
-      titleW = Math.min(w * .9, 520); titleH = titleW * 465 / 1089;
+      titleW = Math.min(w * .96, 600); titleH = titleW * 465 / 1089;
       cx = w / 2;
       const below = inH + g2 + btnH + g2 + rowH;
       top = Math.max(h * .5, h - 14 - below - g1 - titleH);
       if (dom.inkTitle.dataset.k !== 'h') { dom.inkTitle.src = ASSETS.ink.title_h; dom.inkTitle.dataset.k = 'h'; }
     } else {
-      titleH = Math.min(h * .56, 640); titleW = titleH * 364 / 995;
+      titleH = Math.min(h * .68, 920, h - 200); titleW = titleH * 364 / 995;   /* 11/13 用户：标题字太小 → 放大 */
       cx = w * .755;
       const total = titleH + g1 + inH + g2 + btnH + g2 + rowH;
       top = Math.max(6, (h - total) / 2);
@@ -7749,7 +7749,8 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     // 11/13：按钮是像素图，按原图比例排：新的开始 4.34:1、继续 2.66:1；整排宽度不超过名字框
     let bh = btnH * 1.25, wStart = Math.round(bh * 4.34), wCont = hasRun ? Math.round(bh * 2.66) : 0;
     const k0 = Math.min(1, Math.min(w * .94, colW * 1.35) / (wStart + (hasRun ? gap + wCont : 0))); bh *= k0; wStart = Math.round(wStart * k0); wCont = Math.round(wCont * k0);
-    const rowL = cx - (wStart + (hasRun ? gap + wCont : 0)) / 2;
+    const rowW = wStart + (hasRun ? gap + wCont : 0), rowL = cx - rowW / 2;
+    { const n = dom.name.style; n.left = rowL + 'px'; n.width = rowW + 'px'; }   // 11/13 用户：名字框和下面一排按钮一样宽
     s = dom.start.style;
     s.left = rowL + 'px'; s.top = (startTop + (btnH - bh) / 2) + 'px'; s.width = wStart + 'px'; s.height = Math.round(bh) + 'px';
     s.fontSize = Math.round(Math.max(15, Math.min(24, bh * .4))) + 'px';
