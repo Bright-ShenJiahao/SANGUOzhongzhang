@@ -1874,7 +1874,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       if (e.k === 'ghost') {   // 残影：半透明主角，带一道拖尾
         const q = Math.min(1, e.t / e.mt), x = e.x0 + (e.x1 - e.x0) * q, y = e.y0 + (e.y1 - e.y0) * q, al = .6 * (1 - Math.max(0, (e.t - e.mt) / (e.T - e.mt)));
         ctx.save(); ctx.strokeStyle = `rgba(200,225,255,${al * .5})`; ctx.lineWidth = 8; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(e.x0, e.y0 - 22); ctx.lineTo(x, y - 22); ctx.stroke(); ctx.restore();
-        if (typeof drawChar === 'function') { ctx.save(); ctx.filter = 'brightness(1.6) saturate(.4)'; drawChar('hero', e.fr, x, y, e.flip, al); ctx.restore(); }
+        if (typeof drawChar === 'function') { ctx.save(); ctx.filter = 'brightness(1.6) saturate(.4)'; drawChar('hero', e.fr, x, y, e.flip, al, false, typeof HERO_SC === 'number' ? HERO_SC : 1); ctx.restore(); }
         continue;
       }
       if (e.k === 'ring') {   // 震地：地上一圈冲击波 + 裂纹

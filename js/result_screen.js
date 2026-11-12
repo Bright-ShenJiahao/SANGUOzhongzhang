@@ -32,16 +32,23 @@ function drawCoinRain(HW, HH, raw) {
   R.rain = R.rain.filter(c => c.y < HH + 20);
 }
 // 三国终章路线模式结算（11/11）：整屏插画（胜利晨光 / 战败雨夜）+ 右侧战绩 + 两个按钮；不再出现旧系统的金币、长戟、复活
+const RES_UI = { panel: new Image(), btn: new Image() }; RES_UI.panel.src = 'art/ui/kaiju2/panel.webp'; RES_UI.btn.src = 'art/ui/kit/btn_dark.webp';
+const resOk = im => im.complete && im.naturalWidth > 0;
+function draw9(im, x, y, w, h, s, b) {   // 九宫格：s = 原图角的像素，b = 画出来的边宽
+  const W = im.naturalWidth, H = im.naturalHeight, X = [0, s, W - s, W], Y = [0, s, H - s, H], x2 = [x, x + b, x + w - b, x + w], y2 = [y, y + b, y + h - b, y + h];
+  for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) ctx.drawImage(im, X[i], Y[j], X[i + 1] - X[i], Y[j + 1] - Y[j], x2[i], y2[j], x2[i + 1] - x2[i], y2[j + 1] - y2[j]);
+}
 const RES_IMG = { win: new Image(), lose: new Image() }; RES_IMG.win.src = 'art/ui/result/win.webp'; RES_IMG.lose.src = 'art/ui/result/lose.webp';
 function drawRouteResult(HW, HH, raw) {
   const BRUSH = '"MaShanZheng","KaiTi","STKaiti","Kaiti SC",serif', F = '"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",sans-serif';
   for (const id of ['bR', 'top']) { const e = document.getElementById(id); if (e) e.style.visibility = 'hidden'; }
+  { const t = document.getElementById('survTut'); if (t) t.remove(); }   // 11/13：教学提示别压在结算按钮上
   if (!result._jingle && window.SFX) { result._jingle = 1; SFX.play(result.win ? 'j_clear' : 'j_lose'); }
   const im = RES_IMG[result.win ? 'win' : 'lose'], fade = Math.min(1, raw / .6);
   ctx.save(); ctx.fillStyle = '#0c0806'; ctx.fillRect(0, 0, HW, HH);
   if (im.complete && im.naturalWidth) { const sc = Math.max(HW / im.naturalWidth, HH / im.naturalHeight) * (1.06 - .06 * Math.min(1, raw / 4)); const dw = im.naturalWidth * sc, dh = im.naturalHeight * sc; ctx.globalAlpha = fade; ctx.drawImage(im, (HW - dw) * .25, (HH - dh) / 2, dw, dh); }
   const gr = ctx.createLinearGradient(HW * .4, 0, HW, 0); gr.addColorStop(0, 'rgba(10,6,4,0)'); gr.addColorStop(.45, 'rgba(10,6,4,.55)'); gr.addColorStop(1, 'rgba(10,6,4,.78)'); ctx.fillStyle = gr; ctx.fillRect(0, 0, HW, HH);
-  const k = Math.max(.7, Math.min(1.5, Math.min(HW / 1280, HH / 720))), cx = HW * .74, a2 = Math.min(1, Math.max(0, (raw - .4) / .5));
+  const k = Math.max(.7, Math.min(1.5, Math.min(HW / 1280, HH / 720))), cx = HW < HH ? HW / 2 : HW * .74, a2 = Math.min(1, Math.max(0, (raw - .4) / .5));
   ctx.globalAlpha = a2; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
   ctx.font = Math.round(110 * k) + 'px ' + BRUSH; ctx.lineWidth = 8 * k; ctx.strokeStyle = 'rgba(0,0,0,.7)'; ctx.strokeText(result.win ? '平 乱' : '倒 下', cx, HH * .3);
   ctx.fillStyle = result.win ? '#ffd27a' : '#e8dccb'; ctx.fillText(result.win ? '平 乱' : '倒 下', cx, HH * .3);
@@ -49,16 +56,22 @@ function drawRouteResult(HW, HH, raw) {
   ctx.fillText(result.win ? '张角伏诛，黄巾之乱平定' : '黄巾未平，壮志未酬', cx, HH * .3 + 40 * k);
   const st = window.SURV && SURV.status ? SURV.status() : null, rr = window.ROUTE && ROUTE.debug && ROUTE.debug(), layer = rr && rr.cur ? rr.cur.layer : 0;
   const rows = [['击倒', result.kills + ' 名'], ['用时', fmtTime(result.time)], ['修为', 'LV.' + (st ? st.lv : 1)], ['抵达', result.win ? '张角祭坛' : '倒在第 ' + Math.max(1, layer + 1) + ' / ' + ROUTE.layers() + ' 层']];
-  ctx.font = '600 ' + Math.round(20 * k) + 'px ' + F;
-  rows.forEach(([a, b], i) => { const y = HH * .46 + i * 38 * k; ctx.textAlign = 'right'; ctx.fillStyle = 'rgba(230,210,170,.75)'; ctx.fillText(a, cx - 14 * k, y); ctx.textAlign = 'left'; ctx.fillStyle = '#fff3dc'; ctx.fillText(b, cx + 14 * k, y); });
+  // 11/13 用户：结算的框和按钮跟主界面、开局配置统一 → 金边墨底面板 + 墨色金边按钮，字用像素字
+  const pw = HW < HH ? HW * .86 : Math.min(HW * .9, 380 * k), rh = 40 * k, ph = rows.length * rh + 40 * k, px = cx - pw / 2, py = HH * .4;
+  if (resOk(RES_UI.panel)) draw9(RES_UI.panel, px, py, pw, ph, 100, 26 * k); else { ctx.fillStyle = 'rgba(16,14,12,.9)'; ctx.fillRect(px, py, pw, ph); }
+  ctx.font = Math.round(19 * k) + 'px ' + F;
+  rows.forEach(([a, b], i) => { const y = py + 20 * k + i * rh + rh * .64;
+    ctx.textAlign = 'left'; ctx.fillStyle = 'rgba(214,196,160,.8)'; ctx.fillText(a, px + 34 * k, y);
+    ctx.textAlign = 'right'; ctx.fillStyle = '#f6e6c4'; ctx.fillText(b, px + pw - 34 * k, y);
+    if (i < rows.length - 1) { ctx.strokeStyle = 'rgba(201,164,92,.32)'; ctx.setLineDash([3 * k, 3 * k]); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(px + 30 * k, py + 20 * k + (i + 1) * rh); ctx.lineTo(px + pw - 30 * k, py + 20 * k + (i + 1) * rh); ctx.stroke(); ctx.setLineDash([]); } });
   ctx.globalAlpha = Math.min(1, Math.max(0, (raw - .8) / .4));
-  const bw = 170 * k, bh = 50 * k, by = HH * .46 + rows.length * 38 * k + 26 * k;
+  const bh = 52 * k, bw = Math.min(bh * 4.37, (pw - 12 * k) / 2), bh2 = bw / 4.37, by = py + ph + 18 * k;
   [['返回首页', 'home'], ['再来一局', 'restart']].forEach(([t, act], i) => {
-    const x = cx - bw - 8 * k + i * (bw + 16 * k), sel = result.sel === act;
-    ctx.fillStyle = i ? 'rgba(140,40,28,.92)' : 'rgba(30,20,12,.88)'; ctx.fillRect(x, by, bw, bh);
-    ctx.strokeStyle = sel ? '#fff1b8' : '#c9a24a'; ctx.lineWidth = sel ? 3 : 1.5; ctx.strokeRect(x + .5, by + .5, bw - 1, bh - 1);
-    ctx.textAlign = 'center'; ctx.font = Math.round(24 * k) + 'px ' + BRUSH; ctx.fillStyle = '#f6e6c4'; ctx.fillText(t, x + bw / 2, by + bh * .66);
-    uiBtns.push({ x, y: by, w: bw, h: bh, act });
+    const x = cx - bw - 6 * k + i * (bw + 12 * k), sel = result.sel === act;
+    if (resOk(RES_UI.btn)) { if (sel) ctx.filter = 'brightness(1.15)'; ctx.drawImage(RES_UI.btn, x, by, bw, bh2); ctx.filter = 'none'; }
+    else { ctx.fillStyle = 'rgba(30,20,12,.9)'; ctx.fillRect(x, by, bw, bh2); ctx.strokeStyle = '#c9a24a'; ctx.strokeRect(x + .5, by + .5, bw - 1, bh2 - 1); }
+    ctx.textAlign = 'center'; ctx.font = Math.round(Math.max(14, bh2 * .38)) + 'px ' + F; ctx.fillStyle = sel ? '#fff6d8' : '#f3e4c2'; ctx.fillText(t, x + bw / 2, by + bh2 * .62);
+    uiBtns.push({ x, y: by, w: bw, h: bh2, act });
   });
   ctx.restore(); ctx.textAlign = 'left'; ctx.globalAlpha = 1;
 }
