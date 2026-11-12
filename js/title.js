@@ -755,11 +755,15 @@
     L.inY = nameTop;
     let s = dom.name.style;
     s.left = (cx - colW / 2) + 'px'; s.top = nameTop + 'px'; s.width = colW + 'px'; s.height = inH + 'px';
-    const hasRun = S.mode === 'title' && window.RUNSAVE && RUNSAVE.has(), gap = 10, wStart = hasRun ? Math.round((colW - gap) * .6) : colW;
+    const hasRun = S.mode === 'title' && window.RUNSAVE && RUNSAVE.has(), gap = 8;
+    // 11/13：按钮是像素图，按原图比例排：新的开始 4.34:1、继续 2.66:1；整排宽度不超过名字框
+    let bh = btnH * 1.25, wStart = Math.round(bh * 4.34), wCont = hasRun ? Math.round(bh * 2.66) : 0;
+    const k0 = Math.min(1, Math.min(w * .94, colW * 1.35) / (wStart + (hasRun ? gap + wCont : 0))); bh *= k0; wStart = Math.round(wStart * k0); wCont = Math.round(wCont * k0);
+    const rowL = cx - (wStart + (hasRun ? gap + wCont : 0)) / 2;
     s = dom.start.style;
-    s.left = (cx - colW / 2) + 'px'; s.top = startTop + 'px'; s.width = wStart + 'px'; s.height = btnH + 'px';
-    s.fontSize = Math.round(Math.max(16, Math.min(24, h * .045))) + 'px';
-    if (dom.cont) { const c = dom.cont.style; c.display = hasRun ? '' : 'none'; c.left = (cx - colW / 2 + wStart + gap) + 'px'; c.top = startTop + 'px'; c.width = (colW - wStart - gap) + 'px'; c.height = btnH + 'px'; c.fontSize = s.fontSize; }
+    s.left = rowL + 'px'; s.top = (startTop + (btnH - bh) / 2) + 'px'; s.width = wStart + 'px'; s.height = Math.round(bh) + 'px';
+    s.fontSize = Math.round(Math.max(15, Math.min(24, bh * .4))) + 'px';
+    if (dom.cont) { const c = dom.cont.style; c.display = hasRun ? '' : 'none'; c.left = (rowL + wStart + gap) + 'px'; c.top = (startTop + (btnH - bh) / 2) + 'px'; c.width = wCont + 'px'; c.height = Math.round(bh) + 'px'; c.fontSize = s.fontSize; }
     s = dom.novice.style;
     s.left = (cx - 112) + 'px'; s.right = ''; s.top = rowTop + 'px'; s.width = '104px'; s.height = rowH + 'px'; s.justifyContent = 'center';
     s = dom.hintOff.style;
