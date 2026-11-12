@@ -526,11 +526,13 @@
     dom.tip = mk('div', 'tTip', '请输入名字');
     dom.panel = document.createElement('div'); dom.panel.id = 'tHelpPanel';
     dom.panel.innerHTML = `<h3>操作说明</h3>
-      <div><b>电脑</b>：WASD / 方向键 移动 · J 攻击/长按蓄力（棍四连击，锤/石子三连击）· K 或空格 翻滚 · 1 / 2 / 3 换武器· R 重来</div>
-      <div><b>手机</b>：左下摇杆移动 · 右下「攻击」短按出招、长按蓄力；棍四连击，锤/石子三连击 · 「翻滚」闪避 · 右上换武器</div>
-      <div><b>武器</b>：棍攻击范围大、四连击；锤重击可打断；石子可远程攻击。</div>
-      <div><b>蓄力</b>：按住攻击 0.4 秒开始蓄力，最多 2 秒；受击会打断，松开释放。</div>
-      <div style="margin-top:6px;color:#c9b68a">打中敌人才能接着连招；被打中会打断连招。草垛和推车可以打坏。</div>`;
+      <div><b>电脑</b>：WASD / 方向键 移动 · 空格 或 K 翻滚 · Tab 打开兵籍牒 · Esc / P 暂停</div>
+      <div><b>手机</b>：左下摇杆移动 · 右下「翻滚」 · 右上暂停</div>
+      <div><b>出手</b>：武艺自己出手，你只管走位。最多同时带五路，按整备「武学」页排好的顺序依次循环出手。</div>
+      <div><b>翻滚</b>：滚的时候刀枪不入。出招前摇中翻滚，这一招作废、直接换下一招；收招后摇中翻滚，立刻收招。</div>
+      <div><b>真气</b>：血条上面的蓝条。挨打时先扣真气，替你挡下三成伤害；真气过半时出手伤害 +30%。</div>
+      <div><b>路线</b>：在长卷上点亮的节点往前走，分普通、精英、奇遇、首领。打完一仗进整备：结算 → 拾取 → 修炼 → 行商 → 武学。</div>
+      <div style="margin-top:6px;color:#c9b68a">出身的两种本门兵器武艺 ×1.2，剑、拳谁用都是 ×1.0，其他兵器 ×0.85。</div>`;
     document.body.appendChild(dom.panel);
     dom.flash = mk('div', 'tFlash', '');
     dom.chapter = mk('div', 'tChapter', '');
@@ -755,7 +757,7 @@
     L.inY = nameTop;
     let s = dom.name.style;
     s.left = (cx - colW / 2) + 'px'; s.top = nameTop + 'px'; s.width = colW + 'px'; s.height = inH + 'px';
-    const hasRun = S.mode === 'title' && window.RUNSAVE && RUNSAVE.has(), gap = 8;
+    const hasRun = !!(window.RUNSAVE && RUNSAVE.has()), gap = 8;
     // 11/13：按钮是像素图，按原图比例排：新的开始 4.34:1、继续 2.66:1；整排宽度不超过名字框
     let bh = btnH * 1.25, wStart = Math.round(bh * 4.34), wCont = hasRun ? Math.round(bh * 2.66) : 0;
     const k0 = Math.min(1, Math.min(w * .94, colW * 1.35) / (wStart + (hasRun ? gap + wCont : 0))); bh *= k0; wStart = Math.round(wStart * k0); wCont = Math.round(wCont * k0);
@@ -764,7 +766,7 @@
     s = dom.start.style;
     s.left = rowL + 'px'; s.top = (startTop + (btnH - bh) / 2) + 'px'; s.width = wStart + 'px'; s.height = Math.round(bh) + 'px';
     s.fontSize = Math.round(Math.max(15, Math.min(24, bh * .4))) + 'px';
-    if (dom.cont) { const c = dom.cont.style; c.display = hasRun ? '' : 'none'; c.left = (rowL + wStart + gap) + 'px'; c.top = (startTop + (btnH - bh) / 2) + 'px'; c.width = wCont + 'px'; c.height = Math.round(bh) + 'px'; c.fontSize = s.fontSize; }
+    if (dom.cont) { const c = dom.cont.style; c.setProperty('display', hasRun ? 'inline-flex' : 'none', 'important'); c.left = (rowL + wStart + gap) + 'px'; c.top = (startTop + (btnH - bh) / 2) + 'px'; c.width = wCont + 'px'; c.height = Math.round(bh) + 'px'; c.fontSize = s.fontSize; }
     s = dom.novice.style;
     s.left = (cx - 112) + 'px'; s.right = ''; s.top = rowTop + 'px'; s.width = '104px'; s.height = rowH + 'px'; s.justifyContent = 'center';
     s = dom.hintOff.style;
@@ -954,7 +956,7 @@
   function setDomVisible(v) {
     const d = v ? '' : 'none';
     for (const k of ['name', 'start', 'help', 'novice', 'board', 'hintOff', 'inkTitle']) if (dom[k]) dom[k].style.display = d;
-    if (dom.cont) dom.cont.style.display = v && window.RUNSAVE && RUNSAVE.has() ? '' : 'none';
+    if (dom.cont) dom.cont.style.setProperty('display', v && window.RUNSAVE && RUNSAVE.has() ? 'inline-flex' : 'none', 'important');   // 套件里 display 带 !important，这里也要带
     if (!v && dom.modeTip) { dom.modeTip.style.opacity = '0'; }
     if (!v && dom.panel) { dom.panel.style.display = 'none'; helpOpen = false; }
   }

@@ -62,7 +62,7 @@ body.szz-pro #help{display:none}
 .x-back{min-height:34px!important}
 }
 #rot small{display:block;margin-top:10px;font-size:14px;font-weight:600;color:#c9b691;line-height:1.6}
-</style><link rel="preload" href="pack/fonts/result.woff2?v=77efb647f6" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=77efb647f6)format("woff2");font-display:swap}</style><link rel="preload" href="pack/fonts/pixel.woff2?v=61c4707110" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"Pixel12";src:url(pack/fonts/pixel.woff2?v=61c4707110)format("woff2");font-display:swap}@font-face{font-family:"Songti SC";src:url(pack/fonts/pixel.woff2?v=61c4707110)format("woff2");font-display:swap}@font-face{font-family:"STSong";src:url(pack/fonts/pixel.woff2?v=61c4707110)format("woff2");font-display:swap}@font-face{font-family:"Noto Serif SC";src:url(pack/fonts/pixel.woff2?v=61c4707110)format("woff2");font-display:swap}@font-face{font-family:"SimSun";src:url(pack/fonts/pixel.woff2?v=61c4707110)format("woff2");font-display:swap}@font-face{font-family:"PingFang SC";src:url(pack/fonts/pixel.woff2?v=61c4707110)format("woff2");font-display:swap}@font-face{font-family:"Microsoft YaHei";src:url(pack/fonts/pixel.woff2?v=61c4707110)format("woff2");font-display:swap}@font-face{font-family:"Noto Sans CJK SC";src:url(pack/fonts/pixel.woff2?v=61c4707110)format("woff2");font-display:swap}@font-face{font-family:"STKaiti";src:url(pack/fonts/pixel.woff2?v=61c4707110)format("woff2");font-display:swap}@font-face{font-family:"KaiTi";src:url(pack/fonts/pixel.woff2?v=61c4707110)format("woff2");font-display:swap}*{font-synthesis:none}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
+</style><link rel="preload" href="pack/fonts/result.woff2?v=1ab9883742" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=1ab9883742)format("woff2");font-display:swap}</style><link rel="preload" href="pack/fonts/pixel.woff2?v=80c6588689" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"Pixel12";src:url(pack/fonts/pixel.woff2?v=80c6588689)format("woff2");font-display:swap}@font-face{font-family:"Songti SC";src:url(pack/fonts/pixel.woff2?v=80c6588689)format("woff2");font-display:swap}@font-face{font-family:"STSong";src:url(pack/fonts/pixel.woff2?v=80c6588689)format("woff2");font-display:swap}@font-face{font-family:"Noto Serif SC";src:url(pack/fonts/pixel.woff2?v=80c6588689)format("woff2");font-display:swap}@font-face{font-family:"SimSun";src:url(pack/fonts/pixel.woff2?v=80c6588689)format("woff2");font-display:swap}@font-face{font-family:"PingFang SC";src:url(pack/fonts/pixel.woff2?v=80c6588689)format("woff2");font-display:swap}@font-face{font-family:"Microsoft YaHei";src:url(pack/fonts/pixel.woff2?v=80c6588689)format("woff2");font-display:swap}@font-face{font-family:"Noto Sans CJK SC";src:url(pack/fonts/pixel.woff2?v=80c6588689)format("woff2");font-display:swap}@font-face{font-family:"STKaiti";src:url(pack/fonts/pixel.woff2?v=80c6588689)format("woff2");font-display:swap}@font-face{font-family:"KaiTi";src:url(pack/fonts/pixel.woff2?v=80c6588689)format("woff2");font-display:swap}*{font-synthesis:none}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
 <style>button{letter-spacing:.04em!important}</style></head><body>
 <style>
 #bootSplash{position:fixed;inset:0;z-index:99999;background:radial-gradient(ellipse at 50% 45%,#f3e4cf 0%,#ecd9c0 55%,#d9c09f 100%);transition:opacity .45s ease-out}
@@ -112,7 +112,7 @@ if(location.protocol==='https:'&&!/[?&]debug(?:=|&|$)/.test(location.search)&&'s
 })();
 // 自动更新：打开游戏、或从后台切回来时，查一下线上有没有新版本；有就在标题/整备页自动刷新（战斗中不打扰）
 (function(){
-var BUILD='15282aea9aec',busy=false;
+var BUILD='6d8f58ed2654',busy=false;
 if(location.protocol!=='https:'||/[?&]debug(?:=|&|$)/.test(location.search))return;
 function check(){
   if(busy)return;
@@ -4456,6 +4456,7 @@ function resultKey(e) {
     box.innerHTML = `<div class="p"><h3>设置</h3>
       <div class="row"><label>音乐</label><input type="range" min="0" max="100" step="5" value="${pct(v.bgm)}" data-k="bgm"><b>${pct(v.bgm)}</b></div>
       <div class="row"><label>音效</label><input type="range" min="0" max="100" step="5" value="${pct(v.sfx)}" data-k="sfx"><b>${pct(v.sfx)}</b></div>
+      <div class="row"><label>静音</label><div class="tg tm"><button data-m="1" class="${window.SFX && SFX.isMuted() ? 'on' : ''}">开</button><button data-m="0" class="${window.SFX && SFX.isMuted() ? '' : 'on'}">关</button></div></div>
       <div class="row"><label>震屏</label><div class="tg"><button data-s="1" class="${v.shake ? 'on' : ''}">开</button><button data-s="0" class="${v.shake ? '' : 'on'}">关</button></div></div>
       <button class="ok">关闭</button><small>设置会自动保存</small></div>`;
     box.querySelectorAll('input[type=range]').forEach(r => r.addEventListener('input', () => {
@@ -4463,7 +4464,8 @@ function resultKey(e) {
       if (r.dataset.k === 'sfx' && window.SFX && SFX.refreshVol) SFX.refreshVol();
       if (r.dataset.k === 'sfx' && window.SFX) SFX.play('j_pick0');
     }));
-    box.querySelectorAll('.tg button').forEach(b => b.addEventListener('click', () => { v.shake = b.dataset.s === '1'; save(); render(); }));
+    box.querySelectorAll('.tm button').forEach(b => b.addEventListener('click', () => { if (window.SFX && SFX.isMuted() !== (b.dataset.m === '1')) SFX.toggleMute(); render(); }));   // 11/13：静音放进设置
+    box.querySelectorAll('.tg:not(.tm) button').forEach(b => b.addEventListener('click', () => { v.shake = b.dataset.s === '1'; save(); render(); }));
     box.querySelector('.ok').addEventListener('click', close);
   }
   function open() { render(); box.hidden = false; }
@@ -7517,11 +7519,13 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     dom.tip = mk('div', 'tTip', '请输入名字');
     dom.panel = document.createElement('div'); dom.panel.id = 'tHelpPanel';
     dom.panel.innerHTML = `<h3>操作说明</h3>
-      <div><b>电脑</b>：WASD / 方向键 移动 · J 攻击/长按蓄力（棍四连击，锤/石子三连击）· K 或空格 翻滚 · 1 / 2 / 3 换武器· R 重来</div>
-      <div><b>手机</b>：左下摇杆移动 · 右下「攻击」短按出招、长按蓄力；棍四连击，锤/石子三连击 · 「翻滚」闪避 · 右上换武器</div>
-      <div><b>武器</b>：棍攻击范围大、四连击；锤重击可打断；石子可远程攻击。</div>
-      <div><b>蓄力</b>：按住攻击 0.4 秒开始蓄力，最多 2 秒；受击会打断，松开释放。</div>
-      <div style="margin-top:6px;color:#c9b68a">打中敌人才能接着连招；被打中会打断连招。草垛和推车可以打坏。</div>`;
+      <div><b>电脑</b>：WASD / 方向键 移动 · 空格 或 K 翻滚 · Tab 打开兵籍牒 · Esc / P 暂停</div>
+      <div><b>手机</b>：左下摇杆移动 · 右下「翻滚」 · 右上暂停</div>
+      <div><b>出手</b>：武艺自己出手，你只管走位。最多同时带五路，按整备「武学」页排好的顺序依次循环出手。</div>
+      <div><b>翻滚</b>：滚的时候刀枪不入。出招前摇中翻滚，这一招作废、直接换下一招；收招后摇中翻滚，立刻收招。</div>
+      <div><b>真气</b>：血条上面的蓝条。挨打时先扣真气，替你挡下三成伤害；真气过半时出手伤害 +30%。</div>
+      <div><b>路线</b>：在长卷上点亮的节点往前走，分普通、精英、奇遇、首领。打完一仗进整备：结算 → 拾取 → 修炼 → 行商 → 武学。</div>
+      <div style="margin-top:6px;color:#c9b68a">出身的两种本门兵器武艺 ×1.2，剑、拳谁用都是 ×1.0，其他兵器 ×0.85。</div>`;
     document.body.appendChild(dom.panel);
     dom.flash = mk('div', 'tFlash', '');
     dom.chapter = mk('div', 'tChapter', '');
@@ -7746,7 +7750,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     L.inY = nameTop;
     let s = dom.name.style;
     s.left = (cx - colW / 2) + 'px'; s.top = nameTop + 'px'; s.width = colW + 'px'; s.height = inH + 'px';
-    const hasRun = S.mode === 'title' && window.RUNSAVE && RUNSAVE.has(), gap = 8;
+    const hasRun = !!(window.RUNSAVE && RUNSAVE.has()), gap = 8;
     // 11/13：按钮是像素图，按原图比例排：新的开始 4.34:1、继续 2.66:1；整排宽度不超过名字框
     let bh = btnH * 1.25, wStart = Math.round(bh * 4.34), wCont = hasRun ? Math.round(bh * 2.66) : 0;
     const k0 = Math.min(1, Math.min(w * .94, colW * 1.35) / (wStart + (hasRun ? gap + wCont : 0))); bh *= k0; wStart = Math.round(wStart * k0); wCont = Math.round(wCont * k0);
@@ -7755,7 +7759,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     s = dom.start.style;
     s.left = rowL + 'px'; s.top = (startTop + (btnH - bh) / 2) + 'px'; s.width = wStart + 'px'; s.height = Math.round(bh) + 'px';
     s.fontSize = Math.round(Math.max(15, Math.min(24, bh * .4))) + 'px';
-    if (dom.cont) { const c = dom.cont.style; c.display = hasRun ? '' : 'none'; c.left = (rowL + wStart + gap) + 'px'; c.top = (startTop + (btnH - bh) / 2) + 'px'; c.width = wCont + 'px'; c.height = Math.round(bh) + 'px'; c.fontSize = s.fontSize; }
+    if (dom.cont) { const c = dom.cont.style; c.setProperty('display', hasRun ? 'inline-flex' : 'none', 'important'); c.left = (rowL + wStart + gap) + 'px'; c.top = (startTop + (btnH - bh) / 2) + 'px'; c.width = wCont + 'px'; c.height = Math.round(bh) + 'px'; c.fontSize = s.fontSize; }
     s = dom.novice.style;
     s.left = (cx - 112) + 'px'; s.right = ''; s.top = rowTop + 'px'; s.width = '104px'; s.height = rowH + 'px'; s.justifyContent = 'center';
     s = dom.hintOff.style;
@@ -7945,7 +7949,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   function setDomVisible(v) {
     const d = v ? '' : 'none';
     for (const k of ['name', 'start', 'help', 'novice', 'board', 'hintOff', 'inkTitle']) if (dom[k]) dom[k].style.display = d;
-    if (dom.cont) dom.cont.style.display = v && window.RUNSAVE && RUNSAVE.has() ? '' : 'none';
+    if (dom.cont) dom.cont.style.setProperty('display', v && window.RUNSAVE && RUNSAVE.has() ? 'inline-flex' : 'none', 'important');   // 套件里 display 带 !important，这里也要带
     if (!v && dom.modeTip) { dom.modeTip.style.opacity = '0'; }
     if (!v && dom.panel) { dom.panel.style.display = 'none'; helpOpen = false; }
   }
@@ -8524,7 +8528,8 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     return `${sel}{background:url(${src}) center/100% 100% no-repeat!important;${free ? '' : `aspect-ratio:${ar.toFixed(3)};height:auto!important;min-height:0!important;min-width:min(${(ar * 2.5).toFixed(1)}em,38vw)!important;max-width:100%;`}box-sizing:border-box;padding:0 1em!important;display:inline-flex!important;align-items:center;justify-content:center;border:0!important;border-radius:0!important;box-shadow:none!important;color:#fff6e0!important;font-weight:400!important;letter-spacing:.06em!important;text-shadow:1px 0 #2a1608,-1px 0 #2a1608,0 1px #2a1608,0 -1px #2a1608,0 2px 0 rgba(0,0,0,.45)!important}
 ${sel}:active{transform:translateY(2px);filter:brightness(.92)}${sel}:hover{filter:brightness(1.08)}${sel}[disabled]{filter:grayscale(.7) brightness(.8)}`; };
   const css = [
-    btn('#tStart', 'gold', 1), btn('#tCont', 'darkS', 1),   // 标题页两颗按钮的大小由 title.js 按原图比例排 btn('#tConfirm .no', 'dark'), btn('#tConfirm .yes', 'red'),
+    btn('#tStart', 'gold', 1), btn('#tCont', 'darkS', 1),   // 标题页两颗按钮的大小由 title.js 按原图比例排
+    btn('#tConfirm .no', 'dark'), btn('#tConfirm .yes', 'red'),
     btn('#kaiju .bot .go', 'gold'), btn('#kaiju .bot .back', 'dark'),
     `#tConfirm .p{box-sizing:border-box;max-width:94vw!important;border:28px solid transparent!important;border-image:url(${PANEL}) 28 fill stretch!important;background:none!important;box-shadow:0 10px 30px rgba(0,0,0,.6)!important;border-radius:0!important;color:#efe2c4!important;padding:8px 18px 4px!important;position:relative;overflow:visible!important}`,
     `#tConfirm .p h3{position:relative;top:-46px;margin:0 auto -30px!important;width:max-content;min-width:60%;padding:6px 34px!important;background:url(${TAB}) center/100% 100% no-repeat;color:#fff2d0!important;font-weight:400!important;text-shadow:0 1px 0 #000}`,
@@ -8532,11 +8537,11 @@ ${sel}:active{transform:translateY(2px);filter:brightness(.92)}${sel}:hover{filt
     `#tName{border:10px solid transparent!important;border-image:url(${INPUT}) 18 fill stretch!important;background:none!important;border-radius:0!important;box-shadow:none!important;color:#3a2410!important}#tName::placeholder{color:rgba(90,60,30,.55)!important}`,
     `#tNovice input,#tHintOff input,#szzHintOff input{appearance:none;-webkit-appearance:none;width:20px!important;height:20px!important;margin:0 6px 0 0;background:url(${CK0}) center/100% 100% no-repeat;border:0;vertical-align:middle;cursor:pointer}#tNovice input:checked,#tHintOff input:checked,#szzHintOff input:checked{background-image:url(${CK1})}`,
     // 11/13 用户：右上角 图鉴 / 设置 / 帮助 / 声音 都用文字 + 短款墨色按钮（只在主界面）
-    `body.ontitle #szzCodexBtn,body.ontitle #szzSetBtn,body.ontitle #tHelp,body.ontitle #bMute{position:fixed!important;top:8px!important;width:var(--tb-w)!important;height:var(--tb-h)!important;min-width:0!important;padding:0!important;margin:0!important;background:url(${IMG.darkS[0]}) center/100% 100% no-repeat!important;border:0!important;border-radius:0!important;box-shadow:none!important;color:#fff6e0!important;font:400 var(--tb-f) Pixel12,Pixel12,sans-serif!important;letter-spacing:.06em!important;text-shadow:1px 0 #2a1608,-1px 0 #2a1608,0 1px #2a1608,0 -1px #2a1608!important;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:31}`,
+    `body.ontitle #szzCodexBtn,body.ontitle #szzSetBtn,body.ontitle #tHelp{position:fixed!important;top:8px!important;width:var(--tb-w)!important;height:var(--tb-h)!important;min-width:0!important;padding:0!important;margin:0!important;background:url(${IMG.darkS[0]}) center/100% 100% no-repeat!important;border:0!important;border-radius:0!important;box-shadow:none!important;color:#fff6e0!important;font:400 var(--tb-f) Pixel12,Pixel12,sans-serif!important;letter-spacing:.06em!important;text-shadow:1px 0 #2a1608,-1px 0 #2a1608,0 1px #2a1608,0 -1px #2a1608!important;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:31}`,
     `:root{--tb-h:34px;--tb-w:90px;--tb-f:15px;--tb-g:6px}@media (max-width:600px){:root{--tb-h:30px;--tb-w:78px;--tb-f:13px;--tb-g:4px}}`,
-    `body.ontitle #bMute{right:8px!important;left:auto!important;bottom:auto!important}body.ontitle #tHelp{right:calc(8px + var(--tb-w) + var(--tb-g))!important}body.ontitle #szzSetBtn{right:calc(8px + 2 * (var(--tb-w) + var(--tb-g)))!important}body.ontitle #szzCodexBtn{right:calc(8px + 3 * (var(--tb-w) + var(--tb-g)))!important}`,
-    `body.ontitle #bMute{font-size:0!important}body.ontitle #bMute::after{content:"声音";font:400 var(--tb-f) Pixel12,Pixel12,sans-serif}body.ontitle #bMute.on::after{content:"静音"}`,
-    `body.ontitle #szzCodexBtn:hover,body.ontitle #szzSetBtn:hover,body.ontitle #tHelp:hover,body.ontitle #bMute:hover{filter:brightness(1.12)}`,
+    `body.ontitle #bMute{display:none!important}body.ontitle #tHelp{right:8px!important}body.ontitle #szzSetBtn{right:calc(8px + var(--tb-w) + var(--tb-g))!important}body.ontitle #szzCodexBtn{right:calc(8px + 2 * (var(--tb-w) + var(--tb-g)))!important}`,   // 静音放进设置里
+    `body.ontitle #szzCodexBtn:hover,body.ontitle #szzSetBtn:hover,body.ontitle #tHelp:hover{filter:brightness(1.12)}`,
+    `#tHelpPanel{box-sizing:border-box!important;width:min(760px,92vw)!important;max-height:84vh!important;overflow:auto!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;border:28px solid transparent!important;border-image:url(${PANEL}) 28 fill stretch!important;background:none!important;border-radius:0!important;padding:4px 10px!important;font:400 14px/1.8 Pixel12,Pixel12,sans-serif!important;color:#efe2c4!important}#tHelpPanel h3{margin:0 0 8px!important;text-align:center;color:#ffd86e!important;font-weight:400!important}#tHelpPanel b{color:#ffd86e;font-weight:400}`,
   ].join('\n');
   void PAPER;
   const st = document.createElement('style'); st.id = 'uikit'; st.textContent = css;

@@ -32,6 +32,7 @@
     box.innerHTML = `<div class="p"><h3>设置</h3>
       <div class="row"><label>音乐</label><input type="range" min="0" max="100" step="5" value="${pct(v.bgm)}" data-k="bgm"><b>${pct(v.bgm)}</b></div>
       <div class="row"><label>音效</label><input type="range" min="0" max="100" step="5" value="${pct(v.sfx)}" data-k="sfx"><b>${pct(v.sfx)}</b></div>
+      <div class="row"><label>静音</label><div class="tg tm"><button data-m="1" class="${window.SFX && SFX.isMuted() ? 'on' : ''}">开</button><button data-m="0" class="${window.SFX && SFX.isMuted() ? '' : 'on'}">关</button></div></div>
       <div class="row"><label>震屏</label><div class="tg"><button data-s="1" class="${v.shake ? 'on' : ''}">开</button><button data-s="0" class="${v.shake ? '' : 'on'}">关</button></div></div>
       <button class="ok">关闭</button><small>设置会自动保存</small></div>`;
     box.querySelectorAll('input[type=range]').forEach(r => r.addEventListener('input', () => {
@@ -39,7 +40,8 @@
       if (r.dataset.k === 'sfx' && window.SFX && SFX.refreshVol) SFX.refreshVol();
       if (r.dataset.k === 'sfx' && window.SFX) SFX.play('j_pick0');
     }));
-    box.querySelectorAll('.tg button').forEach(b => b.addEventListener('click', () => { v.shake = b.dataset.s === '1'; save(); render(); }));
+    box.querySelectorAll('.tm button').forEach(b => b.addEventListener('click', () => { if (window.SFX && SFX.isMuted() !== (b.dataset.m === '1')) SFX.toggleMute(); render(); }));   // 11/13：静音放进设置
+    box.querySelectorAll('.tg:not(.tm) button').forEach(b => b.addEventListener('click', () => { v.shake = b.dataset.s === '1'; save(); render(); }));
     box.querySelector('.ok').addEventListener('click', close);
   }
   function open() { render(); box.hidden = false; }
