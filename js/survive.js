@@ -533,26 +533,91 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   add('longyin', { tier: 4, name: '龙吟', icon: '龙', color: '#a8e0ff', desc: '一枪砸地，枪劲化龙沿地面一路轰出', need: 200, beam: true, len: 220, wu: .8, rc: .5,
     cast() { const a = aim(); lineHit(a, 220, 24, 3.2, 70, '168,224,255'); for (let i = 1; i <= 5; i++) { const x = hero.x + Math.cos(a) * i * 44, y = clampY(hero.y + Math.sin(a) * i * 22); later(i * .08, () => blast(x, y, 30, 1.6, 40, '168,224,255')); }
       sfx('crack', hero.x); shake = Math.max(shake, .4); } });
+  // ---------- 石子 12 招 + 黄符 12 招（11/13 用户定，按黄玄地天由弱到强） ----------
+  const shotAt = (x, y, a, o) => bolts.push(Object.assign({ x, y, vx: Math.cos(a) * 270, vy: Math.sin(a) * 135, a, t: 0, T: .6, hitSet: [], dmg: 1.2, col: ['200,200,195', '245,245,240'] }, o));
+  const STN = ['190,186,176', '240,236,226'], FUC = ['255,214,90', '255,248,200'];
+  const stunz = (z, t) => { z.stun = Math.max(z.stun || 0, t); };
+  function chain(n, range, dmg, col, gap) {   // 在敌人之间连跳 n 次（跳石、掌心雷）
+    let x = hero.x, y = hero.y; const hitd = [];
+    for (let i = 0; i < n; i++) later(i * (gap || .09), () => {
+      let t = null, bd = range; for (const z of hittable()) { if (hitd.includes(z)) continue; const d = Math.hypot(z.x - x, (z.y - y) * 2); if (d < bd) { bd = d; t = z; } }
+      if (!t) return; hitd.push(t); const a = Math.atan2((t.y - y) * 2, t.x - x);
+      lineHit(a, Math.max(10, bd / RM), 8, dmg, 20, col, x, y); x = t.x; y = t.y; sfx('swing_knife', x); });
+  }
+  // 石子
+  add('feishi', { tier: 1, name: '飞石', icon: '石', color: '#d8d2c4', desc: '直线连掷三颗快石', need: 170, beam: true, len: 170, wu: .4, rc: .3,
+    cast() { [0, 1, 2].forEach(i => later(i * .1, () => shot(aim(), { dmg: 1.4, T: .6, vx: Math.cos(aim()) * 380, vy: Math.sin(aim()) * 190, col: STN }))); sfx('swing_knife', hero.x); } });
+  add('sashi', { tier: 1, name: '撒石', icon: '撒', color: '#cfc6b0', desc: '扇形撒出一把碎石', need: 110, wu: .45, rc: .3,
+    cast() { const a0 = aim(); for (let i = 0; i < 7; i++) { const a = a0 - .5 + i / 6; shot(a, { dmg: 1.0, T: .45, col: STN }); } sfx('swing_knife', hero.x); } });
+  add('zashi', { tier: 1, name: '砸石', icon: '砸', color: '#bfb59c', desc: '往前方地上一砸，震晕附近的人', need: 80, wu: .55, rc: .35,
+    cast() { const a = aim(), x = hero.x + Math.cos(a) * 44, y = clampY(hero.y + Math.sin(a) * 22); blast(x, y, 42, 2.2, 30, '200,190,165'); for (const z of near(x, y, 42 * RM)) stunz(z, .6); sfx('crack', x); shake = Math.max(shake, .2); } });
+  add('tiaoshi', { tier: 2, name: '跳石', icon: '跳', color: '#e6dfcf', desc: '石子像打水漂，在敌人之间连跳五次', need: 160, wu: .45, rc: .35,
+    cast() { chain(5, 170, 1.6, '230,226,214'); } });
+  add('xuanshi', { tier: 2, name: '旋石', icon: '旋', color: '#d6cdb8', desc: '原地转一圈，甩出一圈石子', need: 90, wu: .5, rc: .35,
+    cast() { for (let i = 0; i < 12; i++) shot(i * Math.PI / 6, { dmg: 1.1, T: .55, col: STN }); sfx('swing_knife', hero.x); } });
+  add('paoshi', { tier: 2, name: '抛石', icon: '抛', color: '#c9bea4', desc: '高抛一块大石，落地爆开碎石四溅', need: 200, none: true, wu: .55, rc: .35,
+    cast() { const [[x, y]] = pts(1, 210); fx.push({ k: 'mark', x, y, r: 40, t: 0, T: .5 });
+      later(.5, () => { blast(x, y, 46, 2.6, 40, '210,200,175'); for (let i = 0; i < 6; i++) shotAt(x, y, i * Math.PI / 3, { dmg: .9, T: .4, col: STN }); sfx('crack', x); shake = Math.max(shake, .2); }); } });
+  add('luoshi', { tier: 3, name: '落石', icon: '落', color: '#b8ab8c', desc: '数块大石从天砸下，砸出的坑里敌人减速', need: 220, none: true, wu: .6, rc: .4,
+    cast() { pts(4, 230).forEach(([x, y], i) => { fx.push({ k: 'mark', x, y, r: 34, t: 0, T: .55 + i * .08 }); later(.55 + i * .08, () => { blast(x, y, 36, 2.4, 30, '190,175,140'); zones.push({ x, y, r: 36, t: 0, T: 3, tk: 0, dmg: .3, kind: 'pit' }); sfx('crack', x); }); }); shake = Math.max(shake, .2); } });
+  add('shici', { tier: 3, name: '石刺', icon: '刺', color: '#c4b493', desc: '地面一排石刺依次往前突起', need: 190, beam: true, len: 190, wu: .6, rc: .4,
+    cast() { const a = aim(); for (let i = 1; i <= 6; i++) { const x = hero.x + Math.cos(a) * i * 34, y = clampY(hero.y + Math.sin(a) * i * 17); later(i * .07, () => { blast(x, y, 28, 1.6, 30, '196,180,147'); for (const z of near(x, y, 28 * RM)) z.vx = (z.vx || 0); }); } sfx('crack', hero.x); shake = Math.max(shake, .15); } });
+  add('raoshen', { tier: 3, name: '绕身石', icon: '绕', color: '#dcd3be', desc: '三颗石子绕身飞转五秒', need: 70, wu: .5, rc: .35,
+    cast() { zones.push({ x: 0, y: 0, follow: 1, r: 62, t: 0, T: 5, tk: 0, dmg: .9, kind: 'orbit', col: '220,212,190', n: 3 }); sfx('swing_knife', hero.x); } });
+  add('luanshi', { tier: 4, name: '乱石穿空', icon: '乱', color: '#e8dcc0', desc: '三秒内全屏乱石密集落下', need: 260, none: true, wu: .7, rc: .45,
+    cast() { for (let i = 0; i < 20; i++) later(i * .15, () => { const [[x, y]] = pts(1, 280); fx.push({ k: 'mark', x, y, r: 26, t: 0, T: .3 }); later(.3, () => { blast(x, y, 30, 1.8, 24, '210,198,170'); sfx('crack', x); }); }); shake = Math.max(shake, .25); } });
+  add('feihuang', { tier: 4, name: '飞蝗石', icon: '蝗', color: '#f0e6cc', desc: '连撒五波大扇形石雨', need: 150, wu: .6, rc: .45,
+    cast() { for (let w = 0; w < 5; w++) later(w * .18, () => { const a0 = aim(); for (let i = 0; i < 9; i++) shot(a0 - .6 + i * .15, { dmg: 1.1, T: .55, col: STN }); sfx('swing_knife', hero.x); }); } });
+  add('gunshi', { tier: 4, name: '滚石', icon: '滚', color: '#a99a7a', desc: '推出一块巨石往前碾压，滚到尽头碎成十块', need: 220, beam: true, len: 240, wu: .7, rc: .5,
+    cast() { const a = aim(); let x = hero.x, y = hero.y;
+      for (let i = 1; i <= 10; i++) later(i * .07, () => { x += Math.cos(a) * 26; y = clampY(y + Math.sin(a) * 13); blast(x, y, 36, 1.4, 50, '170,154,122'); if (i === 10) { for (let j = 0; j < 10; j++) shotAt(x, y, j * Math.PI / 5, { dmg: 1.0, T: .45, col: STN }); sfx('crack', x); shake = Math.max(shake, .3); } }); } });
+  // 黄符
+  add('huofu', { tier: 1, name: '火符', icon: '符', color: '#ffb35a', desc: '甩出一张火符，打中就炸开起火', need: 190, wu: .45, rc: .3,
+    cast() { const t = nearest(200), a = aim(), x = t ? t.x : hero.x + Math.cos(a) * 150, y = t ? t.y : hero.y + Math.sin(a) * 75;
+      shot(a, { dmg: .8, T: .3, vx: Math.cos(a) * 420, vy: Math.sin(a) * 210, col: FUC });
+      later(.28, () => { blast(x, y, 34, 2.0, 24, '255,150,60'); zones.push({ x, y, r: 28, t: 0, T: 2, tk: 0, dmg: .45, kind: 'fire' }); sfx('crack', x); }); } });
+  add('feifu', { tier: 1, name: '飞符', icon: '飞', color: '#ffe07a', desc: '扇形甩出三张会追人的符', need: 220, wu: .45, rc: .3,
+    cast() { const a0 = aim(); [-.6, 0, .6].forEach(d => shot(a0 + d, { dmg: 1.8, T: 1.4, home: 1, vx: Math.cos(a0 + d) * 200, vy: Math.sin(a0 + d) * 100, col: FUC })); sfx('swing_knife', hero.x); } });
+  add('dingshen', { tier: 2, name: '定身符', icon: '定', color: '#ffd24a', desc: '前方锥形范围内的敌人定住两秒', need: 130, range: 130, half: .6, wu: .5, rc: .35,
+    cast() { const a = aim(); fx.push({ k: 'arc', x: hero.x, y: hero.y, a0: a, half: .6, r: 130 * RM, t: 0, T: .4, color: ['rgba(255,214,90,', 'rgba(255,250,210,'] });
+      for (const z of hittable()) { const dx = z.x - hero.x, dy = (z.y - hero.y) * 2, d = Math.hypot(dx, dy); let da = Math.abs(Math.atan2(dy, dx) - a); if (da > Math.PI) da = Math.PI * 2 - da; if (d < 130 * RM && da < .6) { HT(z, .8, 0); stunz(z, 2); } } sfx('crack', hero.x); } });
+  add('zhangxin', { tier: 2, name: '掌心雷', icon: '掌', color: '#dfe6ff', desc: '闪电在敌人之间连锁跳八次', need: 180, wu: .5, rc: .35,
+    cast() { chain(8, 160, 1.5, '220,230,255', .06); shake = Math.max(shake, .12); } });
+  add('wulei', { tier: 2, name: '五雷符', icon: '五', color: '#ffe68a', desc: '五张符绕身飞转，碰到敌人就炸雷', need: 70, wu: .5, rc: .35,
+    cast() { zones.push({ x: 0, y: 0, follow: 1, r: 58, t: 0, T: 4, tk: 0, dmg: 1.2, kind: 'orbit', col: '255,220,100', n: 5, zap: 1 }); sfx('swing_knife', hero.x); } });
+  add('sadou', { tier: 3, name: '撒豆成兵', icon: '豆', color: '#f2c94c', desc: '撒出豆子化作四个金甲小兵，冲向敌人撞上就爆', need: 230, wu: .55, rc: .4,
+    cast() { for (let i = 0; i < 4; i++) { const a = aim() + R(-1.2, 1.2); shot(a, { dmg: 2.6, T: 2.2, home: 1, big: 1, vx: Math.cos(a) * 150, vy: Math.sin(a) * 75, col: ['242,201,76', '255,244,200'] }); } sfx('swing_knife', hero.x); } });
+  add('tianlei', { tier: 3, name: '天雷阵', icon: '阵', color: '#cfd8ff', desc: '地上画一圈雷阵，三秒内阵里不停落雷', need: 200, none: true, wu: .6, rc: .4,
+    cast() { const [[x, y]] = pts(1, 200); zones.push({ x, y, r: 80, t: 0, T: 3, tk: 0, dmg: 1.6, kind: 'thunder' }); sfx('crack', x); } });
+  add('fuhuo', { tier: 3, name: '符火燎原', icon: '燎', color: '#ff8a3c', desc: '一排火符落地，烧成一道火墙', need: 200, beam: true, len: 200, wu: .55, rc: .4,
+    cast() { const a = aim(); for (let i = 1; i <= 5; i++) { const x = hero.x + Math.cos(a) * i * 40, y = clampY(hero.y + Math.sin(a) * i * 20); later(i * .06, () => zones.push({ x, y, r: 28, t: 0, T: 3, tk: 0, dmg: .6, kind: 'fire' })); } sfx('crack', hero.x); } });
+  add('jiutian', { tier: 4, name: '九天雷罚', icon: '罚', color: '#e6ecff', desc: '全屏随机落下十道大雷', need: 300, none: true, wu: .7, rc: .45,
+    cast() { pts(10, 300).forEach(([x, y], i) => { fx.push({ k: 'mark', x, y, r: 40, t: 0, T: .35 + i * .08 }); later(.35 + i * .08, () => { fx.push({ k: 'bolt', x, y, t: 0, T: .35 }); blast(x, y, 40, 3.0, 40, '220,230,255'); sfx('crack', x); }); }); shake = Math.max(shake, .35); } });
+  add('huangtian', { tier: 4, name: '黄天当立', icon: '黄', color: '#ffd700', desc: '全屏黄光，所有敌人受伤并定住一秒半', need: 260, none: true, wu: .8, rc: .5,
+    cast() { fx.push({ k: 'ring', x: hero.x, y: hero.y, t: 0, T: .6, r: 320 }); for (const z of hittable()) if (dist(z, hero) < 330) { HT(z, 2.5, 20); stunz(z, 1.5); } sfx('crack', hero.x); shake = Math.max(shake, .4); } });
+  add('taiping', { tier: 4, name: '太平要术', icon: '太', color: '#fff0a0', desc: '身周展开旋转符阵五秒，阵里不停落雷', need: 90, wu: .7, rc: .5,
+    cast() { zones.push({ x: 0, y: 0, follow: 1, r: 95, t: 0, T: 5, tk: 0, dmg: 1.5, kind: 'thunder' }); sfx('crack', hero.x); } });
+  SK.pili.tier = 1;
   SK.qiang.tier = 1; SK.chong.tier = 2;
   SK.daobo.tier = 1; SK.huima.tier = 2; SK.daolun.tier = 2; SK.xuanfeng.tier = 2; SK.dilie.tier = 3; SK.shuanghuan.tier = 3; SK.xuehe.tier = 4; SK.tianbeng.tier = 4; SK.wanren.tier = 4;   /* 11/12 刀 13 招按黄玄地天重排 */
   // ---------- 出身（开局配置里选；起手只有 1 个武艺） ----------
   const ORIGINS = {
-    nongfu: { name: '农夫', tag: '短兵器', wep: 0, skill: 'hengsao', desc: '庄稼汉，挨得住打。受到伤害 -20%', take: .8, oa: [5, 4, 2, 1, 1, 2, 1, 3], at: [6, 4, 2, 2, 3, 2] },
-    xiaozu: { name: '小卒', tag: '长兵器', wep: 3, skill: 'qiang', desc: '行伍出身，出手利落。武艺前摇 -20%', wu: .8, oa: [4, 4, 5, 1, 1, 2, 1, 3], at: [4, 3, 4, 3, 2, 2] },
-    liehu: { locked: true, name: '猎户', tag: '远程', wep: 5, skill: 'daobo', desc: '山里跑惯了。移动速度 +12%', move: 1.12, oa: [3, 4, 1, 5, 1, 4, 1, 3], at: [3, 3, 1, 5, 3, 2] },
-    shusheng: { locked: true, name: '书生', tag: '术法', wep: 8, skill: 'huima', desc: '手无缚鸡之力，却通术法。术法最强，近战偏弱', oa: [2, 1, 1, 1, 1, 2, 6, 4], at: [2, 1, 1, 2, 3, 6] },
+    nongfu: { name: '农夫', tag: '刀 · 锤', wep: 0, weps: [0, 2], skill: 'hengsao', desc: '庄稼汉，挨得住打。受到伤害 -20%；刀、锤武艺 ×1.2', take: .8, oa: [5, 4, 2, 1, 1, 2, 1, 3], at: [6, 4, 2, 2, 3, 2] },
+    xiaozu: { name: '小卒', tag: '枪 · 关刀', wep: 3, weps: [3, 4], skill: 'qiang', desc: '行伍出身，出手利落。武艺前摇 -20%；枪、关刀武艺 ×1.2', wu: .8, oa: [4, 4, 5, 1, 1, 2, 1, 3], at: [4, 3, 4, 3, 2, 2] },
+    liehu: { name: '猎户', tag: '石子 · 弓', wep: 7, weps: [7, 5], skill: 'feishi', desc: '山里跑惯了。移动速度 +12%；石子、弓武艺 ×1.2', move: 1.12, oa: [3, 4, 1, 5, 1, 4, 1, 3], at: [3, 3, 1, 5, 3, 2] },
+    shusheng: { name: '书生', tag: '黄符 · 羽扇', wep: 8, weps: [8, 9], skill: 'huofu', desc: '手无缚鸡之力，却通术法。黄符、羽扇武艺 ×1.2', oa: [2, 1, 1, 1, 1, 2, 6, 4], at: [2, 1, 1, 2, 3, 6] },
   };
   let origin = 'nongfu';
   const OG = () => ORIGINS[origin] || ORIGINS.nongfu;
   // ---------- 武艺类别 / 出身熟练 / 类别共鸣 / 连携 / 熟练度 ----------
   // 大类（出身熟练、心法专精）→ 具体兵器（连携、共鸣、施法时手里拿什么）
   const CATN = ['短兵器', '长兵器', '远程', '法师'], CATA = [1, 2, 3, 6];   // 大类 → 出身属性下标
-  const WEPN = ['刀', '剑', '锤', '枪', '关刀', '弓', '弩', '石子', '法术'], WEPCAT = [0, 0, 0, 1, 1, 2, 2, 2, 3];
+  const WEPN = ['刀', '剑', '锤', '枪', '关刀', '弓', '弩', '石子', '黄符', '羽扇', '拳'], WEPCAT = [0, 0, 0, 1, 1, 2, 2, 2, 3, 3, 0];
   // 11/12 用户定：刀一共 13 招（黄：横扫 连斩 刀波 / 玄：回马刀 刀轮 回旋斩 / 地：裂地环 地裂波 双环击飞 / 天：天崩地裂 飞轮刃 血河斩 万刃归宗），任何出身都能捡、能买，出刀时就是刀的帧，只是出身的短兵属性决定威力（农夫 ×1.18、书生 ×0.73）
   //   原本归剑/锤/关刀的连斩、地裂波、双环击飞、天崩地裂、回旋斩、血河斩、万刃归宗改归刀；四象剑气、震地不在名单里，留给以后的剑、锤
-  const WOF = { hengsao: 0, daobo: 0, huima: 0, daolun: 0, lianzhan: 0, wanren: 0, dilie: 0, shuanghuan: 0, tianbeng: 0, xuanfeng: 0, xuehe: 0, liedihuan: 0, feilunren: 0, sixiang: 1, zhendi: 2, qiang: 3, chong: 3, lianci: 3, lansao: 3, tiaoqiang: 3, lihua: 3, touqiang: 3, huimaq: 3, qianglin: 3, bainiao: 3, qijin: 3, longyin: 3, jianyu: 5, huogong: 8, pili: 8 };
+  const WOF = { hengsao: 0, daobo: 0, huima: 0, daolun: 0, lianzhan: 0, wanren: 0, dilie: 0, shuanghuan: 0, tianbeng: 0, xuanfeng: 0, xuehe: 0, liedihuan: 0, feilunren: 0, sixiang: 1, zhendi: 2, qiang: 3, chong: 3, lianci: 3, lansao: 3, tiaoqiang: 3, lihua: 3, touqiang: 3, huimaq: 3, qianglin: 3, bainiao: 3, qijin: 3, longyin: 3, jianyu: 5, huogong: 9, pili: 8, feishi: 7, sashi: 7, zashi: 7, tiaoshi: 7, xuanshi: 7, paoshi: 7, luoshi: 7, shici: 7, raoshen: 7, luanshi: 7, feihuang: 7, gunshi: 7, huofu: 8, feifu: 8, dingshen: 8, zhangxin: 8, wulei: 8, sadou: 8, tianlei: 8, fuhuo: 8, jiutian: 8, huangtian: 8, taiping: 8 };
   const wepOf = k => WOF[k] != null ? WOF[k] : 0;
-  const ONLY_DAO = true; const wepOk = k => wepOf(k) === 0 || wepOf(k) === 3;   // 11/12：刀、枪都有美术了   // 用户定 11/10：目前只有刀的美术，武艺奖励只出刀系；其他武器等美术补齐再开
+  const ONLY_DAO = true; const WEP_ON = [0, 3, 7, 8]; const wepOk = k => WEP_ON.includes(wepOf(k));   // 11/13：刀、枪、石子、黄符的招式做好了   // 11/12：刀、枪都有美术了   // 用户定 11/10：目前只有刀的美术，武艺奖励只出刀系；其他武器等美术补齐再开
   const catOf = k => WEPCAT[wepOf(k)];
   // 武艺姿势：主角固定空手，放招时按这一招的兵器举起对应的施招帧（第 1 帧蓄力，第 2 帧出手，更多帧给第二刀和收势）
   // FRW 下标同 WEPN：[帧名前缀, 帧数]；法术暂按武艺配法器，之后改成按装备的法器
@@ -561,12 +626,14 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   // 11/12 用户定：主角始终拿出身兵器（农夫刀、小卒枪），不论放刀招还是枪招，都按这一招的「动作类型」取手中兵器的帧
   //   5 种动作：劈 chop / 横扫 sweep / 刺 thrust / 转 spin / 挑 up。以后弓、法术、石子的图集也都画这 5 个动作
   const MOT = { hengsao: 'sweep', lianzhan: 'sweep', xuehe: 'sweep', feilunren: 'sweep', daobo: 'chop', dilie: 'chop', shuanghuan: 'chop', liedihuan: 'chop', tianbeng: 'chop', daolun: 'spin', xuanfeng: 'spin', wanren: 'spin', huima: 'up',
-    qiang: 'thrust', chong: 'thrust', lianci: 'thrust', touqiang: 'thrust', huimaq: 'thrust', bainiao: 'thrust', qijin: 'thrust', lansao: 'sweep', tiaoqiang: 'up', lihua: 'spin', qianglin: 'spin', longyin: 'chop' };
+    qiang: 'thrust', chong: 'thrust', lianci: 'thrust', touqiang: 'thrust', huimaq: 'thrust', bainiao: 'thrust', qijin: 'thrust', lansao: 'sweep', tiaoqiang: 'up', lihua: 'spin', qianglin: 'spin', longyin: 'chop',
+    feishi: 'thrust', sashi: 'sweep', zashi: 'chop', tiaoshi: 'thrust', xuanshi: 'spin', paoshi: 'up', luoshi: 'up', shici: 'chop', raoshen: 'spin', luanshi: 'up', feihuang: 'sweep', gunshi: 'chop',
+    pili: 'chop', huofu: 'thrust', feifu: 'sweep', dingshen: 'thrust', zhangxin: 'chop', wulei: 'spin', sadou: 'up', tianlei: 'chop', fuhuo: 'sweep', jiutian: 'chop', huangtian: 'up', taiping: 'spin', jianyu: 'up', huogong: 'up' };
   // [起手, 出手, 第二击]；刀没有专门的刺帧，借横斩
   // 11/12 新图集：每种兵器 20 帧，统一命名 前缀 + idle/walk1-3/roll1-4/hurt/down/chop1-2/sweep1-2/thrust1-2/spin1-2/up1-2
   const FRM0 = p => ({ chop: [p + 'chop1', p + 'chop2', p + 'chop2'], sweep: [p + 'sweep1', p + 'sweep2', p + 'sweep1'], thrust: [p + 'thrust1', p + 'thrust2', p + 'thrust1'], spin: [p + 'spin1', p + 'spin2', p + 'spin2'], up: [p + 'up1', p + 'up2', p + 'chop2'] });
   const FRM = { wd_: FRM0('wd_'), qiang_: FRM0('qiang_'), bow_: FRM0('bow_'), stone_: FRM0('stone_'), fan_: FRM0('fan_'), huangfu_: FRM0('huangfu_'), quan_: FRM0('quan_'), guandao_: FRM0('guandao_'), jian_: FRM0('jian_'), chui_: FRM0('chui_') };
-  const HELDP = { 0: 'wd_', 3: 'qiang_', 5: 'bow_', 7: 'stone_', 8: 'huangfu_' };   // 书生开局拿黄符
+  const HELDP = { 0: 'wd_', 1: 'jian_', 2: 'chui_', 3: 'qiang_', 4: 'guandao_', 5: 'bow_', 7: 'stone_', 8: 'huangfu_', 9: 'fan_', 10: 'quan_' };   // 书生开局拿黄符
   const heldPre = () => HELDP[OG().wep] || 'wd_';
   const motFr = k => (FRM[heldPre()] || FRM.wd_)[MOT[k] || 'chop'];
   for (const k of Object.keys(SK)) Object.defineProperties(SK[k], {
@@ -614,10 +681,13 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     const rr = box.querySelector('.rr'); if (rr) rr.onclick = e => { e.preventDefault(); box.remove(); cultivate(cb, i, n, true); };
     document.body.appendChild(box);
   }
+  // 11/13 用户定：出身两种本门兵器 ×1.2，剑、拳通用 ×1.0，其他兵器 ×0.85；短兵/长兵属性只算修炼加上去的那部分成长
+  const wmul = k => { const w = wepOf(k); return w === 1 || w === 10 ? 1 : (OG().weps || [OG().wep]).includes(w) ? 1.2 : .85; };
+  const growOf = c => c === 0 ? profV(AT()[1]) / profV(AT0()[1]) : c === 1 ? profV(AT()[2]) / profV(AT0()[2]) : 1;
   const profOf = c => c === 0 ? profV(AT()[1]) : c === 1 ? profV(AT()[2]) : profV((OG().oa || [3, 3, 3, 3, 3, 3, 3, 3])[CATA[c]]);   // 短兵/长兵：对应大类武艺伤害
   const RESD = [0, 0, .08, .16, .26, .40];   // 同类别 n 件：该类别武艺伤害加成
   function RES() {
-    const cnt = [0, 0, 0, 0, 0, 0, 0, 0, 0]; for (const k of S.slots) if (SK[k]) cnt[wepOf(k)]++;   // 按具体兵器数
+    const cnt = WEPN.map(() => 0); for (const k of S.slots) if (SK[k]) cnt[wepOf(k)]++;   // 按具体兵器数
     const mx = Math.max(...cnt);
     return { cnt, take: mx >= 3 ? .95 : 1, cd: mx >= 5 ? .9 : mx >= 4 ? .95 : 1 };
   }
@@ -626,7 +696,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const mastMul = k => { const l = lvOf(k); return 1 + .06 * Math.min(3, l - 1) + (l >= 5 ? .12 : 0) + .05 * Math.max(0, Math.min(l, 9) - 5); };   // LV2-4、6-9 递增，LV5 质变
   function skillMul(k) {
     const c = catOf(k), n = RES().cnt[wepOf(k)], low = hero.hp / maxHp() < .3 ? 1 + .25 * GM.low : 1;
-    return profOf(c) * (1 + RESD[Math.min(5, n)]) * mastMul(k) * GM.all * GM.cat[c] * low * (1 + .06 * S.xy);
+    return wmul(k) * growOf(c) * (1 + RESD[Math.min(5, n)]) * mastMul(k) * GM.all * GM.cat[c] * low * (1 + .06 * S.xy);
   }
   function critRoll() {   // 暴击：基础 5% + 心法；伤害 ×1.5 + 心诀
     if (!CK || !SK[CK]) return 1;
@@ -1263,7 +1333,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   const ATD = ['提高气血，受到的伤害按比例减少', '提高刀、剑等短兵武艺伤害', '提高枪、关刀等长兵武艺伤害', '提高移动速度', '提高暴击率，修炼更容易出好品阶', '武艺、心法熟练度和修为涨得更快'];
   const icoOf = it => it.kind === 'item' ? `art/ui/item/${it.id}.webp` : iconUrl(it.kind, it.k || it.id) || '';
   const RQ = ['普通', '精良', '稀有', '绝世'], RQC = ['#e8e0d0', '#6fb8ff', '#c58cff', '#ffb347'];
-  const tagsOf = it => it.kind === 'skill' ? ['武艺', '主动', '刀'] : it.kind === 'gf' ? (GF[it.id].qg ? ['轻功', '被动'] : ['心法', '被动']) : ITEMS[it.id].use ? ['道具', '消耗'] : ['道具', '永久'];
+  const tagsOf = it => it.kind === 'skill' ? ['武艺', '主动', WEPN[wepOf(it.k)]] : it.kind === 'gf' ? (GF[it.id].qg ? ['轻功', '被动'] : ['心法', '被动']) : ITEMS[it.id].use ? ['道具', '消耗'] : ['道具', '永久'];
   function prepOpen(nd) { { const t = document.getElementById('survTut'); if (t) t.remove(); tutQ = []; }   // 战斗里没看完的提醒不带进整备屏
     prepNd = nd; prepTab = 'jie'; prepLastTab = ''; selLoot = 0; selWu = null; selShop = 0; if (window.SFX) SFX.play('j_shop'); prepRender(); tut('prep'); }
   function prepClose() {
@@ -1451,14 +1521,21 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     skillTick(dt); bossTick(dt);
     for (const e of fx) e.t += dt;
     for (const b of bolts) {
-      CM = b.cm || 1; CK = b.ck || ''; b.t += dt; b.x += b.vx * dt; b.y += b.vy * dt;
+      CM = b.cm || 1; CK = b.ck || ''; b.t += dt;
+      if (b.home) { let t = null, bd = 260; for (const z of hittable()) { if (b.hitSet.includes(z)) continue; const d = Math.hypot(z.x - b.x, (z.y - b.y) * 2); if (d < bd) { bd = d; t = z; } }
+        if (t) { const sp = Math.hypot(b.vx, b.vy * 2) || 200, ta = Math.atan2((t.y - b.y) * 2, t.x - b.x); let da = ta - b.a; while (da > Math.PI) da -= Math.PI * 2; while (da < -Math.PI) da += Math.PI * 2; b.a += Math.max(-5 * dt, Math.min(5 * dt, da)); b.vx = Math.cos(b.a) * sp; b.vy = Math.sin(b.a) * sp / 2; } }
+      b.x += b.vx * dt; b.y += b.vy * dt;
       if (b.y < M.top - 4 || b.y > M.bot + 4) b.t = b.T;
-      for (const z of hittable()) if (!b.hitSet.includes(z) && Math.abs(z.x - b.x) < 16 && Math.abs(z.y - b.y) < 16) { b.hitSet.push(z); const f0 = freeze; rec((b.dmg || 1.8) * DM()); hit(z, (b.dmg || 1.8) * DM(), 40, Math.sign(b.vx) || hero.f, false, 0, .3, false, false, { secondary: true, survSkill: true }); freeze = Math.min(freeze, Math.max(f0, .03)); }
+      for (const z of hittable()) if (!b.hitSet.includes(z) && Math.abs(z.x - b.x) < (b.big ? 22 : 16) && Math.abs(z.y - b.y) < 16) { b.hitSet.push(z); if (b.big) { b.t = b.T; fx.push({ k: 'burst', x: b.x, y: b.y, r: 40, t: 0, T: .4, col: '242,201,76' }); for (const z2 of near(b.x, b.y, 40)) if (z2 !== z) HT(z2, b.dmg * .6, 30); } const f0 = freeze; rec((b.dmg || 1.8) * DM()); hit(z, (b.dmg || 1.8) * DM(), 40, Math.sign(b.vx) || hero.f, false, 0, .3, false, false, { secondary: true, survSkill: true }); freeze = Math.min(freeze, Math.max(f0, .03)); }
     }
     CM = 1; CK = '';
     for (const zn of zones) {
       CM = zn.cm || 1; CK = zn.ck || ''; zn.t += dt; if (zn.follow) { zn.x = hero.x; zn.y = hero.y; }
-      if ((zn.tk -= dt) <= 0) { zn.tk = .35; if (zn.kind === 'trail') { for (const z of near(zn.x, zn.y, zn.r)) z.survSlow = .6; } else for (const z of near(zn.x, zn.y, zn.r)) HT(z, zn.dmg, zn.kind === 'wheel' ? 25 : 4, Math.sign(z.x - zn.x) || hero.f, .02); }
+      if ((zn.tk -= dt) <= 0) { zn.tk = .35;
+        if (zn.kind === 'thunder') { zn.tk = .3; const c = near(zn.x, zn.y, zn.r * RM), z = c[Math.floor(Math.random() * c.length)], a = Math.random() * 7, rr = Math.random() * zn.r * RM, x = z ? z.x : zn.x + Math.cos(a) * rr, y = z ? z.y : zn.y + Math.sin(a) * rr * .5; fx.push({ k: 'bolt', x, y, t: 0, T: .3 }); blast(x, y, 22, zn.dmg, 20, '220,230,255'); continue; }
+        if (zn.kind === 'orbit') { zn.tk = .12; const N = zn.n || 3; for (let i = 0; i < N; i++) { const a = zn.t * 5 + i * Math.PI * 2 / N, x = zn.x + Math.cos(a) * zn.r, y = zn.y + Math.sin(a) * zn.r * .5; for (const z of near(x, y, 16)) { if ((z.orbT || 0) > zn.t) continue; z.orbT = zn.t + .4; HT(z, zn.dmg, 20); if (zn.zap) fx.push({ k: 'bolt', x: z.x, y: z.y, t: 0, T: .25 }); } } continue; }
+        if (zn.kind === 'pit') for (const z of near(zn.x, zn.y, zn.r)) z.survSlow = .6;
+        if (zn.kind === 'trail') { for (const z of near(zn.x, zn.y, zn.r)) z.survSlow = .6; } else for (const z of near(zn.x, zn.y, zn.r)) HT(z, zn.dmg, zn.kind === 'wheel' ? 25 : 4, Math.sign(z.x - zn.x) || hero.f, .02); }
     }
     CM = 1; CK = '';
     for (let i = zones.length - 1; i >= 0; i--) if (zones[i].t >= zones[i].T) zones.splice(i, 1);
@@ -1499,8 +1576,15 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       else { ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, k.range * (.4 + .6 * p), a - k.half, a + k.half); ctx.closePath(); ctx.fill(); ctx.stroke(); }
       ctx.restore();
     }
-    for (const b of bolts) {   // 月牙刀波
+    for (const b of bolts) {   // 月牙刀波；石子、黄符、豆兵另画
       const p = b.t / b.T, al = 1 - p * p;
+      if (b.col === STN || b.col === FUC || b.big) {
+        ctx.save(); ctx.translate(b.x, b.y - 16); ctx.globalAlpha = Math.min(1, al + .3); ctx.strokeStyle = 'rgba(40,30,20,.95)'; ctx.lineWidth = 1.5;
+        if (b.big) { ctx.fillStyle = '#f2c94c'; ctx.beginPath(); ctx.arc(0, 0, 8, 0, 7); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#fff4c8'; ctx.beginPath(); ctx.arc(-2, -3, 3, 0, 7); ctx.fill(); }
+        else if (b.col === FUC) { ctx.rotate(b.a + Math.sin(b.t * 20) * .3); ctx.fillStyle = '#ffd65a'; ctx.fillRect(-7, -4, 14, 8); ctx.strokeRect(-7, -4, 14, 8); ctx.fillStyle = '#c0392b'; ctx.fillRect(-4, -1, 8, 2); }
+        else { ctx.fillStyle = '#bdb6a6'; ctx.beginPath(); ctx.arc(0, 0, 4.5, 0, 7); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#ece6d8'; ctx.beginPath(); ctx.arc(-1.5, -1.5, 1.6, 0, 7); ctx.fill(); }
+        ctx.restore(); continue;
+      }
       ctx.save(); ctx.translate(b.x, b.y - 14); ctx.scale(1, .5); ctx.rotate(b.a);
       ctx.strokeStyle = `rgba(${(b.col || ['160,225,255'])[0]},${.5 * al})`; ctx.lineWidth = 9; ctx.lineCap = 'round';
       ctx.beginPath(); ctx.arc(-10, 0, 26, -1.1, 1.1); ctx.stroke();
@@ -1510,6 +1594,9 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     for (const zn of zones) {
       const al = Math.min(1, (zn.T - zn.t) / .4, zn.t / .15 + .2);
       ctx.save(); ctx.translate(zn.x, zn.y); ctx.scale(1, .5); ctx.globalAlpha = al;
+      if (zn.kind === 'pit') { ctx.fillStyle = 'rgba(70,55,35,.55)'; ctx.beginPath(); ctx.arc(0, 0, zn.r, 0, 7); ctx.fill(); ctx.strokeStyle = 'rgba(160,140,100,.7)'; ctx.lineWidth = 2; ctx.stroke(); ctx.restore(); continue; }
+      if (zn.kind === 'thunder') { const rr = zn.r * (zn.cm ? 1 : 1); ctx.strokeStyle = `rgba(220,230,255,${.5 + .3 * Math.sin(zn.t * 12)})`; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(0, 0, rr, 0, 7); ctx.stroke(); ctx.strokeStyle = 'rgba(255,220,100,.6)'; ctx.lineWidth = 1.5; for (let i = 0; i < 8; i++) { const a = zn.t * 1.5 + i * Math.PI / 4; ctx.beginPath(); ctx.arc(Math.cos(a) * rr * .8, Math.sin(a) * rr * .8, 6, 0, 7); ctx.stroke(); } ctx.restore(); continue; }
+      if (zn.kind === 'orbit') { ctx.restore(); const N = zn.n || 3; for (let i = 0; i < N; i++) { const a = zn.t * 5 + i * Math.PI * 2 / N, x = zn.x + Math.cos(a) * zn.r, y = zn.y + Math.sin(a) * zn.r * .5 - 18; ctx.globalAlpha = al; ctx.fillStyle = `rgb(${zn.col})`; ctx.strokeStyle = 'rgba(40,30,20,.9)'; ctx.lineWidth = 1.5; ctx.beginPath(); if (zn.zap) ctx.rect(x - 4, y - 7, 8, 14); else ctx.arc(x, y, 6, 0, 7); ctx.fill(); ctx.stroke(); ctx.globalAlpha = 1; } continue; }
       if (zn.kind === 'fire') {
         const g = ctx.createRadialGradient(0, 0, 2, 0, 0, zn.r); g.addColorStop(0, 'rgba(255,200,60,.6)'); g.addColorStop(1, 'rgba(220,60,20,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, zn.r * 1.1, 0, 7); ctx.fill();
         for (let i = 0; i < 7; i++) { const a = i * .9 + Math.sin(zn.t * 3 + i), rr = zn.r * .6 * (((i * 37) % 10) / 10 + .2), h = 14 + 10 * Math.abs(Math.sin(zn.t * 9 + i * 2)); ctx.fillStyle = i % 2 ? '#ff9a3c' : '#ffd25a'; ctx.beginPath(); ctx.ellipse(Math.cos(a) * rr, Math.sin(a) * rr, 4, h, 0, 0, 7); ctx.fill(); }
@@ -1725,7 +1812,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   let buildOpen = false, buildBtn = null, hudT = 0;
   function buildHtml() {
     const o = OG(), R = RES(), tot = Object.values(S.dps).reduce((a, b) => a + b, 0);
-    const cats = CATN.map((n, c) => `<span style="display:inline-block;margin:2px 8px 2px 0">${n} <b style="color:${profOf(c) >= 1.15 ? '#9fe08a' : profOf(c) < .9 ? '#e08a8a' : '#ddd'}">×${profOf(c).toFixed(2)}</b></span>`).join('');
+    const cats = `<span style="display:inline-block;margin:2px 8px 2px 0">${(o.weps || []).map(w => WEPN[w]).join('、')} <b style="color:#9fe08a">×1.2</b></span><span style="display:inline-block;margin:2px 8px 2px 0">剑、拳 <b style="color:#ddd">×1.0</b></span><span style="display:inline-block;margin:2px 8px 2px 0">其他兵器 <b style="color:#e08a8a">×0.85</b></span>`;
     const rows = S.slots.map((k, i) => !SK[k] ? `<div class="r" style="opacity:.4">${i + 1}. 空</div>` :
       `<div class="r"><b style="color:${SK[k].color}">${i + 1}. ${SK[k].name}</b> <span class="t">${WEPN[wepOf(k)]} · ${CATN[catOf(k)]}${SK[k].tier ? ' · ' + TIERN[SK[k].tier] + '阶' : ''}</span><span class="v">LV${lvOf(k)} · ×${skillMul(k).toFixed(2)}${tot ? ' · 输出 ' + Math.round((S.dps[k] || 0) / tot * 100) + '%' : ''}</span><span class="mv"><button data-mv="${i}:-1"${i < 1 ? ' disabled' : ''}>▲</button><button data-mv="${i}:1"${i > 3 || !SK[S.slots[i + 1]] ? ' disabled' : ''}>▼</button></span></div>`).join('');
     const res = R.cnt.map((n, c) => n >= 2 ? `<div class="r"><b>${WEPN[c]}共鸣 ${n} 件</b><span class="v">${WEPN[c]}武艺伤害 +${Math.round(RESD[Math.min(5, n)] * 100)}%</span></div>` : '').join('') || '<div class="r" style="opacity:.5">还没有（同一种兵器的武艺 2 件起）</div>';
@@ -1770,7 +1857,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   setInterval(buildUi, 400);
 
   const attrInfo = (k, cur) => { const o0 = origin, d0 = S.atAdd; if (ORIGINS[k]) origin = k; if (!cur) S.atAdd = null; const at = AT(), pct = x => (x >= 0 ? '+' : '') + Math.round(x * 100) + '%';
-    const r = [['体魄', at[0], '气血 ' + pct(AFX.hp() - 1), '越高越扛打：受到的伤害按比例减少'], ['短兵', at[1], '刀剑武艺 ' + pct(profV(at[1]) - 1), '刀、剑等短兵器武艺的伤害'], ['长兵', at[2], '枪戟武艺 ' + pct(profV(at[2]) - 1), '枪、关刀等长兵器武艺的伤害'],
+    const r = [['体魄', at[0], '气血 ' + pct(AFX.hp() - 1), '越高越扛打：受到的伤害按比例减少'], ['短兵', at[1], '刀锤武艺 ' + pct(growOf(0) - 1), '修炼提升短兵：刀、锤等武艺的伤害成长'], ['长兵', at[2], '枪刀武艺 ' + pct(growOf(1) - 1), '修炼提升长兵：枪、关刀等武艺的伤害成长'],
       ['身法', at[3], '移速 ' + pct(AFX.move() - 1), '移动速度'], ['运气', at[4], '暴击 ' + pct(AFX.crit()), '暴击率（基础 5%）'], ['悟性', at[5], '熟练 ' + pct(AFX.xp() - 1), '武艺、心法熟练度涨得更快']];
     origin = o0; S.atAdd = d0; return r; };
   const status = () => ({   // 路线长卷「兵籍牒」用：这一局的当前状态（11/11）
