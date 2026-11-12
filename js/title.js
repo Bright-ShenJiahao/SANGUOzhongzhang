@@ -719,7 +719,7 @@
     document.head.appendChild(st);
     dom.inkTitle = document.createElement('img'); dom.inkTitle.id = 'tInkTitle'; dom.inkTitle.alt = '三国终章：幸存者'; dom.inkTitle.draggable = false;
     document.body.appendChild(dom.inkTitle);
-    dom.start.textContent = '新的旅途';
+    dom.start.textContent = '新的开始';
     dom.cont = document.createElement('button'); dom.cont.id = 'tCont'; dom.cont.type = 'button'; dom.cont.textContent = '继续'; document.body.appendChild(dom.cont);
     dom.cont.addEventListener('click', () => {   // 读档：回到上次的路线长卷（11/11）
       const sv = window.RUNSAVE && RUNSAVE.load(); if (!sv || S.mode !== 'title') return;
@@ -959,7 +959,7 @@
     if (S.mode !== 'title' || startPending) return;
     if (window.RUNSAVE && RUNSAVE.has() && !S.okNew && !document.getElementById('tConfirm')) {   // 有未完成的一局：先确认（11/11）
       const box = document.createElement('div'); box.id = 'tConfirm';
-      box.innerHTML = '<div class="p"><h3>开启新的旅途？</h3><p>还有一局没打完。<br>新局出发后会覆盖它，旧局将无法继续。</p><small>章节进度、设置不受影响</small><div class="r"><button class="no">取消</button><button class="yes">仍要新开</button></div></div>';
+      box.innerHTML = '<div class="p"><h3>开始新的一局？</h3><p>还有一局没打完。<br>新局出发后会覆盖它，旧局将无法继续。</p><small>章节进度、设置不受影响</small><div class="r"><button class="no">取消</button><button class="yes">仍要新开</button></div></div>';
       box.querySelector('.no').onclick = () => box.remove();
       box.onclick = e => { if (e.target === box) box.remove(); };
       box.querySelector('.yes').onclick = () => { box.remove(); S.okNew = true; start().finally(() => { S.okNew = false; }); };
