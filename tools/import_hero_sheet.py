@@ -6,6 +6,8 @@ from PIL import Image, ImageFilter
 from scipy import ndimage
 SRC, PRE = sys.argv[1], sys.argv[2]
 ORDER = ['idle','walk1','walk2','walk3','chop1','chop2','sweep1','sweep2','thrust1','thrust2','spin1','spin2','up1','up2','roll1','roll2','roll3','roll4','hurt','down']
+if len(sys.argv) > 3 and sys.argv[3] == 'old':   # 老排法（关刀、锤那几张）：走路后面先是受伤、翻滚、倒地，再是出招
+    ORDER = ['idle','walk1','walk2','walk3','hurt','roll1','roll2','roll3','roll4','down','chop1','chop2','sweep1','sweep2','thrust1','thrust2','spin1','spin2','up1','up2']
 im = np.asarray(Image.open(SRC).convert('RGB')).astype(float)
 r, g, b = im[..., 0], im[..., 1], im[..., 2]
 d = g - np.maximum(r, b)
