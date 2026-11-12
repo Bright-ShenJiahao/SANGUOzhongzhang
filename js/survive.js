@@ -168,6 +168,8 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
         const fade = Math.min(1, (o.T - o.t) / .5); ctx.translate(o.x, o.y); ctx.scale(1, YS); ctx.globalCompositeOperation = 'lighter';
         const g = ctx.createRadialGradient(0, 0, 0, 0, 0, o.r); g.addColorStop(0, `rgba(255,170,60,${.55 * fade})`); g.addColorStop(.7, `rgba(230,80,20,${.35 * fade})`); g.addColorStop(1, 'rgba(160,30,10,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, o.r, 0, 7); ctx.fill();
         for (let k = 0; k < 6; k++) { const a = k * 1.05 + o.t * 2, rr = o.r * (.35 + .4 * ((k * 37) % 10) / 10), fl = 6 + 4 * Math.sin(o.t * 14 + k * 2); ctx.fillStyle = `rgba(255,${150 + k * 12},60,${.6 * fade})`; ctx.beginPath(); ctx.ellipse(Math.cos(a) * rr, Math.sin(a) * rr, 4, fl, 0, 0, 7); ctx.fill(); }
+      } else if (o.kind === 'heal') {   // 方士回春：一圈往外扩的绿环
+        ctx.translate(o.x, o.y); ctx.scale(1, YS); const q = o.t / o.T; ctx.strokeStyle = `rgba(120,230,120,${.7 * (1 - q)})`; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, 20 + q * 110, 0, 7); ctx.stroke();
       } else if (o.kind === 'drum') {   // 战鼓声浪：一圈往外扩的红环
         ctx.translate(o.x, o.y); ctx.scale(1, YS); const q = o.t / o.T; ctx.strokeStyle = `rgba(255,90,60,${.7 * (1 - q)})`; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(0, 0, 20 + q * 110, 0, 7); ctx.stroke();
       } else if (o.kind === 'stuck') {   // 插在地上的长戟
@@ -863,6 +865,35 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       keep(180, 260);
       if (z.ucd <= 0 && d < 330) { z.ucd = R(3.8, 4.8); const a = ang(z, hero.x, hero.y); z.f = Math.cos(a) < 0 ? -1 : 1; set(z, 'wind');
         teleAdd({ k: 'line', x: z.x, y: z.y, a, len: 440, w: 16, T: .8, dmg: 1.6, src: z, snd: '', then: () => { set(z, 'strike'); if (window.SFX) SFX.play('bow', 0, .9); } }); }
+      return;
+    }
+    // ===== 11/12 用户：老兵种重新设计（数量多 → 难度低：伤害小、冷却长、预警清楚）=====
+    const tele = (o, cd, then) => { z.ucd = cd; z.f = Math.sign(hero.x - z.x) || z.f; set(z, 'wind'); teleAdd(Object.assign({ src: z, snd: '' }, o, { then: () => { if (!z.dead) set(z, 'strike'); if (then) then(); } })); };
+    const OLD = T.unit === 'heavy' || T.unit === 'shield' || T.unit === 'spear';
+    if (OLD && z.cdash) { const c = z.cdash; c.t += dt; const q = Math.min(1, c.t / .24); z.x = c.x0 + (c.x1 - c.x0) * q; z.y = Math.max(M.top + 6, Math.min(M.bot - 6, c.y0 + (c.y1 - c.y0) * q)); z.moving = true; if (q >= 1) z.cdash = null; return; }
+    if (OLD && z.st === 'wind') { z.moving = false; return; }
+    if ((OLD || T.unit === 'priest') && z.st === 'strike') { z.moving = false; if (z.t > .4) set(z, 'move'); return; }
+    if (T.unit === 'heavy') {   // 大刀兵：走近后蓄力 0.9 秒，朝你横劈一片（短而宽），劈完喘口气
+      if (d < 70 && z.ucd <= 0) { tele({ k: 'line', x: z.x, y: z.y, a: ang(z, hero.x, hero.y), len: 78, w: 74, T: .9, dmg: 1.4 }, R(4.5, 5.5), () => { z.stun = Math.max(z.stun || 0, .5); }); return; }
+      go(hero.x, hero.y, d < 60 ? 0 : 1); return;
+    }
+    if (T.unit === 'shield') {   // 盾兵：远程打他只吃七成（rangedResist）；靠近后举盾往前一撞，把你推开
+      if (d < 120 && d > 30 && z.ucd <= 0) { const a = ang(z, hero.x, hero.y), L = 100, x0 = z.x, y0 = z.y;
+        tele({ k: 'line', x: x0, y: y0, a, len: L, w: 36, T: .7, dmg: 1 }, R(5.5, 6.5), () => { z.cdash = { x0: z.x, y0: z.y, x1: z.x + Math.cos(a) * L * .8, y1: z.y + Math.sin(a) * L * .8 * YS, t: 0 }; }); return; }
+      go(hero.x, hero.y, d < 40 ? 0 : 1); return;
+    }
+    if (T.unit === 'spear') {   // 枪兵：中距离停下，地上一条细长预警线，0.7 秒后往前突刺一段
+      if (d < 170 && d > 50 && z.ucd <= 0) { const a = ang(z, hero.x, hero.y), L = 150;
+        tele({ k: 'line', x: z.x, y: z.y, a, len: L, w: 22, T: .75, dmg: 1.2 }, R(4.5, 5.5), () => { z.cdash = { x0: z.x, y0: z.y, x1: z.x + Math.cos(a) * L * .7, y1: z.y + Math.sin(a) * L * .7 * YS, t: 0 }; }); return; }
+      keep(90, 150); return;
+    }
+    if (T.unit === 'priest') {   // 方士：躲在后排念咒；附近有受伤的同伴就回血，没有就朝你丢一团符火（落地小火 2 秒）
+      if (z.st === 'wind') { z.moving = false; if (z.t > .9) { set(z, 'strike');
+          const hurt = zs.filter(o => o !== z && !o.dead && !o.survBoss && o.hp < (o.maxHp || o.hp) && Math.hypot(o.x - z.x, (o.y - z.y) / YS) < 130);
+          if (hurt.length) { for (const o of hurt) o.hp = Math.min(o.maxHp || o.hp, o.hp + 1.5); hzAdd({ kind: 'heal', x: z.x, y: z.y, T: .7 }); floaters.push({ x: z.x, y: z.y - 50, t: 0, txt: '回春！', color: '#8fe08a' }); }
+          else { const tx = hero.x, ty = hero.y; teleAdd({ k: 'circle', x: tx, y: ty, r: 32, T: .9, dmg: .9, c: 3, snd: 'land', src: z, then: () => hzAdd({ kind: 'fire', x: tx, y: ty, r: 28, dmg: .5, T: 2 }) }); }
+        } return; }
+      keep(160, 230); if (z.ucd <= 0 && d < 300) { z.ucd = R(5.5, 6.5); set(z, 'wind'); }
       return;
     }
     if (T.unit === 'fan') {   // 狂信徒：直冲主角，贴身扑一下；死的时候炸一小圈（dropCoins 里）

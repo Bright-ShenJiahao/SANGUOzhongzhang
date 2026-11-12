@@ -62,7 +62,7 @@ body.szz-pro #help{display:none}
 .x-back{min-height:34px!important}
 }
 #rot small{display:block;margin-top:10px;font-size:14px;font-weight:600;color:#c9b691;line-height:1.6}
-</style><link rel="preload" href="pack/fonts/result.woff2?v=8b2196e25e" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=8b2196e25e)format("woff2");font-display:swap}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
+</style><link rel="preload" href="pack/fonts/result.woff2?v=ad48e72a6c" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=ad48e72a6c)format("woff2");font-display:swap}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
 </head><body>
 <style>
 #bootSplash{position:fixed;inset:0;z-index:99999;background:radial-gradient(ellipse at 50% 45%,#f3e4cf 0%,#ecd9c0 55%,#d9c09f 100%);transition:opacity .45s ease-out}
@@ -108,7 +108,7 @@ if(location.protocol==='https:'&&!/[?&]debug(?:=|&|$)/.test(location.search)&&'s
 })();
 // 自动更新：打开游戏、或从后台切回来时，查一下线上有没有新版本；有就在标题/整备页自动刷新（战斗中不打扰）
 (function(){
-var BUILD='cd63c20c919d',busy=false;
+var BUILD='bc718cb047fa',busy=false;
 if(location.protocol!=='https:'||/[?&]debug(?:=|&|$)/.test(location.search))return;
 function check(){
   if(busy)return;
@@ -979,15 +979,15 @@ const XIAOCHANG = { drawBackground() {}, state: () => null, start() {}, on: () =
     ['elite', '老卒', 'elite', '第 1 段起', '打过几场硬仗的老兵，刀口都卷了。', ['刀气：蓄力后劈出一道扇形刀气，出手不会被打断。', '精英：打倒掉 5 枚铜钱。']],
     ['thief', '黄巾窃贼', 'thief', '第 1 段起', '背着麻袋专捡地上的铜钱，打不过就跑。', ['偷钱：捡走地上的铜钱，跑掉就拿不回来。', '打倒他钱袋会破，连本带利吐出来。']],
     ['archer', '弓箭手', 'archer', '第 2 段起', '猎户入伙，箭头裹着浸了油的布。', ['火箭：抛射火箭，落地前地上有红圈预警。']],
-    ['yellow-heavy', '大刀兵', 'yellow_heavy', '第 2 段起', '膀大腰圆的壮汉，抡着厚背大刀。', ['重劈：出手慢但伤害高，挨打不容易被打断。']],
-    ['yellow-shield', '盾兵', 'yellow_shield', '第 2 段起', '举着木盾顶在最前排。', ['举盾：挡掉大部分远程攻击，近身才好打。']],
+    ['yellow-heavy', '大刀兵', 'yellow_heavy', '第 2 段起', '膀大腰圆的壮汉，抡着厚背大刀。', ['横劈：走到身边后蓄力约 1 秒，朝你横扫一片，劈完会喘口气。']],
+    ['yellow-shield', '盾兵', 'yellow_shield', '第 2 段起', '举着木盾顶在最前排。', ['举盾：远程打他只吃七成伤害。', '盾撞：地上出现一条预警线，随后举盾往前撞一段，把你推开。']],
     ['fire-jar', '火罐手', 'fire_jar', '第 2 段起', '背着一篓火油罐的纵火贼。', ['火油罐：扔向你脚下，落地烧出一片火，3 秒内站在里面持续掉血。']],
-    ['yellow-spear', '枪兵', 'yellow_spear', '第 3 段起', '长枪比人还高，专戳冲得太近的人。', ['突刺：攻击距离远，别站在枪尖前面。']],
+    ['yellow-spear', '枪兵', 'yellow_spear', '第 3 段起', '长枪比人还高，专戳冲得太近的人。', ['突刺：停在中距离，地上出现一条细长预警线，0.75 秒后往前突刺。']],
     ['cavalry', '黄巾骑兵', 'cavalry', '第 3 段起', '骑着抢来的土马，挺矛冲阵。', ['冲锋：绕着你兜圈，停下后出一条预警线，直线冲过去。', '血比步卒厚。']],
     ['drummer', '鼓手', 'drummer', '第 3 段起', '胸前挂着战鼓，鼓声一响，黄巾就红了眼。', ['擂鼓：附近黄巾 4 秒内动作快 30%（脚下发红光）。', '自己不打人，最好先杀。']],
     ['crossbow', '黄巾弩手', 'crossbow', '第 3 段起', '端着大弩的老兵，一箭能射穿两个人。', ['穿透弩：半蹲瞄准时地上出现一条细红线，0.8 秒后射出，线上的全中。']],
     ['yellow-golem', '黄巾力士', 'yellow_golem', '第 3 段起', '喝了符水、力大无穷的巨汉。', ['重拳：一拳能把人打飞，血非常厚。', '精英：打倒掉 5 枚铜钱。']],
-    ['priest', '黄巾方士', 'priest', '第 4 段起', '太平道的小道士，摇铃念咒替同伙续命。', ['念咒：躲在后排给附近黄巾回血、加速；念咒时打他能打断。']],
+    ['priest', '黄巾方士', 'priest', '第 4 段起', '太平道的小道士，摇铃念咒，能救人也能放火。', ['回春：附近有受伤的黄巾就给他们回血。', '符火：没人受伤时朝你丢一团符火，落地烧 2 秒。']],
     ['fanatic', '狂信徒', 'fanatic', '第 4 段起', '喝了符水、不知疼痛的信徒。', ['扑击：跑得最快，冲到身边扑打。', '自爆：倒下 0.45 秒后炸开一小圈，别贴着杀。']],
     ['yellow-catapult', '投石车', 'yellow_catapult', '投石车节点', '黄巾从官府抢来的守城器械。', ['砸石：远程抛大石，落点有预警圈。', '拆掉掉 5 枚铜钱。']],
   ];
@@ -5008,6 +5008,8 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
         const fade = Math.min(1, (o.T - o.t) / .5); ctx.translate(o.x, o.y); ctx.scale(1, YS); ctx.globalCompositeOperation = 'lighter';
         const g = ctx.createRadialGradient(0, 0, 0, 0, 0, o.r); g.addColorStop(0, `rgba(255,170,60,${.55 * fade})`); g.addColorStop(.7, `rgba(230,80,20,${.35 * fade})`); g.addColorStop(1, 'rgba(160,30,10,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, o.r, 0, 7); ctx.fill();
         for (let k = 0; k < 6; k++) { const a = k * 1.05 + o.t * 2, rr = o.r * (.35 + .4 * ((k * 37) % 10) / 10), fl = 6 + 4 * Math.sin(o.t * 14 + k * 2); ctx.fillStyle = `rgba(255,${150 + k * 12},60,${.6 * fade})`; ctx.beginPath(); ctx.ellipse(Math.cos(a) * rr, Math.sin(a) * rr, 4, fl, 0, 0, 7); ctx.fill(); }
+      } else if (o.kind === 'heal') {   // 方士回春：一圈往外扩的绿环
+        ctx.translate(o.x, o.y); ctx.scale(1, YS); const q = o.t / o.T; ctx.strokeStyle = `rgba(120,230,120,${.7 * (1 - q)})`; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, 20 + q * 110, 0, 7); ctx.stroke();
       } else if (o.kind === 'drum') {   // 战鼓声浪：一圈往外扩的红环
         ctx.translate(o.x, o.y); ctx.scale(1, YS); const q = o.t / o.T; ctx.strokeStyle = `rgba(255,90,60,${.7 * (1 - q)})`; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(0, 0, 20 + q * 110, 0, 7); ctx.stroke();
       } else if (o.kind === 'stuck') {   // 插在地上的长戟
@@ -5703,6 +5705,35 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       keep(180, 260);
       if (z.ucd <= 0 && d < 330) { z.ucd = R(3.8, 4.8); const a = ang(z, hero.x, hero.y); z.f = Math.cos(a) < 0 ? -1 : 1; set(z, 'wind');
         teleAdd({ k: 'line', x: z.x, y: z.y, a, len: 440, w: 16, T: .8, dmg: 1.6, src: z, snd: '', then: () => { set(z, 'strike'); if (window.SFX) SFX.play('bow', 0, .9); } }); }
+      return;
+    }
+    // ===== 11/12 用户：老兵种重新设计（数量多 → 难度低：伤害小、冷却长、预警清楚）=====
+    const tele = (o, cd, then) => { z.ucd = cd; z.f = Math.sign(hero.x - z.x) || z.f; set(z, 'wind'); teleAdd(Object.assign({ src: z, snd: '' }, o, { then: () => { if (!z.dead) set(z, 'strike'); if (then) then(); } })); };
+    const OLD = T.unit === 'heavy' || T.unit === 'shield' || T.unit === 'spear';
+    if (OLD && z.cdash) { const c = z.cdash; c.t += dt; const q = Math.min(1, c.t / .24); z.x = c.x0 + (c.x1 - c.x0) * q; z.y = Math.max(M.top + 6, Math.min(M.bot - 6, c.y0 + (c.y1 - c.y0) * q)); z.moving = true; if (q >= 1) z.cdash = null; return; }
+    if (OLD && z.st === 'wind') { z.moving = false; return; }
+    if ((OLD || T.unit === 'priest') && z.st === 'strike') { z.moving = false; if (z.t > .4) set(z, 'move'); return; }
+    if (T.unit === 'heavy') {   // 大刀兵：走近后蓄力 0.9 秒，朝你横劈一片（短而宽），劈完喘口气
+      if (d < 70 && z.ucd <= 0) { tele({ k: 'line', x: z.x, y: z.y, a: ang(z, hero.x, hero.y), len: 78, w: 74, T: .9, dmg: 1.4 }, R(4.5, 5.5), () => { z.stun = Math.max(z.stun || 0, .5); }); return; }
+      go(hero.x, hero.y, d < 60 ? 0 : 1); return;
+    }
+    if (T.unit === 'shield') {   // 盾兵：远程打他只吃七成（rangedResist）；靠近后举盾往前一撞，把你推开
+      if (d < 120 && d > 30 && z.ucd <= 0) { const a = ang(z, hero.x, hero.y), L = 100, x0 = z.x, y0 = z.y;
+        tele({ k: 'line', x: x0, y: y0, a, len: L, w: 36, T: .7, dmg: 1 }, R(5.5, 6.5), () => { z.cdash = { x0: z.x, y0: z.y, x1: z.x + Math.cos(a) * L * .8, y1: z.y + Math.sin(a) * L * .8 * YS, t: 0 }; }); return; }
+      go(hero.x, hero.y, d < 40 ? 0 : 1); return;
+    }
+    if (T.unit === 'spear') {   // 枪兵：中距离停下，地上一条细长预警线，0.7 秒后往前突刺一段
+      if (d < 170 && d > 50 && z.ucd <= 0) { const a = ang(z, hero.x, hero.y), L = 150;
+        tele({ k: 'line', x: z.x, y: z.y, a, len: L, w: 22, T: .75, dmg: 1.2 }, R(4.5, 5.5), () => { z.cdash = { x0: z.x, y0: z.y, x1: z.x + Math.cos(a) * L * .7, y1: z.y + Math.sin(a) * L * .7 * YS, t: 0 }; }); return; }
+      keep(90, 150); return;
+    }
+    if (T.unit === 'priest') {   // 方士：躲在后排念咒；附近有受伤的同伴就回血，没有就朝你丢一团符火（落地小火 2 秒）
+      if (z.st === 'wind') { z.moving = false; if (z.t > .9) { set(z, 'strike');
+          const hurt = zs.filter(o => o !== z && !o.dead && !o.survBoss && o.hp < (o.maxHp || o.hp) && Math.hypot(o.x - z.x, (o.y - z.y) / YS) < 130);
+          if (hurt.length) { for (const o of hurt) o.hp = Math.min(o.maxHp || o.hp, o.hp + 1.5); hzAdd({ kind: 'heal', x: z.x, y: z.y, T: .7 }); floaters.push({ x: z.x, y: z.y - 50, t: 0, txt: '回春！', color: '#8fe08a' }); }
+          else { const tx = hero.x, ty = hero.y; teleAdd({ k: 'circle', x: tx, y: ty, r: 32, T: .9, dmg: .9, c: 3, snd: 'land', src: z, then: () => hzAdd({ kind: 'fire', x: tx, y: ty, r: 28, dmg: .5, T: 2 }) }); }
+        } return; }
+      keep(160, 230); if (z.ucd <= 0 && d < 300) { z.ucd = R(5.5, 6.5); set(z, 'wind'); }
       return;
     }
     if (T.unit === 'fan') {   // 狂信徒：直冲主角，贴身扑一下；死的时候炸一小圈（dropCoins 里）
@@ -8125,10 +8156,10 @@ const TYPES = {
   slinger: { name: '投石手', hp: 2, spd: 40, wind: .6, ranged: 'stone', range: [64, 104], cd: 2.4, scale: 0.86 },
   archer:  { name: '弓箭手', hp: 2, spd: 34, wind: .85, ranged: 'fire', range: [120, 190], cd: 3.2, scale: 0.88 },
   elite:   { name: '老卒', hp: 10, spd: 26, wind: 1.05, reach: 30, dmg: 3, heavy: true, elite: true, w: 12, sprite: 'elite', scale: 0.97 },   // 精英：血厚、出手慢、打不断
-  priest:  { name: '黄巾方士', hp: 4, spd: 40, priest: true, w: 10, sprite: 'priest', scale: 0.86 },   // 不打人，念咒奶人+加速，跑位躲后排
-  'yellow-heavy': { name: '黄巾大刀兵', hp: 7, spd: 25, wind: .9, reach: 31, dmg: 2, heavy: true, sprite: 'yellow_heavy', scale: 0.95 },
-  'yellow-shield': { name: '黄巾盾兵', hp: 8, spd: 24, wind: .8, reach: 25, dmg: 1.5, heavy: true, shield: true, rangedResist: .7, blocksPierce: true, sprite: 'yellow_shield', scale: 0.99 },
-  'yellow-spear': { name: '黄巾枪兵', hp: 5, spd: 31, wind: .7, reach: 37, dmg: 1.5, sprite: 'yellow_spear', scale: 0.91 },
+  priest:  { name: '黄巾方士', hp: 4, spd: 40, priest: true, unit: 'priest', w: 10, sprite: 'priest', scale: 0.86 },   // 不打人，念咒奶人+加速，跑位躲后排
+  'yellow-heavy': { name: '黄巾大刀兵', hp: 7, spd: 25, wind: .9, reach: 31, dmg: 2, heavy: true, unit: 'heavy', sprite: 'yellow_heavy', scale: 0.95 },
+  'yellow-shield': { name: '黄巾盾兵', hp: 8, spd: 24, wind: .8, reach: 25, dmg: 1.5, heavy: true, shield: true, unit: 'shield', rangedResist: .7, blocksPierce: true, sprite: 'yellow_shield', scale: 0.99 },
+  'yellow-spear': { name: '黄巾枪兵', hp: 5, spd: 31, wind: .7, reach: 37, dmg: 1.5, unit: 'spear', sprite: 'yellow_spear', scale: 0.91 },
   /* 11/12 新兵种（用户 GPT 出图，按屏幕大小切成最高像素）：行为写在 survive.js 的 unitAI */
   'fire-jar': { name: '火罐手', hp: 3, spd: 32, wind: .6, reach: 22, dmg: 1, unit: 'fire', w: 10, sprite: 'fire_jar', scale: 0.84 },
   'drummer': { name: '鼓手', hp: 5, spd: 30, wind: .6, reach: 22, dmg: 1, unit: 'drum', w: 11, sprite: 'drummer', scale: 0.84 },

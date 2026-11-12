@@ -138,10 +138,10 @@ const TYPES = {
   slinger: { name: '投石手', hp: 2, spd: 40, wind: .6, ranged: 'stone', range: [64, 104], cd: 2.4, scale: 0.86 },
   archer:  { name: '弓箭手', hp: 2, spd: 34, wind: .85, ranged: 'fire', range: [120, 190], cd: 3.2, scale: 0.88 },
   elite:   { name: '老卒', hp: 10, spd: 26, wind: 1.05, reach: 30, dmg: 3, heavy: true, elite: true, w: 12, sprite: 'elite', scale: 0.97 },   // 精英：血厚、出手慢、打不断
-  priest:  { name: '黄巾方士', hp: 4, spd: 40, priest: true, w: 10, sprite: 'priest', scale: 0.86 },   // 不打人，念咒奶人+加速，跑位躲后排
-  'yellow-heavy': { name: '黄巾大刀兵', hp: 7, spd: 25, wind: .9, reach: 31, dmg: 2, heavy: true, sprite: 'yellow_heavy', scale: 0.95 },
-  'yellow-shield': { name: '黄巾盾兵', hp: 8, spd: 24, wind: .8, reach: 25, dmg: 1.5, heavy: true, shield: true, rangedResist: .7, blocksPierce: true, sprite: 'yellow_shield', scale: 0.99 },
-  'yellow-spear': { name: '黄巾枪兵', hp: 5, spd: 31, wind: .7, reach: 37, dmg: 1.5, sprite: 'yellow_spear', scale: 0.91 },
+  priest:  { name: '黄巾方士', hp: 4, spd: 40, priest: true, unit: 'priest', w: 10, sprite: 'priest', scale: 0.86 },   // 不打人，念咒奶人+加速，跑位躲后排
+  'yellow-heavy': { name: '黄巾大刀兵', hp: 7, spd: 25, wind: .9, reach: 31, dmg: 2, heavy: true, unit: 'heavy', sprite: 'yellow_heavy', scale: 0.95 },
+  'yellow-shield': { name: '黄巾盾兵', hp: 8, spd: 24, wind: .8, reach: 25, dmg: 1.5, heavy: true, shield: true, unit: 'shield', rangedResist: .7, blocksPierce: true, sprite: 'yellow_shield', scale: 0.99 },
+  'yellow-spear': { name: '黄巾枪兵', hp: 5, spd: 31, wind: .7, reach: 37, dmg: 1.5, unit: 'spear', sprite: 'yellow_spear', scale: 0.91 },
   /* 11/12 新兵种（用户 GPT 出图，按屏幕大小切成最高像素）：行为写在 survive.js 的 unitAI */
   'fire-jar': { name: '火罐手', hp: 3, spd: 32, wind: .6, reach: 22, dmg: 1, unit: 'fire', w: 10, sprite: 'fire_jar', scale: 0.84 },
   'drummer': { name: '鼓手', hp: 5, spd: 30, wind: .6, reach: 22, dmg: 1, unit: 'drum', w: 11, sprite: 'drummer', scale: 0.84 },
