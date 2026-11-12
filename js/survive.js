@@ -462,6 +462,13 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const later = (t, f) => { const c = CM, r = RM, k = CK; S.later.push({ t, f() { const o = CM, q = RM, w = CK; CM = c; RM = r; CK = k; f(); CM = o; RM = q; CK = w; } }); };
   const add = (k, o) => { SK[k] = Object.assign({ wu: .6, rc: .35, pose: [], range: 0, half: 0, tier: 0 }, o); };
   SK.hengsao.tier = 1; SK.lianzhan.tier = 1; SK.zhendi.tier = 2;
+  // 刀 13 招两招新的（11/12）
+  add('liedihuan', { tier: 3, name: '裂地环', icon: '圜', color: '#e0a860', desc: '劈地，落点一圈接一圈向外裂开', need: 150, none: true, wu: .7, rc: .4,
+    cast() { const [[x, y]] = pts(1, 170); fx.push({ k: 'mark', x, y, r: 26, t: 0, T: .3 }); sfx('crack', hero.x); shake = Math.max(shake, .15);
+      [0, 1, 2].forEach(i => later(.12 + i * .16, () => { blast(x, y, 34 + i * 30, 1.25, 26 + i * 8, '224,170,100'); if (!i) shake = Math.max(shake, .2); })); } });
+  add('feilunren', { tier: 4, name: '飞轮刃', icon: '轮', color: '#d8f0ff', desc: '刀脱手飞旋，绕身一大圈再飞回', need: 140, none: true, wu: .6, rc: .35,
+    cast() { const a0 = aim(), N = 16; sfx('swing_knife', hero.x);
+      for (let i = 1; i <= N; i++) later(i * .09, () => { const q = i / N, r = Math.sin(q * Math.PI) * 150 + 18, a = a0 + q * Math.PI * 2.2; blast(hero.x + Math.cos(a) * r, hero.y + Math.sin(a) * r * .5, 22, .8, 12, '216,240,255'); }); } });
   add('huima', { tier: 1, name: '回马刀', icon: '回', color: '#ffc27a', desc: '先斩身前，再回身斩身后', need: 60, range: 44, half: 1.2, wu: .55, rc: .35,
     cast() { const a = aim(); sweep(a, 1.2, 44, 1.8, 40, ['rgba(255,190,110,', 'rgba(255,235,180,']); sfx('swing_knife', hero.x); later(.22, () => { S.poseOverride = { f: SK.huima.pose2, t: .25 }; sweep(a + Math.PI, 1.2, 44, 2.2, 55, ['rgba(255,120,90,', 'rgba(255,215,200,'], { rev: true }); sfx('swing_knife', hero.x); }); } });
   add('qiang', { name: '枪刺', icon: '枪', color: '#ffe9a8', desc: '向前刺出一条长枪线', need: 130, beam: true, len: 100, wu: .5,
@@ -490,6 +497,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     cast() { blast(hero.x, hero.y, 100, 3.8, 90); pts(6, 240).forEach(([x, y], i) => later(.2 + i * .12, () => blast(x, y, 44, 2.4, 50))); sfx('crack', hero.x); shake = Math.max(shake, .5); } });
   add('wanren', { tier: 4, name: '万刃归宗', icon: '万', color: '#b8f0ff', desc: '十四柄飞刃自四面八方袭来', need: 200, none: true, wu: .8, rc: .5,
     cast() { for (let i = 0; i < 14; i++) later(i * .05, () => { const a = i * Math.PI * 2 / 14 + R(-.1, .1); shot(a, { dmg: 1.6, T: .9, vx: Math.cos(a) * 300, vy: Math.sin(a) * 150, col: ['170,235,255', '255,255,255'] }); }); sfx('swing_knife', hero.x); shake = Math.max(shake, .2); } });
+  SK.daobo.tier = 1; SK.huima.tier = 2; SK.daolun.tier = 2; SK.xuanfeng.tier = 2; SK.dilie.tier = 3; SK.shuanghuan.tier = 3; SK.xuehe.tier = 4; SK.tianbeng.tier = 4; SK.wanren.tier = 4;   /* 11/12 刀 13 招按黄玄地天重排 */
   // ---------- 出身（开局配置里选；起手只有 1 个武艺） ----------
   const ORIGINS = {
     nongfu: { name: '农夫', tag: '短兵器', skill: 'hengsao', desc: '庄稼汉，挨得住打。受到伤害 -20%', take: .8, oa: [5, 4, 2, 1, 1, 2, 1, 3], at: [6, 4, 2, 2, 3, 2] },
@@ -503,7 +511,9 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   // 大类（出身熟练、心法专精）→ 具体兵器（连携、共鸣、施法时手里拿什么）
   const CATN = ['短兵器', '长兵器', '远程', '法师'], CATA = [1, 2, 3, 6];   // 大类 → 出身属性下标
   const WEPN = ['刀', '剑', '锤', '枪', '关刀', '弓', '弩', '石子', '法术'], WEPCAT = [0, 0, 0, 1, 1, 2, 2, 2, 3];
-  const WOF = { hengsao: 0, daobo: 0, huima: 0, daolun: 0, lianzhan: 1, sixiang: 1, wanren: 1, zhendi: 2, dilie: 2, shuanghuan: 2, tianbeng: 2, qiang: 3, chong: 3, xuanfeng: 4, xuehe: 4, jianyu: 5, huogong: 8, pili: 8 };
+  // 11/12 用户定：刀一共 13 招（黄：横扫 连斩 刀波 / 玄：回马刀 刀轮 回旋斩 / 地：裂地环 地裂波 双环击飞 / 天：天崩地裂 飞轮刃 血河斩 万刃归宗），任何出身都能捡、能买，出刀时就是刀的帧，只是出身的短兵属性决定威力（农夫 ×1.18、书生 ×0.73）
+  //   原本归剑/锤/关刀的连斩、地裂波、双环击飞、天崩地裂、回旋斩、血河斩、万刃归宗改归刀；四象剑气、震地不在名单里，留给以后的剑、锤
+  const WOF = { hengsao: 0, daobo: 0, huima: 0, daolun: 0, lianzhan: 0, wanren: 0, dilie: 0, shuanghuan: 0, tianbeng: 0, xuanfeng: 0, xuehe: 0, liedihuan: 0, feilunren: 0, sixiang: 1, zhendi: 2, qiang: 3, chong: 3, jianyu: 5, huogong: 8, pili: 8 };
   const wepOf = k => WOF[k] != null ? WOF[k] : 0;
   const ONLY_DAO = true;   // 用户定 11/10：目前只有刀的美术，武艺奖励只出刀系；其他武器等美术补齐再开
   const catOf = k => WEPCAT[wepOf(k)];
@@ -639,7 +649,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   // 波间习得武艺：从还没学会的武艺里随机给最多 3 个，选一个放进空格
   function offerSkill(cb) {
     const owned = S.slots.filter(Boolean), free = S.slots.indexOf('');
-    const pool = Object.keys(SK).filter(k => !owned.includes(k) && tierOk(k));
+    const pool = Object.keys(SK).filter(k => !owned.includes(k) && tierOk(k) && (!ONLY_DAO || wepOf(k) === 0));
     if (free < 0 || !pool.length) return false;
     const pick = pool.sort(() => Math.random() - .5).slice(0, 3);
     W.pick = true;
