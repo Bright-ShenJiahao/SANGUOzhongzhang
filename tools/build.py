@@ -177,6 +177,25 @@ if os.path.exists(FONT_OUT):
         print('提示：没装 brotli（pip install brotli），字体退回 TTF，体积大一倍')
         _font_url, _fmt = emit('fonts/result.ttf', open(FONT_OUT, 'rb').read()), 'truetype'
     FONT_FACE = '<link rel="preload" href="' + _font_url + '" as="font" type="font/' + ('woff2' if _fmt == 'woff2' else 'ttf') + '" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(' + _font_url + ')format("' + _fmt + '");font-display:swap}</style>'
+# 11/13 用户定：UI 文字换像素字体（缝合像素字体 Fusion Pixel 12px，OFL-1.1，见 tools/fonts/FusionPixel-OFL.txt）
+# 做法：把常用中文字体名（宋体、苹方、雅黑……）用 @font-face 指到像素字体上，毛笔字（MaShanZheng）不受影响
+PIX_SRC = P('tools', 'fonts', 'FusionPixel12-SC.woff')
+PIX_OUT = P('art', 'fonts', 'pixel.ttf')
+if os.path.exists(PIX_SRC):
+    from fontTools import subset as _sub
+    _o = _sub.Options(); _o.name_IDs = ['*']; _o.recalc_bounds = True; _o.flavor = None
+    _f = _sub.load_font(PIX_SRC, _o)
+    _ss = _sub.Subsetter(_o); _ss.populate(text=''.join(sorted(_chars)) + '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ%+-×/:.,!?()[]#&*@\'" ')
+    _ss.subset(_f); _f.flavor = None; _sub.save_font(_f, PIX_OUT, _o)
+    try:
+        from fontTools.ttLib import TTFont
+        _tt = TTFont(PIX_OUT); _tt.flavor = 'woff2'; _b = io.BytesIO(); _tt.save(_b)
+        _pix_url, _pfmt = emit('fonts/pixel.woff2', _b.getvalue()), 'woff2'
+    except ImportError:
+        _pix_url, _pfmt = emit('fonts/pixel.ttf', open(PIX_OUT, 'rb').read()), 'truetype'
+    _alias = ['Pixel12', 'Songti SC', 'STSong', 'Noto Serif SC', 'SimSun', 'PingFang SC', 'Microsoft YaHei', 'Noto Sans CJK SC', 'STKaiti', 'KaiTi']
+    FONT_FACE += '<link rel="preload" href="' + _pix_url + '" as="font" type="font/' + _pfmt + '" crossorigin><style>' + ''.join('@font-face{font-family:"' + n + '";src:url(' + _pix_url + ')format("' + _pfmt + '");font-display:swap}' for n in _alias) + '*{font-synthesis:none}</style>'
+    print('pixel font', os.path.getsize(PIX_OUT) // 1024, 'KB')
 assets['voice'] = {os.path.splitext(os.path.basename(f))[0]: file_uri(f)
                    for f in sorted(__import__('glob').glob(P('art', 'voice', '*.mp3')))}
 bg = {'arena': uri(P('art', 'bg', 'arena.webp')),
