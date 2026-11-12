@@ -168,7 +168,7 @@
   function tap(cx, cy) {
     if (campBox || !run) return;
     let best = null, bd = 1e9;
-    for (const n of run.cur.next) { const p = pos(n), d = Math.hypot(p.x - cx, p.y - cy); if (d < radius(n) + 16 && d < bd) { bd = d; best = n; } }
+    for (const n of (window.ROUTE_ALL ? run.nodes.filter(x => x !== run.cur) : run.cur.next)) { const p = pos(n)   /* 11/12 修：解锁关卡开着时，点哪个节点都算 */, d = Math.hypot(p.x - cx, p.y - cy); if (d < radius(n) + 16 && d < bd) { bd = d; best = n; } }
     if (best) choose(best);
   }
   function choose(n) {
