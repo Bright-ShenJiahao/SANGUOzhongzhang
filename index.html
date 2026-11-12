@@ -62,7 +62,7 @@ body.szz-pro #help{display:none}
 .x-back{min-height:34px!important}
 }
 #rot small{display:block;margin-top:10px;font-size:14px;font-weight:600;color:#c9b691;line-height:1.6}
-</style><link rel="preload" href="pack/fonts/result.woff2?v=7ca75c24cf" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=7ca75c24cf)format("woff2");font-display:swap}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
+</style><link rel="preload" href="pack/fonts/result.woff2?v=6142b19ab4" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=6142b19ab4)format("woff2");font-display:swap}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
 </head><body>
 <style>
 #bootSplash{position:fixed;inset:0;z-index:99999;background:radial-gradient(ellipse at 50% 45%,#f3e4cf 0%,#ecd9c0 55%,#d9c09f 100%);transition:opacity .45s ease-out}
@@ -108,7 +108,7 @@ if(location.protocol==='https:'&&!/[?&]debug(?:=|&|$)/.test(location.search)&&'s
 })();
 // 自动更新：打开游戏、或从后台切回来时，查一下线上有没有新版本；有就在标题/整备页自动刷新（战斗中不打扰）
 (function(){
-var BUILD='8095326523bd',busy=false;
+var BUILD='aa9786e68f06',busy=false;
 if(location.protocol!=='https:'||/[?&]debug(?:=|&|$)/.test(location.search))return;
 function check(){
   if(busy)return;
@@ -974,36 +974,40 @@ const XIAOCHANG = { drawBackground() {}, state: () => null, start() {}, on: () =
   // [键, 名字, 用哪张游戏贴图（没有高清头像时用站立帧）, 出现, 一句简介, 技能]
   const UNITS = [
     ['grunt', '喽啰', 'grunt', '第 1 段起', '被裹挟入伙的流民，拿根木棍就上了阵。', ['挥棍：贴身挥一棍，伤害低。']],
-    ['blade', '刀手', 'blade', '第 1 段起', '黄巾里最常见的步卒，一把环首刀砍人不眨眼。', ['劈砍：举刀蓄力后劈下，比喽啰打得重。']],
     ['slinger', '投石手', 'slinger', '第 1 段起', '放羊娃出身，甩石子百发百中。', ['投石：站在远处甩石块，看准落点就能躲。']],
-    ['elite', '老卒', 'elite', '第 1 段起', '打过几场硬仗的老兵，刀口都卷了。', ['刀气：蓄力后劈出一道扇形刀气，出手不会被打断。', '精英：打倒掉 5 枚铜钱。']],
+    ['blade', '刀手', 'blade', '第 1 段起', '黄巾里最常见的步卒，一把环首刀砍人不眨眼。', ['劈砍：举刀蓄力后劈下，比喽啰打得重。']],
     ['thief', '黄巾窃贼', 'thief', '第 1 段起', '背着麻袋专捡地上的铜钱，打不过就跑。', ['偷钱：捡走地上的铜钱，跑掉就拿不回来。', '打倒他钱袋会破，连本带利吐出来。']],
     ['archer', '弓箭手', 'archer', '第 2 段起', '猎户入伙，箭头裹着浸了油的布。', ['火箭：抛射火箭，落地前地上有红圈预警。']],
-    ['yellow-heavy', '大刀兵', 'yellow_heavy', '第 2 段起', '膀大腰圆的壮汉，抡着厚背大刀。', ['横劈：走到身边后蓄力约 1 秒，朝你横扫一片，劈完会喘口气。']],
-    ['yellow-shield', '盾兵', 'yellow_shield', '第 2 段起', '举着木盾顶在最前排。', ['举盾：远程打他只吃七成伤害。', '盾撞：地上出现一条预警线，随后举盾往前撞一段，把你推开。']],
     ['fire-jar', '火罐手', 'fire_jar', '第 2 段起', '背着一篓火油罐的纵火贼。', ['火油罐：扔向你脚下，落地烧出一片火，3 秒内站在里面持续掉血。']],
     ['yellow-spear', '枪兵', 'yellow_spear', '第 3 段起', '长枪比人还高，专戳冲得太近的人。', ['突刺：停在中距离，地上出现一条细长预警线，0.75 秒后往前突刺。']],
-    ['cavalry', '黄巾骑兵', 'cavalry', '第 3 段起', '骑着抢来的土马，挺矛冲阵。', ['冲锋：绕着你兜圈，停下后出一条预警线，直线冲过去。', '血比步卒厚。']],
-    ['drummer', '鼓手', 'drummer', '第 3 段起', '胸前挂着战鼓，鼓声一响，黄巾就红了眼。', ['擂鼓：附近黄巾 4 秒内动作快 30%（脚下发红光）。', '自己不打人，最好先杀。']],
-    ['crossbow', '黄巾弩手', 'crossbow', '第 3 段起', '端着大弩的老兵，一箭能射穿两个人。', ['穿透弩：半蹲瞄准时地上出现一条细红线，0.8 秒后射出，线上的全中。']],
-    ['yellow-golem', '黄巾力士', 'yellow_golem', '第 3 段起', '喝了符水、力大无穷的巨汉。', ['重拳：一拳能把人打飞，血非常厚。', '精英：打倒掉 5 枚铜钱。']],
-    ['priest', '黄巾方士', 'priest', '第 4 段起', '太平道的小道士，摇铃念咒，能救人也能放火。', ['回春：附近有受伤的黄巾就给他们回血。', '符火：没人受伤时朝你丢一团符火，落地烧 2 秒。']],
+    ['yellow-shield', '盾兵', 'yellow_shield', '第 2 段起', '举着木盾顶在最前排。', ['举盾：远程打他只吃七成伤害。', '盾撞：地上出现一条预警线，随后举盾往前撞一段，把你推开。']],
+    ['yellow-heavy', '大刀兵', 'yellow_heavy', '第 2 段起', '膀大腰圆的壮汉，抡着厚背大刀。', ['横劈：走到身边后蓄力约 1 秒，朝你横扫一片，劈完会喘口气。']],
     ['fanatic', '狂信徒', 'fanatic', '第 4 段起', '喝了符水、不知疼痛的信徒。', ['扑击：跑得最快，冲到身边扑打。', '自爆：倒下 0.45 秒后炸开一小圈，别贴着杀。']],
+    ['drummer', '鼓手', 'drummer', '第 3 段起', '胸前挂着战鼓，鼓声一响，黄巾就红了眼。', ['擂鼓：附近黄巾 4 秒内动作快 30%（脚下发红光）。', '自己不打人，最好先杀。']],
+    ['priest', '黄巾方士', 'priest', '第 4 段起', '太平道的小道士，摇铃念咒，能救人也能放火。', ['回春：附近有受伤的黄巾就给他们回血。', '符火：没人受伤时朝你丢一团符火，落地烧 2 秒。']],
+    ['crossbow', '黄巾弩手', 'crossbow', '第 3 段起', '端着大弩的老兵，一箭能射穿两个人。', ['穿透弩：半蹲瞄准时地上出现一条细红线，0.8 秒后射出，线上的全中。']],
+    ['cavalry', '黄巾骑兵', 'cavalry', '第 3 段起', '骑着抢来的土马，挺矛冲阵。', ['冲锋：绕着你兜圈，停下后出一条预警线，直线冲过去。', '血比步卒厚。']],
+    ['elite', '老卒', 'elite', '第 1 段起', '打过几场硬仗的老兵，刀口都卷了。', ['刀气：蓄力后劈出一道扇形刀气，出手不会被打断。', '精英：打倒掉 5 枚铜钱。']],
+    ['yellow-golem', '黄巾力士', 'yellow_golem', '第 3 段起', '喝了符水、力大无穷的巨汉。', ['重拳：一拳能把人打飞，血非常厚。', '精英：打倒掉 5 枚铜钱。']],
     ['yellow-catapult', '投石车', 'yellow_catapult', '投石车节点', '黄巾从官府抢来的守城器械。', ['砸石：远程抛大石，落点有预警圈。', '拆掉掉 5 枚铜钱。']],
   ];
   const BOSSES = [
-    ['cheng_yuanzhi', '程远志', 'cheng_yuanzhi', '第 1 段首领', '黄巾渠帅，率五万之众进犯涿郡。', ['大刀回旋：长柄大刀脱手飞出再飞回，去回都伤人；刀没回来前他空手站着。', '横扫千军：以自己为圆心大范围横扫。']],
     ['deng_mao', '邓茂', 'deng_mao', '第 1 段副将', '程远志的副将，性情暴躁，使一口九环大刀。', ['九环震地：三道裂地波扇形冲出，劈完刀卡在地里 1 秒。', '开山劈：朝你劈出一道长条。']],
-    ['bo_cai', '波才', 'bo_cai', '第 2 段首领', '颍川黄巾大帅，背插令旗，号令千军。', ['令旗点兵：插下令旗，旗边不停冒兵；站到旗边 0.8 秒就能拔掉。', '旋斩：开山大斧抡圆一圈。']],
+    ['cheng_yuanzhi', '程远志', 'cheng_yuanzhi', '第 1 段首领', '黄巾渠帅，率五万之众进犯涿郡。', ['大刀回旋：长柄大刀脱手飞出再飞回，去回都伤人；刀没回来前他空手站着。', '横扫千军：以自己为圆心大范围横扫。']],
     ['he_yi', '何仪', 'he_yi', '第 2 段副将', '汝南黄巾头领，双戟在手，身法迅捷。', ['双戟连突：三段冲刺，每段重新瞄准，第三段后喘口气。', '开山劈。']],
-    ['guanhai', '管亥', 'guanhai_m', '第 3 段首领', '北海黄巾猛将，马上使一杆长戟。', ['骑马：冲锋、马踏飞燕（跃起砸在你的位置）。', '半血被打下马，改用掷戟：长戟插在地上，他空手发愣后冲过去捡；还有旋斩。']],
+    ['bo_cai', '波才', 'bo_cai', '第 2 段首领', '颍川黄巾大帅，背插令旗，号令千军。', ['令旗点兵：插下令旗，旗边不停冒兵；站到旗边 0.8 秒就能拔掉。', '旋斩：开山大斧抡圆一圈。']],
     ['zhang_mancheng', '张曼成', 'zhang_mancheng', '第 3 段副将', '南阳黄巾首领，自称「神上使」。', ['符火阵：在你周围画一圈火，1.4 秒后烧起，只留一个缺口。', '符火落雨：你周围依次落下火球。']],
-    ['zhang_liang', '张梁', 'zhang_liang_q', '第 4 段首领', '人公将军，张角三弟，以勇猛著称。', ['双刀旋风：边转边追 2.2 秒，转完头晕。', '冲锋。', '半血狂怒：更快，出招几乎不停。']],
-    ['zhang_bao', '张宝', 'zhang_bao_q', '第 4 段首领', '地公将军，张角二弟，擅长妖术。', ['地裂：一道裂缝一段段朝你冲过来。', '土墙：在你身后升墙堵路，留一个缺口，5 秒后倒塌。', '半血召出两个半透明分身。']],
-    ['zhang_jiao', '张角', 'zhang_jiao_q', '最终首领', '天公将军，太平道大贤良师，以《太平要术》号令天下黄巾。', ['雷符：三张符追着你飘，随后在你脚下落雷。', '天雷滚滚：全场随机落雷，其中一道必定劈在你脚下。']],
+    ['guanhai', '管亥', 'guanhai_m', '第 3 段首领', '北海黄巾猛将，马上使一杆长戟。', ['骑马：冲锋、马踏飞燕（跃起砸在你的位置）。', '半血被打下马，改用掷戟：长戟插在地上，他空手发愣后冲过去捡；还有旋斩。']],
     ['ma_yuanyi', '马元义', 'ma_yuanyi', '最终副将', '潜入洛阳的黄巾大方首领，斗笠黑衣。', ['流星锤：甩出去再拉回来，去回都伤人，收锤后硬直。', '旋斩。']],
+    ['zhang_bao', '张宝', 'zhang_bao_q', '第 4 段首领', '地公将军，张角二弟，擅长妖术。', ['地裂：一道裂缝一段段朝你冲过来。', '土墙：在你身后升墙堵路，留一个缺口，5 秒后倒塌。', '半血召出两个半透明分身。']],
+    ['zhang_liang', '张梁', 'zhang_liang_q', '第 4 段首领', '人公将军，张角三弟，以勇猛著称。', ['双刀旋风：边转边追 2.2 秒，转完头晕。', '冲锋。', '半血狂怒：更快，出招几乎不停。']],
+    ['zhang_jiao', '张角', 'zhang_jiao_q', '最终首领', '天公将军，太平道大贤良师，以《太平要术》号令天下黄巾。', ['雷符：三张符追着你飘，随后在你脚下落雷。', '天雷滚滚：全场随机落雷，其中一道必定劈在你脚下。']],
   ];
   const ALL = UNITS.concat(BOSSES);
+  // 11/13 用户定：按强弱排序编号；小兵格子按游戏里的真实大小统一比例显示（不再各自撑满格子）
+  const no = e => { const L = UNITS.includes(e) ? UNITS : BOSSES; return 'No.' + String(L.indexOf(e) + 1).padStart(2, '0'); };
+  const dim = e => { const f = typeof ASSETS !== 'undefined' && ASSETS.chars && ASSETS.chars[e[2]] && ASSETS.chars[e[2]].idle; const t = typeof TYPES !== 'undefined' && TYPES[e[0]]; return f ? [f[1], f[2], (t && t.scale) || 1] : null; };
+  let UK = 0; const uk = () => { if (UK) return UK; UK = 9; for (const e of UNITS) { if (e[0] === 'yellow-catapult') continue; const d = dim(e); if (d) UK = Math.min(UK, 80 / (d[1] * d[2])); } return UK; };
   const body = e => (typeof ASSETS !== 'undefined' && ASSETS.chars && ASSETS.chars[e[2]] && ASSETS.chars[e[2]].idle ? ASSETS.chars[e[2]].idle[0] : '');
   const card = e => UNITS.includes(e) ? body(e) || PIC[e[0]] : PIC[e[0]] || body(e);   // 小兵格子统一用全身站立图，首领格子用头像
   const img = (e) => PIC[e[0]] || (typeof ASSETS !== 'undefined' && ASSETS.chars && ASSETS.chars[e[2]] && ASSETS.chars[e[2]].idle ? ASSETS.chars[e[2]].idle[0] : '');
@@ -1024,7 +1028,7 @@ const XIAOCHANG = { drawBackground() {}, state: () => null, start() {}, on: () =
 #szzCodex .gr{flex:1;min-width:0;overflow:auto;padding:12px;display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:10px;align-content:start}
 #szzCodex .cd{height:118px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;padding:6px 4px;border:1px solid rgba(184,149,90,.25);background:rgba(255,255,255,.03);cursor:pointer}
 #szzCodex .cd:hover,#szzCodex .cd.sel{border-color:rgba(240,200,120,.85);background:rgba(184,149,90,.14)}
-#szzCodex .cd img{max-width:84px;max-height:82px;object-fit:contain;image-rendering:pixelated}
+#szzCodex .cd{position:relative}#szzCodex .cd .nb{position:absolute;left:5px;top:3px;font-style:normal;font-size:11px;color:#b8955a;opacity:.85;font-family:monospace}#szzCodex .cd img{max-width:84px;max-height:82px;object-fit:contain;image-rendering:pixelated}
 #szzCodex .cd span{font-size:13px;color:#e8dcc0;white-space:nowrap}
 #szzCodex .lk img{filter:brightness(0) opacity(.55)}
 #szzCodex .lk span{color:#7a6c58}
@@ -1047,7 +1051,7 @@ const XIAOCHANG = { drawBackground() {}, state: () => null, start() {}, on: () =
   function detail(e) {
     const dt = box.querySelector('.dt'); if (!e) { dt.innerHTML = '<p class="no">点左边的头像看详情。</p>'; return; }
     if (!has(e[0])) { dt.innerHTML = `<div class="pic lk"><img src="${img(e)}" alt="" style="filter:brightness(0) opacity(.55)"></div><h3>？？？</h3><span class="tg">${e[3]}</span><p class="no">尚未遇到。在战斗中第一次遇到后解锁。</p>`; return; }
-    dt.innerHTML = `<div class="pic"><img src="${img(e)}" alt=""></div><h3>${e[1]}</h3><span class="tg">${e[3]}</span><p>${e[4]}</p><h4>技 能</h4><ul>${e[5].map(t => `<li>${t}</li>`).join('')}</ul>`;
+    dt.innerHTML = `<div class="pic"><img src="${img(e)}" alt=""></div><h3>${no(e)}　${e[1]}</h3><span class="tg">${e[3]}</span><p>${e[4]}</p><h4>技 能</h4><ul>${e[5].map(t => `<li>${t}</li>`).join('')}</ul>`;
   }
   function render() {
     box.querySelectorAll('.tb').forEach(b => b.classList.toggle('on', b.dataset.t === tab));
@@ -1056,7 +1060,8 @@ const XIAOCHANG = { drawBackground() {}, state: () => null, start() {}, on: () =
     const gr = box.querySelector('.gr'); gr.innerHTML = '';
     for (const e of L) {
       const c = document.createElement('div'); c.className = 'cd' + (has(e[0]) ? '' : ' lk') + (sel === e ? ' sel' : '');
-      c.innerHTML = `<img src="${card(e)}" alt=""><span>${has(e[0]) ? e[1] : '？？？'}</span>`;
+      const d = UNITS.includes(e) && dim(e), st = d ? ` style="width:${Math.round(d[0] * d[2] * uk())}px;height:${Math.round(d[1] * d[2] * uk())}px;max-width:86px;max-height:none;object-fit:contain"` : '';
+      c.innerHTML = `<i class="nb">${no(e)}</i><img src="${card(e)}" alt=""${st}><span>${has(e[0]) ? e[1] : '？？？'}</span>`;
       c.addEventListener('click', () => { sel = e; render(); });
       gr.appendChild(c);
     }
@@ -3470,7 +3475,7 @@ let blessFx = []; // 方士施法成功的黄圈
     #kaiju .pic{min-height:60px}#kaiju .bot{margin-top:5px}#kaiju .bot button{padding:6px 14px;font-size:calc(14px*var(--k))}#kaiju .bot .go{padding:7px 36px}#kaiju .fname{font-size:calc(16px*var(--k))}#kaiju .fl{margin-top:5px}#kaiju .fl button{padding:4px}#kaiju .fl button small{display:none}#kaiju .top{padding:4px 10px;margin-bottom:6px}}
   @media (max-width:700px) and (orientation:portrait){#kaiju .cols{display:flex;flex-direction:column;overflow-y:auto;gap:10px;-webkit-overflow-scrolling:touch}#kaiju .pan{overflow:visible;flex:none}#kaiju .field{order:-1;height:auto}#kaiju .pic{flex:none;height:min(56vw,240px)}#kaiju .bot button{letter-spacing:2px;padding:9px 12px;white-space:nowrap}#kaiju .bot .go{flex:1;padding:10px 0;letter-spacing:8px}}`;
   function render() {
-    const O = window.SURV ? SURV.ORIGINS : {}, cur = SURV.origin(), o = O[cur], ai = SURV.attrInfo ? SURV.attrInfo(cur) : [], SK = SURV.SK, sk = SK[o.skill];
+    const O = window.SURV ? SURV.ORIGINS : {}, cur = SURV.origin(), o = O[cur], ai = SURV.attrInfo ? SURV.attrInfo(cur) : [], SK = SURV.SK, sk = SK[SURV.startSk ? SURV.startSk() : o.skill], curW = SURV.wep ? SURV.wep() : o.wep;
     const F = FIELDS[field], hard = !!(window.TITLE && TITLE.hardMode && TITLE.hardMode());
     const ic = u => `style="background-image:url('${u}')"`;
     el.innerHTML = `
@@ -3490,7 +3495,7 @@ let blessFx = []; // 方士施法成功的黄圈
           <div class="og">${Object.keys(O).map(k => `<button data-o="${k}" class="card ${k === cur ? 'on' : ''} ${O[k].locked ? 'lock' : ''}"><div class="ico" ${ic(OGI[k] || '')}></div><span><b>${O[k].name}</b><small>${O[k].locked ? '🔒 暂未开放' : (O[k].desc || '').split('。')[0]}</small></span></button>`).join('')}</div>
           <div class="ogd"><b>${o.name}</b><span class="tag">${o.tag}</span><p>${o.desc}</p><p>起手武艺：<b style="font-size:calc(13px*var(--k));color:${sk ? sk.color : '#fff'}">${sk ? sk.name : '—'}</b>${sk ? '（' + sk.desc + '）' : ''}</p></div>
           <h4 style="margin-top:10px">兵器路数</h4>
-          <div class="wp">${WEP.map(w => `<button data-w="${w[0]}" class="${w[2] ? 'on' : 'lock'}" title="${w[2] ? '' : '暂未开放'}">${w[1]}</button>`).join('')}</div>
+          <div class="wp" style="grid-template-columns:repeat(2,1fr)">${(o.weps || [o.wep]).map(w => `<button data-w="${w}" class="${w === curW ? 'on' : ''}">${SURV.WEPN[w]}</button>`).join('')}</div>
           <h4 style="margin-top:10px">难度</h4>
           <div class="diff"><button class="card ${hard ? '' : 'on'}" data-h="0"><div class="ico" ${ic(PIC.std)}></div><span><b>标准</b><small>试牛刀，来去自如</small></span></button><button class="card ${hard ? 'on' : ''}" data-h="1"><div class="ico" ${ic(PIC.hard)}></div><span><b style="color:#ff8a70">困难</b><small>敌人更强，积分×1.25</small></span></button></div>
         </div>
@@ -3511,7 +3516,7 @@ let blessFx = []; // 方士施法成功的黄圈
       </div>
       <div class="bot"><button class="back">返回主菜单</button><button class="dice" title="随机出身">🎲</button><button class="go" ${F.open ? '' : 'disabled style="opacity:.5"'}>出　发</button></div>`;
     el.querySelectorAll('.og .card').forEach(b => b.onclick = () => { if (O[b.dataset.o].locked) return; SURV.setOrigin(b.dataset.o); render(); });
-    el.querySelectorAll('.wp button.lock').forEach(b => b.onclick = () => { b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake'); });
+    el.querySelectorAll('.wp button').forEach(b => b.onclick = () => { SURV.setWep(+b.dataset.w); render(); });   // 11/13：出身的两种本门兵器选一种开局
     el.querySelectorAll('.bar').forEach(b => b.onclick = () => { axSel = +b.dataset.a === axSel ? -1 : +b.dataset.a; render(); });
     el.querySelectorAll('.diff .card').forEach(b => b.onclick = () => { if (window.TITLE && TITLE.setHard) TITLE.setHard(b.dataset.h === '1'); render(); });
     el.querySelectorAll('.fl button').forEach(b => b.onclick = () => { field = +b.dataset.i; render(); });   // 上锁的章节也能点开预览（灰图），但「出发」不可用
@@ -5692,7 +5697,11 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const FRM = { wd_: FRM0('wd_'), qiang_: FRM0('qiang_'), bow_: FRM0('bow_'), stone_: FRM0('stone_'), fan_: FRM0('fan_'), huangfu_: FRM0('huangfu_'), quan_: FRM0('quan_'), guandao_: FRM0('guandao_'), jian_: FRM0('jian_'), chui_: FRM0('chui_') };
   Object.assign(MOT, MOTX);
   const HELDP = { 0: 'wd_', 1: 'jian_', 2: 'chui_', 3: 'qiang_', 4: 'guandao_', 5: 'bow_', 7: 'stone_', 8: 'huangfu_', 9: 'fan_', 10: 'quan_' };   // 书生开局拿黄符
-  const heldPre = () => HELDP[OG().wep] || 'wd_';
+  // 11/13 用户定：开局在出身的两种本门兵器里挑一种，主角手里一直拿它，起手武艺也跟着换
+  let startW = null; const heldW = () => startW != null && (OG().weps || []).includes(startW) ? startW : OG().wep;
+  const START_SK = { 0: 'hengsao', 2: 'zhendi', 3: 'qiang', 4: 'hengti', 7: 'feishi', 5: 'qishe', 8: 'huofu', 9: 'shanfeng', 1: 'jlianci', 10: 'chongquan' };
+  const startSk = () => START_SK[heldW()] || OG().skill;
+  const heldPre = () => HELDP[heldW()] || 'wd_';
   const motFr = k => (FRM[heldPre()] || FRM.wd_)[MOT[k] || 'chop'];
   for (const k of Object.keys(SK)) Object.defineProperties(SK[k], {
     pose: { get: () => motFr(k).slice(0, 2), set() {}, configurable: true },
@@ -6561,7 +6570,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   // ---------- 对外接口 ----------
   function forceBlade() { weapon = 'blade'; pendingWeapon = null; try { if (window.GEAR && GEAR.switch) GEAR.switch(); } catch (e) {} if (typeof ui === 'function') ui(); }
   function startRun() {
-    S.lv = 1; S.shopLock = null; S.xiu = 0; S.bank = 0; S.atAdd = [0, 0, 0, 0, 0, 0]; S.lvFx = 0; S.money = 0; S.coins = []; S.loot = []; S.shop = []; S.items = []; S.owned = []; S.hutiSum = 0; S.slots = [OG().skill || 'hengsao', '', '', '', '']; S.held = wepOf(S.slots[0]) < 7 ? wepOf(S.slots[0]) : null; S.mast = {}; S.dps = {}; S.gf = ['', '', '']; S.qg = ''; S.gfExp = {}; S.xy = 0; S.lhjReady = false; S.lhjOn = false; GM = GM0(); S.zq = zqMax(); S.hp0 = hero.hp; S.combo = 0; S.lk = typeof kills === 'number' ? kills : 0; S.chain = 0; S.lastCat = -1; S.lastI = -9; W.pick = false; const old = document.getElementById('survPick'); if (old) old.remove();
+    S.lv = 1; S.shopLock = null; S.xiu = 0; S.bank = 0; S.atAdd = [0, 0, 0, 0, 0, 0]; S.lvFx = 0; S.money = 0; S.coins = []; S.loot = []; S.shop = []; S.items = []; S.owned = []; S.hutiSum = 0; S.slots = [startSk() || 'hengsao', '', '', '', '']; S.held = wepOf(S.slots[0]) < 7 ? wepOf(S.slots[0]) : null; S.mast = {}; S.dps = {}; S.gf = ['', '', '']; S.qg = ''; S.gfExp = {}; S.xy = 0; S.lhjReady = false; S.lhjOn = false; GM = GM0(); S.zq = zqMax(); S.hp0 = hero.hp; S.combo = 0; S.lk = typeof kills === 'number' ? kills : 0; S.chain = 0; S.lastCat = -1; S.lastI = -9; W.pick = false; const old = document.getElementById('survPick'); if (old) old.remove();
     W.started = true; W.between = 0; S.wind = null; S.recov = null; S.later = []; S.qi = 0; bolts.length = 0; zones.length = 0; S.cycles = 0; fx.length = 0;
     forceBlade();
     const vw = viewW(); arenaL = M.gates[0] + 10; lockR = arenaL + vw * 1.5; gateI = 0;
@@ -6957,7 +6966,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     slots: S.slots.map(k => k && SK[k] ? { name: SK[k].name, icon: SK[k].icon, color: SK[k].color, desc: SK[k].desc, lv: lvOf(k) } : null),
     gf: S.gf.map(id => id && GF[id] ? { name: GF[id].n, desc: GF[id].d, lv: gfLv(id) } : null), qg: S.qg && GF[S.qg] ? { name: GF[S.qg].n, desc: GF[S.qg].d } : null,
     dmg: RT.dmg });
-  window.SURV = { curNode: () => RT.on && W.started ? RT.node : null, status, attrInfo, addXiu: n => addXiu(n), heldPre: () => heldPre(), dbg: () => ({ gf: S.gf.slice(), qg: S.qg, zq: S.zq, zqMax: zqMax(), exp: S.gfExp, GM }), giveGf: id => { if (GF[id]) { if (GF[id].qg) S.qg = id; else { const f = S.gf.indexOf(""); if (f >= 0) S.gf[f] = id; } } }, newHud: () => RT.on && !!RT.node, stunGate, noStun: () => RT.on, get slots() { return S.slots; }, SK, beginNode, frozen: () => RT.on && (ROUTE.shown() || buildOpen), routeHp: () => [hero.hp, maxHp()], camp(k) { if (k === 'heal') heal(maxHp() * .3); else RT.dmg *= 1.1; }, ORIGINS, setOrigin(k) { if (ORIGINS[k] && !ORIGINS[k].locked) origin = k; }, origin: () => origin, takeMul: () => {
+  window.SURV = { curNode: () => RT.on && W.started ? RT.node : null, status, attrInfo, addXiu: n => addXiu(n), heldPre: () => heldPre(), dbg: () => ({ gf: S.gf.slice(), qg: S.qg, zq: S.zq, zqMax: zqMax(), exp: S.gfExp, GM }), giveGf: id => { if (GF[id]) { if (GF[id].qg) S.qg = id; else { const f = S.gf.indexOf(""); if (f >= 0) S.gf[f] = id; } } }, newHud: () => RT.on && !!RT.node, stunGate, noStun: () => RT.on, get slots() { return S.slots; }, SK, beginNode, frozen: () => RT.on && (ROUTE.shown() || buildOpen), routeHp: () => [hero.hp, maxHp()], camp(k) { if (k === 'heal') heal(maxHp() * .3); else RT.dmg *= 1.1; }, ORIGINS, setOrigin(k) { if (ORIGINS[k] && !ORIGINS[k].locked) { origin = k; startW = null; } }, origin: () => origin, setWep(w) { startW = w; }, wep: () => heldW(), startSk: () => startSk(), WEPN, takeMul: () => {
       if (RT.on && GM.block && Math.random() < GM.block) { floaters.push({ x: hero.x, y: hero.y - 50, t: 0, txt: '格挡', color: '#bfe0ff' }); return 0; }
       const mv = Math.abs(hero.ix) > .1 || Math.abs(hero.iy) > .1, low = hero.hp / maxHp() < .3 ? 1 - .10 * GM.low : 1;
       return (OG().take || 1) / AFX.hp() * (1 - IT('take')) * RT.take * RES().take * GM.take / GM.hp * low * (S.qg === 'taxue' && mv ? .85 : 1) * (GM.still && S.stillT > 1 ? 1 - GM.still : 1);

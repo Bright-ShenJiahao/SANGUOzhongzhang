@@ -14,36 +14,40 @@
   // [键, 名字, 用哪张游戏贴图（没有高清头像时用站立帧）, 出现, 一句简介, 技能]
   const UNITS = [
     ['grunt', '喽啰', 'grunt', '第 1 段起', '被裹挟入伙的流民，拿根木棍就上了阵。', ['挥棍：贴身挥一棍，伤害低。']],
-    ['blade', '刀手', 'blade', '第 1 段起', '黄巾里最常见的步卒，一把环首刀砍人不眨眼。', ['劈砍：举刀蓄力后劈下，比喽啰打得重。']],
     ['slinger', '投石手', 'slinger', '第 1 段起', '放羊娃出身，甩石子百发百中。', ['投石：站在远处甩石块，看准落点就能躲。']],
-    ['elite', '老卒', 'elite', '第 1 段起', '打过几场硬仗的老兵，刀口都卷了。', ['刀气：蓄力后劈出一道扇形刀气，出手不会被打断。', '精英：打倒掉 5 枚铜钱。']],
+    ['blade', '刀手', 'blade', '第 1 段起', '黄巾里最常见的步卒，一把环首刀砍人不眨眼。', ['劈砍：举刀蓄力后劈下，比喽啰打得重。']],
     ['thief', '黄巾窃贼', 'thief', '第 1 段起', '背着麻袋专捡地上的铜钱，打不过就跑。', ['偷钱：捡走地上的铜钱，跑掉就拿不回来。', '打倒他钱袋会破，连本带利吐出来。']],
     ['archer', '弓箭手', 'archer', '第 2 段起', '猎户入伙，箭头裹着浸了油的布。', ['火箭：抛射火箭，落地前地上有红圈预警。']],
-    ['yellow-heavy', '大刀兵', 'yellow_heavy', '第 2 段起', '膀大腰圆的壮汉，抡着厚背大刀。', ['横劈：走到身边后蓄力约 1 秒，朝你横扫一片，劈完会喘口气。']],
-    ['yellow-shield', '盾兵', 'yellow_shield', '第 2 段起', '举着木盾顶在最前排。', ['举盾：远程打他只吃七成伤害。', '盾撞：地上出现一条预警线，随后举盾往前撞一段，把你推开。']],
     ['fire-jar', '火罐手', 'fire_jar', '第 2 段起', '背着一篓火油罐的纵火贼。', ['火油罐：扔向你脚下，落地烧出一片火，3 秒内站在里面持续掉血。']],
     ['yellow-spear', '枪兵', 'yellow_spear', '第 3 段起', '长枪比人还高，专戳冲得太近的人。', ['突刺：停在中距离，地上出现一条细长预警线，0.75 秒后往前突刺。']],
-    ['cavalry', '黄巾骑兵', 'cavalry', '第 3 段起', '骑着抢来的土马，挺矛冲阵。', ['冲锋：绕着你兜圈，停下后出一条预警线，直线冲过去。', '血比步卒厚。']],
-    ['drummer', '鼓手', 'drummer', '第 3 段起', '胸前挂着战鼓，鼓声一响，黄巾就红了眼。', ['擂鼓：附近黄巾 4 秒内动作快 30%（脚下发红光）。', '自己不打人，最好先杀。']],
-    ['crossbow', '黄巾弩手', 'crossbow', '第 3 段起', '端着大弩的老兵，一箭能射穿两个人。', ['穿透弩：半蹲瞄准时地上出现一条细红线，0.8 秒后射出，线上的全中。']],
-    ['yellow-golem', '黄巾力士', 'yellow_golem', '第 3 段起', '喝了符水、力大无穷的巨汉。', ['重拳：一拳能把人打飞，血非常厚。', '精英：打倒掉 5 枚铜钱。']],
-    ['priest', '黄巾方士', 'priest', '第 4 段起', '太平道的小道士，摇铃念咒，能救人也能放火。', ['回春：附近有受伤的黄巾就给他们回血。', '符火：没人受伤时朝你丢一团符火，落地烧 2 秒。']],
+    ['yellow-shield', '盾兵', 'yellow_shield', '第 2 段起', '举着木盾顶在最前排。', ['举盾：远程打他只吃七成伤害。', '盾撞：地上出现一条预警线，随后举盾往前撞一段，把你推开。']],
+    ['yellow-heavy', '大刀兵', 'yellow_heavy', '第 2 段起', '膀大腰圆的壮汉，抡着厚背大刀。', ['横劈：走到身边后蓄力约 1 秒，朝你横扫一片，劈完会喘口气。']],
     ['fanatic', '狂信徒', 'fanatic', '第 4 段起', '喝了符水、不知疼痛的信徒。', ['扑击：跑得最快，冲到身边扑打。', '自爆：倒下 0.45 秒后炸开一小圈，别贴着杀。']],
+    ['drummer', '鼓手', 'drummer', '第 3 段起', '胸前挂着战鼓，鼓声一响，黄巾就红了眼。', ['擂鼓：附近黄巾 4 秒内动作快 30%（脚下发红光）。', '自己不打人，最好先杀。']],
+    ['priest', '黄巾方士', 'priest', '第 4 段起', '太平道的小道士，摇铃念咒，能救人也能放火。', ['回春：附近有受伤的黄巾就给他们回血。', '符火：没人受伤时朝你丢一团符火，落地烧 2 秒。']],
+    ['crossbow', '黄巾弩手', 'crossbow', '第 3 段起', '端着大弩的老兵，一箭能射穿两个人。', ['穿透弩：半蹲瞄准时地上出现一条细红线，0.8 秒后射出，线上的全中。']],
+    ['cavalry', '黄巾骑兵', 'cavalry', '第 3 段起', '骑着抢来的土马，挺矛冲阵。', ['冲锋：绕着你兜圈，停下后出一条预警线，直线冲过去。', '血比步卒厚。']],
+    ['elite', '老卒', 'elite', '第 1 段起', '打过几场硬仗的老兵，刀口都卷了。', ['刀气：蓄力后劈出一道扇形刀气，出手不会被打断。', '精英：打倒掉 5 枚铜钱。']],
+    ['yellow-golem', '黄巾力士', 'yellow_golem', '第 3 段起', '喝了符水、力大无穷的巨汉。', ['重拳：一拳能把人打飞，血非常厚。', '精英：打倒掉 5 枚铜钱。']],
     ['yellow-catapult', '投石车', 'yellow_catapult', '投石车节点', '黄巾从官府抢来的守城器械。', ['砸石：远程抛大石，落点有预警圈。', '拆掉掉 5 枚铜钱。']],
   ];
   const BOSSES = [
-    ['cheng_yuanzhi', '程远志', 'cheng_yuanzhi', '第 1 段首领', '黄巾渠帅，率五万之众进犯涿郡。', ['大刀回旋：长柄大刀脱手飞出再飞回，去回都伤人；刀没回来前他空手站着。', '横扫千军：以自己为圆心大范围横扫。']],
     ['deng_mao', '邓茂', 'deng_mao', '第 1 段副将', '程远志的副将，性情暴躁，使一口九环大刀。', ['九环震地：三道裂地波扇形冲出，劈完刀卡在地里 1 秒。', '开山劈：朝你劈出一道长条。']],
-    ['bo_cai', '波才', 'bo_cai', '第 2 段首领', '颍川黄巾大帅，背插令旗，号令千军。', ['令旗点兵：插下令旗，旗边不停冒兵；站到旗边 0.8 秒就能拔掉。', '旋斩：开山大斧抡圆一圈。']],
+    ['cheng_yuanzhi', '程远志', 'cheng_yuanzhi', '第 1 段首领', '黄巾渠帅，率五万之众进犯涿郡。', ['大刀回旋：长柄大刀脱手飞出再飞回，去回都伤人；刀没回来前他空手站着。', '横扫千军：以自己为圆心大范围横扫。']],
     ['he_yi', '何仪', 'he_yi', '第 2 段副将', '汝南黄巾头领，双戟在手，身法迅捷。', ['双戟连突：三段冲刺，每段重新瞄准，第三段后喘口气。', '开山劈。']],
-    ['guanhai', '管亥', 'guanhai_m', '第 3 段首领', '北海黄巾猛将，马上使一杆长戟。', ['骑马：冲锋、马踏飞燕（跃起砸在你的位置）。', '半血被打下马，改用掷戟：长戟插在地上，他空手发愣后冲过去捡；还有旋斩。']],
+    ['bo_cai', '波才', 'bo_cai', '第 2 段首领', '颍川黄巾大帅，背插令旗，号令千军。', ['令旗点兵：插下令旗，旗边不停冒兵；站到旗边 0.8 秒就能拔掉。', '旋斩：开山大斧抡圆一圈。']],
     ['zhang_mancheng', '张曼成', 'zhang_mancheng', '第 3 段副将', '南阳黄巾首领，自称「神上使」。', ['符火阵：在你周围画一圈火，1.4 秒后烧起，只留一个缺口。', '符火落雨：你周围依次落下火球。']],
-    ['zhang_liang', '张梁', 'zhang_liang_q', '第 4 段首领', '人公将军，张角三弟，以勇猛著称。', ['双刀旋风：边转边追 2.2 秒，转完头晕。', '冲锋。', '半血狂怒：更快，出招几乎不停。']],
-    ['zhang_bao', '张宝', 'zhang_bao_q', '第 4 段首领', '地公将军，张角二弟，擅长妖术。', ['地裂：一道裂缝一段段朝你冲过来。', '土墙：在你身后升墙堵路，留一个缺口，5 秒后倒塌。', '半血召出两个半透明分身。']],
-    ['zhang_jiao', '张角', 'zhang_jiao_q', '最终首领', '天公将军，太平道大贤良师，以《太平要术》号令天下黄巾。', ['雷符：三张符追着你飘，随后在你脚下落雷。', '天雷滚滚：全场随机落雷，其中一道必定劈在你脚下。']],
+    ['guanhai', '管亥', 'guanhai_m', '第 3 段首领', '北海黄巾猛将，马上使一杆长戟。', ['骑马：冲锋、马踏飞燕（跃起砸在你的位置）。', '半血被打下马，改用掷戟：长戟插在地上，他空手发愣后冲过去捡；还有旋斩。']],
     ['ma_yuanyi', '马元义', 'ma_yuanyi', '最终副将', '潜入洛阳的黄巾大方首领，斗笠黑衣。', ['流星锤：甩出去再拉回来，去回都伤人，收锤后硬直。', '旋斩。']],
+    ['zhang_bao', '张宝', 'zhang_bao_q', '第 4 段首领', '地公将军，张角二弟，擅长妖术。', ['地裂：一道裂缝一段段朝你冲过来。', '土墙：在你身后升墙堵路，留一个缺口，5 秒后倒塌。', '半血召出两个半透明分身。']],
+    ['zhang_liang', '张梁', 'zhang_liang_q', '第 4 段首领', '人公将军，张角三弟，以勇猛著称。', ['双刀旋风：边转边追 2.2 秒，转完头晕。', '冲锋。', '半血狂怒：更快，出招几乎不停。']],
+    ['zhang_jiao', '张角', 'zhang_jiao_q', '最终首领', '天公将军，太平道大贤良师，以《太平要术》号令天下黄巾。', ['雷符：三张符追着你飘，随后在你脚下落雷。', '天雷滚滚：全场随机落雷，其中一道必定劈在你脚下。']],
   ];
   const ALL = UNITS.concat(BOSSES);
+  // 11/13 用户定：按强弱排序编号；小兵格子按游戏里的真实大小统一比例显示（不再各自撑满格子）
+  const no = e => { const L = UNITS.includes(e) ? UNITS : BOSSES; return 'No.' + String(L.indexOf(e) + 1).padStart(2, '0'); };
+  const dim = e => { const f = typeof ASSETS !== 'undefined' && ASSETS.chars && ASSETS.chars[e[2]] && ASSETS.chars[e[2]].idle; const t = typeof TYPES !== 'undefined' && TYPES[e[0]]; return f ? [f[1], f[2], (t && t.scale) || 1] : null; };
+  let UK = 0; const uk = () => { if (UK) return UK; UK = 9; for (const e of UNITS) { if (e[0] === 'yellow-catapult') continue; const d = dim(e); if (d) UK = Math.min(UK, 80 / (d[1] * d[2])); } return UK; };
   const body = e => (typeof ASSETS !== 'undefined' && ASSETS.chars && ASSETS.chars[e[2]] && ASSETS.chars[e[2]].idle ? ASSETS.chars[e[2]].idle[0] : '');
   const card = e => UNITS.includes(e) ? body(e) || PIC[e[0]] : PIC[e[0]] || body(e);   // 小兵格子统一用全身站立图，首领格子用头像
   const img = (e) => PIC[e[0]] || (typeof ASSETS !== 'undefined' && ASSETS.chars && ASSETS.chars[e[2]] && ASSETS.chars[e[2]].idle ? ASSETS.chars[e[2]].idle[0] : '');
@@ -64,7 +68,7 @@
 #szzCodex .gr{flex:1;min-width:0;overflow:auto;padding:12px;display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:10px;align-content:start}
 #szzCodex .cd{height:118px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;padding:6px 4px;border:1px solid rgba(184,149,90,.25);background:rgba(255,255,255,.03);cursor:pointer}
 #szzCodex .cd:hover,#szzCodex .cd.sel{border-color:rgba(240,200,120,.85);background:rgba(184,149,90,.14)}
-#szzCodex .cd img{max-width:84px;max-height:82px;object-fit:contain;image-rendering:pixelated}
+#szzCodex .cd{position:relative}#szzCodex .cd .nb{position:absolute;left:5px;top:3px;font-style:normal;font-size:11px;color:#b8955a;opacity:.85;font-family:monospace}#szzCodex .cd img{max-width:84px;max-height:82px;object-fit:contain;image-rendering:pixelated}
 #szzCodex .cd span{font-size:13px;color:#e8dcc0;white-space:nowrap}
 #szzCodex .lk img{filter:brightness(0) opacity(.55)}
 #szzCodex .lk span{color:#7a6c58}
@@ -87,7 +91,7 @@
   function detail(e) {
     const dt = box.querySelector('.dt'); if (!e) { dt.innerHTML = '<p class="no">点左边的头像看详情。</p>'; return; }
     if (!has(e[0])) { dt.innerHTML = `<div class="pic lk"><img src="${img(e)}" alt="" style="filter:brightness(0) opacity(.55)"></div><h3>？？？</h3><span class="tg">${e[3]}</span><p class="no">尚未遇到。在战斗中第一次遇到后解锁。</p>`; return; }
-    dt.innerHTML = `<div class="pic"><img src="${img(e)}" alt=""></div><h3>${e[1]}</h3><span class="tg">${e[3]}</span><p>${e[4]}</p><h4>技 能</h4><ul>${e[5].map(t => `<li>${t}</li>`).join('')}</ul>`;
+    dt.innerHTML = `<div class="pic"><img src="${img(e)}" alt=""></div><h3>${no(e)}　${e[1]}</h3><span class="tg">${e[3]}</span><p>${e[4]}</p><h4>技 能</h4><ul>${e[5].map(t => `<li>${t}</li>`).join('')}</ul>`;
   }
   function render() {
     box.querySelectorAll('.tb').forEach(b => b.classList.toggle('on', b.dataset.t === tab));
@@ -96,7 +100,8 @@
     const gr = box.querySelector('.gr'); gr.innerHTML = '';
     for (const e of L) {
       const c = document.createElement('div'); c.className = 'cd' + (has(e[0]) ? '' : ' lk') + (sel === e ? ' sel' : '');
-      c.innerHTML = `<img src="${card(e)}" alt=""><span>${has(e[0]) ? e[1] : '？？？'}</span>`;
+      const d = UNITS.includes(e) && dim(e), st = d ? ` style="width:${Math.round(d[0] * d[2] * uk())}px;height:${Math.round(d[1] * d[2] * uk())}px;max-width:86px;max-height:none;object-fit:contain"` : '';
+      c.innerHTML = `<i class="nb">${no(e)}</i><img src="${card(e)}" alt=""${st}><span>${has(e[0]) ? e[1] : '？？？'}</span>`;
       c.addEventListener('click', () => { sel = e; render(); });
       gr.appendChild(c);
     }

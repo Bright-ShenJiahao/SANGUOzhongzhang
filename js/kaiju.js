@@ -87,7 +87,7 @@
     #kaiju .pic{min-height:60px}#kaiju .bot{margin-top:5px}#kaiju .bot button{padding:6px 14px;font-size:calc(14px*var(--k))}#kaiju .bot .go{padding:7px 36px}#kaiju .fname{font-size:calc(16px*var(--k))}#kaiju .fl{margin-top:5px}#kaiju .fl button{padding:4px}#kaiju .fl button small{display:none}#kaiju .top{padding:4px 10px;margin-bottom:6px}}
   @media (max-width:700px) and (orientation:portrait){#kaiju .cols{display:flex;flex-direction:column;overflow-y:auto;gap:10px;-webkit-overflow-scrolling:touch}#kaiju .pan{overflow:visible;flex:none}#kaiju .field{order:-1;height:auto}#kaiju .pic{flex:none;height:min(56vw,240px)}#kaiju .bot button{letter-spacing:2px;padding:9px 12px;white-space:nowrap}#kaiju .bot .go{flex:1;padding:10px 0;letter-spacing:8px}}`;
   function render() {
-    const O = window.SURV ? SURV.ORIGINS : {}, cur = SURV.origin(), o = O[cur], ai = SURV.attrInfo ? SURV.attrInfo(cur) : [], SK = SURV.SK, sk = SK[o.skill];
+    const O = window.SURV ? SURV.ORIGINS : {}, cur = SURV.origin(), o = O[cur], ai = SURV.attrInfo ? SURV.attrInfo(cur) : [], SK = SURV.SK, sk = SK[SURV.startSk ? SURV.startSk() : o.skill], curW = SURV.wep ? SURV.wep() : o.wep;
     const F = FIELDS[field], hard = !!(window.TITLE && TITLE.hardMode && TITLE.hardMode());
     const ic = u => `style="background-image:url('${u}')"`;
     el.innerHTML = `
@@ -107,7 +107,7 @@
           <div class="og">${Object.keys(O).map(k => `<button data-o="${k}" class="card ${k === cur ? 'on' : ''} ${O[k].locked ? 'lock' : ''}"><div class="ico" ${ic(OGI[k] || '')}></div><span><b>${O[k].name}</b><small>${O[k].locked ? '🔒 暂未开放' : (O[k].desc || '').split('。')[0]}</small></span></button>`).join('')}</div>
           <div class="ogd"><b>${o.name}</b><span class="tag">${o.tag}</span><p>${o.desc}</p><p>起手武艺：<b style="font-size:calc(13px*var(--k));color:${sk ? sk.color : '#fff'}">${sk ? sk.name : '—'}</b>${sk ? '（' + sk.desc + '）' : ''}</p></div>
           <h4 style="margin-top:10px">兵器路数</h4>
-          <div class="wp">${WEP.map(w => `<button data-w="${w[0]}" class="${w[2] ? 'on' : 'lock'}" title="${w[2] ? '' : '暂未开放'}">${w[1]}</button>`).join('')}</div>
+          <div class="wp" style="grid-template-columns:repeat(2,1fr)">${(o.weps || [o.wep]).map(w => `<button data-w="${w}" class="${w === curW ? 'on' : ''}">${SURV.WEPN[w]}</button>`).join('')}</div>
           <h4 style="margin-top:10px">难度</h4>
           <div class="diff"><button class="card ${hard ? '' : 'on'}" data-h="0"><div class="ico" ${ic(PIC.std)}></div><span><b>标准</b><small>试牛刀，来去自如</small></span></button><button class="card ${hard ? 'on' : ''}" data-h="1"><div class="ico" ${ic(PIC.hard)}></div><span><b style="color:#ff8a70">困难</b><small>敌人更强，积分×1.25</small></span></button></div>
         </div>
@@ -128,7 +128,7 @@
       </div>
       <div class="bot"><button class="back">返回主菜单</button><button class="dice" title="随机出身">🎲</button><button class="go" ${F.open ? '' : 'disabled style="opacity:.5"'}>出　发</button></div>`;
     el.querySelectorAll('.og .card').forEach(b => b.onclick = () => { if (O[b.dataset.o].locked) return; SURV.setOrigin(b.dataset.o); render(); });
-    el.querySelectorAll('.wp button.lock').forEach(b => b.onclick = () => { b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake'); });
+    el.querySelectorAll('.wp button').forEach(b => b.onclick = () => { SURV.setWep(+b.dataset.w); render(); });   // 11/13：出身的两种本门兵器选一种开局
     el.querySelectorAll('.bar').forEach(b => b.onclick = () => { axSel = +b.dataset.a === axSel ? -1 : +b.dataset.a; render(); });
     el.querySelectorAll('.diff .card').forEach(b => b.onclick = () => { if (window.TITLE && TITLE.setHard) TITLE.setHard(b.dataset.h === '1'); render(); });
     el.querySelectorAll('.fl button').forEach(b => b.onclick = () => { field = +b.dataset.i; render(); });   // 上锁的章节也能点开预览（灰图），但「出发」不可用
