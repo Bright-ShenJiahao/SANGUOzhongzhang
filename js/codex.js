@@ -7,7 +7,7 @@
   const ALIAS = { guanhai_m: 'guanhai', guanhai_b: 'guanhai' };
   // 首领和新兵种的高清头像：写死字面路径，打包时才会换成 pack/ 网址
   const PIC = {
-    cheng_yuanzhi: 'art/ui/boss/cheng_yuanzhi.webp', deng_mao: 'art/ui/boss/deng_mao.webp', bo_cai: 'art/ui/boss/bo_cai.webp', he_yi: 'art/ui/boss/he_yi.webp',
+    guanhai: 'art/ui/boss/guanhai.webp', cheng_yuanzhi: 'art/ui/boss/cheng_yuanzhi.webp', deng_mao: 'art/ui/boss/deng_mao.webp', bo_cai: 'art/ui/boss/bo_cai.webp', he_yi: 'art/ui/boss/he_yi.webp',
     zhang_mancheng: 'art/ui/boss/zhang_mancheng.webp', ma_yuanyi: 'art/ui/boss/ma_yuanyi.webp', zhang_liang: 'art/ui/boss/zhang_liang.webp', zhang_bao: 'art/ui/boss/zhang_bao.webp', zhang_jiao: 'art/ui/boss/zhang_jiao.webp',
     'fire-jar': 'art/ui/unit/fire_jar.webp', drummer: 'art/ui/unit/drummer.webp', cavalry: 'art/ui/unit/cavalry.webp', fanatic: 'art/ui/unit/fanatic.webp', crossbow: 'art/ui/unit/crossbow.webp',
   };
