@@ -27,7 +27,7 @@
   #kaiju .top:before{content:"";position:absolute;left:50%;bottom:-6px;width:9px;height:9px;margin-left:-5px;background:var(--ink);border:2px solid var(--gd);transform:rotate(45deg);z-index:1}
   #kaiju .seal{width:calc(34px*var(--k));height:calc(34px*var(--k));border:2px solid var(--gd);background:#2a231a;color:var(--gl);display:flex;align-items:center;justify-content:center;font-size:calc(17px*var(--k))}
   #kaiju .top h1{margin:0;font-size:calc(21px*var(--k));letter-spacing:6px;color:var(--gl);font-weight:400}#kaiju .top small{color:#8f826c;font-size:calc(12px*var(--k));letter-spacing:3px}
-  #kaiju .cols{flex:1;min-height:0;display:grid;grid-template-columns:1.25fr 1fr 1fr;gap:14px}
+  #kaiju .cols{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr) minmax(0,1fr);gap:14px}
   #kaiju .pan{position:relative;border:30px solid transparent;border-image:url('art/ui/kaiju2/panel.webp') 100 fill stretch;padding:0 2px 0;overflow:auto;min-height:0;filter:drop-shadow(0 8px 16px rgba(30,20,10,.35))}
   #kaiju h4{margin:2px 0 9px;color:var(--gl);font-size:calc(14px*var(--k));font-weight:400;letter-spacing:5px;display:flex;align-items:center;gap:8px}
   #kaiju h4:after{content:"";flex:1;height:2px;background:linear-gradient(90deg,var(--rd),rgba(168,130,63,.1));border-bottom:1px solid rgba(201,164,92,.35);margin-right:2px}
@@ -51,7 +51,12 @@
   #kaiju .eff{margin-top:7px;padding:6px 10px;font-size:calc(12px*var(--k));color:#cdbd9e;text-align:center;background:linear-gradient(90deg,transparent,rgba(201,164,92,.12) 20%,rgba(201,164,92,.12) 80%,transparent);border-top:1px solid rgba(201,164,92,.3);border-bottom:1px solid rgba(201,164,92,.3);line-height:1.6}
   #kaiju .eff em{font-style:normal;color:var(--gl)}
   /* 左栏：战场 */
-  #kaiju .field{display:flex;flex-direction:column;padding-top:16px}
+  #kaiju .field{display:flex;flex-direction:column}
+  #kaiju .fl{display:flex;gap:8px;margin-top:10px}
+  #kaiju .fl button{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:8px 6px;border:1px solid var(--rdd);background:var(--ink2);color:#cfc2a6;font-family:inherit;cursor:pointer}
+  #kaiju .fl button b{font-size:calc(16px*var(--k));letter-spacing:5px;white-space:nowrap;font-weight:400;color:var(--gl)}#kaiju .fl button small{font-size:calc(11px*var(--k));color:#8f826c;white-space:nowrap}
+  #kaiju .fl button.on{border-color:var(--gl);background:linear-gradient(180deg,#2c261c,#15130f);box-shadow:0 0 0 1px #000,0 0 0 2px var(--gd),0 0 12px rgba(240,200,110,.25)}
+  #kaiju .fl button.lock{opacity:.5}#kaiju .fl button.lock b{color:#a99878}
   #kaiju .plaque{position:absolute;left:50%;top:-18px;transform:translateX(-50%);z-index:2;height:calc(36px*var(--k));display:flex;align-items:center;padding:0 6px;border-style:solid;border-width:0 calc(34px*var(--k));border-color:transparent;border-image:url('art/ui/kaiju2/slip.webp') 0 80 fill stretch;color:#f6e3bd;text-shadow:0 1px 0 #000;font-size:calc(15px*var(--k));letter-spacing:5px;white-space:nowrap}
   #kaiju .pic{flex:1;min-height:90px;border:1px solid #5d4b2c;box-shadow:inset 0 0 0 1px #000;background:#0d0c0a center/cover no-repeat;position:relative;overflow:hidden}
   #kaiju .pic.lock{filter:grayscale(.85) brightness(.62)}
@@ -87,23 +92,24 @@
     #kaiju .pan{border-width:20px}#kaiju h4{margin:0 0 5px;font-size:calc(12px*var(--k))}#kaiju .sec{margin-top:7px}#kaiju .ico{width:32px;height:32px}#kaiju .tile{width:34px;height:40px;padding:2px}#kaiju .tile small{display:none!important}#kaiju .tile.on .ico{width:32px;height:32px}#kaiju .tile.txt{height:32px}
     #kaiju .tile b{font-size:calc(13px*var(--k))}#kaiju .tile small{font-size:calc(10px*var(--k))}#kaiju .namep b{font-size:calc(15px*var(--k))}#kaiju select{padding:3px 6px;margin-top:5px}#kaiju .eff{margin-top:4px;padding:3px 6px;font-size:calc(11px*var(--k))}
     #kaiju .att div{padding:2px 6px}#kaiju .rows div{padding:1px 0;font-size:calc(12px*var(--k))}#kaiju .slots div{max-width:36px}#kaiju .bot{margin-top:5px}#kaiju .bot button{height:38px;font-size:calc(14px*var(--k))}#kaiju .bot .back{width:150px}#kaiju .bot .go{width:190px}#kaiju .bot .dice{width:38px}
-    #kaiju .fname{font-size:calc(16px*var(--k))}#kaiju .fnote,#kaiju .pic .dots{display:none}#kaiju .plaque{font-size:13px;top:-10px}#kaiju .field{padding-top:10px}}
+    #kaiju .fname{font-size:calc(16px*var(--k))}#kaiju .fnote{display:none}#kaiju .fl{margin-top:5px}#kaiju .fl button{padding:4px}#kaiju .fl button small{display:none}}
   @media (max-width:700px) and (orientation:portrait){#kaiju .cols{display:flex;flex-direction:column;overflow-y:auto;gap:12px;-webkit-overflow-scrolling:touch;padding-top:12px}#kaiju .pan{overflow:visible;flex:none;border-width:22px}#kaiju .pic{flex:none;height:min(58vw,250px)}#kaiju .pic .arr{width:28px;height:42px}
     #kaiju .bot .back{width:auto;flex:none;padding:0 14px!important;letter-spacing:2px}#kaiju .bot .go{flex:1;width:auto}#kaiju .tile{width:46px;height:46px}#kaiju .tile.on .ico{width:38px;height:38px}}`;
   function render() {
     const O = window.SURV ? SURV.ORIGINS : {}, cur = SURV.origin(), o = O[cur], ai = SURV.attrInfo ? SURV.attrInfo(cur) : [], SK = SURV.SK, sk = SK[SURV.startSk ? SURV.startSk() : o.skill], curW = SURV.wep ? SURV.wep() : o.wep;
     const F = FIELDS[field], hard = !!(window.TITLE && TITLE.hardMode && TITLE.hardMode());
     const ic = u => `style="background-image:url('${u}')"`;
+    const pctOf = t => { const m = String(t).match(/[+\-−]\s*\d+%/); return m ? m[0].replace(/\s/g, '').replace('−', '-') : '+0%'; };   // 11/13 用户：直接写 +XX% / -XX%
     const AH = { 体魄: '体', 短兵: '短', 长兵: '长', 身法: '身', 运气: '运', 悟性: '悟', 射艺: '射', 术法: '术', 内力: '内' };
     void AH;
     el.innerHTML = `
       <div class="top"><div class="seal">卒</div><div><h1>开局配置</h1><small>选择你的出身与兵器</small></div></div>
       <div class="cols">
         <div class="pan field">
-          <div class="plaque">所选战场</div>
+          <h4><i style="background-image:url('${K2('h_qi')}')"></i>所选战场</h4>
           <div class="pic ${F.open ? '' : 'lock'}" style="background-image:url('${F.pic}')">${F.open ? '' : '<div class="lk">暂未开放</div>'}
-            <button class="arr l" data-d="-1">‹</button><button class="arr r" data-d="1">›</button>
-            <div class="ban"><div class="dots">${FIELDS.map((f, i) => `<i class="${i === field ? 'on' : ''}"></i>`).join('')}</div><div class="fname">${F.name}</div><div class="fsub">${F.sub}${F.open ? '' : ' · 未开放'}</div><div class="fnote">${F.note}</div></div></div>
+            <div class="ban"><div class="fname">${F.name}</div><div class="fsub">${F.sub}${F.open ? '' : ' · 未开放'}</div><div class="fnote">${F.note}</div></div></div>
+          <div class="fl">${FIELDS.map((f, i) => `<button data-i="${i}" class="${i === field ? 'on' : ''} ${f.open ? '' : 'lock'}"><b>${f.open ? '' : '🔒 '}${f.name}</b><small>${f.open ? f.sub : f.sub + ' · 未开放'}</small></button>`).join('')}</div>
         </div>
         <div class="pan">
           <h4><i style="background-image:url('${K2('h_yin')}')"></i>名号</h4>
@@ -122,8 +128,8 @@
           <h4><i style="background-image:url('${K2('h_hufu')}')"></i>兵籍牒</h4>
           <div class="rows"><div><span>姓名</span>${esc(name)}</div><div><span>出身</span>${o.name}</div><div><span>兵器</span>${SURV.WEPN ? SURV.WEPN[curW] : '刀'}</div><div><span>战场</span>${F.name}</div><div><span>难度</span>${hard ? '困难' : '标准'}</div></div>
           <div class="sec"><h4><i style="background-image:url('${K2('h_qi')}')"></i>属性</h4>
-          <div class="att">${ai.map((r, i) => `<div class="${i === axSel ? 'sel' : ''} ${r[1] > 3 ? 'hi' : r[1] < 3 ? 'lo' : ''}" data-a="${i}" title="${r[3]}"><span>${r[0]}</span><b>${r[1]}</b></div>`).join('')}</div>
-          <div class="axd">${axSel >= 0 && ai[axSel] ? '<b>' + ai[axSel][0] + '</b>　' + ai[axSel][2] + '　' + ai[axSel][3] : '点属性看效果（3 为常人水平）'}</div></div>
+          <div class="att">${ai.map((r, i) => `<div class="${i === axSel ? 'sel' : ''} ${r[1] > 3 ? 'hi' : r[1] < 3 ? 'lo' : ''}" data-a="${i}" title="${r[2]}：${r[3]}"><span>${r[0]}</span><b>${pctOf(r[2])}</b></div>`).join('')}</div>
+          <div class="axd">${axSel >= 0 && ai[axSel] ? '<b>' + ai[axSel][0] + '</b>　' + ai[axSel][2] + '　' + ai[axSel][3] : '点属性看它加的是什么'}</div></div>
           <div class="sec"><h4><i style="background-image:url('${K2('w' + curW)}')"></i>起手武艺</h4>
           <div class="slots sk">${[0, 1, 2, 3, 4].map(i => i === 0 && sk ? (SKI[SURV.startSk ? SURV.startSk() : o.skill] ? `<div class="has" title="${sk.name}" ${ic(SKI[SURV.startSk ? SURV.startSk() : o.skill])}></div>` : `<div class="has" title="${sk.name}" style="color:${sk.color}">${sk.icon || sk.name[0]}</div>`) : '<div></div>').join('')}</div>
           <div class="skd">起手 1 个武艺，其余路上习得；5 格依次自动出手。</div></div>
@@ -132,7 +138,7 @@
         </div>
       </div>
       <div class="bot"><button class="back">返回主菜单</button><button class="dice" title="随机出身">🎲</button><button class="go" ${F.open ? '' : 'disabled style="opacity:.5"'}>出发</button></div>`;
-    el.querySelectorAll('.pic .arr').forEach(b => b.onclick = () => { field = (field + +b.dataset.d + FIELDS.length) % FIELDS.length; render(); });
+    el.querySelectorAll('.fl button').forEach(b => b.onclick = () => { field = +b.dataset.i; render(); });   // 上锁的章节也能点开预览（灰图），但「出发」不可用
     el.querySelectorAll('.og .tile').forEach(b => b.onclick = () => { if (O[b.dataset.o].locked) return; SURV.setOrigin(b.dataset.o); render(); });
     el.querySelectorAll('.wp button').forEach(b => b.onclick = () => { SURV.setWep(+b.dataset.w); render(); });   // 11/13：出身的两种本门兵器选一种开局
     el.querySelectorAll('.att div').forEach(b => b.onclick = () => { axSel = +b.dataset.a === axSel ? -1 : +b.dataset.a; render(); });
