@@ -358,7 +358,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       if (n === 1) waveBanner(ROUTE.name(nd), nd.type === 'boss' ? '首领战 · 迎战' : nd.type === 'elite' ? '第 ' + nd.layer + ' 层 · 精锐 · 迎战' : '第 ' + nd.layer + ' 层 · 迎战');
       const lvOf = k => Math.max(1, Math.min(WAVES, 1 + Math.floor(((nd.layer - 1 + (k - 1) / N0) / L) * WAVES) + (nd.type === 'elite' ? 2 : 0) + (nd.type === 'boss' ? 2 : 0)));
       W.lv0 = lvOf(1); W.lv1 = lvOf(N0); W.tot = 0; for (let k = 1; k <= N0; k++) W.tot += (WAVE_T[lvOf(k) - 1] || 60) * ROUTE.TIME_K;
-      W.tot = nd.type === 'boss' ? 60 : nd.type === 'elite' ? 50 : 36 + 8 * nd.layer / L;   /* 11/12 用户：关卡太长 → 普通约 40 秒（36~44）、精英 50、首领（含张角）60 秒内 */   // 11/11：第一关太长太难 → 前三层 35/42/48 秒   // 用户定 11/09：首领 3 分钟；精英约 1.5~2 分钟；普通战斗约 50~65 秒（18 层）
+      W.tot = nd.type === 'boss' ? 60 : nd.type === 'elite' ? 50 : 36 + 8 * nd.layer / L; if (/[?&]longwave/.test(location.search)) W.tot = 9999;   // 测试用：关卡不结束   /* 11/12 用户：关卡太长 → 普通约 40 秒（36~44）、精英 50、首领（含张角）60 秒内 */   // 11/11：第一关太长太难 → 前三层 35/42/48 秒   // 用户定 11/09：首领 3 分钟；精英约 1.5~2 分钟；普通战斗约 50~65 秒（18 层）
       W.k = 1; W.N = 1; W.n = W.lv0; W.lvF = W.lv0; W.t = 0; W.retreat = 0; W.spawnT = 0; W.batchT = 0; W.bossDone = false;
       say(ROUTE.name(nd), 1.6); return;
     }
@@ -600,6 +600,218 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   SK.pili.tier = 1;
   SK.qiang.tier = 1; SK.chong.tier = 2;
   SK.daobo.tier = 1; SK.huima.tier = 2; SK.daolun.tier = 2; SK.xuanfeng.tier = 2; SK.dilie.tier = 3; SK.shuanghuan.tier = 3; SK.xuehe.tier = 4; SK.tianbeng.tier = 4; SK.wanren.tier = 4;   /* 11/12 刀 13 招按黄玄地天重排 */
+  // ================= 11/13 全部重做：10 种兵器 × 12 招（参考三国群英传按兵器分系的必杀、三国志的兵种战法） =================
+  // 状态：击退 / 定身(stun) / 混乱(conf：乱走、误伤旁人) / 溃散(rout：掉头逃) / 减速(survSlow) / 起火(fire 区)
+  const ZN = o => zones.push(Object.assign({ x: 0, y: 0, t: 0, tk: 0, dmg: 0 }, o));
+  const tough = z => z.T && (z.T.boss || z.T.chapterBoss || z.T.elite);
+  const conf = (z, t) => { if (tough(z)) { stunz(z, t * .3); return; } if (!(z.conf > 0)) floaters.push({ x: z.x, y: z.y - 64, t: 0, txt: '乱', color: '#d79bff' }); z.conf = Math.max(z.conf || 0, t); };
+  const rout = (z, t) => { if (tough(z)) { stunz(z, t * .3); return; } if (!(z.rout > 0)) floaters.push({ x: z.x, y: z.y - 64, t: 0, txt: '逃', color: '#ffd27a' }); z.rout = Math.max(z.rout || 0, t); };
+  const cone = (a, r, half) => hittable().filter(z => { const dx = z.x - hero.x, dy = (z.y - hero.y) * 2, d = Math.hypot(dx, dy); let da = Math.abs(Math.atan2(dy, dx) - a); if (da > Math.PI) da = Math.PI * 2 - da; return d < r * RM && (d < 14 || da < half); });
+  const fan = (a0, n, spread, o) => { for (let i = 0; i < n; i++) { const a = a0 - spread / 2 + (n > 1 ? spread * i / (n - 1) : spread / 2); shot(a, Object.assign({ vx: Math.cos(a) * (o.sp || 300), vy: Math.sin(a) * (o.sp || 300) / 2 }, o)); } };
+  const ring = (n, o, x, y) => { for (let i = 0; i < n; i++) { const a = i * Math.PI * 2 / n + (o.off || 0); (x != null ? shotAt(x, y, a, Object.assign({ vx: Math.cos(a) * (o.sp || 270), vy: Math.sin(a) * (o.sp || 270) / 2 }, o)) : shot(a, Object.assign({ vx: Math.cos(a) * (o.sp || 270), vy: Math.sin(a) * (o.sp || 270) / 2 }, o))); } };
+  const front = (d) => { const a = aim(); return [hero.x + Math.cos(a) * d, clampY(hero.y + Math.sin(a) * d * .5), a]; };
+  const drop = (x, y, what, T, cb) => { fx.push({ k: 'drop', x, y, what, t: 0, T }); later(T, cb); };
+  const SW = 'swing_knife', CR = 'crack';
+  const ARW = { shape: 'arrow', col: ['220,200,160', '255,250,230'] }, FEA = { shape: 'feather', col: ['255,140,60', '255,230,160'] }, SWD = { shape: 'sword', col: ['200,230,255', '255,255,255'] }, FLY = { shape: 'firefly', col: ['200,255,140', '255,255,220'] };
+  const C = { dao: ['rgba(255,170,90,', 'rgba(255,230,160,'], chui: ['rgba(220,170,110,', 'rgba(255,230,190,'], qiang: ['rgba(255,233,168,', 'rgba(255,250,225,'], gd: ['rgba(120,220,170,', 'rgba(220,255,235,'], jian: ['rgba(170,215,255,', 'rgba(240,250,255,'], quan: ['rgba(255,190,140,', 'rgba(255,240,220,'], fan: ['rgba(190,240,230,', 'rgba(250,255,250,'] };
+  const def = (k, w, tier, mot, o) => { add(k, Object.assign({ tier, wu: .5, rc: .35 }, o)); WOFX[k] = w; MOTX[k] = mot; };
+  const WOFX = {}, MOTX = {};
+
+  // ---------- 刀（0）：轻快连斩、月牙刀气 ----------
+  def('tuodao', 0, 1, 'sweep', { name: '拖刀', icon: '拖', color: '#ffb46a', desc: '先退半步，再回身一刀重斩', need: 70, range: 52, half: 1.3,
+    cast() { const a = aim(); hero.x -= Math.cos(a) * 14; later(.14, () => { sweep(a, 1.3, 54, 3.0, 55, C.dao); sfx(SW, hero.x); shake = Math.max(shake, .14); }); } });
+  def('tiaozhan', 0, 1, 'up', { name: '挑斩', icon: '挑', color: '#ffd08a', desc: '往上一挑，把身前的人挑飞', need: 60, range: 46, half: 1.0,
+    cast() { const a = aim(); fx.push({ k: 'arc', x: hero.x, y: hero.y, a0: a, half: 1.0, r: 46 * RM, t: 0, T: .26, color: C.dao }); for (const z of cone(a, 46, 1.0)) HTU(z, 2.2, 20, Math.sign(z.x - hero.x)); sfx(SW, hero.x); } });
+  def('hongji', 0, 3, 'chop', { name: '轰击', icon: '轰', color: '#ffa860', desc: '一刀劈地，冲击波一路往前推', need: 180, beam: true, len: 180,
+    cast() { const a = aim(); for (let i = 1; i <= 5; i++) { const x = hero.x + Math.cos(a) * i * 34, y = clampY(hero.y + Math.sin(a) * i * 17); later(i * .06, () => blast(x, y, 30 + i * 3, 1.5, 40, '255,180,110')); } sfx(CR, hero.x); shake = Math.max(shake, .25); } });
+  def('shuangyue', 0, 3, 'sweep', { name: '双月斩', icon: '双', color: '#c8f0ff', desc: '两道月牙交叉飞出，一路穿透', need: 180, beam: true, len: 180,
+    cast() { const a = aim(); [-.35, .35].forEach(d => { const b = a + d; bolts.push({ x: hero.x, y: hero.y, vx: Math.cos(b) * 300, vy: Math.sin(b) * 150, a: b, t: 0, T: .9, hitSet: [], dmg: 2.4 }); }); sfx(SW, hero.x); } });
+  def('luanwu', 0, 4, 'spin', { name: '乱舞', icon: '舞', color: '#ff8a6a', desc: '原地乱斩三秒，身边的人连连挨刀', need: 70,
+    cast() { for (let i = 0; i < 15; i++) later(i * .2, () => { S.poseOverride = { f: i % 2 ? SK.luanwu.pose[1] : SK.luanwu.pose2, t: .18 }; sweep(Math.random() * 7, 1.6, 62, 1.0, 25, C.dao, { rev: i % 2 }); if (i % 3 === 0) sfx(SW, hero.x); }); } });
+
+  // ---------- 锤（2）：慢、重、砸地 ----------
+  def('lunchui', 2, 1, 'sweep', { name: '抡锤', icon: '抡', color: '#e0b080', desc: '大半圈重扫，把人抡飞', need: 70, range: 60, half: 1.6, wu: .65,
+    cast() { sweep(aim(), 1.6, 60, 2.4, 90, C.chui); sfx(SW, hero.x); shake = Math.max(shake, .15); } });
+  def('zhidao', 2, 1, 'thrust', { name: '直捣', icon: '捣', color: '#d8a878', desc: '锤头往前一捅，前面一排人被撞飞', need: 90, beam: true, len: 90,
+    cast() { lineHit(aim(), 90, 18, 2.2, 110, '230,190,140'); sfx(CR, hero.x); shake = Math.max(shake, .12); } });
+  def('xuanchui', 2, 2, 'spin', { name: '旋锤', icon: '旋', color: '#e8c090', desc: '原地抡三圈，一圈比一圈大', need: 70, wu: .6,
+    cast() { [0, 1, 2].forEach(i => later(i * .22, () => { sweep(i * 2, Math.PI, 46 + i * 16, 1.4, 60, C.chui); sfx(SW, hero.x); })); } });
+  def('dizhen', 2, 2, 'chop', { name: '地震', icon: '震', color: '#d0a070', desc: '砸地后三道裂缝向外放射', need: 150, wu: .65,
+    cast() { const a0 = aim(); [-.5, 0, .5].forEach(d => lineHit(a0 + d, 150, 14, 1.6, 40, '210,160,100')); fx.push({ k: 'ring', x: hero.x, y: hero.y, t: 0, T: .4, r: 40 }); sfx(CR, hero.x); shake = Math.max(shake, .25); } });
+  def('tiaotian', 2, 2, 'up', { name: '挑天锤', icon: '天', color: '#f0c080', desc: '把前方的人全挑上天，落地再受一次伤', need: 70, range: 60, half: 1.1,
+    cast() { const a = aim(); fx.push({ k: 'arc', x: hero.x, y: hero.y, a0: a, half: 1.1, r: 60 * RM, t: 0, T: .3, color: C.chui }); const zz = cone(a, 60, 1.1); for (const z of zz) HTU(z, 1.8, 10, Math.sign(z.x - hero.x)); later(.6, () => { for (const z of zz) if (!z.dead) blast(z.x, z.y, 22, 1.4, 0, '230,190,140'); }); sfx(CR, hero.x); } });
+  def('wanjun', 2, 3, 'chop', { name: '万钧破', icon: '钧', color: '#e8a860', desc: '砸地后周围地面一圈圈接连爆裂', need: 120, wu: .7,
+    cast() { blast(hero.x, hero.y, 50, 2.0, 60, '230,170,100'); for (let i = 0; i < 10; i++) { const a = i * .63, r = 70 + (i % 3) * 28, x = hero.x + Math.cos(a) * r, y = clampY(hero.y + Math.sin(a) * r * .5); later(.15 + i * .06, () => blast(x, y, 28, 1.3, 30, '220,160,90')); } sfx(CR, hero.x); shake = Math.max(shake, .35); } });
+  def('kaishan', 2, 3, 'chop', { name: '开山', icon: '山', color: '#c89060', desc: '前方扇形地面整片塌陷，伤害大并震晕', need: 110, range: 110, half: .8, wu: .75,
+    cast() { const a = aim(); fx.push({ k: 'arc', x: hero.x, y: hero.y, a0: a, half: .8, r: 110 * RM, t: 0, T: .4, color: C.chui }); for (const z of cone(a, 110, .8)) { HT(z, 3.6, 40); stunz(z, 1); } sfx(CR, hero.x); shake = Math.max(shake, .35); } });
+  def('zhichui', 2, 3, 'thrust', { name: '掷锤', icon: '掷', color: '#d8b080', desc: '巨锤扔出去一路碾过，到尽头再滚回来', need: 200, beam: true, len: 200,
+    cast() { const a = aim(), o = { dmg: 2.4, T: .7, shape: 'hammer', col: ['200,150,90', '255,220,170'], vx: Math.cos(a) * 320, vy: Math.sin(a) * 160 }; shot(a, o); later(.7, () => { const x = hero.x + Math.cos(a) * 224, y = clampY(hero.y + Math.sin(a) * 112); shotAt(x, y, a + Math.PI, Object.assign({}, o, { vx: -o.vx, vy: -o.vy })); }); sfx(SW, hero.x); } });
+  def('bengshan', 2, 4, 'chop', { name: '崩山裂地', icon: '崩', color: '#ff9a50', desc: '连砸三下，每下冲击波覆盖半个屏幕', need: 130, wu: .8,
+    cast() { [0, 1, 2].forEach(i => later(i * .35, () => { S.poseOverride = { f: SK.bengshan.pose[1], t: .25 }; fx.push({ k: 'ring', x: hero.x, y: hero.y, t: 0, T: .5, r: 150 }); for (const z of hittable()) if (dist(z, hero) < 150 * RM) HT(z, 2.4, 60); sfx(CR, hero.x); shake = Math.max(shake, .4); })); } });
+  def('leiting', 2, 4, 'up', { name: '雷霆万钧', icon: '霆', color: '#ffd060', desc: '跳起砸下，落点巨大冲击，再震两圈余震', need: 200, none: true, wu: .8,
+    cast() { const [[x, y]] = pts(1, 200); ghost(hero.x, hero.y, x, y, Math.atan2(y - hero.y, x - hero.x), SK.leiting.pose[1], .35);
+      later(.3, () => { blast(x, y, 80, 4.0, 80, '255,210,110'); [1, 2].forEach(i => later(i * .25, () => blast(x, y, 80 + i * 40, 1.2, 30, '255,200,120'))); sfx(CR, x); shake = Math.max(shake, .5); }); } });
+  def('pocheng', 2, 4, 'chop', { name: '破城锤', icon: '城', color: '#ffb070', desc: '巨锤虚影从天砸下，一锤砸出最大一坑', need: 260, none: true, wu: .8,
+    cast() { const [[x, y]] = pts(1, 240); fx.push({ k: 'mark', x, y, r: 90, t: 0, T: .55 }); drop(x, y, 'hammer', .55, () => { blast(x, y, 100, 5.0, 100, '255,190,110'); for (const z of near(x, y, 100 * RM)) stunz(z, 1); ZN({ x, y, r: 70, T: 3, kind: 'pit', dmg: .3 }); sfx(CR, x); shake = Math.max(shake, .6); }); } });
+
+  // ---------- 枪（3）：突、刺、穿 ----------
+  def('luoxuan', 3, 2, 'thrust', { name: '螺旋突', icon: '螺', color: '#ffe0a0', desc: '旋转刺出，刺中的人陷入混乱', need: 120, beam: true, len: 120,
+    cast() { const a = aim(); lineHit(a, 120, 14, 2.4, 20, '255,224,160'); for (const z of hittable()) { const dx = z.x - hero.x, dy = (z.y - hero.y) * 2, al = dx * Math.cos(a) + dy * Math.sin(a), pe = Math.abs(-dx * Math.sin(a) + dy * Math.cos(a)); if (al > -10 && al < 120 * RM && pe < 20) conf(z, 2.5); } sfx(SW, hero.x); } });
+  def('erduan', 3, 2, 'thrust', { name: '二段突', icon: '二', color: '#ffd890', desc: '连刺两段，穿透两排人，各击退一次', need: 150, beam: true, len: 150,
+    cast() { const a = aim(); lineHit(a, 90, 12, 1.8, 80, '255,216,144'); later(.16, () => { S.poseOverride = { f: SK.erduan.pose[1], t: .15 }; lineHit(a, 160, 12, 2.0, 90, '255,240,200'); sfx(SW, hero.x); }); sfx(SW, hero.x); } });
+  def('qianhou', 3, 3, 'thrust', { name: '前后突', icon: '前', color: '#ffe8b0', desc: '枪劲同时刺向身前和身后两条线', need: 140, beam: true, len: 150,
+    cast() { const a = aim(); lineHit(a, 160, 16, 3.0, 60, '255,232,176'); lineHit(a + Math.PI, 160, 16, 3.0, 60, '255,232,176'); sfx(SW, hero.x); shake = Math.max(shake, .15); } });
+  def('sifang', 3, 4, 'spin', { name: '四方突', icon: '四', color: '#fff0c0', desc: '分出四道残影，同时刺向四方', need: 110,
+    cast() { const fr = SK.sifang.pose[1]; for (let i = 0; i < 4; i++) { const a = aim() + i * Math.PI / 2, x1 = hero.x + Math.cos(a) * 150, y1 = clampY(hero.y + Math.sin(a) * 75); ghost(hero.x, hero.y, x1, y1, a, fr, .35); lineHit(a, 170, 18, 3.6, 60, '255,240,192'); } sfx(CR, hero.x); shake = Math.max(shake, .3); } });
+
+  // ---------- 关刀（4）：长、宽、勾、横 ----------
+  def('hengti', 4, 1, 'sweep', { name: '横薙', icon: '薙', color: '#9be0c0', desc: '长柄横扫，身前一大排都挨刀', need: 80, range: 80, half: 1.2, wu: .6,
+    cast() { sweep(aim(), 1.2, 80, 2.2, 50, C.gd); sfx(SW, hero.x); shake = Math.max(shake, .12); } });
+  def('pidao', 4, 1, 'chop', { name: '劈刀', icon: '劈', color: '#8fd8b0', desc: '一刀竖劈，前方一长条', need: 120, beam: true, len: 120,
+    cast() { lineHit(aim(), 120, 20, 2.6, 40, '150,230,190'); sfx(CR, hero.x); shake = Math.max(shake, .12); } });
+  def('xiongshou', 4, 1, 'up', { name: '熊手', icon: '勾', color: '#a8e8c8', desc: '刀背一勾，把前面的人拉到身前再斩', need: 130, beam: true, len: 130,
+    cast() { const a = aim(); fx.push({ k: 'line', x: hero.x, y: hero.y, a, L: 130 * RM, w: 10, t: 0, T: .3, col: '160,230,200' });
+      const zz = hittable().filter(z => { const dx = z.x - hero.x, dy = (z.y - hero.y) * 2, al = dx * Math.cos(a) + dy * Math.sin(a), pe = Math.abs(-dx * Math.sin(a) + dy * Math.cos(a)); return al > 20 && al < 130 * RM && pe < 24; });
+      for (const z of zz) { z.x = hero.x + Math.cos(a) * 30; z.y = clampY(hero.y + Math.sin(a) * 15); HT(z, 1.2, 0); } later(.15, () => sweep(a, 1.0, 50, 2.0, 40, C.gd)); sfx(SW, hero.x); } });
+  def('xuanfengd', 4, 2, 'spin', { name: '旋风', icon: '旋', color: '#80d8b0', desc: '长刀周身大旋两圈，被围时用', need: 70, wu: .6,
+    cast() { [0, 1].forEach(i => later(i * .25, () => { sweep(i * 3, Math.PI, 78, 1.8, 60, C.gd, { rev: i }); sfx(SW, hero.x); })); } });
+  def('daoqi', 4, 2, 'thrust', { name: '刀气', icon: '气', color: '#b0f0d0', desc: '直线飞出一道巨大刀气，一路贯穿', need: 220, beam: true, len: 220,
+    cast() { const a = aim(); bolts.push({ x: hero.x, y: hero.y, vx: Math.cos(a) * 340, vy: Math.sin(a) * 170, a, t: 0, T: .8, hitSet: [], dmg: 3.0, col: ['120,220,170', '230,255,240'], big2: 1 }); sfx(SW, hero.x); } });
+  def('handi', 4, 2, 'chop', { name: '撼地', icon: '撼', color: '#70c8a0', desc: '砸地，震波往前一路推开', need: 160, beam: true, len: 160,
+    cast() { const a = aim(); for (let i = 1; i <= 4; i++) { const x = hero.x + Math.cos(a) * i * 40, y = clampY(hero.y + Math.sin(a) * i * 20); later(i * .08, () => blast(x, y, 34, 1.4, 70, '140,220,180')); } sfx(CR, hero.x); shake = Math.max(shake, .2); } });
+  def('yanyue', 4, 3, 'sweep', { name: '偃月斩', icon: '偃', color: '#a0f0d0', desc: '月牙刀气往前推，越推越大', need: 220, beam: true, len: 220,
+    cast() { const a = aim(); for (let i = 1; i <= 6; i++) later(i * .07, () => { const x = hero.x + Math.cos(a) * i * 36, y = clampY(hero.y + Math.sin(a) * i * 18); fx.push({ k: 'arc', x, y, a0: a, half: .9, r: (20 + i * 8) * RM, t: 0, T: .25, color: C.gd }); for (const z of near(x, y, (20 + i * 8) * RM)) if (!(z.yyT > W.t)) { z.yyT = W.t + .5; HT(z, 1.6, 40); } }); sfx(SW, hero.x); } });
+  def('tuodaoji', 4, 3, 'up', { name: '拖刀计', icon: '计', color: '#c0ffe0', desc: '佯退一步，回身向上反撩一刀，伤害极高', need: 90, range: 70, half: 1.0,
+    cast() { const a = aim(); hero.x -= Math.cos(a) * 20; later(.2, () => { S.poseOverride = { f: SK.tuodaoji.pose[1], t: .25 }; fx.push({ k: 'arc', x: hero.x, y: hero.y, a0: a, half: 1.0, r: 80 * RM, t: 0, T: .3, color: C.gd }); for (const z of cone(a, 80, 1.0)) HTU(z, 4.5, 30, Math.sign(z.x - hero.x)); sfx(CR, hero.x); shake = Math.max(shake, .25); }); } });
+  def('zhanjiang', 4, 3, 'chop', { name: '斩将', icon: '斩', color: '#e0fff0', desc: '对准最近的敌将一刀重斩（优先首领）', need: 200,
+    cast() { const zz = hittable().filter(z => dist(z, hero) < 200 * RM); const t = zz.sort((p, q) => (tough(q) ? 1 : 0) - (tough(p) ? 1 : 0) || dist(p, hero) - dist(q, hero))[0]; if (!t) return;
+      fx.push({ k: 'bolt', x: t.x, y: t.y, t: 0, T: .3 }); blast(t.x, t.y, 30, 5.5, 60, '200,255,230'); sfx(CR, t.x); shake = Math.max(shake, .3); } });
+  def('guowu', 4, 4, 'thrust', { name: '过五关', icon: '关', color: '#d0ffe8', desc: '分出残影，一路连斩五个不同的敌人', need: 200,
+    cast() { const g = { x: hero.x, y: hero.y }, hit = [], fr = SK.guowu.pose[1]; for (let i = 0; i < 5; i++) later(i * .18, () => { let t = null, bd = 260; for (const z of hittable()) { if (hit.includes(z)) continue; const d = Math.hypot(z.x - g.x, (z.y - g.y) * 2); if (d < bd) { bd = d; t = z; } } if (!t) return; hit.push(t);
+      const a = Math.atan2((t.y - g.y) * 2, t.x - g.x); ghost(g.x, g.y, t.x, t.y, a, fr, .3); lineHit(a, bd / RM + 20, 14, 2.4, 40, '200,255,230', g.x, g.y); blast(t.x, t.y, 40, 1.6, 30, '160,240,200'); g.x = t.x; g.y = t.y; sfx(SW, g.x); }); } });
+  def('shuiyan', 4, 4, 'sweep', { name: '水淹七军', icon: '水', color: '#80c0ff', desc: '一刀劈出大浪往前推，把敌人卷着走', need: 260, beam: true, len: 260,
+    cast() { const a = aim(); ZN({ x: hero.x + Math.cos(a) * 30, y: hero.y + Math.sin(a) * 15, vx: Math.cos(a) * 200, vy: Math.sin(a) * 100, r: 60, T: 1.4, dmg: 1.4, kind: 'wave', push: 1 }); sfx(CR, hero.x); shake = Math.max(shake, .3); } });
+  def('qinglong', 4, 4, 'up', { name: '青龙偃月', icon: '龙', color: '#60e0a0', desc: '青龙刀气从地面腾起，绕全场盘旋一圈', need: 120,
+    cast() { const N = 22; for (let i = 0; i < N; i++) later(i * .07, () => { const q = i / N, r = 60 + q * 180, a = aim() + q * Math.PI * 2.2, x = hero.x + Math.cos(a) * r, y = clampY(hero.y + Math.sin(a) * r * .5); blast(x, y, 34, 1.4, 30, '110,230,160'); }); sfx(CR, hero.x); shake = Math.max(shake, .3); } });
+
+  // ---------- 弓（5）：齐射、贯穿、火矢、天降 ----------
+  def('qishe', 5, 1, 'sweep', { name: '齐射', icon: '齐', color: '#e8d8a8', desc: '扇形一次射出五箭', need: 200,
+    cast() { fan(aim(), 5, .7, Object.assign({ dmg: 1.4, T: .7, sp: 360 }, ARW)); sfx(SW, hero.x); } });
+  def('lianzhu', 5, 1, 'thrust', { name: '连珠箭', icon: '珠', color: '#f0e0b0', desc: '直线连射三箭', need: 220, beam: true, len: 220,
+    cast() { [0, 1, 2].forEach(i => later(i * .1, () => { const a = aim(); shot(a, Object.assign({ dmg: 1.6, T: .7, vx: Math.cos(a) * 420, vy: Math.sin(a) * 210 }, ARW)); })); sfx(SW, hero.x); } });
+  def('huoshi', 5, 1, 'chop', { name: '火矢', icon: '矢', color: '#ff9a50', desc: '火箭射地起火，火里的人走不动', need: 220, none: true,
+    cast() { pts(2, 220).forEach(([x, y]) => { fx.push({ k: 'mark', x, y, r: 30, t: 0, T: .4 }); later(.4, () => { blast(x, y, 26, 1.4, 10, '255,150,60'); ZN({ x, y, r: 32, T: 2.5, dmg: .45, kind: 'fire', slow: 1 }); }); }); sfx(SW, hero.x); } });
+  def('guanri', 5, 2, 'thrust', { name: '贯日', icon: '贯', color: '#fff0a0', desc: '一箭贯穿全屏', need: 320, beam: true, len: 320,
+    cast() { const a = aim(); lineHit(a, 360, 10, 3.2, 30, '255,240,160'); sfx(CR, hero.x); shake = Math.max(shake, .15); } });
+  def('liannu', 5, 2, 'thrust', { name: '连弩', icon: '弩', color: '#e0d0a0', desc: '快速连射十二箭，扎向最近的敌人', need: 220,
+    cast() { for (let i = 0; i < 12; i++) later(i * .06, () => { const a = aim() + R(-.08, .08); shot(a, Object.assign({ dmg: .8, T: .7, vx: Math.cos(a) * 440, vy: Math.sin(a) * 220 }, ARW)); }); sfx(SW, hero.x); } });
+  def('xuanshe', 5, 2, 'spin', { name: '旋射', icon: '旋', color: '#f0e0c0', desc: '转身一圈，环射十二箭', need: 120,
+    cast() { ring(12, Object.assign({ dmg: 1.2, T: .6, sp: 330 }, ARW)); sfx(SW, hero.x); } });
+  def('zhuihun', 5, 3, 'thrust', { name: '追魂箭', icon: '魂', color: '#c0a0ff', desc: '五支箭各自追最近的敌人', need: 260,
+    cast() { const a0 = aim(); for (let i = 0; i < 5; i++) { const a = a0 - .8 + i * .4; shot(a, Object.assign({ dmg: 2.0, T: 1.5, home: 1, vx: Math.cos(a) * 260, vy: Math.sin(a) * 130 }, ARW, { col: ['190,160,255', '240,230,255'] })); } sfx(SW, hero.x); } });
+  def('luoyue', 5, 3, 'up', { name: '落月', icon: '月', color: '#d0e0ff', desc: '一排箭沿直线依次落下', need: 260, beam: true, len: 260,
+    cast() { const a = aim(); for (let i = 1; i <= 8; i++) { const x = hero.x + Math.cos(a) * i * 32, y = clampY(hero.y + Math.sin(a) * i * 16); fx.push({ k: 'mark', x, y, r: 24, t: 0, T: .35 + i * .05 }); later(.35 + i * .05, () => { drop(x, y, 'arrow', .01, () => {}); blast(x, y, 26, 1.6, 15, '220,230,255'); }); } sfx(SW, hero.x); } });
+  def('wanjian', 5, 4, 'up', { name: '万箭齐发', icon: '万', color: '#fff0c0', desc: '三秒内全屏密集落箭', need: 300, none: true,
+    cast() { for (let i = 0; i < 30; i++) later(i * .1, () => { const [[x, y]] = pts(1, 300); later(.2, () => blast(x, y, 22, 1.3, 10, '240,230,190')); fx.push({ k: 'mark', x, y, r: 20, t: 0, T: .2 }); }); sfx(SW, hero.x); } });
+  def('dianguang', 5, 4, 'thrust', { name: '电光', icon: '电', color: '#c0e0ff', desc: '闪电箭在敌人之间连锁十次', need: 240,
+    cast() { chain(10, 200, 2.0, '190,225,255', .05); sfx(CR, hero.x); shake = Math.max(shake, .15); } });
+  def('luori', 5, 4, 'up', { name: '落日', icon: '日', color: '#ff7040', desc: '巨箭从天坠下，大爆炸后留下一片火地', need: 280, none: true,
+    cast() { const [[x, y]] = pts(1, 260); fx.push({ k: 'mark', x, y, r: 90, t: 0, T: .6 }); drop(x, y, 'arrow', .6, () => { blast(x, y, 95, 4.5, 80, '255,140,60'); ZN({ x, y, r: 80, T: 3, dmg: .6, kind: 'fire' }); sfx(CR, x); shake = Math.max(shake, .5); }); } });
+
+  // ---------- 石子（7）补：炬石 ----------
+  def('jushi', 7, 4, 'up', { name: '炬石', icon: '炬', color: '#ff8a40', desc: '三块燃烧巨石砸下，留下一片火地', need: 280, none: true,
+    cast() { pts(3, 260).forEach(([x, y], i) => { fx.push({ k: 'mark', x, y, r: 56, t: 0, T: .55 + i * .2 }); drop(x, y, 'rock', .55 + i * .2, () => { blast(x, y, 60, 3.4, 50, '255,140,60'); ZN({ x, y, r: 50, T: 3, dmg: .55, kind: 'fire' }); sfx(CR, x); shake = Math.max(shake, .35); }); }); } });
+
+  // ---------- 黄符（8）补：妖术 ----------
+  def('yaoshu', 8, 3, 'sweep', { name: '妖术', icon: '妖', color: '#d08aff', desc: '妖风扇面，里面的人陷入混乱、互相误伤', need: 160, range: 160, half: .7,
+    cast() { const a = aim(); fx.push({ k: 'arc', x: hero.x, y: hero.y, a0: a, half: .7, r: 160 * RM, t: 0, T: .45, color: ['rgba(200,120,255,', 'rgba(240,210,255,'] }); for (const z of cone(a, 160, .7)) { HT(z, 1.0, 0); conf(z, 4); } sfx(CR, hero.x); } });
+
+  // ---------- 羽扇（9）：风、火、迷、阵 ----------
+  def('shanfeng', 9, 1, 'sweep', { name: '扇风', icon: '风', color: '#c8f0e8', desc: '扇出一道风墙往前推，把人推开', need: 120, beam: true, len: 120,
+    cast() { const a = aim(); ZN({ x: hero.x, y: hero.y, vx: Math.cos(a) * 240, vy: Math.sin(a) * 120, r: 46, T: .7, dmg: .9, kind: 'wave', push: 1, col: '200,240,230' }); sfx(SW, hero.x); } });
+  def('liuying', 9, 1, 'thrust', { name: '流萤', icon: '萤', color: '#d0ff90', desc: '五点萤火自己去找人', need: 240,
+    cast() { const a0 = aim(); for (let i = 0; i < 5; i++) { const a = a0 + R(-1.5, 1.5); shot(a, Object.assign({ dmg: 1.4, T: 2, home: 1, vx: Math.cos(a) * 160, vy: Math.sin(a) * 80 }, FLY)); } sfx(SW, hero.x); } });
+  def('longjuan', 9, 2, 'spin', { name: '龙卷', icon: '卷', color: '#b0e8ff', desc: '放出一股往前走的龙卷风，把人卷进去', need: 200, beam: true, len: 200,
+    cast() { const a = aim(); ZN({ x: hero.x + Math.cos(a) * 30, y: hero.y + Math.sin(a) * 15, vx: Math.cos(a) * 80, vy: Math.sin(a) * 40, r: 52, T: 2.8, dmg: .8, kind: 'wind', pull: 2.5 }); sfx(SW, hero.x); } });
+  def('mihun', 9, 2, 'sweep', { name: '迷魂', icon: '迷', color: '#e0b0ff', desc: '扇面迷香，里面的人陷入混乱', need: 140, range: 140, half: .8,
+    cast() { const a = aim(); fx.push({ k: 'arc', x: hero.x, y: hero.y, a0: a, half: .8, r: 140 * RM, t: 0, T: .45, color: ['rgba(220,170,255,', 'rgba(250,235,255,'] }); for (const z of cone(a, 140, .8)) { HT(z, .6, 0); conf(z, 3); } sfx(SW, hero.x); } });
+  def('shuangxue', 9, 2, 'sweep', { name: '霜雪', icon: '霜', color: '#d8f0ff', desc: '扇出寒气，扇面里的人冻得走不动', need: 150, range: 150, half: .8,
+    cast() { const a = aim(), [x, y] = front(70); fx.push({ k: 'arc', x: hero.x, y: hero.y, a0: a, half: .8, r: 150 * RM, t: 0, T: .45, color: ['rgba(200,235,255,', 'rgba(255,255,255,'] }); for (const z of cone(a, 150, .8)) HT(z, 1.2, 10); ZN({ x, y, r: 70, T: 3, dmg: .3, kind: 'frost' }); sfx(SW, hero.x); } });
+  def('lianying', 9, 3, 'sweep', { name: '火烧连营', icon: '营', color: '#ff7a3c', desc: '一排火墙往前推进', need: 220, beam: true, len: 220,
+    cast() { const a = aim(), p = a + Math.PI / 2; for (let j = -2; j <= 2; j++) ZN({ x: hero.x + Math.cos(p) * j * 30 + Math.cos(a) * 30, y: hero.y + Math.sin(p) * j * 15 + Math.sin(a) * 15, vx: Math.cos(a) * 110, vy: Math.sin(a) * 55, r: 26, T: 2.2, dmg: .7, kind: 'fire' }); sfx(CR, hero.x); } });
+  def('bazhen', 9, 3, 'spin', { name: '八阵图', icon: '阵', color: '#f0e0a0', desc: '身周八个阵点轮流爆开', need: 100,
+    cast() { for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4, x = hero.x + Math.cos(a) * 80, y = hero.y + Math.sin(a) * 40; fx.push({ k: 'mark', x, y, r: 26, t: 0, T: .2 + i * .1 }); later(.2 + i * .1, () => blast(x, y, 32, 1.8, 40, '240,224,160')); } sfx(CR, hero.x); } });
+  def('huoyu', 9, 3, 'thrust', { name: '火羽', icon: '羽', color: '#ff9050', desc: '扇出一排火羽追击，打中就起火', need: 220,
+    cast() { fan(aim(), 7, 1.0, Object.assign({ dmg: 1.4, T: 1.3, home: 1, sp: 230, onHit: z => ZN({ x: z.x, y: z.y, r: 20, T: 1.5, dmg: .35, kind: 'fire' }) }, FEA)); sfx(SW, hero.x); } });
+  def('dongfeng', 9, 4, 'up', { name: '借东风', icon: '东', color: '#a0f0ff', desc: '全场大风四秒：火更大、伤害翻倍，敌人被吹退', need: 200, none: true,
+    cast() { S.windT = 4; S.windA = hero.f > 0 ? 0 : Math.PI; for (const zn of zones) if (zn.kind === 'fire') { zn.r *= 1.6; zn.dmg *= 2; zn.T += 2; } for (let i = 0; i < 4; i++) { const [[x, y]] = pts(1, 220); ZN({ x, y, r: 34, T: 4, dmg: .6, kind: 'fire' }); } sfx(SW, hero.x); shake = Math.max(shake, .2); } });
+  def('chibi', 9, 4, 'sweep', { name: '火烧赤壁', icon: '赤', color: '#ff5030', desc: '巨大火浪横扫全屏，留下大片火地', need: 260, none: true,
+    cast() { const a = aim(); ZN({ x: hero.x, y: hero.y, vx: Math.cos(a) * 260, vy: Math.sin(a) * 130, r: 90, T: 1.4, dmg: 1.6, kind: 'wave', col: '255,110,50', trailFire: 1 }); sfx(CR, hero.x); shake = Math.max(shake, .35); } });
+  def('qimen', 9, 4, 'spin', { name: '奇门遁甲', icon: '奇', color: '#fff0b0', desc: '身周展开旋转八卦阵五秒，把人吸进来持续伤害', need: 110,
+    cast() { ZN({ follow: 1, r: 110, T: 5, dmg: 1.0, kind: 'bagua', pull: 1.2 }); sfx(CR, hero.x); } });
+
+  // ---------- 剑（1）：快刺、飞剑、剑气 ----------
+  def('jlianci', 1, 1, 'thrust', { name: '连刺', icon: '刺', color: '#c0e0ff', desc: '三连快刺', need: 90, beam: true, len: 90, wu: .4,
+    cast() { [0, 1, 2].forEach(i => later(i * .1, () => { if (i) S.poseOverride = { f: i % 2 ? SK.jlianci.pose2 : SK.jlianci.pose[1], t: .1 }; lineHit(aim(), 90, 8, 1.1, 12, '200,230,255'); sfx(SW, hero.x); })); } });
+  def('zhantie', 1, 1, 'chop', { name: '斩铁', icon: '铁', color: '#e0f0ff', desc: '一剑重斩，伤害很高', need: 60, range: 50, half: .9, wu: .6,
+    cast() { sweep(aim(), .9, 54, 3.4, 40, C.jian); sfx(CR, hero.x); shake = Math.max(shake, .15); } });
+  def('jianqi', 1, 1, 'thrust', { name: '剑气', icon: '气', color: '#b0d8ff', desc: '直线飞出一道剑气，一路穿透', need: 200, beam: true, len: 200,
+    cast() { const a = aim(); shot(a, Object.assign({ dmg: 2.2, T: .7, vx: Math.cos(a) * 380, vy: Math.sin(a) * 190 }, SWD)); sfx(SW, hero.x); } });
+  def('liefeng', 1, 2, 'sweep', { name: '烈风', icon: '烈', color: '#d0f0ff', desc: '剑风扇面，把人一路吹开', need: 120, range: 120, half: 1.0,
+    cast() { const a = aim(); fx.push({ k: 'arc', x: hero.x, y: hero.y, a0: a, half: 1.0, r: 120 * RM, t: 0, T: .35, color: C.jian }); for (const z of cone(a, 120, 1.0)) HT(z, 1.8, 120); sfx(SW, hero.x); } });
+  def('feijian', 1, 2, 'thrust', { name: '飞剑', icon: '飞', color: '#a0d0ff', desc: '放出一柄飞剑，自己追着敌人连砍', need: 240,
+    cast() { const a = aim(); shot(a, Object.assign({ dmg: 1.6, T: 2.2, home: 1, multi: 3, vx: Math.cos(a) * 240, vy: Math.sin(a) * 120 }, SWD)); sfx(SW, hero.x); } });
+  def('jianzhen', 1, 3, 'up', { name: '剑阵', icon: '阵', color: '#c8e8ff', desc: '地上插下六把剑围成一圈，三秒后一齐爆发', need: 160, none: true,
+    cast() { const [[x, y]] = pts(1, 160); ZN({ x, y, r: 70, T: 2, dmg: .5, kind: 'swords', slow: 1 }); later(2, () => { blast(x, y, 80, 3.4, 60, '200,230,255'); for (let i = 0; i < 6; i++) { const b = i * Math.PI / 3; shotAt(x + Math.cos(b) * 60, y + Math.sin(b) * 30, b, Object.assign({ dmg: 1.2, T: .4 }, SWD)); } sfx(CR, x); shake = Math.max(shake, .25); }); } });
+  def('xinjian', 1, 3, 'thrust', { name: '心剑', icon: '心', color: '#ffb0c0', desc: '两把飞剑自己找人砍，消失时炸出旋转火石', need: 240,
+    cast() { [-1, 1].forEach(s => { const a = aim() + s * .8; shot(a, Object.assign({ dmg: 1.6, T: 2.6, home: 1, multi: 4, vx: Math.cos(a) * 230, vy: Math.sin(a) * 115, onEnd: b => ring(6, { dmg: 1.0, T: .45, shape: 'ember', col: ['255,150,60', '255,230,150'] }, b.x, b.y) }, SWD, { col: ['255,170,190', '255,240,245'] })); }); sfx(SW, hero.x); } });
+  def('jinghong', 1, 3, 'thrust', { name: '惊虹', icon: '虹', color: '#ffffff', desc: '剑气凝成一点，直线贯穿全屏', need: 340, beam: true, len: 340, wu: .7,
+    cast() { const a = aim(); lineHit(a, 380, 14, 5.0, 40, '255,255,255'); sfx(CR, hero.x); shake = Math.max(shake, .25); } });
+  def('yujian', 1, 4, 'spin', { name: '御剑', icon: '御', color: '#c0e8ff', desc: '十二柄飞剑环绕五秒，不停射向敌人', need: 220,
+    cast() { ZN({ follow: 1, r: 56, T: 5, dmg: .8, kind: 'orbit', col: '220,240,255', n: 6, sword: 1 }); for (let i = 0; i < 12; i++) later(.4 + i * .38, () => { const t = nearest(240); if (!t) return; const a = Math.atan2((t.y - hero.y) * 2, t.x - hero.x); shot(a, Object.assign({ dmg: 1.6, T: .8, vx: Math.cos(a) * 400, vy: Math.sin(a) * 200 }, SWD)); }); sfx(SW, hero.x); } });
+  def('tianjian', 1, 4, 'chop', { name: '天剑', icon: '天', color: '#ffffd0', desc: '巨剑从天插入敌阵，引下数道落雷', need: 260, none: true,
+    cast() { const [[x, y]] = pts(1, 240); fx.push({ k: 'mark', x, y, r: 80, t: 0, T: .5 }); drop(x, y, 'sword', .5, () => { blast(x, y, 80, 4.2, 70, '255,255,210'); for (let i = 0; i < 5; i++) later(.15 + i * .12, () => { const b = Math.random() * 7, r = Math.random() * 90, px = x + Math.cos(b) * r, py = y + Math.sin(b) * r * .5; fx.push({ k: 'bolt', x: px, y: py, t: 0, T: .3 }); blast(px, py, 26, 1.6, 20, '220,230,255'); }); sfx(CR, x); shake = Math.max(shake, .45); }); } });
+  def('jianlun', 1, 4, 'spin', { name: '剑轮', icon: '轮', color: '#e0f0ff', desc: '剑气化成光轮向四周飞散，飞远了再飞回', need: 140,
+    cast() { [0, .2].forEach((off, k) => later(k * .25, () => ring(8, Object.assign({ dmg: 1.8, T: 1.1, sp: 280, off, ret: 1 }, SWD, { shape: 'wheel' })))); sfx(SW, hero.x); } });
+
+  // ---------- 拳（10）：拳风、腿法、吼 ----------
+  def('chongquan', 10, 1, 'thrust', { name: '冲拳', icon: '拳', color: '#ffd0a0', desc: '一拳打出，拳风直线飞出去', need: 150, beam: true, len: 150, wu: .35,
+    cast() { const a = aim(); shot(a, { dmg: 2.0, T: .5, vx: Math.cos(a) * 360, vy: Math.sin(a) * 180, shape: 'fist', col: ['255,200,150', '255,245,230'] }); sfx(SW, hero.x); } });
+  def('saotui', 10, 1, 'sweep', { name: '扫腿', icon: '扫', color: '#f0c090', desc: '低身扫腿，身前一片绊倒', need: 60, range: 56, half: 1.5,
+    cast() { const a = aim(); sweep(a, 1.5, 56, 1.6, 20, C.quan); for (const z of cone(a, 56, 1.5)) stunz(z, .5); sfx(SW, hero.x); } });
+  def('shanggou', 10, 1, 'up', { name: '上勾拳', icon: '勾', color: '#ffb080', desc: '一记上勾拳，把身前的人打上天', need: 50, range: 44, half: .9, wu: .4,
+    cast() { const a = aim(); fx.push({ k: 'arc', x: hero.x, y: hero.y, a0: a, half: .9, r: 44 * RM, t: 0, T: .25, color: C.quan }); for (const z of cone(a, 44, .9)) HTU(z, 2.6, 20, Math.sign(z.x - hero.x)); sfx(CR, hero.x); } });
+  def('xuanfengtui', 10, 2, 'spin', { name: '旋风腿', icon: '旋', color: '#ffc890', desc: '原地旋踢两圈，把人踢飞', need: 60,
+    cast() { [0, 1].forEach(i => later(i * .2, () => { sweep(i * 3, Math.PI, 56, 1.5, 90, C.quan, { rev: i }); sfx(SW, hero.x); })); } });
+  def('tieshan', 10, 2, 'thrust', { name: '铁山靠', icon: '靠', color: '#e0a070', desc: '往前一撞，撞穿一排，被撞的人吓得溃散', need: 110, beam: true, len: 110,
+    cast() { const a = aim(), L = 90; ghost(hero.x, hero.y, hero.x + Math.cos(a) * L, clampY(hero.y + Math.sin(a) * L * .5), a, SK.tieshan.pose[1], .25);
+      for (const z of hittable()) { const dx = z.x - hero.x, dy = (z.y - hero.y) * 2, al = dx * Math.cos(a) + dy * Math.sin(a), pe = Math.abs(-dx * Math.sin(a) + dy * Math.cos(a)); if (al > -10 && al < 110 * RM && pe < 26) { HT(z, 2.0, 110); rout(z, 2.5); } }
+      hero.x += Math.cos(a) * L * .6; hero.y = clampY(hero.y + Math.sin(a) * L * .3); sfx(CR, hero.x); shake = Math.max(shake, .2); } });
+  def('dahe', 10, 2, 'chop', { name: '大喝', icon: '喝', color: '#ffe0a0', desc: '一声怒吼，身边一圈人被震住', need: 70, ring: true, range: 80,
+    cast() { fx.push({ k: 'ring', x: hero.x, y: hero.y, t: 0, T: .4, r: 80 }); for (const z of hittable()) if (dist(z, hero) < 84 * RM) { HT(z, .8, 30); stunz(z, 1.2); } floaters.push({ x: hero.x, y: hero.y - 80, t: 0, txt: '喝！', color: '#ffe08a', big: 1 }); sfx(CR, hero.x); shake = Math.max(shake, .25); } });
+  def('lianhuan', 10, 3, 'thrust', { name: '连环拳', icon: '连', color: '#ffd8b0', desc: '前方连打十二拳，拳影密集', need: 90, beam: true, len: 90,
+    cast() { for (let i = 0; i < 12; i++) later(i * .06, () => { S.poseOverride = { f: i % 2 ? SK.lianhuan.pose[1] : SK.lianhuan.pose[0], t: .06 }; lineHit(aim() + R(-.2, .2), 90, 12, .7, 10, '255,216,176'); if (i % 3 === 0) sfx(SW, hero.x); }); } });
+  def('jingang', 10, 3, 'chop', { name: '金刚掌', icon: '掌', color: '#ffd060', desc: '一个巨大掌印从天上拍下', need: 200, none: true,
+    cast() { const [[x, y]] = pts(1, 200); fx.push({ k: 'mark', x, y, r: 64, t: 0, T: .45 }); drop(x, y, 'palm', .45, () => { blast(x, y, 66, 3.8, 60, '255,210,100'); for (const z of near(x, y, 66 * RM)) stunz(z, .8); sfx(CR, x); shake = Math.max(shake, .4); }); } });
+  def('huxiao', 10, 3, 'thrust', { name: '虎啸', icon: '虎', color: '#ffb040', desc: '吼出一道猛虎冲击波，直线推出去，被冲到的人溃散', need: 220, beam: true, len: 220,
+    cast() { const a = aim(); ZN({ x: hero.x + Math.cos(a) * 20, y: hero.y + Math.sin(a) * 10, vx: Math.cos(a) * 280, vy: Math.sin(a) * 140, r: 44, T: .9, dmg: 1.6, kind: 'wave', push: 1, col: '255,190,80', routs: 1 }); sfx(CR, hero.x); shake = Math.max(shake, .2); } });
+  def('qluanwu', 10, 4, 'spin', { name: '乱舞', icon: '乱', color: '#ff9060', desc: '冲进敌群乱打三秒', need: 160,
+    cast() { for (let i = 0; i < 12; i++) later(i * .25, () => { const t = nearest(170); if (t) { const a = Math.atan2((t.y - hero.y) * 2, t.x - hero.x); ghost(hero.x, hero.y, t.x, t.y, a, SK.qluanwu.pose[1], .2); hero.x += (t.x - hero.x) * .6; hero.y = clampY(hero.y + (t.y - hero.y) * .6); } sweep(Math.random() * 7, Math.PI, 52, 1.4, 50, C.quan); if (i % 2) sfx(SW, hero.x); }); } });
+  def('baji', 10, 4, 'chop', { name: '八极崩', icon: '崩', color: '#ffc060', desc: '一跺脚，全屏震荡，敌人全部浮空', need: 200, none: true, wu: .8,
+    cast() { fx.push({ k: 'ring', x: hero.x, y: hero.y, t: 0, T: .6, r: 300 }); for (const z of hittable()) if (dist(z, hero) < 300 * RM) HTU(z, 2.8, 20, Math.sign(z.x - hero.x)); sfx(CR, hero.x); shake = Math.max(shake, .5); } });
+  def('fengjuan', 10, 4, 'spin', { name: '风卷残云', icon: '云', color: '#ffe0c0', desc: '身周拳风卷成龙卷五秒，卷进来的人被连打', need: 100,
+    cast() { ZN({ follow: 1, r: 90, T: 5, dmg: 1.1, kind: 'wind', pull: 1.5 }); sfx(SW, hero.x); } });
+
+  // ---------- 改名、改阶、下架（11/13 全部重做） ----------
+  { const R2 = (k, o) => Object.assign(SK[k], o);
+    R2('daobo', { name: '半月斩', icon: '月', desc: '劈出月牙刀气，一路穿透' }); R2('qiang', { name: '突出', desc: '一枪刺出，把人刺退一大段', cast() { lineHit(aim(), 110, 10, 2.6, 110, '255,233,168'); sfx(SW, hero.x); shake = Math.max(shake, .08); } });
+    R2('bainiao', { name: '暴雨', icon: '雨', desc: '枪如暴雨，扇面连出十八枪' }); R2('lihua', { name: '旋枪', icon: '旋', desc: '长枪回旋一圈，枪花四散' }); R2('shici', { name: '突石', desc: '石柱从地面一路破土而出' });
+    R2('tianlei', { name: '天雷牢', icon: '牢', desc: '雷阵困住里面的人，出不去还挨雷', cast() { const [[x, y]] = pts(1, 200); ZN({ x, y, r: 80, T: 3.5, dmg: 1.6, kind: 'thunder', cage: 1 }); sfx(CR, x); } });
+    R2('sixiang', { name: '八方剑光', icon: '八', desc: '八个方向各飞出一道剑气', cast() { ring(8, Object.assign({ dmg: 1.8, T: .7, sp: 330 }, SWD)); sfx(SW, hero.x); } });
+    const TI = { hengsao: 1, tuodao: 1, tiaozhan: 1, daobo: 2, lianzhan: 2, huima: 2, feilunren: 3, wanren: 4, tianbeng: 4, zhendi: 1, qiang: 1, lianci: 1, lansao: 1, huimaq: 2, bainiao: 3, lihua: 3, qijin: 4, longyin: 4,
+      feishi: 1, sashi: 1, zashi: 1, tiaoshi: 2, paoshi: 2, raoshen: 2, luoshi: 3, shici: 3, feihuang: 3, luanshi: 4, gunshi: 4, jianyu: 3, huogong: 1, pili: 1, huofu: 1, feifu: 1, dingshen: 2, zhangxin: 2, wulei: 2, sadou: 3, tianlei: 3, jiutian: 4, huangtian: 4, taiping: 4, sixiang: 2 };
+    for (const k in TI) SK[k].tier = TI[k];
+    for (const k of ['daolun', 'xuanfeng', 'liedihuan', 'dilie', 'shuanghuan', 'xuehe', 'chong', 'tiaoqiang', 'touqiang', 'qianglin', 'xuanshi', 'fuhuo']) SK[k].off = true; }
   // ---------- 出身（开局配置里选；起手只有 1 个武艺） ----------
   const ORIGINS = {
     nongfu: { name: '农夫', tag: '刀 · 锤', wep: 0, weps: [0, 2], skill: 'hengsao', desc: '庄稼汉，挨得住打。受到伤害 -20%；刀、锤武艺 ×1.2', take: .8, oa: [5, 4, 2, 1, 1, 2, 1, 3], at: [6, 4, 2, 2, 3, 2] },
@@ -616,8 +828,9 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   // 11/12 用户定：刀一共 13 招（黄：横扫 连斩 刀波 / 玄：回马刀 刀轮 回旋斩 / 地：裂地环 地裂波 双环击飞 / 天：天崩地裂 飞轮刃 血河斩 万刃归宗），任何出身都能捡、能买，出刀时就是刀的帧，只是出身的短兵属性决定威力（农夫 ×1.18、书生 ×0.73）
   //   原本归剑/锤/关刀的连斩、地裂波、双环击飞、天崩地裂、回旋斩、血河斩、万刃归宗改归刀；四象剑气、震地不在名单里，留给以后的剑、锤
   const WOF = { hengsao: 0, daobo: 0, huima: 0, daolun: 0, lianzhan: 0, wanren: 0, dilie: 0, shuanghuan: 0, tianbeng: 0, xuanfeng: 0, xuehe: 0, liedihuan: 0, feilunren: 0, sixiang: 1, zhendi: 2, qiang: 3, chong: 3, lianci: 3, lansao: 3, tiaoqiang: 3, lihua: 3, touqiang: 3, huimaq: 3, qianglin: 3, bainiao: 3, qijin: 3, longyin: 3, jianyu: 5, huogong: 9, pili: 8, feishi: 7, sashi: 7, zashi: 7, tiaoshi: 7, xuanshi: 7, paoshi: 7, luoshi: 7, shici: 7, raoshen: 7, luanshi: 7, feihuang: 7, gunshi: 7, huofu: 8, feifu: 8, dingshen: 8, zhangxin: 8, wulei: 8, sadou: 8, tianlei: 8, fuhuo: 8, jiutian: 8, huangtian: 8, taiping: 8 };
+  Object.assign(WOF, WOFX);
   const wepOf = k => WOF[k] != null ? WOF[k] : 0;
-  const ONLY_DAO = true; const WEP_ON = [0, 3, 7, 8]; const wepOk = k => WEP_ON.includes(wepOf(k));   // 11/13：刀、枪、石子、黄符的招式做好了   // 11/12：刀、枪都有美术了   // 用户定 11/10：目前只有刀的美术，武艺奖励只出刀系；其他武器等美术补齐再开
+  const ONLY_DAO = true; const WEP_ON = [0, 1, 2, 3, 4, 5, 7, 8, 9, 10]; const wepOk = k => WEP_ON.includes(wepOf(k));   // 11/13：刀、枪、石子、黄符的招式做好了   // 11/12：刀、枪都有美术了   // 用户定 11/10：目前只有刀的美术，武艺奖励只出刀系；其他武器等美术补齐再开
   const catOf = k => WEPCAT[wepOf(k)];
   // 武艺姿势：主角固定空手，放招时按这一招的兵器举起对应的施招帧（第 1 帧蓄力，第 2 帧出手，更多帧给第二刀和收势）
   // FRW 下标同 WEPN：[帧名前缀, 帧数]；法术暂按武艺配法器，之后改成按装备的法器
@@ -633,6 +846,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   // 11/12 新图集：每种兵器 20 帧，统一命名 前缀 + idle/walk1-3/roll1-4/hurt/down/chop1-2/sweep1-2/thrust1-2/spin1-2/up1-2
   const FRM0 = p => ({ chop: [p + 'chop1', p + 'chop2', p + 'chop2'], sweep: [p + 'sweep1', p + 'sweep2', p + 'sweep1'], thrust: [p + 'thrust1', p + 'thrust2', p + 'thrust1'], spin: [p + 'spin1', p + 'spin2', p + 'spin2'], up: [p + 'up1', p + 'up2', p + 'chop2'] });
   const FRM = { wd_: FRM0('wd_'), qiang_: FRM0('qiang_'), bow_: FRM0('bow_'), stone_: FRM0('stone_'), fan_: FRM0('fan_'), huangfu_: FRM0('huangfu_'), quan_: FRM0('quan_'), guandao_: FRM0('guandao_'), jian_: FRM0('jian_'), chui_: FRM0('chui_') };
+  Object.assign(MOT, MOTX);
   const HELDP = { 0: 'wd_', 1: 'jian_', 2: 'chui_', 3: 'qiang_', 4: 'guandao_', 5: 'bow_', 7: 'stone_', 8: 'huangfu_', 9: 'fan_', 10: 'quan_' };   // 书生开局拿黄符
   const heldPre = () => HELDP[OG().wep] || 'wd_';
   const motFr = k => (FRM[heldPre()] || FRM.wd_)[MOT[k] || 'chop'];
@@ -761,7 +975,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   // 波间习得武艺：从还没学会的武艺里随机给最多 3 个，选一个放进空格
   function offerSkill(cb) {
     const owned = S.slots.filter(Boolean), free = S.slots.indexOf('');
-    const pool = Object.keys(SK).filter(k => !owned.includes(k) && tierOk(k) && (!ONLY_DAO || wepOk(k)));
+    const pool = Object.keys(SK).filter(k => !owned.includes(k) && tierOk(k) && !SK[k].off && (!ONLY_DAO || wepOk(k)));
     if (free < 0 || !pool.length) return false;
     const pick = pool.sort(() => Math.random() - .5).slice(0, 3);
     W.pick = true;
@@ -881,7 +1095,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   // ---------- 节点结算：连选 n 次（武艺 / 强化 三选一）----------
   function rewardOptions(kind) {
     const owned = S.slots.filter(Boolean).concat(S.owned || []), free = true;   // 格子满了也能学（放进掌握武学）
-    const sk = (free ? Object.keys(SK).filter(k => !owned.includes(k) && tierOk(k) && (!ONLY_DAO || wepOk(k))) : []).sort(() => Math.random() - .5).slice(0, kind === 'skill' ? 3 : 2).map(k => ({ kind: 'skill', k, q: Math.min(3, SK[k].tier || 0), name: SK[k].name, icon: SK[k].icon, color: SK[k].color, desc: (SK[k].tier ? TIERN[SK[k].tier] + '阶 · ' : '') + SK[k].desc }));
+    const sk = (free ? Object.keys(SK).filter(k => !owned.includes(k) && tierOk(k) && !SK[k].off && (!ONLY_DAO || wepOk(k))) : []).sort(() => Math.random() - .5).slice(0, kind === 'skill' ? 3 : 2).map(k => ({ kind: 'skill', k, q: Math.min(3, SK[k].tier || 0), name: SK[k].name, icon: SK[k].icon, color: SK[k].color, desc: (SK[k].tier ? TIERN[SK[k].tier] + '阶 · ' : '') + SK[k].desc }));
     const gp = Object.keys(GF).filter(id => { const g = GF[id]; return !g.off && (!ONLY_DAO || g.c < 2) && !S.gf.includes(id) && S.qg !== id && !(S.owned || []).includes(id) && W.n >= TMIN[g.t + 1]; });
     const pk = gp.sort(() => Math.random() - .5).map(id => { const g = GF[id]; return { kind: 'gf', id, q: g.t, name: g.n, icon: g.qg ? '轻' : g.n[0], color: GTC[g.t], desc: GTN[g.t] + '阶 · ' + (g.qg ? '轻功 · ' : g.c >= 0 ? g.cn + ' · ' : '内功 · ') + gfText(g) }; });
     if (pk.length < 3) pk.push({ kind: 'heal', name: '回春', icon: '春', color: '#ff9a9a', desc: '立刻回复 40% 血量' });
@@ -1517,24 +1731,39 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     if (RT.on && RT.node && W.started && S.coins) { coinTick(dt); S.tutT = (S.tutT || 0) + dt; if (S.tutT > 1.5) tut('start'); if (S.tutT > 25) tut('zq'); if (zs.filter(z => !z.dead && Math.hypot(z.x - hero.x, z.y - hero.y) < 60).length >= 4) tut('roll'); }
     if (weapon !== 'blade') forceBlade();
     if (charging || atkHeldSince) cancelCharge();
-    for (const z of zs) { if (z.stunCd > 0) z.stunCd -= dt; if (z.survSlow > 0) z.survSlow -= dt; }
+    for (const z of zs) { if (z.stunCd > 0) z.stunCd -= dt; if (z.survSlow > 0) z.survSlow -= dt;
+      if (z.dead || z.air) continue;
+      if (z.rout > 0 || z.conf > 0) {   // 11/13 溃散：掉头逃；混乱：乱走、误伤旁人
+        z.stun = Math.max(z.stun || 0, .06); const sp = (z.T.spd || 60) * dt;
+        if (z.rout > 0) { z.rout -= dt; const a = Math.atan2(z.y - hero.y, z.x - hero.x); moveEnt(z, Math.cos(a) * sp * 1.2, Math.sin(a) * sp * .6); z.f = Math.sign(z.x - hero.x) || 1; }
+        else { z.conf -= dt; if (!z.cdir || Math.random() < dt * 1.5) z.cdir = Math.random() * 7; moveEnt(z, Math.cos(z.cdir) * sp, Math.sin(z.cdir) * sp * .5); z.f = Math.cos(z.cdir) > 0 ? 1 : -1;
+          if ((z.cbit = (z.cbit || 0) - dt) <= 0) { z.cbit = .6; const o = alive().find(q => q !== z && !q.air && Math.hypot(q.x - z.x, q.y - z.y) < 46); if (o) { CM = 1; CK = ''; HT(o, .5, 20, Math.sign(o.x - z.x) || 1); } } }
+        z.moving = true; }
+      if (S.windT > 0 && !tough(z)) moveEnt(z, Math.cos(S.windA) * 70 * dt, 0); }
+    if (S.windT > 0) S.windT -= dt;
     skillTick(dt); bossTick(dt);
     for (const e of fx) e.t += dt;
     for (const b of bolts) {
       CM = b.cm || 1; CK = b.ck || ''; b.t += dt;
       if (b.home) { let t = null, bd = 260; for (const z of hittable()) { if (b.hitSet.includes(z)) continue; const d = Math.hypot(z.x - b.x, (z.y - b.y) * 2); if (d < bd) { bd = d; t = z; } }
         if (t) { const sp = Math.hypot(b.vx, b.vy * 2) || 200, ta = Math.atan2((t.y - b.y) * 2, t.x - b.x); let da = ta - b.a; while (da > Math.PI) da -= Math.PI * 2; while (da < -Math.PI) da += Math.PI * 2; b.a += Math.max(-5 * dt, Math.min(5 * dt, da)); b.vx = Math.cos(b.a) * sp; b.vy = Math.sin(b.a) * sp / 2; } }
+      if (b.ret && !b.back && b.t > b.T / 2) { b.back = 1; b.vx = -b.vx; b.vy = -b.vy; b.a += Math.PI; b.hitSet = []; }
       b.x += b.vx * dt; b.y += b.vy * dt;
       if (b.y < M.top - 4 || b.y > M.bot + 4) b.t = b.T;
-      for (const z of hittable()) if (!b.hitSet.includes(z) && Math.abs(z.x - b.x) < (b.big ? 22 : 16) && Math.abs(z.y - b.y) < 16) { b.hitSet.push(z); if (b.big) { b.t = b.T; fx.push({ k: 'burst', x: b.x, y: b.y, r: 40, t: 0, T: .4, col: '242,201,76' }); for (const z2 of near(b.x, b.y, 40)) if (z2 !== z) HT(z2, b.dmg * .6, 30); } const f0 = freeze; rec((b.dmg || 1.8) * DM()); hit(z, (b.dmg || 1.8) * DM(), 40, Math.sign(b.vx) || hero.f, false, 0, .3, false, false, { secondary: true, survSkill: true }); freeze = Math.min(freeze, Math.max(f0, .03)); }
+      for (const z of hittable()) if (!b.hitSet.includes(z) && Math.abs(z.x - b.x) < (b.big ? 22 : 16) && Math.abs(z.y - b.y) < 16) { b.hitSet.push(z); if (b.big) { b.t = b.T; fx.push({ k: 'burst', x: b.x, y: b.y, r: 40, t: 0, T: .4, col: '242,201,76' }); for (const z2 of near(b.x, b.y, 40)) if (z2 !== z) HT(z2, b.dmg * .6, 30); } const f0 = freeze; rec((b.dmg || 1.8) * DM()); hit(z, (b.dmg || 1.8) * DM(), 40, Math.sign(b.vx) || hero.f, false, 0, .3, false, false, { secondary: true, survSkill: true }); freeze = Math.min(freeze, Math.max(f0, .03)); if (b.onHit) b.onHit(z, b); if (b.multi && b.hitSet.length >= b.multi) b.t = b.T; }
+      if (b.t >= b.T && b.onEnd && !b.ended) { b.ended = 1; b.onEnd(b); }
     }
     CM = 1; CK = '';
     for (const zn of zones) {
       CM = zn.cm || 1; CK = zn.ck || ''; zn.t += dt; if (zn.follow) { zn.x = hero.x; zn.y = hero.y; }
+      if (zn.vx || zn.vy) { zn.x += (zn.vx || 0) * dt; zn.y = clampY(zn.y + (zn.vy || 0) * dt); if (zn.trailFire && (zn.ft = (zn.ft || 0) - dt) <= 0) { zn.ft = .15; zones.push({ x: zn.x + R(-40, 40), y: zn.y + R(-15, 15), r: 30, t: 0, T: 3, tk: 0, dmg: .5, kind: 'fire', cm: zn.cm, ck: zn.ck }); } }
+      if (zn.pull) for (const z of near(zn.x, zn.y, zn.r * 1.4)) { if (tough(z)) continue; const k = Math.min(1, zn.pull * dt); z.x += (zn.x - z.x) * k; z.y += (zn.y - z.y) * k; }
+      if (zn.push) { const sp = Math.hypot(zn.vx || 0, zn.vy || 0) || 1; for (const z of near(zn.x, zn.y, zn.r)) if (!tough(z)) { z.x += zn.vx * dt * .9; z.y = clampY(z.y + zn.vy * dt * .9); if (zn.routs) rout(z, 2); } }
+      if (zn.cage) for (const z of alive()) { const dx = z.x - zn.x, dy = (z.y - zn.y) * 2, d = Math.hypot(dx, dy), R0 = zn.r * (zn.cm ? 1 : 1); if (d < R0 * 1.25 && d > R0 * .9) { z.x = zn.x + dx / d * R0 * .88; z.y = zn.y + dy / d * R0 * .44; } }
       if ((zn.tk -= dt) <= 0) { zn.tk = .35;
         if (zn.kind === 'thunder') { zn.tk = .3; const c = near(zn.x, zn.y, zn.r * RM), z = c[Math.floor(Math.random() * c.length)], a = Math.random() * 7, rr = Math.random() * zn.r * RM, x = z ? z.x : zn.x + Math.cos(a) * rr, y = z ? z.y : zn.y + Math.sin(a) * rr * .5; fx.push({ k: 'bolt', x, y, t: 0, T: .3 }); blast(x, y, 22, zn.dmg, 20, '220,230,255'); continue; }
         if (zn.kind === 'orbit') { zn.tk = .12; const N = zn.n || 3; for (let i = 0; i < N; i++) { const a = zn.t * 5 + i * Math.PI * 2 / N, x = zn.x + Math.cos(a) * zn.r, y = zn.y + Math.sin(a) * zn.r * .5; for (const z of near(x, y, 16)) { if ((z.orbT || 0) > zn.t) continue; z.orbT = zn.t + .4; HT(z, zn.dmg, 20); if (zn.zap) fx.push({ k: 'bolt', x: z.x, y: z.y, t: 0, T: .25 }); } } continue; }
-        if (zn.kind === 'pit') for (const z of near(zn.x, zn.y, zn.r)) z.survSlow = .6;
+        if (zn.kind === 'pit' || zn.kind === 'frost' || zn.kind === 'swords' || zn.slow) for (const z of near(zn.x, zn.y, zn.r)) z.survSlow = zn.kind === 'frost' ? 1 : .6;
         if (zn.kind === 'trail') { for (const z of near(zn.x, zn.y, zn.r)) z.survSlow = .6; } else for (const z of near(zn.x, zn.y, zn.r)) HT(z, zn.dmg, zn.kind === 'wheel' ? 25 : 4, Math.sign(z.x - zn.x) || hero.f, .02); }
     }
     CM = 1; CK = '';
@@ -1578,14 +1807,20 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     }
     for (const b of bolts) {   // 月牙刀波；石子、黄符、豆兵另画
       const p = b.t / b.T, al = 1 - p * p;
-      if (b.col === STN || b.col === FUC || b.big) {
+      if (b.shape || b.col === STN || b.col === FUC || b.big) {
         ctx.save(); ctx.translate(b.x, b.y - 16); ctx.globalAlpha = Math.min(1, al + .3); ctx.strokeStyle = 'rgba(40,30,20,.95)'; ctx.lineWidth = 1.5;
         if (b.big) { ctx.fillStyle = '#f2c94c'; ctx.beginPath(); ctx.arc(0, 0, 8, 0, 7); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#fff4c8'; ctx.beginPath(); ctx.arc(-2, -3, 3, 0, 7); ctx.fill(); }
+        else if (b.shape === 'arrow' || b.shape === 'sword') { ctx.rotate(Math.atan2(b.vy * 2, b.vx)); const L = b.shape === 'sword' ? 18 : 14; ctx.strokeStyle = `rgb(${b.col[0]})`; ctx.lineWidth = b.shape === 'sword' ? 3 : 2; ctx.beginPath(); ctx.moveTo(-L, 0); ctx.lineTo(L - 4, 0); ctx.stroke(); ctx.fillStyle = `rgb(${b.col[1]})`; ctx.beginPath(); ctx.moveTo(L + 2, 0); ctx.lineTo(L - 5, -3); ctx.lineTo(L - 5, 3); ctx.closePath(); ctx.fill(); if (b.shape === 'sword') { ctx.fillStyle = '#d8b050'; ctx.fillRect(-L, -4, 3, 8); } }
+        else if (b.shape === 'feather') { ctx.rotate(Math.atan2(b.vy * 2, b.vx)); ctx.fillStyle = '#ff8a40'; ctx.beginPath(); ctx.ellipse(0, 0, 10, 3.5, 0, 0, 7); ctx.fill(); ctx.fillStyle = '#ffe0a0'; ctx.fillRect(-8, -1, 14, 2); }
+        else if (b.shape === 'firefly' || b.shape === 'ember') { const g = ctx.createRadialGradient(0, 0, 1, 0, 0, 9); g.addColorStop(0, `rgba(${b.col[1]},1)`); g.addColorStop(1, `rgba(${b.col[0]},0)`); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, 9, 0, 7); ctx.fill(); }
+        else if (b.shape === 'hammer') { ctx.rotate(b.t * 14); ctx.fillStyle = '#7a5030'; ctx.fillRect(-2, 0, 4, 14); ctx.fillStyle = '#b07840'; ctx.beginPath(); ctx.ellipse(0, -2, 9, 7, 0, 0, 7); ctx.fill(); ctx.stroke(); }
+        else if (b.shape === 'fist') { ctx.fillStyle = `rgba(${b.col[0]},.8)`; ctx.beginPath(); ctx.arc(0, 0, 9, 0, 7); ctx.fill(); ctx.strokeStyle = `rgba(${b.col[1]},.9)`; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(-6, 0, 12, -1, 1); ctx.stroke(); }
+        else if (b.shape === 'wheel') { ctx.scale(1, .5); ctx.rotate(b.t * 12); ctx.strokeStyle = `rgba(${b.col[1]},.95)`; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, 11, 0, 4.5); ctx.stroke(); ctx.strokeStyle = `rgba(${b.col[0]},.6)`; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(0, 0, 11, 4.6, 6.2); ctx.stroke(); }
         else if (b.col === FUC) { ctx.rotate(b.a + Math.sin(b.t * 20) * .3); ctx.fillStyle = '#ffd65a'; ctx.fillRect(-7, -4, 14, 8); ctx.strokeRect(-7, -4, 14, 8); ctx.fillStyle = '#c0392b'; ctx.fillRect(-4, -1, 8, 2); }
         else { ctx.fillStyle = '#bdb6a6'; ctx.beginPath(); ctx.arc(0, 0, 4.5, 0, 7); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#ece6d8'; ctx.beginPath(); ctx.arc(-1.5, -1.5, 1.6, 0, 7); ctx.fill(); }
         ctx.restore(); continue;
       }
-      ctx.save(); ctx.translate(b.x, b.y - 14); ctx.scale(1, .5); ctx.rotate(b.a);
+      ctx.save(); ctx.translate(b.x, b.y - 14); ctx.scale(b.big2 ? 1.8 : 1, b.big2 ? .9 : .5); ctx.rotate(b.a);
       ctx.strokeStyle = `rgba(${(b.col || ['160,225,255'])[0]},${.5 * al})`; ctx.lineWidth = 9; ctx.lineCap = 'round';
       ctx.beginPath(); ctx.arc(-10, 0, 26, -1.1, 1.1); ctx.stroke();
       ctx.strokeStyle = `rgba(${(b.col || [0, '240,252,255'])[1]},${.95 * al})`; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(-8, 0, 26, -1.0, 1.0); ctx.stroke();
@@ -1594,9 +1829,14 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     for (const zn of zones) {
       const al = Math.min(1, (zn.T - zn.t) / .4, zn.t / .15 + .2);
       ctx.save(); ctx.translate(zn.x, zn.y); ctx.scale(1, .5); ctx.globalAlpha = al;
+      if (zn.kind === 'wave') { const a = Math.atan2(zn.vy || 0, zn.vx || 1); ctx.rotate(a); ctx.strokeStyle = `rgba(${zn.col || '120,190,255'},.85)`; ctx.lineWidth = 6; ctx.lineCap = 'round'; for (let i = 0; i < 3; i++) { ctx.globalAlpha = al * (1 - i * .28); ctx.beginPath(); ctx.arc(-i * 14, 0, zn.r, -1.1, 1.1); ctx.stroke(); } ctx.restore(); continue; }
+      if (zn.kind === 'frost') { ctx.fillStyle = 'rgba(200,235,255,.35)'; ctx.beginPath(); ctx.arc(0, 0, zn.r, 0, 7); ctx.fill(); ctx.strokeStyle = 'rgba(240,250,255,.8)'; ctx.lineWidth = 1.5; for (let i = 0; i < 6; i++) { const a = i * 1.05 + zn.t; ctx.beginPath(); ctx.moveTo(Math.cos(a) * zn.r * .2, Math.sin(a) * zn.r * .2); ctx.lineTo(Math.cos(a) * zn.r * .8, Math.sin(a) * zn.r * .8); ctx.stroke(); } ctx.restore(); continue; }
+      if (zn.kind === 'wind') { ctx.strokeStyle = 'rgba(220,245,255,.75)'; ctx.lineWidth = 2.5; for (let i = 0; i < 5; i++) { const a = zn.t * 8 + i * 1.26, rr = zn.r * (.3 + i * .15); ctx.beginPath(); ctx.arc(0, -i * 16, rr, a, a + 2.2); ctx.stroke(); } ctx.restore(); continue; }
+      if (zn.kind === 'bagua') { ctx.rotate(zn.t * 1.2); ctx.strokeStyle = 'rgba(255,240,170,.8)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(0, 0, zn.r, 0, 7); ctx.stroke(); ctx.beginPath(); ctx.arc(0, 0, zn.r * .55, 0, 7); ctx.stroke(); for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4; ctx.beginPath(); ctx.moveTo(Math.cos(a) * zn.r * .6, Math.sin(a) * zn.r * .6); ctx.lineTo(Math.cos(a) * zn.r * .95, Math.sin(a) * zn.r * .95); ctx.stroke(); } ctx.restore(); continue; }
+      if (zn.kind === 'swords') { ctx.restore(); for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3, x = zn.x + Math.cos(a) * zn.r * .85, y = zn.y + Math.sin(a) * zn.r * .42; ctx.globalAlpha = al; ctx.fillStyle = '#dfefff'; ctx.strokeStyle = 'rgba(30,40,60,.9)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - 3, y - 26); ctx.lineTo(x, y - 32); ctx.lineTo(x + 3, y - 26); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#d8b050'; ctx.fillRect(x - 5, y - 28, 10, 3); ctx.globalAlpha = 1; } continue; }
       if (zn.kind === 'pit') { ctx.fillStyle = 'rgba(70,55,35,.55)'; ctx.beginPath(); ctx.arc(0, 0, zn.r, 0, 7); ctx.fill(); ctx.strokeStyle = 'rgba(160,140,100,.7)'; ctx.lineWidth = 2; ctx.stroke(); ctx.restore(); continue; }
       if (zn.kind === 'thunder') { const rr = zn.r * (zn.cm ? 1 : 1); ctx.strokeStyle = `rgba(220,230,255,${.5 + .3 * Math.sin(zn.t * 12)})`; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(0, 0, rr, 0, 7); ctx.stroke(); ctx.strokeStyle = 'rgba(255,220,100,.6)'; ctx.lineWidth = 1.5; for (let i = 0; i < 8; i++) { const a = zn.t * 1.5 + i * Math.PI / 4; ctx.beginPath(); ctx.arc(Math.cos(a) * rr * .8, Math.sin(a) * rr * .8, 6, 0, 7); ctx.stroke(); } ctx.restore(); continue; }
-      if (zn.kind === 'orbit') { ctx.restore(); const N = zn.n || 3; for (let i = 0; i < N; i++) { const a = zn.t * 5 + i * Math.PI * 2 / N, x = zn.x + Math.cos(a) * zn.r, y = zn.y + Math.sin(a) * zn.r * .5 - 18; ctx.globalAlpha = al; ctx.fillStyle = `rgb(${zn.col})`; ctx.strokeStyle = 'rgba(40,30,20,.9)'; ctx.lineWidth = 1.5; ctx.beginPath(); if (zn.zap) ctx.rect(x - 4, y - 7, 8, 14); else ctx.arc(x, y, 6, 0, 7); ctx.fill(); ctx.stroke(); ctx.globalAlpha = 1; } continue; }
+      if (zn.kind === 'orbit') { ctx.restore(); const N = zn.n || 3; for (let i = 0; i < N; i++) { const a = zn.t * 5 + i * Math.PI * 2 / N, x = zn.x + Math.cos(a) * zn.r, y = zn.y + Math.sin(a) * zn.r * .5 - 18; ctx.globalAlpha = al; ctx.fillStyle = `rgb(${zn.col})`; ctx.strokeStyle = 'rgba(40,30,20,.9)'; ctx.lineWidth = 1.5; ctx.beginPath(); if (zn.zap) ctx.rect(x - 4, y - 7, 8, 14); else if (zn.sword) { ctx.moveTo(x - 9, y); ctx.lineTo(x + 9, y - 2); ctx.lineTo(x + 9, y + 2); ctx.closePath(); } else ctx.arc(x, y, 6, 0, 7); ctx.fill(); ctx.stroke(); ctx.globalAlpha = 1; } continue; }
       if (zn.kind === 'fire') {
         const g = ctx.createRadialGradient(0, 0, 2, 0, 0, zn.r); g.addColorStop(0, 'rgba(255,200,60,.6)'); g.addColorStop(1, 'rgba(220,60,20,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, zn.r * 1.1, 0, 7); ctx.fill();
         for (let i = 0; i < 7; i++) { const a = i * .9 + Math.sin(zn.t * 3 + i), rr = zn.r * .6 * (((i * 37) % 10) / 10 + .2), h = 14 + 10 * Math.abs(Math.sin(zn.t * 9 + i * 2)); ctx.fillStyle = i % 2 ? '#ff9a3c' : '#ffd25a'; ctx.beginPath(); ctx.ellipse(Math.cos(a) * rr, Math.sin(a) * rr, 4, h, 0, 0, 7); ctx.fill(); }
@@ -1609,13 +1849,20 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     }
     for (const e of fx) {
       const p = e.t / e.T;
+      if (e.k === 'drop') { const q = Math.min(1, p), y = e.y - 260 * (1 - q * q), x = e.x; ctx.save(); ctx.globalAlpha = .95; ctx.strokeStyle = 'rgba(20,20,30,.9)'; ctx.lineWidth = 2;
+        if (e.what === 'sword') { ctx.fillStyle = '#eef6ff'; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - 9, y - 80); ctx.lineTo(x, y - 96); ctx.lineTo(x + 9, y - 80); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#d8b050'; ctx.fillRect(x - 18, y - 100, 36, 8); ctx.fillRect(x - 4, y - 124, 8, 24); }
+        else if (e.what === 'hammer') { ctx.fillStyle = '#7a5030'; ctx.fillRect(x - 4, y - 120, 8, 80); ctx.fillStyle = '#c08048'; ctx.beginPath(); ctx.ellipse(x, y - 30, 36, 30, 0, 0, 7); ctx.fill(); ctx.stroke(); }
+        else if (e.what === 'arrow') { ctx.strokeStyle = '#fff0c0'; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(x, y - 110); ctx.lineTo(x, y); ctx.stroke(); ctx.fillStyle = '#ff9a50'; ctx.beginPath(); ctx.moveTo(x, y + 6); ctx.lineTo(x - 10, y - 14); ctx.lineTo(x + 10, y - 14); ctx.closePath(); ctx.fill(); }
+        else if (e.what === 'rock') { ctx.fillStyle = '#8a7a60'; ctx.beginPath(); ctx.arc(x, y - 20, 22, 0, 7); ctx.fill(); ctx.stroke(); ctx.fillStyle = 'rgba(255,140,60,.8)'; ctx.beginPath(); ctx.arc(x, y - 40, 16, 0, 7); ctx.fill(); }
+        else if (e.what === 'palm') { ctx.fillStyle = 'rgba(255,210,100,.75)'; ctx.beginPath(); ctx.ellipse(x, y - 20, 50, 34, 0, 0, 7); ctx.fill(); for (let i = -2; i <= 2; i++) ctx.fillRect(x + i * 18 - 6, y - 80, 12, 40); }
+        ctx.restore(); continue; }
       if (e.k === 'burst') { ctx.save(); ctx.translate(e.x, e.y); ctx.scale(1, .5); const r = e.r * (.4 + .6 * Math.min(1, p * 2)); ctx.fillStyle = `rgba(${e.col},${.28 * (1 - p)})`; ctx.beginPath(); ctx.arc(0, 0, r, 0, 7); ctx.fill(); ctx.strokeStyle = `rgba(255,250,230,${.9 * (1 - p)})`; ctx.lineWidth = 4 * (1 - p) + 1; ctx.stroke(); ctx.restore(); }
       else if (e.k === 'mark') { ctx.save(); ctx.translate(e.x, e.y); ctx.scale(1, .5); ctx.strokeStyle = `rgba(255,90,60,${.3 + .4 * p})`; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.arc(0, 0, e.r, 0, 7); ctx.stroke(); ctx.restore(); ctx.strokeStyle = 'rgba(233,220,176,.9)'; ctx.lineWidth = 2; for (let i = 0; i < 4; i++) { const ox = (i - 1.5) * e.r * .4, yy = e.y * 1 - (1 - p) * 120; ctx.beginPath(); ctx.moveTo(e.x + ox, yy - 20); ctx.lineTo(e.x + ox, yy); ctx.stroke(); } }
       else if (e.k === 'bolt') { ctx.save(); ctx.strokeStyle = `rgba(235,240,255,${1 - p})`; ctx.lineWidth = 4 * (1 - p) + 1; ctx.beginPath(); let x = e.x, y = e.y - 170; ctx.moveTo(x, y); for (let i = 0; i < 6; i++) { x = e.x + R(-10, 10) * (i < 5); y += (e.y - (e.y - 170)) / 6; ctx.lineTo(x, y); } ctx.stroke(); ctx.restore(); }
       else if (e.k === 'line') { ctx.save(); ctx.translate(e.x, e.y - 14); ctx.scale(1, .5); ctx.rotate(e.a); const k = Math.min(1, p * 4); ctx.lineCap = 'round'; ctx.strokeStyle = `rgba(${e.col},${.55 * (1 - p)})`; ctx.lineWidth = e.w * 1.6 * (1 - p) + 4; ctx.beginPath(); ctx.moveTo(10, 0); ctx.lineTo(10 + e.L * k, 0); ctx.stroke(); ctx.strokeStyle = `rgba(255,255,255,${.95 * (1 - p)})`; ctx.lineWidth = 3; ctx.stroke(); ctx.restore(); }
     }
     for (const e of fx) {
-      if (e.k === 'burst' || e.k === 'mark' || e.k === 'bolt' || e.k === 'line') continue;
+      if (e.k === 'burst' || e.k === 'mark' || e.k === 'bolt' || e.k === 'line' || e.k === 'drop') continue;
       if (e.k === 'ghost') {   // 残影：半透明主角，带一道拖尾
         const q = Math.min(1, e.t / e.mt), x = e.x0 + (e.x1 - e.x0) * q, y = e.y0 + (e.y1 - e.y0) * q, al = .6 * (1 - Math.max(0, (e.t - e.mt) / (e.T - e.mt)));
         ctx.save(); ctx.strokeStyle = `rgba(200,225,255,${al * .5})`; ctx.lineWidth = 8; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(e.x0, e.y0 - 22); ctx.lineTo(x, y - 22); ctx.stroke(); ctx.restore();
