@@ -26,7 +26,10 @@ for i in range(1, n + 1):
     groups[m].append(i)
 # 缩放：待机帧（第 1 帧）高度对齐刀的待机
 ref = Image.open('art/sprites/hero/wd_idle.png'); TH = json.load(open('art/sprites/atlas.json'))['hero']['wd_idle'][3]
-o0 = objs[mains[0]-1]; s = TH / (o0[0].stop - o0[0].start)
+o0 = objs[mains[0]-1]; sub = im[o0]; mx = sub.max(-1); mn = sub.min(-1)
+hair = (mx - mn < 28) & (mx < 95) & (lab[o0] == mains[0])   # 用头发顶到脚底量身高（长兵器会高过头顶，不能用外接框）
+top = np.where(hair.sum(1) >= 14)[0][0]   # 头发一行很宽，枪杆、枪头只有几格
+s = TH / (o0[0].stop - o0[0].start - top)
 atlas = json.load(open('art/sprites/atlas.json'))
 rgba = np.dstack([im, alpha * 255])
 for name, m in zip(ORDER, mains):
