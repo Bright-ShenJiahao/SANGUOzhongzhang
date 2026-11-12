@@ -156,7 +156,7 @@ _chars = set()
 for _m in __import__('re').findall(r"'([^'\\]*)'|\"([^\"\\]*)\"|`([^`\\]*)`", _body):
     for _t in _m:
         _chars |= set(_t)
-_chars |= set('通关倒下败分享再来一局返回首页评价击倒用时被击全程无伤名次SSSABCDE0123456789:·— ！？，。出征终章磨刀整军点兵擂鼓城中调弦%')   # 加载画面的字也要进子集
+_chars |= set('通关倒下败分享再来一局返回首页评价击倒用时被击全程无伤名次SSSABCDE0123456789:·— ！？，。出征终章磨刀整军点兵擂鼓城中调弦%乱世报上名号')   # 加载画面的字也要进子集
 _chars = {c for c in _chars if c.strip()}
 _chars |= set('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ')
 if os.path.exists(FONT_SRC):

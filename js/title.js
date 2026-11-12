@@ -716,11 +716,30 @@
         filter: drop-shadow(0 2px 5px rgba(60,40,20,.18)); animation: tInkIn 1.5s .7s cubic-bezier(.2,.7,.2,1) forwards; }
       @keyframes tInkIn { from { opacity: 0; transform: translateY(-16px) scale(1.05); filter: blur(7px) drop-shadow(0 2px 5px rgba(60,40,20,0)); } to { opacity: 1; transform: none; filter: blur(0) drop-shadow(0 2px 5px rgba(60,40,20,.18)); } }   /* 11/11：iPhone 上 blur→drop-shadow 两种滤镜不能过渡，标题会一直糊着；改成同一组滤镜从 blur(7px) 过渡到 blur(0) */
       #tName, #tStart, #tNovice, #tHintOff, #tBoard { animation: tInkUp 1.2s .8s ease-out both; }   /* 11/11 用户定：名字框、按钮和书法标题一起出现 */
+      /* 11/13 用户：学群侠传的留白——标题下只留一排按钮；名字在点「新的开始」后填，困难模式/关闭提醒放进设置 */
+      body.szz-title #tName, body.szz-title #tNovice, body.szz-title #tHintOff { display: none !important; }
+      #tSeal { position: fixed; z-index: 6; pointer-events: none; display: flex; align-items: center; justify-content: center; writing-mode: vertical-rl; box-sizing: border-box;
+        background: #b3261c; color: #fbe6cf; font-family: "MaShanZheng", serif; line-height: 1; border-radius: 3px; box-shadow: inset 0 0 0 2px #b3261c, inset 0 0 0 3px #fbe6cf;
+        opacity: 0; animation: tInkUp 1s 1.6s ease-out both; }
+      #tSub { position: fixed; z-index: 6; pointer-events: none; color: #a9823e; font: 400 13px/1.6 "Noto Serif SC", Georgia, serif; letter-spacing: .5em; white-space: nowrap;
+        text-shadow: 0 1px 0 rgba(255,250,235,.6); opacity: 0; animation: tInkUp 1.2s 1.2s ease-out both; }
+      #tSub.v { writing-mode: vertical-rl; letter-spacing: .38em; white-space: normal; line-height: 1.9; }
+      #tSub.h { text-align: center; }
+      #tNameAsk { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; background: rgba(30,20,12,.5); }
+      #tNameAsk .p { width: min(88vw,420px); box-sizing: border-box; text-align: center; padding: 8px 18px 6px; }
+      #tNameAsk h3 { margin: 0 0 14px; font-size: 22px; letter-spacing: .3em; font-weight: 400; }
+      #tNameAsk input { display: block; box-sizing: border-box; width: 100%; height: 46px; margin: 0 0 16px; text-align: center; font-size: 18px; outline: none; }
+      #tNameAsk .r { display: flex; gap: 12px; justify-content: center; }
+      #tNameAsk button { flex: 1; height: 50px; font-size: 18px; cursor: pointer; }
+      #tNameAsk.shake input { animation: tShake .35s; }
+      @keyframes tShake { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
       @keyframes tInkUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
     `;
     document.head.appendChild(st);
     dom.inkTitle = document.createElement('img'); dom.inkTitle.id = 'tInkTitle'; dom.inkTitle.alt = '三国终章：幸存者'; dom.inkTitle.draggable = false;
     document.body.appendChild(dom.inkTitle);
+    dom.seal = document.createElement('div'); dom.seal.id = 'tSeal'; dom.seal.textContent = '乱世'; document.body.appendChild(dom.seal);   // 11/13：印章不再写「幸存者」，免得和群侠传撞
+    dom.sub = document.createElement('div'); dom.sub.id = 'tSub'; document.body.appendChild(dom.sub);
     dom.start.textContent = '新的开始';
     dom.cont = document.createElement('button'); dom.cont.id = 'tCont'; dom.cont.type = 'button'; dom.cont.textContent = '继续'; document.body.appendChild(dom.cont);
     dom.cont.addEventListener('click', () => {   // 读档：回到上次的路线长卷（11/11）
@@ -734,24 +753,35 @@
 
   function layoutInk() {
     const w = L.w, h = L.h, portrait = inkPortrait();
-    const inH = Math.max(34, Math.min(46, h * .07)), btnH = Math.max(40, Math.min(54, h * .085));
-    const rowH = 26, g1 = 12, g2 = 10;
+    const inH = 0, btnH = Math.max(40, Math.min(54, h * .085));
+    const rowH = 0, g1 = Math.max(18, h * .04), g2 = 0;   // 11/13：标题下只剩一排按钮
     let cx, titleW, titleH, top;
     if (portrait) {
-      titleW = Math.min(w * .96, 600); titleH = titleW * 465 / 1089;
+      titleW = Math.min(w * .92, 560); titleH = titleW * 428 / 1172;
       cx = w / 2;
       const below = inH + g2 + btnH + g2 + rowH;
       top = Math.max(h * .5, h - 14 - below - g1 - titleH);
       if (dom.inkTitle.dataset.k !== 'h') { dom.inkTitle.src = ASSETS.ink.title_h; dom.inkTitle.dataset.k = 'h'; }
     } else {
-      titleH = Math.min(h * .68, 920, h - 200); titleW = titleH * 364 / 995;   /* 11/13 用户：标题字太小 → 放大 */
-      cx = w * .755;
+      titleH = Math.min(h * .66, 900, h - 170); titleW = titleH * 340 / 859;   /* 11/13 用户：标题字太小 → 放大 */
+      cx = w * .77;
       const total = titleH + g1 + inH + g2 + btnH + g2 + rowH;
       top = Math.max(6, (h - total) / 2);
       if (dom.inkTitle.dataset.k !== 'v') { dom.inkTitle.src = ASSETS.ink.title_v; dom.inkTitle.dataset.k = 'v'; }
     }
     const ts = dom.inkTitle.style;
     ts.left = (cx - titleW / 2) + 'px'; ts.top = top + 'px'; ts.width = titleW + 'px'; ts.height = titleH + 'px';
+    { // 印章：竖排标题贴「章」右下，横排贴「章」右下
+      const ss = dom.seal.style, sw = Math.round(portrait ? Math.max(22, titleH * .2) : Math.max(24, titleW * .2));
+      ss.width = sw + 'px'; ss.height = Math.round(sw * 1.5) + 'px'; ss.fontSize = Math.round(sw * .52) + 'px';
+      ss.left = Math.round(portrait ? cx + titleW * .46 : cx + titleW * .44) + 'px';
+      ss.top = Math.round(portrait ? top + titleH * .52 : top + titleH * .8) + 'px';
+      const u = dom.sub, us = u.style;   // 英文副标题：横屏竖排贴在标题左侧，竖屏横排在标题下
+      u.className = portrait ? 'h' : 'v'; u.textContent = portrait ? 'THREE KINGDOMS · FINAL CHAPTER SURVIVORS' : 'THREE KINGDOMS FINAL CHAPTER SURVIVORS';
+      us.fontSize = Math.round(portrait ? Math.max(9, Math.min(12, w * .028)) : Math.max(11, Math.min(15, h * .018))) + 'px';
+      if (portrait) { us.left = '0px'; us.width = w + 'px'; us.top = Math.round(top + titleH + 4) + 'px'; us.transform = ''; us.height = ''; us.letterSpacing = '.3em'; }
+      else { us.width = ''; us.letterSpacing = ''; us.left = Math.round(cx - titleW * .7) + 'px'; us.top = Math.round(top + titleH * .08) + 'px'; us.transform = ''; us.height = Math.round(titleH * .62) + 'px'; }
+    }
     const colW = Math.max(180, Math.min(portrait ? w * .72 : w * .3, 300));
     const nameTop = top + titleH + g1, startTop = nameTop + inH + g2, rowTop = startTop + btnH + g2;
     L.inY = nameTop;
@@ -789,10 +819,15 @@
     const s = Math.max(W / iw, H / ih) * breathe * (1.04 - .04 * e);
     const dw = iw * s, dh = ih * s;
     const ax = portrait ? .72 : .28, ay = portrait ? 0 : .5;        // 竖屏贴顶，横屏偏左（人物在左）
-    const dx = (W - dw) * ax, dy = (H - dh) * ay;
+    const dx = (W - dw) * ax - (portrait ? 0 : W * .07), dy = (H - dh) * ay;   // 11/13 用户：学群侠传，横屏背景往左让一点，给标题留白
     c.save();
     c.globalAlpha = e;
     c.drawImage(img, dx, dy, dw, dh);
+    { // 标题那一侧铺一层宣纸色渐变：横屏在右，竖屏在下
+      const gr = portrait ? c.createLinearGradient(0, H * .5, 0, H) : c.createLinearGradient(W * .5, 0, W, 0);
+      gr.addColorStop(0, 'rgba(236,217,192,0)'); gr.addColorStop(portrait ? .45 : .42, 'rgba(236,217,192,.55)'); gr.addColorStop(1, 'rgba(236,217,192,.82)');
+      c.fillStyle = gr; c.fillRect(0, 0, W, H);
+    }
     c.globalAlpha = 1;
     // 灯笼暖光：叠加发光 + 不规则闪烁
     const lp = portrait ? INK_LANTERN.phone : INK_LANTERN.pc;
@@ -955,7 +990,7 @@
   // ---------- 状态切换 ----------
   function setDomVisible(v) {
     const d = v ? '' : 'none';
-    for (const k of ['name', 'start', 'help', 'novice', 'board', 'hintOff', 'inkTitle']) if (dom[k]) dom[k].style.display = d;
+    for (const k of ['name', 'start', 'help', 'novice', 'board', 'hintOff', 'inkTitle', 'seal', 'sub']) if (dom[k]) dom[k].style.display = d;
     if (dom.cont) dom.cont.style.setProperty('display', v && window.RUNSAVE && RUNSAVE.has() ? 'inline-flex' : 'none', 'important');   // 套件里 display 带 !important，这里也要带
     if (!v && dom.modeTip) { dom.modeTip.style.opacity = '0'; }
     if (!v && dom.panel) { dom.panel.style.display = 'none'; helpOpen = false; }
@@ -971,6 +1006,18 @@
       box.onclick = e => { if (e.target === box) box.remove(); };
       box.querySelector('.yes').onclick = () => { box.remove(); S.okNew = true; start().finally(() => { S.okNew = false; }); };
       document.body.appendChild(box); return;
+    }
+    if (!S.nameOk && !document.getElementById('tNameAsk')) {   // 11/13：名字不放主界面，点「新的开始」后再报名号
+      const box = document.createElement('div'); box.id = 'tNameAsk';
+      box.innerHTML = '<div class="p"><h3>报上名号</h3><input maxlength="8" autocomplete="off" spellcheck="false" placeholder="输入你的名字"><div class="r"><button class="no">取消</button><button class="yes">出征</button></div></div>';
+      const okNew0 = S.okNew, ip = box.querySelector('input'); ip.value = dom.name.value || S.name || '';
+      const go = () => { const v = ip.value.trim().slice(0, 8); if (!v) { box.classList.remove('shake'); void box.offsetWidth; box.classList.add('shake'); ip.focus(); return; }
+        dom.name.value = v; box.remove(); S.nameOk = true; S.okNew = okNew0; start().finally(() => { S.nameOk = false; S.okNew = false; }); };
+      box.querySelector('.no').onclick = () => box.remove();
+      box.onclick = e => { if (e.target === box) box.remove(); };
+      box.querySelector('.yes').onclick = go;
+      ip.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') go(); if (e.key === 'Escape') box.remove(); });
+      document.body.appendChild(box); setTimeout(() => { ip.focus(); ip.select(); }, 30); return;
     }
     const n = (dom.name.value || '').trim().slice(0, 8);
     if (!n) {
@@ -1434,7 +1481,7 @@
           if (!S.bootAsked) { S.bootAsked = true; if (window.bootDone) window.bootDone(); }   // 11/12：加载幕可能还要等音乐、等玩家点「点击任意处开始」，真正揭幕时才放首页入场动画
           if (!window.bootDone || window.bootRevealed) {
             S.booted = true; S.t = 1.3;   // 加载幕上图已经淡入了，揭幕时画布直接画满，不再从宣纸淡入
-            for (const e of [ti, dom.name, dom.start, dom.cont, dom.novice, dom.hintOff, dom.board]) if (e) { e.style.animation = 'none'; void e.offsetWidth; e.style.animation = ''; }
+            for (const e of [ti, dom.name, dom.start, dom.cont, dom.novice, dom.hintOff, dom.board, dom.seal, dom.sub]) if (e) { e.style.animation = 'none'; void e.offsetWidth; e.style.animation = ''; }
           } else S.t = 0;
         } else S.t = 0;
       }

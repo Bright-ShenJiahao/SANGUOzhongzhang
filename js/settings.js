@@ -28,12 +28,16 @@
 
   const box = document.createElement('div'); box.id = 'szzSet'; box.hidden = true;
   const pct = x => Math.round(x * 100);
+  const hintOff = () => { try { return localStorage.getItem('szz-hint-off') === '1'; } catch (e) { return false; } };
   function render() {
     box.innerHTML = `<div class="p"><h3>设置</h3>
       <div class="row"><label>音乐</label><input type="range" min="0" max="100" step="5" value="${pct(v.bgm)}" data-k="bgm"><b>${pct(v.bgm)}</b></div>
       <div class="row"><label>音效</label><input type="range" min="0" max="100" step="5" value="${pct(v.sfx)}" data-k="sfx"><b>${pct(v.sfx)}</b></div>
       <div class="row"><label>静音</label><div class="tg tm"><button data-m="1" class="${window.SFX && SFX.isMuted() ? 'on' : ''}">开</button><button data-m="0" class="${window.SFX && SFX.isMuted() ? '' : 'on'}">关</button></div></div>
       <div class="row"><label>震屏</label><div class="tg"><button data-s="1" class="${v.shake ? 'on' : ''}">开</button><button data-s="0" class="${v.shake ? '' : 'on'}">关</button></div></div>
+      <div class="row"><label>困难模式</label><div class="tg th"><button data-h="1" class="${window.TITLE && TITLE.hardMode && TITLE.hardMode() ? 'on' : ''}">开</button><button data-h="0" class="${window.TITLE && TITLE.hardMode && TITLE.hardMode() ? '' : 'on'}">关</button></div></div>
+      <div class="row"><label>全屏提醒</label><div class="tg tp"><button data-p="1" class="${hintOff() ? '' : 'on'}">开</button><button data-p="0" class="${hintOff() ? 'on' : ''}">关</button></div></div>
+      <small style="margin-top:2px">困难模式：敌人更强，积分 1.25 倍</small>
       <button class="ok">关闭</button><small>设置会自动保存</small></div>`;
     box.querySelectorAll('input[type=range]').forEach(r => r.addEventListener('input', () => {
       v[r.dataset.k] = +r.value / 100; r.nextElementSibling.textContent = r.value; save();
@@ -41,7 +45,9 @@
       if (r.dataset.k === 'sfx' && window.SFX) SFX.play('j_pick0');
     }));
     box.querySelectorAll('.tm button').forEach(b => b.addEventListener('click', () => { if (window.SFX && SFX.isMuted() !== (b.dataset.m === '1')) SFX.toggleMute(); render(); }));   // 11/13：静音放进设置
-    box.querySelectorAll('.tg:not(.tm) button').forEach(b => b.addEventListener('click', () => { v.shake = b.dataset.s === '1'; save(); render(); }));
+    box.querySelectorAll('.th button').forEach(b => b.addEventListener('click', () => { if (window.TITLE && TITLE.setHard) TITLE.setHard(b.dataset.h === '1'); render(); }));   // 11/13：困难模式、关闭提醒从主界面挪进设置
+    box.querySelectorAll('.tp button').forEach(b => b.addEventListener('click', () => { try { localStorage.setItem('szz-hint-off', b.dataset.p === '1' ? '0' : '1'); } catch (e) {} const i = document.querySelector('#tHintOff input'); if (i) i.checked = hintOff(); render(); }));
+    box.querySelectorAll('.tg:not(.tm):not(.th):not(.tp) button').forEach(b => b.addEventListener('click', () => { v.shake = b.dataset.s === '1'; save(); render(); }));
     box.querySelector('.ok').addEventListener('click', close);
   }
   function open() { render(); box.hidden = false; }
