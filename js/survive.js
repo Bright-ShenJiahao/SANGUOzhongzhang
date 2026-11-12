@@ -447,9 +447,9 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const HT = (z, dmg, kb, dir, fr) => { rec(dmg * DM()); const f0 = freeze; hit(z, dmg * DM(), kb, dir || hero.f, false, 0, .3, false, false, { secondary: true, survSkill: true }); freeze = Math.min(freeze, Math.max(f0, fr || .04)); };
   const near = (x, y, r) => hittable().filter(z => Math.hypot(z.x - x, (z.y - y) * 2) < r + 6);
   function blast(x, y, r, dmg, kb, col) { r *= RM; fx.push({ k: 'burst', x, y, r, t: 0, T: .4, col: col || '255,210,120' }); for (const z of near(x, y, r)) HT(z, dmg, kb, Math.sign(z.x - x) || hero.f); }
-  function lineHit(a, L, w, dmg, kb, col) {
-    L *= RM;   // 朝 a 方向一条宽 w 的直线（清版透视：y 压一半）
-    const vx = Math.cos(a), vy = Math.sin(a) / 2, x0 = hero.x, y0 = hero.y;
+  function lineHit(a, L, w, dmg, kb, col, ox, oy) {
+    L *= RM;   // 朝 a 方向一条宽 w 的直线（清版透视：y 压一半）；ox/oy 给了就从那里出手（残影用）
+    const vx = Math.cos(a), vy = Math.sin(a) / 2, x0 = ox != null ? ox : hero.x, y0 = oy != null ? oy : hero.y;
     fx.push({ k: 'line', x: x0, y: y0, a, L, w, t: 0, T: .3, col: col || '255,240,190' });
     for (const z of hittable()) { const dx = z.x - x0, dy = (z.y - y0) * 2, al = dx * Math.cos(a) + dy * Math.sin(a), pe = Math.abs(-dx * Math.sin(a) + dy * Math.cos(a)); if (al > -10 && al < L && pe < w + 6) HT(z, dmg, kb, Math.sign(dx) || hero.f); }
   }
@@ -500,6 +500,8 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   // ---------- 枪 12 招（11/12 用户定：黄 枪刺 连刺 拦扫 / 玄 冲锋 挑枪 梨花枪 / 地 投枪 回马枪 枪林 / 天 百鸟朝凤 七进七出 龙吟） ----------
   const HTU = (z, dmg, kb, dir) => { rec(dmg * DM()); const f0 = freeze; hit(z, dmg * DM(), kb, dir || hero.f, true, 0, .45, false, false, { secondary: true, survSkill: true }); freeze = Math.min(freeze, Math.max(f0, .05)); };   // 挑飞
   const QC = ['255,233,168', '255,250,225'];
+  // 11/12 用户定：七进七出、回马枪由残影出手，主角原地不动。残影 = 半透明主角刺帧，从 (x0,y0) 冲到 (x1,y1)
+  const ghost = (x0, y0, x1, y1, a, fr, T) => fx.push({ k: 'ghost', x0, y0, x1, y1, fr, flip: Math.cos(a) < 0, t: 0, T: T || .3, mt: .09 });
   add('lianci', { tier: 1, name: '连刺', icon: '刺', color: '#ffe0a0', desc: '向前连刺三枪', need: 110, beam: true, len: 90, wu: .45, rc: .35,
     cast() { [0, 1, 2].forEach(i => later(i * .13, () => { if (i) S.poseOverride = { f: i % 2 ? SK.lianci.pose2 : SK.lianci.pose[1], t: .12 }; lineHit(aim(), 90, 8, 1.15, 14, QC[0]); sfx('swing_knife', hero.x); })); } });
   add('lansao', { tier: 1, name: '拦扫', icon: '拦', color: '#f0c890', desc: '枪杆横拦，身前 200° 长距扫开', need: 70, range: 62, half: 1.75, wu: .6, rc: .35,
@@ -514,17 +516,20 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   add('touqiang', { tier: 3, name: '投枪', icon: '投', color: '#ffd890', desc: '掷出一杆重枪，一路贯穿，落地再炸', need: 220, beam: true, len: 220, wu: .6, rc: .4,
     cast() { const a = aim(); shot(a, { dmg: 3.2, T: .75, vx: Math.cos(a) * 420, vy: Math.sin(a) * 210, col: QC });
       const x = hero.x + Math.cos(a) * 300, y = clampY(hero.y + Math.sin(a) * 150); later(.72, () => blast(x, y, 40, 2, 40, '255,216,144')); sfx('swing_knife', hero.x); shake = Math.max(shake, .12); } });
-  add('huimaq', { tier: 3, name: '回马枪', icon: '马', color: '#ffb890', desc: '佯退一步，回身一记长刺', need: 140, beam: true, len: 140, wu: .5, rc: .4,
-    cast() { const a = aim(); hero.x -= Math.cos(a) * 26; hero.y = clampY(hero.y - Math.sin(a) * 13);
-      later(.16, () => { S.poseOverride = { f: SK.huimaq.pose2, t: .2 }; lineHit(aim(), 140, 12, 3.4, 60, '255,184,144'); sfx('crack', hero.x); shake = Math.max(shake, .2); }); } });
+  add('huimaq', { tier: 3, name: '回马枪', icon: '马', color: '#ffb890', desc: '残影冲出穿过敌群，再回身反刺一枪', need: 140, beam: true, len: 140, wu: .5, rc: .4,
+    cast() { const a = aim(), x0 = hero.x, y0 = hero.y, x1 = x0 + Math.cos(a) * 140 * RM, y1 = clampY(y0 + Math.sin(a) * 70 * RM), fr = SK.huimaq.pose[1];
+      ghost(x0, y0, x1, y1, a, fr, .3); lineHit(a, 140, 12, 1.2, 20, '200,225,255', x0, y0); sfx('swing_knife', hero.x);
+      later(.26, () => { ghost(x1, y1, x1, y1, a + Math.PI, fr, .4); lineHit(a + Math.PI, 150, 14, 3.4, 60, '255,184,144', x1, y1); sfx('crack', x1); shake = Math.max(shake, .2); }); } });
   add('qianglin', { tier: 3, name: '枪林', icon: '林', color: '#e8d0a0', desc: '身周地里一圈圈刺出枪尖', need: 90, wu: .7, rc: .45,
     cast() { [50, 90].forEach((r, j) => { for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4 + j * Math.PI / 8, x = hero.x + Math.cos(a) * r, y = hero.y + Math.sin(a) * r * .5;
       fx.push({ k: 'mark', x, y, r: 16, t: 0, T: .2 + j * .18 }); later(.2 + j * .18, () => blast(x, y, 20, 1.4, 30, '232,208,160')); } }); sfx('crack', hero.x); shake = Math.max(shake, .15); } });
   add('bainiao', { tier: 4, name: '百鸟朝凤', icon: '凤', color: '#ffd060', desc: '枪如雨点，身前扇面连出十八枪', need: 170, beam: true, len: 170, wu: .7, rc: .45,
     cast() { const a0 = aim(); for (let i = 0; i < 18; i++) later(i * .035, () => { const a = a0 + R(-.55, .55); shot(a, { dmg: 1.15, T: .55, vx: Math.cos(a) * 340, vy: Math.sin(a) * 170, col: ['255,208,96', '255,248,220'] }); }); sfx('swing_knife', hero.x); shake = Math.max(shake, .15); } });
-  add('qijin', { tier: 4, name: '七进七出', icon: '七', color: '#fff0c0', desc: '连冲七次，每次扎向最近的敌人', need: 160, beam: true, len: 120, wu: .6, rc: .5,
-    cast() { for (let i = 0; i < 7; i++) later(i * .15, () => { const t = nearest(170); const a = t ? Math.atan2((t.y - hero.y) * 2, t.x - hero.x) : aim(), L = t ? Math.min(150, dist(t, hero) + 24) : 60;
-      S.poseOverride = { f: i % 2 ? SK.qijin.pose2 : SK.qijin.pose[1], t: .14 }; lineHit(a, L, 14, 1.6, 40, '255,240,192'); hero.x += Math.cos(a) * (L - 18); hero.y = clampY(hero.y + Math.sin(a) * (L - 18) * .5); sfx('swing_knife', hero.x); }); shake = Math.max(shake, .2); } });
+  add('qijin', { tier: 4, name: '七进七出', icon: '七', color: '#fff0c0', desc: '分出残影连冲七次，每次扎向最近的敌人', need: 160, beam: true, len: 120, wu: .6, rc: .5,
+    cast() { const g = { x: hero.x, y: hero.y }, fr = SK.qijin.pose[1];
+      for (let i = 0; i < 7; i++) later(i * .15, () => { let t = null, bd = 170; for (const z of hittable()) { const d = Math.hypot(z.x - g.x, (z.y - g.y) * 2); if (d < bd) { bd = d; t = z; } }
+        const a = t ? Math.atan2((t.y - g.y) * 2, t.x - g.x) : aim() + R(-1, 1), L = t ? Math.min(150, bd + 24) : 70, nx = g.x + Math.cos(a) * (L - 18), ny = clampY(g.y + Math.sin(a) * (L - 18) * .5);
+        ghost(g.x, g.y, nx, ny, a, fr, i === 6 ? .45 : .22); lineHit(a, L, 14, 1.6, 40, '255,240,192', g.x, g.y); g.x = nx; g.y = ny; sfx('swing_knife', g.x); }); shake = Math.max(shake, .2); } });
   add('longyin', { tier: 4, name: '龙吟', icon: '龙', color: '#a8e0ff', desc: '一枪砸地，枪劲化龙沿地面一路轰出', need: 200, beam: true, len: 220, wu: .8, rc: .5,
     cast() { const a = aim(); lineHit(a, 220, 24, 3.2, 70, '168,224,255'); for (let i = 1; i <= 5; i++) { const x = hero.x + Math.cos(a) * i * 44, y = clampY(hero.y + Math.sin(a) * i * 22); later(i * .08, () => blast(x, y, 30, 1.6, 40, '168,224,255')); }
       sfx('crack', hero.x); shake = Math.max(shake, .4); } });
@@ -1523,6 +1528,12 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     }
     for (const e of fx) {
       if (e.k === 'burst' || e.k === 'mark' || e.k === 'bolt' || e.k === 'line') continue;
+      if (e.k === 'ghost') {   // 残影：半透明主角，带一道拖尾
+        const q = Math.min(1, e.t / e.mt), x = e.x0 + (e.x1 - e.x0) * q, y = e.y0 + (e.y1 - e.y0) * q, al = .6 * (1 - Math.max(0, (e.t - e.mt) / (e.T - e.mt)));
+        ctx.save(); ctx.strokeStyle = `rgba(200,225,255,${al * .5})`; ctx.lineWidth = 8; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(e.x0, e.y0 - 22); ctx.lineTo(x, y - 22); ctx.stroke(); ctx.restore();
+        if (typeof drawChar === 'function') { ctx.save(); ctx.filter = 'brightness(1.6) saturate(.4)'; drawChar('hero', e.fr, x, y, e.flip, al); ctx.restore(); }
+        continue;
+      }
       if (e.k === 'ring') {   // 震地：地上一圈冲击波 + 裂纹
         const p = e.t / e.T, r = e.r * (.3 + .7 * Math.min(1, p * 2));
         ctx.save(); ctx.translate(e.x, e.y); ctx.scale(1, .5);
