@@ -2,7 +2,7 @@
 按连通区域切：大块是人，小块（飞出去的符纸、剑尖等）归到最近的人；整张按「待机帧身高 = 刀的待机身高」统一缩小。
 用法：python3 tools/import_hero_sheet.py 总表.png 前缀"""
 import sys, json, numpy as np
-from PIL import Image
+from PIL import Image, ImageFilter
 from scipy import ndimage
 SRC, PRE = sys.argv[1], sys.argv[2]
 ORDER = ['idle','walk1','walk2','walk3','chop1','chop2','sweep1','sweep2','thrust1','thrust2','spin1','spin2','up1','up2','roll1','roll2','roll3','roll4','hurt','down']
@@ -39,10 +39,11 @@ for name, m in zip(ORDER, mains):
     a = rgba[y0:y1, x0:x1].copy(); a[..., 3] *= mask
     W, H = max(1, round((x1-x0)*s)), max(1, round((y1-y0)*s))
     al = a[..., 3:] / 255
-    pm = Image.fromarray(np.clip(a[..., :3]*al, 0, 255).astype('uint8')).resize((W, H), Image.BOX)
+    # 11/13 用户：清晰度要和刀一样、兵器别缩成一根线 → LANCZOS 缩小再锐化；透明度门槛放低，细兵器多留一格
+    pm = Image.fromarray(np.clip(a[..., :3]*al, 0, 255).astype('uint8')).resize((W, H), Image.LANCZOS).filter(ImageFilter.UnsharpMask(1, 90, 2))
     aa = np.asarray(Image.fromarray((al[..., 0]*255).astype('uint8')).resize((W, H), Image.BOX)).astype(float) / 255
-    col = np.asarray(pm).astype(float) / np.maximum(aa, 1e-3)[..., None]
-    out = np.dstack([np.clip(col, 0, 255), np.where(aa > .5, 255, 0)]).astype('uint8')
+    col = np.asarray(pm).astype(float) / np.maximum(aa, .3)[..., None]
+    out = np.dstack([np.clip(col, 0, 255), np.where(aa > .3, 255, 0)]).astype('uint8')
     # 锚点：主体（不含飞出去的小块）下部的横向中心、脚底
     mo = objs[m-1]; mm = (lab[mo] == m); hh = mm.shape[0]
     low = mm[int(hh*.7):]; cx = (np.where(low.any(0))[0].mean() + mo[1].start - x0) * s
