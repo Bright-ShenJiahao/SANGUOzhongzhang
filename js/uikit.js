@@ -13,7 +13,7 @@ ${sel}:active{transform:translateY(2px);filter:brightness(.92)}${sel}:hover{filt
     btn('#tStart', 'dark', 1), btn('#tCont', 'darkS', 1),   // 标题页两颗按钮的大小由 title.js 按原图比例排
     btn('#tConfirm .no', 'dark'), btn('#tConfirm .yes', 'red'), btn('#tNameAsk .no', 'darkS', 1), btn('#tNameAsk .yes', 'gold', 1),
     `#tNameAsk .p{border:28px solid transparent;border-image:url(${PANEL}) 28 fill stretch;color:#efe2c4}#tNameAsk .p h3{color:#fff2d0}#tNameAsk input{border:10px solid transparent;border-image:url(${INPUT}) 18 fill stretch;background:none;color:#3a2410}`,
-    btn('#kaiju .bot .go', 'gold'), btn('#kaiju .bot .back', 'dark'),
+    btn('#kaiju .bot .go', 'dark', 1), btn('#kaiju .bot .back', 'dark', 1),
     `#tConfirm .p{box-sizing:border-box;max-width:94vw!important;border:28px solid transparent!important;border-image:url(${PANEL}) 28 fill stretch!important;background:none!important;box-shadow:0 10px 30px rgba(0,0,0,.6)!important;border-radius:0!important;color:#efe2c4!important;padding:8px 18px 4px!important;position:relative;overflow:visible!important}`,
     `#tConfirm .p h3{position:relative;top:-46px;margin:0 auto -30px!important;width:max-content;min-width:60%;padding:6px 34px!important;background:url(${TAB}) center/100% 100% no-repeat;color:#fff2d0!important;font-weight:400!important;text-shadow:0 1px 0 #000}`,
     `#tConfirm .p p{color:#efe2c4!important}#tConfirm .p small{color:#d8b878!important}`,
