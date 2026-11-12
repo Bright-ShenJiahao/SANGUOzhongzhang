@@ -539,8 +539,8 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const ORIGINS = {
     nongfu: { name: '农夫', tag: '短兵器', wep: 0, skill: 'hengsao', desc: '庄稼汉，挨得住打。受到伤害 -20%', take: .8, oa: [5, 4, 2, 1, 1, 2, 1, 3], at: [6, 4, 2, 2, 3, 2] },
     xiaozu: { name: '小卒', tag: '长兵器', wep: 3, skill: 'qiang', desc: '行伍出身，出手利落。武艺前摇 -20%', wu: .8, oa: [4, 4, 5, 1, 1, 2, 1, 3], at: [4, 3, 4, 3, 2, 2] },
-    liehu: { locked: true, name: '猎户', tag: '远程', skill: 'daobo', desc: '山里跑惯了。移动速度 +12%', move: 1.12, oa: [3, 4, 1, 5, 1, 4, 1, 3], at: [3, 3, 1, 5, 3, 2] },
-    shusheng: { locked: true, name: '书生', tag: '术法', skill: 'huima', desc: '手无缚鸡之力，却通术法。术法最强，近战偏弱', oa: [2, 1, 1, 1, 1, 2, 6, 4], at: [2, 1, 1, 2, 3, 6] },
+    liehu: { locked: true, name: '猎户', tag: '远程', wep: 5, skill: 'daobo', desc: '山里跑惯了。移动速度 +12%', move: 1.12, oa: [3, 4, 1, 5, 1, 4, 1, 3], at: [3, 3, 1, 5, 3, 2] },
+    shusheng: { locked: true, name: '书生', tag: '术法', wep: 8, skill: 'huima', desc: '手无缚鸡之力，却通术法。术法最强，近战偏弱', oa: [2, 1, 1, 1, 1, 2, 6, 4], at: [2, 1, 1, 2, 3, 6] },
   };
   let origin = 'nongfu';
   const OG = () => ORIGINS[origin] || ORIGINS.nongfu;
@@ -563,9 +563,10 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const MOT = { hengsao: 'sweep', lianzhan: 'sweep', xuehe: 'sweep', feilunren: 'sweep', daobo: 'chop', dilie: 'chop', shuanghuan: 'chop', liedihuan: 'chop', tianbeng: 'chop', daolun: 'spin', xuanfeng: 'spin', wanren: 'spin', huima: 'up',
     qiang: 'thrust', chong: 'thrust', lianci: 'thrust', touqiang: 'thrust', huimaq: 'thrust', bainiao: 'thrust', qijin: 'thrust', lansao: 'sweep', tiaoqiang: 'up', lihua: 'spin', qianglin: 'spin', longyin: 'chop' };
   // [起手, 出手, 第二击]；刀没有专门的刺帧，借横斩
-  const FRM = { wd_: { chop: ['wd_1', 'wd_2', 'wd_2'], sweep: ['wd_3', 'wd_4', 'wd_6'], thrust: ['wd_3', 'wd_4', 'wd_4'], spin: ['wd_7', 'wd_4', 'wd_4'], up: ['wd_1', 'wd_6', 'wd_2'] },
-    qiang_: { chop: ['qiang_6', 'qiang_4', 'qiang_4'], sweep: ['qiang_3', 'qiang_4', 'qiang_3'], thrust: ['qiang_1', 'qiang_2', 'qiang_1'], spin: ['qiang_6', 'qiang_4', 'qiang_4'], up: ['qiang_1', 'qiang_5', 'qiang_4'] } };
-  const HELDP = { 0: 'wd_', 3: 'qiang_' };
+  // 11/12 新图集：每种兵器 20 帧，统一命名 前缀 + idle/walk1-3/roll1-4/hurt/down/chop1-2/sweep1-2/thrust1-2/spin1-2/up1-2
+  const FRM0 = p => ({ chop: [p + 'chop1', p + 'chop2', p + 'chop2'], sweep: [p + 'sweep1', p + 'sweep2', p + 'sweep1'], thrust: [p + 'thrust1', p + 'thrust2', p + 'thrust1'], spin: [p + 'spin1', p + 'spin2', p + 'spin2'], up: [p + 'up1', p + 'up2', p + 'chop2'] });
+  const FRM = { wd_: FRM0('wd_'), qiang_: FRM0('qiang_'), bow_: FRM0('bow_'), stone_: FRM0('stone_'), fan_: FRM0('fan_') };
+  const HELDP = { 0: 'wd_', 3: 'qiang_', 5: 'bow_', 7: 'stone_', 8: 'fan_' };
   const heldPre = () => HELDP[OG().wep] || 'wd_';
   const motFr = k => (FRM[heldPre()] || FRM.wd_)[MOT[k] || 'chop'];
   for (const k of Object.keys(SK)) Object.defineProperties(SK[k], {
