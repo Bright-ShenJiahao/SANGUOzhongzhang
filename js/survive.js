@@ -822,8 +822,10 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   // 11/14 用户：范围比群侠传大 → 按阶缩（黄 .75 玄 .75 地 .7 天 .65）；武学试炼里能一招招调，存在本机，调完复制给 Claude 写死
   const DRS0 = { 1: .75, 2: .75, 3: .7, 4: .65 }; let DRS = {}; try { DRS = JSON.parse(localStorage.getItem('szz-dao-rs') || '{}') || {}; } catch (e) {}
   const rsOf = k => DRS[k] != null ? DRS[k] : DRS0[(SK[k] && SK[k].tier) || 1] || 1;
+  let DSP = {}; try { DSP = JSON.parse(localStorage.getItem('szz-dao-sp') || '{}') || {}; } catch (e) {}   // 起手/收势倍率（越大越慢），同样在武学试炼里拖动调
+  const spOf = k => DSP[k] != null ? DSP[k] : 1;
   const SPDN = [[.62, '极快'], [.85, '快'], [1.05, '中'], [1.25, '慢'], [99, '极慢']];
-  const spdTxt = o => { const wu = o.dk ? o.wu : o.wu * 1.2, t = wu + o.rc; return `出手${SPDN.find(q => t <= q[0])[1]}　起手 ${wu.toFixed(2)} 秒 · 收势 ${o.rc.toFixed(2)} 秒`; };
+  const spdTxt = o => { const m = o.dk ? spOf(o.key) : 1, wu = (o.dk ? o.wu : o.wu * 1.2) * m, rc = o.rc * m, t = wu + rc; return `出手${SPDN.find(q => t <= q[0])[1]}　起手 ${wu.toFixed(2)} 秒 · 收势 ${rc.toFixed(2)} 秒`; };
   let DKT = 0; const DKO = [];   // 刀的持续判定（飞刃、血河、裂地环等）不靠 later：翻滚也不会断
   const dmk = o => Object.assign({ t: 0, cm: CM, ck: CK, rm: RM }, o);
   // 易伤：破甲每层 +10%；浮空窗口 +25%（精锐/首领只吃一半）
@@ -891,7 +893,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       ctx.restore();
     }
   }
-  const DAO = (k, tier, mot, o) => { add(k, Object.assign({ tier, dk: 1 }, o)); WOFX[k] = 0; MOTX[k] = mot; };
+  const DAO = (k, tier, mot, o) => { add(k, Object.assign({ tier, dk: 1, key: k }, o)); WOFX[k] = 0; MOTX[k] = mot; };
   const RED = ['rgba(255,90,80,', 'rgba(255,225,215,'];
   // ---- 黄 ----
   DAO('hengsao', 1, 'sweep', { name: '截江扫', icon: '截', color: '#ffb45a', need: 75, wu: .40, rc: .20, range: 60, half: 2.356,
@@ -1235,7 +1237,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
         const l0 = lvOf(key); S.mast[key] = (S.mast[key] || 0) + AFX.xp(); if (lvOf(key) > l0) floaters.push({ x: hero.x, y: hero.y - 76, t: 0, txt: k.name + ' LV' + lvOf(key), color: '#ffd86e' });
         if (!k.dk && lvOf(key) >= 10) later(.2, () => { CM *= .6; k.cast(); });   // LV10 质变：多出一击
         CM = 1; RM = 1; CK = '';
-        S.recov = { t: 0, dur: (k.dk ? Math.max(.08, k.rc - DLV.rc[lvOf(key) - 1]) : k.rc) * CDM(), pose: k.pose[1], late: k.poseL }; S.wind = null;
+        S.recov = { t: 0, dur: (k.dk ? Math.max(.08, k.rc - DLV.rc[lvOf(key) - 1]) * spOf(key) : k.rc) * CDM(), pose: k.pose[1], late: k.poseL }; S.wind = null;
         S.qi = (S.qi + 1) % 5; if (S.qi === 0) S.cycles++;
       }
       return;
@@ -1246,7 +1248,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     if ((S.qt += dt) < .05) return;
     const k = SK[S.slots[S.qi]];
     if (k && nearest(k.need)) { const key = S.slots[S.qi], ch = 0;   // 11/14 用户定：连携删掉（和兵器精通重复）   // 只算同一轮里紧挨着的前一槽；同一招重复、轮回到第 1 槽都不算
-       S.wind = { i: S.qi, k, key, ch, t: 0, dur: (k.dk ? Math.max(.12, k.wu - DLV.wu[lvOf(S.slots[S.qi]) - 1]) : k.wu * 1.2) * (OG().wu || 1) * CDM() * (1 - .2 * ch) }; S.hold = 0; return; }
+       S.wind = { i: S.qi, k, key, ch, t: 0, dur: (k.dk ? Math.max(.12, k.wu - DLV.wu[lvOf(S.slots[S.qi]) - 1]) * spOf(S.slots[S.qi]) : k.wu * 1.2) * (OG().wu || 1) * CDM() * (1 - .2 * ch) }; S.hold = 0; return; }
     if (k && S.hold < 1.2) { S.hold += .05; S.qt = 0; return; }   // 这一招够不着人：等 1.2 秒，还不行就跳下一招
     S.skip[S.qi] = .2; S.qt = -.05; S.qi = (S.qi + 1) % 5; if (S.qi === 0) S.cycles++; S.hold = 0;
   }
@@ -2287,7 +2289,8 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   // 11/13 武学试炼（开发者面板）：看招用
   const TRIAL = { SK, GF, MOT, WEPN, TIERN, wepOf, long() { W.tot = 9999; if (W.t > W.tot - 5) W.t = 0; },
     setGf(ids) { S.gf = ['', '', '']; ids.slice(0, 3).forEach((id, i) => { S.gf[i] = id; }); GM = gfCalc(); }, setQg(id) { S.qg = id || ''; GM = gfCalc(); }, gf: () => S.gf.slice(), qg: () => S.qg, mul: k => skillMul(k), lv: k => lvOf(k), spd: k => spdTxt(SK[k]), rs: k => SK[k] && SK[k].dk ? rsOf(k) : null, setRs(k, v) { DRS[k] = v; try { localStorage.setItem('szz-dao-rs', JSON.stringify(DRS)); } catch (e) {} },
-    rsAll: () => Object.keys(SK).filter(k => SK[k].dk && !SK[k].off).sort((a, b) => SK[a].tier - SK[b].tier).map(k => `${TIERN[SK[k].tier]} ${SK[k].name}(${k}) ×${rsOf(k)}`).join('\n'), setLv(k, l) { S.lvLock = {}; if (k && l) S.lvLock[k] = l; } };
+    sp: k => spOf(k), setSp(k, v) { DSP[k] = v; try { localStorage.setItem('szz-dao-sp', JSON.stringify(DSP)); } catch (e) {} }, spAll(v) { Object.keys(SK).forEach(k => { if (SK[k].dk) DSP[k] = v; }); try { localStorage.setItem('szz-dao-sp', JSON.stringify(DSP)); } catch (e) {} },
+    rsAll: () => Object.keys(SK).filter(k => SK[k].dk && !SK[k].off).sort((a, b) => SK[a].tier - SK[b].tier).map(k => `${TIERN[SK[k].tier]} ${SK[k].name}(${k}) 范围×${rsOf(k)} 速度×${spOf(k)}（${spdTxt(SK[k])}）`).join('\n'), setLv(k, l) { S.lvLock = {}; if (k && l) S.lvLock[k] = l; } };
   window.SURV = { trial: TRIAL, curNode: () => RT.on && W.started ? RT.node : null, status, attrInfo, addXiu: n => addXiu(n), heldPre: () => heldPre(), dbg: () => ({ gf: S.gf.slice(), qg: S.qg, zq: S.zq, zqMax: zqMax(), exp: S.gfExp, GM }), giveGf: id => { if (GF[id]) { if (GF[id].qg) S.qg = id; else { const f = S.gf.indexOf(""); if (f >= 0) S.gf[f] = id; } } }, newHud: () => RT.on && !!RT.node, stunGate, noStun: () => RT.on, get slots() { return S.slots; }, SK, beginNode, frozen: () => RT.on && (ROUTE.shown() || buildOpen), routeHp: () => [hero.hp, maxHp()], camp(k) { if (k === 'heal') heal(maxHp() * .3); else RT.dmg *= 1.1; }, ORIGINS, setOrigin(k) { if (ORIGINS[k] && !ORIGINS[k].locked) { origin = k; startW = null; } }, origin: () => origin, setWep(w) { startW = w; }, wep: () => heldW(), startSk: () => startSk(), WEPN, takeMul: () => {
       if (RT.on && GM.block && Math.random() < GM.block) { floaters.push({ x: hero.x, y: hero.y - 50, t: 0, txt: '格挡', color: '#bfe0ff' }); return 0; }
       const mv = Math.abs(hero.ix) > .1 || Math.abs(hero.iy) > .1, low = hero.hp / maxHp() < .3 ? 1 - .10 * GM.low : 1;
