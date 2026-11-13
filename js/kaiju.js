@@ -75,7 +75,7 @@
   #kaiju .shake{animation:kjShake .3s}@keyframes kjShake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
   /* 右栏：兵籍牒 */
   /* 11/13 用户：兵籍牒五行和左、中栏重复 → 换成主角原地走动的人像（当前皮肤 + 当前兵器） */
-  #kaiju .fig{position:relative;height:calc(150px*var(--k));border:1px solid #4a3c25;background:radial-gradient(ellipse at 50% 82%,rgba(201,164,92,.18),transparent 60%),#15130f;box-shadow:inset 0 0 0 2px #0b0a08;margin-bottom:4px}
+  #kaiju .fig{position:relative;height:clamp(84px,17vh,calc(150px*var(--k)));border:1px solid #4a3c25;background:radial-gradient(ellipse at 50% 82%,rgba(201,164,92,.18),transparent 60%),#15130f;box-shadow:inset 0 0 0 2px #0b0a08;margin-bottom:4px}
   #kaiju .fig canvas{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;display:block;image-rendering:pixelated;z-index:0!important}
   #kaiju .fig small{position:absolute;left:0;right:0;bottom:4px;text-align:center;font-size:calc(11px*var(--k));color:#a99878;letter-spacing:.15em}
   #kaiju .rows div{display:flex;justify-content:space-between;border-bottom:1px dashed rgba(201,164,92,.3);padding:4px 2px;font-size:calc(13px*var(--k));color:#e8dcc0}#kaiju .rows span{color:#8f826c}
@@ -85,6 +85,9 @@
   #kaiju .att div.hi b{color:var(--gl)}#kaiju .att div.lo b{color:#8a7f6c}
   #kaiju .att div.sel{border-color:var(--gl);box-shadow:0 0 0 1px var(--gd)}
   #kaiju .axd{min-height:1.6em;margin:6px 0 0;font-size:calc(11px*var(--k));color:#8f826c;text-align:center}#kaiju .axd b{color:var(--gl);font-weight:400}
+  #kaiju .pan{scrollbar-width:none}#kaiju .pan::-webkit-scrollbar{display:none}   /* 11/13 用户：右栏不要滚动条 */
+  @media (max-height:760px){#kaiju .skd{display:none}#kaiju .fig{height:90px}}
+  @media (max-height:820px){#kaiju .sec{margin-top:8px}#kaiju h4{margin-bottom:6px}#kaiju .att div{padding:3px 8px}#kaiju .axd{margin-top:3px}#kaiju .skd{margin-top:4px}#kaiju .slots div{max-width:calc(46px*var(--k))}}
   #kaiju .slots{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
   #kaiju .slots div{aspect-ratio:1;max-width:calc(54px*var(--k));border:2px solid var(--rdd);background:var(--ink2) center/cover;position:relative;box-shadow:inset 0 0 0 2px #0b0a08;display:flex;align-items:center;justify-content:center;font-size:calc(18px*var(--k));color:var(--gl)}
   #kaiju .slots div:before,#kaiju .slots div:after{content:"";position:absolute;width:7px;height:7px;border:2px solid var(--rd);pointer-events:none}
