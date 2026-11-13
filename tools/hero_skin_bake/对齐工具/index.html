@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>武器对齐工具</title>
+<style>
+:root{--bg:#f4f3ef;--panel:#fff;--ink:#1f2328;--mute:#667085;--line:#d9d6cd;--acc:#b4541a;--acc-ink:#fff;--chip:#ebe8df;--stage:#476e47}
+@media (prefers-color-scheme:dark){:root{--bg:#17181a;--panel:#212326;--ink:#ecebe7;--mute:#9aa1ab;--line:#35383d;--acc:#e08a4a;--acc-ink:#1b1206;--chip:#2b2e33}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+header{padding:14px 16px 6px}
+h1{font-size:19px;margin:0 0 2px;text-wrap:balance}
+.sub{color:var(--mute);font-size:13px;margin:0}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:10px 16px}
+.chip,button{font:inherit;color:var(--ink);background:var(--chip);border:1px solid var(--line);border-radius:8px;padding:6px 12px;cursor:pointer;white-space:nowrap}
+.chip[aria-pressed=true],button.on{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+button:focus-visible,.chip:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+main{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:14px;padding:0 16px 16px;align-items:start}
+@media (max-width:900px){main{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px}
+.stagewrap{position:relative}
+#stage{width:100%;height:auto;display:block;border-radius:8px;touch-action:none;cursor:grab;background:var(--stage)}
+#stage.drag{cursor:grabbing}
+.stagebar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin-bottom:8px}
+.fname{font-weight:600;font-size:16px}
+.row{display:flex;align-items:center;gap:8px;margin:8px 0;flex-wrap:wrap}
+.row label{min-width:5.2em;color:var(--mute);font-size:13px}
+.row input[type=range]{flex:1;min-width:120px;accent-color:var(--acc)}
+.val{font-variant-numeric:tabular-nums;min-width:3.4em;text-align:right;font-size:13px}
+.pad{display:grid;grid-template-columns:repeat(3,44px);grid-template-rows:repeat(3,40px);gap:4px}
+.pad button{padding:0;font-size:17px}
+.btns{display:flex;flex-wrap:wrap;gap:6px}
+h2{font-size:14px;margin:14px 0 4px;color:var(--mute);font-weight:600}
+.strip{display:grid;grid-template-columns:repeat(10,minmax(64px,1fr));gap:6px;overflow-x:auto;padding:0 16px 14px}
+.th{background:var(--panel);border:2px solid var(--line);border-radius:8px;padding:2px;cursor:pointer;text-align:center;font-size:11px;color:var(--mute);min-width:64px}
+.th[aria-current=true]{border-color:var(--acc);color:var(--ink)}
+.th canvas{width:100%;height:auto;display:block;border-radius:5px;background:var(--stage)}
+textarea{width:100%;height:110px;font:12px/1.4 ui-monospace,Menlo,Consolas,monospace;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px;resize:vertical}
+.hint{color:var(--mute);font-size:12.5px;margin:6px 0 0}
+#pv{background:var(--stage);border-radius:8px;display:block;width:100%;height:auto;image-rendering:pixelated}
+.ok{color:var(--acc);font-size:13px;margin-left:6px}
+kbd{font:12px ui-monospace,monospace;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 4px;background:var(--bg)}
+</style>
+</head>
+<body>
+<header>
+  <h1>武器对齐工具</h1>
+  <p class="sub">拖动武器对齐到手上，改完后把最下面的数据复制发给 Claude，由 Claude 按这些位置出图。</p>
+</header>
+<div class="chips" id="chips" role="group" aria-label="选择武器"></div>
+<main>
+  <section class="panel">
+    <div class="stagebar">
+      <span class="fname" id="fname"></span>
+      <span class="btns">
+        <button id="prev" aria-label="上一帧">← 上一帧</button>
+        <button id="next" aria-label="下一帧">下一帧 →</button>
+        <button id="guide" class="on">辅助线</button>
+        <button id="skin0" class="on">白衣</button><button id="skin1">盔甲</button><button id="skin2">黄巾</button><button id="skin3">白马</button><button id="skin4">曹军</button><button id="skin5">白毦</button><button id="skin6">吴军</button><button id="skin7">西凉</button>
+      </span>
+    </div>
+    <div class="stagewrap"><canvas id="stage" width="1248" height="948" aria-label="对齐画布：拖动移动武器，拖动武器尖端的圆点旋转"></canvas></div>
+    <p class="hint">直接拖动画面移动武器；拖动武器尖端的圆点旋转。键盘：方向键移动 1 像素（按住 Shift 为 5 像素），<kbd>Q</kbd>/<kbd>E</kbd> 旋转 1 度，<kbd>[</kbd>/<kbd>]</kbd> 换帧。</p>
+  </section>
+  <aside class="panel" id="side">
+    <div id="ctl">
+      <div class="row"><label>位置</label>
+        <div class="pad" aria-label="微调位置">
+          <span></span><button data-n="0,-1" aria-label="上移">↑</button><span></span>
+          <button data-n="-1,0" aria-label="左移">←</button><span class="val" id="xy" style="align-self:center;text-align:center;min-width:0;font-size:11px"></span><button data-n="1,0" aria-label="右移">→</button>
+          <span></span><button data-n="0,1" aria-label="下移">↓</button><span></span>
+        </div>
+      </div>
+      <div class="row"><label for="ang">角度</label><input id="ang" type="range" min="-180" max="180" step="1"><span class="val" id="angv"></span></div>
+      <div class="row"><label></label><span class="btns"><button data-r="-5">−5°</button><button data-r="-1">−1°</button><button data-r="1">+1°</button><button data-r="5">+5°</button></span></div>
+      <div class="row"><label>前后</label><span class="btns"><button id="front">在身体前面</button><button id="back">在身体后面</button></span></div>
+      <div class="row"><label for="cover">手盖住柄</label><input id="cover" type="range" min="0" max="16" step="1"><span class="val" id="coverv"></span></div>
+      <div class="row"><label for="hands">两手间距</label><input id="hands" type="range" min="0" max="45" step="1"><span class="val" id="handsv"></span></div>
+      <div class="row" id="bowrow"><label for="bowsel">弓的状态</label><select id="bowsel"><option value="bow0">松弦</option><option value="bow1">半拉</option><option value="bow2">满弓</option></select></div>
+      <div class="row"><label>其他</label><span class="btns"><button id="flip">上下翻转</button><button id="hide">这一帧不显示武器</button></span></div>
+      <div class="row"><label>整帧</label><span class="btns"><button id="copyprev">照搬上一帧</button><button id="reset">这一帧恢复默认</button></span></div>
+    </div>
+    <p class="hint" id="noweapon" hidden>拳没有武器，不需要对齐。</p>
+    <h2>动起来看</h2>
+    <canvas id="pv" width="416" height="316"></canvas>
+    <div class="row"><span class="btns"><button id="play" class="on">暂停</button><button id="pvall" class="on">全部动作</button><button id="pvcur">只看当前动作</button></span></div>
+  </aside>
+</main>
+<div class="strip" id="strip" aria-label="20 帧"></div>
+<section class="panel" style="margin:0 16px 24px">
+  <h2 style="margin-top:0">改完后：把这段数据发给 Claude</h2>
+  <textarea id="out" readonly aria-label="对齐数据"></textarea>
+  <div class="row"><button id="copy">复制数据</button><span class="ok" id="copied" role="status"></span>
+    <span style="flex:1"></span><button id="resetall">全部恢复默认</button><button id="resetyes" hidden>确认全部恢复</button></div>
+  <p class="hint">数据包含全部 10 种武器。你的修改会自动记在这个浏览器里，下次打开还在；换设备不会带过去，所以改完请复制发给 Claude。</p>
+</section>
+<script src="data.js"></script>
+<script>
+(function(){
+const D=window.DATA,C=D.cell,VX=-120,VY=-70,VW=416,VH=316,Z=3,KEY='weapon-align-v1';
+const $=id=>document.getElementById(id);
+const clone=o=>JSON.parse(JSON.stringify(o));
+let sets=clone(D.sets);
+try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&s.v===1)for(const st of sets){const a=s.sets[st.key];if(a&&a.length===20)st.frames.forEach((f,i)=>Object.assign(f,a[i]))}}catch(e){}
+let si=0,fi=0,guides=true,playing=true,pvAll=true;
+const frames=new Image();frames.src='frames.png';
+const imgs={};for(const k in D.weapons){imgs[k]=new Image();imgs[k].src=D.weapons[k].img;imgs[k].onload=()=>{drawAll()}}
+let built=false;frames.onload=()=>{if(!built){buildStrip();built=true}drawAll()};
+const SK=['frames.png','frames_armor.png','frames_hj.png','frames_bm.png','frames_cao.png','frames_baier.png','frames_wu.png','frames_xl.png'];SK.forEach((u,i)=>{$('skin'+i).onclick=()=>{frames.src=u;SK.forEach((_,j)=>$('skin'+j).classList.toggle('on',i===j))}});
+const cur=()=>sets[si].frames[fi];
+function save(){try{localStorage.setItem(KEY,JSON.stringify({v:1,sets:pack()}))}catch(e){}}
+function pack(){const o={};for(const st of sets)o[st.key]=st.frames.map(f=>({x:+f.x.toFixed(1),y:+f.y.toFixed(1),a:+f.a.toFixed(1),front:f.front,hide:f.hide,cover:f.cover,hands:f.hands,flip:f.flip,v:f.v}));return o}
+function body(ctx,f){ctx.imageSmoothingEnabled=false;ctx.drawImage(frames,f.c*C,f.r*C,C,C,0,0,C,C)}
+function dir(f){const r=f.a*Math.PI/180;return [Math.cos(r),Math.sin(r)]}
+function covers(f){const [dx,dy]=dir(f);return (f.hands>0?[-f.hands,f.hands]:[0]).map(t=>[f.x+dx*t,f.y+dy*t])}
+function weapon(ctx,f){const w=D.weapons[f.v],im=imgs[f.v];if(!w||!im||!im.complete)return;ctx.save();ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.translate(f.x,f.y);ctx.rotate(f.a*Math.PI/180);ctx.scale(.5,f.flip?-.5:.5);ctx.drawImage(im,-w.gx,-w.gy);ctx.restore()}
+function render(ctx,f){
+  const has=f.v&&!f.hide;
+  if(has&&!f.front)weapon(ctx,f);
+  body(ctx,f);
+  if(has&&f.front){weapon(ctx,f);if(f.cover>0){ctx.save();ctx.beginPath();for(const [x,y] of covers(f)){ctx.moveTo(x+f.cover,y);ctx.arc(x,y,f.cover,0,7)}ctx.clip();body(ctx,f);ctx.restore()}}
+}
+function tip(f){const w=D.weapons[f.v];const L=Math.max(34,(w.w-w.gx)*.5-6);const [dx,dy]=dir(f);return [f.x+dx*L,f.y+dy*L]}
+const st=$('stage'),sx=st.getContext('2d');
+function drawStage(){const f=cur();sx.setTransform(1,0,0,1,0,0);sx.clearRect(0,0,st.width,st.height);sx.setTransform(Z,0,0,Z,-VX*Z,-VY*Z);
+  if(guides){sx.strokeStyle='rgba(255,255,255,.28)';sx.lineWidth=1/Z;sx.strokeRect(0,0,C,C);sx.beginPath();sx.moveTo(VX,170);sx.lineTo(VX+VW,170);sx.stroke()}
+  render(sx,f);
+  if(guides&&f.v&&!f.hide){sx.lineWidth=1.5/Z;sx.strokeStyle='#ffe14d';
+    if(f.front&&f.cover>0)for(const [x,y] of covers(f)){sx.beginPath();sx.arc(x,y,f.cover,0,7);sx.stroke()}
+    sx.beginPath();sx.moveTo(f.x-5,f.y);sx.lineTo(f.x+5,f.y);sx.moveTo(f.x,f.y-5);sx.lineTo(f.x,f.y+5);sx.stroke();
+    const [tx,ty]=tip(f);sx.beginPath();sx.arc(tx,ty,5,0,7);sx.fillStyle='#ffe14d';sx.fill();sx.strokeStyle='#3a2a00';sx.stroke()}
+}
+function drawThumb(i){const cv=thumbs[i];if(!cv)return;const c=cv.getContext('2d');c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,cv.width,cv.height);const s=cv.width/260;c.setTransform(s,0,0,s,42*s,22*s);render(c,sets[si].frames[i])}
+let thumbs=[];
+function buildStrip(){const el=$('strip');el.textContent='';thumbs=[];D.names.forEach((n,i)=>{const b=document.createElement('div');b.className='th';b.tabIndex=0;b.setAttribute('role','button');const cv=document.createElement('canvas');cv.width=130;cv.height=110;b.appendChild(cv);b.appendChild(document.createTextNode((i+1)+' '+n));b.onclick=()=>{fi=i;sync()};b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();fi=i;sync()}};el.appendChild(b);thumbs.push(cv)})}
+function sync(){const f=cur(),s=sets[si];
+  [...$('chips').children].forEach((c,i)=>c.setAttribute('aria-pressed',i===si));
+  [...$('strip').children].forEach((c,i)=>c.setAttribute('aria-current',i===fi));
+  $('fname').textContent=s.name+' · 第 '+(fi+1)+' 帧 '+D.names[fi];
+  const has=!!f.v;$('ctl').hidden=!has;$('noweapon').hidden=has;
+  if(has){$('xy').textContent=Math.round(f.x)+','+Math.round(f.y);$('ang').value=Math.round(f.a);$('angv').textContent=Math.round(f.a)+'°';
+    $('front').classList.toggle('on',f.front);$('back').classList.toggle('on',!f.front);
+    $('cover').value=f.cover;$('coverv').textContent=f.cover?f.cover+' 像素':'关';$('cover').disabled=!f.front;
+    $('hands').value=f.hands;$('handsv').textContent=f.hands?Math.round(f.hands*2)+' 像素':'单手';
+    $('flip').classList.toggle('on',f.flip);$('hide').classList.toggle('on',f.hide);
+    $('bowrow').hidden=s.key!=='bow';if(s.key==='bow')$('bowsel').value=f.v}
+  drawStage();drawThumb(fi);$('out').value=JSON.stringify({v:1,sets:pack()});save()}
+function drawAll(){for(let i=0;i<20;i++)drawThumb(i);sync()}
+function norm(a){a=((a+180)%360+360)%360-180;return a}
+// chips
+sets.forEach((s,i)=>{const b=document.createElement('button');b.className='chip';b.textContent=s.name;b.onclick=()=>{si=i;drawAll()};$('chips').appendChild(b)});
+// pointer
+let drag=null;
+function pt(e){const r=st.getBoundingClientRect();return [(e.clientX-r.left)/r.width*VW+VX,(e.clientY-r.top)/r.height*VH+VY,r.width/VW]}
+st.addEventListener('pointerdown',e=>{const f=cur();if(!f.v||f.hide)return;const [x,y,k]=pt(e),[tx,ty]=tip(f);const near=Math.hypot(x-tx,y-ty)*k<22;drag={rot:near,ox:x-f.x,oy:y-f.y};st.setPointerCapture(e.pointerId);st.classList.add('drag');e.preventDefault()});
+st.addEventListener('pointermove',e=>{if(!drag)return;const f=cur(),[x,y]=pt(e);if(drag.rot)f.a=norm(Math.atan2(y-f.y,x-f.x)*180/Math.PI);else{f.x=Math.round(x-drag.ox);f.y=Math.round(y-drag.oy)}sync()});
+const end=()=>{drag=null;st.classList.remove('drag')};st.addEventListener('pointerup',end);st.addEventListener('pointercancel',end);
+// controls
+document.querySelectorAll('[data-n]').forEach(b=>b.onclick=()=>{const [dx,dy]=b.dataset.n.split(',').map(Number),f=cur();f.x+=dx;f.y+=dy;sync()});
+document.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{const f=cur();f.a=norm(f.a+ +b.dataset.r);sync()});
+$('ang').oninput=e=>{cur().a=+e.target.value;sync()};
+$('cover').oninput=e=>{cur().cover=+e.target.value;sync()};
+$('hands').oninput=e=>{cur().hands=+e.target.value;sync()};
+$('front').onclick=()=>{cur().front=true;sync()};$('back').onclick=()=>{cur().front=false;sync()};
+$('flip').onclick=()=>{const f=cur();f.flip=!f.flip;sync()};
+$('hide').onclick=()=>{const f=cur();f.hide=!f.hide;sync()};
+$('bowsel').onchange=e=>{cur().v=e.target.value;sync()};
+$('guide').onclick=e=>{guides=!guides;e.target.classList.toggle('on',guides);drawStage()};
+const step=d=>{fi=(fi+d+20)%20;sync()};$('prev').onclick=()=>step(-1);$('next').onclick=()=>step(1);
+$('copyprev').onclick=()=>{if(fi===0)return;const p=sets[si].frames[fi-1],f=cur();for(const k of ['x','y','a','front','hide','cover','hands','flip','v'])f[k]=p[k];sync()};
+$('reset').onclick=()=>{const d=D.sets[si].frames[fi];Object.assign(cur(),clone(d));sync()};
+$('resetall').onclick=()=>{$('resetyes').hidden=false};
+$('resetyes').onclick=()=>{sets=clone(D.sets);$('resetyes').hidden=true;drawAll()};
+$('copy').onclick=async()=>{const t=$('out');let ok=false;try{await navigator.clipboard.writeText(t.value);ok=true}catch(e){try{t.focus();t.select();ok=document.execCommand('copy')}catch(e2){}}
+  $('copied').textContent=ok?'已复制':'复制失败，请手动全选上面的文字复制';setTimeout(()=>{$('copied').textContent=''},3000)};
+document.addEventListener('keydown',e=>{const t=e.target.tagName;if(t==='TEXTAREA'||t==='SELECT')return;if(t==='INPUT'&&e.key.startsWith('Arrow'))return;const f=cur(),n=e.shiftKey?5:1;let h=true;
+  if(e.key==='['){step(-1)}else if(e.key===']'){step(1)}
+  else if(!f.v){h=false}
+  else if(e.key==='ArrowLeft')f.x-=n;else if(e.key==='ArrowRight')f.x+=n;else if(e.key==='ArrowUp')f.y-=n;else if(e.key==='ArrowDown')f.y+=n;
+  else if(e.key==='q'||e.key==='Q')f.a=norm(f.a-n);else if(e.key==='e'||e.key==='E')f.a=norm(f.a+n);else h=false;
+  if(h){e.preventDefault();sync()}});
+// preview
+const pv=$('pv'),px=pv.getContext('2d');
+function seq(){const a=[];if(pvAll){a.push([0,500]);for(let k=0;k<2;k++)for(const i of [1,2,3,2])a.push([i,130]);a.push([4,350]);for(const i of [5,6,7,8])a.push([i,90]);a.push([0,300]);for(let m=0;m<5;m++){a.push([10+m*2,190],[11+m*2,300],[0,220])}a.push([9,700])}
+  else{if(fi>=10){const m=(fi-10)>>1;a.push([0,300],[10+m*2,190],[11+m*2,320])}else if(fi>=1&&fi<=3){for(const i of [1,2,3,2])a.push([i,130])}else if(fi>=5&&fi<=8){for(const i of [5,6,7,8])a.push([i,90]);a.push([0,300])}else a.push([fi,400],[0,300])}return a}
+let pi=0,pt0=0;
+function tick(t){if(playing){const s=seq();if(pi>=s.length)pi=0;if(t-pt0>s[pi][1]){pi=(pi+1)%s.length;pt0=t}
+  px.setTransform(1,0,0,1,0,0);px.clearRect(0,0,pv.width,pv.height);px.setTransform(1,0,0,1,-VX,-VY);if(frames.complete)render(px,sets[si].frames[s[pi][0]])}
+  requestAnimationFrame(tick)}
+requestAnimationFrame(tick);
+$('play').onclick=e=>{playing=!playing;e.target.textContent=playing?'暂停':'播放';e.target.classList.toggle('on',playing)};
+$('pvall').onclick=()=>{pvAll=true;pi=0;$('pvall').classList.add('on');$('pvcur').classList.remove('on')};
+$('pvcur').onclick=()=>{pvAll=false;pi=0;$('pvcur').classList.add('on');$('pvall').classList.remove('on')};
+})();
+</script>
+</body>
+</html>

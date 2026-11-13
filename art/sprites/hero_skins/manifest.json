@@ -53,7 +53,10 @@
   "caojun": "曹军",
   "baier": "白毦兵·刘备",
   "wujun": "吴军·孙权",
-  "xiliang": "西凉"
+  "xiliang": "西凉",
+  "xianzhen": "吕布·陷阵营",
+  "xiandeng": "袁绍·先登营",
+  "danyang": "陶谦·丹阳兵"
  },
  "weapons": {
   "dao": {

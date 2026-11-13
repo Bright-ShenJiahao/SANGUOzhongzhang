@@ -34,7 +34,7 @@
   #kaiju h4 i{width:calc(26px*var(--k));height:calc(26px*var(--k));flex:none;background:center/contain no-repeat}
   #kaiju .sec{margin-top:12px}
   #kaiju .ico{width:calc(44px*var(--k));height:calc(44px*var(--k));flex:none;background:#0d0c0a center/cover;box-shadow:0 0 0 1px #5d4b2c,inset 0 0 0 1px #000}
-  #kaiju .fac{display:grid;grid-template-columns:repeat(8,1fr);gap:5px}
+  #kaiju .fac{display:grid;grid-template-columns:repeat(6,1fr);gap:5px}
   #kaiju .fac button{position:relative;aspect-ratio:1;padding:0;border:1px solid #4a3c25;background:#1c1a17 no-repeat;background-size:260% auto;background-position:50% 4%;image-rendering:pixelated;cursor:pointer;box-shadow:inset 0 0 0 2px #0b0a08}
   #kaiju .fac button.on{border-color:#f0d89a;box-shadow:inset 0 0 0 2px #0b0a08,0 0 0 1px #000,0 0 0 2px #c9a45c,0 0 10px rgba(240,200,110,.3)}
   #kaiju .fac button.lock{filter:grayscale(1) brightness(.45);cursor:not-allowed}#kaiju .fac button i{position:absolute;right:2px;bottom:1px;font-style:normal;font-size:calc(10px*var(--k));filter:none}
@@ -104,7 +104,7 @@
   @media (max-width:700px) and (orientation:portrait){#kaiju .cols{display:flex;flex-direction:column;overflow-y:auto;gap:12px;-webkit-overflow-scrolling:touch;padding-top:12px}#kaiju .pan{overflow:visible;flex:none;border-width:22px}#kaiju .pic{flex:none;height:min(58vw,250px)}#kaiju .pic .arr{width:28px;height:42px}
     #kaiju .bot .back{width:auto;flex:none;padding:0 14px!important;letter-spacing:2px}#kaiju .bot .go{flex:1;width:auto}#kaiju .tile{width:46px;height:46px}#kaiju .tile.on .ico{width:38px;height:38px}}`;
   // 11/13 用户：「名号」改成「势力」，初始没有势力（白衣乡勇），8 套皮肤就是 8 个势力；怎么解锁之后再定，先只开白衣（?debug 全开看效果）
-  const FAC = [['baiyi', '穿越者 · 乡勇'], ['guanjun', '皇甫嵩 · 官军'], ['huangjin', '张角 · 黄巾'], ['baima', '公孙瓒 · 白马义从'], ['caojun', '曹操 · 虎豹骑'], ['baier', '刘备 · 白毦兵'], ['wujun', '孙权 · 解烦卫'], ['xiliang', '董卓 · 飞熊军']];   // 11/13 用户核对历史后定名
+  const FAC = [['baiyi', '穿越者 · 乡勇'], ['guanjun', '皇甫嵩 · 官军'], ['huangjin', '张角 · 黄巾'], ['baima', '公孙瓒 · 白马义从'], ['caojun', '曹操 · 虎豹骑'], ['baier', '刘备 · 白毦兵'], ['wujun', '孙权 · 解烦卫'], ['xiliang', '董卓 · 飞熊军'], ['xianzhen', '吕布 · 陷阵营'], ['xiandeng', '袁绍 · 先登营'], ['danyang', '陶谦 · 丹阳兵']];   // 11/13 用户核对历史后定名
   const facOpen = f => f === 'baiyi' || /[?&]debug/.test(location.search);
   function render() {
     let curF = window.HERO_SKIN ? HERO_SKIN.cur() : 'baiyi'; if (!facOpen(curF) && window.HERO_SKIN) { HERO_SKIN.set('baiyi'); curF = 'baiyi'; }
