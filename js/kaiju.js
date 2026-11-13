@@ -152,14 +152,13 @@
           <div class="slots bag"><div class="has" style="background-image:url('art/ui/kaiju/bag.webp')" title="盘缠"><i>0</i></div>${'<div></div>'.repeat(4)}</div></div>
         </div>
       </div>
-      <div class="bot"><button class="back">返回主菜单</button><button class="dice" title="随机出身">🎲</button><button class="go" ${F.open && facOk ? '' : 'disabled style="opacity:.5"'}>${facOk ? '出发' : '未解锁'}</button></div>`;
+      <div class="bot"><button class="back">返回主菜单</button><button class="go" ${F.open && facOk ? '' : 'disabled style="opacity:.5"'}>${facOk ? '出发' : '未解锁'}</button></div>`;
     el.querySelectorAll('.fl button').forEach(b => b.onclick = () => { field = +b.dataset.i; render(); });   // 上锁的章节也能点开预览（灰图），但「出发」不可用
     el.querySelectorAll('.og .tile').forEach(b => b.onclick = () => { if (O[b.dataset.o].locked) return; SURV.setOrigin(b.dataset.o); render(); });
     el.querySelectorAll('.wp button').forEach(b => b.onclick = () => { SURV.setWep(+b.dataset.w); render(); });   // 11/13：出身的两种本门兵器选一种开局
     el.querySelectorAll('.att div').forEach(b => b.onclick = () => { axSel = +b.dataset.a === axSel ? -1 : +b.dataset.a; render(); });
     el.querySelectorAll('.fac button').forEach(b => b.onclick = () => { const f = b.dataset.f; if (window.HERO_SKIN) HERO_SKIN.set(f); render(); });
     el.querySelectorAll('.diff .tile').forEach(b => b.onclick = () => { if (window.TITLE && TITLE.setHard) TITLE.setHard(b.dataset.h === '1'); render(); });
-    el.querySelector('.dice').onclick = () => { const ks = Object.keys(O).filter(k => !O[k].locked); SURV.setOrigin(ks[Math.random() * ks.length | 0]); render(); };
     const tapBind = (b, fn) => {   // 手机：抬手就触发（不等 click，iOS 内置浏览器有时吞掉 click）；电脑照常 click
       let t = 0; b.addEventListener('pointerup', e => { if (e.pointerType === 'mouse') return; t = Date.now(); fn(); });
       b.onclick = () => { if (Date.now() - t > 700) fn(); };
