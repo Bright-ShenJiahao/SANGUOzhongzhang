@@ -34,6 +34,10 @@
   #kaiju h4 i{width:calc(26px*var(--k));height:calc(26px*var(--k));flex:none;background:center/contain no-repeat}
   #kaiju .sec{margin-top:12px}
   #kaiju .ico{width:calc(44px*var(--k));height:calc(44px*var(--k));flex:none;background:#0d0c0a center/cover;box-shadow:0 0 0 1px #5d4b2c,inset 0 0 0 1px #000}
+  #kaiju .fac{display:grid;grid-template-columns:repeat(8,1fr);gap:5px}
+  #kaiju .fac button{position:relative;aspect-ratio:1;padding:0;border:1px solid #4a3c25;background:#1c1a17 no-repeat;background-size:260% auto;background-position:50% 4%;image-rendering:pixelated;cursor:pointer;box-shadow:inset 0 0 0 2px #0b0a08}
+  #kaiju .fac button.on{border-color:#f0d89a;box-shadow:inset 0 0 0 2px #0b0a08,0 0 0 1px #000,0 0 0 2px #c9a45c,0 0 10px rgba(240,200,110,.3)}
+  #kaiju .fac button.lock{filter:grayscale(1) brightness(.45);cursor:not-allowed}#kaiju .fac button i{position:absolute;right:2px;bottom:1px;font-style:normal;font-size:calc(10px*var(--k));filter:none}
   #kaiju .namep{display:flex;align-items:center;gap:10px}#kaiju .namep b{font-size:calc(18px*var(--k));color:var(--gl);letter-spacing:2px;font-weight:400}#kaiju .namep small{display:block;font-size:calc(11px*var(--k));color:#8f826c}
   #kaiju select{width:100%;background:var(--ink);color:#d8ccb0;border:1px solid #5d4b2c;padding:6px;font-size:calc(13px*var(--k));font-family:inherit;margin-top:8px}
   /* 图标格：选中的展开成「图标 + 名字 + 一句话」，其余只露图标 */
@@ -99,7 +103,11 @@
     #kaiju .fname{font-size:calc(16px*var(--k))}#kaiju .fnote{display:none}#kaiju .fl{margin-top:5px}#kaiju .fl button{padding:4px}#kaiju .fl button small{display:none}}
   @media (max-width:700px) and (orientation:portrait){#kaiju .cols{display:flex;flex-direction:column;overflow-y:auto;gap:12px;-webkit-overflow-scrolling:touch;padding-top:12px}#kaiju .pan{overflow:visible;flex:none;border-width:22px}#kaiju .pic{flex:none;height:min(58vw,250px)}#kaiju .pic .arr{width:28px;height:42px}
     #kaiju .bot .back{width:auto;flex:none;padding:0 14px!important;letter-spacing:2px}#kaiju .bot .go{flex:1;width:auto}#kaiju .tile{width:46px;height:46px}#kaiju .tile.on .ico{width:38px;height:38px}}`;
+  // 11/13 用户：「名号」改成「势力」，初始没有势力（白衣乡勇），8 套皮肤就是 8 个势力；怎么解锁之后再定，先只开白衣（?debug 全开看效果）
+  const FAC = [['baiyi', '无势力 · 白衣乡勇'], ['guanjun', '官军'], ['huangjin', '黄巾'], ['baima', '白马义从'], ['caojun', '曹军'], ['baier', '白毦兵 · 刘备'], ['wujun', '吴军 · 孙权'], ['xiliang', '西凉']];
+  const facOpen = f => f === 'baiyi' || /[?&]debug/.test(location.search);
   function render() {
+    let curF = window.HERO_SKIN ? HERO_SKIN.cur() : 'baiyi'; if (!facOpen(curF) && window.HERO_SKIN) { HERO_SKIN.set('baiyi'); curF = 'baiyi'; }
     const O = window.SURV ? SURV.ORIGINS : {}, cur = SURV.origin(), o = O[cur], ai = SURV.attrInfo ? SURV.attrInfo(cur) : [], SK = SURV.SK, sk = SK[SURV.startSk ? SURV.startSk() : o.skill], curW = SURV.wep ? SURV.wep() : o.wep;
     const F = FIELDS[field], hard = !!(window.TITLE && TITLE.hardMode && TITLE.hardMode());
     const ic = u => `style="background-image:url('${u}')"`;
@@ -116,9 +124,9 @@
           <div class="fl">${FIELDS.map((f, i) => `<button data-i="${i}" class="${i === field ? 'on' : ''} ${f.open ? '' : 'lock'}"><b>${f.open ? '' : '🔒 '}${f.name}</b><small>${f.open ? f.sub : f.sub + ' · 未开放'}</small></button>`).join('')}</div>
         </div>
         <div class="pan">
-          <h4><i style="background-image:url('${K2('h_yin')}')"></i>名号</h4>
-          <div class="namep"><div class="ico" ${ic(PIC.plate)}></div><div><b>${esc(name)}</b><small>称号：无（通关或达成条件后获得）</small></div></div>
-          <select disabled><option>势力：普通乡勇（无增减）</option></select>
+          <h4><i style="background-image:url('${K2('h_yin')}')"></i>势力</h4>
+          <div class="fac">${FAC.map(f => { const lk = !facOpen(f[0]); return `<button data-f="${f[0]}" class="${f[0] === curF ? 'on' : ''} ${lk ? 'lock' : ''}" title="${f[1]}${lk ? '（未解锁）' : ''}" style="background-image:url('art/sprites/hero_skins/${f[0]}/dao/idle.png')">${lk ? '<i>🔒</i>' : ''}</button>`; }).join('')}</div>
+          <div class="eff">${(FAC.find(f => f[0] === curF) || FAC[0])[1]}　<span style="color:#8f826c">${curF === 'baiyi' ? '初始无势力，加入势力后换装' : '势力加成待定'}</span></div>
           <div class="sec"><h4><i style="background-image:url('${K2('h_jian')}')"></i>出身</h4>
           <div class="tiles og">${Object.keys(O).map(k => `<button data-o="${k}" class="tile ${k === cur ? 'on' : ''} ${O[k].locked ? 'lock' : ''}" title="${O[k].name}"><div class="ico" ${ic(OGI[k] || '')}></div><span><b>${O[k].name}</b><small>${O[k].locked ? '暂未开放' : (O[k].desc || '').split('。')[0]}</small></span></button>`).join('')}</div>
           <div class="eff">${(o.desc || '').split('。').slice(1).join('。') || o.desc}</div></div>
@@ -130,7 +138,7 @@
         </div>
         <div class="pan">
           <h4><i style="background-image:url('${K2('h_hufu')}')"></i>兵籍牒</h4>
-          <div class="fig"><canvas width="240" height="150"></canvas><small>${o.name} · ${SURV.WEPN ? SURV.WEPN[curW] : '刀'}${window.HERO_SKIN ? ' · ' + HERO_SKIN.name() : ''}</small></div>
+          <div class="fig"><canvas width="240" height="150"></canvas><small>${esc(name)} · ${o.name} · ${SURV.WEPN ? SURV.WEPN[curW] : '刀'}</small></div>
           <div class="sec"><h4><i style="background-image:url('${K2('h_qi')}')"></i>属性</h4>
           <div class="att">${ai.map((r, i) => `<div class="${i === axSel ? 'sel' : ''} ${r[1] > 3 ? 'hi' : r[1] < 3 ? 'lo' : ''}" data-a="${i}" title="${r[2]}：${r[3]}"><span>${r[0]}</span><b>${pctOf(r[2])}</b></div>`).join('')}</div>
           <div class="axd">${axSel >= 0 && ai[axSel] ? '<b>' + ai[axSel][0] + '</b>　' + ai[axSel][2] + '　' + ai[axSel][3] : '点属性看它加的是什么'}</div></div>
@@ -146,6 +154,7 @@
     el.querySelectorAll('.og .tile').forEach(b => b.onclick = () => { if (O[b.dataset.o].locked) return; SURV.setOrigin(b.dataset.o); render(); });
     el.querySelectorAll('.wp button').forEach(b => b.onclick = () => { SURV.setWep(+b.dataset.w); render(); });   // 11/13：出身的两种本门兵器选一种开局
     el.querySelectorAll('.att div').forEach(b => b.onclick = () => { axSel = +b.dataset.a === axSel ? -1 : +b.dataset.a; render(); });
+    el.querySelectorAll('.fac button').forEach(b => b.onclick = () => { const f = b.dataset.f; if (!facOpen(f)) { b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake'); return; } if (window.HERO_SKIN) HERO_SKIN.set(f); render(); });
     el.querySelectorAll('.diff .tile').forEach(b => b.onclick = () => { if (window.TITLE && TITLE.setHard) TITLE.setHard(b.dataset.h === '1'); render(); });
     el.querySelector('.dice').onclick = () => { const ks = Object.keys(O).filter(k => !O[k].locked); SURV.setOrigin(ks[Math.random() * ks.length | 0]); render(); };
     const tapBind = (b, fn) => {   // 手机：抬手就触发（不等 click，iOS 内置浏览器有时吞掉 click）；电脑照常 click
@@ -181,5 +190,5 @@
     figRaf = requestAnimationFrame(figLoop);
   }
   function close() { if (el) el.remove(); if (figRaf) cancelAnimationFrame(figRaf); figRaf = 0; }
-  window.KAIJU = { open, close, active: () => !!(el && el.parentNode) };
+  window.KAIJU = { open, close, refresh: () => { if (el && el.parentNode) render(); }, active: () => !!(el && el.parentNode) };
 })();

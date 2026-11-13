@@ -116,7 +116,7 @@
     btn(heroGroup, '跳过这一波', '', () => { if (window.SURV) SURV.skipWave(); });
     btn(heroGroup, '图鉴全开', '', () => { if (window.CODEX) { CODEX.unlockAll(); CODEX.open(); } });
     btn(heroGroup, '武学试炼', 'alt', () => { if (window.TRIAL) TRIAL.open(); });
-    { const sk = btn(heroGroup, '皮肤：' + (window.HERO_SKIN ? HERO_SKIN.name() : '白衣'), 'alt', () => { if (!window.HERO_SKIN) return; HERO_SKIN.next(); sk.textContent = '皮肤：' + HERO_SKIN.name(); });   // 11/13：8 套主角皮肤轮流看
+    { const sk = btn(heroGroup, '皮肤：' + (window.HERO_SKIN ? HERO_SKIN.name() : '白衣'), 'alt', () => { if (!window.HERO_SKIN) return; HERO_SKIN.next(); sk.textContent = '皮肤：' + HERO_SKIN.name(); if (window.KAIJU && KAIJU.refresh) KAIJU.refresh(); });   // 11/13：8 套主角皮肤轮流看
       if (window.HERO_SKIN) HERO_SKIN.preload(HERO_SKIN.cur(), 'wd_'); }   // 11/13：一招一招看武艺、心法、轻功
     const allBtn = btn(heroGroup, '解锁关卡：关', 'off', () => { window.ROUTE_ALL = !window.ROUTE_ALL; allBtn.textContent = '解锁关卡：' + (window.ROUTE_ALL ? '开' : '关'); allBtn.className = window.ROUTE_ALL ? '' : 'off'; tipLine(window.ROUTE_ALL ? '路线长卷上任意节点都能直接点进去（首领、精英、奇遇、商店）' : '恢复正常路线'); });   /* 11/12 用户：随便进去看 */
     btn(heroGroup, '给太平飞剑', '', () => { if (window.ARTIFACT) { ARTIFACT.grant('feijian'); ARTIFACT.equip('feijian'); ARTIFACT.startRun(); if (typeof say === 'function') say('已获得并装备太平飞剑', 2); try { if (window.TITLE && TITLE.refreshPreparation) TITLE.refreshPreparation(); } catch (e) {} } });

@@ -1570,7 +1570,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     const col = (lab, ic, v, tip) => `<div class="ac"><span>${lab}</span><em style="background-image:url('${A(ic)}')"></em><b>${v}</b><div class="at">${tip}</div></div>`;   // 11/11 用户：移上去（手机点一下）有解释
     const T = (h, a, b) => `<h5>${h}</h5><p>${a}</p>${b ? `<p class="cur">${b}</p>` : ''}`;
     const need = XIU_NEED(S.lv);
-    return `<div class="ab"><div class="md"><em style="background-image:url('${A('bag')}')"></em></div><div class="ar">${ai.map((r, i) => col(r[0], ATI[r[4]], r[1], T(r[0], ATD[r[4]] + '。3 为常人水平，修炼和道具可以提高。', '当前效果：' + r[2]))).join('')}<i class="sp"></i>`
+    return `<div class="ab"><div class="md"><em style="background-image:url('${A('bag')}')"></em></div><div class="ar">${ai.map((r, i) => col(r[0], ATI[r[4]], r[1], T(r[0], ATD[r[4]] + '', '当前效果：' + r[2]))).join('')}<i class="sp"></i>`
       + col('气血', 'hp', Math.round(mh * 10), T('气血', '归零就倒下。打完一关不会自动回满，靠「调息」（剩余真气换成气血）和道具回血。', `当前 ${Math.ceil(hero.hp * 10)} / ${Math.round(mh * 10)}`))
       + col('真气', 'zq', Math.round(zqMax() * 10), T('真气', '护体：挨打时先扣真气，替你挡掉三成伤害。发劲：真气过半时出手自动加力，伤害 +30%。战斗中会慢慢回复，打完一关剩下的真气用来调息回血。', `当前 ${Math.round(S.zq * 10)} / ${Math.round(zqMax() * 10)}`))
       + col('会心', 'crit', Math.round(cr * 100) + '%', T('会心', '出手有几率打出会心一击，造成加倍伤害。运气、道具和心法都能提高。', `当前会心几率 ${Math.round(cr * 100)}%`))
@@ -2112,9 +2112,9 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   setInterval(buildUi, 400);
 
   const attrInfo = (k, cur) => { const o0 = origin, d0 = S.atAdd; if (ORIGINS[k]) origin = k; if (!cur) S.atAdd = null; const at = AT(), pct = x => (x >= 0 ? '+' : '') + Math.round(x * 100) + '%';
-    const wp = v => pct((v - 3) * .06), R0 = [['体魄', at[0], '气血 ' + pct(AFX.hp() - 1), '越高越扛打：受到的伤害按比例减少'], ['短兵', at[1], '刀锤剑拳 ' + wp(at[1]), '刀、锤、剑、拳武艺的伤害，3 点为常人'], ['长兵', at[2], '枪、关刀 ' + wp(at[2]), '枪、关刀武艺的伤害，3 点为常人'],
+    const wp = v => pct((v - 3) * .06), R0 = [['体魄', at[0], '气血 ' + pct(AFX.hp() - 1), '越高越扛打：受到的伤害按比例减少'], ['短兵', at[1], '刀锤剑拳 ' + wp(at[1]), '刀、锤、剑、拳武艺的伤害'], ['长兵', at[2], '枪、关刀 ' + wp(at[2]), '枪、关刀武艺的伤害'],
       ['身法', at[3], '移速 ' + pct(AFX.move() - 1), '移动速度'], ['运气', at[4], '暴击 ' + pct(AFX.crit()), '暴击率（基础 5%）'], ['悟性', at[5], '熟练 ' + pct(AFX.xp() - 1), '武艺、心法熟练度涨得更快'],
-      ['射艺', at[6], '石子、弓 ' + wp(at[6]), '石子、弓武艺的伤害，3 点为常人'], ['术法', at[7], '黄符、羽扇 ' + wp(at[7]), '黄符、羽扇武艺的伤害，3 点为常人'], ['内力', at[8], '真气 ' + pct(AFX.nl() - 1), '真气上限和回复速度']];
+      ['射艺', at[6], '石子、弓 ' + wp(at[6]), '石子、弓武艺的伤害'], ['术法', at[7], '黄符、羽扇 ' + wp(at[7]), '黄符、羽扇武艺的伤害'], ['内力', at[8], '真气 ' + pct(AFX.nl() - 1), '真气上限和回复速度']];
     const r = ADO.map(i => R0[i].concat([i]));
     origin = o0; S.atAdd = d0; return r; };
   const status = () => ({   // 路线长卷「兵籍牒」用：这一局的当前状态（11/11）

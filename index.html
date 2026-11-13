@@ -62,7 +62,7 @@ body.szz-pro #help{display:none}
 .x-back{min-height:34px!important}
 }
 #rot small{display:block;margin-top:10px;font-size:14px;font-weight:600;color:#c9b691;line-height:1.6}
-</style><link rel="preload" href="pack/fonts/result.woff2?v=a551f5d7cf" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=a551f5d7cf)format("woff2");font-display:swap}</style><link rel="preload" href="pack/fonts/pixel.woff2?v=deb90e149c" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"Pixel12";src:url(pack/fonts/pixel.woff2?v=deb90e149c)format("woff2");font-display:swap}@font-face{font-family:"Songti SC";src:url(pack/fonts/pixel.woff2?v=deb90e149c)format("woff2");font-display:swap}@font-face{font-family:"STSong";src:url(pack/fonts/pixel.woff2?v=deb90e149c)format("woff2");font-display:swap}@font-face{font-family:"Noto Serif SC";src:url(pack/fonts/pixel.woff2?v=deb90e149c)format("woff2");font-display:swap}@font-face{font-family:"SimSun";src:url(pack/fonts/pixel.woff2?v=deb90e149c)format("woff2");font-display:swap}@font-face{font-family:"PingFang SC";src:url(pack/fonts/pixel.woff2?v=deb90e149c)format("woff2");font-display:swap}@font-face{font-family:"Microsoft YaHei";src:url(pack/fonts/pixel.woff2?v=deb90e149c)format("woff2");font-display:swap}@font-face{font-family:"Noto Sans CJK SC";src:url(pack/fonts/pixel.woff2?v=deb90e149c)format("woff2");font-display:swap}@font-face{font-family:"STKaiti";src:url(pack/fonts/pixel.woff2?v=deb90e149c)format("woff2");font-display:swap}@font-face{font-family:"KaiTi";src:url(pack/fonts/pixel.woff2?v=deb90e149c)format("woff2");font-display:swap}*{font-synthesis:none}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
+</style><link rel="preload" href="pack/fonts/result.woff2?v=47c6f4d219" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=47c6f4d219)format("woff2");font-display:swap}</style><link rel="preload" href="pack/fonts/pixel.woff2?v=bf53a8f5c1" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"Pixel12";src:url(pack/fonts/pixel.woff2?v=bf53a8f5c1)format("woff2");font-display:swap}@font-face{font-family:"Songti SC";src:url(pack/fonts/pixel.woff2?v=bf53a8f5c1)format("woff2");font-display:swap}@font-face{font-family:"STSong";src:url(pack/fonts/pixel.woff2?v=bf53a8f5c1)format("woff2");font-display:swap}@font-face{font-family:"Noto Serif SC";src:url(pack/fonts/pixel.woff2?v=bf53a8f5c1)format("woff2");font-display:swap}@font-face{font-family:"SimSun";src:url(pack/fonts/pixel.woff2?v=bf53a8f5c1)format("woff2");font-display:swap}@font-face{font-family:"PingFang SC";src:url(pack/fonts/pixel.woff2?v=bf53a8f5c1)format("woff2");font-display:swap}@font-face{font-family:"Microsoft YaHei";src:url(pack/fonts/pixel.woff2?v=bf53a8f5c1)format("woff2");font-display:swap}@font-face{font-family:"Noto Sans CJK SC";src:url(pack/fonts/pixel.woff2?v=bf53a8f5c1)format("woff2");font-display:swap}@font-face{font-family:"STKaiti";src:url(pack/fonts/pixel.woff2?v=bf53a8f5c1)format("woff2");font-display:swap}@font-face{font-family:"KaiTi";src:url(pack/fonts/pixel.woff2?v=bf53a8f5c1)format("woff2");font-display:swap}*{font-synthesis:none}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
 <style>button{letter-spacing:.04em!important}</style></head><body>
 <style>
 #bootSplash{position:fixed;inset:0;z-index:99999;background:radial-gradient(ellipse at 50% 45%,#f3e4cf 0%,#ecd9c0 55%,#d9c09f 100%);transition:opacity .45s ease-out}
@@ -112,7 +112,7 @@ if(location.protocol==='https:'&&!/[?&]debug(?:=|&|$)/.test(location.search)&&'s
 })();
 // 自动更新：打开游戏、或从后台切回来时，查一下线上有没有新版本；有就在标题/整备页自动刷新（战斗中不打扰）
 (function(){
-var BUILD='645f7cd0c77c',busy=false;
+var BUILD='6c5d1d1fc3d6',busy=false;
 if(location.protocol!=='https:'||/[?&]debug(?:=|&|$)/.test(location.search))return;
 function check(){
   if(busy)return;
@@ -1208,7 +1208,7 @@ const XIAOCHANG = { drawBackground() {}, state: () => null, start() {}, on: () =
     btn(heroGroup, '跳过这一波', '', () => { if (window.SURV) SURV.skipWave(); });
     btn(heroGroup, '图鉴全开', '', () => { if (window.CODEX) { CODEX.unlockAll(); CODEX.open(); } });
     btn(heroGroup, '武学试炼', 'alt', () => { if (window.TRIAL) TRIAL.open(); });
-    { const sk = btn(heroGroup, '皮肤：' + (window.HERO_SKIN ? HERO_SKIN.name() : '白衣'), 'alt', () => { if (!window.HERO_SKIN) return; HERO_SKIN.next(); sk.textContent = '皮肤：' + HERO_SKIN.name(); });   // 11/13：8 套主角皮肤轮流看
+    { const sk = btn(heroGroup, '皮肤：' + (window.HERO_SKIN ? HERO_SKIN.name() : '白衣'), 'alt', () => { if (!window.HERO_SKIN) return; HERO_SKIN.next(); sk.textContent = '皮肤：' + HERO_SKIN.name(); if (window.KAIJU && KAIJU.refresh) KAIJU.refresh(); });   // 11/13：8 套主角皮肤轮流看
       if (window.HERO_SKIN) HERO_SKIN.preload(HERO_SKIN.cur(), 'wd_'); }   // 11/13：一招一招看武艺、心法、轻功
     const allBtn = btn(heroGroup, '解锁关卡：关', 'off', () => { window.ROUTE_ALL = !window.ROUTE_ALL; allBtn.textContent = '解锁关卡：' + (window.ROUTE_ALL ? '开' : '关'); allBtn.className = window.ROUTE_ALL ? '' : 'off'; tipLine(window.ROUTE_ALL ? '路线长卷上任意节点都能直接点进去（首领、精英、奇遇、商店）' : '恢复正常路线'); });   /* 11/12 用户：随便进去看 */
     btn(heroGroup, '给太平飞剑', '', () => { if (window.ARTIFACT) { ARTIFACT.grant('feijian'); ARTIFACT.equip('feijian'); ARTIFACT.startRun(); if (typeof say === 'function') say('已获得并装备太平飞剑', 2); try { if (window.TITLE && TITLE.refreshPreparation) TITLE.refreshPreparation(); } catch (e) {} } });
@@ -3480,6 +3480,10 @@ let blessFx = []; // 方士施法成功的黄圈
   #kaiju h4 i{width:calc(26px*var(--k));height:calc(26px*var(--k));flex:none;background:center/contain no-repeat}
   #kaiju .sec{margin-top:12px}
   #kaiju .ico{width:calc(44px*var(--k));height:calc(44px*var(--k));flex:none;background:#0d0c0a center/cover;box-shadow:0 0 0 1px #5d4b2c,inset 0 0 0 1px #000}
+  #kaiju .fac{display:grid;grid-template-columns:repeat(8,1fr);gap:5px}
+  #kaiju .fac button{position:relative;aspect-ratio:1;padding:0;border:1px solid #4a3c25;background:#1c1a17 no-repeat;background-size:260% auto;background-position:50% 4%;image-rendering:pixelated;cursor:pointer;box-shadow:inset 0 0 0 2px #0b0a08}
+  #kaiju .fac button.on{border-color:#f0d89a;box-shadow:inset 0 0 0 2px #0b0a08,0 0 0 1px #000,0 0 0 2px #c9a45c,0 0 10px rgba(240,200,110,.3)}
+  #kaiju .fac button.lock{filter:grayscale(1) brightness(.45);cursor:not-allowed}#kaiju .fac button i{position:absolute;right:2px;bottom:1px;font-style:normal;font-size:calc(10px*var(--k));filter:none}
   #kaiju .namep{display:flex;align-items:center;gap:10px}#kaiju .namep b{font-size:calc(18px*var(--k));color:var(--gl);letter-spacing:2px;font-weight:400}#kaiju .namep small{display:block;font-size:calc(11px*var(--k));color:#8f826c}
   #kaiju select{width:100%;background:var(--ink);color:#d8ccb0;border:1px solid #5d4b2c;padding:6px;font-size:calc(13px*var(--k));font-family:inherit;margin-top:8px}
   /* 图标格：选中的展开成「图标 + 名字 + 一句话」，其余只露图标 */
@@ -3545,7 +3549,11 @@ let blessFx = []; // 方士施法成功的黄圈
     #kaiju .fname{font-size:calc(16px*var(--k))}#kaiju .fnote{display:none}#kaiju .fl{margin-top:5px}#kaiju .fl button{padding:4px}#kaiju .fl button small{display:none}}
   @media (max-width:700px) and (orientation:portrait){#kaiju .cols{display:flex;flex-direction:column;overflow-y:auto;gap:12px;-webkit-overflow-scrolling:touch;padding-top:12px}#kaiju .pan{overflow:visible;flex:none;border-width:22px}#kaiju .pic{flex:none;height:min(58vw,250px)}#kaiju .pic .arr{width:28px;height:42px}
     #kaiju .bot .back{width:auto;flex:none;padding:0 14px!important;letter-spacing:2px}#kaiju .bot .go{flex:1;width:auto}#kaiju .tile{width:46px;height:46px}#kaiju .tile.on .ico{width:38px;height:38px}}`;
+  // 11/13 用户：「名号」改成「势力」，初始没有势力（白衣乡勇），8 套皮肤就是 8 个势力；怎么解锁之后再定，先只开白衣（?debug 全开看效果）
+  const FAC = [['baiyi', '无势力 · 白衣乡勇'], ['guanjun', '官军'], ['huangjin', '黄巾'], ['baima', '白马义从'], ['caojun', '曹军'], ['baier', '白毦兵 · 刘备'], ['wujun', '吴军 · 孙权'], ['xiliang', '西凉']];
+  const facOpen = f => f === 'baiyi' || /[?&]debug/.test(location.search);
   function render() {
+    let curF = window.HERO_SKIN ? HERO_SKIN.cur() : 'baiyi'; if (!facOpen(curF) && window.HERO_SKIN) { HERO_SKIN.set('baiyi'); curF = 'baiyi'; }
     const O = window.SURV ? SURV.ORIGINS : {}, cur = SURV.origin(), o = O[cur], ai = SURV.attrInfo ? SURV.attrInfo(cur) : [], SK = SURV.SK, sk = SK[SURV.startSk ? SURV.startSk() : o.skill], curW = SURV.wep ? SURV.wep() : o.wep;
     const F = FIELDS[field], hard = !!(window.TITLE && TITLE.hardMode && TITLE.hardMode());
     const ic = u => `style="background-image:url('${u}')"`;
@@ -3562,9 +3570,9 @@ let blessFx = []; // 方士施法成功的黄圈
           <div class="fl">${FIELDS.map((f, i) => `<button data-i="${i}" class="${i === field ? 'on' : ''} ${f.open ? '' : 'lock'}"><b>${f.open ? '' : '🔒 '}${f.name}</b><small>${f.open ? f.sub : f.sub + ' · 未开放'}</small></button>`).join('')}</div>
         </div>
         <div class="pan">
-          <h4><i style="background-image:url('${K2('h_yin')}')"></i>名号</h4>
-          <div class="namep"><div class="ico" ${ic(PIC.plate)}></div><div><b>${esc(name)}</b><small>称号：无（通关或达成条件后获得）</small></div></div>
-          <select disabled><option>势力：普通乡勇（无增减）</option></select>
+          <h4><i style="background-image:url('${K2('h_yin')}')"></i>势力</h4>
+          <div class="fac">${FAC.map(f => { const lk = !facOpen(f[0]); return `<button data-f="${f[0]}" class="${f[0] === curF ? 'on' : ''} ${lk ? 'lock' : ''}" title="${f[1]}${lk ? '（未解锁）' : ''}" style="background-image:url('art/sprites/hero_skins/${f[0]}/dao/idle.png')">${lk ? '<i>🔒</i>' : ''}</button>`; }).join('')}</div>
+          <div class="eff">${(FAC.find(f => f[0] === curF) || FAC[0])[1]}　<span style="color:#8f826c">${curF === 'baiyi' ? '初始无势力，加入势力后换装' : '势力加成待定'}</span></div>
           <div class="sec"><h4><i style="background-image:url('${K2('h_jian')}')"></i>出身</h4>
           <div class="tiles og">${Object.keys(O).map(k => `<button data-o="${k}" class="tile ${k === cur ? 'on' : ''} ${O[k].locked ? 'lock' : ''}" title="${O[k].name}"><div class="ico" ${ic(OGI[k] || '')}></div><span><b>${O[k].name}</b><small>${O[k].locked ? '暂未开放' : (O[k].desc || '').split('。')[0]}</small></span></button>`).join('')}</div>
           <div class="eff">${(o.desc || '').split('。').slice(1).join('。') || o.desc}</div></div>
@@ -3576,7 +3584,7 @@ let blessFx = []; // 方士施法成功的黄圈
         </div>
         <div class="pan">
           <h4><i style="background-image:url('${K2('h_hufu')}')"></i>兵籍牒</h4>
-          <div class="fig"><canvas width="240" height="150"></canvas><small>${o.name} · ${SURV.WEPN ? SURV.WEPN[curW] : '刀'}${window.HERO_SKIN ? ' · ' + HERO_SKIN.name() : ''}</small></div>
+          <div class="fig"><canvas width="240" height="150"></canvas><small>${esc(name)} · ${o.name} · ${SURV.WEPN ? SURV.WEPN[curW] : '刀'}</small></div>
           <div class="sec"><h4><i style="background-image:url('${K2('h_qi')}')"></i>属性</h4>
           <div class="att">${ai.map((r, i) => `<div class="${i === axSel ? 'sel' : ''} ${r[1] > 3 ? 'hi' : r[1] < 3 ? 'lo' : ''}" data-a="${i}" title="${r[2]}：${r[3]}"><span>${r[0]}</span><b>${pctOf(r[2])}</b></div>`).join('')}</div>
           <div class="axd">${axSel >= 0 && ai[axSel] ? '<b>' + ai[axSel][0] + '</b>　' + ai[axSel][2] + '　' + ai[axSel][3] : '点属性看它加的是什么'}</div></div>
@@ -3592,6 +3600,7 @@ let blessFx = []; // 方士施法成功的黄圈
     el.querySelectorAll('.og .tile').forEach(b => b.onclick = () => { if (O[b.dataset.o].locked) return; SURV.setOrigin(b.dataset.o); render(); });
     el.querySelectorAll('.wp button').forEach(b => b.onclick = () => { SURV.setWep(+b.dataset.w); render(); });   // 11/13：出身的两种本门兵器选一种开局
     el.querySelectorAll('.att div').forEach(b => b.onclick = () => { axSel = +b.dataset.a === axSel ? -1 : +b.dataset.a; render(); });
+    el.querySelectorAll('.fac button').forEach(b => b.onclick = () => { const f = b.dataset.f; if (!facOpen(f)) { b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake'); return; } if (window.HERO_SKIN) HERO_SKIN.set(f); render(); });
     el.querySelectorAll('.diff .tile').forEach(b => b.onclick = () => { if (window.TITLE && TITLE.setHard) TITLE.setHard(b.dataset.h === '1'); render(); });
     el.querySelector('.dice').onclick = () => { const ks = Object.keys(O).filter(k => !O[k].locked); SURV.setOrigin(ks[Math.random() * ks.length | 0]); render(); };
     const tapBind = (b, fn) => {   // 手机：抬手就触发（不等 click，iOS 内置浏览器有时吞掉 click）；电脑照常 click
@@ -3627,7 +3636,7 @@ let blessFx = []; // 方士施法成功的黄圈
     figRaf = requestAnimationFrame(figLoop);
   }
   function close() { if (el) el.remove(); if (figRaf) cancelAnimationFrame(figRaf); figRaf = 0; }
-  window.KAIJU = { open, close, active: () => !!(el && el.parentNode) };
+  window.KAIJU = { open, close, refresh: () => { if (el && el.parentNode) render(); }, active: () => !!(el && el.parentNode) };
 })();
 
 // 战斗暂停与安全退出；战斗状态检查和重开/退出由 game.js 的窄接口提供。
@@ -6531,7 +6540,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     const col = (lab, ic, v, tip) => `<div class="ac"><span>${lab}</span><em style="background-image:url('${A(ic)}')"></em><b>${v}</b><div class="at">${tip}</div></div>`;   // 11/11 用户：移上去（手机点一下）有解释
     const T = (h, a, b) => `<h5>${h}</h5><p>${a}</p>${b ? `<p class="cur">${b}</p>` : ''}`;
     const need = XIU_NEED(S.lv);
-    return `<div class="ab"><div class="md"><em style="background-image:url('${A('bag')}')"></em></div><div class="ar">${ai.map((r, i) => col(r[0], ATI[r[4]], r[1], T(r[0], ATD[r[4]] + '。3 为常人水平，修炼和道具可以提高。', '当前效果：' + r[2]))).join('')}<i class="sp"></i>`
+    return `<div class="ab"><div class="md"><em style="background-image:url('${A('bag')}')"></em></div><div class="ar">${ai.map((r, i) => col(r[0], ATI[r[4]], r[1], T(r[0], ATD[r[4]] + '', '当前效果：' + r[2]))).join('')}<i class="sp"></i>`
       + col('气血', 'hp', Math.round(mh * 10), T('气血', '归零就倒下。打完一关不会自动回满，靠「调息」（剩余真气换成气血）和道具回血。', `当前 ${Math.ceil(hero.hp * 10)} / ${Math.round(mh * 10)}`))
       + col('真气', 'zq', Math.round(zqMax() * 10), T('真气', '护体：挨打时先扣真气，替你挡掉三成伤害。发劲：真气过半时出手自动加力，伤害 +30%。战斗中会慢慢回复，打完一关剩下的真气用来调息回血。', `当前 ${Math.round(S.zq * 10)} / ${Math.round(zqMax() * 10)}`))
       + col('会心', 'crit', Math.round(cr * 100) + '%', T('会心', '出手有几率打出会心一击，造成加倍伤害。运气、道具和心法都能提高。', `当前会心几率 ${Math.round(cr * 100)}%`))
@@ -7073,9 +7082,9 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   setInterval(buildUi, 400);
 
   const attrInfo = (k, cur) => { const o0 = origin, d0 = S.atAdd; if (ORIGINS[k]) origin = k; if (!cur) S.atAdd = null; const at = AT(), pct = x => (x >= 0 ? '+' : '') + Math.round(x * 100) + '%';
-    const wp = v => pct((v - 3) * .06), R0 = [['体魄', at[0], '气血 ' + pct(AFX.hp() - 1), '越高越扛打：受到的伤害按比例减少'], ['短兵', at[1], '刀锤剑拳 ' + wp(at[1]), '刀、锤、剑、拳武艺的伤害，3 点为常人'], ['长兵', at[2], '枪、关刀 ' + wp(at[2]), '枪、关刀武艺的伤害，3 点为常人'],
+    const wp = v => pct((v - 3) * .06), R0 = [['体魄', at[0], '气血 ' + pct(AFX.hp() - 1), '越高越扛打：受到的伤害按比例减少'], ['短兵', at[1], '刀锤剑拳 ' + wp(at[1]), '刀、锤、剑、拳武艺的伤害'], ['长兵', at[2], '枪、关刀 ' + wp(at[2]), '枪、关刀武艺的伤害'],
       ['身法', at[3], '移速 ' + pct(AFX.move() - 1), '移动速度'], ['运气', at[4], '暴击 ' + pct(AFX.crit()), '暴击率（基础 5%）'], ['悟性', at[5], '熟练 ' + pct(AFX.xp() - 1), '武艺、心法熟练度涨得更快'],
-      ['射艺', at[6], '石子、弓 ' + wp(at[6]), '石子、弓武艺的伤害，3 点为常人'], ['术法', at[7], '黄符、羽扇 ' + wp(at[7]), '黄符、羽扇武艺的伤害，3 点为常人'], ['内力', at[8], '真气 ' + pct(AFX.nl() - 1), '真气上限和回复速度']];
+      ['射艺', at[6], '石子、弓 ' + wp(at[6]), '石子、弓武艺的伤害'], ['术法', at[7], '黄符、羽扇 ' + wp(at[7]), '黄符、羽扇武艺的伤害'], ['内力', at[8], '真气 ' + pct(AFX.nl() - 1), '真气上限和回复速度']];
     const r = ADO.map(i => R0[i].concat([i]));
     origin = o0; S.atAdd = d0; return r; };
   const status = () => ({   // 路线长卷「兵籍牒」用：这一局的当前状态（11/11）
