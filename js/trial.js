@@ -17,6 +17,7 @@
 #szzTrial .ls small{display:block;opacity:.65;font-size:11px}
 #szzTrial .dt{border-top:1px solid rgba(184,149,90,.35);padding:7px 9px;line-height:1.55;min-height:64px}
 #szzTrial .dt b{color:#ffe08a}
+#szzTrial .lvr{margin-top:5px;display:flex;gap:4px;flex-wrap:wrap}#szzTrial .lvr button{padding:2px 7px;font-size:12px;background:#1c140d;border:1px solid #3a2a18;color:#efe2c4;cursor:pointer}#szzTrial .lvr button.on{border-color:#ffd86e;background:#3a2814}
 @media (max-aspect-ratio:1/1){#szzTrial{left:0;right:0;top:auto;bottom:0;width:auto;max-height:46vh}#szzTrial .ls{grid-template-columns:1fr 1fr 1fr}}`;
   function skills(w) { const t = T(); return Object.keys(t.SK).filter(k => !t.SK[k].off && t.wepOf(k) === w).sort((a, b) => (t.SK[a].tier || 0) - (t.SK[b].tier || 0)); }
   function render() {
@@ -26,7 +27,7 @@
     if (typeof tab === 'number') {
       const w = ORDER[tab], ks = skills(w);
       ls = ks.map((k, i) => { const s = t.SK[k]; return `<button data-k="${k}" class="${sel === k ? 'on' : ''}"><span style="color:${TC[s.tier || 0]}">${t.TIERN[s.tier || 0]}</span> ${i + 1}. ${s.name}<small>${MOTN[t.MOT[k]] || '—'}</small></button>`; }).join('');
-      if (sel && t.SK[sel]) { const s = t.SK[sel], i = ks.indexOf(sel); dt = `<b>${t.WEPN[w]} · 第 ${i + 1} 招 · ${s.name}</b>　${t.TIERN[s.tier || 0]}阶 · 动作：${MOTN[t.MOT[sel]] || '—'}<br>${s.desc}<br><span style="opacity:.65">当前伤害倍率 ×${t.mul(sel).toFixed(2)}（出身、属性、熟练都算在内）</span>`; }
+      if (sel && t.SK[sel]) { const s = t.SK[sel], i = ks.indexOf(sel); dt = `<b>${t.WEPN[w]} · 第 ${i + 1} 招 · ${s.name}</b>　${t.TIERN[s.tier || 0]}阶 · 动作：${MOTN[t.MOT[sel]] || '—'}<br>${s.desc}<br><span style="opacity:.65">当前伤害倍率 ×${t.mul(sel).toFixed(2)}（出身、属性、熟练都算在内）</span><div class="lvr">等级：${[1, 3, 5, 7, 10].map(n => `<button data-lv="${n}" class="${t.lv(sel) === n ? 'on' : ''}">LV${n}</button>`).join('')}</div>`; }
     } else {
       const qg = tab === 'qg', on = qg ? [t.qg()] : t.gf();
       const ids = Object.keys(t.GF).filter(id => !t.GF[id].off && !!t.GF[id].qg === qg).sort((a, b) => t.GF[a].t - t.GF[b].t);
@@ -36,7 +37,8 @@
     box.innerHTML = `<div class="hd"><span>武学试炼</span><button class="x">关闭</button></div><div class="tabs">${tabs}</div><div class="ls">${ls}</div><div class="dt">${dt}</div>`;
     box.querySelector('.x').onclick = close;
     box.querySelectorAll('.tabs button').forEach(b => b.onclick = () => { const v = b.dataset.t; tab = v === 'gf' || v === 'qg' ? v : +v; sel = null; render(); });
-    box.querySelectorAll('[data-k]').forEach(b => b.onclick = () => { sel = b.dataset.k; SURV.slots.splice(0, 5, sel, '', '', '', ''); render(); });
+    box.querySelectorAll('[data-k]').forEach(b => b.onclick = () => { sel = b.dataset.k; t.setLv(sel, 1); SURV.slots.splice(0, 5, sel, '', '', '', ''); render(); });
+    box.querySelectorAll('[data-lv]').forEach(b => b.onclick = () => { t.setLv(sel, +b.dataset.lv); render(); });   // 11/14：看各等级的样子（锁定等级，放招不再涨）
     box.querySelectorAll('[data-g]').forEach(b => b.onclick = () => { const id = b.dataset.g; sel = id;
       if (tab === 'qg') t.setQg(t.qg() === id ? '' : id);
       else { let g = t.gf().filter(x => x); g = g.includes(id) ? g.filter(x => x !== id) : g.concat([id]).slice(-3); t.setGf(g); }
@@ -68,6 +70,6 @@
     box.innerHTML = '<div class="hd"><span>武学试炼 · 进场中…</span></div>';
     await enterFight(); render(); clearTimeout(godT); keep();
   }
-  function close() { window.TRIAL_ON = false; clearTimeout(godT); if (box) box.remove(); box = null; }
+  function close() { try { T().setLv(null); } catch (e) {} window.TRIAL_ON = false; clearTimeout(godT); if (box) box.remove(); box = null; }
   window.TRIAL = { open, close };
 })();
