@@ -4,7 +4,7 @@
 // 只在用到时才下载（当前皮肤 × 当前武器 20 张），没下好之前先用旧图顶着，不会隐形。
 (function () {
   const ROOT = 'art/sprites/hero_skins/';
-  const SKINS = { baiyi: '白衣·农夫', guanjun: '红衣黑甲·官军', huangjin: '黄巾披甲', baima: '白马义从', caojun: '曹军', baier: '白毦兵·刘备', wujun: '吴军·孙权', xiliang: '西凉' };
+  const SKINS = { baiyi: '穿越者·乡勇', guanjun: '红衣黑甲·官军', huangjin: '黄巾披甲', baima: '白马义从', caojun: '曹军', baier: '白毦兵·刘备', wujun: '吴军·孙权', xiliang: '西凉' };
   const WEP = {   // manifest.json 的 weapons：图片宽高、脚底中心
     dao: { size: [251, 179], anchor: [127, 175] }, jian: { size: [262, 187], anchor: [131, 177] }, chui: { size: [211, 184], anchor: [115, 175] },
     spear: { size: [365, 217], anchor: [185, 189] }, guandao: { size: [332, 211], anchor: [159, 191] }, bow: { size: [189, 177], anchor: [115, 175] },
