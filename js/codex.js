@@ -65,11 +65,13 @@
 #szzCodex .ct{margin-left:auto;font-size:13px;color:#a8977a}
 #szzCodex .x{width:32px;height:32px;border:1px solid rgba(184,149,90,.4);background:transparent;color:#e6c98a;font-size:18px;cursor:pointer}
 #szzCodex .bd{flex:1;min-height:0;display:flex}
-#szzCodex .gr{flex:1;min-width:0;overflow:auto;padding:12px;display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:10px;align-content:start}
+#szzCodex .gw{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column}#szzCodex .wf{display:none;flex-wrap:wrap;gap:6px;padding:10px 12px 0}#szzCodex .wf.on{display:flex}#szzCodex .wf button{padding:2px 10px;border:1px solid rgba(184,149,90,.35);background:transparent;color:#c9b48a;font:600 13px inherit;cursor:pointer}#szzCodex .wf button.on{background:rgba(184,149,90,.22);color:#ffe2a0;border-color:rgba(230,190,110,.8)}
+#szzCodex .gr{flex:1;min-height:0;overflow:auto;padding:12px;display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:10px;align-content:start}
 #szzCodex .cd{height:118px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;padding:6px 4px;border:1px solid rgba(184,149,90,.25);background:rgba(255,255,255,.03);cursor:pointer}
 #szzCodex .cd:hover,#szzCodex .cd.sel{border-color:rgba(240,200,120,.85);background:rgba(184,149,90,.14)}
 #szzCodex .cd{position:relative}#szzCodex .cd .nb{position:absolute;left:5px;top:3px;font-style:normal;font-size:11px;color:#b8955a;opacity:.85;font-family:monospace}#szzCodex .cd img{max-width:84px;max-height:82px;object-fit:contain;image-rendering:pixelated}
 #szzCodex .cd span{font-size:13px;color:#e8dcc0;white-space:nowrap}
+#szzCodex .si{width:74px;height:74px;flex:none;background:#241e17 center/cover no-repeat;border:1px solid rgba(184,149,90,.5);display:flex;align-items:center;justify-content:center;font:700 40px Pixel12,sans-serif}#szzCodex .lk .si{filter:brightness(0) opacity(.55)}#szzCodex .dt .pic .si{width:150px;height:150px;font-size:80px}#szzCodex .tr{font-weight:700}
 #szzCodex .lk img{filter:brightness(0) opacity(.55)}
 #szzCodex .lk span{color:#7a6c58}
 #szzCodex .dt{width:min(360px,40%);border-left:1px solid rgba(184,149,90,.3);padding:16px 18px;overflow:auto}
@@ -84,10 +86,22 @@
 @media (max-aspect-ratio:1/1){#szzCodex .bd{flex-direction:column}#szzCodex .dt{width:auto;max-height:45%;border-left:0;border-top:1px solid rgba(184,149,90,.3)}#szzCodex .dt .pic{height:120px}}
 @media (max-height:500px){#szzCodex .cx{height:96vh}#szzCodex .cd{height:96px}#szzCodex .cd img{max-height:62px}#szzCodex .dt .pic{height:120px}#szzCodex .hd{padding:6px 12px}#szzCodex .gr{grid-template-columns:repeat(auto-fill,minmax(80px,1fr))}}`;
   const box = document.createElement('div'); box.id = 'szzCodex'; box.hidden = true;
-  box.innerHTML = '<div class="cx"><div class="hd"><h2>图鉴</h2><button type="button" class="tb" data-t="u">小兵</button><button type="button" class="tb" data-t="b">首领</button><span class="ct"></span><button type="button" class="x" aria-label="关闭">✕</button></div><div class="bd"><div class="gr"></div><div class="dt"></div></div></div>';
-  let tab = 'u', sel = null;
-  const list = () => tab === 'u' ? UNITS : BOSSES;
+  box.innerHTML = '<div class="cx"><div class="hd"><h2>图鉴</h2><button type="button" class="tb" data-t="u">小兵</button><button type="button" class="tb" data-t="b">首领</button><button type="button" class="tb" data-t="w">武学</button><span class="ct"></span><button type="button" class="x" aria-label="关闭">✕</button></div><div class="bd"><div class="gw"><div class="wf"></div><div class="gr"></div></div><div class="dt"></div></div></div>';
+  let tab = 'u', sel = null, wf = -1;
+  // 11/14 用户定：图鉴加「武学」页——全部武艺按兵器、黄玄地天排好；学过才解锁（没学过黑剪影 + ？？？）
+  const TCOL = ['#c9b27a', '#c9b27a', '#6fb8ff', '#c58cff', '#ffb347'];
+  const T = () => window.SURV && SURV.trial;
+  const SKL = () => { const t = T(); if (!t) return []; return Object.keys(t.SK).filter(k => !t.SK[k].off).map(k => ({ k, id: 'sk:' + k, o: t.SK[k], w: t.wepOf(k) })).sort((a, b) => a.w - b.w || (a.o.tier || 0) - (b.o.tier || 0)); };
+  const list = () => tab === 'u' ? UNITS : tab === 'b' ? BOSSES : SKL().filter(e => wf < 0 || e.w === wf);
   const has = k => !!seen[k];
+  const sIco = e => { const u = T().IMGU[e.k]; return u ? `<div class="si" style="background-image:url('${u}')"></div>` : `<div class="si" style="color:${e.o.color}">${e.o.icon}</div>`; };
+  const tierTx = e => (e.o.tier ? T().TIERN[e.o.tier] + '阶' : '基础');
+  function wDetail(e) {
+    const dt = box.querySelector('.dt'); if (!e) { dt.innerHTML = '<p class="no">点左边的武艺看详情。</p>'; return; }
+    const t = T(), wn = t.WEPN[e.w];
+    if (!has(e.id)) { dt.innerHTML = `<div class="pic lk">${sIco(e)}</div><h3>？？？</h3><span class="tg">${wn} · ${tierTx(e)}</span><p class="no">尚未学会。拾取或在行商买下秘籍学会后解锁。</p>`; return; }
+    dt.innerHTML = `<div class="pic">${sIco(e)}</div><h3>${e.o.name}</h3><span class="tg">武艺 · ${wn} · <b class="tr" style="color:${TCOL[e.o.tier || 0]}">${tierTx(e)}</b></span><h4>效 果</h4><p>${e.o.desc}</p><h4>出 手</h4><p>${t.spdTxt(e.o)}</p>`;
+  }
   function detail(e) {
     const dt = box.querySelector('.dt'); if (!e) { dt.innerHTML = '<p class="no">点左边的头像看详情。</p>'; return; }
     if (!has(e[0])) { dt.innerHTML = `<div class="pic lk"><img src="${img(e)}" alt="" style="filter:brightness(0) opacity(.55)"></div><h3>？？？</h3><span class="tg">${e[3]}</span><p class="no">尚未遇到。在战斗中第一次遇到后解锁。</p>`; return; }
@@ -95,6 +109,19 @@
   }
   function render() {
     box.querySelectorAll('.tb').forEach(b => b.classList.toggle('on', b.dataset.t === tab));
+    const wfb = box.querySelector('.wf'); wfb.classList.toggle('on', tab === 'w');
+    if (tab === 'w') {
+      const t = T(), all = SKL(), ws = [...new Set(all.map(e => e.w))];
+      wfb.innerHTML = `<button data-w="-1" class="${wf < 0 ? 'on' : ''}">全部</button>` + ws.map(w => `<button data-w="${w}" class="${wf === w ? 'on' : ''}">${t.WEPN[w]}</button>`).join('');
+      const L = list(); box.querySelector('.ct').textContent = `已学会 ${L.filter(e => has(e.id)).length} / ${L.length}`;
+      const gr = box.querySelector('.gr'); gr.innerHTML = '';
+      for (const e of L) {
+        const c = document.createElement('div'); c.className = 'cd' + (has(e.id) ? '' : ' lk') + (sel === e.k ? ' sel' : '');
+        c.innerHTML = `${sIco(e)}<span>${has(e.id) ? e.o.name : '？？？'}</span>`;
+        c.addEventListener('click', () => { sel = e.k; render(); }); gr.appendChild(c);
+      }
+      wDetail(L.find(e => e.k === sel) || null); return;
+    }
     const L = list(), n = L.filter(e => has(e[0])).length;
     box.querySelector('.ct').textContent = `已发现 ${n} / ${L.length}`;
     const gr = box.querySelector('.gr'); gr.innerHTML = '';
@@ -110,6 +137,7 @@
   box.addEventListener('click', e => {
     if (e.target === box || e.target.closest('.x')) close();
     const t = e.target.closest('.tb'); if (t) { tab = t.dataset.t; sel = null; render(); }
+    const w = e.target.closest('.wf button'); if (w) { wf = +w.dataset.w; sel = null; render(); }
   });
   function open() { const hp = document.getElementById('tHelpPanel'); if (hp) hp.style.display = 'none'; const st = document.getElementById('szzSet'); if (st) st.hidden = true; sel = null; render(); box.hidden = false; }
   function close() { box.hidden = true; }
@@ -120,8 +148,8 @@
   if (document.body) mount(); else addEventListener('DOMContentLoaded', mount);
   setInterval(() => { const g = document.getElementById('szzSetBtn'); btn.style.display = g && g.style.display === 'block' ? 'block' : 'none'; }, 300);   // 跟着右上角齿轮：只在主界面显示
   window.CODEX = {
-    see(type) { const k = ALIAS[type] || type; if (!seen[k] && ALL.some(e => e[0] === k)) { seen[k] = 1; save(); } },
-    unlockAll() { for (const e of ALL) seen[e[0]] = 1; save(); if (!box.hidden) render(); },
+    see(type) { const k = ALIAS[type] || type; if (!seen[k] && (k.startsWith('sk:') || ALL.some(e => e[0] === k))) { seen[k] = 1; save(); } },
+    unlockAll() { for (const e of ALL) seen[e[0]] = 1; for (const e of SKL()) seen[e.id] = 1; save(); if (!box.hidden) render(); },
     open, close,
   };
 })();

@@ -1316,6 +1316,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     W.pick = true; setTimeout(() => prepOpen(nd), 1000);
   }
   function beginNode(nd) {
+    if (window.CODEX) for (const k of S.slots.concat(S.owned || [])) if (k) CODEX.see('sk:' + k);   // 11/14：学过的武艺进图鉴
     if (!c2ok && typeof ensureAssets === 'function') ensureAssets('chapter2', { silent: true }).then(() => { c2ok = true; });
     GM = gfCalc(); S.zq = zqMax(); S.hp0 = hero.hp; S.noHitT = 0; S.xy = 0;
     S.k0 = typeof kills === 'number' ? kills : 0; S.coinGot = 0; S.taken = 0; S.hutiSum = 0; S.dps = {}; S.lastHp = hero.hp; S.coins = []; S.lvAt0 = S.lv; S.tutT = 0; S.stolen = 0; S.thiefCd = 8; S.catDone = false; TELE.length = 0; BOOM.length = 0;
@@ -1730,7 +1731,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   }
   function learn(it) {   // 格子满了也能学：先放进「掌握武学」，在武学页换上
     S.owned = S.owned || [];
-    if (it.kind === 'skill') { const f = S.slots.indexOf(''); if (f >= 0) S.slots[f] = it.k; else S.owned.push(it.k); tut('learn'); }
+    if (it.kind === 'skill') { const f = S.slots.indexOf(''); if (f >= 0) S.slots[f] = it.k; else S.owned.push(it.k); tut('learn'); window.CODEX && CODEX.see('sk:' + it.k); }
     else if (it.kind === 'gf') { if (GF[it.id].qg) { if (!S.qg) S.qg = it.id; else S.owned.push(it.id); } else { const f = S.gf.indexOf(''); if (f >= 0) S.gf[f] = it.id; else S.owned.push(it.id); } GM = gfCalc(); }
     else if (it.kind === 'item') { if (ITEMS[it.id].use) heal(maxHp() * .4); else (S.items = S.items || []).push(it.id); GM = gfCalc(); }
     return true;
@@ -2322,7 +2323,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     gf: S.gf.map(id => id && GF[id] ? { name: GF[id].n, desc: GF[id].d, lv: gfLv(id) } : null), qg: S.qg && GF[S.qg] ? { name: GF[S.qg].n, desc: GF[S.qg].d } : null,
     dmg: RT.dmg });
   // 11/13 武学试炼（开发者面板）：看招用
-  const TRIAL = { SK, GF, MOT, WEPN, TIERN, wepOf, long() { W.tot = 9999; if (W.t > W.tot - 5) W.t = 0; },
+  const TRIAL = { SK, GF, MOT, WEPN, TIERN, wepOf, IMGU, spdTxt, long() { W.tot = 9999; if (W.t > W.tot - 5) W.t = 0; },
     setGf(ids) { S.gf = ['', '', '']; ids.slice(0, 3).forEach((id, i) => { S.gf[i] = id; }); GM = gfCalc(); }, setQg(id) { S.qg = id || ''; GM = gfCalc(); }, gf: () => S.gf.slice(), qg: () => S.qg, mul: k => skillMul(k), lv: k => lvOf(k), spd: k => spdTxt(SK[k]), rs: k => SK[k] && SK[k].dk ? rsOf(k) : null, setRs(k, v) { DRS[k] = v; try { localStorage.setItem('szz-dao-rs', JSON.stringify(DRS)); } catch (e) {} },
     sp: k => spOf(k), setSp(k, v) { DSP[k] = v; try { localStorage.setItem('szz-dao-sp', JSON.stringify(DSP)); } catch (e) {} }, spAll(v) { Object.keys(SK).forEach(k => { if (SK[k].dk) DSP[k] = v; }); try { localStorage.setItem('szz-dao-sp', JSON.stringify(DSP)); } catch (e) {} },
     rsAll: () => Object.keys(SK).filter(k => SK[k].dk && !SK[k].off).sort((a, b) => SK[a].tier - SK[b].tier).map(k => `${TIERN[SK[k].tier]} ${SK[k].name}(${k}) 范围×${rsOf(k)} 速度×${spOf(k)}（${spdTxt(SK[k])}）`).join('\n'), setLv(k, l) { S.lvLock = {}; if (k && l) S.lvLock[k] = l; } };
