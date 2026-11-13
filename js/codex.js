@@ -111,7 +111,7 @@
     if (e.target === box || e.target.closest('.x')) close();
     const t = e.target.closest('.tb'); if (t) { tab = t.dataset.t; sel = null; render(); }
   });
-  function open() { sel = null; render(); box.hidden = false; }
+  function open() { const hp = document.getElementById('tHelpPanel'); if (hp) hp.style.display = 'none'; const st = document.getElementById('szzSet'); if (st) st.hidden = true; sel = null; render(); box.hidden = false; }
   function close() { box.hidden = true; }
   addEventListener('keydown', e => { if (!box.hidden && e.key === 'Escape') { e.stopPropagation(); close(); } }, true);
   const btn = document.createElement('button'); btn.id = 'szzCodexBtn'; btn.type = 'button'; btn.textContent = '图鉴';

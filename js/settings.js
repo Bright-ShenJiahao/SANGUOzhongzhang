@@ -50,7 +50,7 @@
     box.querySelectorAll('.tg:not(.tm):not(.th):not(.tp) button').forEach(b => b.addEventListener('click', () => { v.shake = b.dataset.s === '1'; save(); render(); }));
     box.querySelector('.ok').addEventListener('click', close);
   }
-  function open() { render(); box.hidden = false; }
+  function open() { const hp = document.getElementById('tHelpPanel'); if (hp) hp.style.display = 'none'; const cx = document.getElementById('szzCodex'); if (cx) cx.hidden = true; render(); box.hidden = false; }   // 11/13：不和帮助、图鉴叠在一起
   function close() { box.hidden = true; }
   box.addEventListener('pointerdown', e => { if (e.target === box) close(); });
 

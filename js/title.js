@@ -597,7 +597,7 @@
     dom.name.addEventListener('input', () => { if (dom.name.value.length > 8) dom.name.value = dom.name.value.slice(0, 8); });
     dom.start.addEventListener('click', start);
     dom.noviceInput.addEventListener('change', () => writeNovice(dom.noviceInput.checked));
-    dom.help.addEventListener('click', () => { helpOpen = !helpOpen; dom.panel.style.display = helpOpen ? 'block' : 'none'; });
+    dom.help.addEventListener('click', () => { helpOpen = !helpOpen; for (const id of ['szzSet', 'szzCodex']) { const e = document.getElementById(id); if (e && helpOpen) e.hidden = true; } dom.panel.style.display = helpOpen ? 'block' : 'none'; });
     dom.panel.addEventListener('click', () => { helpOpen = false; dom.panel.style.display = 'none'; });
     // 首次进入：把白闪淡出
     requestAnimationFrame(() => { dom.flash.style.opacity = 0; });
