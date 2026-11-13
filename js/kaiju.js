@@ -104,7 +104,7 @@
   @media (max-width:700px) and (orientation:portrait){#kaiju .cols{display:flex;flex-direction:column;overflow-y:auto;gap:12px;-webkit-overflow-scrolling:touch;padding-top:12px}#kaiju .pan{overflow:visible;flex:none;border-width:22px}#kaiju .pic{flex:none;height:min(58vw,250px)}#kaiju .pic .arr{width:28px;height:42px}
     #kaiju .bot .back{width:auto;flex:none;padding:0 14px!important;letter-spacing:2px}#kaiju .bot .go{flex:1;width:auto}#kaiju .tile{width:46px;height:46px}#kaiju .tile.on .ico{width:38px;height:38px}}`;
   // 11/13 用户：「名号」改成「势力」，初始没有势力（白衣乡勇），8 套皮肤就是 8 个势力；怎么解锁之后再定，先只开白衣（?debug 全开看效果）
-  const FAC = [['baiyi', '穿越者 · 乡勇'], ['guanjun', '官军'], ['huangjin', '黄巾'], ['baima', '白马义从'], ['caojun', '曹军'], ['baier', '白毦兵 · 刘备'], ['wujun', '吴军 · 孙权'], ['xiliang', '西凉']];
+  const FAC = [['baiyi', '穿越者 · 乡勇'], ['guanjun', '官军'], ['huangjin', '黄巾'], ['baima', '公孙瓒 · 白马义从'], ['caojun', '曹操 · 虎豹骑'], ['baier', '刘备 · 白毦兵'], ['wujun', '孙权 · 解烦卫'], ['xiliang', '马超 · 西凉铁骑']];   // 11/13 用户核对历史后定名
   const facOpen = f => f === 'baiyi' || /[?&]debug/.test(location.search);
   function render() {
     let curF = window.HERO_SKIN ? HERO_SKIN.cur() : 'baiyi'; if (!facOpen(curF) && window.HERO_SKIN) { HERO_SKIN.set('baiyi'); curF = 'baiyi'; }
