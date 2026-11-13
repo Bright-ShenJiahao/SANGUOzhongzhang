@@ -54,6 +54,8 @@
     if (window.RUNSAVE) RUNSAVE.has = () => false;
     const vis = e => e && e.getClientRects().length > 0;
     const st = document.getElementById('tStart'); if (vis(st)) st.click();
+    const ask = await wait(() => document.getElementById('tNameAsk'), 2500);   // 11/14：「新的开始」之后要先报名号
+    if (ask) { const ip = ask.querySelector('input'); if (ip && !ip.value) ip.value = '试炼'; const y = ask.querySelector('.yes'); if (y) y.click(); }
     const go = await wait(() => { const b = document.querySelector('#kaiju .bot .go'); return vis(b) && b; }); if (go) go.click();
     await wait(() => window.TITLE && TITLE.mode && TITLE.mode() === 'game'); await new Promise(r => setTimeout(r, 1200));
     try { const r = ROUTE.debug(), n = (r.nodes || []).flat().find(x => x && x.layer === 1); ROUTE.choose(n); } catch (e) {}
