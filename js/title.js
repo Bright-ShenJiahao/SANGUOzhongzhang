@@ -736,7 +736,7 @@
       @keyframes tInkUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
     `;
     document.head.appendChild(st);
-    dom.inkTitle = document.createElement('img'); dom.inkTitle.id = 'tInkTitle'; dom.inkTitle.alt = '三国终章：幸存者'; dom.inkTitle.draggable = false;
+    dom.inkTitle = document.createElement('img'); dom.inkTitle.id = 'tInkTitle'; dom.inkTitle.alt = '三国：战至终章'; dom.inkTitle.draggable = false;
     document.body.appendChild(dom.inkTitle);
     dom.seal = document.createElement('div'); dom.seal.id = 'tSeal'; dom.seal.textContent = 'ROGUELIKE'; document.body.appendChild(dom.seal);   // 11/13：印章不写「幸存者」（免得和群侠传撞），用户定为竖排红章 ROGUELIKE
     dom.sub = document.createElement('div'); dom.sub.id = 'tSub'; document.body.appendChild(dom.sub);
@@ -754,16 +754,16 @@
   function layoutInk() {
     const w = L.w, h = L.h, portrait = inkPortrait();
     const inH = 0, btnH = Math.max(40, Math.min(54, h * .085));
-    const rowH = 0, g1 = Math.max(18, h * .04), g2 = 0;   // 11/13：标题下只剩一排按钮
+    const rowH = 0, g1 = Math.max(portrait ? 30 : 18, h * .04), g2 = 0;   // 11/13：标题下只剩一排按钮
     let cx, titleW, titleH, top;
     if (portrait) {
-      titleW = Math.min(w * .92, 560); titleH = titleW * 428 / 1172;
+      titleW = Math.min(w * .56, 280, h * .36 * 984 / 1387); titleH = titleW * 1387 / 984;   // 11/13 新标题「三国 / — 战至终章 —」，横竖屏同一张
       cx = w / 2;
       const below = inH + g2 + btnH + g2 + rowH;
-      top = Math.max(h * .5, h - 14 - below - g1 - titleH);
+      top = Math.max(h * .42, h - 14 - below - g1 - titleH);
       if (dom.inkTitle.dataset.k !== 'h') { dom.inkTitle.src = ASSETS.ink.title_h; dom.inkTitle.dataset.k = 'h'; }
     } else {
-      titleH = Math.min(h * .66, 900, h - 170); titleW = titleH * 340 / 859;   /* 11/13 用户：标题字太小 → 放大 */
+      titleH = Math.min(h * .7, 900, h - 160); titleW = titleH * 984 / 1387;   /* 11/13 用户：标题字太小 → 放大 */
       cx = w * .77;
       const total = titleH + g1 + inH + g2 + btnH + g2 + rowH;
       top = Math.max(6, (h - total) / 2);
@@ -772,16 +772,15 @@
     const ts = dom.inkTitle.style;
     ts.left = (cx - titleW / 2) + 'px'; ts.top = top + 'px'; ts.width = titleW + 'px'; ts.height = titleH + 'px';
     { // 印章：竖排标题贴「章」右下，横排贴「章」右下
-      const ss = dom.seal.style, sw = Math.round(portrait ? Math.max(22, titleH * .2) : Math.max(24, titleW * .2));
+      const ss = dom.seal.style, sw = Math.round(Math.max(24, titleW * .17));
       ss.width = Math.round(sw * .62) + 'px'; ss.height = 'auto'; ss.fontSize = Math.max(10, Math.round(sw * .36)) + 'px';
-      ss.left = Math.round(portrait ? Math.min(cx + titleW * .5 + 2, w - sw * .62 - 8) : cx + titleW * .44) + 'px';
-      const sh = dom.seal.offsetHeight || sw * 3;   // 竖屏：章底对齐标题底，往上伸进画里，不压英文副标题
-      ss.top = Math.round(portrait ? top + titleH - sh : top + titleH * .8) + 'px';
+      ss.left = Math.round(Math.min(cx + titleW * .44, w - sw * .62 - 8)) + 'px';   // 贴在「国」右下
+      ss.top = Math.round(top + titleH * .5) + 'px';
       const u = dom.sub, us = u.style;   // 英文副标题：横屏竖排贴在标题左侧，竖屏横排在标题下
-      u.className = portrait ? 'h' : 'v'; u.textContent = portrait ? 'THREE KINGDOMS · FINAL CHAPTER SURVIVORS' : 'THREE KINGDOMS FINAL CHAPTER SURVIVORS';
+      u.className = portrait ? 'h' : 'v'; u.textContent = portrait ? 'THREE KINGDOMS · TO THE FINAL CHAPTER' : 'THREE KINGDOMS TO THE FINAL CHAPTER';
       us.fontSize = Math.round(portrait ? Math.max(9, Math.min(12, w * .028)) : Math.max(11, Math.min(15, h * .018))) + 'px';
-      if (portrait) { us.left = '0px'; us.width = w + 'px'; us.top = Math.round(top + titleH + 4) + 'px'; us.transform = ''; us.height = ''; us.letterSpacing = '.3em'; }
-      else { us.width = ''; us.letterSpacing = ''; us.left = Math.round(cx - titleW * .7) + 'px'; us.top = Math.round(top + titleH * .08) + 'px'; us.transform = ''; us.height = Math.round(titleH * .62) + 'px'; }
+      if (portrait) { us.right = 'auto'; us.left = '0px'; us.width = w + 'px'; us.top = Math.round(top + titleH + 4) + 'px'; us.transform = ''; us.height = ''; us.letterSpacing = '.3em'; }
+      else { us.width = ''; us.letterSpacing = ''; us.left = 'auto'; us.right = Math.round(w - (cx - titleW * .5)) + 'px'; us.top = Math.round(top + titleH * .06) + 'px'; us.transform = ''; us.height = Math.round(titleH * .62) + 'px'; }   // 竖排往左长，不压标题
     }
     const colW = Math.max(180, Math.min(portrait ? w * .72 : w * .3, 300));
     const nameTop = top + titleH + g1, startTop = nameTop + inH + g2, rowTop = startTop + btnH + g2;
