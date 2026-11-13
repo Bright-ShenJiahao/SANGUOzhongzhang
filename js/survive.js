@@ -948,10 +948,10 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
           b.x = hero.x + Math.cos(an) * r; b.y = hero.y + Math.sin(an) * r * .5; const back = q > .5, hs = back ? o.h2 : o.h1;
           for (const z of hittable()) if (!hs.has(z) && Math.hypot(z.x - b.x, (z.y - b.y) * 2) < 24 * o.rm) { hs.add(z); DH(z, (back ? 1.40 : 1.00) * k, 20, { bl: back ? (L >= 3 ? 2 : 1) : 0, x: b.x }); } } })); } } });
   DAO('liedihuan', 3, 'chop', { name: '裂地环', icon: '圜', color: '#e0a860', need: 110, wu: .60, rc: .40, range: 143, half: Math.PI, ring: true,
-    desc: '劈地，5 道环由脚下往外一道道裂开（同一人最多吃 3 环），每环挂破甲（本招最多 2 层）。LV3 本招破甲最多 3 层；LV5 7 道环、更远；LV7 裂得更快',
-    cast() { const L = dlv(), N = L >= 5 ? 7 : 5, st = L >= 7 ? .09 : .12, pjCap = L >= 3 ? 3 : 2, cnt = new Map(), cx = hero.x, cy = hero.y; sfx(CR, hero.x); shake = Math.max(shake, .2);
+    desc: '劈地，3 道环由脚下往外一道道慢慢裂开，每环挂破甲（本招最多 2 层）。LV3 本招破甲最多 3 层；LV5 4 道环；LV7 裂得快一点',
+    cast() { const L = dlv(), N = L >= 5 ? 4 : 3, st = L >= 7 ? .2 : .26, pjCap = L >= 3 ? 3 : 2, cnt = new Map(), cx = hero.x, cy = hero.y; sfx(CR, hero.x); shake = Math.max(shake, .2);
       DKO.push(dmk({ T: N * st + .05, i: 0, tick(o) {
-        while (o.i < N && o.t >= o.i * st) { const r = (60 + 50 * o.i) * DK * o.rm, bw = 14 * o.rm; fx.push({ k: 'ring', x: cx, y: cy, t: 0, T: .35, r });
+        while (o.i < N && o.t >= o.i * st) { const r = (60 + 200 / (N - 1) * o.i) * DK * o.rm, bw = 14 * o.rm; fx.push({ k: 'ring', x: cx, y: cy, t: 0, T: .35, r });
           for (const z of hittable()) { const d = Math.hypot(z.x - cx, (z.y - cy) * 2); if (!(Math.abs(d - r) < bw + 6 || (o.i === 0 && d < r))) continue; const c = cnt.get(z) || 0; if (c >= 3) continue; cnt.set(z, c + 1); DH(z, .85, 60, { x: cx, pj: c < pjCap ? 1 : 0 }); }
           if (o.i % 2 === 0) shake = Math.max(shake, .12); o.i++; } } })); } });
   DAO('xuehe', 3, 'sweep', { name: '血河斩', icon: '血', color: '#ff5050', need: 140, wu: .70, rc: .40, beam: true, len: 154,
