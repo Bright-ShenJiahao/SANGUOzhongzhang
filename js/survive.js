@@ -1643,6 +1643,25 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(900px,58v
 #survPrep .sc .lkb.on{border-color:#e2c27a;background:rgba(80,56,20,.7)}#survPrep .sc i.lkb:empty{display:none}
 #survPrep .t-shang .srow{margin-bottom:calc(40px*var(--k))}
 @media (max-height:520px){#survPrep .sc{min-height:0;width:calc(250px*var(--k))}#survPrep .sc .ds{font-size:calc(12px*var(--kt))}#survPrep .sc h5{display:none}#survPrep .sc .tg{display:none}}
+/* 11/14 用户定：整备屏的字照「整军备战」——金色小标题加字距加前导菱形，正文米白至少 14.6px，品阶只写黄/玄/地/天阶 */
+#survPrep h4{font-size:calc(18px*var(--kt));color:#f0d89a;letter-spacing:calc(5px*var(--k));justify-content:flex-start;gap:calc(8px*var(--k))}
+#survPrep h4::before{content:'';width:calc(7px*var(--k));height:calc(7px*var(--k));flex:none;align-self:center;transform:rotate(45deg);background:#c9a35e;box-shadow:0 0 0 1px rgba(0,0,0,.6)}
+#survPrep h4 small{margin-left:auto;font-size:calc(14px*var(--kt));color:#a8977a}#survPrep h4 .so{margin-left:auto}
+#survPrep h5,#survPrep .sc h5{font-size:calc(15px*var(--kt));color:#b8a27a;letter-spacing:calc(2px*var(--k))}
+#survPrep .sc .ds,#survPrep .ds{font-size:calc(16px*var(--kt));line-height:1.55;color:#e2d4b6}
+#survPrep .sc h3{font-size:calc(21px*var(--kt));color:#f0d89a;letter-spacing:calc(2px*var(--k))}
+#survPrep .sc .rq{font-size:calc(15px*var(--kt));font-weight:700}
+#survPrep .tg span{font-size:calc(14px*var(--kt))}
+#survPrep .em2,#survPrep .lkh{color:#a8977a}#survPrep .lkh{font-size:calc(15px*var(--kt))}
+#survPrep .cbb{font-size:calc(16px*var(--kt));letter-spacing:calc(1px*var(--k));color:#fff6e0;text-shadow:1px 0 0 #2a1608,-1px 0 0 #2a1608,0 1px 0 #2a1608,0 -1px 0 #2a1608}
+#survPrep .ln,#survPrep .sm span{font-size:calc(16px*var(--kt));color:#e2d4b6}
+/* 卡片详情：移上去（手机点卡片）浮出，放这一招自己的图标 */
+#survPrep .sc{cursor:pointer}#survPrep .sc .tip{width:calc(300px*var(--k));top:calc(-10px*var(--k))}
+#survPrep .tip .th{display:flex;gap:calc(12px*var(--k));align-items:center;margin-bottom:calc(6px*var(--k))}
+#survPrep .sic{flex:none;width:calc(84px*var(--k));height:calc(84px*var(--k));background:#241e17 center/cover no-repeat;border:1px solid rgba(184,149,90,.6);box-shadow:0 0 0 2px rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;font:700 calc(48px*var(--kt)) Pixel12,sans-serif;font-style:normal}
+#survPrep .tip .th h3{margin:0;font-size:calc(22px*var(--kt));color:#f0d89a;letter-spacing:calc(2px*var(--k))}#survPrep .tip .th p{margin:calc(2px*var(--k)) 0 0;font-size:calc(15px*var(--kt));font-weight:700}
+#survPrep .tip .sp2{margin:calc(6px*var(--k)) 0 0;font-size:calc(14px*var(--kt));color:#a8977a}
+#survPrep .sc.on{transform:none}
 /* 线装秘籍（CSS 版，等 Gemini 书封到了换图） */
 .bk{position:relative;width:calc(104px*var(--k,1));height:calc(138px*var(--k,1));box-sizing:border-box;border-radius:2px 4px 4px 2px;background-size:100% 100%;
   box-shadow:inset calc(16px*var(--k,1)) 0 0 rgba(0,0,0,.35),inset calc(17px*var(--k,1)) 0 0 var(--rc),inset 0 0 0 2px rgba(0,0,0,.45),inset 0 0 calc(18px*var(--k,1)) rgba(0,0,0,.55),3px 4px 8px rgba(0,0,0,.6)}
@@ -1721,6 +1740,13 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   const ATD = ['提高气血，受到的伤害按比例减少', '提高刀、锤、剑、拳等短兵武艺伤害', '提高枪、关刀等长兵武艺伤害', '提高移动速度', '提高暴击率，修炼更容易出好品阶', '武艺、心法熟练度和修为涨得更快', '提高石子、弓等射艺武艺伤害', '提高黄符、羽扇等术法武艺伤害', '提高真气上限和真气回复速度'];
   const icoOf = it => it.kind === 'item' ? `art/ui/item/${it.id}.webp` : iconUrl(it.kind, it.k || it.id) || '';
   const RQ = ['普通', '精良', '稀有', '绝世'], RQC = ['#e8e0d0', '#6fb8ff', '#c58cff', '#ffb347'];
+  const rk = it => {   // 11/14 用户定：武艺/心法只写黄/玄/地/天阶（颜色同心法品阶色），道具才用普通/精良/稀有/绝世
+    if (it.kind === 'skill') { const t = SK[it.k] && SK[it.k].tier || 0; return t ? { n: TIERN[t] + '阶', c: GTC[t - 1], i: t - 1 } : { n: '基础', c: GTC[0], i: 0 }; }
+    if (it.kind === 'gf') { const t = GF[it.id].t || 0; return { n: GTN[t] + '阶', c: GTC[t], i: t }; }
+    const q = Math.min(3, it.q || 0); return { n: RQ[q], c: RQC[q], i: q }; };
+  const dsOf = it => (it.desc || '').replace(/^[黄玄地天]阶 · /, '');
+  const skIco = it => it.kind === 'gf' ? `<em class="sic" style="background-image:url('art/ui/gf/${it.id}.webp')"></em>` : IMGU[it.k] ? `<em class="sic" style="background-image:url('${IMGU[it.k]}')"></em>` : `<em class="sic" style="color:${SK[it.k].color}">${SK[it.k].icon}</em>`;
+  const tipOf = (it, right) => it.kind === 'item' || it.kind === 'heal' ? '' : `<div class="tip${right ? ' r' : ''}"><div class="th">${skIco(it)}<div><h3>${it.name}</h3><p style="color:${rk(it).c}">${rk(it).n}</p><div class="tg">${tagsOf(it).map(t => `<span>${t}</span>`).join('')}</div></div></div><h5>${it.kind === 'skill' ? '武艺效果' : '心法效果'}</h5><p class="ds">${dsOf(it)}</p>${it.kind === 'skill' ? `<p class="sp2">${spdTxt(SK[it.k])}</p>` : ''}</div>`;
   const tagsOf = it => it.kind === 'skill' ? ['武艺', '主动', WEPN[wepOf(it.k)]] : it.kind === 'gf' ? (GF[it.id].qg ? ['轻功', '被动'] : ['心法', '被动']) : ITEMS[it.id].use ? ['道具', '消耗'] : ['道具', '永久'];
   function prepOpen(nd) { { const t = document.getElementById('survTut'); if (t) t.remove(); tutQ = []; }   // 战斗里没看完的提醒不带进整备屏
     prepNd = nd; prepTab = 'jie'; prepLastTab = ''; selLoot = 0; selWu = null; selShop = 0; if (window.SFX) SFX.play('j_shop'); prepRender(); tut('prep'); }
@@ -1751,14 +1777,14 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   const BOOK_IMG = { wy0: 'art/ui/book/wy0.webp', wy1: 'art/ui/book/wy1.webp', wy2: 'art/ui/book/wy2.webp', wy3: 'art/ui/book/wy3.webp', xf0: 'art/ui/book/xf0.webp', xf1: 'art/ui/book/xf1.webp', xf2: 'art/ui/book/xf2.webp', xf3: 'art/ui/book/xf3.webp' };   // 用户的 Gemini 书封（art/gemini/秘籍书封.png 按连通区域切）：武艺红 / 心法青 × 白蓝紫橙
   function bookOf(it) {
     if (it.kind === 'item' || it.kind === 'heal') return `<em class="ico" style="background-image:url('${icoOf(it)}')"></em>`;
-    const t = it.kind === 'skill' ? 'wy' : 'xf', q = Math.min(3, it.q || 0), im = BOOK_IMG[t + q];
+    const t = it.kind === 'skill' ? 'wy' : 'xf', q = rk(it).i, im = BOOK_IMG[t + q];
     const sym = it.kind === 'skill' ? 'art/ui/attr/duan.webp' : GF[it.id] && GF[it.id].qg ? 'art/ui/attr/shen.webp' : 'art/ui/attr/tiaoxi.webp';   // 11/11 用户定 B：照群侠，书上不画各招的图，武艺统一画兵器（现在只开刀），心法画打坐，轻功画身法
-    return `<div class="bk ${t}${im ? ' im' : ''}" style="--rc:${RQC[q]}${im ? `;background-image:url('${im}')` : ''}"><em style="background-image:url('${sym}')"></em><span>${it.name}</span></div>`;
+    return `<div class="bk ${t}${im ? ' im' : ''}" style="--rc:${GTC[q]}${im ? `;background-image:url('${im}')` : ''}"><em style="background-image:url('${sym}')"></em><span>${it.name}</span></div>`;
   }
   function card(it, i, mode, onI, btns, extra) {   // 一张竖卡：秘籍/道具图 + 名字 + 品质 + 按钮；鼠标移上去（手机点一下）浮出详情
-    const q = Math.min(3, it.q || 0), right = i >= 3;
-    return `<div class="sc${extra || ''}" style="--rc:${RQC[q]}"><div class="ch2"><div class="ci">${bookOf(it)}</div><div><h3>${it.name}</h3><p class="rq" style="color:${RQC[q]}">${RQ[q]}</p><div class="tg">${tagsOf(it).map(t => `<span>${t}</span>`).join('')}</div></div></div>
-      <h5>${it.kind === 'item' ? '道具属性' : it.kind === 'skill' ? '武艺效果' : '心法效果'}</h5><p class="ds">${it.desc}</p><div class="cb">${btns}</div></div>`;   // 11/11：照群侠，属性直接写在卡上，不用移上去看
+    const r = rk(it), right = i >= 3;
+    return `<div class="sc${extra || ''}" style="--rc:${r.c}"><div class="ch2"><div class="ci">${bookOf(it)}</div><div><h3>${it.name}</h3><p class="rq" style="color:${r.c}">${r.n}</p><div class="tg">${tagsOf(it).map(t => `<span>${t}</span>`).join('')}</div></div></div>
+      <h5>${it.kind === 'item' ? '道具属性' : it.kind === 'skill' ? '武艺效果' : '心法效果'}</h5><p class="ds">${dsOf(it)}</p><div class="cb">${btns}</div>${tipOf(it, right)}</div>`;   // 11/11：照群侠，属性直接写在卡上，不用移上去看
   }
   function detail(it, btns) {
     if (!it) return '<p class="em2">选择一件战利品</p>';
@@ -1811,6 +1837,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       ${attrBar()}${vitals()}<div class="lf">${left}</div><button class="bb go">${prepTab === 'wu' ? '出 发' : '继 续'}</button>`;
     prepLastTab = prepTab;
     el.querySelectorAll('.ac').forEach(a => a.onclick = () => { const on = a.classList.contains('on'); el.querySelectorAll('.ac.on').forEach(x => x.classList.remove('on')); if (!on) a.classList.add('on'); });   // 手机：点属性看解释，再点收起
+    el.querySelectorAll('.sc').forEach(c => c.onclick = () => { const on = c.classList.contains('on'); el.querySelectorAll('.sc.on').forEach(x => x.classList.remove('on')); if (!on && c.querySelector('.tip')) c.classList.add('on'); });   // 11/14：手机点卡片看详情（专属图标），再点收起；按钮自己拦截不触发
     el.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { prepTab = b.dataset.t; if (window.SFX) SFX.play('tick'); prepRender(); tut({ shi: 'loot', xiu: 'xiu', shang: 'shop', wu: 'wu' }[prepTab]); });
     el.querySelector('.go').onclick = () => { const i = TABS.findIndex(t => t[0] === prepTab); if (i < TABS.length - 1) { prepTab = TABS[i + 1][0]; prepRender(); tut({ shi: 'loot', xiu: 'xiu', shang: 'shop', wu: 'wu' }[prepTab]); } else prepClose(); };   // 照原作：继续 = 下一页，最后一页「出发」
     el.querySelectorAll('[data-a]').forEach(b => b.onclick = e => {
