@@ -70,6 +70,10 @@
   #kaiju .fsub{font-size:calc(11px*var(--k));color:#a99878;letter-spacing:3px;margin-top:5px}#kaiju .fnote{font-size:calc(12px*var(--k));color:#cfc2a6;margin-top:3px}
   #kaiju .shake{animation:kjShake .3s}@keyframes kjShake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
   /* 右栏：兵籍牒 */
+  /* 11/13 用户：兵籍牒五行和左、中栏重复 → 换成主角原地走动的人像（当前皮肤 + 当前兵器） */
+  #kaiju .fig{position:relative;height:calc(150px*var(--k));border:1px solid #4a3c25;background:radial-gradient(ellipse at 50% 82%,rgba(201,164,92,.18),transparent 60%),#15130f;box-shadow:inset 0 0 0 2px #0b0a08;margin-bottom:4px}
+  #kaiju .fig canvas{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;display:block;image-rendering:pixelated;z-index:0!important}
+  #kaiju .fig small{position:absolute;left:0;right:0;bottom:4px;text-align:center;font-size:calc(11px*var(--k));color:#a99878;letter-spacing:.15em}
   #kaiju .rows div{display:flex;justify-content:space-between;border-bottom:1px dashed rgba(201,164,92,.3);padding:4px 2px;font-size:calc(13px*var(--k));color:#e8dcc0}#kaiju .rows span{color:#8f826c}
   #kaiju .att{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
   #kaiju .att div{display:flex;justify-content:space-between;align-items:center;padding:5px 9px;border:1px solid var(--rdd);background:var(--ink2);cursor:pointer;font-size:calc(13px*var(--k))}
@@ -126,7 +130,7 @@
         </div>
         <div class="pan">
           <h4><i style="background-image:url('${K2('h_hufu')}')"></i>兵籍牒</h4>
-          <div class="rows"><div><span>姓名</span>${esc(name)}</div><div><span>出身</span>${o.name}</div><div><span>兵器</span>${SURV.WEPN ? SURV.WEPN[curW] : '刀'}</div><div><span>战场</span>${F.name}</div><div><span>难度</span>${hard ? '困难' : '标准'}</div></div>
+          <div class="fig"><canvas width="240" height="150"></canvas><small>${o.name} · ${SURV.WEPN ? SURV.WEPN[curW] : '刀'}${window.HERO_SKIN ? ' · ' + HERO_SKIN.name() : ''}</small></div>
           <div class="sec"><h4><i style="background-image:url('${K2('h_qi')}')"></i>属性</h4>
           <div class="att">${ai.map((r, i) => `<div class="${i === axSel ? 'sel' : ''} ${r[1] > 3 ? 'hi' : r[1] < 3 ? 'lo' : ''}" data-a="${i}" title="${r[2]}：${r[3]}"><span>${r[0]}</span><b>${pctOf(r[2])}</b></div>`).join('')}</div>
           <div class="axd">${axSel >= 0 && ai[axSel] ? '<b>' + ai[axSel][0] + '</b>　' + ai[axSel][2] + '　' + ai[axSel][3] : '点属性看它加的是什么'}</div></div>
@@ -157,7 +161,25 @@
     if (!document.getElementById('kaijuCss')) { const s = document.createElement('style'); s.id = 'kaijuCss'; s.textContent = CSS; document.head.appendChild(s); }
     if (!el) { el = document.createElement('div'); el.id = 'kaiju'; el.addEventListener('pointerdown', e => e.stopPropagation()); el.addEventListener('touchmove', e => e.stopPropagation(), { passive: true }); }
     document.body.appendChild(el); render();
+    if (!figRaf) figRaf = requestAnimationFrame(figLoop);
   }
-  function close() { if (el) el.remove(); }
+  const HELDP = { 0: 'wd_', 1: 'jian_', 2: 'chui_', 3: 'qiang_', 4: 'guandao_', 5: 'bow_', 7: 'stone_', 8: 'huangfu_', 9: 'fan_', 10: 'quan_' };
+  let figRaf = 0;
+  function figLoop(t) {   // 人像：原地循环走路
+    figRaf = 0; if (!el || !el.parentNode) return;
+    const cv = el.querySelector('.fig canvas');
+    if (cv && window.HERO_SKIN) {
+      const r = cv.getBoundingClientRect(), dpr = Math.min(2, window.devicePixelRatio || 1), W = Math.round(r.width * dpr), H = Math.round(r.height * dpr);
+      if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
+      const g = cv.getContext('2d'); g.clearRect(0, 0, W, H); g.imageSmoothingEnabled = false;
+      const pre = HELDP[window.SURV && SURV.wep ? SURV.wep() : 0] || 'wd_';
+      const fr = HERO_SKIN.get(pre + 'walk' + [1, 2, 3, 2][Math.floor(t / 125) % 4]) || HERO_SKIN.get(pre + 'idle');
+      const fx = W / 2, fy = H * .84;
+      g.fillStyle = 'rgba(0,0,0,.35)'; g.beginPath(); g.ellipse(fx, fy, W * .09, H * .03, 0, 0, Math.PI * 2); g.fill();
+      if (fr) { const k = H * .66 / 75; g.drawImage(fr.img, fx - fr.ax * k, fy - fr.ay * k, fr.w * k, fr.h * k); }
+    }
+    figRaf = requestAnimationFrame(figLoop);
+  }
+  function close() { if (el) el.remove(); if (figRaf) cancelAnimationFrame(figRaf); figRaf = 0; }
   window.KAIJU = { open, close, active: () => !!(el && el.parentNode) };
 })();
