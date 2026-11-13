@@ -721,7 +721,7 @@
       #tSeal { position: fixed; z-index: 6; pointer-events: none; display: flex; align-items: center; justify-content: center; writing-mode: vertical-rl; box-sizing: border-box;
         background: #b3261c; color: #fbe6cf; font-family: Georgia, "Times New Roman", serif; font-weight: 700; letter-spacing: .14em; line-height: 1; border-radius: 3px; padding: .5em 0 .36em; box-shadow: inset 0 0 0 2px #b3261c, inset 0 0 0 3px #fbe6cf;
         opacity: 0; animation: tInkUp 1s 1.6s ease-out both; }
-      #tSub { position: fixed; z-index: 6; pointer-events: none; color: #a9823e; font: 400 13px/1.6 "Noto Serif SC", Georgia, serif; letter-spacing: .5em; white-space: nowrap;
+      #tSub { position: fixed; z-index: 6; pointer-events: none; color: #a9823e; font: 400 12px/1.6 Georgia, "Times New Roman", serif; letter-spacing: .26em; opacity: .78; white-space: nowrap;
         text-shadow: 0 1px 0 rgba(255,250,235,.6); opacity: 0; animation: tInkUp 1.2s 1.2s ease-out both; }
       #tSub.v { writing-mode: vertical-rl; letter-spacing: .38em; white-space: normal; line-height: 1.9; }
       #tSub.h { text-align: center; }
@@ -754,7 +754,7 @@
   function layoutInk() {
     const w = L.w, h = L.h, portrait = inkPortrait();
     const inH = 0, btnH = Math.max(40, Math.min(54, h * .085));
-    const rowH = 0, g1 = Math.max(portrait ? 30 : 18, h * .04), g2 = 0;   // 11/13：标题下只剩一排按钮
+    const rowH = 0, g1 = Math.max(portrait ? 30 : 26, h * .045), g2 = 0;   // 11/13：标题下只剩一排按钮
     let cx, titleW, titleH, top;
     if (portrait) {
       titleW = Math.min(w * .56, 280, h * .36 * 984 / 1387); titleH = titleW * 1387 / 984;   // 11/13 新标题「三国 / — 战至终章 —」，横竖屏同一张
@@ -773,14 +773,13 @@
     ts.left = (cx - titleW / 2) + 'px'; ts.top = top + 'px'; ts.width = titleW + 'px'; ts.height = titleH + 'px';
     { // 印章：竖排标题贴「章」右下，横排贴「章」右下
       const ss = dom.seal.style, sw = Math.round(Math.max(24, titleW * .17));
-      ss.width = Math.round(sw * .62) + 'px'; ss.height = 'auto'; ss.fontSize = Math.max(10, Math.round(sw * .36)) + 'px';
-      ss.left = Math.round(Math.min(cx + titleW * .44, w - sw * .62 - 8)) + 'px';   // 贴在「国」右下
-      ss.top = Math.round(top + titleH * .5) + 'px';
+      ss.width = Math.round(sw * .42) + 'px'; ss.height = 'auto'; ss.fontSize = Math.max(8, Math.round(sw * .24)) + 'px';   // 11/13 用户：红章小一些
+      ss.left = Math.round(Math.min(cx + titleW * .43, w - sw * .42 - 8)) + 'px';   // 贴在「国」右下
+      ss.top = Math.round(top + titleH * .52) + 'px';
       const u = dom.sub, us = u.style;   // 英文副标题：横屏竖排贴在标题左侧，竖屏横排在标题下
-      u.className = portrait ? 'h' : 'v'; u.textContent = portrait ? 'THREE KINGDOMS · TO THE FINAL CHAPTER' : 'THREE KINGDOMS TO THE FINAL CHAPTER';
-      us.fontSize = Math.round(portrait ? Math.max(9, Math.min(12, w * .028)) : Math.max(11, Math.min(15, h * .018))) + 'px';
-      if (portrait) { us.right = 'auto'; us.left = '0px'; us.width = w + 'px'; us.top = Math.round(top + titleH + 4) + 'px'; us.transform = ''; us.height = ''; us.letterSpacing = '.3em'; }
-      else { us.width = ''; us.letterSpacing = ''; us.left = 'auto'; us.right = Math.round(w - (cx - titleW * .5)) + 'px'; us.top = Math.round(top + titleH * .06) + 'px'; us.transform = ''; us.height = Math.round(titleH * .62) + 'px'; }   // 竖排往左长，不压标题
+      u.className = 'h'; u.textContent = 'THREE KINGDOMS · TO THE FINAL CHAPTER';   // 11/13 用户：一行小字放在「战至终章」下面（电脑、手机一样）
+      us.fontSize = Math.round(portrait ? Math.max(8, Math.min(10, w * .024)) : Math.max(10, Math.min(13, h * .015))) + 'px';
+      { us.right = 'auto'; us.left = '0px'; us.width = w + 'px'; us.top = Math.round(top + titleH + 4) + 'px'; us.transform = ''; us.height = ''; us.letterSpacing = portrait ? '.18em' : ''; if (!portrait) { us.left = Math.round(cx - w) + 'px'; us.width = (2 * w) + 'px'; } }
     }
     const colW = Math.max(180, Math.min(portrait ? w * .72 : w * .3, 300));
     const nameTop = top + titleH + g1, startTop = nameTop + inH + g2, rowTop = startTop + btnH + g2;

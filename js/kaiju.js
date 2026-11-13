@@ -103,7 +103,7 @@
     const AH = { 体魄: '体', 短兵: '短', 长兵: '长', 身法: '身', 运气: '运', 悟性: '悟', 射艺: '射', 术法: '术', 内力: '内' };
     void AH;
     el.innerHTML = `
-      <div class="top"><div class="seal">卒</div><div><h1>开局配置</h1><small>选择你的出身与兵器</small></div></div>
+      <div class="top"><div><h1>开局配置</h1><small>选择你的出身与兵器</small></div></div>
       <div class="cols">
         <div class="pan field">
           <h4><i style="background-image:url('${K2('h_qi')}')"></i>所选战场</h4>
