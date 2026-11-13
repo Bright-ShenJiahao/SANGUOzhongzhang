@@ -9,7 +9,7 @@
   ];
   const K2 = n => 'art/ui/kaiju2/' + n + '.webp';   // 11/13 用户出的「汉代漆器」红黑零件
   const OGI = { nongfu: K2('og_nongfu'), xiaozu: K2('og_xiaozu'), liehu: K2('og_liehu'), shusheng: K2('og_shusheng') };
-  const SKI = { hengsao: 'art/ui/kaiju/sk_hengsao.webp', daobo: 'art/ui/kaiju/sk_daobo.webp', huima: 'art/ui/kaiju/sk_huima.webp', daolun: 'art/ui/kaiju/sk_daolun.webp' };   // 武艺图标（11/11 Gemini）
+  const SKI = { hengsao: 'art/ui/skill/hengsao.webp', daobo: 'art/ui/skill/daobo.webp', huima: 'art/ui/skill/huima.webp', daolun: 'art/ui/kaiju/sk_daolun.webp' };   // 武艺图标（11/11 Gemini）
   const PIC = { bg: 'art/ui/kaiju/bg.webp', field1: 'art/ui/kaiju/field1.webp', std: K2('diff_std'), hard: K2('diff_hard'), plate: 'art/ui/kaiju/plate.webp' };
   let el = null, field = 0, name = '无名';
   // 11/11 改版（用户给了美术）：宣纸水墨背景 + 深色木框面板压在纸上；出身/难度做成「图标 + 名字 + 一句话」卡片

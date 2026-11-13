@@ -2098,9 +2098,10 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   const HIMG = {}; const himg = (k, u) => { const i = new Image(); i.src = u; HIMG[k] = i; };
   himg('empty', 'art/ui/hud/empty.webp'); himg('waigong', 'art/ui/hud/waigong.webp'); himg('neigong', 'art/ui/hud/neigong.webp'); himg('qinggong', 'art/ui/hud/qinggong.webp');
   himg('taiji', 'art/ui/hud/taiji.webp'); himg('hourglass', 'art/ui/hud/hourglass.webp'); himg('blood', 'art/ui/hud/blood.webp');
-  himg('hengsao', 'art/ui/kaiju/sk_hengsao.webp'); himg('daobo', 'art/ui/kaiju/sk_daobo.webp'); himg('huima', 'art/ui/kaiju/sk_huima.webp'); himg('daolun', 'art/ui/kaiju/sk_daolun.webp');
+  himg('daolun', 'art/ui/kaiju/sk_daolun.webp');
   ['tuna','yangqi','tieyi','tayun','guanxing','taiping','hunyuan','gf00','gf01','gf02','gf03','gf30','gf31','gf32','gf33','qingshen','juqi','shixue','beishui','lhj','caoshang','xingyun','taxue','tiesha','yufeng'].forEach(id => himg('gf_' + id, 'art/ui/gf/' + id + '.webp'));
-  const IMGU = { hengsao: 'art/ui/kaiju/sk_hengsao.webp', daobo: 'art/ui/kaiju/sk_daobo.webp', huima: 'art/ui/kaiju/sk_huima.webp', daolun: 'art/ui/kaiju/sk_daolun.webp' };
+  const IMGU = { daolun: 'art/ui/kaiju/sk_daolun.webp' };
+  'hengsao tuodao tiaozhan daobo lianzhan huima cuofeng feilunren liedihuan xuehe tianbeng wanren'.split(' ').forEach(k => { IMGU[k] = 'art/ui/skill/' + k + '.webp'; himg(k, IMGU[k]); });   // 11/14 用户的刀 12 招图标（每招一把不同的中国刀 + 招式特效）
   const iconUrl = (kind, id) => kind === 'skill' ? IMGU[id] : kind === 'gf' && HIMG['gf_' + id] ? 'art/ui/gf/' + id + '.webp' : '';
   const hok = k => HIMG[k] && HIMG[k].complete && HIMG[k].naturalWidth;
   function waveBanner(title, sub) {   // 每个节点开打时的卷轴横幅（照群侠幸存者「第 1 波 · 迎战」）
