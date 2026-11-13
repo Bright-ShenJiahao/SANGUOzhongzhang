@@ -152,7 +152,7 @@
           <div class="slots bag"><div class="has" style="background-image:url('art/ui/kaiju/bag.webp')" title="盘缠"><i>0</i></div>${'<div></div>'.repeat(4)}</div></div>
         </div>
       </div>
-      <div class="bot"><button class="back">返回主菜单</button><button class="go" ${F.open && facOk ? '' : 'disabled style="opacity:.5"'}>${facOk ? '出发' : '未解锁'}</button></div>`;
+      <div class="bot"><button class="back">返回主菜单</button><button class="go" ${F.open && facOk ? '' : 'disabled style="opacity:.5"'}>${facOk ? '出征' : '未解锁'}</button></div>`;
     el.querySelectorAll('.fl button').forEach(b => b.onclick = () => { field = +b.dataset.i; render(); });   // 上锁的章节也能点开预览（灰图），但「出发」不可用
     el.querySelectorAll('.og .tile').forEach(b => b.onclick = () => { if (O[b.dataset.o].locked) return; SURV.setOrigin(b.dataset.o); render(); });
     el.querySelectorAll('.wp button').forEach(b => b.onclick = () => { SURV.setWep(+b.dataset.w); render(); });   // 11/13：出身的两种本门兵器选一种开局
