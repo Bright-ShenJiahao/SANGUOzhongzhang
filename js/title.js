@@ -719,7 +719,7 @@
       /* 11/13 用户：学群侠传的留白——标题下只留一排按钮；名字在点「新的开始」后填，困难模式/关闭提醒放进设置 */
       body.szz-title #tName, body.szz-title #tNovice, body.szz-title #tHintOff { display: none !important; }
       #tSeal { position: fixed; z-index: 6; pointer-events: none; display: flex; align-items: center; justify-content: center; writing-mode: vertical-rl; box-sizing: border-box;
-        background: #b3261c; color: #fbe6cf; font-family: "MaShanZheng", serif; line-height: 1; border-radius: 3px; box-shadow: inset 0 0 0 2px #b3261c, inset 0 0 0 3px #fbe6cf;
+        background: #b3261c; color: #fbe6cf; font-family: Georgia, "Times New Roman", serif; font-weight: 700; letter-spacing: .14em; line-height: 1; border-radius: 3px; padding: .5em 0 .36em; box-shadow: inset 0 0 0 2px #b3261c, inset 0 0 0 3px #fbe6cf;
         opacity: 0; animation: tInkUp 1s 1.6s ease-out both; }
       #tSub { position: fixed; z-index: 6; pointer-events: none; color: #a9823e; font: 400 13px/1.6 "Noto Serif SC", Georgia, serif; letter-spacing: .5em; white-space: nowrap;
         text-shadow: 0 1px 0 rgba(255,250,235,.6); opacity: 0; animation: tInkUp 1.2s 1.2s ease-out both; }
@@ -738,7 +738,7 @@
     document.head.appendChild(st);
     dom.inkTitle = document.createElement('img'); dom.inkTitle.id = 'tInkTitle'; dom.inkTitle.alt = '三国终章：幸存者'; dom.inkTitle.draggable = false;
     document.body.appendChild(dom.inkTitle);
-    dom.seal = document.createElement('div'); dom.seal.id = 'tSeal'; dom.seal.textContent = '乱世'; document.body.appendChild(dom.seal);   // 11/13：印章不再写「幸存者」，免得和群侠传撞
+    dom.seal = document.createElement('div'); dom.seal.id = 'tSeal'; dom.seal.textContent = 'ROGUELIKE'; document.body.appendChild(dom.seal);   // 11/13：印章不写「幸存者」（免得和群侠传撞），用户定为竖排红章 ROGUELIKE
     dom.sub = document.createElement('div'); dom.sub.id = 'tSub'; document.body.appendChild(dom.sub);
     dom.start.textContent = '新的开始';
     dom.cont = document.createElement('button'); dom.cont.id = 'tCont'; dom.cont.type = 'button'; dom.cont.textContent = '继续'; document.body.appendChild(dom.cont);
@@ -773,9 +773,10 @@
     ts.left = (cx - titleW / 2) + 'px'; ts.top = top + 'px'; ts.width = titleW + 'px'; ts.height = titleH + 'px';
     { // 印章：竖排标题贴「章」右下，横排贴「章」右下
       const ss = dom.seal.style, sw = Math.round(portrait ? Math.max(22, titleH * .2) : Math.max(24, titleW * .2));
-      ss.width = sw + 'px'; ss.height = Math.round(sw * 1.5) + 'px'; ss.fontSize = Math.round(sw * .52) + 'px';
-      ss.left = Math.round(portrait ? cx + titleW * .46 : cx + titleW * .44) + 'px';
-      ss.top = Math.round(portrait ? top + titleH * .52 : top + titleH * .8) + 'px';
+      ss.width = Math.round(sw * .62) + 'px'; ss.height = 'auto'; ss.fontSize = Math.max(10, Math.round(sw * .36)) + 'px';
+      ss.left = Math.round(portrait ? Math.min(cx + titleW * .5 + 2, w - sw * .62 - 8) : cx + titleW * .44) + 'px';
+      const sh = dom.seal.offsetHeight || sw * 3;   // 竖屏：章底对齐标题底，往上伸进画里，不压英文副标题
+      ss.top = Math.round(portrait ? top + titleH - sh : top + titleH * .8) + 'px';
       const u = dom.sub, us = u.style;   // 英文副标题：横屏竖排贴在标题左侧，竖屏横排在标题下
       u.className = portrait ? 'h' : 'v'; u.textContent = portrait ? 'THREE KINGDOMS · FINAL CHAPTER SURVIVORS' : 'THREE KINGDOMS FINAL CHAPTER SURVIVORS';
       us.fontSize = Math.round(portrait ? Math.max(9, Math.min(12, w * .028)) : Math.max(11, Math.min(15, h * .018))) + 'px';
