@@ -1676,6 +1676,10 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(900px,58v
 .bk.im{background-color:transparent!important;background-size:100% 100%!important;box-shadow:none;height:calc(134px*var(--k,1));filter:drop-shadow(2px 4px 5px rgba(0,0,0,.6))}.bk.im::before,.bk.im::after{display:none}
 .bk.im em{left:29.5%;top:20.3%;width:40.5%;height:31.7%;aspect-ratio:auto;background-color:transparent;background-size:92%;border:0;box-shadow:none;mix-blend-mode:multiply}
 .bk.im span{left:73%;right:auto;top:21%;width:15.2%;height:46%;min-height:0;background:transparent;box-shadow:none;padding:0}
+/* 11/14 用户的新书封（武/太极印 × 黄玄地天）：封面不再叠兵器图，名字写进题签；书带玉坠所以画布比书宽，按 240×274 */
+.bk.im{width:calc(118px*var(--k,1));height:calc(135px*var(--k,1));background-position:0 0!important}.bk.im em{display:none}
+.bk.im span{left:20.5%;top:23%;width:20%;height:35%;color:#3a2414;font-size:calc(11px*var(--kt,1));letter-spacing:0;overflow:hidden}
+#survPrep .sc .ci .bk.im{width:calc(76px*var(--k));height:calc(87px*var(--k))}#survPrep .sc .ci .bk.im span{display:none}
 #survPick .pkb{display:flex;justify-content:center;margin:4px 0}#survPick .pkb .bk{--k:.62}
 @media (max-height:520px){#survPick .pkb .bk{--k:.46}}
 /* 人物提醒：缩成右下角小框（不再放全身像），细线暗底 */
@@ -1779,7 +1783,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     if (it.kind === 'item' || it.kind === 'heal') return `<em class="ico" style="background-image:url('${icoOf(it)}')"></em>`;
     const t = it.kind === 'skill' ? 'wy' : 'xf', q = rk(it).i, im = BOOK_IMG[t + q];
     const sym = it.kind === 'skill' ? 'art/ui/attr/duan.webp' : GF[it.id] && GF[it.id].qg ? 'art/ui/attr/shen.webp' : 'art/ui/attr/tiaoxi.webp';   // 11/11 用户定 B：照群侠，书上不画各招的图，武艺统一画兵器（现在只开刀），心法画打坐，轻功画身法
-    return `<div class="bk ${t}${im ? ' im' : ''}" style="--rc:${GTC[q]}${im ? `;background-image:url('${im}')` : ''}"><em style="background-image:url('${sym}')"></em><span>${it.name}</span></div>`;
+    return `<div class="bk ${t}${im ? ' im' : ''}" style="--rc:${GTC[q]}${im ? `;background-image:url('${im}')` : ''}">${im ? '' : `<em style="background-image:url('${sym}')"></em>`}<span>${it.name}</span></div>`;
   }
   function card(it, i, mode, onI, btns, extra) {   // 一张竖卡：秘籍/道具图 + 名字 + 品质 + 按钮；鼠标移上去（手机点一下）浮出详情
     const r = rk(it), right = i >= 3;
