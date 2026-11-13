@@ -72,6 +72,8 @@
 #szzCodex .cd{position:relative}#szzCodex .cd .nb{position:absolute;left:5px;top:3px;font-style:normal;font-size:11px;color:#b8955a;opacity:.85;font-family:monospace}#szzCodex .cd img{max-width:84px;max-height:82px;object-fit:contain;image-rendering:pixelated}
 #szzCodex .cd span{font-size:13px;color:#e8dcc0;white-space:nowrap}
 #szzCodex .si{width:74px;height:74px;flex:none;background:#241e17 center/cover no-repeat;border:1px solid rgba(184,149,90,.5);display:flex;align-items:center;justify-content:center;font:700 40px Pixel12,sans-serif}#szzCodex .lk .si{filter:grayscale(1) brightness(.38) contrast(1.1)}#szzCodex .dt .pic .si{width:150px;height:150px;font-size:80px}#szzCodex .tr{font-weight:700}
+#szzCodex .gr,#szzCodex .dt{scrollbar-width:thin;scrollbar-color:rgba(184,149,90,.55) rgba(0,0,0,.25)}
+#szzCodex ::-webkit-scrollbar{width:8px;height:8px}#szzCodex ::-webkit-scrollbar-track{background:rgba(0,0,0,.25)}#szzCodex ::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#8a6a3a,#5c4524);border:1px solid rgba(230,190,110,.35);border-radius:4px}#szzCodex ::-webkit-scrollbar-thumb:hover{background:#b8955a}#szzCodex ::-webkit-scrollbar-button{display:none}
 #szzCodex .lk img{filter:brightness(0) opacity(.55)}
 #szzCodex .lk span{color:#7a6c58}
 #szzCodex .dt{width:min(360px,40%);border-left:1px solid rgba(184,149,90,.3);padding:16px 18px;overflow:auto}
