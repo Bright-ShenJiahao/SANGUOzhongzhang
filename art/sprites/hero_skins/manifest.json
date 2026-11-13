@@ -56,7 +56,11 @@
   "xiliang": "西凉",
   "xianzhen": "吕布·陷阵营",
   "xiandeng": "袁绍·先登营",
-  "danyang": "陶谦·丹阳兵"
+  "danyang": "陶谦·丹阳兵",
+  "qingzhou": "曹操·青州兵",
+  "wudang": "诸葛亮·无当飞军",
+  "jinfan": "甘宁·锦帆军",
+  "tengjia": "孟获·藤甲兵"
  },
  "weapons": {
   "dao": {
