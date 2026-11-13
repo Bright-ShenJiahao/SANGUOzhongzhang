@@ -774,7 +774,8 @@ function safeArea() {   // 读 CSS 的 env(safe-area-inset-*)，每秒更新一�
 { const _di = CanvasRenderingContext2D.prototype.drawImage; CanvasRenderingContext2D.prototype.drawImage = function (img, ...a) { if (img instanceof HTMLImageElement && (!img.complete || !img.naturalWidth)) { if (img.src && img.complete && typeof retryImg === 'function') retryImg(img); return; } return _di.call(this, img, ...a); }; }
 function retryImg(img) { const now = performance.now(); if ((img._tries || 0) >= 8 || now - (img._at || 0) < 1500) return; img._at = now; img._tries = (img._tries || 0) + 1; const base = img.src.replace(/([?&])retry=\d+/, ''); img.src = base + (base.includes('?') ? '&' : '?') + 'retry=' + img._tries; }
 function drawChar(name, f, x, y, flip, alpha = 1, white = false, sc = 1, dark = false) {
-  let fr = CH[name] && CH[name][f]; if (!fr && name === 'hero' && CH.hero) fr = CH.hero.idle;   // 旧武器帧已删：老模式里找不到的主角帧用待机帧顶上，不隐形
+  let fr = name === 'hero' && window.HERO_SKIN ? HERO_SKIN.get(f) : null;   // 11/13 主角皮肤（hero_skins，0.5 倍、按 anchor 对脚底）；没下好就用旧图
+  if (!fr) fr = CH[name] && CH[name][f]; if (!fr && name === 'hero' && CH.hero) fr = CH.hero.idle;   // 旧武器帧已删：老模式里找不到的主角帧用待机帧顶上，不隐形
   if (!fr) return;
   // 时装换色后主角的帧是 canvas（没有 src）：以前这里当成「还没开始下载」直接跳过，买了时装颜色的玩家人物整个隐形（用户报 果汁、柴业政）
   if (fr.img instanceof HTMLImageElement && !fr.img.src) { promoteLoad(fr.img); return; }
@@ -783,7 +784,7 @@ function drawChar(name, f, x, y, flip, alpha = 1, white = false, sc = 1, dark = 
   if (!fr.img.complete) return;
   const sp = Math.max(.5, SC * PX) * sc;
   const sx = Math.round(x * SC + OXs), sy = Math.round(y * SC + OYs);
-  ctx.save(); ctx.setTransform(1, 0, 0, 1, sx, sy); if (flip) ctx.scale(-1, 1);
+  ctx.save(); ctx.setTransform(1, 0, 0, 1, sx, sy); if (flip) ctx.scale(-1, 1); if (fr.skin) ctx.imageSmoothingEnabled = false;
   ctx.globalAlpha = alpha;
   const im = white && fr.white ? fr.white : (dark && fr.dark ? fr.dark : fr.img);
   if (dark && !fr.dark) {

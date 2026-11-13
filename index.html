@@ -62,7 +62,7 @@ body.szz-pro #help{display:none}
 .x-back{min-height:34px!important}
 }
 #rot small{display:block;margin-top:10px;font-size:14px;font-weight:600;color:#c9b691;line-height:1.6}
-</style><link rel="preload" href="pack/fonts/result.woff2?v=f9fea0144f" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=f9fea0144f)format("woff2");font-display:swap}</style><link rel="preload" href="pack/fonts/pixel.woff2?v=f3c0fb4227" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"Pixel12";src:url(pack/fonts/pixel.woff2?v=f3c0fb4227)format("woff2");font-display:swap}@font-face{font-family:"Songti SC";src:url(pack/fonts/pixel.woff2?v=f3c0fb4227)format("woff2");font-display:swap}@font-face{font-family:"STSong";src:url(pack/fonts/pixel.woff2?v=f3c0fb4227)format("woff2");font-display:swap}@font-face{font-family:"Noto Serif SC";src:url(pack/fonts/pixel.woff2?v=f3c0fb4227)format("woff2");font-display:swap}@font-face{font-family:"SimSun";src:url(pack/fonts/pixel.woff2?v=f3c0fb4227)format("woff2");font-display:swap}@font-face{font-family:"PingFang SC";src:url(pack/fonts/pixel.woff2?v=f3c0fb4227)format("woff2");font-display:swap}@font-face{font-family:"Microsoft YaHei";src:url(pack/fonts/pixel.woff2?v=f3c0fb4227)format("woff2");font-display:swap}@font-face{font-family:"Noto Sans CJK SC";src:url(pack/fonts/pixel.woff2?v=f3c0fb4227)format("woff2");font-display:swap}@font-face{font-family:"STKaiti";src:url(pack/fonts/pixel.woff2?v=f3c0fb4227)format("woff2");font-display:swap}@font-face{font-family:"KaiTi";src:url(pack/fonts/pixel.woff2?v=f3c0fb4227)format("woff2");font-display:swap}*{font-synthesis:none}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
+</style><link rel="preload" href="pack/fonts/result.woff2?v=1216ac7612" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=1216ac7612)format("woff2");font-display:swap}</style><link rel="preload" href="pack/fonts/pixel.woff2?v=8f97748e43" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"Pixel12";src:url(pack/fonts/pixel.woff2?v=8f97748e43)format("woff2");font-display:swap}@font-face{font-family:"Songti SC";src:url(pack/fonts/pixel.woff2?v=8f97748e43)format("woff2");font-display:swap}@font-face{font-family:"STSong";src:url(pack/fonts/pixel.woff2?v=8f97748e43)format("woff2");font-display:swap}@font-face{font-family:"Noto Serif SC";src:url(pack/fonts/pixel.woff2?v=8f97748e43)format("woff2");font-display:swap}@font-face{font-family:"SimSun";src:url(pack/fonts/pixel.woff2?v=8f97748e43)format("woff2");font-display:swap}@font-face{font-family:"PingFang SC";src:url(pack/fonts/pixel.woff2?v=8f97748e43)format("woff2");font-display:swap}@font-face{font-family:"Microsoft YaHei";src:url(pack/fonts/pixel.woff2?v=8f97748e43)format("woff2");font-display:swap}@font-face{font-family:"Noto Sans CJK SC";src:url(pack/fonts/pixel.woff2?v=8f97748e43)format("woff2");font-display:swap}@font-face{font-family:"STKaiti";src:url(pack/fonts/pixel.woff2?v=8f97748e43)format("woff2");font-display:swap}@font-face{font-family:"KaiTi";src:url(pack/fonts/pixel.woff2?v=8f97748e43)format("woff2");font-display:swap}*{font-synthesis:none}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
 <style>button{letter-spacing:.04em!important}</style></head><body>
 <style>
 #bootSplash{position:fixed;inset:0;z-index:99999;background:radial-gradient(ellipse at 50% 45%,#f3e4cf 0%,#ecd9c0 55%,#d9c09f 100%);transition:opacity .45s ease-out}
@@ -112,7 +112,7 @@ if(location.protocol==='https:'&&!/[?&]debug(?:=|&|$)/.test(location.search)&&'s
 })();
 // 自动更新：打开游戏、或从后台切回来时，查一下线上有没有新版本；有就在标题/整备页自动刷新（战斗中不打扰）
 (function(){
-var BUILD='4ca7c35d9361',busy=false;
+var BUILD='4ecd4779c76b',busy=false;
 if(location.protocol!=='https:'||/[?&]debug(?:=|&|$)/.test(location.search))return;
 function check(){
   if(busy)return;
@@ -1207,7 +1207,9 @@ const XIAOCHANG = { drawBackground() {}, state: () => null, start() {}, on: () =
     btn(heroGroup, '给 7 颗通脉丹', '', () => { if (window.MERIDIAN) { ['ch1','ch2','ch3','xc1','xc2','xc3','tg'].forEach(k => MERIDIAN.award(k)); tipLine('通脉丹 7/7：整军备战 → 经脉'); try { if (window.TITLE && TITLE.refreshPreparation) TITLE.refreshPreparation(); } catch (e) {} } });
     btn(heroGroup, '跳过这一波', '', () => { if (window.SURV) SURV.skipWave(); });
     btn(heroGroup, '图鉴全开', '', () => { if (window.CODEX) { CODEX.unlockAll(); CODEX.open(); } });
-    btn(heroGroup, '武学试炼', 'alt', () => { if (window.TRIAL) TRIAL.open(); });   // 11/13：一招一招看武艺、心法、轻功
+    btn(heroGroup, '武学试炼', 'alt', () => { if (window.TRIAL) TRIAL.open(); });
+    { const sk = btn(heroGroup, '皮肤：' + (window.HERO_SKIN ? HERO_SKIN.name() : '白衣'), 'alt', () => { if (!window.HERO_SKIN) return; HERO_SKIN.next(); sk.textContent = '皮肤：' + HERO_SKIN.name(); });   // 11/13：8 套主角皮肤轮流看
+      if (window.HERO_SKIN) HERO_SKIN.preload(HERO_SKIN.cur(), 'wd_'); }   // 11/13：一招一招看武艺、心法、轻功
     const allBtn = btn(heroGroup, '解锁关卡：关', 'off', () => { window.ROUTE_ALL = !window.ROUTE_ALL; allBtn.textContent = '解锁关卡：' + (window.ROUTE_ALL ? '开' : '关'); allBtn.className = window.ROUTE_ALL ? '' : 'off'; tipLine(window.ROUTE_ALL ? '路线长卷上任意节点都能直接点进去（首领、精英、奇遇、商店）' : '恢复正常路线'); });   /* 11/12 用户：随便进去看 */
     btn(heroGroup, '给太平飞剑', '', () => { if (window.ARTIFACT) { ARTIFACT.grant('feijian'); ARTIFACT.equip('feijian'); ARTIFACT.startRun(); if (typeof say === 'function') say('已获得并装备太平飞剑', 2); try { if (window.TITLE && TITLE.refreshPreparation) TITLE.refreshPreparation(); } catch (e) {} } });
     // 预览结算动画（数字滚动 + 铜钱雨）：直接判本局通关，结算显示 37 击倒、180 金币
@@ -1315,7 +1317,7 @@ const XIAOCHANG = { drawBackground() {}, state: () => null, start() {}, on: () =
 
   // 三国终章：老游戏的按钮先藏起来（锦囊、经脉、神器、校场、第二章、Boss 等已拿掉），只留测试要用的几个
   function trimPanel() {
-    const keep = ['回到主界面', '武艺：刀', '武艺：剑', '回满血', '无敌', '跳过这一波', '恢复存档', '跳到第', '修为', '图鉴全开', '解锁关卡', '武学试炼'];   /* 11/12：图鉴、解锁关卡也留着 */
+    const keep = ['回到主界面', '武艺：刀', '武艺：剑', '回满血', '无敌', '跳过这一波', '恢复存档', '跳到第', '修为', '图鉴全开', '解锁关卡', '武学试炼', '皮肤：'];   /* 11/12：图鉴、解锁关卡也留着 */
     panel.querySelectorAll('button').forEach(b => { if (!keep.some(k => b.textContent.startsWith(k))) b.style.display = 'none'; });
     panel.querySelectorAll('.dbgTrial,.dbgFloors').forEach(e => { e.style.display = 'none'; });
     panel.querySelectorAll('.dbgGroup').forEach(g => { if (![...g.querySelectorAll('button')].some(b => b.style.display !== 'none')) g.style.display = 'none'; });
@@ -3303,6 +3305,57 @@ function drawPropFx() {
 let qiFx = [];   // 老卒的扇形剑气特效
 let blessFx = []; // 方士施法成功的黄圈
 // 攻击按下先等待：短按松开才出普通攻击，长按到 0.4 秒后转为蓄力。
+
+// 11/13 主角皮肤：8 套皮肤 × 10 种武器 × 20 帧，武器已画进每一帧（art/sprites/hero_skins/，说明见那里的 README_交接说明.md）。
+// 主角帧名照旧是「前缀_帧名」（wd_chop1、qiang_idle…），这里把它换成 hero_skins/{皮肤}/{武器}/{帧名}.png。
+// 图是高清的（人约 150 像素高）：按旧帧的 0.5 倍画、关平滑，脚底对齐 manifest 里的 anchor；朝左翻转由 drawChar 统一处理。
+// 只在用到时才下载（当前皮肤 × 当前武器 20 张），没下好之前先用旧图顶着，不会隐形。
+(function () {
+  const ROOT = 'art/sprites/hero_skins/';
+  const SKINS = { baiyi: '白衣·农夫', guanjun: '红衣黑甲·官军', huangjin: '黄巾披甲', baima: '白马义从', caojun: '曹军', baier: '白毦兵·刘备', wujun: '吴军·孙权', xiliang: '西凉' };
+  const WEP = {   // manifest.json 的 weapons：图片宽高、脚底中心
+    dao: { size: [251, 179], anchor: [127, 175] }, jian: { size: [262, 187], anchor: [131, 177] }, chui: { size: [211, 184], anchor: [115, 175] },
+    spear: { size: [365, 217], anchor: [185, 189] }, guandao: { size: [332, 211], anchor: [159, 191] }, bow: { size: [189, 177], anchor: [115, 175] },
+    stone: { size: [189, 177], anchor: [115, 175] }, fu: { size: [189, 183], anchor: [115, 175] }, fan: { size: [237, 192], anchor: [120, 175] },
+    quan: { size: [189, 180], anchor: [115, 178] } };
+  const PRE = { wd_: 'dao', jian_: 'jian', chui_: 'chui', qiang_: 'spear', guandao_: 'guandao', bow_: 'bow', stone_: 'stone', huangfu_: 'fu', fan_: 'fan', quan_: 'quan' };
+  const FR = new Set(['idle', 'walk1', 'walk2', 'walk3', 'hurt', 'roll1', 'roll2', 'roll3', 'roll4', 'down', 'chop1', 'chop2', 'sweep1', 'sweep2', 'thrust1', 'thrust2', 'spin1', 'spin2', 'up1', 'up2']);
+  const SCALE = .5;
+  let cur = 'baiyi';
+  try { const s = localStorage.getItem('szz-skin'); if (s && SKINS[s]) cur = s; } catch (e) {}
+  const cache = {};   // 'skin/wep/frame' → { img, white, w, h, ax, ay }
+  function split(f) {   // 'wd_chop1' → ['dao','chop1']；没有前缀的（idle、roll1）按刀算
+    const i = f.indexOf('_');
+    if (i < 0) return FR.has(f) ? ['dao', f] : null;
+    const w = PRE[f.slice(0, i + 1)], n = f.slice(i + 1);
+    return w && FR.has(n) ? [w, n] : null;
+  }
+  function whiteOf(img) {   // 受击闪白用的剪影
+    try { const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight; const g = c.getContext('2d');
+      g.drawImage(img, 0, 0); g.globalCompositeOperation = 'source-in'; g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); return c; } catch (e) { return null; }
+  }
+  function get(f, skin) {
+    const p = split(f); if (!p) return null;
+    const key = (skin || cur) + '/' + p[0] + '/' + p[1];
+    let o = cache[key];
+    if (!o) {
+      const m = WEP[p[0]], img = new Image();
+      o = cache[key] = { img, white: null, w: m.size[0] * SCALE, h: m.size[1] * SCALE, ax: m.anchor[0] * SCALE, ay: m.anchor[1] * SCALE, skin: true };
+      img.onload = () => { o.white = whiteOf(img); };
+      img.src = ROOT + key + '.png';
+    }
+    return o.img.complete && o.img.naturalWidth ? o : null;
+  }
+  function preload(skin, prePrefix) {   // 换皮肤/换武器时先把这 20 张拉下来
+    const w = PRE[prePrefix] || 'dao'; for (const n of FR) get(Object.keys(PRE).find(k => PRE[k] === w) + n, skin);
+  }
+  window.HERO_SKIN = {
+    SKINS, list: Object.keys(SKINS), get, preload,
+    cur: () => cur, name: () => SKINS[cur],
+    set(s) { if (!SKINS[s]) return; cur = s; try { localStorage.setItem('szz-skin', s); } catch (e) {} preload(s, window.SURV && SURV.heldPre ? SURV.heldPre() : 'wd_'); },
+    next() { const L = this.list; this.set(L[(L.indexOf(cur) + 1) % L.length]); return cur; },
+  };
+})();
 
 // 手机全屏提示：只要用手机打开就强制显示，直到在标题页勾选「关闭提醒」。
 // 浏览器一定有工具栏/地址栏，只有"添加到主屏幕"后从桌面图标进入才是真全屏。
@@ -9404,7 +9457,8 @@ function safeArea() {   // 读 CSS 的 env(safe-area-inset-*)，每秒更新一�
 { const _di = CanvasRenderingContext2D.prototype.drawImage; CanvasRenderingContext2D.prototype.drawImage = function (img, ...a) { if (img instanceof HTMLImageElement && (!img.complete || !img.naturalWidth)) { if (img.src && img.complete && typeof retryImg === 'function') retryImg(img); return; } return _di.call(this, img, ...a); }; }
 function retryImg(img) { const now = performance.now(); if ((img._tries || 0) >= 8 || now - (img._at || 0) < 1500) return; img._at = now; img._tries = (img._tries || 0) + 1; const base = img.src.replace(/([?&])retry=\d+/, ''); img.src = base + (base.includes('?') ? '&' : '?') + 'retry=' + img._tries; }
 function drawChar(name, f, x, y, flip, alpha = 1, white = false, sc = 1, dark = false) {
-  let fr = CH[name] && CH[name][f]; if (!fr && name === 'hero' && CH.hero) fr = CH.hero.idle;   // 旧武器帧已删：老模式里找不到的主角帧用待机帧顶上，不隐形
+  let fr = name === 'hero' && window.HERO_SKIN ? HERO_SKIN.get(f) : null;   // 11/13 主角皮肤（hero_skins，0.5 倍、按 anchor 对脚底）；没下好就用旧图
+  if (!fr) fr = CH[name] && CH[name][f]; if (!fr && name === 'hero' && CH.hero) fr = CH.hero.idle;   // 旧武器帧已删：老模式里找不到的主角帧用待机帧顶上，不隐形
   if (!fr) return;
   // 时装换色后主角的帧是 canvas（没有 src）：以前这里当成「还没开始下载」直接跳过，买了时装颜色的玩家人物整个隐形（用户报 果汁、柴业政）
   if (fr.img instanceof HTMLImageElement && !fr.img.src) { promoteLoad(fr.img); return; }
@@ -9413,7 +9467,7 @@ function drawChar(name, f, x, y, flip, alpha = 1, white = false, sc = 1, dark = 
   if (!fr.img.complete) return;
   const sp = Math.max(.5, SC * PX) * sc;
   const sx = Math.round(x * SC + OXs), sy = Math.round(y * SC + OYs);
-  ctx.save(); ctx.setTransform(1, 0, 0, 1, sx, sy); if (flip) ctx.scale(-1, 1);
+  ctx.save(); ctx.setTransform(1, 0, 0, 1, sx, sy); if (flip) ctx.scale(-1, 1); if (fr.skin) ctx.imageSmoothingEnabled = false;
   ctx.globalAlpha = alpha;
   const im = white && fr.white ? fr.white : (dark && fr.dark ? fr.dark : fr.img);
   if (dark && !fr.dark) {
