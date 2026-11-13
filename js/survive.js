@@ -821,9 +821,12 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const dlv = () => lvOf(CK);
   // 11/14 用户：范围比群侠传大 → 按阶缩（黄 .75 玄 .75 地 .7 天 .65）；武学试炼里能一招招调，存在本机，调完复制给 Claude 写死
   const DRS0 = { 1: .75, 2: .75, 3: .7, 4: .65 }; let DRS = {}; try { DRS = JSON.parse(localStorage.getItem('szz-dao-rs') || '{}') || {}; } catch (e) {}
-  const rsOf = k => DRS[k] != null ? DRS[k] : DRS0[(SK[k] && SK[k].tier) || 1] || 1;
+  // 11/14 用户在武学试炼里一招招拖出来的定稿（本机拖动条仍可覆盖，方便以后再调）
+  const DRS1 = { hengsao: .6, tuodao: .69, tiaozhan: .75, lianzhan: .55, daobo: .75, huima: .75, cuofeng: .68, liedihuan: .33, feilunren: .81, xuehe: .75, tianbeng: 1.12, wanren: .75 };
+  const DSP1 = { hengsao: 1.3, tuodao: 1.3, tiaozhan: 1.3, lianzhan: 1.2, daobo: 1.4, huima: 1.4, cuofeng: 1.4, liedihuan: 1.51, feilunren: 2.29, xuehe: 1.7, tianbeng: 2.2, wanren: 1.9 };
+  const rsOf = k => DRS[k] != null ? DRS[k] : DRS1[k] != null ? DRS1[k] : DRS0[(SK[k] && SK[k].tier) || 1] || 1;
   let DSP = {}; try { DSP = JSON.parse(localStorage.getItem('szz-dao-sp') || '{}') || {}; } catch (e) {}   // 起手/收势倍率（越大越慢），同样在武学试炼里拖动调
-  const spOf = k => DSP[k] != null ? DSP[k] : 1;
+  const spOf = k => DSP[k] != null ? DSP[k] : DSP1[k] != null ? DSP1[k] : 1;
   const SPDN = [[.62, '极快'], [.85, '快'], [1.05, '中'], [1.25, '慢'], [99, '极慢']];
   const spdTxt = o => { const m = o.dk ? spOf(o.key) : 1, wu = (o.dk ? o.wu : o.wu * 1.2) * m, rc = o.rc * m, t = wu + rc; return `出手${SPDN.find(q => t <= q[0])[1]}　起手 ${wu.toFixed(2)} 秒 · 收势 ${rc.toFixed(2)} 秒`; };
   let DKT = 0; const DKO = [];   // 刀的持续判定（飞刃、血河、裂地环等）不靠 later：翻滚也不会断
