@@ -47,13 +47,13 @@
   }
   // lines: [{ who:'liubei'|'hero'|'zhangjiao'|''(旁白), name?, bg?, t:'台词' }]
   function play(lines, done, see) {
-    ensure(); if (box) box.remove();
+    ensure(); if (st && st.cleanup) st.cleanup(); if (box) box.remove();   // 上一段没放完就被新的一段顶掉：先把旧的键盘/点击监听拆掉
     box = document.createElement('div'); box.id = 'szzStory'; if (see) box.className = 'see';   // see：首领台词，战场半透明压暗露在后面
     box.innerHTML = '<div class="bg"></div><div class="bg"></div><div class="sh"></div><img class="pt" alt=""><div class="box"><div class="nm"></div><div class="bt"><button class="n" title="下一句"></button><button class="s" title="跳过剧情"></button></div><div class="tx"></div><div class="hn">点击<span class="k"> / 空格</span> 继续<span class="k">　长按空格 跳过</span><em></em></div></div>';
     document.body.appendChild(box);
     const bgs = box.querySelectorAll('.bg'), pt = box.querySelector('.pt'), nm = box.querySelector('.nm'), tx = box.querySelector('.tx');
     st = { i: -1, lines, done, typing: 0, full: '', bgi: 0, bg: '' };
-    const finish = () => { if (!st) return; const d = st.done; st = null; removeEventListener('keydown', kd, true); removeEventListener('keyup', ku, true); box.style.transition = 'opacity .3s'; box.style.opacity = '0'; const b = box; setTimeout(() => b.remove(), 320); box = null; if (d) d(); };
+    const finish = () => { if (!st) return; const d = st.done; st = null; removeEventListener('keydown', kd, true); removeEventListener('keyup', ku, true); removeEventListener('pointerdown', pd, true); box.style.transition = 'opacity .3s'; box.style.opacity = '0'; const b = box; setTimeout(() => b.remove(), 320); box = null; if (d) d(); };
     const show = () => {
       st.i++; if (st.i >= st.lines.length) return finish();
       const L = st.lines[st.i];
@@ -67,9 +67,14 @@
       if (window.SFX) SFX.play('j_pick0');
     };
     const next = () => { if (!st) return; if (st.typing) { clearInterval(st.typing); st.typing = 0; tx.innerHTML = st.full; return; } show(); };
-    box.querySelector('.n').onclick = e => { e.stopPropagation(); if (st && st.typing) { clearInterval(st.typing); st.typing = 0; } show(); };
-    box.querySelector('.s').onclick = e => { e.stopPropagation(); finish(); };
-    box.addEventListener('click', next);
+    // 11/15 用户：最后一句常点不下去——改成在 window 捕获阶段收 pointerdown（游戏自己的触摸/鼠标处理会吞掉 click），点到剧情框里任何地方都算
+    let lastP = 0;
+    const pd = e => { if (!st || !box || !box.contains(e.target)) return; e.preventDefault(); e.stopPropagation(); const now = performance.now(); if (now - lastP < 120) return; lastP = now;
+      if (e.target.closest('.s')) return finish();
+      if (e.target.closest('.n')) { if (st.typing) { clearInterval(st.typing); st.typing = 0; } return show(); }
+      next(); };
+    addEventListener('pointerdown', pd, true);
+    st.cleanup = () => { removeEventListener('keydown', kd, true); removeEventListener('keyup', ku, true); removeEventListener('pointerdown', pd, true); };
     let hold = 0;
     const kd = e => { if (!st) return; if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); if (e.repeat) { if (++hold > 18) finish(); return; } hold = 0; next(); } else if (e.key === 'Escape') { e.preventDefault(); finish(); } };
     const ku = e => { if (e.key === ' ') hold = 0; };
