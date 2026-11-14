@@ -1198,11 +1198,13 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     const g = ctx.createLinearGradient(0, -fs / 2, 0, fs / 2); g.addColorStop(0, '#fff3c8'); g.addColorStop(.5, c.big ? '#ff9a3a' : '#e8c070'); g.addColorStop(1, c.big ? '#b02a12' : '#8a5a20'); ctx.fillStyle = g; ctx.fillText(c.txt, 0, 0);
     ctx.restore();
   }
+  // 11/14 用户定（照群侠）：普通命中敌人不停步、不硬直，只闪白、稍微推一下；只有眩晕（stunz）和浮空（挑飞）才让敌人停下
   function stunGate(z, stun, knock) {
-    if (!RT.on || !(stun > .05 || knock)) return null;
-    if (z.stunCd > 0) return { stun: 0, knock: false };
+    if (!RT.on) return null;
+    if (!knock) return { stun: 0, knock: false, kbM: .35 };
+    if (z.stunCd > 0) return { stun: 0, knock: false, kbM: .35 };
     const t = z.survTier || 0, st = STUN[t]; z.stunCd = st[0];
-    return { stun: st[1], knock: knock && t < 2 };
+    return { stun: t < 2 ? st[1] : 0, knock: t < 2, kbM: t < 2 ? 1 : .35 };
   }
   function skillTick(dt) {
     GM = gfCalc();

@@ -1,7 +1,7 @@
 // 受击结算：hit/rawHit、击飞、落地、敌人欢呼（2026-10-31 从 game.js 原样拆出，逻辑不变）
 // 依赖 game.js 的全局变量，只在运行时调用；本文件加载时不访问 game.js 的变量。
 function hit(z, dmg, kb, dir, knock, daze = 0, stun = .35, interrupt = false, ranged = false, traits = {}) {
-  if (window.SURV && SURV.stunGate && z) { const g = SURV.stunGate(z, stun, knock); if (g) { stun = g.stun; knock = g.knock; } }   // 三国终章：眩晕有冷却
+  if (window.SURV && SURV.stunGate && z) { const g = SURV.stunGate(z, stun, knock); if (g) { stun = g.stun; knock = g.knock; if (g.kbM != null) kb *= g.kbM; } }   // 三国终章：眩晕有冷却
   // 盾兵举盾（第二章）：穿云箭、投石车这类从天上砸下的攻击，盾兵周围 45 内的黄巾兵：50% 完全挡住，否则只吃 40% 且不硬直（用户定）
   if (chapter2Run && z && !z.dead && (traits.skyArrow || traits.siegeShot)) {
     const sh = zs.find(s => s.type === 'yellow-shield' && !s.dead && Math.hypot(s.x - z.x, (s.y - z.y) * 2) < (s.T.ch2Elite ? 65 : 45));
@@ -79,7 +79,7 @@ function rawHit(z, dmg, kb, dir, knock, daze = 0, stun = .35, interrupt = false,
   if (window.ROGUE && ROGUE.onHit) { dmg = ROGUE.onHit(z, dmg, traits, ranged); dbg.rogue = dmg; }   // 震慑破绽加伤、避实眩晕回血
   dbg.hp0 = z.hp; z.hp -= dmg * (z.daze > 0 ? 1.5 : 1);   // 被打晕的目标吃 1.5 倍伤害
   if (!traits.secondary) window.__hitTrace = Object.assign(dbg, { out: dmg, hp1: z.hp, st: z.st, type: z.type, xcActive: !!(window.XIAOCHANG && XIAOCHANG.active()), xcRun: !!(window.XIAOCHANG && XIAOCHANG.state()) });
-  z.flash = .1; z.stun = z.T.siege ? 0 : (z.T.heavy && z.st === 'wind' && !interrupt ? 0 : stun); z.vx = z.T.siege ? 0 : kb * dir * (z.T.heavy ? .6 : 1);
+  z.flash = .1; z.stun = z.T.siege ? 0 : (window.SURV && SURV.noStun && SURV.noStun() ? Math.max(z.stun || 0, stun) : (z.T.heavy && z.st === 'wind' && !interrupt ? 0 : stun));   /* 三国终章：普通命中不清掉已有的眩晕 */ z.vx = z.T.siege ? 0 : kb * dir * (z.T.heavy ? .6 : 1);
   if (z.T.chapterBoss) {   // 用户定：第二章首领沿用管亥的「韧性」——挨打累积，满了才踉跄；出招中不被打断；平时只被推一点
     const POISE = { zhang_liang: 8, zhang_bao: 6, zhang_jiao: 10 }[z.type] || 8;
     z.poise = (z.poise || 0) + dmg; (z.hitLog ||= []).push(gameT); z.hitLog = z.hitLog.filter(t => gameT - t < 2);
