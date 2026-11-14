@@ -847,6 +847,11 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     const d = m * DU * DM() * pjm * fkm, up = !!o.up && !tough(z), f0 = freeze, x0 = o.x != null ? o.x : hero.x;
     rec(d); hit(z, d, kb * (tough(z) ? .5 : 1), Math.sign(z.x - x0) || hero.f, up, 0, up ? .45 : .3, false, false, { secondary: true, survSkill: true });
     freeze = Math.min(freeze, Math.max(f0, .04));
+    {   // 11/14 用户：打中时的手感——敌人身上闪一道刀痕；同一时刻多个目标只顿一次帧（约 0.05 秒）
+      const sk = SK[CK], col = (sk && sk.color || '#ffe0a0').replace('#', ''), rgb = [0, 2, 4].map(i => parseInt(col.slice(i, i + 2), 16)).join(',');
+      fx.push({ k: 'cut', x: z.x, y: z.y - 20 * (z.sc || 1), a: Math.atan2(z.y - hero.y, z.x - x0) + (Math.random() - .5) * 1.2 - .6, L: 26 * (z.sc || 1), t: 0, T: .16, col: rgb });
+      const now = performance.now(); if (now - (DH.hs || 0) > 110) { DH.hs = now; freeze = Math.max(freeze, .05); }
+    }
     if (z.dead) return true;
     const first = !o.once || !o.once.has(z); if (o.once) o.once.add(z);
     if (first && o.pj) addPJ(z, o.pj, o.pjMax);
@@ -1240,7 +1245,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
         const l0 = lvOf(key); S.mast[key] = (S.mast[key] || 0) + AFX.xp(); if (lvOf(key) > l0) floaters.push({ x: hero.x, y: hero.y - 76, t: 0, txt: k.name + ' LV' + lvOf(key), color: '#ffd86e' });
         if (!k.dk && lvOf(key) >= 10) later(.2, () => { CM *= .6; k.cast(); });   // LV10 质变：多出一击
         CM = 1; RM = 1; CK = '';
-        S.recov = { t: 0, dur: (k.dk ? Math.max(.08, k.rc - DLV.rc[lvOf(key) - 1]) * spOf(key) : k.rc) * CDM(), pose: k.pose[1], late: k.poseL }; S.wind = null;
+        S.recov = { t: 0, dur: (k.dk ? Math.max(.08, k.rc - DLV.rc[lvOf(key) - 1]) * spOf(key) : k.rc) * CDM(), pose: k.pose[1], late: k.poseL }; S.wind = null; if (k.dk) { const a = aim(), dx = Math.cos(a) * 7, dy = Math.sin(a) * 3; hero.x += dx; hero.y = clampY(hero.y + dy); }   // 11/14：刀招出手往前踏半步
         S.qi = (S.qi + 1) % 5; if (S.qi === 0) S.cycles++;
       }
       return;
@@ -2066,10 +2071,11 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       if (e.k === 'burst') { ctx.save(); ctx.translate(e.x, e.y); ctx.scale(1, .5); const r = e.r * (.4 + .6 * Math.min(1, p * 2)); ctx.fillStyle = `rgba(${e.col},${.28 * (1 - p)})`; ctx.beginPath(); ctx.arc(0, 0, r, 0, 7); ctx.fill(); ctx.strokeStyle = `rgba(255,250,230,${.9 * (1 - p)})`; ctx.lineWidth = 4 * (1 - p) + 1; ctx.stroke(); ctx.restore(); }
       else if (e.k === 'mark') { ctx.save(); ctx.translate(e.x, e.y); ctx.scale(1, .5); ctx.strokeStyle = `rgba(255,90,60,${.3 + .4 * p})`; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.arc(0, 0, e.r, 0, 7); ctx.stroke(); ctx.restore(); ctx.strokeStyle = 'rgba(233,220,176,.9)'; ctx.lineWidth = 2; for (let i = 0; i < 4; i++) { const ox = (i - 1.5) * e.r * .4, yy = e.y * 1 - (1 - p) * 120; ctx.beginPath(); ctx.moveTo(e.x + ox, yy - 20); ctx.lineTo(e.x + ox, yy); ctx.stroke(); } }
       else if (e.k === 'bolt') { ctx.save(); ctx.strokeStyle = `rgba(235,240,255,${1 - p})`; ctx.lineWidth = 4 * (1 - p) + 1; ctx.beginPath(); let x = e.x, y = e.y - 170; ctx.moveTo(x, y); for (let i = 0; i < 6; i++) { x = e.x + R(-10, 10) * (i < 5); y += (e.y - (e.y - 170)) / 6; ctx.lineTo(x, y); } ctx.stroke(); ctx.restore(); }
+      else if (e.k === 'cut') { ctx.save(); ctx.translate(e.x, e.y); ctx.rotate(e.a); const g = Math.min(1, p * 5), L = e.L * g, al = 1 - p * p; ctx.lineCap = 'round'; ctx.strokeStyle = `rgba(${e.col},${.6 * al})`; ctx.lineWidth = 7 * (1 - p) + 2; ctx.beginPath(); ctx.moveTo(-L, 0); ctx.lineTo(L, 0); ctx.stroke(); ctx.strokeStyle = `rgba(255,255,255,${al})`; ctx.lineWidth = 2.5 * (1 - p) + .8; ctx.beginPath(); ctx.moveTo(-L, 0); ctx.lineTo(L, 0); ctx.stroke(); ctx.restore(); }
       else if (e.k === 'line') { ctx.save(); ctx.translate(e.x, e.y - 14); ctx.scale(1, .5); ctx.rotate(e.a); const k = Math.min(1, p * 4); ctx.lineCap = 'round'; ctx.strokeStyle = `rgba(${e.col},${.55 * (1 - p)})`; ctx.lineWidth = e.w * 1.6 * (1 - p) + 4; ctx.beginPath(); ctx.moveTo(10, 0); ctx.lineTo(10 + e.L * k, 0); ctx.stroke(); ctx.strokeStyle = `rgba(255,255,255,${.95 * (1 - p)})`; ctx.lineWidth = 3; ctx.stroke(); ctx.restore(); }
     }
     for (const e of fx) {
-      if (e.k === 'burst' || e.k === 'mark' || e.k === 'bolt' || e.k === 'line' || e.k === 'drop') continue;
+      if (e.k === 'burst' || e.k === 'mark' || e.k === 'bolt' || e.k === 'line' || e.k === 'drop' || e.k === 'cut') continue;
       if (e.k === 'ghost') {   // 残影：半透明主角，带一道拖尾
         const q = Math.min(1, e.t / e.mt), x = e.x0 + (e.x1 - e.x0) * q, y = e.y0 + (e.y1 - e.y0) * q, al = .6 * (1 - Math.max(0, (e.t - e.mt) / (e.T - e.mt)));
         ctx.save(); ctx.strokeStyle = `rgba(200,225,255,${al * .5})`; ctx.lineWidth = 8; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(e.x0, e.y0 - 22); ctx.lineTo(x, y - 22); ctx.stroke(); ctx.restore();
@@ -2250,7 +2256,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   function pose() {
     if (S.poseOverride) return S.poseOverride.f;
     if (S.recov) return S.recov.late && S.recov.t > S.recov.dur * .55 ? S.recov.late : S.recov.pose;
-    if (S.wind && (hero.st !== 'walk' || S.wind.dur - S.wind.t < .16)) return S.wind.k.pose[0];   // 边走边打时，出手前 0.16 秒也露一下起手帧
+    if (S.wind && (hero.st !== 'walk' || S.wind.dur - S.wind.t < (S.wind.k.dk ? .32 : .16))) return S.wind.k.pose[0];   // 11/14：刀招举刀至少露 0.32 秒   // 边走边打时，出手前 0.16 秒也露一下起手帧
     return null;
   }
   const rooted = () => !!S.recov;
