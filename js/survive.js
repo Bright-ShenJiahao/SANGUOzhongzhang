@@ -861,7 +861,10 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   }
   const inArc = (x, y, z, a0, half, r) => { const dx = z.x - x, dy = (z.y - y) * 2, d = Math.hypot(dx, dy); return d <= r + 8 && (d < 14 || angDiff(Math.atan2(dy, dx), a0) <= half); };
   function dSweep(x, y, a0, half, r, m, kb, o = {}) {   // 扇形（r 用方案单位）
-    r *= DK * RM; fx.push({ k: 'arc', x, y, a0, half, r, t: 0, T: .26, color: o.col || C.dao, rev: !!o.rev });
+    r *= DK * RM;
+    // 11/14 用户：有刀光图的招不再画代码扇形；出手那一下已由 daoSlash 播过，之后的追加刀（回锋、叠锋第二三刀等）按这一刀的方向再播一道刀光
+    if (typeof DGM !== 'undefined' && DGM[CK]) { if (DKT - (daoSlash.t || -9) > .06) daoSlash(CK, a0, x, y); }
+    else fx.push({ k: 'arc', x, y, a0, half, r, t: 0, T: .26, color: o.col || C.dao, rev: !!o.rev });
     return hittable().filter(z => inArc(x, y, z, a0, half, r) && DH(z, m, kb, Object.assign({ x }, o)));
   }
   function dCircle(x, y, r, m, kb, o = {}) {   // 圆（r 用方案单位）
@@ -1033,10 +1036,10 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const DGM = { hengsao: ['dg1', 2.6, .5, .8, 14, -14], lianzhan: ['dg1', 2.6, .5, .8, 14, -14], tuodao: ['dg2', 2.4, .5, .5, 10, -14], tiaozhan: ['dg3', 1.6, .3, .6, 14, -24], daobo: ['dg4', 2.2, .45, .6, 10, -26], cuofeng: ['dg4', 2.2, .45, .6, 10, -26], huima: ['dg5', 2.4, .5, .55, 0, -24],
     xuehe: ['dd_xuehe', 2.6, .5, .75, 20, -16], feilunren: ['dd_feilun', 2.6, .35, .5, 30, -16], liedihuan: ['dd_liedi', 3.2, .55, .88, 24, 2], tianbeng: ['dt_tianbeng', 1.7, .5, .9, 30, 4], wanren: ['dt_wanren', 2.2, .5, .5, 0, -16, .65] };
   const hexRgb = h => { const c = (h || '#ffe0a0').replace('#', ''); return [0, 2, 4].map(i => parseInt(c.slice(i, i + 2), 16)).join(','); };
-  function daoSlash(key) {
-    const m = DGM[key], o = SK[key]; if (!m || !o) return;
-    const a = aim(), f = Math.cos(a) >= 0 ? 1 : -1, R = Math.max(30, (o.range || (o.len ? o.len / 2 : 60)) * DK * rsOf(key)), t = o.tier || 1;
-    fx.push({ k: 'dg', n: m[0], w: R * m[1], ax: m[2], ay: m[3], x: hero.x + f * m[4], y: hero.y + m[5], sy: m[6] || 1, f, t: 0, T: t >= 4 ? .42 : t >= 3 ? .34 : .24, col: hexRgb(o.color), al: t <= 1 ? .7 : 1, wh: [.3, .3, .5, .6, .8][t], ghost: t === 2 });
+  function daoSlash(key, a1, x1, y1) {
+    const m = DGM[key], o = SK[key]; if (!m || !o) return; daoSlash.t = DKT;
+    const a = a1 != null ? a1 : aim(), f = Math.cos(a) >= 0 ? 1 : -1, hx = x1 != null ? x1 : hero.x, hy = y1 != null ? y1 : hero.y, R = Math.max(30, (o.range || (o.len ? o.len / 2 : 60)) * DK * rsOf(key)), t = o.tier || 1;
+    fx.push({ k: 'dg', n: m[0], w: R * m[1], ax: m[2], ay: m[3], x: hx + f * m[4], y: hy + m[5], sy: m[6] || 1, f, t: 0, T: t >= 4 ? .42 : t >= 3 ? .34 : .24, col: hexRgb(o.color), al: t <= 1 ? .7 : 1, wh: [.3, .3, .5, .6, .8][t], ghost: t === 2 });
     if (t >= 4) shake = Math.max(shake, .25);
   }
   // 11/14 用户：刀招的起手帧 / 出手帧可在武学试炼里挑（可水平翻转，帧名末尾加 ~ 表示翻转），存 localStorage szz-dao-pose，调好复制给 Claude 写死进 DPS1
