@@ -184,7 +184,7 @@ KAI_OUT = P('art', 'fonts', 'kai.ttf')
 if os.path.exists(KAI_SRC):
     from fontTools import subset as _sub
     _kc = set()
-    for _m in __import__('re').findall(r"'([^'\\]*)'|\"([^\"\\]*)\"|`([^`\\]*)`", open(P('js', 'route.js'), encoding='utf-8').read()):
+    for _m in __import__('re').findall(r"'([^'\\]*)'|\"([^\"\\]*)\"|`([^`\\]*)`", (open(P('js', 'route.js'), encoding='utf-8').read() + open(P('js', 'story.js'), encoding='utf-8').read())):   # 11/14：开局剧情台词也用楷书
         for _t in _m: _kc |= set(_t)
     _kc |= set('第一二三四五六七八九十层迎战精锐首领战营垒张角祭坛宝梁·点击下令')
     for _f in __import__('glob').glob(P('js', '*.js')) + [P('game.js')]:   # 战斗飘字（floaters.push 那几行里的字）也进楷书子集

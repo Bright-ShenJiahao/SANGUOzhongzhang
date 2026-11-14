@@ -211,7 +211,7 @@
   function open() {
     if (!run) return;
     ensureDom(); fit(); focus(true); shown = true; root.style.display = ''; t0 = performance.now();
-    if (run.blessed === false && window.SURV && SURV.blessOpts) setTimeout(bless, 300);
+    if (run.blessed === false && window.SURV && SURV.blessOpts) { if (!run.storyDone && window.STORY) { run.storyDone = true; STORY.intro(() => setTimeout(bless, 200)); } else setTimeout(bless, 300); }   // 11/14 用户：出征先放开局剧情，再桃园三赠
     if (!raf) raf = requestAnimationFrame(frame);
   }
   function close() { shown = false; if (root) root.style.display = 'none'; if (campBox) { campBox.remove(); campBox = null; } cancelAnimationFrame(raf); raf = 0; }

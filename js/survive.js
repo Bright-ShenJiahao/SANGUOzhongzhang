@@ -2069,7 +2069,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   let tutSeen = {}; try { tutSeen = JSON.parse(localStorage.getItem(TUT_KEY) || '{}') || {}; } catch (e) {}
   let tutQ = [];
   function tut(k) {
-    if (!RT.on || tutSeen[k] || !TUT[k]) return; tutSeen[k] = 1; try { localStorage.setItem(TUT_KEY, JSON.stringify(tutSeen)); } catch (e) {}
+    if (!RT.on || tutSeen[k] || !TUT[k]) return; try { if (localStorage.getItem('szz-skip-tut') === '1') return; } catch (e) {}   // 11/14 用户：可设置跳过指引 tutSeen[k] = 1; try { localStorage.setItem(TUT_KEY, JSON.stringify(tutSeen)); } catch (e) {}
     tutQ.push(k); if (!document.getElementById('survTut')) tutNext();
   }
   function tutNext() {

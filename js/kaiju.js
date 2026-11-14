@@ -96,6 +96,7 @@
   #kaiju .slots div.has{border-color:var(--gl);box-shadow:inset 0 0 0 2px #0b0a08,0 0 8px rgba(240,200,110,.3)}
   #kaiju .slots div i{position:absolute;right:3px;bottom:1px;font-style:normal;font-size:calc(10px*var(--k));color:var(--gl);text-shadow:0 1px 2px #000}
   #kaiju .skd{margin-top:7px;font-size:calc(12px*var(--k));color:#bfb196;line-height:1.6}#kaiju .skd b{font-weight:400;font-size:calc(14px*var(--k))}
+  #kaiju .skp{display:flex;flex-direction:column;gap:3px;margin-left:auto;font-size:calc(13px*var(--k));color:#ecdcb4;white-space:nowrap;background:rgba(18,13,9,.88);border:1px solid #8a6a32;padding:4px 10px;border-radius:3px}#kaiju .skp label{display:flex;align-items:center;gap:5px;cursor:pointer}#kaiju .skp input{accent-color:#c9a24a;width:calc(15px*var(--k));height:calc(15px*var(--k));margin:0}#kaiju .bot .skp+.go{margin-left:10px}   /* 11/14：出征旁边勾选跳过剧情/指引，记住选择 */
   #kaiju .bot{display:flex;align-items:center;gap:10px;margin-top:10px}
   #kaiju .bot button{white-space:nowrap;color:#f5e8c8;font-size:calc(17px*var(--k));letter-spacing:6px;cursor:pointer;font-family:inherit;height:calc(50px*var(--k))}
   #kaiju .bot .back{width:calc(210px*var(--k))}#kaiju .bot .go{margin-left:auto;width:calc(260px*var(--k));font-size:calc(19px*var(--k));letter-spacing:12px}
@@ -110,6 +111,7 @@
   // 11/13 用户：「名号」改成「势力」，初始没有势力（白衣乡勇），8 套皮肤就是 8 个势力；怎么解锁之后再定，先只开白衣（?debug 全开看效果）
   const FAC = [['baiyi', '穿越者 · 乡勇'], ['guanjun', '皇甫嵩 · 官军'], ['huangjin', '张角 · 黄巾'], ['baima', '公孙瓒 · 白马义从'], ['caojun', '曹操 · 虎豹骑'], ['baier', '刘备 · 白毦兵'], ['wujun', '孙权 · 解烦卫'], ['xiliang', '董卓 · 飞熊军'], ['xianzhen', '吕布 · 陷阵营'], ['xiandeng', '袁绍 · 先登营'], ['danyang', '陶谦 · 丹阳兵'], ['qingzhou', '曹操 · 青州兵'], ['wudang', '诸葛亮 · 无当飞军'], ['jinfan', '甘宁 · 锦帆军'], ['tengjia', '孟获 · 藤甲兵']];   // 11/13 用户核对历史后定名
   const facOpen = f => f === 'baiyi' || /[?&]debug/.test(location.search);
+  const lsOn = k => { try { return localStorage.getItem(k) === '1'; } catch (e) { return false; } };
   function render() {
     const curF = window.HERO_SKIN ? HERO_SKIN.cur() : 'baiyi', facOk = facOpen(curF);   // 11/14 用户：没解锁的势力也能点开预览，只是不能出发
     const O = window.SURV ? SURV.ORIGINS : {}, cur = SURV.origin(), o = O[cur], ai = SURV.attrInfo ? SURV.attrInfo(cur) : [], SK = SURV.SK, sk = SK[SURV.startSk ? SURV.startSk() : o.skill], curW = SURV.wep ? SURV.wep() : o.wep;
@@ -154,7 +156,7 @@
           <div class="slots bag"><div class="has" style="background-image:url('art/ui/kaiju/bag.webp')" title="盘缠"><i>0</i></div>${'<div></div>'.repeat(4)}</div></div>
         </div>
       </div>
-      <div class="bot"><button class="back">返回主菜单</button><button class="go" ${F.open && facOk ? '' : 'disabled style="opacity:.5"'}>${facOk ? '出征' : '未解锁'}</button></div>`;
+      <div class="bot"><button class="back">返回主菜单</button><div class="skp"><label><input type="checkbox" data-ls="szz-skip-story" ${lsOn('szz-skip-story') ? 'checked' : ''}>跳过剧情</label><label><input type="checkbox" data-ls="szz-skip-tut" ${lsOn('szz-skip-tut') ? 'checked' : ''}>跳过指引</label></div><button class="go" ${F.open && facOk ? '' : 'disabled style="opacity:.5"'}>${facOk ? '出征' : '未解锁'}</button></div>`;
     el.querySelectorAll('.fl button').forEach(b => b.onclick = () => { field = +b.dataset.i; render(); });   // 上锁的章节也能点开预览（灰图），但「出发」不可用
     el.querySelectorAll('.og .tile').forEach(b => b.onclick = () => { if (O[b.dataset.o].locked) return; SURV.setOrigin(b.dataset.o); render(); });
     el.querySelectorAll('.wp button').forEach(b => b.onclick = () => { SURV.setWep(+b.dataset.w); render(); });   // 11/13：出身的两种本门兵器选一种开局
@@ -165,6 +167,7 @@
       let t = 0; b.addEventListener('pointerup', e => { if (e.pointerType === 'mouse') return; t = Date.now(); fn(); });
       b.onclick = () => { if (Date.now() - t > 700) fn(); };
     };
+    el.querySelectorAll('.skp input').forEach(i => i.addEventListener('change', () => { try { localStorage.setItem(i.dataset.ls, i.checked ? '1' : '0'); } catch (e) {} }));
     tapBind(el.querySelector('.back'), () => { if (!el || !el.parentNode) return; close(); if (window.TITLE && TITLE.show) TITLE.show(); });
     tapBind(el.querySelector('.go'), () => { if (!el || !el.parentNode || !FIELDS[field].open || !facOpen(window.HERO_SKIN ? HERO_SKIN.cur() : 'baiyi')) return; close(); if (window.TITLE && TITLE.beginRun) TITLE.beginRun(); });
   }
