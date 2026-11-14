@@ -6,6 +6,7 @@ const FOOD = [
   { k: 'pig', heal: 4, w: 6 },    // 烤乳猪：稀有，回 4（10→6）
 ];
 function spawnDrop(x, y, forceK) {
+  if (window.SURV && SURV.curNode && SURV.curNode()) return;   // 11/14 用户：路线模式不掉回血食物（回血靠真气/营地），精英改掉铜钱
   if (window.XINMO && XINMO.active && XINMO.active()) return;   // 心魔战不掉回血道具（用户定 10/31）
   let pick;
   if (forceK) pick = FOOD.find(f => f.k === forceK) || FOOD[0];
@@ -241,6 +242,7 @@ function hitProp(p, dir) {
           sfx('finisher', p.x); ROGUE.offer();
         }
       } else if (p.chapter2) { if (Math.random() < .4) spawnDrop(p.x, p.y); }   // 用户定：第二章道具掉回血 70%→40%   // 第二章道具 70% 掉回血食物（用户定）
+      else if (window.SURV && SURV.curNode && SURV.curNode()) { if (Math.random() < .3 && SURV.coinAt) SURV.coinAt(p.x, p.y, 3 + (Math.random() * 3 | 0)); }   // 11/14：路线模式草垛/推车 30% 掉几文钱
       else if (Math.random() < .7) spawnDrop(p.x, p.y);                        // 第一章草垛/推车/石碾 70%（用户定）
     }
   }

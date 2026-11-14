@@ -2,13 +2,14 @@
 (function () {
   const POR = {
     hero: 'art/ui/npc/hero_lihui.webp', liubei: 'art/ui/npc/liubei_lihui.webp', guanyu: 'art/ui/npc/guanyu_lihui.webp', zhangfei: 'art/ui/npc/zhangfei_lihui.webp',
-    zhangjiao: 'art/ui/npc/zhangjiao_lihui.webp', zhang_jiao: 'art/ui/npc/zhangjiao_lihui.webp', cheng_yuanzhi: 'art/ui/npc/cheng_yuanzhi_lihui.webp', bo_cai: 'art/ui/npc/bo_cai_lihui.webp',
+    zhangjiao: 'art/ui/npc/zhangjiao_lihui.webp', zhang_jiao: 'art/ui/npc/zhangjiao_lihui.webp', cheng_yuanzhi: 'art/ui/npc/cheng_yuanzhi_lihui.webp', bo_cai: 'art/ui/npc/bo_cai_lihui.webp', guanhai_m: 'art/ui/npc/guanhai_lihui.webp',
   };
-  const NAME = { liubei: '刘备', guanyu: '关羽', zhangfei: '张飞', zhangjiao: '张角', zhang_jiao: '张角', cheng_yuanzhi: '程远志', bo_cai: '波才' };
+  const NAME = { liubei: '刘备', guanyu: '关羽', zhangfei: '张飞', zhangjiao: '张角', zhang_jiao: '张角', cheng_yuanzhi: '程远志', bo_cai: '波才', guanhai_m: '管亥' };
   // 11/14 用户：只给大首领台词（登场一句、被打败一句），有立绘的才说
   const BLINES = {
     cheng_yuanzhi: ['涿郡的小子，敢挡黄天的路？老子这口大刀，正缺个磨刀石！', '这……这是哪来的狠角色……撤！快撤！'],
     bo_cai: ['颍川数万黄巾在此！小小乡勇，也敢来送死？', '令旗……我的令旗倒了……'],
+    guanhai_m: ['北海管亥在此！谁敢上前，吃我一枪！', '好……好身手……管某认栽……'],
     zhang_jiao: ['黄天当立！尔等蝼蚁，也敢登我祭台？', '苍天……竟不佑我黄天……'],
   };
   function boss(t, out, done) { const L = BLINES[t]; if (!L || !POR[t] || skipStory()) return false; play([{ who: t, t: L[out ? 1 : 0] }], done, 1); return true; }
@@ -73,22 +74,25 @@
     addEventListener('keydown', kd, true); addEventListener('keyup', ku, true);
     show();
   }
-  const ORL = {   // 主角按出身说一句
-    nongfu: '家里的地被烧了……这条命，跟你们走。',
-    xiaozu: '小人原是营里的兵，营散了，正愁没处投奔。',
-    liehu: '山里的野兽都比这帮贼人讲规矩。算我一个。',
-    shusheng: '读了十年书，救不了一个人。今日便弃笔从戎！',
+  const ORL = {   // 11/14 用户定：主角是穿越者，出身 = 穿越前是干什么的
+    nongfu: '穿越前我就会种地……也罢，这条命，先跟你们走。',
+    xiaozu: '退伍好几年了，没想到还得上战场……拼了！',
+    liehu: '荒野求生我在行，打仗……就当打猎。算我一个。',
+    shusheng: '这段历史我背得滚瓜烂熟……这一次，我要亲手改写！',
   };
   function intro(done) {
     if (skipStory()) return done && done();
     const og = window.SURV && SURV.origin ? SURV.origin() : 'nongfu', pn = (window.TITLE && TITLE.playerName && TITLE.playerName()) || '你';
     play([
+      { t: '深夜，屏幕上还开着一局三国游戏……眼前忽然一黑。' },
+      { bg: 'art/ui/story/bg1.webp', t: '再睁眼，是一片烧焦的田地。远处城头，飘着一面「汉」字大旗。' },
+      { who: 'hero', name: pn, bg: 'art/ui/story/bg1.webp', t: '这是……哪儿？拍古装戏？' },
       { bg: 'art/ui/story/bg0.webp', t: '中平元年，巨鹿张角以「<b>苍天已死，黄天当立</b>」号令天下，三十六方同日而起，黄巾遍地。' },
       { who: 'zhangjiao', bg: 'art/ui/story/bg0.webp', t: '天公将军在此——岁在甲子，天下大吉！' },
-      { bg: 'art/ui/story/bg1.webp', t: '涿郡城外，流民四散。黄巾渠帅<b>程远志</b>引兵五万，直扑而来。' },
-      { who: 'liubei', bg: 'art/ui/story/bg1.webp', t: '这位壮士，我等三人正募乡勇讨贼，可愿同行？' },
+      { bg: 'art/ui/story/bg1.webp', t: '黄巾渠帅<b>程远志</b>，引兵五万，直扑涿郡。' },
+      { who: 'zhangfei', bg: 'art/ui/story/bg1.webp', t: '喂！穿得古里古怪的那个！还愣着干嘛，黄巾贼杀过来了！' },
+      { who: 'liubei', bg: 'art/ui/story/bg1.webp', t: '壮士莫慌。我等三人正募乡勇讨贼，可愿同行？' },
       { who: 'hero', name: pn, bg: 'art/ui/story/bg1.webp', t: ORL[og] || ORL.nongfu },
-      { who: 'zhangfei', bg: 'art/ui/story/bg1.webp', t: '哈哈，好！又多一个能打的！' },
       { who: 'guanyu', bg: 'art/ui/story/bg2.webp', t: '贼势正盛，先去村口，探探程远志的虚实。' },
       { who: 'liubei', bg: 'art/ui/story/bg2.webp', t: '出发之前，我兄弟三人，各有一份心意。' },
     ], done);
