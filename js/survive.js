@@ -1471,10 +1471,14 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     if ((S.weakN || 0) > 0) S.weakN--; S.enemyHpK = 1;
     const af = S.afterFight; S.afterFight = null;   // 奇遇里打的仗：打完的额外奖励
     if (af) { if (af.xiu) addXiu(af.xiu); if (af.heal) heal(maxHp() * af.heal); if (af.coin2) { S.money += R.got + R.left; } }
+    {   // 11/14 用户：局内不弹选择——精锐随机掉一件凡品/良品，首领随机掉一件传说，奇遇里的精锐战掉对应品级，直接拿到
+      const q = af && af.bao != null ? af.bao : nd.type === 'elite' ? (Math.random() < .35 ? 1 : 0) : nd.type === 'boss' ? 2 : -1;
+      const k = q >= 0 ? baoOpts([q])[0] : null;
+      if (k) { gainBao(k); floaters.push({ x: hero.x, y: hero.y - 90, t: 0, txt: '获得宝物：' + BAO[k].n, big: 1, color: BQC[BAO[k].q] }); R.bao = BAO[k].n; }
+    }
     report(R);
     W.pick = true;
-    const baoQ = af && af.bao != null ? [af.bao, af.bao, af.bao] : nd.type === 'elite' ? [Math.random() < .35 ? 1 : 0, Math.random() < .35 ? 1 : 0, Math.random() < .35 ? 1 : 0] : nd.type === 'boss' ? [2, 2, 2] : null;   // 精锐必掉宝物（凡/良），首领给奇品三选一
-    setTimeout(() => baoQ ? pickBao(baoQ, () => { W.pick = true; prepOpen(nd); }, nd.type === 'boss' ? '首领战利 · 传说宝物' : '战利 · 宝物') : prepOpen(nd), 1000);
+    setTimeout(() => prepOpen(nd), 1000);
   }
   function beginNode(nd) {
     if (window.CODEX) for (const k of S.slots.concat(S.owned || [])) if (k) CODEX.see('sk:' + k);
@@ -1650,7 +1654,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   function report(R) {   // 左下角战报，2.6 秒后淡出
     const old = document.getElementById('survRep'); if (old) old.remove();
     const d = document.createElement('div'); d.id = 'survRep';
-    d.innerHTML = `<b>战报</b><span>击倒 ${R.kills}</span><span>铜钱 +${R.got + R.left}</span><span>受伤 ${R.taken}</span>${R.stolen ? `<span style="color:#ff7a5a">被贼人顺走 ${R.stolen} 铜钱……</span>` : ''}`;
+    d.innerHTML = `<b>战报</b><span>击倒 ${R.kills}</span><span>铜钱 +${R.got + R.left}</span><span>受伤 ${R.taken}</span>${R.bao ? `<span style="color:#ffd36e">宝物：${R.bao}</span>` : ''}${R.stolen ? `<span style="color:#ff7a5a">被贼人顺走 ${R.stolen} 铜钱……</span>` : ''}`;
     document.body.appendChild(d); setTimeout(() => d.classList.add('out'), 2600); setTimeout(() => d.remove(), 3200);
   }
 
