@@ -2177,11 +2177,11 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     diangang: { n: '点钢枪', q: 1, w: 3, wd: .15, d: '枪的武艺伤害 +15%；流血每跳伤害 +30%' },
     bawang: { n: '霸王枪', q: 1, w: 3, wd: .2, d: '枪的武艺伤害 +20%；直线刺的招长 20%' },
     longdan: { n: '龙胆亮银枪', q: 2, w: 3, wd: .3, d: '枪的武艺伤害 +30%；冲刺距离 +30%，冲刺路上的伤害 ×1.5；浮空的敌人多受 50% 伤害（原来 25%）', c: '枪以外的武艺伤害 −30%' },
-    sangmugong: { image: 'art/ui/bao/muqiang.webp', n: '桑木弓', q: 0, w: 5, wd: 0, d: '弓武艺起手、收势 ×0.90' },
-    niujiaogong: { image: 'art/ui/bao/hongying.webp', n: '牛角弓', q: 0, w: 5, wd: .12, d: '弓武艺伤害 +12%' },
-    diaolinggong: { image: 'art/ui/bao/bawang.webp', n: '雕翎弓', q: 1, w: 5, wd: 0, d: '满月箭、穿云箭、贯日惊弦远距增伤门槛提前 20%，飞行距离 +15%', c: '这三招起手 ×1.08' },
-    chiyugong: { image: 'art/ui/bao/diangang.webp', n: '赤羽弓', q: 1, w: 5, wd: 0, d: '燎原箭的火星半径 +20%，灼烧多一跳；落雁箭和坠星箭附加三跳灼烧' },
-    zhurigong: { image: 'art/ui/bao/longdan.webp', n: '逐日弓', q: 2, w: 5, wd: .30, d: '弓武艺伤害 +30%；坠星箭或万箭穿心末波命中中心时追加光箭，每次施放最多一次', c: '弓以外的武艺伤害 −30%' },
+    sangmugong: { image: 'art/ui/bao/sangmugong.webp', n: '桑木弓', q: 0, w: 5, wd: 0, d: '弓武艺起手、收势 ×0.90' },
+    niujiaogong: { image: 'art/ui/bao/niujiaogong.webp', n: '牛角弓', q: 0, w: 5, wd: .12, d: '弓武艺伤害 +12%' },
+    diaolinggong: { image: 'art/ui/bao/diaolinggong.webp', n: '雕翎弓', q: 1, w: 5, wd: 0, d: '满月箭、穿云箭、贯日惊弦远距增伤门槛提前 20%，飞行距离 +15%', c: '这三招起手 ×1.08' },
+    chiyugong: { image: 'art/ui/bao/chiyugong.webp', n: '赤羽弓', q: 1, w: 5, wd: 0, d: '燎原箭的火星半径 +20%，灼烧多一跳；落雁箭和坠星箭附加三跳灼烧' },
+    zhurigong: { image: 'art/ui/bao/zhurigong.webp', n: '逐日弓', q: 2, w: 5, wd: .30, d: '弓武艺伤害 +30%；坠星箭或万箭穿心末波命中中心时追加光箭，每次施放最多一次', c: '弓以外的武艺伤害 −30%' },
     qingtongchui: { image: 'art/ui/bao/qingtongchui.webp', n: '青铜锤', q: 0, w: 2, wd: 0, d: '锤武艺起手、收势 ×0.90' },
     shutiechui: { image: 'art/ui/bao/shutiechui.webp', n: '熟铁锤', q: 0, w: 2, wd: 0.12, d: '锤武艺伤害 +12%' },
     pobichui: { image: 'art/ui/bao/pobichui.webp', n: '破壁锤', q: 1, w: 2, wd: 0, d: '断碑砸、飞崖砸、五岳压顶锤心伤害 +25%', c: '这三招起手 ×1.10' },
@@ -3272,7 +3272,21 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     pocheng: 'art/ui/skill/pocheng.webp',
     bengshan: 'art/ui/skill/bengshan.webp',
   });
-  for (const k of Object.keys(IMGU).filter(k => SK[k]?.stone || SK[k]?.hammer)) himg(k, IMGU[k]);
+  Object.assign(IMGU, {
+    qishe: 'art/ui/skill/qishe.webp',
+    lianzhu: 'art/ui/skill/lianzhu.webp',
+    luoyue: 'art/ui/skill/luoyue.webp',
+    zhuihun: 'art/ui/skill/zhuihun.webp',
+    liannu: 'art/ui/skill/liannu.webp',
+    xuanshe: 'art/ui/skill/xuanshe.webp',
+    jianyu: 'art/ui/skill/jianyu.webp',
+    dianguang: 'art/ui/skill/dianguang.webp',
+    huoshi: 'art/ui/skill/huoshi.webp',
+    luori: 'art/ui/skill/luori.webp',
+    guanri: 'art/ui/skill/guanri.webp',
+    wanjian: 'art/ui/skill/wanjian.webp',
+  });
+  for (const k of Object.keys(IMGU).filter(k => SK[k]?.stone || SK[k]?.hammer || SK[k]?.bow)) himg(k, IMGU[k]);
   const iconUrl = (kind, id) => kind === 'skill' ? IMGU[id] : kind === 'gf' && HIMG['gf_' + id] ? 'art/ui/gf/' + id + '.webp' : '';
   const hok = k => HIMG[k] && HIMG[k].complete && HIMG[k].naturalWidth;
   // 11/14 用户选 A：开打前的「军令」——（第三版：深色金边牌匾，和图鉴/整备一套）牌匾落下写本关名，点一下（或按任意键）「令」字大印砸下，竹简收起才开战；等待时战斗冻结
