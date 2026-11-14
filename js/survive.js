@@ -1819,6 +1819,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(900px,58v
 #survPrep .vf u{background:url(art/ui/hud2/bar_red.webp) left center/auto 100% repeat-x!important}#survPrep .vf.zq u{background-image:url(art/ui/hud2/bar_blue.webp)!important}
 #survPrep .mo{border:0!important;border-image:none!important;background:url(art/ui/hud2/money.webp) center/100% 100% no-repeat!important;box-shadow:none!important;height:calc(64px*var(--k))!important;min-width:calc(166px*var(--k))!important;padding:0 calc(30px*var(--k)) 0 calc(76px*var(--k))!important;justify-content:center}#survPrep .mo em{display:none!important}
 #survPrep .ar em{filter:none!important}
+#survPrep .vb>em.md2{width:calc(46px*var(--k))!important;height:calc(46px*var(--k))!important;margin:calc(-6px*var(--k)) calc(-10px*var(--k)) calc(-6px*var(--k)) 0;position:relative;z-index:2;background-size:contain!important;background-repeat:no-repeat;filter:drop-shadow(0 2px 3px rgba(0,0,0,.7))}   /* 11/14：气血真气大圆章压在条的左头 */
 /* 11/14 用户对比群侠：属性栏套黑漆金回纹长框（九宫格不拉花），气血/真气条套两头尖角金框 */
 #survPrep .ab .ar{border:calc(16px*var(--k)) solid transparent!important;border-image:url(art/ui/dlg/box.webp) 34 fill stretch!important;background:none!important;box-shadow:none!important;height:calc(104px*var(--k));padding:0 calc(14px*var(--k));margin:0 calc(-14px*var(--k))}
 #survPrep .vf{border:calc(5px*var(--k)) calc(15px*var(--k)) solid transparent!important;border-image:url(art/ui/hud2/barframe.webp) 16 52 fill stretch!important;background:none!important;height:calc(26px*var(--k))!important;padding:0!important;overflow:visible!important}
@@ -1988,7 +1989,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   }
   function vitals() {
     const mh = maxHp(), zr = Math.max(0, S.zq / zqMax()), hr = hero.hp / mh;
-    return `<div class="vt"><div class="vb"><em style="background-image:url('${A('zq')}')"></em><div class="vf zq"><u style="width:${zr * 100}%"></u><b>${Math.round(S.zq * 10)} / ${Math.round(zqMax() * 10)}</b></div></div><div class="vb"><em style="background-image:url('${A('hp')}')"></em><div class="vf hp"><u style="width:${hr * 100}%"></u><b>${Math.ceil(hero.hp * 10)} / ${Math.round(mh * 10)}</b></div></div></div>`;
+    return `<div class="vt"><div class="vb"><em class="md2" style="background-image:url(art/ui/hud2/md_zq.webp)"></em><div class="vf zq"><u style="width:${zr * 100}%"></u><b>${Math.round(S.zq * 10)} / ${Math.round(zqMax() * 10)}</b></div></div><div class="vb"><em class="md2" style="background-image:url(art/ui/hud2/md_hp.webp)"></em><div class="vf hp"><u style="width:${hr * 100}%"></u><b>${Math.ceil(hero.hp * 10)} / ${Math.round(mh * 10)}</b></div></div></div>`;
   }
   // 武艺/心法一律画成线装秘籍（11/11 用户定：一眼和道具分开）：武艺红封面、心法青封面，包角/书脊是品质色，封面小窗放图标，右边竖题签写名字
   const BOOK_IMG = { wy0: 'art/ui/book/wy0.webp', wy1: 'art/ui/book/wy1.webp', wy2: 'art/ui/book/wy2.webp', wy3: 'art/ui/book/wy3.webp', xf0: 'art/ui/book/xf0.webp', xf1: 'art/ui/book/xf1.webp', xf2: 'art/ui/book/xf2.webp', xf3: 'art/ui/book/xf3.webp' };   // 用户的 Gemini 书封（art/gemini/秘籍书封.png 按连通区域切）：武艺红 / 心法青 × 白蓝紫橙
