@@ -21,6 +21,16 @@
     #pauseConfirm p{margin:8px 0 18px;color:#4d341e;font-size:16px;line-height:1.7}
     .pause-confirm-actions{display:flex;gap:10px;justify-content:center}
     .pause-confirm-actions .pause-action{flex:1;min-height:48px}
+    /* 11/14 用户：暂停照开战牌匾 / 整备屏重做——金边云纹面板、牌匾标题、深色金边按钮、楷书 */
+    #pauseScreen{background:rgba(6,4,3,.62)!important}
+    #pauseScreen .pause-paper{overflow:visible!important;max-height:none!important;width:min(400px,90vw)!important;padding:clamp(30px,6vh,46px) clamp(26px,4vw,40px) clamp(20px,4vh,30px)!important;border:clamp(30px,5.5vh,46px) solid transparent;border-image:url(art/ui/prep/panel.webp) 72 fill stretch;background:none!important;filter:drop-shadow(0 14px 30px rgba(0,0,0,.7))!important;position:relative}
+    #pauseScreen .pause-paper h2{position:absolute;left:50%;top:clamp(-62px,-9vh,-44px);transform:translateX(-50%);margin:0!important;white-space:nowrap;padding:0 clamp(44px,6vw,64px);height:clamp(48px,8vh,60px);display:flex;align-items:center;background:url(art/ui/hud/bian.webp) center/100% 100% no-repeat;font:400 clamp(22px,3.8vh,28px) WenKai,MaShanZheng,serif!important;letter-spacing:.3em;color:#f0d89a!important;text-shadow:0 2px 0 #1a0e05!important}
+    #pauseScreen .pause-actions{display:grid!important;grid-template-columns:1fr!important;gap:10px!important;margin-top:6px}
+    #pauseScreen .pause-action{min-height:46px;border:1px solid rgba(184,149,90,.65)!important;border-radius:2px!important;background:linear-gradient(180deg,rgba(44,36,27,.95),rgba(18,15,12,.95))!important;box-shadow:inset 0 0 0 1px rgba(0,0,0,.6)!important;color:#e3cf9f!important;font:400 clamp(18px,3vh,21px) WenKai,MaShanZheng,serif!important;letter-spacing:.25em}
+    #pauseScreen .pause-action:hover,#pauseScreen .pause-action.kb-sel{border-color:#e2c27a!important;color:#fff0cc!important;filter:none!important;outline:none!important}
+    #pauseScreen .pause-action.main{color:#ffe2a0!important;border-color:#c9a35e!important}#pauseScreen .pause-action.quit{color:#d9a59a!important}
+    #pauseConfirm .pause-paper p{color:#e2d4b6!important;font:400 clamp(15px,2.5vh,18px)/1.7 WenKai,MaShanZheng,serif!important}
+    #pauseScreen .pause-confirm-actions{display:flex;gap:10px}
     @media(pointer:coarse){#bPause{width:46px;height:46px;min-width:46px}}
     @media(max-height:430px){.pause-paper{padding:26px 30px 14px;max-height:96dvh}.pause-paper h2{margin:6px 0 8px;font-size:24px}.pause-actions{grid-template-columns:1fr 1fr;gap:6px}.pause-action{min-height:44px;padding:5px 9px;font-size:15px}.pause-volume{margin-top:7px}.pause-volume button{min-height:40px}}
   `;
@@ -38,13 +48,13 @@
   const confirm = document.createElement('section'); confirm.id = 'pauseConfirm'; confirm.hidden = true;
   const scroll = typeof ASSETS !== 'undefined' && ASSETS.ui && ASSETS.ui.scroll;
   const btn = typeof ASSETS !== 'undefined' && ASSETS.ui && ASSETS.ui.btn;
-  if (scroll) { menu.style.backgroundImage = `url("${scroll}")`; }
-  menu.innerHTML = '<h2 id="pauseTitle">暂停</h2><div class="pause-actions"><button class="pause-action" data-pause="resume">继续</button><button class="pause-action" data-pause="restart">重新开始</button><button class="pause-action" data-pause="settings">设置</button><button class="pause-action" data-pause="codex">图鉴</button><button class="pause-action" data-pause="preparation">返回整备</button><button class="pause-action" data-pause="home">返回主界面</button><button class="pause-action" data-pause="reload">重新载入游戏</button></div>';
-  menu.querySelectorAll('.pause-action').forEach(b => { b.type = 'button'; if (btn) b.style.backgroundImage = `url("${btn}")`; });
+  
+  menu.innerHTML = '<h2 id="pauseTitle">暂 停</h2><div class="pause-actions"><button class="pause-action main" data-pause="resume">继续战斗</button><button class="pause-action" data-pause="codex">图鉴</button><button class="pause-action" data-pause="settings">设置</button><button class="pause-action quit" data-pause="home">返回主界面</button></div>';   // 11/14 用户：去掉无名之辈留下的「重新开始 / 返回整备 / 重新载入」
+  menu.querySelectorAll('.pause-action').forEach(b => { b.type = 'button'; });
   const volumeButton = menu.querySelector('[data-pause="volume"]');
-  confirm.innerHTML = '<section class="pause-paper"><h2>确认退出</h2><p>确定退出这一局？已拾取的装备会保留。</p><div class="pause-confirm-actions"><button class="pause-action" data-confirm="yes">确定</button><button class="pause-action" data-confirm="no">取消</button></div></section>';
-  if (scroll) confirm.querySelector('.pause-paper').style.backgroundImage = `url("${scroll}")`;
-  confirm.querySelectorAll('.pause-action').forEach(b => { if (btn) b.style.backgroundImage = `url("${btn}")`; });
+  confirm.innerHTML = '<section class="pause-paper"><h2>返回主界面</h2><p>确定退出这一局？已拾取的装备会保留。</p><div class="pause-confirm-actions"><button class="pause-action" data-confirm="yes">确定</button><button class="pause-action" data-confirm="no">取消</button></div></section>';
+  
+  
   screen.append(menu, confirm); document.body.appendChild(screen);
 
   const game = () => window.GAME_PAUSE;
@@ -73,7 +83,7 @@
     return true;
   }
   function ask(action) {
-    confirm.querySelector('p').textContent=action==='reload'?'重新载入会退出这一局，已拾取的装备会保留':'确定退出这一局？已拾取的装备会保留。';
+    confirm.querySelector('p').textContent='回到主界面？这一仗打到一半的进度不会保存；上一次回到长卷时已经自动存档，从主界面可以接着玩。';
     confirm.dataset.action = action; menu.hidden = true; confirm.hidden = false;
   }
   function execute(action) {
