@@ -226,7 +226,12 @@
     + '.rtEv .pf{border:1px solid rgba(184,149,90,.6);border-image:none}'
     + '.rtEv button{border:1px solid rgba(184,149,90,.6);border-image:none;background:linear-gradient(180deg,rgba(44,36,27,.95),rgba(18,15,12,.95));box-shadow:inset 0 0 0 1px rgba(0,0,0,.6);color:#e3cf9f;border-radius:2px}'
     + '.rtEv button:hover{filter:none;border-color:#e2c27a;color:#fff0cc}';
-  { const st = document.createElement('style'); st.textContent = EV_CSS + EV_THIN; document.head.appendChild(st); }
+  const EV_KAI = '.rtEv,.rtEv .ds,.rtEv .sy,.rtEv .hp,.rtEv button small{font-family:WenKai,MaShanZheng,"STKaiti",serif!important}'   // 11/14 用户：弹窗字体照开战牌匾，粗楷书
+    + '.rtEv .ds{font-size:clamp(17px,2.9vh,22px)!important;font-weight:400!important;line-height:1.6!important}.rtEv .sy{font-size:clamp(15px,2.6vh,19px)!important;font-weight:400!important}.rtEv .hp{font-weight:400!important}'
+    + '.rtEv .tt{border:none!important;background:url(art/ui/hud/bian.webp) center/100% 100% no-repeat!important;height:clamp(48px,8.5vh,64px)!important;padding:0 clamp(48px,6vw,80px)!important;top:clamp(-38px,-6vh,-26px)!important;font:400 clamp(22px,3.8vh,30px) WenKai,MaShanZheng,serif!important;letter-spacing:.3em;color:#f0d89a!important;text-shadow:0 2px 0 #1a0e05}'
+    + '.rtEv button{font-family:WenKai,MaShanZheng,"STKaiti",serif!important;font-weight:400!important}.rtEv button small{font-size:clamp(13px,2.3vh,16px)!important;color:#e2d4b6!important}'
+    + '.rtEv button img{border:1px solid rgba(184,149,90,.6);object-fit:cover}.rtEv.bl .op{flex-wrap:nowrap}.rtEv.bl button{min-width:0;flex:1}.rtEv.bl button img{width:clamp(72px,12vh,96px)!important;height:clamp(72px,12vh,96px)!important;margin-bottom:8px!important}';
+  { const st = document.createElement('style'); st.textContent = EV_CSS + EV_THIN + EV_KAI; document.head.appendChild(st); }
   function popup(title, sub, desc, opts, pick, npc) {   // 通用选择弹窗（奇遇用）
     const box = campBox = document.createElement('div'); box.className = 'rtEv';
     const hp = window.SURV && SURV.routeHp ? SURV.routeHp() : null;
@@ -268,7 +273,9 @@
   function chest(n) { if (window.SFX) SFX.play('j_event'); const q = () => Math.random() < .3 ? 1 : 0; SURV.baoPick([q(), q(), q()], () => done(n, true), '宝 箱 · 选一件宝物'); }
   function bless() {   // 11/14 用户定：出征前·桃园三赠（刘备、关羽免费，张飞有代价），三选一
     run.blessed = true; const L = SURV.blessOpts();
-    popup('出征前 · 桃园三赠', '', '涿郡城外，三兄弟为你送行。各有一份心意，只能收下一份。', L.map(o => [o[0] + ' · ' + o[2], o[3], o[1]]), k => SURV.bless(k, () => { if (window.RUNSAVE) RUNSAVE.save(); }), ['张飞', 'art/ui/npc/zhangfei_face.webp', '大哥二哥给的都是好东西，俺老张这份……得拿点东西来换！']);
+    const FACE = { 刘备: 'liubei', 关羽: 'guanyu', 张飞: 'zhangfei' };
+    popup('桃 园 三 赠', '', '涿郡城外，刘关张三兄弟为你送行。各有一份心意，只能收下一份。<br><span style="color:#e8c47a">张飞：大哥二哥给的都是好东西，俺老张这份……得拿点东西来换！</span>', L.map(o => [o[2], o[0] + '：' + o[3], o[1], 0, 'art/ui/npc/' + FACE[o[0]] + '_face.webp']), k => SURV.bless(k, () => { if (window.RUNSAVE) RUNSAVE.save(); }));
+    if (campBox) campBox.classList.add('bl');
   }
   function camp(n) {   // 11/14 用户：营地二选一——休整回三成血，或修炼（任选一招武艺直接升一级）
     if (window.SFX) SFX.play('j_event');

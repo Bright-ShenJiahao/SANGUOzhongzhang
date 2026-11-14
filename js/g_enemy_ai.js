@@ -306,7 +306,7 @@ function zUpdate(z, dt) {
         z.pd = true; pdCd = 1.5; slowT = .3; critT = 1.0;
         floaters.push({ x: hero.x, y: hero.y - 30, t: 0, txt: '闪避！', dodge: true });
         sfx('perfect', hero.x); shake = Math.max(shake, .12);
-        for (let i = 1; i <= 3; i++) ghosts.push({ x: hero.x - hero.rx * i * 9, y: hero.y - (hero.ry || 0) * i * 9, f: hero.f, a: .45 - i * .1, t: 0 });
+        for (let i = 1; i <= 3; i++) ghosts.push({ x: hero.x - hero.rx * i * 9, y: hero.y - (hero.ry || 0) * i * 9, f: hero.f, a: .45 - i * .1, t: 0, fr: heroFrame(hero) });
       }
     }
     if (z.t > T.wind) {

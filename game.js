@@ -907,13 +907,8 @@ function draw() {
     }
   }
   // 完美闪避的残影
-  for (const gh of ghosts) {
-    const ch2 = CH['hero'] && CH['hero'].idle;
-    if (!ch2) break;
-    ctx.globalAlpha = Math.max(0, gh.a * (1 - gh.t / .45));
-    ctx.save(); ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(ch2.img, Math.round(gh.x - ch2.ax * PX), Math.round(gh.y - ch2.ay * PX), ch2.w * PX, ch2.h * PX);
-    ctx.restore();
+  for (const gh of ghosts) {   // 11/14 用户：残影跟当前皮肤一致（用主角当时那一帧，不再用旧的白短袖待机图）
+    drawChar('hero', gh.fr || heroFrame(hero), gh.x, gh.y, gh.f < 0, Math.max(0, gh.a * (1 - gh.t / .45)), false, typeof HERO_SC !== 'undefined' ? HERO_SC : 1);
   }
   ctx.globalAlpha = 1;
   // 蓄力：主角身上渐亮的光
