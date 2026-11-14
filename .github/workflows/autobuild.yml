@@ -1,0 +1,33 @@
+# 自动打包（11/15 用户定）：别的 AI 不能在本地跑 tools/build.py 时，只要把源码推到 preview，这里自动打包并把 index.html / pack 提交回 preview。
+# 只在源码变动时跑；打包提交只改生成文件，不会再触发自己。提交信息里写出试玩网址。
+name: 自动打包 preview
+on:
+  push:
+    branches: [preview]
+    paths: ['js/**', 'game.js', 'index.src.html', 'tools/build.py', 'art/**', 'css/**']
+  workflow_dispatch: {}
+permissions: { contents: write }
+concurrency: { group: autobuild, cancel-in-progress: false }
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: preview, fetch-depth: 0 }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install pillow fonttools brotli
+      - name: 语法检查
+        run: for f in js/*.js game.js; do node --check "$f" || exit 1; done
+      - name: 打包
+        run: python3 tools/build.py && (git checkout art/fonts/result.ttf || true)
+      - name: 提交打包结果
+        run: |
+          git config user.name "autobuild-bot"
+          git config user.email "autobuild-bot@users.noreply.github.com"
+          git add -A index.html pack sw.js version.json || true
+          if git diff --cached --quiet; then echo "打包结果没变"; exit 0; fi
+          git commit -m "自动打包（源码 ${GITHUB_SHA::7}）"
+          git pull --rebase origin preview && git push origin HEAD:preview
+          echo "试玩：https://raw.githack.com/${GITHUB_REPOSITORY}/$(git rev-parse HEAD)/index.html?debug" >> $GITHUB_STEP_SUMMARY
