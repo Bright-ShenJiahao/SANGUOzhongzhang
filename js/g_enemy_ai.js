@@ -175,7 +175,7 @@ function zUpdate(z, dt) {
       qiFx.push({ x: z.x, y: z.y, f: z.f, t: 0, T: .28 });
       sfx('enemySwing', z.x); shake = Math.max(shake, .18);
       const hx = hero.x - z.x;
-      if (Math.abs(hx) < 60 && Math.abs(hero.y - z.y) < 20 && hx * z.f > -10) dmgHero(2, z, 'skill');
+      if (Math.abs(hx) < 60 && Math.abs(hero.y - z.y) < 20 && hx * z.f > -10) dmgHero((window.SURV && SURV.curNode && SURV.curNode()) ? (z.T.dmg || 3) * .8 : 2, z, 'skill');   // 11/14：路线模式剑气 = 老卒普攻的八成，跟着精英伤害一起缩放
     }
   }
   if (z.adds != null) {                 // 援军弓箭手：两轮箭，然后撤离
@@ -246,9 +246,9 @@ function zUpdate(z, dt) {
     if (z.chantCd <= 0) {
       // 所有方士：有友军受伤先回血（念咒2秒），否则丢火球（念咒1秒）
       const hurtAlly = zs.some(o => o !== z && !o.dead && !o.T.boss && o.hp < o.T.hp * .7);
-      const canFire = inChapter2Context();   // 第一章方士只回血，第二章起才丢火球
+      const rt = (window.SURV && SURV.curNode && SURV.curNode()), canFire = rt || inChapter2Context();   // 11/14 用户：路线模式方士只丢火球、不给人回血   // 第一章方士只回血，第二章起才丢火球
       // 用户反馈：首领一掉血方士就一直回血、从不放火球 → 回血和火球轮流（刚回过血下一次必丢火球）
-      const heal = hurtAlly && (!canFire || z.lastCast !== 'heal');
+      const heal = !rt && hurtAlly && (!canFire || z.lastCast !== 'heal');
       if (heal || canFire) { z.castKind = heal ? 'heal' : 'fire'; z.lastCast = z.castKind; set(z, 'chant'); return; }
     }
     const pdx = hero.x - z.x, pad = Math.abs(pdx);
@@ -335,6 +335,7 @@ function zUpdate(z, dt) {
     if (z.cd <= 0 && ad > T.range[0] * .7 && ad < (z.siegeArcher ? 340 : T.range[1] * 1.2) && Math.abs(dy) < (z.siegeArcher ? 120 : T.ranged === 'stone' ? 14 : 60)) { set(z, 'wind'); z.cd = ch2Troops()&&z.type==='archer'?4.5:T.cd; return; }
   } else {          // 近战：最多 M.token 个同时贴身，其余在旁边游走
     const tokens = zs.filter(o => o.tok && !o.dead).length;
+    if (!z.tok && (window.SURV && SURV.curNode && SURV.curNode())) z.tok = true;   // 11/14 用户：路线模式删掉「出手名额」，小兵一窝蜂直接围上来
     if (!z.tok && tokens < (window.XIAOCHANG && XIAOCHANG.tokenCap ? XIAOCHANG.tokenCap() : M.token) && Math.abs(dx) < 200) z.tok = true;
     tx = hero.x - z.f * (z.tok ? T.reach - 6 : 26 + (z.slot % 3) * 8); ty = hero.y + (z.tok ? 0 : (z.slot % 2 ? 16 : -16));
     // 老卒专属：站到中距离就蓄力放剑气（6.5 秒一次）
