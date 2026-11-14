@@ -42,7 +42,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   ];
   let c2ok = false;
   const unit = k => { const u = U[k]; return c2ok || !u[1] ? u[0] : u[1]; };
-  const secOf = nd => Math.min(4, ((nd.layer - 1) / 4) | 0);
+  const secOf = nd => Math.min(4, ((nd.layer - 1) / (window.ROUTE && ROUTE.segLen || 6)) | 0);
   function pickType() {
     if (RT.on && RT.node) {
       const nd = RT.node, w = (POOL[secOf(nd)][nd.tag || 'melee']) || POOL[0].melee, ks = Object.keys(w);
@@ -358,7 +358,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       if (n === 1) { const cn = v => v <= 10 ? '零一二三四五六七八九十'[v] : v < 20 ? '十' + (v % 10 ? '零一二三四五六七八九'[v % 10] : '') : '零一二三四五六七八九'[(v / 10) | 0] + '十' + (v % 10 ? '零一二三四五六七八九'[v % 10] : ''); waveBanner(ROUTE.name(nd), nd.type === 'boss' ? '首领战 · 迎战' : nd.type === 'elite' ? '第' + cn(nd.layer) + '层 · 精锐 · 迎战' : '第' + cn(nd.layer) + '层 · 迎战'); }
       const lvOf = k => Math.max(1, Math.min(WAVES, 1 + Math.floor(((nd.layer - 1 + (k - 1) / N0) / L) * WAVES) + (nd.type === 'elite' ? 2 : 0) + (nd.type === 'boss' ? 2 : 0)));
       W.lv0 = lvOf(1); W.lv1 = lvOf(N0); W.tot = 0; for (let k = 1; k <= N0; k++) W.tot += (WAVE_T[lvOf(k) - 1] || 60) * ROUTE.TIME_K;
-      W.tot = nd.type === 'boss' ? 60 : nd.type === 'elite' ? 50 : 36 + 8 * nd.layer / L; if (/[?&]longwave/.test(location.search) || window.TRIAL_ON) W.tot = 9999;   // 测试用：关卡不结束   /* 11/12 用户：关卡太长 → 普通约 40 秒（36~44）、精英 50、首领（含张角）60 秒内 */   // 11/11：第一关太长太难 → 前三层 35/42/48 秒   // 用户定 11/09：首领 3 分钟；精英约 1.5~2 分钟；普通战斗约 50~65 秒（18 层）
+      W.tot = nd.type === 'boss' ? 60 : nd.type === 'elite' ? 42 : 30;   /* 11/14 用户：普通战斗每场 30 秒、场次加多 */ if (/[?&]longwave/.test(location.search) || window.TRIAL_ON) W.tot = 9999;   // 测试用：关卡不结束   /* 11/12 用户：关卡太长 → 普通约 40 秒（36~44）、精英 50、首领（含张角）60 秒内 */   // 11/11：第一关太长太难 → 前三层 35/42/48 秒   // 用户定 11/09：首领 3 分钟；精英约 1.5~2 分钟；普通战斗约 50~65 秒（18 层）
       W.k = 1; W.N = 1; W.n = W.lv0; W.lvF = W.lv0; W.t = 0; W.retreat = 0; W.spawnT = 0; W.batchT = 0; W.bossDone = false;
       say(ROUTE.name(nd), 1.6); return;
     }
@@ -1910,7 +1910,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   function rollShop(nd) {   // 行商：3 件道具 + 2 本秘籍（11/11 用户定 5 件），都能买，不能刷新；价格随层数涨（第 1 层 ×2，每 8 层再 +100%）
     const ks = Object.keys(ITEMS).sort(() => Math.random() - .5), out = ks.slice(0, 3).map(itemOf), seen = new Set(ownedAll().concat(S.loot.map(it => it.k || it.id)));
     let nb = 0; for (const o of rewardOptions(undefined).concat(rewardOptions('perk'), rewardOptions('skill'))) { const it = itemFrom(o); const key = it && (it.k || it.id); if (it && !seen.has(key) && nb < 2) { seen.add(key); out.push(it); nb++; } }
-    const m = 2 * (1 + ((nd && nd.layer || 1) - 1) / 8); for (const it of out) it.price = Math.round(it.price * m * (HAS('muniu') ? .85 : 1));   // 11/11 用户定：整体 ×2，平均每关只买得起三件里的两件左右
+    const m = 2 * (1 + ((nd && nd.layer || 1) - 1) / 12); for (const it of out) it.price = Math.round(it.price * m * (HAS('muniu') ? .85 : 1));   // 11/11 用户定：整体 ×2，平均每关只买得起三件里的两件左右
     if (S.shopLock) { const L = S.shopLock; S.shopLock = null; const k = L.k || L.id; const j = out.findIndex(o => (o.k || o.id) === k); out.splice(j >= 0 ? j : 0, 1, Object.assign({}, L, { kept: 1 })); }   // 上一关锁定的货：原价留到这一关（只留一关）
     return out.sort((a, b) => (a.kind === 'item') - (b.kind === 'item') || (b.q || 0) - (a.q || 0));   // 秘籍在前，道具在后
   }

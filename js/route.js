@@ -4,7 +4,7 @@
 // - 战斗由 survive.js 负责：SURV.beginNode(节点) 开打，打完回到这里 ROUTE.done(节点)。
 (() => {
   const ON = true;   // 11/11：路线图是唯一玩法
-  const LAYERS = 18, LANES = 5;
+  const SEGS = 4, SEGLEN = 6, LAYERS = SEGS * SEGLEN + 2, LANES = 5;   // 11/14 用户：每段打首领前路要长——每条路至少 3 场战斗（段长 4 → 6）
   const WAVES_OF = { battle: 3, elite: 4, boss: 3 };   // 每种节点打几波（可调）
   const TIME_K = 1.1;                                   // 路线模式下每波时间缩放（20 波表 ≈21 分钟，12 层约合 30 分钟）
   const ICON = { battle: 0, elite: 1, camp: 2, boss: 3, start: 4, shop: 5, event: 6, chest: 7 };   // 图标表（art/ui/route_icons.webp，4×2，每格 256）
@@ -48,7 +48,6 @@
   // ---------- 生成地图 ----------
   // 结构（用户定 11/09，仿杀戮尖塔 + 群侠传）：4 段 × 4 层。每段：3 层岔路（4 条路径）→ 汇聚到该段唯一的首领节点 → 下一段从首领再散开。
   // 第 17 层单个营地，第 18 层最终首领。段内节奏：第 1 层纯近战；第 2 层加远程/盾枪；第 3 层精锐或小营地；第 4 层段首领。
-  const SEGS = 4, SEGLEN = 4;
   // 节点名按「这一段里这种仗实际出什么兵」来取（11/11 用户：前期叫刀盾队却没有盾兵，名不副实）——和 survive.js 的 POOL 一一对应
   const TAGNS = [
     { melee: '流民群', raid: '刀手队', range: '投石队', shield: '乱兵营', patrol: '老卒巡逻' },
@@ -100,29 +99,51 @@
     for (let l = 1; l < LAYERS - 1; l++) {
       const k = (l - 1) % SEGLEN + 1, sg = (l - 1) / SEGLEN | 0; if (k === SEGLEN) continue;
       for (const n of byLayer[l] || []) {
-        const r = rnd(); let t = 'battle';
-        if (k === 1) t = l > 1 ? (r > .84 ? 'event' : 'battle') : (r < .2 ? 'event' : 'battle');   // 第一列也可能出奇遇
-        else if (k === 2) t = r < .14 && sg >= 1 ? 'elite' : r < .32 ? 'event' : 'battle';
-        else t = r < .5 ? 'elite' : r < .7 ? 'event' : 'battle';
+        const r = rnd(); let t = 'battle';   // 段内第 k 层（k = 1..SEGLEN-1，SEGLEN 是首领）
+        if (k === 1) t = l > 1 ? (r > .85 ? 'event' : 'battle') : (r < .15 ? 'event' : 'battle');
+        else if (k === 2) t = r < .3 ? 'event' : 'battle';
+        else if (k === SEGLEN - 1) t = r < .35 ? 'elite' : r < .5 ? 'event' : 'battle';
+        else t = r < (sg >= 1 || k >= 4 ? .25 : .12) ? 'elite' : r < .45 ? 'event' : 'battle';
         if ((t === 'camp' || t === 'elite') && n.prev.some(p => p.type === t)) t = 'battle';
         n.type = t;
       }
       const lay = byLayer[l] || [];
       // 11/14 用户（参考杀戮尖塔）：每段第 3 层（打首领前一层）至少一个营地；每段第 2 层放一个宝箱
-      if (k === 3 && lay.length && !lay.some(n => n.type === 'camp')) { const n = lay[(rnd() * lay.length) | 0]; n.type = 'camp'; }
-      if (k === 3) for (const n of lay) if (n.type !== 'camp' && rnd() < .25) n.type = 'camp';
+      if (k === SEGLEN - 1 && lay.length && !lay.some(n => n.type === 'camp')) { const n = lay[(rnd() * lay.length) | 0]; n.type = 'camp'; }
+      if (k === SEGLEN - 1) for (const n of lay) if (n.type !== 'camp' && rnd() < .2) n.type = 'camp';
+      if (k === 3 && lay.length >= 3 && rnd() < .5) { const c = lay.filter(n => n.type === 'battle'); if (c.length > 1) c[(rnd() * c.length) | 0].type = 'camp'; }   // 段中间偶尔也有营地
       if (k === 2 && lay.length >= 3) { const c = lay.filter(n => n.type === 'battle'); if (c.length) c[(rnd() * c.length) | 0].type = 'chest'; }
       if (lay.length >= 2 && new Set(lay.map(n => n.type)).size === 1) {   // 同层不能全是同一种
         const n = lay[lay.length - 1], cur = n.type;
-        const alts = k === 1 ? (l > 1 ? ['event'] : []) : k === 2 ? ['event', 'elite'] : cur === 'elite' ? ['battle'] : ['elite'];
+        const alts = k === 1 ? (l > 1 ? ['event'] : []) : k === 2 ? ['event', 'battle'] : cur === 'elite' ? ['battle'] : ['elite'];
         const a = alts.filter(x => x !== cur && !(n.prev.some(p => p.type === x) && (x === 'camp' || x === 'elite')));
         if (a.length) n.type = a[(rnd() * a.length) | 0];
       }
       const bat = lay.filter(n => n.type === 'battle');
-      const opt = k === 1 ? ['melee', 'raid'] : ['range', 'shield'];
+      const opt = k <= 2 ? ['melee', 'raid'] : ['range', 'shield'];
       bat.forEach((n, i) => { n.tag = opt[(i + (rnd() < .5 ? 1 : 0)) % 2]; if (bat.length >= 2 && i > 0 && n.tag === bat[i - 1].tag) n.tag = opt.find(x => x !== n.tag); });
       for (const n of lay) { if (n.type === 'elite') { n.tag = 'patrol'; } }
       for (const n of lay) if (sg >= 1 && (n.type === 'elite' || n.tag === 'range' || n.tag === 'shield') && rnd() < .55) n.cat = sg >= 3 ? 2 : 1;   // 第二段起：部分远程/盾阵/精锐节点带投石车
+    }
+    {   // 11/14 用户：每段从入口到首领，任何一条路都至少 3 场战斗（普通或精锐）；不够就把路上的奇遇/宝箱改成普通战斗（营地不动）
+      const fight = n => n.type === 'battle' || n.type === 'elite';
+      for (let sg = 0; sg < SEGS; sg++) {
+        const l0 = sg * SEGLEN + 1, lb = l0 + SEGLEN - 1;
+        for (let guard = 0; guard < 40; guard++) {
+          const best = new Map();   // 节点 -> [到它为止最少战斗数, 来路]
+          for (let l = l0; l < lb; l++) for (const n of byLayer[l] || []) {
+            if (n.type === 'boss' || (l > l0 && !n.prev.length)) continue;
+            const ps = n.prev.filter(p => best.has(p)); let b = [0, null];
+            if (ps.length) { const p = ps.reduce((a, c) => best.get(c)[0] < best.get(a)[0] ? c : a); b = [best.get(p)[0], p]; }
+            best.set(n, [b[0] + (fight(n) ? 1 : 0), b[1]]);
+          }
+          const last = (byLayer[lb - 1] || []).filter(n => n.type !== 'boss' && best.has(n)), worst = last.sort((a, c) => best.get(a)[0] - best.get(c)[0])[0];
+          if (!worst || best.get(worst)[0] >= 3) break;
+          let n = worst, done = false; const path = []; while (n) { path.push(n); n = best.get(n)[1]; }
+          for (const m of path) if (m.type === 'event' || m.type === 'chest') { m.type = 'battle'; m.tag = m.tag || 'melee'; done = true; break; }
+          if (!done) { const m = path.find(x => x.type === 'camp' && x.layer !== lb - 1); if (m) { m.type = 'battle'; m.tag = 'melee'; } else break; }
+        }
+      }
     }
     // 11/14：生成时被「交叉」拒掉的格子会留下孤零零的节点（没有路连到它），画出来像在路线外——全部删掉
     const keep = nodes.filter(n => n === start || n.prev.length);
@@ -144,7 +165,7 @@
     const c = lo + (n.lane + n.jx * .35) / (LANES - 1) * (hi - lo) + n.jy * 10;
     return port() ? { x: c, y: H - m } : { x: m, y: c };
   }
-  const nlabel = n => !n ? '' : n.type === 'boss' ? (n.final ? '张角祭坛' : (n.br === 'bao' ? '张宝' : n.br === 'liang' ? '张梁' : SECBOSS[n.sec - 1][0]) + ' 营垒') : (n.tag && (n.type === 'battle' || n.type === 'elite') && (TAGNS[Math.min(3, ((n.layer - 1) / 4) | 0)] || TAGNS[0])[n.tag] + (n.cat ? '·投石车' : '')) || LABEL[n.type];
+  const nlabel = n => !n ? '' : n.type === 'boss' ? (n.final ? '张角祭坛' : (n.br === 'bao' ? '张宝' : n.br === 'liang' ? '张梁' : SECBOSS[n.sec - 1][0]) + ' 营垒') : (n.tag && (n.type === 'battle' || n.type === 'elite') && (TAGNS[Math.min(3, ((n.layer - 1) / SEGLEN) | 0)] || TAGNS[0])[n.tag] + (n.cat ? '·投石车' : '')) || LABEL[n.type];
   const radius = n => (n.type === 'boss' ? 42 : n.type === 'elite' ? 30 : n.type === 'start' ? 28 : 26) * (!port() && H < 560 ? Math.max(.6, H / 620) : 1);
   const reachable = n => !!run && (window.ROUTE_ALL ? n !== run.cur : run.cur.next.includes(n));   /* 11/12 开发者模式「解锁全部关卡」：任意节点都能点进去 */
   const visited = n => !!run && run.visited.has(n);
@@ -501,9 +522,9 @@
   }
 
   if (ON) { const poll = () => { if (window.RUNSAVE && ((typeof over !== 'undefined' && over) || (typeof won !== 'undefined' && won))) RUNSAVE.clear(); if (pending && (!window.TITLE || TITLE.mode() === 'game')) { pending = false; open(); if (window.RUNSAVE) RUNSAVE.save(); } requestAnimationFrame(poll); }; requestAnimationFrame(poll); }   // 真正进游戏（不是在标题页）才打开长卷
-  const MAP_OF = l => l <= 4 ? 'field' : l <= 8 ? 'town' : l <= 12 ? 'forest' : l <= 16 ? 'camp' : 'altar';   // 第 1~4 层打谷场，5~8 县城，9~12 林间空地，13~17 营寨腹地，18 张角祭坛
+  const MAP_OF = l => l <= SEGLEN ? 'field' : l <= SEGLEN * 2 ? 'town' : l <= SEGLEN * 3 ? 'forest' : l <= SEGLEN * 4 + 1 ? 'camp' : 'altar';   // 第 1~4 层打谷场，5~8 县城，9~12 林间空地，13~17 营寨腹地，18 张角祭坛
   window.ROUTE = {
-    mapOf: n => MAP_OF(n.layer),
+    mapOf: n => MAP_OF(n.layer), segLen: SEGLEN,
     on: () => ON, TIME_K, layers: () => LAYERS,
     waves: n => WAVES_OF[n.type] || 3,
     name: n => nlabel(n),
@@ -514,9 +535,10 @@
     start() { run = { ...gen(), visited: new Set(), blessed: false }; run.cur = run.start; run.visited.add(run.start); pending = true; if (shown) close(); },
     snap() {   // 存档用：节点之间的连线存成编号
       if (!run) return null;
-      return { nodes: run.nodes.map(n => ({ id: n.id, layer: n.layer, lane: n.lane, type: n.type, tag: n.tag, cat: n.cat, rw: n.rw, sec: n.sec, final: n.final, jx: n.jx, jy: n.jy, next: n.next.map(x => x.id) })), cur: run.cur.id, visited: [...run.visited].map(n => n.id), blessed: run.blessed !== false, evSeen: run.evSeen || [] };
+      return { nodes: run.nodes.map(n => ({ id: n.id, layer: n.layer, lane: n.lane, type: n.type, tag: n.tag, cat: n.cat, rw: n.rw, sec: n.sec, final: n.final, jx: n.jx, jy: n.jy, next: n.next.map(x => x.id) })), cur: run.cur.id, visited: [...run.visited].map(n => n.id), blessed: run.blessed !== false, evSeen: run.evSeen || [], seg: SEGLEN };
     },
     resume(o) {
+      if ((o.seg || 4) !== SEGLEN) { this.start(); return; }   // 11/14：路线变长了，旧存档的地图作废重开一张
       const nodes = o.nodes.map(n => ({ ...n, next: [], prev: [] })), byLayer = [];
       o.nodes.forEach((n, i) => n.next.forEach(j => { nodes[i].next.push(nodes[j]); nodes[j].prev.push(nodes[i]); }));
       for (const n of nodes) (byLayer[n.layer] || (byLayer[n.layer] = [])).push(n);
