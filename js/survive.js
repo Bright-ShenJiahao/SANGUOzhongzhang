@@ -908,7 +908,9 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       ctx.restore();
     }
   }
-  const DAO = (k, tier, mot, o) => { add(k, Object.assign({ tier, dk: 1, key: k }, o)); WOFX[k] = 0; MOTX[k] = mot; };
+  // 11/14 用户：刀光不要都是金黄——每招颜色照图标的主色（染刀光、刀痕、飞行物）
+  const DCOL = { hengsao: '#3fb6e8', tuodao: '#ff6a2a', tiaozhan: '#ffd23a', daobo: '#b9a6ff', lianzhan: '#ff3b2f', huima: '#ff9a1f', cuofeng: '#ff4f9a', feilunren: '#cfe6ff', liedihuan: '#c8902e', xuehe: '#c0141e', tianbeng: '#ffb02e', wanren: '#5fd4ff' };
+  const DAO = (k, tier, mot, o) => { add(k, Object.assign({ tier, dk: 1, key: k }, o, DCOL[k] ? { color: DCOL[k] } : {})); WOFX[k] = 0; MOTX[k] = mot; };
   const RED = ['rgba(255,90,80,', 'rgba(255,225,215,'];
   // ---- 黄 ----
   DAO('hengsao', 1, 'sweep', { name: '截江扫', icon: '截', color: '#ffb45a', need: 75, wu: .40, rc: .20, range: 60, half: 2.356,
@@ -1044,7 +1046,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   function daoSlash(key, a1, x1, y1) {
     const m = DGM[key], o = SK[key]; if (!m || !o) return; daoSlash.t = DKT;
     const a = a1 != null ? a1 : aim(), f = Math.cos(a) >= 0 ? 1 : -1, hx = x1 != null ? x1 : hero.x, hy = y1 != null ? y1 : hero.y, R = Math.max(30, (o.range || (o.len ? o.len / 2 : 60)) * DK * rsOf(key)), t = o.tier || 1;
-    fx.push({ k: 'dg', n: m[0], w: R * m[1], ax: m[2], ay: m[3], x: hx + f * m[4], y: hy + m[5], sy: m[6] || 1, f, t: 0, T: t >= 4 ? .42 : t >= 3 ? .34 : .24, col: hexRgb(o.color), al: t <= 1 ? .7 : 1, wh: [.3, .3, .5, .6, .8][t], ghost: t === 2 });
+    fx.push({ k: 'dg', n: m[0], w: R * m[1], ax: m[2], ay: m[3], x: hx + f * m[4], y: hy + m[5], sy: m[6] || 1, f, t: 0, T: t >= 4 ? .42 : t >= 3 ? .34 : .24, col: hexRgb(o.color), al: t <= 1 ? .75 : t === 2 ? .85 : .9, wh: [.15, .15, .25, .3, .4][t], ghost: t === 2 });
     if (t >= 4) shake = Math.max(shake, .25);
   }
   // 11/14 用户：刀招的起手帧 / 出手帧可在武学试炼里挑（可水平翻转，帧名末尾加 ~ 表示翻转），存 localStorage szz-dao-pose，调好复制给 Claude 写死进 DPS1
@@ -2047,8 +2049,8 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     for (const b of bolts) {   // 月牙刀波；石子、黄符、豆兵另画
       const p = b.t / b.T, al = 1 - p * p;
       if (b.img && DGI[b.img] && DGI[b.img].complete && DGI[b.img].naturalWidth) {   // 11/14：刀招的飞行物用刀光图（偃月斩刀气、万刃归宗飞刃、飞轮刃刀轮暂代）
-        const im = DGI[b.img], w = b.iw, h = w * im.naturalHeight / im.naturalWidth; ctx.save(); ctx.translate(b.x, b.y - 16); ctx.rotate(b.spin ? b.t * 14 : Math.atan2(b.vy * 2, b.vx)); if (b.spin) ctx.scale(1, .55); ctx.globalCompositeOperation = 'lighter';
-        ctx.globalAlpha = Math.min(1, al + .4); ctx.drawImage(dgTint(b.img, b.tc), -w / 2, -h / 2, w, h); ctx.globalAlpha *= .5; ctx.drawImage(im, -w / 2, -h / 2, w, h); ctx.restore(); continue; }
+        const im = DGI[b.img], w = b.iw, h = w * im.naturalHeight / im.naturalWidth; ctx.save(); ctx.translate(b.x, b.y - 16); ctx.rotate(b.spin ? b.t * 14 : Math.atan2(b.vy * 2, b.vx)); if (b.spin) ctx.scale(1, .55); ctx.globalCompositeOperation = 'screen';
+        ctx.globalAlpha = Math.min(.9, al + .3); ctx.globalCompositeOperation = 'source-over'; ctx.drawImage(dgTint(b.img, b.tc), -w / 2, -h / 2, w, h); ctx.globalAlpha *= .3; ctx.globalCompositeOperation = 'screen'; ctx.drawImage(im, -w / 2, -h / 2, w, h); ctx.restore(); continue; }
       if (b.shape || b.col === STN || b.col === FUC || b.big) {
         ctx.save(); ctx.translate(b.x, b.y - 16); ctx.globalAlpha = Math.min(1, al + .3); ctx.strokeStyle = 'rgba(40,30,20,.95)'; ctx.lineWidth = 1.5;
         if (b.big) { ctx.fillStyle = '#f2c94c'; ctx.beginPath(); ctx.arc(0, 0, 8, 0, 7); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#fff4c8'; ctx.beginPath(); ctx.arc(-2, -3, 3, 0, 7); ctx.fill(); }
@@ -2102,15 +2104,15 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       if (e.k === 'burst') { ctx.save(); ctx.translate(e.x, e.y); ctx.scale(1, .5); const r = e.r * (.4 + .6 * Math.min(1, p * 2)); ctx.fillStyle = `rgba(${e.col},${.28 * (1 - p)})`; ctx.beginPath(); ctx.arc(0, 0, r, 0, 7); ctx.fill(); ctx.strokeStyle = `rgba(255,250,230,${.9 * (1 - p)})`; ctx.lineWidth = 4 * (1 - p) + 1; ctx.stroke(); ctx.restore(); }
       else if (e.k === 'mark') { ctx.save(); ctx.translate(e.x, e.y); ctx.scale(1, .5); ctx.strokeStyle = `rgba(255,90,60,${.3 + .4 * p})`; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.arc(0, 0, e.r, 0, 7); ctx.stroke(); ctx.restore(); ctx.strokeStyle = 'rgba(233,220,176,.9)'; ctx.lineWidth = 2; for (let i = 0; i < 4; i++) { const ox = (i - 1.5) * e.r * .4, yy = e.y * 1 - (1 - p) * 120; ctx.beginPath(); ctx.moveTo(e.x + ox, yy - 20); ctx.lineTo(e.x + ox, yy); ctx.stroke(); } }
       else if (e.k === 'bolt') { ctx.save(); ctx.strokeStyle = `rgba(235,240,255,${1 - p})`; ctx.lineWidth = 4 * (1 - p) + 1; ctx.beginPath(); let x = e.x, y = e.y - 170; ctx.moveTo(x, y); for (let i = 0; i < 6; i++) { x = e.x + R(-10, 10) * (i < 5); y += (e.y - (e.y - 170)) / 6; ctx.lineTo(x, y); } ctx.stroke(); ctx.restore(); }
-      else if (e.k === 'img') { const im = DGI[e.n]; if (im.complete && im.naturalWidth) { const q = Math.min(1, p); ctx.save(); ctx.globalCompositeOperation = 'lighter';
-        if (e.river) { const al = Math.min(1, q * 12) * (q > .9 ? (1 - q) * 10 : 1) * (.75 + .15 * Math.sin(e.t * 6)), h = e.w; ctx.translate(e.x, e.y); ctx.scale(1, .5); ctx.rotate(e.a); ctx.globalAlpha = al; ctx.drawImage(dgTint(e.n, e.col), 0, -h / 2, e.L, h); ctx.globalAlpha = al * .35; ctx.drawImage(im, 0, -h / 2, e.L, h); }
-        else { const al = e.warn ? .35 + .55 * q : (q < .15 ? q / .15 : 1 - (q - .15) / .85), g = e.warn ? 1.2 - .2 * q : (e.g0 || 1) + (1 - (e.g0 || 1)) * q, w = e.w * g, h = w * im.naturalHeight / im.naturalWidth; ctx.translate(e.x, e.y); ctx.globalAlpha = al; ctx.drawImage(dgTint(e.n, e.col), -w / 2, -h / 2, w, h); ctx.globalAlpha = al * .4; ctx.drawImage(im, -w / 2, -h / 2, w, h); }
+      else if (e.k === 'img') { const im = DGI[e.n]; if (im.complete && im.naturalWidth) { const q = Math.min(1, p); ctx.save(); ctx.globalCompositeOperation = 'screen';
+        if (e.river) { const al = Math.min(1, q * 12) * (q > .9 ? (1 - q) * 10 : 1) * (.75 + .15 * Math.sin(e.t * 6)), h = e.w; ctx.translate(e.x, e.y); ctx.scale(1, .5); ctx.rotate(e.a); ctx.globalAlpha = al; ctx.globalCompositeOperation = 'source-over'; ctx.drawImage(dgTint(e.n, e.col), 0, -h / 2, e.L, h); ctx.globalAlpha = al * .35; ctx.globalCompositeOperation = 'screen'; ctx.drawImage(im, 0, -h / 2, e.L, h); }
+        else { const al = e.warn ? .35 + .55 * q : (q < .15 ? q / .15 : 1 - (q - .15) / .85), g = e.warn ? 1.2 - .2 * q : (e.g0 || 1) + (1 - (e.g0 || 1)) * q, w = e.w * g, h = w * im.naturalHeight / im.naturalWidth; ctx.translate(e.x, e.y); ctx.globalAlpha = al * .85; ctx.globalCompositeOperation = 'source-over'; ctx.drawImage(dgTint(e.n, e.col), -w / 2, -h / 2, w, h); ctx.globalAlpha = al * .2; ctx.globalCompositeOperation = 'screen'; ctx.drawImage(im, -w / 2, -h / 2, w, h); }
         ctx.restore(); } }
       else if (e.k === 'dg') { const im = DGI[e.n]; if (im.complete && im.naturalWidth) { const q = Math.min(1, p), al = q < .15 ? q / .15 : 1 - (q - .15) / .85, w = e.w, h = w * im.naturalHeight / im.naturalWidth, sc = 1 + .08 * q;
-        ctx.save(); ctx.translate(e.x, e.y); ctx.scale(e.f * sc, sc * e.sy); ctx.translate(-e.ax * w, -e.ay * h); ctx.globalCompositeOperation = 'lighter';
-        if (e.ghost) { ctx.globalAlpha = al * .3; ctx.drawImage(dgTint(e.n, e.col), -w * .06, h * .03, w, h); }
-        ctx.globalAlpha = al * e.al; ctx.drawImage(dgTint(e.n, e.col), 0, 0, w, h); ctx.globalAlpha = al * e.al * e.wh; ctx.drawImage(im, 0, 0, w, h); ctx.restore(); } }
-      else if (e.k === 'cut' && e.n && DGI[e.n].complete && DGI[e.n].naturalWidth) { const im = DGI[e.n], al = 1 - p * p, w = e.L * (e.n === 'dh2' ? 2.6 : 2.2), h = w * im.naturalHeight / im.naturalWidth; ctx.save(); ctx.translate(e.x, e.y); ctx.rotate(e.n === 'dh2' ? 0 : e.a); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = al; ctx.drawImage(dgTint(e.n, e.col), -w / 2, -h / 2, w, h); ctx.globalAlpha = al * .6; ctx.drawImage(im, -w / 2, -h / 2, w, h); ctx.restore(); }
+        ctx.save(); ctx.translate(e.x, e.y); ctx.scale(e.f * sc, sc * e.sy); ctx.translate(-e.ax * w, -e.ay * h); ctx.globalCompositeOperation = 'screen';
+        if (e.ghost) { ctx.globalAlpha = al * .3; ctx.globalCompositeOperation = 'source-over'; ctx.drawImage(dgTint(e.n, e.col), -w * .06, h * .03, w, h); }
+        ctx.globalAlpha = al * e.al; ctx.globalCompositeOperation = 'source-over'; ctx.drawImage(dgTint(e.n, e.col), 0, 0, w, h); ctx.globalAlpha = al * e.al * e.wh; ctx.globalCompositeOperation = 'screen'; ctx.drawImage(im, 0, 0, w, h); ctx.restore(); } }
+      else if (e.k === 'cut' && e.n && DGI[e.n].complete && DGI[e.n].naturalWidth) { const im = DGI[e.n], al = 1 - p * p, w = e.L * (e.n === 'dh2' ? 2.6 : 2.2), h = w * im.naturalHeight / im.naturalWidth; ctx.save(); ctx.translate(e.x, e.y); ctx.rotate(e.n === 'dh2' ? 0 : e.a); ctx.globalCompositeOperation = 'screen'; ctx.globalAlpha = al * .8; ctx.globalCompositeOperation = 'source-over'; ctx.drawImage(dgTint(e.n, e.col), -w / 2, -h / 2, w, h); ctx.globalAlpha = al * .3; ctx.globalCompositeOperation = 'screen'; ctx.drawImage(im, -w / 2, -h / 2, w, h); ctx.restore(); }
       else if (e.k === 'cut') { ctx.save(); ctx.translate(e.x, e.y); ctx.rotate(e.a); const g = Math.min(1, p * 5), L = e.L * g, al = 1 - p * p; ctx.lineCap = 'round'; ctx.strokeStyle = `rgba(${e.col},${.6 * al})`; ctx.lineWidth = 7 * (1 - p) + 2; ctx.beginPath(); ctx.moveTo(-L, 0); ctx.lineTo(L, 0); ctx.stroke(); ctx.strokeStyle = `rgba(255,255,255,${al})`; ctx.lineWidth = 2.5 * (1 - p) + .8; ctx.beginPath(); ctx.moveTo(-L, 0); ctx.lineTo(L, 0); ctx.stroke(); ctx.restore(); }
       else if (e.k === 'line') { ctx.save(); ctx.translate(e.x, e.y - 14); ctx.scale(1, .5); ctx.rotate(e.a); const k = Math.min(1, p * 4); ctx.lineCap = 'round'; ctx.strokeStyle = `rgba(${e.col},${.55 * (1 - p)})`; ctx.lineWidth = e.w * 1.6 * (1 - p) + 4; ctx.beginPath(); ctx.moveTo(10, 0); ctx.lineTo(10 + e.L * k, 0); ctx.stroke(); ctx.strokeStyle = `rgba(255,255,255,${.95 * (1 - p)})`; ctx.lineWidth = 3; ctx.stroke(); ctx.restore(); }
     }
