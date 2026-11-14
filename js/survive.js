@@ -802,7 +802,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const DSP1 = { hengsao: 1.3, tuodao: 1.3, tiaozhan: 1.3, lianzhan: 1.2, daobo: 1.4, huima: 1.4, cuofeng: 1.4, liedihuan: 1.51, feilunren: 2.29, xuehe: 1.7, tianbeng: 2.2, wanren: 1.9 };
   const rsOf = k => DRS[k] != null ? DRS[k] : DRS1[k] != null ? DRS1[k] : DRS0[(SK[k] && SK[k].tier) || 1] || 1;
   let DSP = {}; try { DSP = JSON.parse(localStorage.getItem('szz-dao-sp') || '{}') || {}; } catch (e) {}   // 起手/收势倍率（越大越慢），同样在武学试炼里拖动调
-  const spOf = k => (DSP[k] != null ? DSP[k] : DSP1[k] != null ? DSP1[k] : 1) * (typeof HAS === 'function' && SK[k] && SK[k].dk && ((HAS('huanshou') && WOFX[k] === 0) || (HAS('muqiang') && WOFX[k] === 3) || (HAS('bunangshi') && WOFX[k] === 7)) ? .9 : 1);   // 环首刀：刀的武艺快 10%
+  const spOf = k => (DSP[k] != null ? DSP[k] : DSP1[k] != null ? DSP1[k] : 1) * (typeof HAS === 'function' && SK[k] && SK[k].dk && ((HAS('huanshou') && WOFX[k] === 0) || (HAS('muqiang') && WOFX[k] === 3) || (HAS('qingshizi') && WOFX[k] === 7)) ? .9 : 1);   // 环首刀：刀的武艺快 10%
   const SPDN = [[.62, '极快'], [.85, '快'], [1.05, '中'], [1.25, '慢'], [99, '极慢']];
   const spdTxt = o => { const m = o.dk ? spOf(o.key) : 1, wu = (o.dk ? o.wu : o.wu * 1.2) * m, rc = o.rc * m, t = wu + rc; return `出手${SPDN.find(q => t <= q[0])[1]}　起手 ${wu.toFixed(2)} 秒 · 收势 ${rc.toFixed(2)} 秒`; };
   let DKT = 0; const DKO = [];   // 刀的持续判定（飞刃、血河、裂地环等）不靠 later：翻滚也不会断
@@ -814,7 +814,8 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const slowMove = (z, legacy = 1) => Math.min(z.survSlow > 0 ? legacy : 1,
     z.slT > 0 ? [.80, .88, .92][slowGrade(z)] : 1);
   function addSL(z, extra = 0) {
-    z.slT = Math.max(z.slT || 0, (slowGrade(z) === 2 ? 2 : 2.5) + extra);
+    const mul = HAS('yuhua') && (CK === 'zashi' || CK === 'paoshi') ? 1.3 : 1;
+    z.slT = Math.max(z.slT || 0, ((slowGrade(z) === 2 ? 2 : 2.5) + extra) * mul);
   }
   function addPJ(z, n, cap) { const CP = HAS('baipi') ? 6 : 4; cap = cap ? Math.min(CP, cap + (CP - 4)) : CP; const c = z.pjT > 0 ? z.pj || 0 : 0; z.pjT = 5; if (c >= cap) return; z.pj = Math.min(cap, c + n); }
   function addBL(z, n, cap) { const CB = HAS('baipi') ? 8 : 5; cap = cap ? Math.min(CB, cap + (CB - 5)) : CB;   /* 百辟刀：流血上限 8、破甲上限 6 */ const c = z.blT > 0 ? z.bl || 0 : 0; z.blT = 4; z.blCM = CM; if (!(z.blTk > 0)) z.blTk = .5; if (c >= cap) return; z.bl = Math.min(cap, c + n); }
@@ -1130,18 +1131,16 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const stoneBurst = (p, r, T = .25) =>
     fx.push({ k: 'burst', x: p.x, y: p.y, r, t: 0, T, col: hexRgb(SK[CK].color) });
 
-  function stoneHit(c, z, m, p, { slow, extra = 0, bonus = 0, kb = 8, secondary = false } = {}) {
-    const chilled = z.slT > 0;
-    const mult = chilled ? (1 + bonus) * (HAS('tiejishi') ? 1.18 : 1) : 1;
-    if (!DH(z, m * mult * (secondary ? 1 : c.penalty), kb, { x: p.x })) return;
-    if (slow && !z.dead) addSL(z, extra);
-    if (secondary || !chilled || !HAS('liuxingshi') || c.stars >= 2) return;
-    const other = stoneTargets(z, stoneScale(150), q => q !== z)[0];
-    if (!other) return;
-    c.stars++;
-    stoneSeek(z, other, stoneScale(150), q => stoneHit(c, q, .45, z, { secondary: true }));
+  function stoneHit(z, m, p, { slow, extra = 0, bonus = 0, kb = 8 } = {}) {
+    const mult = (z.slT > 0 ? 1 + bonus : 1) *
+      (HAS('feihuang') && (CK === 'feishi' || CK === 'gunshi') ? 1.15 : 1);
+    if (!DH(z, m * mult, kb, { x: p.x }) || z.dead) return;
+    if (slow) addSL(z, extra);
+    if (HAS('yunxing') && !(z.stoneStunCd > 0) && Math.random() < .2) {
+      z.stoneStunCd = 2;
+      stunz(z, slowGrade(z) === 2 ? .2 : .4);
+    }
   }
-  const stoneCast = () => ({ stars: 0, penalty: HAS('feihuangnang') && ['tiaoshi', 'sashi', 'feihuang'].includes(CK) ? .85 : 1 });
   const stoneBolt = (p, a, length, size = 1) => {
     const sp = 420;
     const b = { x: p.x, y: p.y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp / 2,
@@ -1150,7 +1149,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     return b;
   };
   // 用每帧扫过的线段判定，按命中先后处理，避免快石穿过近处敌人。
-  function stoneShot(p, a, length, width, accept, contact, end, size = 1) {
+  function stoneShot(p, a, length, width, accept, contact, end, size = 1, pierce = HAS('yunxing') ? 1 : 0) {
     const b = stoneBolt(p, a, length, size);
     const seen = new Set();
     let gone = false, previous = 0;
@@ -1170,8 +1169,9 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       }
       hits.sort((a, b) => a[1] - b[1]);
       for (const [z, at] of hits) {
+        if (z.dead || !accept(z)) continue;
         seen.add(z);
-        if (contact(z, stonePoint(p, a, at)) === false) {
+        if (contact(z, stonePoint(p, a, at)) === false && pierce-- <= 0) {
           gone = true; b.T = 0; return;
         }
       }
@@ -1179,7 +1179,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       if (d >= length && end) end(stonePoint(p, a, length));
     });
   }
-  function stoneSeek(p, target, range, contact, size = 1) {
+  function stoneSeek(p, target, range, contact, size = 1, canPierce = true) {
     const b = stoneBolt(p, stoneAngle(p, target), range, size);
     let travelled = 0, done = false;
     b.vx = b.vy = 0;
@@ -1192,6 +1192,11 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       travelled += step;
       if (left <= step + 3) {
         done = true; b.T = 0; contact(target);
+        const remaining = range - travelled;
+        if (canPierce && HAS('yunxing') && remaining > 0) {
+          stoneShot({ x: b.x, y: b.y }, b.a, remaining, stoneScale(20), z => z !== target,
+            z => { contact(z); return false; }, null, size, 0);
+        }
       }
     });
   }
@@ -1213,54 +1218,59 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
 
   SG('feishi', 1, 'thrust', 340, .26, .20, .70, 1.3, '惊鸿石',
     '直掷一颗石子，命中首个敌人；LV3 命中使敌人迟缓；LV5 命中后分出两颗碎石追击其他敌人；LV7 主石对迟缓目标伤害 +15%', () => {
-      const c = stoneCast(), L = dlv(), p = { x: hero.x, y: hero.y };
+      const L = dlv(), p = { x: hero.x, y: hero.y };
       stoneShot(p, stoneAim(p), stoneScale(380), stoneScale(28), openStone, z => {
-        stoneHit(c, z, .80, p, { slow: L >= 3, bonus: L >= 7 ? .15 : 0 });
+        stoneHit(z, .80, p, { slow: L >= 3, bonus: L >= 7 ? .15 : 0 });
         if (L >= 5) for (const q of stoneTargets(z, stoneScale(120), q => q !== z).slice(0, 2))
-          stoneSeek(z, q, stoneScale(120), t => stoneHit(c, t, .25, z));
+          stoneSeek(z, q, stoneScale(120), t => stoneHit(t, .25, z));
         return false;
       });
     });
 
   SG('sashi', 1, 'sweep', 260, .30, .22, .75, 1.3, '散花石',
     '向前方扇形撒出五颗石子，每敌最多命中两次；LV3 命中施加迟缓；LV5 改撒七颗并展开扇面；LV7 对迟缓目标击退加强', () => {
-      const c = stoneCast(), L = dlv(), p = { x: hero.x, y: hero.y }, a = stoneAim(p);
-      const n = (L >= 5 ? 7 : 5) + (HAS('feihuangnang') ? 2 : 0), hits = new Map();
+      const L = dlv(), p = { x: hero.x, y: hero.y }, a = stoneAim(p);
+      const n = (L >= 5 ? 7 : 5) + (HAS('feihuang') ? 1 : 0), hits = new Map();
       const arc = (L >= 5 ? 90 : 70) * Math.PI / 180;
       for (let i = 0; i < n; i++) stoneShot(p, a + arc * (i / (n - 1) - .5), stoneScale(300), stoneScale(24),
         z => (hits.get(z) || 0) < 2, z => {
           if (!stoneCount(hits, z, 2)) return;
-          stoneHit(c, z, L >= 5 ? .34 : .40, p, { slow: L >= 3, kb: L >= 7 && z.slT > 0 ? 20 : 8 });
+          stoneHit(z, L >= 5 ? .34 : .40, p, { slow: L >= 3, kb: L >= 7 && z.slT > 0 ? 20 : 8 });
           return false;
         });
     });
 
   SG('tiaoshi', 1, 'thrust', 300, .28, .22, .72, 1.3, '漂萍石',
     '石子在附近不同敌人之间弹射，无下一目标时可回击当前敌人一次；LV3 首击施加迟缓；LV5 多跳一人并扩大弹射范围；LV7 末次命中处爆开', () => {
-      const c = stoneCast(), L = dlv(), p = { x: hero.x, y: hero.y }, seen = new Set();
-      const cap = (L >= 5 ? 5 : 4) + (HAS('feihuangnang') ? 1 : 0), range = stoneScale(L >= 5 ? 180 : 160);
+      const L = dlv(), p = { x: hero.x, y: hero.y }, seen = new Set();
+      const cap = (L >= 5 ? 5 : 4) + (HAS('yuhua') ? 1 : 0), range = stoneScale(L >= 5 ? 180 : 160);
       const explode = z => {
         if (L < 7) return;
         const r = stoneScale(50);
         stoneBurst(z, r);
-        for (const q of near(z.x, z.y, r)) stoneHit(c, q, .40, z);
+        for (const q of near(z.x, z.y, r)) stoneHit(q, .40, z);
       };
       const jump = (z, from) => {
         seen.add(z);
-        stoneHit(c, z, .65, from, { slow: L >= 3 && seen.size === 1 });
+        stoneHit(z, .65, from, { slow: L >= 3 && seen.size === 1 });
         if (seen.size >= cap) { explode(z); return; }
         const q = stoneTargets(z, range, q => !seen.has(q))[0];
-        if (q) { stoneSeek(z, q, range, t => jump(t, z)); return; }
+        if (q) { stoneSeek(z, q, range, t => { if (!seen.has(t)) jump(t, z); else explode(z); }, 1, false); return; }
         if (z.dead) { explode(z); return; }
         const off = stonePoint(z, stoneAngle(from, z), Math.min(14, range / 2));
-        stoneSeek(off, z, range, t => { stoneHit(c, t, .35, off); explode(t); });
+        stoneSeek(off, z, range, t => { stoneHit(t, .35, off); explode(t); }, 1, false);
       };
-      stoneShot(p, stoneAim(p), stoneScale(340), stoneScale(28), openStone, (z, from) => { jump(z, from); return false; });
+      let started = false;
+      stoneShot(p, stoneAim(p), stoneScale(340), stoneScale(28), z => !seen.has(z) && seen.size < cap, (z, from) => {
+        if (!started) { started = true; jump(z, from); }
+        else { seen.add(z); stoneHit(z, .65, from); }
+        return false;
+      });
     });
 
   SG('zashi', 2, 'sweep', 180, .32, .24, .75, 1.3, '绊马石',
     '前方铺石三秒，首次踩入受伤，留在区内持续受伤；首次踩入施加迟缓；LV3 迟缓多半秒；LV5 左右各铺一片，重叠只算一次；LV7 每秒额外弹击一次', () => {
-      const c = stoneCast(), L = dlv(), p = { x: hero.x, y: hero.y }, a = stoneAim(p);
+      const L = dlv(), p = { x: hero.x, y: hero.y }, a = stoneAim(p);
       const center = stonePoint(p, a, stoneScale(180)), r = stoneScale(80);
       const areas = L >= 5 ? [-60, 60].map(d => stonePoint(center, a + Math.PI / 2, stoneScale(d))) : [center];
       const stayed = new Map();
@@ -1274,28 +1284,31 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
         if (leap) beat++;
         for (const z of hittable()) {
           if (!areas.some(q => dist(z, q) <= r)) continue;
-          if (!stayed.has(z)) stoneHit(c, z, .30, center, { slow: true, extra: L >= 3 ? .5 : 0, kb: 0 });
+          if (!stayed.has(z)) stoneHit(z, .30, center, { slow: true, extra: L >= 3 ? .5 : 0, kb: 0 });
           const prev = stayed.get(z) || 0, next = Math.min(3, prev + Math.min(dt, 3 - o.t + dt));
           stayed.set(z, next);
-          if (Math.floor((next + 1e-8) * 2) > Math.floor((prev + 1e-8) * 2)) stoneHit(c, z, .15, center, { kb: 0 });
-          if (leap) stoneHit(c, z, .25, center, { kb: 0 });
+          if (Math.floor((next + 1e-8) * 2) > Math.floor((prev + 1e-8) * 2)) stoneHit(z, .15, center, { kb: 0 });
+          if (leap) stoneHit(z, .25, center, { kb: 0 });
         }
       });
     });
 
   SG('xuanshi', 2, 'spin', 300, .32, .26, .72, 1.3, '回燕石',
     '投出可贯穿敌人的石子，去程和回程分别结算；LV3 回程施加迟缓；LV5 展开成左右双轨，共享去程及回程伤害上限；LV7 折返时各分成两颗碎石', () => {
-      const c = stoneCast(), L = dlv(), p = { x: hero.x, y: hero.y }, a = stoneAim(p);
+      const L = dlv(), p = { x: hero.x, y: hero.y }, a = stoneAim(p);
       const out = new Map(), back = new Map(), range = stoneScale(340), w = stoneScale(36);
-      const returnCap = L >= 7 ? 2 : 1;
+      const returnCap = L >= 7 ? 2 : 1, extraReturn = HAS('yuhua'), extraHits = new Set();
       for (const off of L >= 5 ? [-.09, .09] : [0]) {
         const g = a + off;
         stoneShot(p, g, range, w, z => !out.has(z), z => {
-          if (stoneCount(out, z, 1)) stoneHit(c, z, .95, p);
+          if (stoneCount(out, z, 1)) stoneHit(z, .95, p);
         }, end => {
+          if (extraReturn) stoneShot(end, g + Math.PI, range, w, z => !extraHits.has(z), z => {
+            extraHits.add(z); stoneHit(z, L >= 7 ? .425 : .85, end, { slow: L >= 3 });
+          });
           for (const split of L >= 7 ? [-.06, .06] : [0]) {
             stoneShot(end, g + Math.PI + split, range, w, z => (back.get(z) || 0) < returnCap, z => {
-              if (stoneCount(back, z, returnCap)) stoneHit(c, z, L >= 7 ? .425 : .85, end, { slow: L >= 3 });
+              if (stoneCount(back, z, returnCap)) stoneHit(z, L >= 7 ? .425 : .85, end, { slow: L >= 3 });
             });
           }
         });
@@ -1304,48 +1317,49 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
 
   SG('shici', 2, 'thrust', 300, .30, .24, .70, 1.2, '连珠石',
     '锁定敌人，依次投出五颗石子；LV3 最后一颗施加迟缓；LV5 最后一颗换成重石；LV7 对迟缓目标伤害 +10%', () => {
-      const c = stoneCast(), L = dlv(), range = stoneScale(340);
+      const L = dlv(), range = stoneScale(340);
       let target = nearest(stoneScale(300));
-      stoneSequence(5, .07, i => {
+      const n = HAS('feihuang') ? 6 : 5;
+      stoneSequence(n, .07, i => {
         const p = { x: hero.x, y: hero.y };
         if (!target || target.dead || target.hidden || target.air || dist(target, p) > range) target = nearest(range);
         if (!target) return false;
         stoneShot(p, stoneAngle(p, target), range, stoneScale(28), openStone, z => {
-          stoneHit(c, z, i === 4 && L >= 5 ? .65 : .42, p, { slow: i === 4 && L >= 3, bonus: L >= 7 ? .10 : 0 });
+          stoneHit(z, i === n - 1 && L >= 5 ? .65 : .42, p, { slow: i === n - 1 && L >= 3, bonus: L >= 7 ? .10 : 0 });
           return false;
-        }, null, i === 4 && L >= 5 ? 1.4 : 1);
+        }, null, i === n - 1 && L >= 5 ? 1.4 : 1);
       });
-      return .28;
+      return (n - 1) * .07;
     });
 
   SG('paoshi', 2, 'sweep', 180, .28, .24, .75, 1.3, '锁足石',
     '向附近最多四名敌人脚边各投一颗；命中施加迟缓；LV3 迟缓多半秒；LV5 最多攻击六名敌人；LV7 轻推已迟缓的目标', () => {
-      const c = stoneCast(), L = dlv(), p = { x: hero.x, y: hero.y }, range = stoneScale(200);
+      const L = dlv(), p = { x: hero.x, y: hero.y }, range = stoneScale(200);
       for (const z of stoneTargets(p, range).slice(0, L >= 5 ? 6 : 4)) {
-        stoneSeek(p, z, range, q => stoneHit(c, q, .55, p, { slow: true, extra: L >= 3 ? .5 : 0, kb: L >= 7 && q.slT > 0 ? 22 : 8 }));
+        stoneSeek(p, z, range, q => stoneHit(q, .55, p, { slow: true, extra: L >= 3 ? .5 : 0, kb: L >= 7 && q.slT > 0 ? 22 : 8 }));
       }
     });
 
   SG('gunshi', 3, 'thrust', 380, .46, .34, .80, 1.7, '赶月石',
     '抛出贯穿主石，命中后分出追击碎石，每敌主石和碎石各最多命中一次；LV3 主石施加迟缓；LV5 每次最多分出两颗碎石，全招最多六颗；LV7 碎石对迟缓目标伤害 +20%', () => {
-      const c = stoneCast(), L = dlv(), p = { x: hero.x, y: hero.y }, hits = new Set(), range = stoneScale(150);
+      const L = dlv(), p = { x: hero.x, y: hero.y }, hits = new Set(), range = stoneScale(150);
       let chips = 0;
       stoneShot(p, stoneAim(p), stoneScale(420), stoneScale(44), openStone, z => {
-        stoneHit(c, z, 1.10, p, { slow: L >= 3 });
+        stoneHit(z, 1.10, p, { slow: L >= 3 });
         const targets = stoneTargets(z, range, q => q !== z && !hits.has(q)).slice(0, L >= 5 ? 2 : 1);
         if (!targets.length && !z.dead && !hits.has(z) && hittable().length === 1) targets.push(z);
         for (const q of targets) {
           if (chips >= (L >= 5 ? 6 : 5)) break;
           chips++; hits.add(q);
           const from = q === z ? stonePoint(z, stoneAngle(p, z), Math.min(15, range / 2)) : z;
-          stoneSeek(from, q, range, t => stoneHit(c, t, L >= 5 ? .35 : .45, from, { bonus: L >= 7 ? .20 : 0 }));
+          stoneSeek(from, q, range, t => stoneHit(t, L >= 5 ? .35 : .45, from, { bonus: L >= 7 ? .20 : 0 }));
         }
       }, null, 1.65);
     });
 
   SG('luanshi', 3, 'sweep', 340, .55, .40, .73, 2.0, '穿林石',
     '前方走廊内依次落下十二颗石子，每敌最多命中五次；LV3 命中施加迟缓；LV5 改为前后两段交错落点，共十六颗；LV7 迟缓多一秒', () => {
-      const c = stoneCast(), L = dlv(), p = { x: hero.x, y: hero.y }, a = stoneAim(p);
+      const L = dlv(), p = { x: hero.x, y: hero.y }, a = stoneAim(p);
       const n = L >= 5 ? 16 : 12, hits = new Map(), r = stoneScale(32), length = stoneScale(380), halfWidth = stoneScale(50);
       const points = Array.from({ length: n }, (_, i) => {
         const u = L >= 5 ? ((i % 2) * .5 + Math.floor(i / 2) / n) : i / n;
@@ -1358,7 +1372,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
           q.y = clampY(q.y); stoneBurst(q, r, .18);
           dRect(p.x, p.y, a, length, halfWidth, z => {
             if (dist(q, z) <= r && stoneCount(hits, z, 5))
-              stoneHit(c, z, L >= 5 ? .30 : .36, q, { slow: L >= 3, extra: L >= 7 ? 1 : 0, kb: 0 });
+              stoneHit(z, L >= 5 ? .30 : .36, q, { slow: L >= 3, extra: L >= 7 ? 1 : 0, kb: 0 });
           });
         }
       });
@@ -1366,7 +1380,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
 
   SG('raoshen', 3, 'spin', 220, .40, .32, .75, 1.5, '流萤石',
     '六颗石子先绕身，随后飞向附近敌人；LV3 环绕命中施加迟缓；LV5 增至八颗并优先分散索敌；LV7 飞出后回到身边再绕一圈', () => {
-      const c = stoneCast(), L = dlv(), n = L >= 5 ? 8 : 6, r = stoneScale(75), range = stoneScale(280);
+      const L = dlv(), n = L >= 5 ? 8 : 6, r = stoneScale(75), range = stoneScale(280);
       const roll = S.stoneRoll || 0, flightHits = new Map();
       function orbit(returning) {
         const hits = new Map(), bodies = [];
@@ -1381,7 +1395,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
             const p = stonePoint(hero, a, r);
             Object.assign(bodies[j], p, { a: a + Math.PI / 2 });
             for (const z of near(p.x, p.y, stoneScale(18))) if (stoneCount(hits, z, returning ? 1 : 2))
-              stoneHit(c, z, .25, p, { slow: L >= 3 });
+              stoneHit(z, .25, p, { slow: L >= 3 });
           }
           if (o.t < .5 && (returning || (S.stoneRoll || 0) === roll)) return;
           o.T = 0;
@@ -1393,7 +1407,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
             const q = targets[j % targets.length];
             if (j >= targets.length * 2) continue;
             stoneSeek(bodies[j], q, range + r, z => {
-              if (stoneCount(flightHits, z, 2)) stoneHit(c, z, .70, bodies[j]);
+              if (stoneCount(flightHits, z, 2)) stoneHit(z, .70, bodies[j]);
               ends[j] = { x: z.x, y: z.y };
             });
           }
@@ -1419,7 +1433,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
 
   SG('feihuang', 4, 'sweep', 300, .62, .42, .95, 1.9, '漫天飞蝗',
     '向四面分批撒出十四颗石子，优先打不同敌人，每敌最多四颗；LV3 命中施加迟缓；LV5 石子增至十八颗；LV7 对迟缓目标伤害 +10%', () => {
-      const c = stoneCast(), L = dlv(), n = (L >= 5 ? 18 : 14) + (HAS('feihuangnang') ? 2 : 0);
+      const L = dlv(), n = (L >= 5 ? 18 : 14) + (HAS('feihuang') ? 1 : 0);
       const range = stoneScale(340), hits = new Map(), sent = new Map();
       stoneSequence(n, .018, i => {
         const p = { x: hero.x, y: hero.y };
@@ -1429,7 +1443,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
         if (!q) { stoneBolt(p, i * 2.39996, range); return; }
         stoneCount(sent, q, 4);
         stoneSeek(p, q, range, z => {
-          if (stoneCount(hits, z, 4)) stoneHit(c, z, L >= 5 ? .65 : .75, p, { slow: L >= 3, bonus: L >= 7 ? .10 : 0 });
+          if (stoneCount(hits, z, 4)) stoneHit(z, L >= 5 ? .65 : .75, p, { slow: L >= 3, bonus: L >= 7 ? .10 : 0 });
         });
       });
       return (n - 1) * .018;
@@ -1437,7 +1451,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
 
   SG('luoshi', 4, 'up', 360, .68, .42, .92, 2.2, '天坠星陨',
     '向敌群投下巨石，在落点炸开并向外飞散碎石，每敌最多受两颗碎石伤害；LV3 巨石施加迟缓；LV5 碎石增至十二颗；LV7 巨石对迟缓目标伤害 +20%', () => {
-      const c = stoneCast(), L = dlv(), origin = { x: hero.x, y: hero.y }, r = stoneScale(90);
+      const L = dlv(), origin = { x: hero.x, y: hero.y }, r = stoneScale(90);
       const targets = stoneTargets(origin, stoneScale(380));
       targets.sort((a, b) => near(b.x, b.y, r).length - near(a.x, a.y, r).length);
       const target = targets[0] || stonePoint(origin, stoneAim(origin), stoneScale(180));
@@ -1447,11 +1461,11 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
         if (o.t < delay) return;
         stoneBurst(p, r);
         sfx(CR, p.x); shake = Math.max(shake, .15);
-        for (const z of near(p.x, p.y, r)) stoneHit(c, z, 2.40, p, { slow: L >= 3, bonus: L >= 7 ? .20 : 0, kb: 24 });
+        for (const z of near(p.x, p.y, r)) stoneHit(z, 2.40, p, { slow: L >= 3, bonus: L >= 7 ? .20 : 0, kb: 24 });
         const hits = new Map(), n = L >= 5 ? 12 : 8;
         for (let i = 0; i < n; i++) stoneShot(p, i * Math.PI * 2 / n, stoneScale(180), stoneScale(20),
           z => (hits.get(z) || 0) < 2, z => {
-            if (stoneCount(hits, z, 2)) stoneHit(c, z, L >= 5 ? .30 : .40, p);
+            if (stoneCount(hits, z, 2)) stoneHit(z, L >= 5 ? .30 : .40, p);
             return false;
           });
       });
@@ -1598,14 +1612,14 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   function powParts(k) {   // 威力 = 各项乘数，100 = 无加成
     const c = catOf(k), at = ATW[wepOf(k)] != null ? ATW[wepOf(k)] : 1, AN = ['体魄', '短兵', '长兵', '射艺', '术法', '身法', '射艺', '术法'];
     const w = wmul(k), am = attrMul(k), lm = mastMul(k), n = RES().cnt[wepOf(k)], rs = 1 + RESD[Math.min(5, n)] * (HAS('xinshu') ? 2 : 1);
-    const bw = 1 + (S.bao || []).reduce((t, b) => t + (BAO[b] && BAO[b].w === wepOf(k) ? BAO[b].wd : 0), 0), other = GM.all * GM.cat[c] * (1 + .06 * S.xy) * baoMul() * bw * rs * (HAS('baipi') && wepOf(k) !== 0 ? .7 : 1) * (HAS('longdan') && wepOf(k) !== 3 ? .7 : 1) * (HAS('liuxingshi') && wepOf(k) !== 7 ? .7 : 1);
+    const bw = 1 + (S.bao || []).reduce((t, b) => t + (BAO[b] && BAO[b].w === wepOf(k) ? BAO[b].wd : 0), 0), other = GM.all * GM.cat[c] * (1 + .06 * S.xy) * baoMul() * bw * rs * (HAS('baipi') && wepOf(k) !== 0 ? .7 : 1) * (HAS('longdan') && wepOf(k) !== 3 ? .7 : 1) * (HAS('yunxing') && wepOf(k) !== 7 ? .7 : 1);
     const r = [['等级', lm], [(AN[at] || '属性') + ' ' + AT()[at], am], [w > 1.05 ? '本门' : w < .95 ? '外门' : '出身兵器', w], ['心法·宝物·同门', other]].filter(x => Math.abs(x[1] - 1) > .005);
     return { total: Math.round(100 * lm * am * w * other), rows: r };
   }
   function skillMul(k) {
     const c = catOf(k), n = RES().cnt[wepOf(k)], low = hero.hp / maxHp() < .3 ? 1 + .25 * GM.low : 1;
     const bw = (S.bao || []).reduce((t, b) => t + (BAO[b] && BAO[b].w === wepOf(k) ? BAO[b].wd : 0), 0);
-    return (1 + bw) * (HAS('baipi') && wepOf(k) !== 0 ? .7 : 1) * (HAS('longdan') && wepOf(k) !== 3 ? .7 : 1) * (HAS('liuxingshi') && wepOf(k) !== 7 ? .7 : 1) * wmul(k) * attrMul(k) * (1 + RESD[Math.min(5, n)] * (HAS('xinshu') ? 2 : 1)) * mastMul(k) * GM.all * GM.cat[c] * low * (1 + .06 * S.xy) * baoMul();
+    return (1 + bw) * (HAS('baipi') && wepOf(k) !== 0 ? .7 : 1) * (HAS('longdan') && wepOf(k) !== 3 ? .7 : 1) * (HAS('yunxing') && wepOf(k) !== 7 ? .7 : 1) * wmul(k) * attrMul(k) * (1 + RESD[Math.min(5, n)] * (HAS('xinshu') ? 2 : 1)) * mastMul(k) * GM.all * GM.cat[c] * low * (1 + .06 * S.xy) * baoMul();
   }
   function critRoll() {   // 暴击：基础 5% + 心法；伤害 ×1.5 + 心诀
     if (!CK || !SK[CK]) return 1;
@@ -1819,11 +1833,11 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     diangang: { n: '点钢枪', q: 1, w: 3, wd: .15, d: '枪的武艺伤害 +15%；流血每跳伤害 +30%' },
     bawang: { n: '霸王枪', q: 1, w: 3, wd: .2, d: '枪的武艺伤害 +20%；直线刺的招长 20%' },
     longdan: { n: '龙胆亮银枪', q: 2, w: 3, wd: .3, d: '枪的武艺伤害 +30%；冲刺距离 +30%，冲刺路上的伤害 ×1.5；浮空的敌人多受 50% 伤害（原来 25%）', c: '枪以外的武艺伤害 −30%' },
-    hetan: { n: '河滩卵石', q: 0, w: 7, wd: .08, icon: 'muqiang', d: '石子武艺伤害 +8%' },
-    bunangshi: { n: '布囊石袋', q: 0, w: 7, wd: 0, icon: 'wuzhu', d: '石子武艺出手快 10%（起手、收势都缩短）' },
-    tiejishi: { n: '铁蒺石', q: 1, w: 7, wd: 0, icon: 'jili', d: '石子武艺对迟缓目标伤害 +18%', c: '移速 −5%' },
-    feihuangnang: { n: '飞蝗石囊', q: 1, w: 7, wd: 0, icon: 'muniu', d: '漂萍石多跳一名敌人；散花石、漫天飞蝗各多投两颗', c: '这三招的伤害 −15%' },
-    liuxingshi: { n: '流星石', q: 2, w: 7, wd: 0, icon: 'longdan', d: '石子打中迟缓敌人时，碎星石追击附近另一名敌人，每次出招最多两颗', c: '石子以外的武艺伤害 −30%' },
+    qingshizi: { image: 'art/ui/bao/qingshizi.webp', n: '青石子', q: 0, w: 7, wd: 0, d: '石子武艺起手、收势 ×0.9' },
+    tiedan: { image: 'art/ui/bao/tiedan.webp', n: '铁胆', q: 0, w: 7, wd: .12, d: '石子武艺伤害 +12%' },
+    feihuang: { image: 'art/ui/bao/feihuang.webp', n: '飞蝗囊', q: 1, w: 7, wd: 0, d: '散花石、连珠石、漫天飞蝗各多投一颗；惊鸿石、赶月石伤害 +15%' },
+    yuhua: { image: 'art/ui/bao/yuhua.webp', n: '雨花石', q: 1, w: 7, wd: 0, d: '漂萍石多弹一名敌人，回燕石多一次回程命中；锁足石、绊马石迟缓时长 ×1.3' },
+    yunxing: { image: 'art/ui/bao/yunxing.webp', n: '陨星铁', q: 2, w: 7, wd: 0, d: '石子可额外穿过一个敌人；命中有 20% 概率眩晕 0.4 秒，首领减半，同一敌人每 2 秒最多触发一次', c: '石子以外的武艺伤害 −30%' },
     baipi: { n: '百辟刀', q: 2, w: 0, wd: .3, d: '刀的武艺伤害 +30%；流血最多叠 8 层、破甲最多 6 层', c: '刀以外的武艺伤害 −30%' },
     yuxi: { n: '传国玉玺', q: 2, d: '武艺伤害 +25%，每仗打完多回 15% 气血', c: '敌人血量 +15%' },
     chitu: { n: '赤兔马', q: 2, d: '移速 +30%', c: '受到的伤害 +10%' },
@@ -1842,7 +1856,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     const ks = baoOpts(qs); if (!ks.length) { if (cb) cb(); return; }
     const old = document.getElementById('survPick'); if (old) old.remove(); W.pick = true;
     const box = document.createElement('div'); box.id = 'survPick';
-    box.innerHTML = `<div class="p"><h3>${title || '宝物 · 选一件'}</h3><div class="row">${ks.map((k, j) => { const b = BAO[k]; return `<button data-j="${j}" class="q${b.q === 2 ? 3 : b.q}"><img src="art/ui/bao/${b.icon || k}.webp" style="width:72px;height:72px;display:block;margin:0 auto;filter:drop-shadow(0 2px 4px rgba(0,0,0,.7))"><b>${b.n}</b><span style="color:${BQC[b.q]};font-size:13px">${BQN[b.q]}</span><span>${b.d}</span>${b.c ? `<span style="color:#ff8a7a">代价：${b.c}</span>` : ''}</button>`; }).join('')}</div></div>`;
+    box.innerHTML = `<div class="p"><h3>${title || '宝物 · 选一件'}</h3><div class="row">${ks.map((k, j) => { const b = BAO[k]; return `<button data-j="${j}" class="q${b.q === 2 ? 3 : b.q}"><img src="${b.image || `art/ui/bao/${k}.webp`}" style="width:72px;height:72px;display:block;margin:0 auto;filter:drop-shadow(0 2px 4px rgba(0,0,0,.7))"><b>${b.n}</b><span style="color:${BQC[b.q]};font-size:13px">${BQN[b.q]}</span><span>${b.d}</span>${b.c ? `<span style="color:#ff8a7a">代价：${b.c}</span>` : ''}</button>`; }).join('')}</div></div>`;
     box.querySelectorAll('button').forEach(b => b.onclick = () => { gainBao(ks[+b.dataset.j]); box.remove(); W.pick = false; if (cb) cb(); });
     document.body.appendChild(box);
   }
@@ -2496,7 +2510,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       const tot = S.slots.filter(Boolean).reduce((t, k) => t + (S.dps[k] || 0), 0) || 1;
       const outs = S.slots.filter(Boolean).map(k => `<div class="pb"><em style="background-image:url('${IMGU[k] || ''}')"></em><div class="pbf"><u style="width:${(S.dps[k] || 0) / tot * 100}%"></u><b>${Math.round((S.dps[k] || 0) * 10)}</b><i>${((S.dps[k] || 0) / tot * 100).toFixed(1)}%</i></div></div>`).join('');
       body = `<div class="pn"><h4>总结</h4><div class="sm"><span><em style="background-image:url('${A('kill')}')"></em>斩敌</span><b>${R.kills}</b><span><em style="background-image:url('${A('coin')}')"></em>铜钱</span><b>${R.got + R.left}</b></div>${R.left ? `<p class="nt">地上没捡的钱袋，帮你收回了九成：+${R.left}</p>` : ''}
-          ${R.bao && BAO[R.bao] ? `<h4>战利宝物</h4><p class="ln"><img src="art/ui/bao/${BAO[R.bao].icon || R.bao}.webp" style="width:44px;height:44px;float:left;margin:0 8px 0 0"><b style="color:${BQC[BAO[R.bao].q]}">${BAO[R.bao].n}</b>　<span style="color:${BQC[BAO[R.bao].q]}">${BQN[BAO[R.bao].q]}</span><br>${BAO[R.bao].d}${BAO[R.bao].c ? `<br><span style="color:#ff8a7a">代价：${BAO[R.bao].c}</span>` : ''}</p>` : ''}
+          ${R.bao && BAO[R.bao] ? `<h4>战利宝物</h4><p class="ln"><img src="${BAO[R.bao].image || `art/ui/bao/${R.bao}.webp`}" style="width:44px;height:44px;float:left;margin:0 8px 0 0"><b style="color:${BQC[BAO[R.bao].q]}">${BAO[R.bao].n}</b>　<span style="color:${BQC[BAO[R.bao].q]}">${BQN[BAO[R.bao].q]}</span><br>${BAO[R.bao].d}${BAO[R.bao].c ? `<br><span style="color:#ff8a7a">代价：${BAO[R.bao].c}</span>` : ''}</p>` : ''}
           <h4>输出统计</h4>${outs}
           <h4>真气回血</h4><p class="ln">剩余 <em style="background-image:url('${A('zq')}')"></em> 真气 <b class="c1">${R.zqLeft || 0}</b> 点</p><p class="ln">转换为 <b class="c2">${R.tiao}</b> 点 <em style="background-image:url('${A('hp')}')"></em> 气血</p><p class="ln"><em style="background-image:url('${A('huti')}')"></em> 护体 总共免除了 <b>${Math.round((S.hutiSum || 0) * 10)}</b> 点伤害</p></div>
         <div class="pn"><h4>修为</h4>${bar(S.lv, Math.min(1, S.xiu / XIU_NEED(S.lv)), A('xiu'))}<h4>武艺</h4>${S.slots.filter(Boolean).map(k => bar(lvOf(k), mastR(k), IMGU[k])).join('')}<h4>心法</h4>${S.gf.concat([S.qg]).filter(Boolean).map(id => bar(gfLv(id), gfR(id), `art/ui/gf/${id}.webp`)).join('') || '<p class="em2" style="padding:6px 0">还没有心法</p>'}<h4>宝物</h4>${(S.bao || []).map(k => `<p class="ln" style="display:flex;gap:6px;align-items:center" title="${BAO[k].d}${BAO[k].c ? '；代价：' + BAO[k].c : ''}"><img src="art/ui/bao/${k}.webp" style="width:30px;height:30px;flex:none"><b style="color:${BQC[BAO[k].q]};flex:none">${BAO[k].n}</b><span style="opacity:.8">${BAO[k].d}</span></p>`).join('') || '<p class="em2" style="padding:6px 0">还没有宝物</p>'}${(S.shang || []).length ? `<h4>伤势</h4>${S.shang.map(k => `<p class="ln" style="display:flex;gap:6px;align-items:center"><img src="art/ui/fx/sh_${k}.webp" style="height:30px;flex:none"><b style="color:#ff8a7a;flex:none">${SHANG[k].n}</b>　${SHANG[k].d}（营地休整可治）</p>`).join('')}` : ''}</div>`;
@@ -2633,7 +2647,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     if (RT.on && RT.node && W.started && S.coins) { coinTick(dt); S.tutT = (S.tutT || 0) + dt; if (S.tutT > 1.5) tut('start'); if (S.tutT > 25) tut('zq'); if (zs.filter(z => !z.dead && Math.hypot(z.x - hero.x, z.y - hero.y) < 60).length >= 4) tut('roll'); }
     if (weapon !== 'blade') forceBlade();
     if (charging || atkHeldSince) cancelCharge();
-    for (const z of zs) { if (z.stunCd > 0) z.stunCd -= dt; if (z.survSlow > 0) z.survSlow -= dt; if (z.slT > 0) z.slT = Math.max(0, z.slT - dt);
+    for (const z of zs) { if (z.stoneStunCd > 0) z.stoneStunCd -= dt; if (z.stunCd > 0) z.stunCd -= dt; if (z.survSlow > 0) z.survSlow -= dt; if (z.slT > 0) z.slT = Math.max(0, z.slT - dt);
       if (z.dead || z.air) continue;
       if (z.rout > 0 || z.conf > 0) {   // 11/13 溃散：掉头逃；混乱：乱走、误伤旁人
         z.stun = Math.max(z.stun || 0, .06); const sp = (z.T.spd || 60) * slowMove(z) * dt;
@@ -2842,6 +2856,21 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   ['tuna','yangqi','tieyi','tayun','guanxing','taiping','hunyuan','gf00','gf01','gf02','gf03','gf30','gf31','gf32','gf33','qingshen','juqi','shixue','beishui','lhj','caoshang','xingyun','taxue','tiesha','yufeng'].forEach(id => himg('gf_' + id, 'art/ui/gf/' + id + '.webp'));
   const IMGU = { daolun: 'art/ui/kaiju/sk_daolun.webp' };
   'hengsao tuodao tiaozhan daobo lianzhan huima cuofeng feilunren liedihuan xuehe tianbeng wanren qiang lansao lianci tiaoqiang lihua chong huimaq touqiang qianglin qijin bainiao longyin'.split(' ').forEach(k => { IMGU[k] = 'art/ui/skill/' + k + '.webp'; himg(k, IMGU[k]); });   // 11/14 用户的刀 12 招图标（每招一把不同的中国刀 + 招式特效）
+  Object.assign(IMGU, {
+    feishi: 'art/ui/skill/feishi.webp',
+    sashi: 'art/ui/skill/sashi.webp',
+    tiaoshi: 'art/ui/skill/tiaoshi.webp',
+    zashi: 'art/ui/skill/zashi.webp',
+    xuanshi: 'art/ui/skill/xuanshi.webp',
+    shici: 'art/ui/skill/shici.webp',
+    paoshi: 'art/ui/skill/paoshi.webp',
+    gunshi: 'art/ui/skill/gunshi.webp',
+    luanshi: 'art/ui/skill/luanshi.webp',
+    raoshen: 'art/ui/skill/raoshen.webp',
+    feihuang: 'art/ui/skill/feihuang.webp',
+    luoshi: 'art/ui/skill/luoshi.webp',
+  });
+  for (const k of Object.keys(IMGU).filter(k => SK[k]?.stone)) himg(k, IMGU[k]);
   const iconUrl = (kind, id) => kind === 'skill' ? IMGU[id] : kind === 'gf' && HIMG['gf_' + id] ? 'art/ui/gf/' + id + '.webp' : '';
   const hok = k => HIMG[k] && HIMG[k].complete && HIMG[k].naturalWidth;
   // 11/14 用户选 A：开打前的「军令」——（第三版：深色金边牌匾，和图鉴/整备一套）牌匾落下写本关名，点一下（或按任意键）「令」字大印砸下，竹简收起才开战；等待时战斗冻结
@@ -3107,5 +3136,5 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       return (HAS('chitu') ? 1.1 : 1) * (HAS('tengjia') ? (fireK ? 2.5 : .75) : 1) * (HURT('mo') ? 1.1 : 1) * ((S.weakN || 0) > 0 ? .85 : 1) * (OG().take || 1) / AFX.hp() * (1 - IT('take')) * RT.take * RES().take * GM.take / GM.hp * low * (S.qg === 'taxue' && mv ? .85 : 1) * (GM.still && S.stillT > 1 ? 1 - GM.still : 1) * (S.qDR && DKT < S.qDR ? .8 : 1);
     },
     absorb: n => { if (!RT.on) return n; if (S.zq > 0) { const a = Math.min(S.zq, n * (.3 + IT('huti'))); S.zq -= a; S.hutiSum = (S.hutiSum || 0) + a; n -= a; } if (HAS('huxin') && !S.huxinUsed && hero.hp - n <= 0 && n > 0) { S.huxinUsed = 1; n = Math.max(0, hero.hp - .1); floaters.push({ x: hero.x, y: hero.y - 60, t: 0, txt: '护心镜！', gold: true }); } return n; },   // 护体（11/11 用户定，照群侠幸存者）：真气只挡 30% 伤害，其余直接扣血；真气空了全扣血
-     moveMul: () => (OG().move || 1) * AFX.move() * (1 + IT('move') + (HAS('caoxie') ? .08 : 0) + (HAS('chitu') ? .3 : 0)) * (HURT('jian') ? .9 : 1) * RT.move * GM.spd * (HAS('tiejishi') ? .95 : 1), left: () => RT.on && RT.node && W.started ? Math.max(0, WT() - W.t) : null, reward: (n, cb) => offerReward(n, cb), event(k, cb) { eventDo(k, cb); }, SK, tick, drawWorld, hud, thief: thiefAI, unitAI: (z, dt) => unitAI(z, dt), startRun, waveFlow, pose, rooted, onRoll, skipWave() { if (W.retreat <= 0 && W.between <= 0 && W.started) endWave(); }, state: () => ({ wave: W.n, t: W.t, slots: S.slots.slice() }) };
+     moveMul: () => (OG().move || 1) * AFX.move() * (1 + IT('move') + (HAS('caoxie') ? .08 : 0) + (HAS('chitu') ? .3 : 0)) * (HURT('jian') ? .9 : 1) * RT.move * GM.spd, left: () => RT.on && RT.node && W.started ? Math.max(0, WT() - W.t) : null, reward: (n, cb) => offerReward(n, cb), event(k, cb) { eventDo(k, cb); }, SK, tick, drawWorld, hud, thief: thiefAI, unitAI: (z, dt) => unitAI(z, dt), startRun, waveFlow, pose, rooted, onRoll, skipWave() { if (W.retreat <= 0 && W.between <= 0 && W.started) endWave(); }, state: () => ({ wave: W.n, t: W.t, slots: S.slots.slice() }) };
 })();

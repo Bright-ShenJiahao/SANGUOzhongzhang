@@ -3,6 +3,10 @@
 (() => {
   const KEY = 'szz-codex';
   let seen = {}; try { seen = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { seen = {}; }
+  const stoneBaoAliases = { bunangshi: 'qingshizi', hetan: 'tiedan', feihuangnang: 'feihuang', tiejishi: 'yuhua', liuxingshi: 'yunxing' };
+  for (const [old, current] of Object.entries(stoneBaoAliases)) {
+    if (seen['bao:' + old]) seen['bao:' + current] = true;
+  }
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(seen)); } catch (e) {} };
   const ALIAS = { guanhai_m: 'guanhai', guanhai_b: 'guanhai' };
   // 首领和新兵种的高清头像：写死字面路径，打包时才会换成 pack/ 网址
@@ -132,7 +136,7 @@
   }
   // 11/15 用户：图鉴加「宝物」页——兵器宝物按兵器分，其余算通用；拿到过才解锁
   const BQ = () => { const S2 = window.SURV; if (!S2 || !S2.BAO) return []; return Object.keys(S2.BAO).map(k => ({ k, id: 'bao:' + k, o: S2.BAO[k], w: S2.BAO[k].w != null ? S2.BAO[k].w : -2 })).sort((a, b) => (a.w === -2) - (b.w === -2) || a.w - b.w || a.o.q - b.o.q); };
-  const bIco = e => `<div class="si" style="background-image:url('art/ui/bao/${e.o.icon || e.k}.webp')"></div>`;
+  const bIco = e => `<div class="si" style="background-image:url('${e.o.image || `art/ui/bao/${e.k}.webp`}')"></div>`;
   function qDetail(e) {
     const dt = box.querySelector('.dt'); if (!e) { dt.innerHTML = '<p class="no">点左边的宝物看详情。</p>'; return; }
     const S2 = SURV, qn = S2.BQN[e.o.q], qc = S2.BQC[e.o.q], wn = e.w >= 0 ? T().WEPN[e.w] + '的兵器宝物' : '通用宝物';
