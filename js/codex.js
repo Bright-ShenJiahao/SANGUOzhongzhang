@@ -89,7 +89,7 @@
 @media (max-aspect-ratio:1/1){#szzCodex .bd{flex-direction:column}#szzCodex .dt{width:auto;max-height:45%;border-left:0;border-top:1px solid rgba(184,149,90,.3)}#szzCodex .dt .pic{height:120px}}
 @media (max-height:500px){#szzCodex .cx{height:96vh}#szzCodex .cd{height:96px}#szzCodex .cd img{max-height:62px}#szzCodex .dt .pic{height:120px}#szzCodex .hd{padding:6px 12px}#szzCodex .gr{grid-template-columns:repeat(auto-fill,minmax(80px,1fr))}}`;
   const box = document.createElement('div'); box.id = 'szzCodex'; box.hidden = true;
-  box.innerHTML = '<div class="cx"><div class="hd"><h2>图鉴</h2><button type="button" class="tb" data-t="u">小兵</button><button type="button" class="tb" data-t="b">首领</button><button type="button" class="tb" data-t="w">武学</button><button type="button" class="tb" data-t="t">术语</button><span class="ct"></span><button type="button" class="x" aria-label="关闭">✕</button></div><div class="bd"><div class="gw"><div class="wf"></div><div class="gr"></div></div><div class="dt"></div></div></div>';
+  box.innerHTML = '<div class="cx"><div class="hd"><h2>图鉴</h2><button type="button" class="tb" data-t="u">小兵</button><button type="button" class="tb" data-t="b">首领</button><button type="button" class="tb" data-t="w">武学</button><button type="button" class="tb" data-t="q">宝物</button><button type="button" class="tb" data-t="t">术语</button><span class="ct"></span><button type="button" class="x" aria-label="关闭">✕</button></div><div class="bd"><div class="gw"><div class="wf"></div><div class="gr"></div></div><div class="dt"></div></div></div>';
   let tab = 'u', sel = null, wf = -1;
   // 11/14 用户定：图鉴加「术语」页，游戏里出现的说法都能在这查（不用解锁）
   const TERMS = [
@@ -129,9 +129,30 @@
     if (!has(e[0])) { dt.innerHTML = `<div class="pic lk"><img src="${img(e)}" alt="" style="filter:brightness(0) opacity(.55)"></div><h3>？？？</h3><span class="tg">${e[3]}</span><p class="no">尚未遇到。在战斗中第一次遇到后解锁。</p>`; return; }
     dt.innerHTML = `<div class="pic"><img src="${img(e)}" alt=""></div><h3>${no(e)}　${e[1]}</h3><span class="tg">${e[3]}</span><p>${e[4]}</p><h4>技 能</h4><ul>${e[5].map(t => `<li>${t}</li>`).join('')}</ul>`;
   }
+  // 11/15 用户：图鉴加「宝物」页——兵器宝物按兵器分，其余算通用；拿到过才解锁
+  const BQ = () => { const S2 = window.SURV; if (!S2 || !S2.BAO) return []; return Object.keys(S2.BAO).map(k => ({ k, id: 'bao:' + k, o: S2.BAO[k], w: S2.BAO[k].w != null ? S2.BAO[k].w : -2 })).sort((a, b) => (a.w === -2) - (b.w === -2) || a.w - b.w || a.o.q - b.o.q); };
+  const bIco = e => `<div class="si" style="background-image:url('art/ui/bao/${e.k}.webp')"></div>`;
+  function qDetail(e) {
+    const dt = box.querySelector('.dt'); if (!e) { dt.innerHTML = '<p class="no">点左边的宝物看详情。</p>'; return; }
+    const S2 = SURV, qn = S2.BQN[e.o.q], qc = S2.BQC[e.o.q], wn = e.w >= 0 ? T().WEPN[e.w] + '的兵器宝物' : '通用宝物';
+    if (!has(e.id)) { dt.innerHTML = `<div class="pic lk">${bIco(e)}</div><h3>？？？</h3><span class="tg">${wn} · ${qn}</span><p class="no">尚未获得。打精锐、首领、开宝箱或在奇遇中获得后解锁。${e.w >= 0 ? '学过这种兵器的武艺才会刷出来。' : ''}</p>`; return; }
+    dt.innerHTML = `<div class="pic">${bIco(e)}</div><h3>${e.o.n}</h3><span class="tg">${wn} · <b class="tr" style="color:${qc}">${qn}</b></span><h4>效 果</h4><p>${e.o.d}</p>${e.o.c ? `<h4>代 价</h4><p style="color:#ff8a7a">${e.o.c}</p>` : ''}`;
+  }
   function render() {
     box.querySelectorAll('.tb').forEach(b => b.classList.toggle('on', b.dataset.t === tab));
-    const wfb = box.querySelector('.wf'); wfb.classList.toggle('on', tab === 'w');
+    const wfb = box.querySelector('.wf'); wfb.classList.toggle('on', tab === 'w' || tab === 'q');
+    if (tab === 'q') {
+      const t = T(), all = BQ(), ws = [...new Set(all.map(e => e.w))];
+      wfb.innerHTML = `<button data-w="-1" class="${wf === -1 ? 'on' : ''}">全部</button>` + ws.map(w => `<button data-w="${w}" class="${wf === w ? 'on' : ''}">${w === -2 ? '通用' : t.WEPN[w]}</button>`).join('');
+      const L = all.filter(e => wf === -1 || e.w === wf); box.querySelector('.ct').textContent = `已获得 ${L.filter(e => has(e.id)).length} / ${L.length}`;
+      const gr = box.querySelector('.gr'); gr.innerHTML = '';
+      for (const e of L) {
+        const c = document.createElement('div'); c.className = 'cd' + (has(e.id) ? '' : ' lk') + (sel === e.k ? ' sel' : '');
+        c.innerHTML = `${bIco(e)}<span style="color:${has(e.id) ? SURV.BQC[e.o.q] : ''}">${has(e.id) ? e.o.n : '？？？'}</span>`;
+        c.addEventListener('click', () => { sel = e.k; render(); }); gr.appendChild(c);
+      }
+      qDetail(L.find(e => e.k === sel) || null); return;
+    }
     if (tab === 't') {
       box.querySelector('.ct').textContent = `共 ${TERMS.length} 条`;
       const gr = box.querySelector('.gr'); gr.innerHTML = '';
@@ -169,7 +190,7 @@
   }
   box.addEventListener('click', e => {
     if (e.target === box || e.target.closest('.x')) close();
-    const t = e.target.closest('.tb'); if (t) { tab = t.dataset.t; sel = null; render(); }
+    const t = e.target.closest('.tb'); if (t) { tab = t.dataset.t; sel = null; wf = -1; render(); }
     const w = e.target.closest('.wf button'); if (w) { wf = +w.dataset.w; sel = null; render(); }
   });
   function open() { const hp = document.getElementById('tHelpPanel'); if (hp) hp.style.display = 'none'; const st = document.getElementById('szzSet'); if (st) st.hidden = true; sel = null; render(); box.hidden = false; }
@@ -181,7 +202,7 @@
   if (document.body) mount(); else addEventListener('DOMContentLoaded', mount);
   setInterval(() => { const g = document.getElementById('szzSetBtn'); btn.style.display = g && g.style.display === 'block' ? 'block' : 'none'; }, 300);   // 跟着右上角齿轮：只在主界面显示
   window.CODEX = {
-    see(type) { const k = ALIAS[type] || type; if (!seen[k] && (k.startsWith('sk:') || ALL.some(e => e[0] === k))) { seen[k] = 1; save(); } },
+    see(type) { const k = ALIAS[type] || type; if (!seen[k] && ((k.startsWith('sk:') || k.startsWith('bao:')) || ALL.some(e => e[0] === k))) { seen[k] = 1; save(); } },
     unlockAll() { for (const e of ALL) seen[e[0]] = 1; for (const e of SKL()) seen[e.id] = 1; save(); if (!box.hidden) render(); },
     open, close,
   };
