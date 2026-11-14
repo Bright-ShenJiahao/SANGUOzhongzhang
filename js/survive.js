@@ -1645,6 +1645,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     }
   }
   function moneyHud() {   // 左上角：铜钱
+    if (hok('h2_money')) { const im = HIMG.h2_money, h = 50, w = h * im.naturalWidth / im.naturalHeight, x = 8, y = 26; ctx.save(); ctx.drawImage(im, x, y, w, h); ctx.font = '900 19px "Arial Black",Impact,sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(10,6,3,.9)'; ctx.fillStyle = '#ffe9a8'; const cx = x + w * .66; ctx.strokeText(String(S.money), cx, y + h * .55); ctx.fillText(String(S.money), cx, y + h * .55); ctx.restore(); return; }   // 11/14：铜钱框（铜钱元宝挂在左头）
     const x = 10, y = 30, w = 104, h = 30;
     ctx.save(); ctx.fillStyle = 'rgba(16,10,6,.82)'; ctx.fillRect(x, y, w, h); ctx.strokeStyle = '#b08a4a'; ctx.lineWidth = 1.2; ctx.strokeRect(x + .5, y + .5, w - 1, h - 1);
     if (COIN_IMG.complete && COIN_IMG.naturalWidth) ctx.drawImage(COIN_IMG, x + 3, y + 2, 26, 26);
@@ -1785,6 +1786,14 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(900px,58v
 #survPrep .tb button{background:linear-gradient(180deg,rgba(34,28,22,.92),rgba(14,12,10,.92))!important;border:1px solid rgba(184,149,90,.4);filter:none!important;color:#a8977a!important;height:calc(52px*var(--k));width:calc(170px*var(--k));font-size:calc(23px*var(--kt));text-shadow:none!important;transition:color .15s,border-color .15s}
 #survPrep .tb button:hover{color:#e6d3a4!important;border-color:rgba(226,194,122,.7)}
 #survPrep .tb button.on{background:linear-gradient(180deg,rgba(84,64,34,.95),rgba(36,27,16,.95))!important;border-color:#e2c27a;color:#f6e6bd!important;box-shadow:inset 0 -2px 0 #e2c27a,0 0 calc(12px*var(--k)) rgba(226,194,122,.25)}
+#survPrep .pbf u{background:url(art/ui/hud2/bar_gold.webp) left center/auto 100% repeat-x!important;opacity:1!important}
+#survPrep .vf u{background:url(art/ui/hud2/bar_red.webp) left center/auto 100% repeat-x!important}#survPrep .vf.zq u{background-image:url(art/ui/hud2/bar_blue.webp)!important}
+#survPrep .mo{border:0!important;border-image:none!important;background:url(art/ui/hud2/money.webp) center/100% 100% no-repeat!important;box-shadow:none!important;height:calc(64px*var(--k))!important;min-width:calc(166px*var(--k))!important;padding:0 calc(30px*var(--k)) 0 calc(76px*var(--k))!important;justify-content:center}#survPrep .mo em{display:none!important}
+#survPrep .ar em{filter:none!important}
+/* 11/14 用户的 HUD 美术：页签用暗牌匾 / 金牌匾（压暗一点不刺眼），继续按钮用云纹木牌匾 */
+#survPrep .tb button{background:url(art/ui/hud2/pl_dark.webp) center/100% 100% no-repeat!important;border:0!important;box-shadow:none!important;height:calc(58px*var(--k));width:calc(176px*var(--k));color:#b9a684!important}
+#survPrep .tb button.on{background:url(art/ui/hud2/pl_gold.webp) center/112% 128% no-repeat!important;filter:brightness(.82) saturate(.85)!important;color:#2a1606!important;text-shadow:0 1px 0 rgba(255,236,190,.5)!important;box-shadow:none!important}
+#survPrep .go{background:url(art/ui/hud2/pl_wood.webp) center/100% 100% no-repeat!important;border:0!important;border-image:none!important;box-shadow:none!important;color:#f3d08a!important;text-shadow:0 2px 0 #1a0c04!important;min-width:calc(280px*var(--k))!important;height:calc(68px*var(--k))!important;padding:0 calc(50px*var(--k))!important}
 #survPrep .ar{border:1px solid rgba(184,149,90,.45)!important;border-image:none!important;background:linear-gradient(180deg,rgba(22,19,16,.92),rgba(10,9,8,.94));filter:none!important;height:calc(96px*var(--k));margin:0 calc(-8px*var(--k));box-shadow:inset 0 0 0 1px rgba(0,0,0,.7)}
 #survPrep .ab{height:calc(110px*var(--k))}#survPrep .ab .md{width:calc(110px*var(--k));height:calc(110px*var(--k));filter:saturate(.55) brightness(.8)!important}
 #survPrep .ar .sp{background:linear-gradient(transparent,rgba(184,149,90,.6),transparent)}
@@ -1908,7 +1917,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   let prepLastTab = '', prepNd = null, prepTab = 'jie', selLoot = 0, selWu = null, selShop = 0;
   const TABS = [['jie', '结算'], ['shi', '拾取'], ['xiu', '修炼'], ['shang', '行商'], ['wu', '武学']];
   const A = n => `art/ui/attr/${n}.webp`, PU = n => `art/ui/prep/${n}.webp`;
-  const ATI = ['tipo', 'duan', 'chang', 'shen', 'yun', 'wu', 'shen', 'wu', 'tipo'];   // 射艺/术法/内力暂借图标
+  const ATI = ['bili', 'daojian', 'qiang', 'jiao', 'yun', 'wuxing', 'gong', 'fu', 'neili'];   // 11/14 用户的新属性图标（运气等新福缘图）
   const ATD = ['提高气血，受到的伤害按比例减少', '提高刀、锤、剑、拳等短兵武艺伤害', '提高枪、关刀等长兵武艺伤害', '提高移动速度', '提高暴击率，修炼更容易出好品阶', '武艺、心法熟练度和修为涨得更快', '提高石子、弓等射艺武艺伤害', '提高黄符、羽扇等术法武艺伤害', '提高真气上限和真气回复速度'];
   const icoOf = it => it.kind === 'item' ? `art/ui/item/${it.id}.webp` : iconUrl(it.kind, it.k || it.id) || '';
   const RQ = ['普通', '精良', '稀有', '绝世'], RQC = ['#e8e0d0', '#6fb8ff', '#c58cff', '#ffb347'];
@@ -2281,6 +2290,8 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   himg('empty', 'art/ui/hud/empty.webp'); himg('waigong', 'art/ui/hud/waigong.webp'); himg('neigong', 'art/ui/hud/neigong.webp'); himg('qinggong', 'art/ui/hud/qinggong.webp');
   himg('taiji', 'art/ui/hud/taiji.webp'); himg('hourglass', 'art/ui/hud/hourglass.webp'); himg('blood', 'art/ui/hud/blood.webp');
   himg('daolun', 'art/ui/kaiju/sk_daolun.webp');
+  'bar_gold bar_red bar_blue barframe timer money'.split(' ').forEach(k => himg('h2_' + k, 'art/ui/hud2/' + k + '.webp'));   // 11/14 用户的 HUD 美术：三色条纹理、修为条框、计时框、铜钱框
+  const tex = (k, x, y, w, h) => { if (w <= 0) return false; const im = HIMG['h2_' + k]; if (!hok('h2_' + k)) return false; const sw = Math.min(im.naturalWidth, im.naturalWidth * w / (h * im.naturalWidth / im.naturalHeight)); ctx.drawImage(im, 0, 0, Math.max(1, sw), im.naturalHeight, x, y, w, h); return true; };   // 纹理条按高度缩放、从左往右截取，不拉花
   ['tuna','yangqi','tieyi','tayun','guanxing','taiping','hunyuan','gf00','gf01','gf02','gf03','gf30','gf31','gf32','gf33','qingshen','juqi','shixue','beishui','lhj','caoshang','xingyun','taxue','tiesha','yufeng'].forEach(id => himg('gf_' + id, 'art/ui/gf/' + id + '.webp'));
   const IMGU = { daolun: 'art/ui/kaiju/sk_daolun.webp' };
   'hengsao tuodao tiaozhan daobo lianzhan huima cuofeng feilunren liedihuan xuehe tianbeng wanren'.split(' ').forEach(k => { IMGU[k] = 'art/ui/skill/' + k + '.webp'; himg(k, IMGU[k]); });   // 11/14 用户的刀 12 招图标（每招一把不同的中国刀 + 招式特效）
@@ -2344,8 +2355,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       const fh = h * 1.8, s0 = fh / 54, fy = y - (fh - h) / 2;
       if (BIMG.f.complete && BIMG.f.naturalWidth) bar3(BIMG.f, 60, bx - 40 * s0, fy, bw + 80 * s0, fh); else { ctx.fillStyle = 'rgba(14,9,6,.85)'; ctx.fillRect(bx - 3, y - 3, bw + 6, h + 6); }
       if (lag > rr) { ctx.fillStyle = '#e88a3a'; ctx.fillRect(bx, y, bw * lag, h); }
-      const gg = ctx.createLinearGradient(0, y, 0, y + h); gg.addColorStop(0, c0); gg.addColorStop(.5, c1); gg.addColorStop(1, c2); ctx.fillStyle = gg; ctx.fillRect(bx, y, bw * rr, h);
-      ctx.fillStyle = 'rgba(255,255,255,.16)'; ctx.fillRect(bx, y, bw * rr, h * .35);
+      if (!tex(c0 === '#7ad0ff' ? 'bar_blue' : 'bar_red', bx, y, bw * rr, h)) { const gg = ctx.createLinearGradient(0, y, 0, y + h); gg.addColorStop(0, c0); gg.addColorStop(.5, c1); gg.addColorStop(1, c2); ctx.fillStyle = gg; ctx.fillRect(bx, y, bw * rr, h); ctx.fillStyle = 'rgba(255,255,255,.16)'; ctx.fillRect(bx, y, bw * rr, h * .35); }
       return 40 * s0;
     };
     S.hpLag = S.hpLag == null ? r : Math.max(r, S.hpLag - .4 / 60);
@@ -2365,9 +2375,11 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     cmbDraw(HW, HH, fine, 1 / 60);
     // 修为条（11/11）：顶部正中，LV + 百分比；攒着的修炼次数写在右边
     if (RT.on && RT.node && S.atAdd) {
-      const bw = Math.min(HW * .42, 460), bx = (HW - bw) / 2, by = 6, bh = 13, r = Math.min(1, S.xiu / XIU_NEED(S.lv));
-      ctx.save(); ctx.fillStyle = 'rgba(14,9,6,.82)'; ctx.fillRect(bx - 3, by - 2, bw + 6, bh + 4); ctx.strokeStyle = '#b08a4a'; ctx.lineWidth = 1; ctx.strokeRect(bx - 2.5, by - 1.5, bw + 5, bh + 3);
-      const gx = ctx.createLinearGradient(0, by, 0, by + bh); gx.addColorStop(0, '#ffe08a'); gx.addColorStop(1, '#b8801e'); ctx.fillStyle = gx; ctx.fillRect(bx, by, bw * r, bh);
+      const bw = Math.min(HW * .42, 460), bx = (HW - bw) / 2, by = 7, bh = 13, r = Math.min(1, S.xiu / XIU_NEED(S.lv));
+      ctx.save();
+      if (hok('h2_barframe')) { const im = HIMG.h2_barframe, fh = bh * 2.2, cap = 52 * fh / im.naturalHeight; ctx.drawImage(im, 0, 0, 52, im.naturalHeight, bx - cap * .62, by + bh / 2 - fh / 2, cap, fh); ctx.drawImage(im, 52, 0, im.naturalWidth - 104, im.naturalHeight, bx - cap * .62 + cap, by + bh / 2 - fh / 2, bw + cap * 1.24 - cap * 2, fh); ctx.drawImage(im, im.naturalWidth - 52, 0, 52, im.naturalHeight, bx + bw + cap * .62 - cap, by + bh / 2 - fh / 2, cap, fh); }   // 11/14：两头尖角的金边框
+      else { ctx.fillStyle = 'rgba(14,9,6,.82)'; ctx.fillRect(bx - 3, by - 2, bw + 6, bh + 4); ctx.strokeStyle = '#b08a4a'; ctx.lineWidth = 1; ctx.strokeRect(bx - 2.5, by - 1.5, bw + 5, bh + 3); }
+      if (!tex('bar_gold', bx, by + 1, bw * r, bh - 2)) { const gx = ctx.createLinearGradient(0, by, 0, by + bh); gx.addColorStop(0, '#ffe08a'); gx.addColorStop(1, '#b8801e'); ctx.fillStyle = gx; ctx.fillRect(bx, by, bw * r, bh); }
       if (S.lvFx > 0) { ctx.globalAlpha = Math.min(1, S.lvFx) * .6; ctx.fillStyle = '#fff6c8'; ctx.fillRect(bx, by, bw, bh); ctx.globalAlpha = 1; S.lvFx = Math.max(0, S.lvFx - 1 / 60); }
       ctx.font = 'bold 11px "PingFang SC",sans-serif'; ctx.textBaseline = 'middle'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(20,10,4,.95)'; ctx.fillStyle = '#fff2d0';
       ctx.textAlign = 'left'; ctx.strokeText('修为 LV.' + S.lv, bx + 6, by + bh / 2 + .5); ctx.fillText('修为 LV.' + S.lv, bx + 6, by + bh / 2 + .5);
@@ -2378,9 +2390,10 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
         const left = Math.max(0, Math.ceil(WT() - W.t)), tt = String(left / 60 | 0).padStart(2, '0') + ':' + String(left % 60).padStart(2, '0'), urg = left <= 10;
         const fs = fine ? 18 : 13, tx = fine ? HW / 2 : bx - (fine ? 0 : 44), ty = fine ? by + bh + 15 : by + bh / 2 + .5, ih = fs + 6;
         ctx.font = '900 ' + fs + 'px "Arial Black",Impact,sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; const tw = ctx.measureText(tt).width, x0 = tx - (tw + ih + 4) / 2;
-        if (hok('hourglass')) ctx.drawImage(HIMG.hourglass, x0, ty - ih / 2, ih, ih);
+        let tdone = false; if (hok('h2_timer')) { const im = HIMG.h2_timer, th = ih + 12, tw2 = th * im.naturalWidth / im.naturalHeight, tx2 = tx - tw2 / 2; ctx.drawImage(im, tx2, ty - th / 2, tw2, th); ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(14,8,4,.95)'; ctx.fillStyle = urg && (performance.now() / 300 | 0) % 2 ? '#ff6a4a' : '#f3e6c8'; ctx.textAlign = 'center'; const cx2 = tx2 + th * .62 + (tw2 - th * .62) / 2; ctx.strokeText(tt, cx2, ty + 1); ctx.fillText(tt, cx2, ty + 1); ctx.textAlign = 'left'; tdone = true; }   // 11/14：计时框（沙漏在框里）
+        if (!tdone) { if (hok('hourglass')) ctx.drawImage(HIMG.hourglass, x0, ty - ih / 2, ih, ih);
         ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(14,8,4,.95)'; ctx.fillStyle = urg && (performance.now() / 300 | 0) % 2 ? '#ff6a4a' : '#f3e6c8';
-        ctx.strokeText(tt, x0 + ih + 4, ty + 1); ctx.fillText(tt, x0 + ih + 4, ty + 1);
+        ctx.strokeText(tt, x0 + ih + 4, ty + 1); ctx.fillText(tt, x0 + ih + 4, ty + 1); }
       }
       ctx.restore();
     }
@@ -2411,8 +2424,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
         if (BIMG.f.complete && BIMG.f.naturalWidth) bar3(BIMG.f, 60, bx, by, bw, bh); else { ctx.fillStyle = 'rgba(14,9,6,.85)'; ctx.fillRect(bx, by, bw, bh); }
         const s0 = bh / 54, ix = bx + 40 * s0, iw = bw - 80 * s0, iy = by + 13 * s0, ih = bh - 26 * s0;
         ctx.fillStyle = '#e88a3a'; ctx.fillRect(ix, iy, iw * z.hpLag, ih);
-        const g = ctx.createLinearGradient(0, iy, 0, iy + ih); g.addColorStop(0, '#f05a44'); g.addColorStop(.5, '#c02a22'); g.addColorStop(1, '#6c1210'); ctx.fillStyle = g; ctx.fillRect(ix, iy, iw * r, ih);
-        ctx.fillStyle = 'rgba(255,255,255,.18)'; ctx.fillRect(ix, iy, iw * r, ih * .35);
+        if (!tex('bar_red', ix, iy, iw * r, ih)) { const g = ctx.createLinearGradient(0, iy, 0, iy + ih); g.addColorStop(0, '#f05a44'); g.addColorStop(.5, '#c02a22'); g.addColorStop(1, '#6c1210'); ctx.fillStyle = g; ctx.fillRect(ix, iy, iw * r, ih); ctx.fillStyle = 'rgba(255,255,255,.18)'; ctx.fillRect(ix, iy, iw * r, ih * .35); }
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(20,6,4,.95)'; ctx.fillStyle = '#fff2d8';
         ctx.font = '900 ' + D.fh + 'px Arial Black,Impact,sans-serif'; const ht = String(Math.ceil(z.hp * 10)); ctx.strokeText(ht, cx, by + bh / 2 + .5); ctx.fillText(ht, cx, by + bh / 2 + .5);
         ctx.font = 'bold ' + D.fn + 'px "Songti SC","STSong","Noto Serif SC",serif'; const nm = (lite ? '精锐 · ' : '') + (z.bossLabel || z.T.name || '敌将'), nw = ctx.measureText(nm).width + D.fn * 2.6;
@@ -2456,12 +2468,13 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     + '@media (pointer:fine){#joy{display:none!important}}'
     + '#bR{background:#241812 url(art/ui/hud/dodge.webp) center/cover no-repeat!important;border-radius:8px!important;border:1px solid #c9a24a!important;font-size:0!important;width:60px!important;height:60px!important}'
     + '@media (pointer:fine){#bR:after{content:"空格";position:absolute;left:0;right:0;bottom:-18px;font:700 12px "PingFang SC",sans-serif;color:#f3dc9a;text-shadow:0 1px 2px #000}}'
-    + '#bPause{background:url(art/ui/hud/pause.webp) top center/100% auto no-repeat!important;border:0!important;width:44px!important;height:63px!important;box-shadow:none!important}#bPause .pause-icon-bar{display:none!important}'
-    + '#survPick button.q0,#survPick button.q1,#survPick button.q2,#survPick button.q3{background:center/100% 100% no-repeat!important;border:0!important;width:156px!important;min-height:222px;padding:22px 14px 18px!important;justify-content:center;gap:4px;border-radius:0!important}'
+    + '#bPause{background:url(art/ui/hud2/pause.webp) top center/100% auto no-repeat!important;border:0!important;width:42px!important;height:72px!important;box-shadow:none!important}#bPause .pause-icon-bar{display:none!important}'
+    + '#survPick button.q0,#survPick button.q1,#survPick button.q2,#survPick button.q3{background:center/100% 100% no-repeat!important;border:0!important;width:156px!important;min-height:236px;padding:22px 14px 18px!important;justify-content:flex-start;gap:4px;border-radius:0!important}'
+    + '#survPick button small{min-height:3.1em;display:block;line-height:1.5;text-align:center}#survPick .row{align-items:stretch}'   // 11/14 用户：三张卡的名字、说明要横着对齐（从上往下排，说明留够两行）
     + '#survPick button.q0{background-image:url(art/ui/card/q0.webp)!important}#survPick button.q1{background-image:url(art/ui/card/q1.webp)!important}#survPick button.q2{background-image:url(art/ui/card/q2.webp)!important}#survPick button.q3{background-image:url(art/ui/card/q3.webp)!important}'
     + '#survPick button.q0:hover,#survPick button.q1:hover,#survPick button.q2:hover,#survPick button.q3:hover{transform:translateY(-4px);filter:brightness(1.15)}'
     + '#survPick em.ic{display:block;width:64px;height:64px;background:center/cover;border-radius:3px;box-shadow:0 0 0 1px rgba(216,176,96,.6);margin:4px 0}'
-    + '@media (max-height:520px){#survPick button.q0,#survPick button.q1,#survPick button.q2,#survPick button.q3{width:130px!important;min-height:180px;padding:16px 10px 12px!important}#survPick em.ic{width:48px;height:48px}}'
+    + '@media (max-height:520px){#survPick button.q0,#survPick button.q1,#survPick button.q2,#survPick button.q3{width:130px!important;min-height:196px;padding:16px 10px 12px!important}#survPick em.ic{width:48px;height:48px}}'
     + '#survRep{position:fixed;left:14px;bottom:calc(120px + env(safe-area-inset-bottom));z-index:10011;display:flex;gap:12px;align-items:center;padding:8px 16px;background:linear-gradient(90deg,rgba(16,10,6,.92),rgba(16,10,6,.6));border-left:3px solid #d8b060;color:#f6e6c4;font:700 15px "PingFang SC",sans-serif;animation:repIn .35s ease-out;transition:opacity .5s;pointer-events:none}#survRep b{color:#ffd86e;font-family:"Songti SC","Noto Serif SC",serif;letter-spacing:.2em}#survRep.out{opacity:0}@keyframes repIn{from{transform:translateX(-30px);opacity:0}}'
     + PREP_CSS
     + '#survPick h3,#survPick button b,#survPick button span{font-family:WenKai,MaShanZheng,"STKaiti",serif!important;font-weight:400!important}#survPick button b{font-size:21px!important;letter-spacing:.06em}#survPick button span{font-size:15px!important;line-height:1.5}#survPick h3{font-size:24px!important;letter-spacing:.3em;color:#f0d89a!important}'   // 11/14 用户：三选一的字也换粗楷书
