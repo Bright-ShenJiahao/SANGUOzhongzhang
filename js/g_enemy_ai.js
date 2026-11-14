@@ -146,6 +146,10 @@ function separateEnemies(dt) {
     }
   }
 }
+const stoneSlowMove = (z, legacy = 1) => window.SURV && SURV.slowMove
+  ? SURV.slowMove(z, legacy)
+  : z.survSlow > 0 ? legacy : 1;
+
 function zUpdate(z, dt) {
   if (z.endFade != null) { z.endFade -= dt; z.vx = 0; z.moving = false; return; }   // 节点打完：敌人原地站定、淡出（11/11 用户定）
   if (window.GEAR && !z.dead) { dt = GEAR.enemyTime(z, dt); if (!dt) return; }
@@ -160,7 +164,7 @@ function zUpdate(z, dt) {
     const dx = z.guard.x - z.x, dy = z.guard.y - z.y, d = Math.hypot(dx, dy);
     if (z.siegeArcher && d > 40) { z.x = z.guard.x; z.y = z.guard.y; return; }   // 投石车弓手：出场就站在拒马墙后的岗位上（以前被锁屏边界推到墙前，卡在墙边走不过去）
     z.t += dt; z.flash = Math.max(0, z.flash - dt); z.cd = Math.max(z.cd, .4);
-    if (d > 4) { z.moving = true; z.f = Math.sign(dx) || z.f; moveEnt(z, dx / d * T.spd * dt, dy / d * T.spd * .7 * dt); }
+    if (d > 4) { z.moving = true; z.f = Math.sign(dx) || z.f; moveEnt(z, dx / d * T.spd * dt * stoneSlowMove(z), dy / d * T.spd * .7 * dt * stoneSlowMove(z)); }
     else { z.moving = false; z.f = Math.sign(hero.x - z.x) || z.f; }
     return;
   }
@@ -269,7 +273,7 @@ function zUpdate(z, dt) {
     z.moving = moving;
     if (moving) {
       const mx = tx - z.x, my = ty - z.y, l = Math.hypot(mx, my) || 1;
-      moveEnt(z, mx / l * T.spd * dt, my / l * T.spd * dt);
+      moveEnt(z, mx / l * T.spd * dt * stoneSlowMove(z), my / l * T.spd * dt * stoneSlowMove(z));
       if (Math.abs(mx) > 2) z.f = Math.sign(mx) || z.f;
     }
     return;
@@ -283,7 +287,7 @@ function zUpdate(z, dt) {
       const dx = target.x - z.x, dy = target.y - z.y, d = Math.hypot(dx, dy);
       z.f = Math.sign(dx) || z.f; z.moving = d > 16;
       if (z.moving) {
-        const cs = Math.min(T.spd, 26);                                // 比村民（30）慢，永远追不上
+        const cs = Math.min(T.spd, 26) * stoneSlowMove(z);                                // 比村民（30）慢，永远追不上
         moveEnt(z, dx / d * cs * dt, dy / d * cs * .7 * dt);
         if (z.bx && z.avoidDir == null) moveEnt(z, 0, (z.slot % 2 ? 1 : -1) * cs * dt);
       }
@@ -296,8 +300,8 @@ function zUpdate(z, dt) {
   if (z.blessT > 0) z.blessT -= dt;
   if (z.st === 'wind') {
     // 防卡Y值：近战前摇时慢慢对齐主角的上下位置（每秒最多 22 像素，大步跑开仍能躲）
-    if (!T.ranged && Math.abs(dy) < 30) moveEnt(z, 0, Math.sign(dy) * Math.min(Math.abs(dy), 22 * dt));
-    if (!T.ranged && !T.elite && !T.chapterBoss && Math.abs(dx) > T.reach - 6) moveEnt(z, Math.sign(dx) * T.spd * .8 * dt, 0);   // 边走边蓄力：抬手时继续逼近
+    if (!T.ranged && Math.abs(dy) < 30) moveEnt(z, 0, Math.sign(dy) * Math.min(Math.abs(dy), 22 * dt) * stoneSlowMove(z));
+    if (!T.ranged && !T.elite && !T.chapterBoss && Math.abs(dx) > T.reach - 6) moveEnt(z, Math.sign(dx) * T.spd * .8 * dt * stoneSlowMove(z), 0);   // 边走边蓄力：抬手时继续逼近
     // 完美闪避：敌人刀落下前 0.18 秒内翻滚 → 慢动作 + 1 秒暴击窗
     if (!z.pd && z.st === 'wind') {
       const rem = T.wind - z.t;
@@ -348,9 +352,9 @@ function zUpdate(z, dt) {
   const mx = tx - z.x, my = ty - z.y, l = Math.hypot(mx, my);
   z.moving = l > 4;
   if (z.moving) {
-    const sp = T.spd * (!window.GEAR && z.moveSlowT > 0 ? .85 : 1) * (Math.abs(dx) > 150 ? 2.2 : 1) * (T.elite || T.chapterBoss ? 1 : 1.25) * (z.survSlow > 0 ? .7 : 1);   // 离得远时快步冲过来；草上飞风痕减速
+    const sp = T.spd * (!window.GEAR && z.moveSlowT > 0 ? .85 : 1) * (Math.abs(dx) > 150 ? 2.2 : 1) * (T.elite || T.chapterBoss ? 1 : 1.25) * stoneSlowMove(z, .7);   // 离得远时快步冲过来；草上飞风痕减速
     moveEnt(z, mx / l * sp * dt, my / l * sp * .7 * dt);
-    if (z.bx && z.avoidDir == null) moveEnt(z, 0, (z.slot % 2 ? 1 : -1) * T.spd * dt);   // 被草垛等挡住时上下绕开（已在绕行时不再额外推）
+    if (z.bx && z.avoidDir == null) moveEnt(z, 0, (z.slot % 2 ? 1 : -1) * T.spd * dt * stoneSlowMove(z));   // 被草垛等挡住时上下绕开（已在绕行时不再额外推）
   }
 }
 // 投石车守卫（用户定）：主角贴近投石车或刚打过投石车 → 守卫全部来打；离开后追一小段再回岗
@@ -415,7 +419,8 @@ function updateChapter2Boss(z, dt) {
   if (!z.summonedHalf && z.hp < z.T.hp * .5) chapter2BossSummon(z);
   if (window.BOSS_BLOCK && BOSS_BLOCK.update(z, dt, (o, tx, ty, sp, d2) => {
     const dx = tx - o.x, dy = ty - o.y, d = Math.hypot(dx, dy) || 1;
-    moveEnt(o, dx / d * sp * d2, dy / d * sp * .5 * d2);
+    const step = sp * d2 * stoneSlowMove(o);
+    moveEnt(o, dx / d * step, dy / d * step * .5);
   }, z.T.spd || 30)) return;
   if (z.stun > 0) { z.stun -= dt; return; }
   if (z.st === 'wind') {
@@ -431,7 +436,7 @@ function updateChapter2Boss(z, dt) {
   z.f = Math.sign(dx) || z.f; z.moving = Math.abs(dx) > z.T.reach - 5 || Math.abs(dy) > 10;
   if (z.moving) {
     const d = Math.hypot(dx, dy) || 1;
-    moveEnt(z, dx / d * z.T.spd * dt, dy / d * z.T.spd * .5 * dt);
+    moveEnt(z, dx / d * z.T.spd * dt * stoneSlowMove(z), dy / d * z.T.spd * .5 * dt * stoneSlowMove(z));
   } else if (z.cd <= 0) { z.st = 'wind'; z.t = 0; sfx('bladeAlert', z.x); }
 }
 

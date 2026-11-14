@@ -108,6 +108,7 @@
     ['状态', '破甲', '敌人被破甲后，每层多受 10% 伤害，最多 4 层，5 秒后消失。刀、关刀、枪的招式会挂。'],
     ['状态', '流血', '敌人每 0.5 秒掉一次血，层数越多掉得越快，最多 5 层，4 秒后消失。有的大招会把流血一口气引爆。'],
     ['状态', '浮空', '小兵被挑飞到空中约 1.8 秒，这段时间多受 25% 伤害，落地时再吃一下并晕 0.5 秒。精英和首领不会被挑飞，只吃一半的加成。同一个敌人 10 秒内挑飞越多次越短，第 4 次起免疫。'],
+    ['状态', '迟缓', '普通敌人移速降低 20%，精锐降低 12%，均持续 2.5 秒；首领移速降低 8%，持续 2 秒。迟缓不叠层，命中时刷新，保留较长时长。迟缓只影响移动速度。'],
     ['状态', '眩晕', '敌人站着不动、不能出手，持续时间很短。'],
   ];
   // 11/14 用户定：图鉴加「武学」页——全部武艺按兵器、黄玄地天排好；学过才解锁（没学过黑剪影 + ？？？）
@@ -131,7 +132,7 @@
   }
   // 11/15 用户：图鉴加「宝物」页——兵器宝物按兵器分，其余算通用；拿到过才解锁
   const BQ = () => { const S2 = window.SURV; if (!S2 || !S2.BAO) return []; return Object.keys(S2.BAO).map(k => ({ k, id: 'bao:' + k, o: S2.BAO[k], w: S2.BAO[k].w != null ? S2.BAO[k].w : -2 })).sort((a, b) => (a.w === -2) - (b.w === -2) || a.w - b.w || a.o.q - b.o.q); };
-  const bIco = e => `<div class="si" style="background-image:url('art/ui/bao/${e.k}.webp')"></div>`;
+  const bIco = e => `<div class="si" style="background-image:url('art/ui/bao/${e.o.icon || e.k}.webp')"></div>`;
   function qDetail(e) {
     const dt = box.querySelector('.dt'); if (!e) { dt.innerHTML = '<p class="no">点左边的宝物看详情。</p>'; return; }
     const S2 = SURV, qn = S2.BQN[e.o.q], qc = S2.BQC[e.o.q], wn = e.w >= 0 ? T().WEPN[e.w] + '的兵器宝物' : '通用宝物';
