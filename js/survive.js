@@ -2110,7 +2110,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   function waveBanner(title, sub) {
     const old = document.getElementById('waveBan'); if (old) old.remove();
     const d = document.createElement('div'); d.id = 'waveBan';
-    d.innerHTML = '<div class="jz">' + '<i></i>'.repeat(13) + '<div class="tx"><div class="t">' + title + '</div><div class="s">' + sub + '</div></div><b class="yin">令</b></div><div class="hn">点击下令</div>';
+    d.innerHTML = '<div class="jz"><div class="tx"><div class="t">' + title + '</div><div class="s">' + sub + '</div></div><b class="yin"></b></div><div class="hn">点击下令</div>';
     if (window.SFX) SFX.play('j_banner');
     document.body.appendChild(d); banHold = true;
     let done = false;
@@ -2257,18 +2257,15 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   // 隐藏普攻和换武器按钮
   const st = document.createElement('style'); st.textContent = '#bA,#bWeapon,#wp button[data-w]{display:none!important}'
     + '#waveBan{position:fixed;inset:0;z-index:10010;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:radial-gradient(ellipse at 50% 42%,rgba(0,0,0,.45),rgba(0,0,0,.15) 60%,transparent);cursor:pointer;transition:opacity .45s}#waveBan.out{opacity:0}'
-    + '#waveBan .jz{position:relative;width:min(78vw,600px);height:min(30vw,230px);display:flex;justify-content:center;filter:drop-shadow(0 10px 18px rgba(0,0,0,.7));animation:jzOpen .5s cubic-bezier(.2,.8,.3,1) both}#waveBan.out .jz{animation:jzClose .45s ease-in both}'
-    + '#waveBan .jz i{flex:1;margin:0 1px;border-radius:3px;background:linear-gradient(90deg,#8a6434,#d6b277 22%,#e6c78e 50%,#c79f62 78%,#7d5a2c);box-shadow:inset 0 0 0 1px rgba(60,35,10,.55);position:relative}'
-    + '#waveBan .jz i:first-child,#waveBan .jz i:last-of-type{flex:.7;background:linear-gradient(90deg,#5a3a18,#8b6230 50%,#5a3a18)}'
-    + '#waveBan .jz::before,#waveBan .jz::after{content:"";position:absolute;left:-1%;right:-1%;height:5px;background:#3a2410;box-shadow:0 1px 0 rgba(255,220,150,.25);z-index:1}#waveBan .jz::before{top:16%}#waveBan .jz::after{bottom:16%}'
-    + '#waveBan .tx{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;animation:jzTx .4s .3s both}'
-    + '#waveBan .t{font:400 clamp(34px,6.4vw,64px) MaShanZheng,"STKaiti",serif;letter-spacing:.18em;text-indent:.18em;color:#2a1608;text-shadow:0 1px 0 rgba(255,235,190,.4)}'
-    + '#waveBan .s{font:700 clamp(14px,2vw,19px) "PingFang SC",sans-serif;letter-spacing:.35em;text-indent:.35em;color:#4a2e14}'
-    + '#waveBan .yin{position:absolute;z-index:3;right:7%;bottom:9%;width:min(13vw,96px);height:min(13vw,96px);display:flex;align-items:center;justify-content:center;font:400 min(9vw,66px) MaShanZheng,"STKaiti",serif;color:#fff1dc;background:#b2241a;border:3px solid #7e140d;box-shadow:inset 0 0 0 3px #d8463a,0 0 0 2px rgba(120,20,10,.4);border-radius:6px;opacity:0;transform:rotate(-8deg) scale(2.6)}'
+    + '#waveBan .jz{position:relative;width:min(80vw,640px);aspect-ratio:1400/505;background:url(art/ui/hud/jz.webp) center/100% 100% no-repeat;filter:drop-shadow(0 12px 20px rgba(0,0,0,.65));animation:jzOpen .5s cubic-bezier(.2,.8,.3,1) both}#waveBan.out .jz{animation:jzClose .45s ease-in both}'
+    + '#waveBan .tx{position:absolute;left:8%;right:8%;top:17%;bottom:24%;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;animation:jzTx .4s .3s both}'
+    + '#waveBan .t{font:400 clamp(38px,7vw,72px) MaShanZheng,"STKaiti",serif;letter-spacing:.14em;text-indent:.14em;color:#160c04;text-shadow:1px 0 0 #160c04,-1px 0 0 #160c04,0 1px 0 #160c04,0 2px 1px rgba(90,60,20,.35);opacity:.92}'
+    + '#waveBan .s{display:flex;align-items:center;gap:.8em;font:400 clamp(16px,2.3vw,22px) MaShanZheng,"STKaiti",serif;letter-spacing:.3em;text-indent:.3em;color:#3a2410}#waveBan .s::before,#waveBan .s::after{content:"";width:clamp(26px,5vw,60px);height:2px;background:linear-gradient(90deg,transparent,#9a7638 30%,#c9a35e 70%,transparent)}'
+    + '#waveBan .yin{position:absolute;z-index:3;right:9%;bottom:14%;width:17%;aspect-ratio:1;background:url(art/ui/hud/yin.webp) center/contain no-repeat;opacity:0;transform:rotate(-6deg) scale(2.6);mix-blend-mode:multiply}'
     + '#waveBan.seal .yin{animation:yinIn .18s .0s cubic-bezier(.5,0,.9,.4) forwards}'
     + '#waveBan .hn{font:700 clamp(15px,2vw,19px) "PingFang SC",sans-serif;letter-spacing:.5em;text-indent:.5em;color:#f0d89a;text-shadow:0 2px 4px #000;animation:hnB 1.2s .6s ease-in-out infinite both}#waveBan.seal .hn{visibility:hidden}'
     + '@keyframes jzOpen{from{clip-path:inset(0 50% 0 50%)}to{clip-path:inset(0 0 0 0)}}@keyframes jzClose{from{clip-path:inset(0 0 0 0)}to{clip-path:inset(0 50% 0 50%)}}@keyframes jzTx{from{opacity:0}}'
-    + '@keyframes yinIn{0%{opacity:0;transform:rotate(-8deg) scale(2.6)}100%{opacity:1;transform:rotate(-8deg) scale(1)}}@keyframes hnB{0%,100%{opacity:.35}50%{opacity:1}}'
+    + '@keyframes yinIn{0%{opacity:0;transform:rotate(-6deg) scale(2.6)}100%{opacity:.95;transform:rotate(-6deg) scale(1)}}@keyframes hnB{0%,100%{opacity:.35}50%{opacity:1}}'
     + '@media (pointer:fine){#joy{display:none!important}}'
     + '#bR{background:#241812 url(art/ui/hud/dodge.webp) center/cover no-repeat!important;border-radius:8px!important;border:1px solid #c9a24a!important;font-size:0!important;width:60px!important;height:60px!important}'
     + '@media (pointer:fine){#bR:after{content:"空格";position:absolute;left:0;right:0;bottom:-18px;font:700 12px "PingFang SC",sans-serif;color:#f3dc9a;text-shadow:0 1px 2px #000}}'
