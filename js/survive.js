@@ -1366,7 +1366,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const BLESS = {
     lb: [['money', '盘缠', '得 100 铜钱'], ['hp', '宽厚', '气血上限 +10%'], ['caoxie', '织席草鞋', '得宝物「织席草鞋」']],
     gy: [['lv3', '指点刀法', '起手的武艺直接升到 LV3'], ['gf', '赠书', '学一门心法（三选一）'], ['xiu', '夜读春秋', '修为 +60']],
-    zf: [['drink', '痛饮', '失去 30% 气血，得一件良品宝物'], ['dice', '赌酒', '失去全部铜钱，得一件奇品宝物（三选一）'], ['fight', '拼命', '气血上限 −15%，多学一招武艺（三选一）']],
+    zf: [['drink', '痛饮', '失去 30% 气血，得一件良品宝物'], ['dice', '赌酒', '失去全部铜钱，得一件传说宝物（三选一）'], ['fight', '拼命', '气血上限 −15%，多学一招武艺（三选一）']],
   };
   function blessOpts() { const r = L => L[(Math.random() * L.length) | 0]; return [['刘备'].concat(r(BLESS.lb)), ['关羽'].concat(r(BLESS.gy)), ['张飞'].concat(r(BLESS.zf))]; }
   function blessDo(k, cb) {
@@ -1378,7 +1378,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     else if (k === 'gf') offerReward(1, cb, 1, ['perk']);
     else if (k === 'xiu') { addXiu(60); done(); }
     else if (k === 'drink') { hero.hp = Math.max(1, hero.hp - maxHp() * .3); pickBao([1, 1, 1], cb, '张飞 · 痛饮 · 良品宝物'); }
-    else if (k === 'dice') { S.money = 0; pickBao([2, 2, 2], cb, '张飞 · 赌酒 · 奇品宝物'); }
+    else if (k === 'dice') { S.money = 0; pickBao([2, 2, 2], cb, '张飞 · 赌酒 · 传说宝物'); }
     else if (k === 'fight') { S.hpMul = (S.hpMul || 1) * .85; hero.hp = Math.min(hero.hp, maxHp()); offerReward(1, cb, 1, ['skill']); }
     else done();
   }
@@ -1474,7 +1474,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     report(R);
     W.pick = true;
     const baoQ = af && af.bao != null ? [af.bao, af.bao, af.bao] : nd.type === 'elite' ? [Math.random() < .35 ? 1 : 0, Math.random() < .35 ? 1 : 0, Math.random() < .35 ? 1 : 0] : nd.type === 'boss' ? [2, 2, 2] : null;   // 精锐必掉宝物（凡/良），首领给奇品三选一
-    setTimeout(() => baoQ ? pickBao(baoQ, () => { W.pick = true; prepOpen(nd); }, nd.type === 'boss' ? '首领战利 · 奇品宝物' : '战利 · 宝物') : prepOpen(nd), 1000);
+    setTimeout(() => baoQ ? pickBao(baoQ, () => { W.pick = true; prepOpen(nd); }, nd.type === 'boss' ? '首领战利 · 传说宝物' : '战利 · 宝物') : prepOpen(nd), 1000);
   }
   function beginNode(nd) {
     if (window.CODEX) for (const k of S.slots.concat(S.owned || [])) if (k) CODEX.see('sk:' + k);
