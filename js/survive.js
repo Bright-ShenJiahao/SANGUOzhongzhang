@@ -1026,10 +1026,15 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const startSk = () => START_SK[heldW()] || OG().skill;
   const heldPre = () => HELDP[heldW()] || 'wd_';
   const motFr = k => (FRM[heldPre()] || FRM.wd_)[MOT[k] || 'chop'];
+  // 11/14 用户：刀招的起手帧 / 出手帧可在武学试炼里挑（可水平翻转，帧名末尾加 ~ 表示翻转），存 localStorage szz-dao-pose，调好复制给 Claude 写死进 DPS1
+  const DPS1 = { daobo: { a: 'up2', b: 'chop2' }, cuofeng: { a: 'up2', b: 'chop2' }, liedihuan: { a: 'up2', b: 'chop2' }, tianbeng: { a: 'up2', b: 'chop2' } };   // 下劈：举刀（up2）→ 劈下（chop2）
+  let DPS = {}; try { DPS = JSON.parse(localStorage.getItem('szz-dao-pose') || '{}') || {}; } catch (e) {}
+  const dpsOf = k => SK[k] && SK[k].dk ? DPS[k] || DPS1[k] || null : null;
+  const dpsFr = (k, i) => { const o = dpsOf(k); if (!o) return motFr(k)[i]; const hp = heldPre(), n = i === 0 ? o.a : o.b, f = i === 0 ? o.fa : o.fb; return hp + n + (f ? '~' : ''); };
   for (const k of Object.keys(SK)) Object.defineProperties(SK[k], {
-    pose: { get: () => motFr(k).slice(0, 2), set() {}, configurable: true },
-    poseL: { get: () => motFr(k)[1], set() {}, configurable: true },
-    pose2: { get: () => motFr(k)[2], set() {}, configurable: true } });
+    pose: { get: () => [dpsFr(k, 0), dpsFr(k, 1)], set() {}, configurable: true },
+    poseL: { get: () => dpsOf(k) ? dpsFr(k, 1) : motFr(k)[1], set() {}, configurable: true },
+    pose2: { get: () => dpsOf(k) ? dpsFr(k, 1) : motFr(k)[2], set() {}, configurable: true } });
   // 出身六项属性（11/11 用户定 A：全部接上效果）：体魄 短兵 长兵 身法 运气 悟性
   const AT0 = () => OG().at || [3, 3, 3, 3, 3, 3, 3, 3, 3];   // 11/13：9 项（体魄 短兵 长兵 身法 运气 悟性 射艺 术法 内力）
   const AT = () => { const b = AT0(), d = S.atAdd || [], it = S.atAdd ? itemAt() : [0, 0, 0, 0, 0, 0, 0, 0, 0]; return b.map((v, i) => v + (d[i] || 0) + it[i]); };   // 出身底子 + 本局修炼
@@ -2253,7 +2258,9 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     ctx.restore();
   }
   // 主角姿势：前摇举刀，出手和后摇用挥刀帧
-  function pose() {
+  let poseFlipNow = false;
+  function pose() { const f = pose0(); poseFlipNow = !!f && f.endsWith('~'); return poseFlipNow ? f.slice(0, -1) : f; }
+  function pose0() {
     if (S.poseOverride) return S.poseOverride.f;
     if (S.recov) return S.recov.late && S.recov.t > S.recov.dur * .55 ? S.recov.late : S.recov.pose;
     if (S.wind && (hero.st !== 'walk' || S.wind.dur - S.wind.t < (S.wind.k.dk ? .32 : .16))) return S.wind.k.pose[0];   // 11/14：刀招举刀至少露 0.32 秒   // 边走边打时，出手前 0.16 秒也露一下起手帧
@@ -2354,8 +2361,12 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   const TRIAL = { SK, GF, MOT, WEPN, TIERN, wepOf, IMGU, spdTxt, long() { W.tot = 9999; if (W.t > W.tot - 5) W.t = 0; },
     setGf(ids) { S.gf = ['', '', '']; ids.slice(0, 3).forEach((id, i) => { S.gf[i] = id; }); GM = gfCalc(); }, setQg(id) { S.qg = id || ''; GM = gfCalc(); }, gf: () => S.gf.slice(), qg: () => S.qg, mul: k => skillMul(k), lv: k => lvOf(k), spd: k => spdTxt(SK[k]), rs: k => SK[k] && SK[k].dk ? rsOf(k) : null, setRs(k, v) { DRS[k] = v; try { localStorage.setItem('szz-dao-rs', JSON.stringify(DRS)); } catch (e) {} },
     sp: k => spOf(k), setSp(k, v) { DSP[k] = v; try { localStorage.setItem('szz-dao-sp', JSON.stringify(DSP)); } catch (e) {} }, spAll(v) { Object.keys(SK).forEach(k => { if (SK[k].dk) DSP[k] = v; }); try { localStorage.setItem('szz-dao-sp', JSON.stringify(DSP)); } catch (e) {} },
+    FRN: ['idle', 'walk1', 'walk2', 'walk3', 'roll1', 'roll2', 'roll3', 'roll4', 'hurt', 'down', 'chop1', 'chop2', 'sweep1', 'sweep2', 'thrust1', 'thrust2', 'spin1', 'spin2', 'up1', 'up2'],
+    getPose: k => { const o = dpsOf(k); if (o) return Object.assign({ fa: 0, fb: 0 }, o); const m = motFr(k), hp = heldPre(); return { a: m[0].slice(hp.length), b: m[1].slice(hp.length), fa: 0, fb: 0 }; },
+    setPose: (k, o) => { DPS[k] = o; try { localStorage.setItem('szz-dao-pose', JSON.stringify(DPS)); } catch (e) {} },
+    poseAll: () => Object.keys(SK).filter(k => SK[k].dk && !SK[k].off).sort((a, b) => SK[a].tier - SK[b].tier).map(k => { const o = TRIAL.getPose(k); return `${SK[k].name}(${k}) 起手 ${o.a}${o.fa ? '（翻转）' : ''} → 出手 ${o.b}${o.fb ? '（翻转）' : ''}`; }).join('\n'),
     rsAll: () => Object.keys(SK).filter(k => SK[k].dk && !SK[k].off).sort((a, b) => SK[a].tier - SK[b].tier).map(k => `${TIERN[SK[k].tier]} ${SK[k].name}(${k}) 范围×${rsOf(k)} 速度×${spOf(k)}（${spdTxt(SK[k])}）`).join('\n'), setLv(k, l) { S.lvLock = {}; if (k && l) S.lvLock[k] = l; } };
-  window.SURV = { trial: TRIAL, banner: (a, b) => waveBanner(a, b), curNode: () => RT.on && W.started ? RT.node : null, status, attrInfo, addXiu: n => addXiu(n), heldPre: () => heldPre(), dbg: () => ({ gf: S.gf.slice(), qg: S.qg, zq: S.zq, zqMax: zqMax(), exp: S.gfExp, GM }), giveGf: id => { if (GF[id]) { if (GF[id].qg) S.qg = id; else { const f = S.gf.indexOf(""); if (f >= 0) S.gf[f] = id; } } }, newHud: () => RT.on && !!RT.node, stunGate, noStun: () => RT.on, get slots() { return S.slots; }, SK, beginNode, frozen: () => RT.on && (ROUTE.shown() || buildOpen || (banHold && !!document.getElementById('waveBan'))), routeHp: () => [hero.hp, maxHp()], camp(k) { if (k === 'heal') heal(maxHp() * .3); else RT.dmg *= 1.1; }, ORIGINS, setOrigin(k) { if (ORIGINS[k] && !ORIGINS[k].locked) { origin = k; startW = null; } }, origin: () => origin, setWep(w) { startW = w; }, wep: () => heldW(), startSk: () => startSk(), WEPN, takeMul: () => {
+  window.SURV = { trial: TRIAL, poseFlip: () => poseFlipNow, banner: (a, b) => waveBanner(a, b), curNode: () => RT.on && W.started ? RT.node : null, status, attrInfo, addXiu: n => addXiu(n), heldPre: () => heldPre(), dbg: () => ({ gf: S.gf.slice(), qg: S.qg, zq: S.zq, zqMax: zqMax(), exp: S.gfExp, GM }), giveGf: id => { if (GF[id]) { if (GF[id].qg) S.qg = id; else { const f = S.gf.indexOf(""); if (f >= 0) S.gf[f] = id; } } }, newHud: () => RT.on && !!RT.node, stunGate, noStun: () => RT.on, get slots() { return S.slots; }, SK, beginNode, frozen: () => RT.on && (ROUTE.shown() || buildOpen || (banHold && !!document.getElementById('waveBan'))), routeHp: () => [hero.hp, maxHp()], camp(k) { if (k === 'heal') heal(maxHp() * .3); else RT.dmg *= 1.1; }, ORIGINS, setOrigin(k) { if (ORIGINS[k] && !ORIGINS[k].locked) { origin = k; startW = null; } }, origin: () => origin, setWep(w) { startW = w; }, wep: () => heldW(), startSk: () => startSk(), WEPN, takeMul: () => {
       if (RT.on && GM.block && Math.random() < GM.block) { floaters.push({ x: hero.x, y: hero.y - 50, t: 0, txt: '格挡', color: '#bfe0ff' }); return 0; }
       const mv = Math.abs(hero.ix) > .1 || Math.abs(hero.iy) > .1, low = hero.hp / maxHp() < .3 ? 1 - .10 * GM.low : 1;
       return (OG().take || 1) / AFX.hp() * (1 - IT('take')) * RT.take * RES().take * GM.take / GM.hp * low * (S.qg === 'taxue' && mv ? .85 : 1) * (GM.still && S.stillT > 1 ? 1 - GM.still : 1);

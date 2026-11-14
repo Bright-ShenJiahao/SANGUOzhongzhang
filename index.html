@@ -62,7 +62,7 @@ body.szz-pro #help{display:none}
 .x-back{min-height:34px!important}
 }
 #rot small{display:block;margin-top:10px;font-size:14px;font-weight:600;color:#c9b691;line-height:1.6}
-</style><link rel="preload" href="pack/fonts/result.woff2?v=e43a5192f3" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=e43a5192f3)format("woff2");font-display:swap}</style><style>@font-face{font-family:"WenKai";src:url(pack/fonts/kai.woff2?v=a2dd2e746c)format("woff2");font-display:swap}</style><link rel="preload" href="pack/fonts/pixel.woff2?v=0ca3c18512" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"Pixel12";src:url(pack/fonts/pixel.woff2?v=0ca3c18512)format("woff2");font-display:swap}@font-face{font-family:"Songti SC";src:url(pack/fonts/pixel.woff2?v=0ca3c18512)format("woff2");font-display:swap}@font-face{font-family:"STSong";src:url(pack/fonts/pixel.woff2?v=0ca3c18512)format("woff2");font-display:swap}@font-face{font-family:"Noto Serif SC";src:url(pack/fonts/pixel.woff2?v=0ca3c18512)format("woff2");font-display:swap}@font-face{font-family:"SimSun";src:url(pack/fonts/pixel.woff2?v=0ca3c18512)format("woff2");font-display:swap}@font-face{font-family:"PingFang SC";src:url(pack/fonts/pixel.woff2?v=0ca3c18512)format("woff2");font-display:swap}@font-face{font-family:"Microsoft YaHei";src:url(pack/fonts/pixel.woff2?v=0ca3c18512)format("woff2");font-display:swap}@font-face{font-family:"Noto Sans CJK SC";src:url(pack/fonts/pixel.woff2?v=0ca3c18512)format("woff2");font-display:swap}@font-face{font-family:"STKaiti";src:url(pack/fonts/pixel.woff2?v=0ca3c18512)format("woff2");font-display:swap}@font-face{font-family:"KaiTi";src:url(pack/fonts/pixel.woff2?v=0ca3c18512)format("woff2");font-display:swap}*{font-synthesis:none}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
+</style><link rel="preload" href="pack/fonts/result.woff2?v=c8376cb0f6" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=c8376cb0f6)format("woff2");font-display:swap}</style><style>@font-face{font-family:"WenKai";src:url(pack/fonts/kai.woff2?v=13a79561ee)format("woff2");font-display:swap}</style><link rel="preload" href="pack/fonts/pixel.woff2?v=35c1155172" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"Pixel12";src:url(pack/fonts/pixel.woff2?v=35c1155172)format("woff2");font-display:swap}@font-face{font-family:"Songti SC";src:url(pack/fonts/pixel.woff2?v=35c1155172)format("woff2");font-display:swap}@font-face{font-family:"STSong";src:url(pack/fonts/pixel.woff2?v=35c1155172)format("woff2");font-display:swap}@font-face{font-family:"Noto Serif SC";src:url(pack/fonts/pixel.woff2?v=35c1155172)format("woff2");font-display:swap}@font-face{font-family:"SimSun";src:url(pack/fonts/pixel.woff2?v=35c1155172)format("woff2");font-display:swap}@font-face{font-family:"PingFang SC";src:url(pack/fonts/pixel.woff2?v=35c1155172)format("woff2");font-display:swap}@font-face{font-family:"Microsoft YaHei";src:url(pack/fonts/pixel.woff2?v=35c1155172)format("woff2");font-display:swap}@font-face{font-family:"Noto Sans CJK SC";src:url(pack/fonts/pixel.woff2?v=35c1155172)format("woff2");font-display:swap}@font-face{font-family:"STKaiti";src:url(pack/fonts/pixel.woff2?v=35c1155172)format("woff2");font-display:swap}@font-face{font-family:"KaiTi";src:url(pack/fonts/pixel.woff2?v=35c1155172)format("woff2");font-display:swap}*{font-synthesis:none}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
 <style>button{letter-spacing:.04em!important}</style></head><body>
 <style>
 #bootSplash{position:fixed;inset:0;z-index:99999;background:radial-gradient(ellipse at 50% 45%,#f3e4cf 0%,#ecd9c0 55%,#d9c09f 100%);transition:opacity .45s ease-out}
@@ -112,7 +112,7 @@ if(location.protocol==='https:'&&!/[?&]debug(?:=|&|$)/.test(location.search)&&'s
 })();
 // 自动更新：打开游戏、或从后台切回来时，查一下线上有没有新版本；有就在标题/整备页自动刷新（战斗中不打扰）
 (function(){
-var BUILD='8f7b9c723bd1',busy=false;
+var BUILD='e7f8510f0fa3',busy=false;
 if(location.protocol!=='https:'||/[?&]debug(?:=|&|$)/.test(location.search))return;
 function check(){
   if(busy)return;
@@ -3004,7 +3004,7 @@ function drawHero() {
   const lift = window.ARTIFACT ? ARTIFACT.drawUnder(h) : 0;   // 踩在飞剑上：剑画在脚下，人抬高一点
   const drunk = window.SUPPLY && SUPPLY.drunk(), sway = drunk && h.st === 'idle' ? Math.sin(performance.now() / 300) * 1.5 : 0;   // 杜康酒：泛红、站着时轻轻摇晃
   if (drunk) { ctx.save(); ctx.filter = 'sepia(.35) saturate(1.8) hue-rotate(-20deg)'; }
-  drawChar('hero', heroFrame(h), h.x + sway, h.y - (h.z || 0) - lift, h.f < 0, 1, false, HERO_SC);   // 11/13 用户：主角和小兵 1:1（像素密度一致，喽啰 .86）
+  { const hf = heroFrame(h); drawChar('hero', hf, h.x + sway, h.y - (h.z || 0) - lift, (h.f < 0) !== !!(window.SURV && SURV.poseFlip && SURV.poseFlip()), 1, false, HERO_SC); }   // 11/14：试炼里挑的翻转帧   // 11/13 用户：主角和小兵 1:1（像素密度一致，喽啰 .86）
   if (h.dazeT > 0) { const t = performance.now() / 160; ctx.fillStyle = '#ffe36a'; for (let i = 0; i < 3; i++) { const a = t + i * 2.09; ctx.fillRect(h.x + Math.cos(a) * 8 - 1.5, h.y - 40 + Math.sin(a) * 2.5, 3, 3); } }   // 头上转星星
   if (drunk) ctx.restore();
 }
@@ -6062,10 +6062,15 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const startSk = () => START_SK[heldW()] || OG().skill;
   const heldPre = () => HELDP[heldW()] || 'wd_';
   const motFr = k => (FRM[heldPre()] || FRM.wd_)[MOT[k] || 'chop'];
+  // 11/14 用户：刀招的起手帧 / 出手帧可在武学试炼里挑（可水平翻转，帧名末尾加 ~ 表示翻转），存 localStorage szz-dao-pose，调好复制给 Claude 写死进 DPS1
+  const DPS1 = { daobo: { a: 'up2', b: 'chop2' }, cuofeng: { a: 'up2', b: 'chop2' }, liedihuan: { a: 'up2', b: 'chop2' }, tianbeng: { a: 'up2', b: 'chop2' } };   // 下劈：举刀（up2）→ 劈下（chop2）
+  let DPS = {}; try { DPS = JSON.parse(localStorage.getItem('szz-dao-pose') || '{}') || {}; } catch (e) {}
+  const dpsOf = k => SK[k] && SK[k].dk ? DPS[k] || DPS1[k] || null : null;
+  const dpsFr = (k, i) => { const o = dpsOf(k); if (!o) return motFr(k)[i]; const hp = heldPre(), n = i === 0 ? o.a : o.b, f = i === 0 ? o.fa : o.fb; return hp + n + (f ? '~' : ''); };
   for (const k of Object.keys(SK)) Object.defineProperties(SK[k], {
-    pose: { get: () => motFr(k).slice(0, 2), set() {}, configurable: true },
-    poseL: { get: () => motFr(k)[1], set() {}, configurable: true },
-    pose2: { get: () => motFr(k)[2], set() {}, configurable: true } });
+    pose: { get: () => [dpsFr(k, 0), dpsFr(k, 1)], set() {}, configurable: true },
+    poseL: { get: () => dpsOf(k) ? dpsFr(k, 1) : motFr(k)[1], set() {}, configurable: true },
+    pose2: { get: () => dpsOf(k) ? dpsFr(k, 1) : motFr(k)[2], set() {}, configurable: true } });
   // 出身六项属性（11/11 用户定 A：全部接上效果）：体魄 短兵 长兵 身法 运气 悟性
   const AT0 = () => OG().at || [3, 3, 3, 3, 3, 3, 3, 3, 3];   // 11/13：9 项（体魄 短兵 长兵 身法 运气 悟性 射艺 术法 内力）
   const AT = () => { const b = AT0(), d = S.atAdd || [], it = S.atAdd ? itemAt() : [0, 0, 0, 0, 0, 0, 0, 0, 0]; return b.map((v, i) => v + (d[i] || 0) + it[i]); };   // 出身底子 + 本局修炼
@@ -7289,7 +7294,9 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     ctx.restore();
   }
   // 主角姿势：前摇举刀，出手和后摇用挥刀帧
-  function pose() {
+  let poseFlipNow = false;
+  function pose() { const f = pose0(); poseFlipNow = !!f && f.endsWith('~'); return poseFlipNow ? f.slice(0, -1) : f; }
+  function pose0() {
     if (S.poseOverride) return S.poseOverride.f;
     if (S.recov) return S.recov.late && S.recov.t > S.recov.dur * .55 ? S.recov.late : S.recov.pose;
     if (S.wind && (hero.st !== 'walk' || S.wind.dur - S.wind.t < (S.wind.k.dk ? .32 : .16))) return S.wind.k.pose[0];   // 11/14：刀招举刀至少露 0.32 秒   // 边走边打时，出手前 0.16 秒也露一下起手帧
@@ -7390,8 +7397,12 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   const TRIAL = { SK, GF, MOT, WEPN, TIERN, wepOf, IMGU, spdTxt, long() { W.tot = 9999; if (W.t > W.tot - 5) W.t = 0; },
     setGf(ids) { S.gf = ['', '', '']; ids.slice(0, 3).forEach((id, i) => { S.gf[i] = id; }); GM = gfCalc(); }, setQg(id) { S.qg = id || ''; GM = gfCalc(); }, gf: () => S.gf.slice(), qg: () => S.qg, mul: k => skillMul(k), lv: k => lvOf(k), spd: k => spdTxt(SK[k]), rs: k => SK[k] && SK[k].dk ? rsOf(k) : null, setRs(k, v) { DRS[k] = v; try { localStorage.setItem('szz-dao-rs', JSON.stringify(DRS)); } catch (e) {} },
     sp: k => spOf(k), setSp(k, v) { DSP[k] = v; try { localStorage.setItem('szz-dao-sp', JSON.stringify(DSP)); } catch (e) {} }, spAll(v) { Object.keys(SK).forEach(k => { if (SK[k].dk) DSP[k] = v; }); try { localStorage.setItem('szz-dao-sp', JSON.stringify(DSP)); } catch (e) {} },
+    FRN: ['idle', 'walk1', 'walk2', 'walk3', 'roll1', 'roll2', 'roll3', 'roll4', 'hurt', 'down', 'chop1', 'chop2', 'sweep1', 'sweep2', 'thrust1', 'thrust2', 'spin1', 'spin2', 'up1', 'up2'],
+    getPose: k => { const o = dpsOf(k); if (o) return Object.assign({ fa: 0, fb: 0 }, o); const m = motFr(k), hp = heldPre(); return { a: m[0].slice(hp.length), b: m[1].slice(hp.length), fa: 0, fb: 0 }; },
+    setPose: (k, o) => { DPS[k] = o; try { localStorage.setItem('szz-dao-pose', JSON.stringify(DPS)); } catch (e) {} },
+    poseAll: () => Object.keys(SK).filter(k => SK[k].dk && !SK[k].off).sort((a, b) => SK[a].tier - SK[b].tier).map(k => { const o = TRIAL.getPose(k); return `${SK[k].name}(${k}) 起手 ${o.a}${o.fa ? '（翻转）' : ''} → 出手 ${o.b}${o.fb ? '（翻转）' : ''}`; }).join('\n'),
     rsAll: () => Object.keys(SK).filter(k => SK[k].dk && !SK[k].off).sort((a, b) => SK[a].tier - SK[b].tier).map(k => `${TIERN[SK[k].tier]} ${SK[k].name}(${k}) 范围×${rsOf(k)} 速度×${spOf(k)}（${spdTxt(SK[k])}）`).join('\n'), setLv(k, l) { S.lvLock = {}; if (k && l) S.lvLock[k] = l; } };
-  window.SURV = { trial: TRIAL, banner: (a, b) => waveBanner(a, b), curNode: () => RT.on && W.started ? RT.node : null, status, attrInfo, addXiu: n => addXiu(n), heldPre: () => heldPre(), dbg: () => ({ gf: S.gf.slice(), qg: S.qg, zq: S.zq, zqMax: zqMax(), exp: S.gfExp, GM }), giveGf: id => { if (GF[id]) { if (GF[id].qg) S.qg = id; else { const f = S.gf.indexOf(""); if (f >= 0) S.gf[f] = id; } } }, newHud: () => RT.on && !!RT.node, stunGate, noStun: () => RT.on, get slots() { return S.slots; }, SK, beginNode, frozen: () => RT.on && (ROUTE.shown() || buildOpen || (banHold && !!document.getElementById('waveBan'))), routeHp: () => [hero.hp, maxHp()], camp(k) { if (k === 'heal') heal(maxHp() * .3); else RT.dmg *= 1.1; }, ORIGINS, setOrigin(k) { if (ORIGINS[k] && !ORIGINS[k].locked) { origin = k; startW = null; } }, origin: () => origin, setWep(w) { startW = w; }, wep: () => heldW(), startSk: () => startSk(), WEPN, takeMul: () => {
+  window.SURV = { trial: TRIAL, poseFlip: () => poseFlipNow, banner: (a, b) => waveBanner(a, b), curNode: () => RT.on && W.started ? RT.node : null, status, attrInfo, addXiu: n => addXiu(n), heldPre: () => heldPre(), dbg: () => ({ gf: S.gf.slice(), qg: S.qg, zq: S.zq, zqMax: zqMax(), exp: S.gfExp, GM }), giveGf: id => { if (GF[id]) { if (GF[id].qg) S.qg = id; else { const f = S.gf.indexOf(""); if (f >= 0) S.gf[f] = id; } } }, newHud: () => RT.on && !!RT.node, stunGate, noStun: () => RT.on, get slots() { return S.slots; }, SK, beginNode, frozen: () => RT.on && (ROUTE.shown() || buildOpen || (banHold && !!document.getElementById('waveBan'))), routeHp: () => [hero.hp, maxHp()], camp(k) { if (k === 'heal') heal(maxHp() * .3); else RT.dmg *= 1.1; }, ORIGINS, setOrigin(k) { if (ORIGINS[k] && !ORIGINS[k].locked) { origin = k; startW = null; } }, origin: () => origin, setWep(w) { startW = w; }, wep: () => heldW(), startSk: () => startSk(), WEPN, takeMul: () => {
       if (RT.on && GM.block && Math.random() < GM.block) { floaters.push({ x: hero.x, y: hero.y - 50, t: 0, txt: '格挡', color: '#bfe0ff' }); return 0; }
       const mv = Math.abs(hero.ix) > .1 || Math.abs(hero.iy) > .1, low = hero.hp / maxHp() < .3 ? 1 - .10 * GM.low : 1;
       return (OG().take || 1) / AFX.hp() * (1 - IT('take')) * RT.take * RES().take * GM.take / GM.hp * low * (S.qg === 'taxue' && mv ? .85 : 1) * (GM.still && S.stillT > 1 ? 1 - GM.still : 1);
@@ -8919,6 +8930,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
 #szzTrial .dt{border-top:1px solid rgba(184,149,90,.35);padding:7px 9px;line-height:1.55;min-height:64px}
 #szzTrial .dt b{color:#ffe08a}
 #szzTrial .sl{display:flex;align-items:center;gap:6px;margin-top:5px}#szzTrial .sl input{flex:1;accent-color:#ffd86e}#szzTrial .sl b{min-width:44px;color:#ffe08a}
+#szzTrial .ps select{background:#1c140d;color:#efe2c4;border:1px solid #3a2a18;font-size:12px;padding:1px 4px}#szzTrial .ps label{font-size:12px;display:flex;align-items:center;gap:3px;cursor:pointer}
 #szzTrial .lvr{margin-top:5px;display:flex;gap:4px;flex-wrap:wrap}#szzTrial .lvr button{padding:2px 7px;font-size:12px;background:#1c140d;border:1px solid #3a2a18;color:#efe2c4;cursor:pointer}#szzTrial .lvr button.on{border-color:#ffd86e;background:#3a2814}
 @media (max-aspect-ratio:1/1){#szzTrial{left:0;right:0;top:auto;bottom:0;width:auto;max-height:46vh}#szzTrial .ls{grid-template-columns:1fr 1fr 1fr}}`;
   function skills(w) { const t = T(); return Object.keys(t.SK).filter(k => !t.SK[k].off && t.wepOf(k) === w).sort((a, b) => (t.SK[a].tier || 0) - (t.SK[b].tier || 0)); }
@@ -8929,7 +8941,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     if (typeof tab === 'number') {
       const w = ORDER[tab], ks = skills(w);
       ls = ks.map((k, i) => { const s = t.SK[k]; return `<button data-k="${k}" class="${sel === k ? 'on' : ''}"><span style="color:${TC[s.tier || 0]}">${t.TIERN[s.tier || 0]}</span> ${i + 1}. ${s.name}<small>${MOTN[t.MOT[k]] || '—'}</small></button>`; }).join('');
-      if (sel && t.SK[sel]) { const s = t.SK[sel], i = ks.indexOf(sel); dt = `<b>${t.WEPN[w]} · 第 ${i + 1} 招 · ${s.name}</b>　${t.TIERN[s.tier || 0]}阶 · 动作：${MOTN[t.MOT[sel]] || '—'}<br>${s.desc}<br><span style="opacity:.65">当前伤害倍率 ×${t.mul(sel).toFixed(2)}（出身、属性、熟练都算在内）</span><br><span style="opacity:.8">${t.spd(sel)}</span><div class="lvr">等级：${[1, 3, 5, 7, 10].map(n => `<button data-lv="${n}" class="${t.lv(sel) === n ? 'on' : ''}">LV${n}</button>`).join('')}</div>${t.rs(sel) != null ? `<div class="sl"><span>范围</span><input type="range" min="0.3" max="1.5" step="0.01" value="${t.rs(sel)}" data-sl="rs"><b>×${t.rs(sel).toFixed(2)}</b></div><div class="sl"><span>速度</span><input type="range" min="0.5" max="3" step="0.01" value="${t.sp(sel)}" data-sl="sp"><b>×${t.sp(sel).toFixed(2)}</b></div><div class="lvr sp2">${t.spd(sel)}</div><div class="lvr"><button data-spall="1">这个速度用到全部刀招</button></div><div class="lvr"><button data-cp="1">复制全部刀设置（发给 Claude）</button></div>` : ''}`; }
+      if (sel && t.SK[sel]) { const s = t.SK[sel], i = ks.indexOf(sel); dt = `<b>${t.WEPN[w]} · 第 ${i + 1} 招 · ${s.name}</b>　${t.TIERN[s.tier || 0]}阶 · 动作：${MOTN[t.MOT[sel]] || '—'}<br>${s.desc}<br><span style="opacity:.65">当前伤害倍率 ×${t.mul(sel).toFixed(2)}（出身、属性、熟练都算在内）</span><br><span style="opacity:.8">${t.spd(sel)}</span><div class="lvr">等级：${[1, 3, 5, 7, 10].map(n => `<button data-lv="${n}" class="${t.lv(sel) === n ? 'on' : ''}">LV${n}</button>`).join('')}</div>${t.rs(sel) != null ? `<div class="sl"><span>范围</span><input type="range" min="0.3" max="1.5" step="0.01" value="${t.rs(sel)}" data-sl="rs"><b>×${t.rs(sel).toFixed(2)}</b></div><div class="sl"><span>速度</span><input type="range" min="0.5" max="3" step="0.01" value="${t.sp(sel)}" data-sl="sp"><b>×${t.sp(sel).toFixed(2)}</b></div><div class="lvr sp2">${t.spd(sel)}</div>${(() => { const o = t.getPose(sel), opt = v => t.FRN.map(n => `<option${n === v ? ' selected' : ''}>${n}</option>`).join(''); return `<div class="sl ps"><span>起手</span><select data-ps="a">${opt(o.a)}</select><label><input type="checkbox" data-pf="fa"${o.fa ? ' checked' : ''}>翻转</label></div><div class="sl ps"><span>出手</span><select data-ps="b">${opt(o.b)}</select><label><input type="checkbox" data-pf="fb"${o.fb ? ' checked' : ''}>翻转</label></div><div class="pv" style="display:flex;gap:6px;align-items:flex-end">${['a', 'b'].map(x => `<img src="art/sprites/hero/${window.SURV && SURV.heldPre ? SURV.heldPre() : 'wd_'}${o[x]}.png" style="height:72px;image-rendering:pixelated;${o['f' + x] ? 'transform:scaleX(-1)' : ''}">`).join('<span style="opacity:.6">→</span>')}</div>`; })()}<div class="lvr"><button data-spall="1">这个速度用到全部刀招</button></div><div class="lvr"><button data-cp="1">复制全部刀设置（发给 Claude）</button></div>` : ''}`; }
     } else {
       const qg = tab === 'qg', on = qg ? [t.qg()] : t.gf();
       const ids = Object.keys(t.GF).filter(id => !t.GF[id].off && !!t.GF[id].qg === qg).sort((a, b) => t.GF[a].t - t.GF[b].t);
@@ -8942,8 +8954,10 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     box.querySelectorAll('[data-k]').forEach(b => b.onclick = () => { sel = b.dataset.k; t.setLv(sel, 1); SURV.slots.splice(0, 5, sel, '', '', '', ''); render(); });
     box.querySelectorAll('[data-lv]').forEach(b => b.onclick = () => { t.setLv(sel, +b.dataset.lv); render(); });
     box.querySelectorAll('[data-sl]').forEach(r => r.oninput = () => { const v = Math.round(+r.value * 100) / 100; if (r.dataset.sl === 'rs') t.setRs(sel, v); else t.setSp(sel, v); r.nextElementSibling.textContent = '×' + v.toFixed(2); const q = box.querySelector('.sp2'); if (q) q.textContent = t.spd(sel); });   // 11/14：范围、速度拖动调（速度越大越慢），存本机
+    const psSave = () => { const g = n => box.querySelector(n); const o = { a: g('[data-ps=a]').value, b: g('[data-ps=b]').value, fa: g('[data-pf=fa]').checked ? 1 : 0, fb: g('[data-pf=fb]').checked ? 1 : 0 }; t.setPose(sel, o); render(); };
+    box.querySelectorAll('[data-ps],[data-pf]').forEach(e => e.onchange = psSave);
     box.querySelectorAll('[data-spall]').forEach(b => b.onclick = () => { t.spAll(t.sp(sel)); b.textContent = '已用到全部刀招 ×' + t.sp(sel).toFixed(2); });
-    box.querySelectorAll('[data-cp]').forEach(b => b.onclick = () => { const txt = '刀范围、速度（武学试炼调好；速度越大越慢）：\n' + t.rsAll();
+    box.querySelectorAll('[data-cp]').forEach(b => b.onclick = () => { const txt = '刀范围、速度（武学试炼调好；速度越大越慢）：\n' + t.rsAll() + '\n\n刀招动作（起手帧 → 出手帧）：\n' + t.poseAll();
       const ta = document.createElement('textarea'); ta.value = txt; ta.readOnly = true; ta.style.cssText = 'width:100%;height:150px;margin-top:6px;font-size:12px;background:#120c07;color:#efe2c4;border:1px solid #6a4a28';
       b.parentNode.appendChild(ta); ta.select(); let ok = false; try { ok = document.execCommand('copy'); } catch (e) {} try { if (navigator.clipboard) navigator.clipboard.writeText(txt).then(() => { b.textContent = '已复制 ✓（下面也能手动全选复制）'; }).catch(() => {}); } catch (e) {} if (ok) b.textContent = '已复制 ✓（下面也能手动全选复制）'; });   // 11/14：看各等级的样子（锁定等级，放招不再涨）
     box.querySelectorAll('[data-g]').forEach(b => b.onclick = () => { const id = b.dataset.g; sel = id;
