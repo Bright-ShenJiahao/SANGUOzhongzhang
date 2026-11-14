@@ -16,8 +16,18 @@
     { t: '破庙神像', npc: ['刘备', 'art/ui/npc/liubei_face.webp', '神明面前，取舍由你。只是拿了供品，心里要过意得去。'], d: '路边一座破庙，神像前还摆着供品。', o: [['上香祈福', '回复 40% 血量', 'pray'], ['搜刮供品', '失去 20% 血量，换一次战利三选一', 'loot']] },
     { t: '路边老兵', npc: ['关羽', 'art/ui/npc/guanyu_face.webp', '老卒阅阵无数，一碗酒换他一句话，不亏。'], d: '一个断了腿的老兵坐在树下，招呼你过去。', o: [['请他喝酒', '武艺伤害 +8%', 'wine'], ['向他求教', '一次战利三选一', 'learn']] },
     { t: '溪边磨石', npc: ['张飞', 'art/ui/npc/zhangfei_face.webp', '磨快了刀，砍起贼来才痛快！不过歇歇脚也行。'], d: '溪水边有一块平整的磨刀石。', o: [['磨刀', '武艺伤害 +10%', 'sharpen'], ['歇脚', '回复 30% 血量', 'rest']] },
+    // 11/14 用户：奇遇扩充（第 4 个起；选项第 4 项是要花的铜钱，不够就点不了）
+    { t: '流民求食', npc: ['刘备', 'art/ui/npc/liubei_face.webp', '乱世之中，百姓最苦。能帮一把，就帮一把。'], d: '一群逃难的流民围上来，孩子饿得直哭。', o: [['分些干粮', '花 30 铜钱，修为 +40', 'feed', 30], ['赶路要紧', '什么也不发生', 'none']] },
+    { t: '逃兵求饶', npc: ['张飞', 'art/ui/npc/zhangfei_face.webp', '哼，这厮要是敢耍花样，俺一矛戳死他！'], d: '一个黄巾逃兵跪在路边，磕头求你放他一条生路。', o: [['放他走', '修为 +20', 'spare'], ['逼问军情', '失去 10% 血量，战利三选一', 'press']] },
+    { t: '江湖郎中', npc: ['关羽', 'art/ui/npc/guanyu_face.webp', '此人虽是走方郎中，药箱里倒有几样好东西。'], d: '一个背着药箱的郎中在树下歇脚。', o: [['买他的药', '花 40 铜钱，回复 50% 血量', 'medic', 40], ['向他讨教', '修为 +30', 'ask']] },
+    { t: '路边赌坊', npc: ['张飞', 'art/ui/npc/zhangfei_face.webp', '赌一把！输了算俺的……算了，俺也没钱。'], d: '一间赌坊，里面吆五喝六，骰子声响成一片。', o: [['押一把', '花 40 铜钱，一半机会赢回 100', 'gamble', 40], ['不赌了', '什么也不发生', 'none']] },
+    { t: '荒野古墓', npc: ['关羽', 'art/ui/npc/guanyu_face.webp', '墓里机关多，进去要小心。富贵险中求。'], d: '一座被盗过的古墓，墓门半开，里面黑漆漆的。', o: [['进墓探寻', '失去 25% 血量，战利三选一（品阶更好）', 'tomb'], ['绕开', '什么也不发生', 'none']] },
+    { t: '村中祠堂', npc: ['刘备', 'art/ui/npc/liubei_face.webp', '敬天法祖，不忘根本。在此歇一夜也好。'], d: '村子里一座祠堂，香火还没断。', o: [['祭拜祖先', '回复 25% 血量，修为 +20', 'ancestor'], ['借宿一夜', '回复 40% 血量', 'lodge']] },
+    { t: '黄巾粮车', npc: ['张飞', 'art/ui/npc/zhangfei_face.webp', '粮车！抢了它，或者一把火烧了，让贼兵饿肚子！'], d: '几辆黄巾的粮车停在路边，看守的只有几个人。', o: [['劫粮', '得 60 铜钱，失去 15% 血量', 'rob'], ['烧粮', '武艺伤害 +6%', 'burn']] },
+    { t: '说书老人', npc: ['刘备', 'art/ui/npc/liubei_face.webp', '老人家讲的是古之名将，听一听，长见识。'], d: '茶棚里一位老人正在讲古，说到兴头上一拍醒木。', o: [['听完这一段', '修为 +50', 'story'], ['打赏几文', '花 20 铜钱，武艺伤害 +5%', 'tip', 20]] },
+    { t: '乡间铁匠', npc: ['关羽', 'art/ui/npc/guanyu_face.webp', '好铁匠难得，兵刃淬一遍火，能利三分。'], d: '一间铁匠铺，炉火正旺，老铁匠在打一把农具。', o: [['请他淬刀', '花 50 铜钱，武艺伤害 +12%', 'forge', 50], ['烤火歇脚', '回复 20% 血量', 'rest2']] },
   ];
-  const FONT = '"MaShanZheng","STKaiti","KaiTi","Songti SC",serif';
+  const FONT = '"WenKai","MaShanZheng","STKaiti","KaiTi","Songti SC",serif';   // 11/14 用户：字不够大气 → 粗楷书
   const UI = '"PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif';   // 小字用黑体加粗，毛笔字只用在标题和节点名（11/11：字太小太细）
   const BGH = new Image(), BGV = new Image(); BGH.src = 'art/route/bg_h.webp'; BGV.src = 'art/route/bg_v.webp'; BGH.onload = BGV.onload = () => { bgKey = ''; };
   const FONT_Q = FONT.replace(/"/g, "'"), UI_Q = UI.replace(/"/g, "'");
@@ -76,7 +86,7 @@
       if (bossB && !bossN.prev.length) { const c = byLane(lb - 1).sort((a, b2) => a.lane - b2.lane)[0]; if (c) { c.next = c.next.filter(x => x !== bossB); bossB.prev = bossB.prev.filter(x => x !== c); link(c, bossN); } }
       from = bossB ? [bossN, bossB] : bossN;
     }
-    const camp = mk(LAYERS - 1, 2, 'event'); [].concat(from).forEach(f => link(f, camp));
+    const camp = mk(LAYERS - 1, 2, 'camp'); [].concat(from).forEach(f => link(f, camp));
     const fin = mk(LAYERS, 2, 'boss'); fin.final = true; fin.sec = 5; link(camp, fin);
     // 节点类型：按「段内第几层」定节奏
     const pickRw = () => { const r = rnd(); return r < .4 ? 'skill' : r < .72 ? 'perk' : 'heal'; };
@@ -91,6 +101,10 @@
         n.type = t;
       }
       const lay = byLayer[l] || [];
+      // 11/14 用户（参考杀戮尖塔）：每段第 3 层（打首领前一层）至少一个营地；每段第 2 层放一个宝箱
+      if (k === 3 && lay.length && !lay.some(n => n.type === 'camp')) { const n = lay[(rnd() * lay.length) | 0]; n.type = 'camp'; }
+      if (k === 3) for (const n of lay) if (n.type !== 'camp' && rnd() < .25) n.type = 'camp';
+      if (k === 2 && lay.length >= 3) { const c = lay.filter(n => n.type === 'battle'); if (c.length) c[(rnd() * c.length) | 0].type = 'chest'; }
       if (lay.length >= 2 && new Set(lay.map(n => n.type)).size === 1) {   // 同层不能全是同一种
         const n = lay[lay.length - 1], cur = n.type;
         const alts = k === 1 ? (l > 1 ? ['event'] : []) : k === 2 ? ['event', 'elite'] : cur === 'elite' ? ['battle'] : ['elite'];
@@ -103,7 +117,11 @@
       for (const n of lay) { if (n.type === 'elite') { n.tag = 'patrol'; } }
       for (const n of lay) if (sg >= 1 && (n.type === 'elite' || n.tag === 'range' || n.tag === 'shield') && rnd() < .55) n.cat = sg >= 3 ? 2 : 1;   // 第二段起：部分远程/盾阵/精锐节点带投石车
     }
-    return { nodes, byLayer, start };
+    // 11/14：生成时被「交叉」拒掉的格子会留下孤零零的节点（没有路连到它），画出来像在路线外——全部删掉
+    const keep = nodes.filter(n => n === start || n.prev.length);
+    for (const n of keep) n.next = n.next.filter(m => keep.includes(m));
+    keep.forEach((n, i) => { n.id = i; }); for (const L of byLayer) if (L) L.splice(0, L.length, ...L.filter(n => keep.includes(n)));
+    return { nodes: keep, byLayer, start };
   }
 
   // ---------- 界面 ----------
@@ -115,12 +133,12 @@
   const maxScroll = () => Math.max(0, LEN() - VIEW());
   function pos(n) {
     const m = MARGIN() + n.layer * GAP() - scroll, span = port() ? W : H;
-    const lo = port() ? W * .18 : H * .24, hi = port() ? W * .82 : H * .8;
+    const sh = !port() && H < 560, lo = port() ? W * .18 : sh ? H * .34 : H * .24, hi = port() ? W * .82 : sh ? H * .84 : H * .8;   // 11/14：手机横屏矮，节点往下挪、避开抬头
     const c = lo + (n.lane + n.jx * .35) / (LANES - 1) * (hi - lo) + n.jy * 10;
     return port() ? { x: c, y: H - m } : { x: m, y: c };
   }
   const nlabel = n => !n ? '' : n.type === 'boss' ? (n.final ? '张角祭坛' : (n.br === 'bao' ? '张宝' : n.br === 'liang' ? '张梁' : SECBOSS[n.sec - 1][0]) + ' 营垒') : (n.tag && (TAGNS[Math.min(3, ((n.layer - 1) / 4) | 0)] || TAGNS[0])[n.tag] + (n.cat ? '·投石车' : '')) || LABEL[n.type];
-  const radius = n => n.type === 'boss' ? 42 : n.type === 'elite' ? 30 : n.type === 'start' ? 28 : 26;
+  const radius = n => (n.type === 'boss' ? 42 : n.type === 'elite' ? 30 : n.type === 'start' ? 28 : 26) * (!port() && H < 560 ? Math.max(.6, H / 620) : 1);
   const reachable = n => !!run && (window.ROUTE_ALL ? n !== run.cur : run.cur.next.includes(n));   /* 11/12 开发者模式「解锁全部关卡」：任意节点都能点进去 */
   const visited = n => !!run && run.visited.has(n);
   const branch = () => { if (!run) return null; for (const n of run.visited) if (n.br) return n.br; return null; };
@@ -175,8 +193,9 @@
     for (const n of (window.ROUTE_ALL ? run.nodes.filter(x => x !== run.cur) : run.cur.next)) { const p = pos(n)   /* 11/12 修：解锁关卡开着时，点哪个节点都算 */, d = Math.hypot(p.x - cx, p.y - cy); if (d < radius(n) + 16 && d < bd) { bd = d; best = n; } }
     if (best) choose(best);
   }
-  function choose(n) {
+  function choose(n, now) {
     if (!reachable(n)) return;
+    if (!now) { if (run.circ) return; run.circ = { n, t: performance.now() }; if (window.SFX) SFX.play('j_banner'); setTimeout(() => { run.circ = null; choose(n, 1); }, 420); return; }
     if (n.type === 'camp') return camp(n);
     if (n.type === 'chest') return chest(n);
     if (n.type === 'event') return happen(n);
@@ -207,27 +226,25 @@
       + (npc ? '<div class="pf" style="background-image:url(' + npc[1] + ')"></div>' : '')
       + '<div><div class="ds">' + desc + '</div>' + (npc ? '<div class="sy"><b>' + npc[0] + '</b>' + npc[2] + '</div>' : '')
       + (hp ? '<div class="hp">当前气血 ' + Math.ceil(hp[0] * 10) + ' / ' + Math.round(hp[1] * 10) + '</div>' : '') + '</div></div>'
-      + '<div class="op">' + opts.map((o, i) => '<button data-i="' + i + '">' + o[0] + '<small>' + o[1] + '</small></button>').join('') + '</div></div>';
-    box.querySelectorAll('button').forEach(b => b.onclick = () => { box.remove(); campBox = null; pick(opts[+b.dataset.i][2]); });
+      + (window.SURV && SURV.money ? '<div class="hp" style="color:#e8c47a;margin:-.4em 0 .8em">铜钱 ' + SURV.money() + '</div>' : '')
+      + '<div class="op">' + opts.map((o, i) => { const poor = o[3] && window.SURV && SURV.money && SURV.money() < o[3]; return '<button data-i="' + i + '"' + (poor ? ' disabled style="opacity:.4;cursor:not-allowed"' : '') + '>' + (o[4] ? '<img src="' + o[4] + '" style="width:40px;height:40px;display:block;margin:0 auto 4px">' : '') + o[0] + '<small>' + (poor ? '铜钱不够' : o[1]) + '</small></button>'; }).join('') + '</div></div>';
+    box.querySelectorAll('button').forEach(b => b.onclick = () => { if (b.disabled) return; box.remove(); campBox = null; pick(opts[+b.dataset.i][2]); });
     root.appendChild(box);
   }
   function happen(n) {
     if (window.SFX) SFX.play('j_event');
     const ev = EVENTS[(n.id * 7 + n.layer) % EVENTS.length];
-    popup(ev.t, '', ev.d, ev.o, k => SURV.event(k, () => done(n, true)), ev.npc);
+    popup(ev.t, '', ev.d, ev.o, k => SURV.event(k, msg => { if (typeof msg === 'string') popup(ev.t, '', msg, [['继续', '', 'ok']], () => done(n, true)); else done(n, true); }), ev.npc);
   }
   function chest(n) { SURV.reward(2, () => done(n, true)); }
-  function camp(n) {
-    const box = campBox = document.createElement('div');
-    box.style.cssText = 'position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(30,20,12,.45);z-index:3';
-    const hp = SURV.routeHp();
-    box.innerHTML = '<div style="background:' + PAPER + ';border:2px solid #7a5a2c;border-radius:10px;padding:18px 22px;max-width:92vw;text-align:center;font-family:' + FONT + ';color:' + INK + ';box-shadow:0 10px 40px rgba(0,0,0,.45)">'
-      + '<div style="font-size:26px;letter-spacing:6px;margin-bottom:6px">营 地</div><div style="font-size:14px;opacity:.75;margin-bottom:14px">血量 ' + Math.ceil(hp[0]) + ' / ' + hp[1] + '</div>'
-      + '<div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">'
-      + '<button data-k="heal" style="width:150px;padding:12px 8px;font:700 18px ' + FONT + ';color:' + INK + ';background:#f3e6c8;border:1px solid #7a5a2c;border-radius:8px;cursor:pointer">歇息<br><small style="font:12px sans-serif;opacity:.8">回复 30% 血量</small></button>'
-      + '<button data-k="up" style="width:150px;padding:12px 8px;font:700 18px ' + FONT + ';color:' + INK + ';background:#f3e6c8;border:1px solid #7a5a2c;border-radius:8px;cursor:pointer">磨刀<br><small style="font:12px sans-serif;opacity:.8">武艺伤害 +10%</small></button></div></div>';
-    box.querySelectorAll('button').forEach(b => b.onclick = () => { SURV.camp(b.dataset.k); box.remove(); campBox = null; done(n, true); });
-    root.appendChild(box);
+  function camp(n) {   // 11/14 用户：营地二选一——休整回三成血，或修炼（任选一招武艺直接升一级）
+    if (window.SFX) SFX.play('j_event');
+    popup('营 地', '', '篝火噼啪作响，弟兄们围坐歇息。今夜做些什么？', [['休整', '回复 30% 血量', 'heal'], ['修炼', '任选一招武艺，熟练直接升一级', 'train']], k => {
+      if (k === 'heal') { SURV.camp('heal'); return done(n, true); }
+      const L = SURV.campSkills ? SURV.campSkills() : [];
+      if (!L.length) { SURV.camp('heal'); return done(n, true); }
+      popup('修 炼', '', '选一招武艺，静心苦练一夜。', L.map(o => [o.name, o.lv >= 10 ? '已满级' : 'LV' + o.lv + ' → LV' + (o.lv + 1), o.k, 0, o.img]), k2 => { SURV.camp(k2); done(n, true); });
+    });
   }
   // 节点打完（或营地选完）：记下走过的路，回到长卷
   function sheet() {   // 兵籍牒：这一局当前的修为、属性、武艺、心法
@@ -313,6 +330,7 @@
     } catch (_) {}
   }
   function seal(n, now) {
+    if (n.type === 'start') return;
     const p = pos(n), R = radius(n), vis = visited(n), reach = reachable(n), cur = run.cur === n, t = (now - t0) / 1000;
     if (p.x < -80 || p.x > W + 80 || p.y < -80 || p.y > H + 80) return;
     const bob = reach ? Math.sin(t * 3 + n.id) * 1.6 : 0;
@@ -325,20 +343,28 @@
     g.globalAlpha = vis ? .75 : reach || cur ? 1 : .55;
     icon(n.type, R * 2.0, vis || (!reach && !cur));
     g.globalAlpha = 1; g.shadowBlur = 0; g.shadowColor = 'transparent'; g.shadowOffsetY = 0;
-    if (vis && !cur) { g.beginPath(); g.arc(R * .62, -R * .62, 7, 0, 7); g.fillStyle = CINNABAR; g.fill(); g.strokeStyle = PAPER; g.lineWidth = 1.6; g.beginPath(); g.moveTo(R * .62 - 3, -R * .62); g.lineTo(R * .62 - .8, -R * .62 + 2.6); g.lineTo(R * .62 + 3.4, -R * .62 - 2.6); g.stroke(); }
+    if (vis || (run.circ && run.circ.n === n)) inkCircle(R, vis ? 1 : Math.min(1, (now - run.circ.t) / 380), n.id);   // 11/14 用户（照杀戮尖塔）：朱砂笔圈住走过/选中的节点
     if (false && n.rw && !vis) { const bc = { skill: ['招', '#3b6ea8'], perk: ['功', '#a8662a'], heal: ['疗', '#3f8a4a'], both: ['双', '#7a3a8a'] }[n.rw]; g.beginPath(); g.arc(R * .7, R * .7, 9, 0, 7); g.fillStyle = bc[1]; g.fill(); g.strokeStyle = PAPER; g.lineWidth = 1.5; g.stroke(); g.fillStyle = '#fff'; g.font = `bold 11px ${UI}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(bc[0], R * .7, R * .7 + 1); }
     g.restore();
     // 名字：可走的节点、当前、Boss 常显；其他鼠标悬停才显
-    if (hov.n !== n && ((reach && !port()) || cur || n.type === 'boss')) tag(p, R, n, cur || n.type === 'boss');
+    if (hov.n !== n && (cur || n.type === 'boss') && !(H < 560 && n.type !== 'boss')) tag(p, R, n, true);   // 11/14：可走节点不再常显名牌（并排时互相压住），移上去才显
+  }
+  function inkCircle(R, q, seed) {   // 手绘朱砂圈：起笔粗、收笔细，略歪，首尾交叠一点
+    const r0 = R * 1.18, rot = seeded(seed + 3) * 6.28, N = 40, end = q * 6.28 * 1.08;
+    g.save(); g.rotate(rot); g.strokeStyle = CINNABAR; g.lineCap = 'round'; g.globalAlpha = .9;
+    for (let i = 0; i < N; i++) { const a0 = i / N * 6.28 * 1.08, a1 = (i + 1) / N * 6.28 * 1.08; if (a0 > end) break;
+      const rr = a => r0 * (1 + .07 * Math.sin(a * 2 + seed) + .04 * Math.sin(a * 5 + seed * 2)) * (1 - .06 * a / 6.8);
+      g.lineWidth = 4.2 - 3 * (i / N); g.beginPath(); g.moveTo(Math.cos(a0) * rr(a0), Math.sin(a0) * rr(a0) * .9); g.lineTo(Math.cos(Math.min(a1, end)) * rr(a1), Math.sin(Math.min(a1, end)) * rr(a1) * .9); g.stroke(); }
+    g.restore();
   }
   function tag(p, R, n, full) {
     const RWS = { skill: '新武艺', perk: '心法', heal: '回血', both: '武艺+心法' }, sh = false;   // 没悬停时一行写完（相邻节点挤不下两行）
-    const l1 = n.type === 'start' ? '涿郡' : nlabel(n) + (sh ? ' · ' + RWS[n.rw] : ''), l2 = sh || !full ? '' : n.type === 'start' ? '' : n.type === 'event' ? '奇遇：做个选择' : n.type === 'elite' ? '精锐 · 掉落更好' : full ? MAPN[MAP_OF(n.layer)] : '';
+    const l1 = n.type === 'start' ? '涿郡' : nlabel(n) + (sh ? ' · ' + RWS[n.rw] : ''), l2 = sh || !full ? '' : n.type === 'start' ? '' : n.type === 'event' ? '奇遇：做个选择' : n.type === 'elite' ? '精锐 · 敌人更强，掉落更好' : n.type === 'camp' ? '营地 · 休整或修炼' : n.type === 'chest' ? '宝箱 · 开一件好东西' : full ? MAPN[MAP_OF(n.layer)] : '';
     const k = KS(), f1 = `bold ${Math.round(18 * k)}px ${FONT}`, f2 = `600 ${Math.round(13 * k)}px ${UI}`;
     g.save(); g.font = f1; const w1 = g.measureText(l1).width; g.font = f2; const w2 = l2 ? g.measureText(l2).width : 0;
     const bw = Math.max(w1, w2) + 20 * k, bh = (l2 ? 44 : 28) * k; let x = p.x - bw / 2, y = p.y + R + 10;
     if (y + bh > H - 6) y = p.y - R - 10 - bh; x = Math.max(6, Math.min(W - bw - 6, x));
-    g.fillStyle = 'rgba(40,28,18,.82)'; g.beginPath(); g.roundRect ? g.roundRect(x, y, bw, bh, 5) : g.rect(x, y, bw, bh); g.fill();
+    g.fillStyle = 'rgba(20,13,8,.88)'; g.fillRect(x, y, bw, bh); g.strokeStyle = 'rgba(201,163,94,.9)'; g.lineWidth = 1.5; g.strokeRect(x + .75, y + .75, bw - 1.5, bh - 1.5); g.strokeStyle = 'rgba(201,163,94,.35)'; g.lineWidth = 1; g.strokeRect(x + 3.5, y + 3.5, bw - 7, bh - 7);   // 11/14：深色金边小牌，跟开战牌匾一套
     g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#f3dc9a'; g.font = f1; g.fillText(l1, x + bw / 2, y + (l2 ? 15 : 14) * k);
     if (l2) { g.fillStyle = 'rgba(243,220,154,.85)'; g.font = f2; g.fillText(l2, x + bw / 2, y + 33 * k); }
     g.restore();
@@ -362,7 +388,7 @@
     const m = maxScroll(), a0 = Math.min(1, scroll / 80), a1 = Math.min(1, (m - scroll) / 80), F = 56;
     if (port()) { fade(0, 0, 0, F, a1, 0, 0, 0, W, F); fade(0, H, 0, H - F, a0, 0, 0, H - F, W, F); } else { fade(0, 0, F, 0, a0, 0, 0, 0, F, H); fade(W, 0, W - F, 0, a1, 0, W - F, 0, F, H); }
     const s = 40, x = W - s - 26, y = H - s - 26; g.fillStyle = CINNABAR; g.globalAlpha = .9; g.fillRect(x, y, s, s); g.globalAlpha = 1; g.fillStyle = PAPER; g.font = `bold 17px ${FONT}`; g.textAlign = 'center'; g.textBaseline = 'middle';
-    g.fillText('三国', x + s / 2, y + s * .3); g.fillText('终章', x + s / 2, y + s * .72); g.restore();
+    g.fillText('战至', x + s / 2, y + s * .3); g.fillText('终章', x + s / 2, y + s * .72); g.restore();
   }
   function frame(now) {
     if (!shown) { raf = 0; return; }
@@ -387,6 +413,7 @@
     if (!bgOk) { hills(.12, .07, H * .16, 1.3); hills(.25, .11, H * .1, 4.1); hills(.45, .16, H * .045, 7.7); }
     // 路线
     for (const n of run.nodes) for (const m of n.next) {
+      if (n.type === 'start') continue;   // 11/14 用户（照杀戮尖塔）：不显示固定起点，第一列直接选
       const a = pos(n), b = pos(m), seedE = n.id * 13 + m.id;
       const walked = visited(n) && visited(m), open = n === run.cur && reachable(m);
       trail(a, b, n, m, walked ? 2 : open ? 1 : 0, seedE);
@@ -399,15 +426,15 @@
     // 抬头：章节、血量、提示（手机竖屏先垫一层纸色渐隐，免得节点叠在字上）
     if (port()) { const hb = g.createLinearGradient(0, 0, 0, 132); hb.addColorStop(0, 'rgba(234,220,192,.97)'); hb.addColorStop(.75, 'rgba(234,220,192,.9)'); hb.addColorStop(1, 'rgba(234,220,192,0)'); g.fillStyle = hb; g.fillRect(0, 0, W, 132); }
     g.textAlign = 'left'; g.textBaseline = 'alphabetic'; g.fillStyle = INK;
-    const k = KS(); g.font = `bold ${Math.round((port() ? 32 : 42) * k)}px ${FONT}`; g.fillText('第一章 · 黄巾之乱', 22, 56 * k);
-    g.font = `600 ${Math.round(15 * k)}px ${UI}`; g.globalAlpha = .78; g.fillText(port() ? '点选发亮的节点前进' : '涿郡 → 张角祭坛　点选发亮的节点前进，可拖动长卷', 24, 84 * k); g.globalAlpha = 1;
+    const k = H < 560 && !port() ? .7 : KS(); g.font = `bold ${Math.round((port() ? 36 : 48) * k)}px ${FONT}`; g.lineJoin = 'round'; g.lineWidth = 6; g.strokeStyle = 'rgba(234,220,192,.9)'; g.strokeText('第一章 · 黄巾之乱', 22, 58 * k); g.fillText('第一章 · 黄巾之乱', 22, 58 * k);
+    g.font = `600 ${Math.round(15 * k)}px ${UI}`; g.globalAlpha = .78; g.fillText(port() ? '点选发亮的节点前进' : '涿郡 → 张角祭坛　点选发亮的节点前进，可拖动长卷', 24, 88 * k); g.globalAlpha = 1;
     if (window.SURV && SURV.routeHp) {
       const [hp, mx] = SURV.routeHp(), bw = Math.min(220 * k, W * .34), x = 24, y = 100 * k, bh = 16 * k;
       g.fillStyle = 'rgba(40,28,18,.6)'; g.fillRect(x, y, bw + 4, bh); g.fillStyle = CINNABAR; g.fillRect(x + 2, y + 2, bw * Math.max(0, Math.min(1, hp / mx)), bh - 4);
       g.fillStyle = INK; g.font = `bold ${Math.round(14 * k)}px ${UI}`; g.textBaseline = 'middle'; g.fillText('气血 ' + Math.ceil(hp * 10) + ' / ' + Math.round(mx * 10), x + bw + 12, y + bh / 2); g.textBaseline = 'alphabetic';
     }
     // 图例（手机竖屏放右上，避开右下印章）
-    const lg = [['battle', '普通'], ['elite', '精英'], ['event', '奇遇'], ['boss', '首领']]; g.font = `bold ${Math.round(14 * k)}px ${UI}`; g.fillStyle = INK; g.textAlign = 'left'; g.textBaseline = 'middle';
+    const lg = [['battle', '普通'], ['elite', '精英'], ['event', '奇遇'], ['camp', '营地'], ['chest', '宝箱'], ['boss', '首领']]; g.font = `bold ${Math.round(14 * k)}px ${UI}`; g.fillStyle = INK; g.textAlign = 'left'; g.textBaseline = 'middle';
     let lx = 30; const ly = H - 36 * k;
     lg.forEach(([ty, t]) => { g.save(); g.translate(lx + 14 * k, ly); icon(ty, 32 * k); g.restore(); g.globalAlpha = .9; g.fillText(t, lx + 34 * k, ly + 1); g.globalAlpha = 1; lx += (port() ? 70 : 90) * k; });
     if (false) {   // 奖励角标说明（已取消：奖励统一在整备屏拿）（11/11：玩家看不懂「招/功/疗/双」）
