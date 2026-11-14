@@ -470,8 +470,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     cast() { const a = aim(); sweep(a, 1.2, 44, 1.8, 40, ['rgba(255,190,110,', 'rgba(255,235,180,']); sfx('swing_knife', hero.x); later(.22, () => { S.poseOverride = { f: SK.huima.pose2, t: .25 }; sweep(a + Math.PI, 1.2, 44, 2.2, 55, ['rgba(255,120,90,', 'rgba(255,215,200,'], { rev: true }); sfx('swing_knife', hero.x); }); } });
   add('qiang', { name: '枪刺', icon: '枪', color: '#ffe9a8', desc: '向前刺出一条长枪线', need: 130, beam: true, len: 100, wu: .5,
     cast() { lineHit(aim(), 100, 10, 2.6, 36, '255,233,168'); sfx('swing_knife', hero.x); shake = Math.max(shake, .08); } });
-  add('jianyu', { name: '箭雨', icon: '箭', color: '#e9dcb0', desc: '数处落箭，片刻后覆盖落点', need: 180, none: true, wu: .5,
-    cast() { for (const [x, y] of pts(5, 220)) { fx.push({ k: 'mark', x, y, r: 26, t: 0, T: .55 }); later(.55, () => blast(x, y, 26, 1.7, 14, '240,225,170')); } } });
+
   add('huogong', { name: '火攻', icon: '火', color: '#ff7a3c', desc: '数处起火，灼烧三秒', need: 180, none: true,
     cast() { for (const [x, y] of pts(3, 230)) zones.push({ x, y, r: 30, t: 0, T: 3, tk: 0, dmg: .55, kind: 'fire' }); sfx('crack', hero.x); } });
   add('pili', { name: '霹雳', icon: '雷', color: '#cfd8ff', desc: '召四道落雷轰击', need: 200, none: true, wu: .5,
@@ -639,30 +638,6 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   def('qinglong', 4, 4, 'up', { name: '青龙偃月', icon: '龙', color: '#60e0a0', desc: '青龙刀气从地面腾起，绕全场盘旋一圈', need: 120,
     cast() { const N = 22; for (let i = 0; i < N; i++) later(i * .07, () => { const q = i / N, r = 60 + q * 180, a = aim() + q * Math.PI * 2.2, x = hero.x + Math.cos(a) * r, y = clampY(hero.y + Math.sin(a) * r * .5); blast(x, y, 34, 1.4, 30, '110,230,160'); }); sfx(CR, hero.x); shake = Math.max(shake, .3); } });
 
-  // ---------- 弓（5）：齐射、贯穿、火矢、天降 ----------
-  def('qishe', 5, 1, 'sweep', { name: '齐射', icon: '齐', color: '#e8d8a8', desc: '扇形一次射出五箭', need: 200,
-    cast() { fan(aim(), 5, .7, Object.assign({ dmg: 1.4, T: .7, sp: 360 }, ARW)); sfx(SW, hero.x); } });
-  def('lianzhu', 5, 1, 'thrust', { name: '连珠箭', icon: '珠', color: '#f0e0b0', desc: '直线连射三箭', need: 220, beam: true, len: 220,
-    cast() { [0, 1, 2].forEach(i => later(i * .1, () => { const a = aim(); shot(a, Object.assign({ dmg: 1.6, T: .7, vx: Math.cos(a) * 420, vy: Math.sin(a) * 210 }, ARW)); })); sfx(SW, hero.x); } });
-  def('huoshi', 5, 1, 'chop', { name: '火矢', icon: '矢', color: '#ff9a50', desc: '火箭射地起火，火里的人走不动', need: 220, none: true,
-    cast() { pts(2, 220).forEach(([x, y]) => { fx.push({ k: 'mark', x, y, r: 30, t: 0, T: .4 }); later(.4, () => { blast(x, y, 26, 1.4, 10, '255,150,60'); ZN({ x, y, r: 32, T: 2.5, dmg: .45, kind: 'fire', slow: 1 }); }); }); sfx(SW, hero.x); } });
-  def('guanri', 5, 2, 'thrust', { name: '贯日', icon: '贯', color: '#fff0a0', desc: '一箭贯穿全屏', need: 320, beam: true, len: 320,
-    cast() { const a = aim(); lineHit(a, 360, 10, 3.2, 30, '255,240,160'); sfx(CR, hero.x); shake = Math.max(shake, .15); } });
-  def('liannu', 5, 2, 'thrust', { name: '连弩', icon: '弩', color: '#e0d0a0', desc: '快速连射十二箭，扎向最近的敌人', need: 220,
-    cast() { for (let i = 0; i < 12; i++) later(i * .06, () => { const a = aim() + R(-.08, .08); shot(a, Object.assign({ dmg: .8, T: .7, vx: Math.cos(a) * 440, vy: Math.sin(a) * 220 }, ARW)); }); sfx(SW, hero.x); } });
-  def('xuanshe', 5, 2, 'spin', { name: '旋射', icon: '旋', color: '#f0e0c0', desc: '转身一圈，环射十二箭', need: 120,
-    cast() { ring(12, Object.assign({ dmg: 1.2, T: .6, sp: 330 }, ARW)); sfx(SW, hero.x); } });
-  def('zhuihun', 5, 3, 'thrust', { name: '追魂箭', icon: '魂', color: '#c0a0ff', desc: '五支箭各自追最近的敌人', need: 260,
-    cast() { const a0 = aim(); for (let i = 0; i < 5; i++) { const a = a0 - .8 + i * .4; shot(a, Object.assign({ dmg: 2.0, T: 1.5, home: 1, vx: Math.cos(a) * 260, vy: Math.sin(a) * 130 }, ARW, { col: ['190,160,255', '240,230,255'] })); } sfx(SW, hero.x); } });
-  def('luoyue', 5, 3, 'up', { name: '落月', icon: '月', color: '#d0e0ff', desc: '一排箭沿直线依次落下', need: 260, beam: true, len: 260,
-    cast() { const a = aim(); for (let i = 1; i <= 8; i++) { const x = hero.x + Math.cos(a) * i * 32, y = clampY(hero.y + Math.sin(a) * i * 16); fx.push({ k: 'mark', x, y, r: 24, t: 0, T: .35 + i * .05 }); later(.35 + i * .05, () => { drop(x, y, 'arrow', .01, () => {}); blast(x, y, 26, 1.6, 15, '220,230,255'); }); } sfx(SW, hero.x); } });
-  def('wanjian', 5, 4, 'up', { name: '万箭齐发', icon: '万', color: '#fff0c0', desc: '三秒内全屏密集落箭', need: 300, none: true,
-    cast() { for (let i = 0; i < 30; i++) later(i * .1, () => { const [[x, y]] = pts(1, 300); later(.2, () => blast(x, y, 22, 1.3, 10, '240,230,190')); fx.push({ k: 'mark', x, y, r: 20, t: 0, T: .2 }); }); sfx(SW, hero.x); } });
-  def('dianguang', 5, 4, 'thrust', { name: '电光', icon: '电', color: '#c0e0ff', desc: '闪电箭在敌人之间连锁十次', need: 240,
-    cast() { chain(10, 200, 2.0, '190,225,255', .05); sfx(CR, hero.x); shake = Math.max(shake, .15); } });
-  def('luori', 5, 4, 'up', { name: '落日', icon: '日', color: '#ff7040', desc: '巨箭从天坠下，大爆炸后留下一片火地', need: 280, none: true,
-    cast() { const [[x, y]] = pts(1, 260); fx.push({ k: 'mark', x, y, r: 90, t: 0, T: .6 }); drop(x, y, 'arrow', .6, () => { blast(x, y, 95, 4.5, 80, '255,140,60'); ZN({ x, y, r: 80, T: 3, dmg: .6, kind: 'fire' }); sfx(CR, x); shake = Math.max(shake, .5); }); } });
-
   // ---------- 石子（7）补：炬石 ----------
   def('jushi', 7, 4, 'up', { name: '炬石', icon: '炬', color: '#ff8a40', desc: '三块燃烧巨石砸下，留下一片火地', need: 280, none: true,
     cast() { pts(3, 260).forEach(([x, y], i) => { fx.push({ k: 'mark', x, y, r: 56, t: 0, T: .55 + i * .2 }); drop(x, y, 'rock', .55 + i * .2, () => { blast(x, y, 60, 3.4, 50, '255,140,60'); ZN({ x, y, r: 50, T: 3, dmg: .55, kind: 'fire' }); sfx(CR, x); shake = Math.max(shake, .35); }); }); } });
@@ -754,7 +729,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     R2('tianlei', { name: '天雷牢', icon: '牢', desc: '雷阵困住里面的人，出不去还挨雷', cast() { const [[x, y]] = pts(1, 200); ZN({ x, y, r: 80, T: 3.5, dmg: 1.6, kind: 'thunder', cage: 1 }); sfx(CR, x); } });
     R2('sixiang', { name: '八方剑光', icon: '八', desc: '八个方向各飞出一道剑气', cast() { ring(8, Object.assign({ dmg: 1.8, T: .7, sp: 330 }, SWD)); sfx(SW, hero.x); } });
     const TI = { hengsao: 1, tuodao: 1, tiaozhan: 1, daobo: 2, lianzhan: 2, huima: 2, feilunren: 3, wanren: 4, tianbeng: 4, qiang: 1, lianci: 1, lansao: 1, huimaq: 2, bainiao: 3, lihua: 3, qijin: 4, longyin: 4,
-      jianyu: 3, huogong: 1, pili: 1, huofu: 1, feifu: 1, dingshen: 2, zhangxin: 2, wulei: 2, sadou: 3, tianlei: 3, jiutian: 4, huangtian: 4, taiping: 4, sixiang: 2 };
+      huogong: 1, pili: 1, huofu: 1, feifu: 1, dingshen: 2, zhangxin: 2, wulei: 2, sadou: 3, tianlei: 3, jiutian: 4, huangtian: 4, taiping: 4, sixiang: 2 };
     for (const k in TI) SK[k].tier = TI[k];
     for (const k of ['daolun', 'xuanfeng', 'liedihuan', 'dilie', 'shuanghuan', 'xuehe', 'chong', 'tiaoqiang', 'touqiang', 'qianglin', 'fuhuo']) SK[k].off = true; }
   // ================= 11/14 刀 12 招重做（按 DS 方案）：破甲（铺增伤）/ 浮空（开窗口）/ 流血（蓄 + 万刃引爆） =================
@@ -771,9 +746,9 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const DSP1 = { hengsao: 1.3, tuodao: 1.3, tiaozhan: 1.3, lianzhan: 1.2, daobo: 1.4, huima: 1.4, cuofeng: 1.4, liedihuan: 1.51, feilunren: 2.29, xuehe: 1.7, tianbeng: 2.2, wanren: 1.9 };
   const rsOf = k => DRS[k] != null ? DRS[k] : DRS1[k] != null ? DRS1[k] : DRS0[(SK[k] && SK[k].tier) || 1] || 1;
   let DSP = {}; try { DSP = JSON.parse(localStorage.getItem('szz-dao-sp') || '{}') || {}; } catch (e) {}   // 起手/收势倍率（越大越慢），同样在武学试炼里拖动调
-  const spOf = k => (DSP[k] != null ? DSP[k] : DSP1[k] != null ? DSP1[k] : 1) * (typeof HAS === 'function' && SK[k] && SK[k].dk && ((HAS('huanshou') && WOFX[k] === 0) || (HAS('muqiang') && WOFX[k] === 3) || (HAS('qingshizi') && WOFX[k] === 7) || (HAS('qingtongchui') && WOFX[k] === 2)) ? .9 : 1);   // 环首刀：刀的武艺快 10%
+  const spOf = k => (DSP[k] != null ? DSP[k] : DSP1[k] != null ? DSP1[k] : 1) * (typeof HAS === 'function' && SK[k] && SK[k].dk && ((HAS('huanshou') && WOFX[k] === 0) || (HAS('muqiang') && WOFX[k] === 3) || (HAS('qingshizi') && WOFX[k] === 7) || (HAS('qingtongchui') && WOFX[k] === 2) || (HAS('sangmugong') && WOFX[k] === 5)) ? .9 : 1);   // 环首刀：刀的武艺快 10%
   const SPDN = [[.62, '极快'], [.85, '快'], [1.05, '中'], [1.25, '慢'], [99, '极慢']];
-  const spdTxt = o => { const m = o.dk ? spOf(o.key) : 1, wu = (o.dk ? o.wu : o.wu * 1.2) * m, rc = o.rc * m, t = wu * hammerWindMul(o.key) + rc; return `出手${SPDN.find(q => t <= q[0])[1]}　起手 ${(wu * hammerWindMul(o.key)).toFixed(2)} 秒 · 收势 ${rc.toFixed(2)} 秒`; };
+  const spdTxt = o => { const m = o.dk ? spOf(o.key) : 1, wu = (o.dk ? o.wu : o.wu * 1.2) * m, rc = o.rc * m, t = wu * weaponWindMul(o.key) + rc; return `出手${SPDN.find(q => t <= q[0])[1]}　起手 ${(wu * weaponWindMul(o.key)).toFixed(2)} 秒 · 收势 ${rc.toFixed(2)} 秒`; };
   let DKT = 0; const DKO = [];   // 刀的持续判定（飞刃、血河、裂地环等）不靠 later：翻滚也不会断
   const dmk = o => Object.assign({ t: 0, cm: CM, ck: CK, rm: RM }, o);
   // 易伤：破甲每层 +10%；浮空窗口 +25%（精锐/首领只吃一半）
@@ -800,7 +775,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     const d = m * DU * DM() * pjm * fkm * (z.fkT > 0 && HAS('zhanma') ? 1.3 : 1),   /* 斩马刀：打浮空 +30% */ up = !!o.up && !tough(z), f0 = freeze, x0 = o.x != null ? o.x : hero.x;
     rec(d); hit(z, d, kb * (tough(z) ? .5 : 1), Math.sign(z.x - x0) || hero.f, up, 0, up ? .45 : .3, false, false, { secondary: true, survSkill: true });
     freeze = Math.min(freeze, Math.max(f0, .04));
-    if (SK[CK] && (SK[CK].stone || SK[CK].hammer)) {
+    if (SK[CK] && (SK[CK].stone || SK[CK].hammer || SK[CK].bow)) {
       freeze = Math.max(freeze, .035);
       stoneBurst(z, 8 + SK[CK].tier * 2, .16);
     } else {   // 11/14 用户：打中时的手感——敌人身上闪一道刀痕；同一时刻多个目标只顿一次帧（约 0.05 秒）
@@ -1118,8 +1093,9 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     return b;
   };
   // 用每帧扫过的线段判定，按命中先后处理，避免快石穿过近处敌人。
-  function stoneShot(p, a, length, width, accept, contact, end, size = 1, pierce = HAS('yunxing') ? 1 : 0) {
+  function stoneShot(p, a, length, width, accept, contact, end, size = 1, pierce = HAS('yunxing') ? 1 : 0, arrowColor = null) {
     const b = stoneBolt(p, a, length, size);
+    if (arrowColor) Object.assign(b, { stone: 0, shape: 'arrow', col: arrowColor });
     const seen = new Set();
     let gone = false, previous = 0;
     stoneJob(b.T, o => {
@@ -1131,7 +1107,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
         const dx = z.x - p.x, dy = (z.y - p.y) * 2;
         const along = dx * Math.cos(a) + dy * Math.sin(a);
         const cross = dx * Math.sin(a) - dy * Math.cos(a);
-        const r = width / 2 + 5;
+        const r = (typeof width === 'function' ? width(Math.max(0, along)) : width) / 2 + 5;
         if (Math.abs(cross) > r) continue;
         const reach = Math.sqrt(r * r - cross * cross);
         if (along + reach >= previous && along - reach <= d) hits.push([z, Math.max(previous, along - reach)]);
@@ -1651,6 +1627,190 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     }
   });
 
+  const BG = (key, tier, mot, name, need, wu, rc, desc, cast) => {
+    const speed = [1.3, 1.35, 1.8, 2.1][tier - 1];
+    DRS1[key] = [.8, .82, .85, .9][tier - 1];
+    DSP1[key] = speed; WOFX[key] = 5; MOTX[key] = mot;
+    add(key, { key, tier, name, icon: name[0], color: key === 'huoshi' ? '#ff9850' : '#eac67e',
+      dk: 1, bow: true, need, wu: wu / speed, rc: rc / speed, desc,
+      cast() { sfx('bow', hero.x); return cast(); } });
+  };
+  const bowLong = k => k === 'zhuihun' || k === 'dianguang' || k === 'guanri';
+  const bowOrigin = () => ({ x: hero.x, y: hero.y });
+  const bowImpact = (p, r, t = .22) => stoneBurst(p, stoneScale(r), t);
+  const bowTarget = n => {
+    const p = bowOrigin(), z = nearest(stoneScale(n));
+    const q = z ? { x: z.x, y: z.y } : stonePoint(p, stoneAim(p), stoneScale(n * .7));
+    q.y = clampY(q.y); return q;
+  };
+  function bowBurn(z, damage, count) {
+    if (z.dead) return;
+    const strength = damage * CM;
+    if (z.bowBurn && DKO.includes(z.bowBurn.job)) {
+      if (z.bowBurn.strength <= strength) Object.assign(z.bowBurn, { strength, damage, cm: CM, ck: CK });
+      z.bowBurn.left = count; z.bowBurn.next = .5;
+    } else {
+      const burn = z.bowBurn = { strength, damage, cm: CM, ck: CK, left: count, next: .5 };
+      burn.job = dmk({ T: Infinity, tick(o, dt) {
+        if (z.dead) { z.bowBurn = null; o.T = 0; return; }
+        burn.next -= dt;
+        while (burn.next <= 0 && burn.left > 0 && !z.dead) {
+          burn.next += .5; burn.left--;
+          CM = burn.cm; CK = burn.ck;
+          const d = burn.damage * DU * RT.dmg * CM * VUL(z);
+          rec(d); hit(z, d, 0, 1, false, 0, 0, false, false, { dot: true, secondary: true, survSkill: true });
+        }
+        if (!burn.left || z.dead) { z.bowBurn = null; o.T = 0; }
+      } });
+      DKO.push(burn.job);
+    }
+  }
+  function bowHit(z, m, p, slow = false, extra = 0, kb = 5) {
+    if (!DH(z, m, kb, { x: p.x }) || z.dead) return;
+    if (slow) addSL(z, extra);
+    if (HAS('chiyugong') && (CK === 'luoyue' || CK === 'luori')) bowBurn(z, .10, 3);
+  }
+  function bowShot(p, a, range, width, contact, flame = false) {
+    const color = flame ? ['255,129,54', '255,211,105'] : ARW.col;
+    stoneShot(p, a, stoneScale(range), typeof width === 'function' ? d => stoneScale(width(d / stoneScale(1))) : stoneScale(width),
+      openStone, z => contact(z, Math.max(0, (z.x - p.x) * Math.cos(a) + (z.y - p.y) * 2 * Math.sin(a)) / stoneScale(1)), null, 1, 0, color);
+  }
+  function bowDrop(p, r, T, fire, arrows = 1) {
+    fx.push({ k: 'bowFall', x: p.x, y: p.y, r: stoneScale(r), t: 0, T, arrows });
+    hammerAfter(T, () => { bowImpact(p, r); fire(); });
+  }
+  const bowInside = (z, p, r) => dist(z, p) <= stoneScale(r);
+  const bowZones = (p, r, spread) => spread ? [p, ...[-1, 1].map(i => ({ x: p.x + i * stoneScale(r * .55), y: p.y }))] : [p];
+  function bowEcho(p) {
+    if (HAS('zhurigong')) bowDrop(p, 30, .20, () => {
+      for (const z of hittable()) if (bowInside(z, p, 30)) DH(z, .55, 0, { x: p.x });
+    });
+  }
+  function bowDistanceBonus(d, threshold, L) {
+    return d >= threshold * (HAS('diaolinggong') ? .8 : 1) ? (L >= 7 ? 1.30 : 1.20) : 1;
+  }
+  const bowReach = n => n * (HAS('diaolinggong') ? 1.15 : 1);
+
+  BG('qishe', 1, 'thrust', '掠风箭', 360, .26, .20, '快速平射一支轻箭，命中首个敌人', () => {
+    const p = bowOrigin();
+    bowShot(p, stoneAim(p), 410, 24, z => { bowHit(z, .85, p); return false; });
+  });
+  BG('lianzhu', 1, 'thrust', '透叶箭', 360, .33, .23, '细箭连续穿过两名敌人；LV5 可再贯穿一人；LV7 末次命中轻推', () => {
+    const p = bowOrigin(), L = dlv(), cap = L >= 5 ? 3 : 2;
+    let i = 0;
+    bowShot(p, stoneAim(p), 430, 30, z => {
+      bowHit(z, [.75,.55,.40][i++], p, false, 0, L >= 7 && i === cap ? 18 : 5);
+      return i < cap;
+    });
+  });
+  BG('luoyue', 1, 'up', '落雁箭', 330, .31, .24, '一支箭从天落入小圆；LV5 增加横向箭影，共享命中上限', () => {
+    const p = bowTarget(350), L = dlv(), spots = bowZones(p, 46, L >= 5);
+    bowDrop(p, 46, .25, () => {
+      for (const q of spots) if (q !== p && L >= 5) bowImpact(q, 35);
+      for (const z of hittable()) if (spots.some(q => bowInside(z, q, q === p || L < 5 ? 46 : 35))) bowHit(z, 1, p);
+    }, L >= 5 ? 3 : 1);
+  });
+  BG('zhuihun', 2, 'thrust', '满月箭', 400, .47, .29, '拉满弓平射重箭，远距命中增伤；LV5 可穿过第一名敌人；LV7 远距增伤提高', () => {
+    const p = bowOrigin(), L = dlv(); let i = 0;
+    bowShot(p, stoneAim(p), bowReach(470), 34, (z, d) => {
+      bowHit(z, (i++ === 0 ? 1.55 : .55) * bowDistanceBonus(d, 230, L), p);
+      return L >= 5 && i < 2;
+    });
+  });
+  BG('liannu', 2, 'thrust', '叠影箭', 360, .32, .28, '沿同一方向先后射出两箭；LV5 第二箭稍向侧方偏移；LV7 第二箭对迟缓敌人增伤', () => {
+    const origin = bowOrigin(), a = stoneAim(origin), L = dlv();
+    stoneSequence(2, .14, i => {
+      const p = bowOrigin();
+      bowShot(p, a + (i && L >= 5 ? .048 : 0), 430, 26, z => {
+        bowHit(z, i && L >= 7 && z.slT > 0 ? .805 : .70, p); return false;
+      });
+    });
+    return .14;
+  });
+  BG('xuanshe', 2, 'thrust', '寒芒箭', 350, .33, .25, '朝脚边射箭，命中首个敌人；命中迟缓；LV3 迟缓多半秒；LV5 追射后方一人；LV7 轻推已迟缓目标', () => {
+    const p = bowOrigin(), a = stoneAim(p), L = dlv(), extra = L >= 3 ? .5 : 0;
+    const hit = (z, m, from) => bowHit(z, m, from, true, extra, L >= 7 && z.slT > 0 ? 20 : 5);
+    bowShot(p, a, 410, 32, z => {
+      hit(z, .90, p);
+      if (L >= 5) {
+        const q = stoneTargets(z, stoneScale(150), q => q !== z && angDiff(stoneAngle(z, q), a) < Math.PI / 3)[0];
+        if (q) bowShot(stonePoint(z, a, 8), stoneAngle(z, q), 155, 22, t => {
+          if (t === z) return true;
+          hit(t, .45, z); return false;
+        });
+      }
+      return false;
+    });
+  });
+  BG('jianyu', 2, 'up', '疏雨箭', 350, .40, .30, '箭从天分落在多处，每敌最多吃两处；命中迟缓；LV3 迟缓多半秒；LV5 增为五处；LV7 第二次命中迟缓再多半秒', () => {
+    const p = bowTarget(380), o = bowOrigin(), L = dlv(), count = L >= 5 ? 5 : 3, hits = new Map();
+    const targets = stoneTargets(p, stoneScale(95), z => bowInside(z, o, 380));
+    for (let i = 0; i < count; i++) {
+      const z = targets[i];
+      const q = z ? { x: z.x, y: z.y } : i === 0 ? p : hammerPoint(p, i * 2.39996, 29 + i * 4);
+      bowDrop(q, 44, .28 + i * .065, () => {
+        for (const t of hittable()) if (bowInside(t, q, 44) && stoneCount(hits, t, 2))
+          bowHit(t, L >= 5 ? .55 : .65, q, true, (L >= 3 ? .5 : 0) + (L >= 7 && hits.get(t) === 2 ? .5 : 0));
+      });
+    }
+  });
+  BG('dianguang', 3, 'thrust', '穿云箭', 450, .54, .36, '沿窄线平射一支贯穿重箭，远距命中增伤；LV5 远段增宽；LV7 远距增伤提高', () => {
+    const p = bowOrigin(), L = dlv();
+    bowShot(p, stoneAim(p), bowReach(560), d => L >= 5 && d >= 250 ? 57 : 42,
+      (z, d) => bowHit(z, 1.95 * bowDistanceBonus(d, 250, L), p));
+  });
+  BG('huoshi', 3, 'thrust', '燎原箭', 380, .46, .33, '火箭命中后溅出一圈火星；命中与火星均施加灼烧；LV3 灼烧多一跳；LV5 两翼扩散；LV7 主目标灼烧加强', () => {
+    const p = bowOrigin(), a = stoneAim(p), L = dlv(), red = HAS('chiyugong');
+    const r = 65 * (red ? 1.2 : 1), n = 4 + (L >= 3 ? 1 : 0) + (red ? 1 : 0);
+    bowShot(p, a, 460, 32, z => {
+      const q = { x: z.x, y: z.y };
+      bowHit(z, 1.30, p); bowBurn(z, L >= 7 ? .22 : .18, n);
+      const spots = L >= 5 ? [-32, 32].map(d => hammerPoint(q, a + Math.PI / 2, d)) : [q];
+      for (const at of spots) bowImpact(at, r, .28);
+      for (const t of hittable()) if (t !== z && spots.some(at => bowInside(t, at, r))) {
+        bowHit(t, .35, q); bowBurn(t, .10, n);
+      }
+      return false;
+    }, true);
+  });
+  BG('luori', 3, 'up', '坠星箭', 400, .53, .36, '重箭从天垂直坠下，中心伤害更高；LV5 外圈向左右展开；LV7 中心伤害额外提高', () => {
+    const p = bowTarget(430), L = dlv(), spots = bowZones(p, 75, L >= 5);
+    bowDrop(p, 75, .50, () => {
+      if (L >= 5) for (const q of spots) if (q.x !== p.x) bowImpact(q, 56);
+      let center = false;
+      for (const z of hittable()) {
+        const core = bowInside(z, p, 28);
+        if (!core && !spots.some(q => bowInside(z, q, q.x === p.x ? 75 : 56))) continue;
+        center ||= core;
+        bowHit(z, core ? (L >= 7 ? 2.90 : 2.65) : 1.45, p);
+      }
+      if (center) bowEcho(p);
+    });
+  });
+  BG('guanri', 4, 'thrust', '贯日惊弦', 480, .67, .44, '一支长箭沿直线贯穿整列，远距增伤；LV5 箭势沿途扩大；LV7 远距增伤提高', () => {
+    const p = bowOrigin(), L = dlv(), reach = bowReach(680);
+    bowShot(p, stoneAim(p), reach, d => 64 + (L >= 5 ? 42 * Math.min(1, d / reach) : 0),
+      (z, d) => bowHit(z, 2.85 * bowDistanceBonus(d, 300, L), p));
+  });
+  BG('wanjian', 4, 'up', '万箭穿心', 410, .66, .44, '锁定同一中心，三波天降箭雨逐次收紧；LV3 第一波迟缓；LV5 首波落区分成三片；LV7 最后一波中心增伤', () => {
+    const p = bowTarget(450), L = dlv();
+    [105, 72, 42].forEach((r, i) => {
+      const split = L >= 5 && i === 0;
+      const spots = split ? [0, 1, 2].map(j => hammerPoint(p, j * Math.PI * 2 / 3, 36)) : [p];
+      const radius = split ? 70 : r, delay = [.30,.48,.66][i];
+      for (const q of spots) bowDrop(q, radius, delay, q === spots[0] ? () => {
+        let center = false;
+        for (const z of hittable()) {
+          if (!spots.some(q => bowInside(z, q, radius))) continue;
+          const core = i === 2 && bowInside(z, p, 21);
+          center ||= core;
+          bowHit(z, [.70, 1.05, 1.65][i] + (core && L >= 7 ? .30 : 0), p, i === 0 && L >= 3);
+        }
+        if (center) bowEcho(p);
+      } : () => {}, i === 2 ? 7 : 5);
+    });
+  });
+
   // ---------- 出身（开局配置里选；起手只有 1 个武艺） ----------
   const ORIGINS = {
     nongfu: { name: '农夫', tag: '刀 · 锤', wep: 0, weps: [0, 2], skill: 'hengsao', desc: '庄稼汉，挨得住打。受到伤害 -20%；本门刀或锤', take: .8, oa: [5, 4, 2, 1, 1, 2, 1, 3], at: [6, 4, 2, 2, 3, 2, 2, 1, 3] },
@@ -1711,7 +1871,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   // 11/14 用户：刀招的起手帧 / 出手帧可在武学试炼里挑（可水平翻转，帧名末尾加 ~ 表示翻转），存 localStorage szz-dao-pose，调好复制给 Claude 写死进 DPS1
   const DPS1 = { hengsao: { a: 'chop1', b: 'sweep2' }, tuodao: { a: 'sweep1', b: 'sweep2' }, tiaozhan: { a: 'up1', b: 'up2' }, lianzhan: { a: 'chop1', b: 'sweep2' }, daobo: { a: 'chop1', b: 'chop2' }, huima: { a: 'spin1', b: 'up2' }, cuofeng: { a: 'chop1', b: 'chop2' }, liedihuan: { a: 'up2', b: 'chop2' }, feilunren: { a: 'sweep1', b: 'sweep2' }, xuehe: { a: 'chop1', b: 'sweep2' }, tianbeng: { a: 'spin2', b: 'chop2' }, wanren: { a: 'spin1', b: 'spin2' },
     qiang: { a: 'thrust1', b: 'thrust2' }, lansao: { a: 'sweep1', b: 'sweep2' }, lianci: { a: 'thrust1', b: 'thrust2' }, tiaoqiang: { a: 'thrust2', b: 'up2' }, lihua: { a: 'spin1', b: 'spin2' }, chong: { a: 'thrust1', b: 'thrust2' }, huimaq: { a: 'thrust1', b: 'thrust2' }, touqiang: { a: 'up1', b: 'thrust2' }, qianglin: { a: 'up2', b: 'chop2' }, qijin: { a: 'thrust1', b: 'thrust2' }, bainiao: { a: 'thrust1', b: 'thrust2' }, longyin: { a: 'up2', b: 'chop2' } };   // 11/15 枪招动作（先按动作分配，试炼里可再挑）   // 11/14 用户在武学试炼里挑好的刀招动作（起手帧 → 出手帧）
-  for (const k of Object.keys(SK).filter(k => SK[k].stone || SK[k].hammer)) DPS1[k] = { a: MOTX[k] + '1', b: MOTX[k] + '2' };
+  for (const k of Object.keys(SK).filter(k => SK[k].stone || SK[k].hammer || SK[k].bow)) DPS1[k] = { a: MOTX[k] + '1', b: MOTX[k] + '2' };
   let DPS = {}; try { DPS = JSON.parse(localStorage.getItem('szz-dao-pose') || '{}') || {}; } catch (e) {}
   const dpsOf = k => SK[k] && SK[k].dk ? DPS[k] || DPS1[k] || null : null;
   const dpsFr = (k, i) => { const o = dpsOf(k); if (!o) return motFr(k)[i]; const hp = preOf(k), n = i === 0 ? o.a : o.b, f = i === 0 ? o.fa : o.fb; return hp + n + (f ? '~' : ''); };
@@ -1792,14 +1952,14 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   function powParts(k) {   // 威力 = 各项乘数，100 = 无加成
     const c = catOf(k), at = ATW[wepOf(k)] != null ? ATW[wepOf(k)] : 1, AN = ['体魄', '短兵', '长兵', '射艺', '术法', '身法', '射艺', '术法'];
     const w = wmul(k), am = attrMul(k), lm = mastMul(k), n = RES().cnt[wepOf(k)], rs = 1 + RESD[Math.min(5, n)] * (HAS('xinshu') ? 2 : 1);
-    const bw = 1 + (S.bao || []).reduce((t, b) => t + (BAO[b] && BAO[b].w === wepOf(k) ? BAO[b].wd : 0), 0), other = GM.all * GM.cat[c] * (1 + .06 * S.xy) * baoMul() * bw * rs * (HAS('baipi') && wepOf(k) !== 0 ? .7 : 1) * (HAS('longdan') && wepOf(k) !== 3 ? .7 : 1) * (HAS('yunxing') && wepOf(k) !== 7 ? .7 : 1) * (HAS('zhenyuechui') && wepOf(k) !== 2 ? .7 : 1);
+    const bw = 1 + (S.bao || []).reduce((t, b) => t + (BAO[b] && BAO[b].w === wepOf(k) ? BAO[b].wd : 0), 0), other = GM.all * GM.cat[c] * (1 + .06 * S.xy) * baoMul() * bw * rs * (HAS('baipi') && wepOf(k) !== 0 ? .7 : 1) * (HAS('longdan') && wepOf(k) !== 3 ? .7 : 1) * (HAS('yunxing') && wepOf(k) !== 7 ? .7 : 1) * (HAS('zhenyuechui') && wepOf(k) !== 2 ? .7 : 1) * (HAS('zhurigong') && wepOf(k) !== 5 ? .7 : 1);
     const r = [['等级', lm], [(AN[at] || '属性') + ' ' + AT()[at], am], [w > 1.05 ? '本门' : w < .95 ? '外门' : '出身兵器', w], ['心法·宝物·同门', other]].filter(x => Math.abs(x[1] - 1) > .005);
     return { total: Math.round(100 * lm * am * w * other), rows: r };
   }
   function skillMul(k) {
     const c = catOf(k), n = RES().cnt[wepOf(k)], low = hero.hp / maxHp() < .3 ? 1 + .25 * GM.low : 1;
     const bw = (S.bao || []).reduce((t, b) => t + (BAO[b] && BAO[b].w === wepOf(k) ? BAO[b].wd : 0), 0);
-    return (1 + bw) * (HAS('baipi') && wepOf(k) !== 0 ? .7 : 1) * (HAS('longdan') && wepOf(k) !== 3 ? .7 : 1) * (HAS('yunxing') && wepOf(k) !== 7 ? .7 : 1) * (HAS('zhenyuechui') && wepOf(k) !== 2 ? .7 : 1) * wmul(k) * attrMul(k) * (1 + RESD[Math.min(5, n)] * (HAS('xinshu') ? 2 : 1)) * mastMul(k) * GM.all * GM.cat[c] * low * (1 + .06 * S.xy) * baoMul();
+    return (1 + bw) * (HAS('baipi') && wepOf(k) !== 0 ? .7 : 1) * (HAS('longdan') && wepOf(k) !== 3 ? .7 : 1) * (HAS('yunxing') && wepOf(k) !== 7 ? .7 : 1) * (HAS('zhenyuechui') && wepOf(k) !== 2 ? .7 : 1) * (HAS('zhurigong') && wepOf(k) !== 5 ? .7 : 1) * wmul(k) * attrMul(k) * (1 + RESD[Math.min(5, n)] * (HAS('xinshu') ? 2 : 1)) * mastMul(k) * GM.all * GM.cat[c] * low * (1 + .06 * S.xy) * baoMul();
   }
   function critRoll() {   // 暴击：基础 5% + 心法；伤害 ×1.5 + 心诀
     if (!CK || !SK[CK]) return 1;
@@ -1911,6 +2071,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     return { stun: t < 2 ? st[1] : 0, knock: t < 2, kbM: t < 2 ? 1 : .35 };
   }
   const hammerWindMul = k => hammerCoreReach[k] && HAS('pobichui') ? 1.10 : 1;
+  const weaponWindMul = k => hammerWindMul(k) * (bowLong(k) && HAS('diaolinggong') ? 1.08 : 1);
   function skillTick(dt) {
     GM = gfCalc();
     if (typeof kills === 'number') {
@@ -1951,27 +2112,27 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       if (!(Math.abs(hero.ix) > .1 || Math.abs(hero.iy) > .1)) { const t = nearest(200); if (t) hero.f = Math.sign(t.x - hero.x) || hero.f; }
       if (S.wind.t >= S.wind.dur) {
         const k = S.wind.k, i = S.wind.i, key = S.wind.key; S.flash[i] = .3;
-        const t = nearest(k.stone || k.hammer ? k.need * DK * rsOf(key) : 200); if (t) hero.f = Math.sign(t.x - hero.x) || hero.f;
+        const t = nearest(k.stone || k.hammer || k.bow ? k.need * DK * rsOf(key) : 200); if (t) hero.f = Math.sign(t.x - hero.x) || hero.f;
         CM = skillMul(key); RM = k.dk ? DLV.sz[lvOf(key) - 1] * rsOf(key) : lvOf(key) >= 5 ? 1.1 : 1; const ch = S.wind.ch; S.chain = ch; S.lastCat = wepOf(key); S.lastI = i;
                 S.lhjOn = S.lhjReady; S.lhjReady = false; if (S.lhjOn) S.noHitT = 0;
         CK = key; const channel = k.cast(); S.lhjOn = false;
         const l0 = lvOf(key); S.mast[key] = (S.mast[key] || 0) + AFX.xp(); if (lvOf(key) > l0) floaters.push({ x: hero.x, y: hero.y - 76, t: 0, txt: k.name + ' LV' + lvOf(key), color: '#ffd86e' });
         if (!k.dk && lvOf(key) >= 10) later(.2, () => { CM *= .6; k.cast(); });   // LV10 质变：多出一击
         CM = 1; RM = 1; CK = '';
-        S.recov = { t: 0, dur: Math.max(k.stone || k.hammer ? channel || 0 : 0, (k.dk ? Math.max(.08, k.rc - DLV.rc[lvOf(key) - 1]) * spOf(key) : k.rc) * CDM()), pose: k.pose[1], late: k.poseL }; S.wind = null; if (k.dk && !k.stone && !k.hammer) { const a = aim(), dx = Math.cos(a) * 7, dy = Math.sin(a) * 3; hero.x += dx; hero.y = clampY(hero.y + dy); daoSlash(key); }   // 11/14：刀招出手往前踏半步
+        S.recov = { t: 0, dur: Math.max(k.stone || k.hammer || k.bow ? channel || 0 : 0, (k.dk ? Math.max(.08, k.rc - DLV.rc[lvOf(key) - 1]) * spOf(key) : k.rc) * CDM()), pose: k.pose[1], late: k.poseL }; S.wind = null; if (k.dk && !k.stone && !k.hammer && !k.bow) { const a = aim(), dx = Math.cos(a) * 7, dy = Math.sin(a) * 3; hero.x += dx; hero.y = clampY(hero.y + dy); daoSlash(key); }   // 11/14：刀招出手往前踏半步
         S.qi = (S.qi + 1) % 5; if (S.qi === 0) S.cycles++;
       }
       return;
     }
     if (S.recov) { if ((S.recov.t += dt) >= S.recov.dur) { S.recov = null; S.qt = -.2; } return; }   // 放完一招，隔 0.25 秒轮到下一招（没有各自冷却）
     const next = SK[S.slots[S.qi]] || [1, 2, 3, 4].map(i => SK[S.slots[(S.qi + i) % 5]]).find(Boolean);
-    const need = next && (next.stone || next.hammer) ? next.need * DK * rsOf(next.key) : 160;
+    const need = next && (next.stone || next.hammer || next.bow) ? next.need * DK * rsOf(next.key) : 160;
     if (!nearest(Math.max(160, need))) { S.qt = 0; return; }
     for (let n = 0; n < 5 && !SK[S.slots[S.qi]]; n++) { S.qi = (S.qi + 1) % 5; if (S.qi === 0) S.cycles++; }
     if ((S.qt += dt) < .05) return;
     const k = SK[S.slots[S.qi]];
-    if (k && nearest(k.stone || k.hammer ? need : k.need)) { const key = S.slots[S.qi], ch = 0;   // 11/14 用户定：连携删掉（和兵器精通重复）   // 只算同一轮里紧挨着的前一槽；同一招重复、轮回到第 1 槽都不算
-       S.wind = { i: S.qi, k, key, ch, t: 0, dur: (k.dk ? Math.max(.12, k.wu - DLV.wu[lvOf(S.slots[S.qi]) - 1]) * spOf(S.slots[S.qi]) : k.wu * 1.2) * (OG().wu || 1) * CDM() * (1 - .2 * ch) * hammerWindMul(key) };
+    if (k && nearest(k.stone || k.hammer || k.bow ? need : k.need)) { const key = S.slots[S.qi], ch = 0;   // 11/14 用户定：连携删掉（和兵器精通重复）   // 只算同一轮里紧挨着的前一槽；同一招重复、轮回到第 1 槽都不算
+       S.wind = { i: S.qi, k, key, ch, t: 0, dur: (k.dk ? Math.max(.12, k.wu - DLV.wu[lvOf(S.slots[S.qi]) - 1]) * spOf(S.slots[S.qi]) : k.wu * 1.2) * (OG().wu || 1) * CDM() * (1 - .2 * ch) * weaponWindMul(key) };
        if (k.hammer && hammerCoreReach[key]) S.wind.hammerLock = hammerWind(key, hammerCoreReach[key]);
        S.hold = 0; return; }
     if (k && S.hold < 1.2) { S.hold += .05; S.qt = 0; return; }   // 这一招够不着人：等 1.2 秒，还不行就跳下一招
@@ -2016,6 +2177,11 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     diangang: { n: '点钢枪', q: 1, w: 3, wd: .15, d: '枪的武艺伤害 +15%；流血每跳伤害 +30%' },
     bawang: { n: '霸王枪', q: 1, w: 3, wd: .2, d: '枪的武艺伤害 +20%；直线刺的招长 20%' },
     longdan: { n: '龙胆亮银枪', q: 2, w: 3, wd: .3, d: '枪的武艺伤害 +30%；冲刺距离 +30%，冲刺路上的伤害 ×1.5；浮空的敌人多受 50% 伤害（原来 25%）', c: '枪以外的武艺伤害 −30%' },
+    sangmugong: { image: 'art/ui/bao/muqiang.webp', n: '桑木弓', q: 0, w: 5, wd: 0, d: '弓武艺起手、收势 ×0.90' },
+    niujiaogong: { image: 'art/ui/bao/hongying.webp', n: '牛角弓', q: 0, w: 5, wd: .12, d: '弓武艺伤害 +12%' },
+    diaolinggong: { image: 'art/ui/bao/bawang.webp', n: '雕翎弓', q: 1, w: 5, wd: 0, d: '满月箭、穿云箭、贯日惊弦远距增伤门槛提前 20%，飞行距离 +15%', c: '这三招起手 ×1.08' },
+    chiyugong: { image: 'art/ui/bao/diangang.webp', n: '赤羽弓', q: 1, w: 5, wd: 0, d: '燎原箭的火星半径 +20%，灼烧多一跳；落雁箭和坠星箭附加三跳灼烧' },
+    zhurigong: { image: 'art/ui/bao/longdan.webp', n: '逐日弓', q: 2, w: 5, wd: .30, d: '弓武艺伤害 +30%；坠星箭或万箭穿心末波命中中心时追加光箭，每次施放最多一次', c: '弓以外的武艺伤害 −30%' },
     qingtongchui: { image: 'art/ui/bao/qingtongchui.webp', n: '青铜锤', q: 0, w: 2, wd: 0, d: '锤武艺起手、收势 ×0.90' },
     shutiechui: { image: 'art/ui/bao/shutiechui.webp', n: '熟铁锤', q: 0, w: 2, wd: 0.12, d: '锤武艺伤害 +12%' },
     pobichui: { image: 'art/ui/bao/pobichui.webp', n: '破壁锤', q: 1, w: 2, wd: 0, d: '断碑砸、飞崖砸、五岳压顶锤心伤害 +25%', c: '这三招起手 ×1.10' },
@@ -2982,6 +3148,18 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
         else if (e.what === 'rock') { ctx.fillStyle = '#8a7a60'; ctx.beginPath(); ctx.arc(x, y - 20, 22, 0, 7); ctx.fill(); ctx.stroke(); ctx.fillStyle = 'rgba(255,140,60,.8)'; ctx.beginPath(); ctx.arc(x, y - 40, 16, 0, 7); ctx.fill(); }
         else if (e.what === 'palm') { ctx.fillStyle = 'rgba(255,210,100,.75)'; ctx.beginPath(); ctx.ellipse(x, y - 20, 50, 34, 0, 0, 7); ctx.fill(); for (let i = -2; i <= 2; i++) ctx.fillRect(x + i * 18 - 6, y - 80, 12, 40); }
         ctx.restore(); continue; }
+      if (e.k === 'bowFall') {
+        ctx.save(); ctx.translate(e.x, e.y);
+        ctx.strokeStyle = 'rgba(236,188,113,' + (.45 + p * .35) + ')';
+        ctx.lineWidth = 1.5; ctx.beginPath(); ctx.ellipse(0, 0, e.r, e.r * .5, 0, 0, 7); ctx.stroke();
+        ctx.strokeStyle = '#f2d39b'; ctx.lineWidth = 2;
+        for (let i = 0; i < e.arrows; i++) {
+          const a = i * 2.39996, spread = i ? e.r * .58 : 0, h = (1 - p * p) * (75 + i * 5);
+          const x = Math.cos(a) * spread, y = Math.sin(a) * spread / 2;
+          ctx.beginPath(); ctx.moveTo(x - 12, y - h - 32); ctx.lineTo(x, y - h); ctx.stroke();
+        }
+        ctx.restore(); continue;
+      }
       if (e.k === 'hammerArc') {
         ctx.save(); ctx.translate(e.x, e.y); ctx.scale(1, .5);
         ctx.strokeStyle = 'rgba(231,173,108,' + (.85 * (1 - p)) + ')';
@@ -3030,7 +3208,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       else if (e.k === 'line') { ctx.save(); ctx.translate(e.x, e.y - 14); ctx.scale(1, .5); ctx.rotate(e.a); const k = Math.min(1, p * 4); ctx.lineCap = 'round'; ctx.strokeStyle = `rgba(${e.col},${.55 * (1 - p)})`; ctx.lineWidth = e.w * 1.6 * (1 - p) + 4; ctx.beginPath(); ctx.moveTo(10, 0); ctx.lineTo(10 + e.L * k, 0); ctx.stroke(); ctx.strokeStyle = `rgba(255,255,255,${.95 * (1 - p)})`; ctx.lineWidth = 3; ctx.stroke(); ctx.restore(); }
     }
     for (const e of fx) {
-      if (e.k === 'hammerArc' || e.k === 'hammerRing' || e.k === 'stonefield' || e.k === 'stonefall' || e.k === 'burst' || e.k === 'mark' || e.k === 'bolt' || e.k === 'line' || e.k === 'drop' || e.k === 'cut' || e.k === 'dg' || e.k === 'img') continue;
+      if (e.k === 'bowFall' || e.k === 'hammerArc' || e.k === 'hammerRing' || e.k === 'stonefield' || e.k === 'stonefall' || e.k === 'burst' || e.k === 'mark' || e.k === 'bolt' || e.k === 'line' || e.k === 'drop' || e.k === 'cut' || e.k === 'dg' || e.k === 'img') continue;
       if (e.k === 'ghost') {   // 残影：半透明主角，带一道拖尾
         const q = Math.min(1, e.t / e.mt), x = e.x0 + (e.x1 - e.x0) * q, y = e.y0 + (e.y1 - e.y0) * q, al = .6 * (1 - Math.max(0, (e.t - e.mt) / (e.T - e.mt)));
         ctx.save(); ctx.strokeStyle = `rgba(200,225,255,${al * .5})`; ctx.lineWidth = 8; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(e.x0, e.y0 - 22); ctx.lineTo(x, y - 22); ctx.stroke(); ctx.restore();
