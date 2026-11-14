@@ -177,6 +177,24 @@ if os.path.exists(FONT_OUT):
         print('提示：没装 brotli（pip install brotli），字体退回 TTF，体积大一倍')
         _font_url, _fmt = emit('fonts/result.ttf', open(FONT_OUT, 'rb').read()), 'truetype'
     FONT_FACE = '<link rel="preload" href="' + _font_url + '" as="font" type="font/' + ('woff2' if _fmt == 'woff2' else 'ttf') + '" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(' + _font_url + ')format("' + _fmt + '");font-display:swap}</style>'
+# 11/14 用户定：开战竹简的关名用粗楷书（霞鹜文楷 Medium，OFL-1.1）。原字体 18MB 不进仓库（.gitignore），
+# 只提交子集 art/fonts/kai.ttf；源字体不在时沿用已提交的子集。字表 = route.js 里的全部字符串 + 竹简用字
+KAI_SRC = P('tools', 'fonts', 'LXGWWenKai-Medium.ttf')
+KAI_OUT = P('art', 'fonts', 'kai.ttf')
+if os.path.exists(KAI_SRC):
+    from fontTools import subset as _sub
+    _kc = set()
+    for _m in __import__('re').findall(r"'([^'\\]*)'|\"([^\"\\]*)\"|`([^`\\]*)`", open(P('js', 'route.js'), encoding='utf-8').read()):
+        for _t in _m: _kc |= set(_t)
+    _kc |= set('第一二三四五六七八九十层迎战精锐首领战营垒张角祭坛宝梁·点击下令')
+    _kc = {c for c in _kc if c.strip()}
+    _o = _sub.Options(); _o.name_IDs = ['*']
+    _f = _sub.load_font(KAI_SRC, _o); _ss = _sub.Subsetter(_o); _ss.populate(text=''.join(sorted(_kc))); _ss.subset(_f); _sub.save_font(_f, KAI_OUT, _o)
+    print('kai subset', len(_kc), 'chars,', os.path.getsize(KAI_OUT) // 1024, 'KB')
+if os.path.exists(KAI_OUT):
+    from fontTools.ttLib import TTFont
+    _tt = TTFont(KAI_OUT); _tt.flavor = 'woff2'; _b = io.BytesIO(); _tt.save(_b)
+    FONT_FACE += '<style>@font-face{font-family:"WenKai";src:url(' + emit('fonts/kai.woff2', _b.getvalue()) + ')format("woff2");font-display:swap}</style>'
 # 11/13 用户定：UI 文字换像素字体（缝合像素字体 Fusion Pixel 12px，OFL-1.1，见 tools/fonts/FusionPixel-OFL.txt）
 # 做法：把常用中文字体名（宋体、苹方、雅黑……）用 @font-face 指到像素字体上，毛笔字（MaShanZheng）不受影响
 PIX_SRC = P('tools', 'fonts', 'FusionPixel12-SC.woff')

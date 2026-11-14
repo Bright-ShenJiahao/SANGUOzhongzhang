@@ -355,7 +355,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   function startWave(n) {
     if (RT.on) {   // 路线模式：一个节点 = 一整场连续的仗（不分波、不鸣金）。难度从「本节点第 1 波」平滑爬到「最后一波」的级别
       const nd = RT.node, L = ROUTE.layers(), N0 = ROUTE.waves(nd);
-      if (n === 1) waveBanner(ROUTE.name(nd), nd.type === 'boss' ? '首领战 · 迎战' : nd.type === 'elite' ? '第 ' + nd.layer + ' 层 · 精锐 · 迎战' : '第 ' + nd.layer + ' 层 · 迎战');
+      if (n === 1) { const cn = v => v <= 10 ? '零一二三四五六七八九十'[v] : v < 20 ? '十' + (v % 10 ? '零一二三四五六七八九'[v % 10] : '') : '零一二三四五六七八九'[(v / 10) | 0] + '十' + (v % 10 ? '零一二三四五六七八九'[v % 10] : ''); waveBanner(ROUTE.name(nd), nd.type === 'boss' ? '首领战 · 迎战' : nd.type === 'elite' ? '第' + cn(nd.layer) + '层 · 精锐 · 迎战' : '第' + cn(nd.layer) + '层 · 迎战'); }
       const lvOf = k => Math.max(1, Math.min(WAVES, 1 + Math.floor(((nd.layer - 1 + (k - 1) / N0) / L) * WAVES) + (nd.type === 'elite' ? 2 : 0) + (nd.type === 'boss' ? 2 : 0)));
       W.lv0 = lvOf(1); W.lv1 = lvOf(N0); W.tot = 0; for (let k = 1; k <= N0; k++) W.tot += (WAVE_T[lvOf(k) - 1] || 60) * ROUTE.TIME_K;
       W.tot = nd.type === 'boss' ? 60 : nd.type === 'elite' ? 50 : 36 + 8 * nd.layer / L; if (/[?&]longwave/.test(location.search) || window.TRIAL_ON) W.tot = 9999;   // 测试用：关卡不结束   /* 11/12 用户：关卡太长 → 普通约 40 秒（36~44）、精英 50、首领（含张角）60 秒内 */   // 11/11：第一关太长太难 → 前三层 35/42/48 秒   // 用户定 11/09：首领 3 分钟；精英约 1.5~2 分钟；普通战斗约 50~65 秒（18 层）
@@ -2110,7 +2110,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   function waveBanner(title, sub) {
     const old = document.getElementById('waveBan'); if (old) old.remove();
     const d = document.createElement('div'); d.id = 'waveBan';
-    d.innerHTML = '<div class="jz"><div class="tx"><div class="t">' + title + '</div><div class="s">' + sub + '</div></div><b class="yin"></b></div><div class="hn">点击下令</div>';
+    d.innerHTML = '<div class="wb"><div class="mo"></div><div class="jz"><div class="tx"><div class="t">' + title + '</div><div class="s">' + sub + '</div></div><b class="yin"></b></div></div><div class="hn">点击下令</div>';
     if (window.SFX) SFX.play('j_banner');
     document.body.appendChild(d); banHold = true;
     let done = false;
@@ -2256,14 +2256,17 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   const rooted = () => !!S.recov;
   // 隐藏普攻和换武器按钮
   const st = document.createElement('style'); st.textContent = '#bA,#bWeapon,#wp button[data-w]{display:none!important}'
-    + '#waveBan{position:fixed;inset:0;z-index:10010;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:radial-gradient(ellipse at 50% 42%,rgba(0,0,0,.45),rgba(0,0,0,.15) 60%,transparent);cursor:pointer;transition:opacity .45s}#waveBan.out{opacity:0}'
-    + '#waveBan .jz{position:relative;width:min(80vw,640px);aspect-ratio:1400/505;background:url(art/ui/hud/jz.webp) center/100% 100% no-repeat;filter:drop-shadow(0 12px 20px rgba(0,0,0,.65));animation:jzOpen .5s cubic-bezier(.2,.8,.3,1) both}#waveBan.out .jz{animation:jzClose .45s ease-in both}'
-    + '#waveBan .tx{position:absolute;left:8%;right:8%;top:17%;bottom:24%;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;animation:jzTx .4s .3s both}'
-    + '#waveBan .t{font:400 clamp(38px,7vw,72px) MaShanZheng,"STKaiti",serif;letter-spacing:.14em;text-indent:.14em;color:#160c04;text-shadow:1px 0 0 #160c04,-1px 0 0 #160c04,0 1px 0 #160c04,0 2px 1px rgba(90,60,20,.35);opacity:.92}'
-    + '#waveBan .s{display:flex;align-items:center;gap:.8em;font:400 clamp(16px,2.3vw,22px) MaShanZheng,"STKaiti",serif;letter-spacing:.3em;text-indent:.3em;color:#3a2410}#waveBan .s::before,#waveBan .s::after{content:"";width:clamp(26px,5vw,60px);height:2px;background:linear-gradient(90deg,transparent,#9a7638 30%,#c9a35e 70%,transparent)}'
-    + '#waveBan .yin{position:absolute;z-index:3;right:9%;bottom:14%;width:17%;aspect-ratio:1;background:url(art/ui/hud/yin.webp) center/contain no-repeat;opacity:0;transform:rotate(-6deg) scale(2.6);mix-blend-mode:multiply}'
+    + '#waveBan{position:fixed;inset:0;z-index:10010;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:rgba(0,0,0,.18);overflow:hidden;cursor:pointer;transition:opacity .45s}#waveBan.out{opacity:0}'
+    + '#waveBan .wb{position:relative;width:100%;display:flex;justify-content:center}'
+    + '#waveBan .mo{position:absolute;left:50%;top:50%;width:min(118vw,1100px);height:min(17vw,150px);transform:translate(-50%,-50%);background:url(art/ui/hud/mo.webp) center/100% 100% no-repeat;animation:moIn .35s ease-out both}#waveBan.out .mo{animation:moOut .4s ease-in both}'
+    + '#waveBan .jz{position:relative;width:min(62vw,460px);aspect-ratio:1400/505;background:url(art/ui/hud/jz.webp) center/100% 100% no-repeat;filter:drop-shadow(0 8px 14px rgba(0,0,0,.7));animation:jzOpen .45s .18s cubic-bezier(.2,.8,.3,1) both}#waveBan.out .jz{animation:jzClose .4s ease-in both}'
+    + '#waveBan .tx{position:absolute;left:8%;right:8%;top:17%;bottom:24%;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;animation:jzTx .35s .5s both}'
+    + '#waveBan .t{font:400 clamp(30px,5.2vw,52px) WenKai,MaShanZheng,"STKaiti",serif;letter-spacing:.16em;text-indent:.16em;color:#1a0e05;text-shadow:.5px 0 0 #1a0e05,-.5px 0 0 #1a0e05,0 1px 1px rgba(90,60,20,.3);line-height:1.25}'
+    + '#waveBan .s{display:flex;align-items:center;gap:.7em;font:400 clamp(13px,1.8vw,17px) WenKai,MaShanZheng,"STKaiti",serif;letter-spacing:.25em;text-indent:.25em;color:#3a2410}#waveBan .s::before,#waveBan .s::after{content:"";width:clamp(20px,3.6vw,44px);height:2px;background:linear-gradient(90deg,transparent,#9a7638 30%,#c9a35e 70%,transparent)}'
+    + '@keyframes moIn{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}@keyframes moOut{from{clip-path:inset(0 0 0 0)}to{clip-path:inset(0 0 0 100%)}}'
+    + '#waveBan .yin{position:absolute;z-index:3;right:7%;bottom:12%;width:19%;aspect-ratio:1;background:url(art/ui/hud/yin.webp) center/contain no-repeat;opacity:0;transform:rotate(-6deg) scale(2.6);mix-blend-mode:multiply}'
     + '#waveBan.seal .yin{animation:yinIn .18s .0s cubic-bezier(.5,0,.9,.4) forwards}'
-    + '#waveBan .hn{font:700 clamp(15px,2vw,19px) "PingFang SC",sans-serif;letter-spacing:.5em;text-indent:.5em;color:#f0d89a;text-shadow:0 2px 4px #000;animation:hnB 1.2s .6s ease-in-out infinite both}#waveBan.seal .hn{visibility:hidden}'
+    + '#waveBan .hn{font:400 clamp(16px,2.1vw,20px) WenKai,MaShanZheng,serif;letter-spacing:.5em;text-indent:.5em;color:#f0d89a;text-shadow:0 2px 4px #000;animation:hnB 1.2s .6s ease-in-out infinite both}#waveBan.seal .hn{visibility:hidden}'
     + '@keyframes jzOpen{from{clip-path:inset(0 50% 0 50%)}to{clip-path:inset(0 0 0 0)}}@keyframes jzClose{from{clip-path:inset(0 0 0 0)}to{clip-path:inset(0 50% 0 50%)}}@keyframes jzTx{from{opacity:0}}'
     + '@keyframes yinIn{0%{opacity:0;transform:rotate(-6deg) scale(2.6)}100%{opacity:.95;transform:rotate(-6deg) scale(1)}}@keyframes hnB{0%,100%{opacity:.35}50%{opacity:1}}'
     + '@media (pointer:fine){#joy{display:none!important}}'
