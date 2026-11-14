@@ -122,7 +122,7 @@
     const dt = box.querySelector('.dt'); if (!e) { dt.innerHTML = '<p class="no">点左边的武艺看详情。</p>'; return; }
     const t = T(), wn = t.WEPN[e.w];
     if (!has(e.id)) { dt.innerHTML = `<div class="pic lk">${sIco(e)}</div><h3>？？？</h3><span class="tg">${wn} · ${tierTx(e)}</span><p class="no">尚未学会。拾取或在行商买下秘籍学会后解锁。</p>`; return; }
-    dt.innerHTML = `<div class="pic">${sIco(e)}</div><h3>${e.o.name}</h3><span class="tg">武艺 · ${wn} · <b class="tr" style="color:${TCOL[e.o.tier || 0]}">${tierTx(e)}</b></span><h4>效 果</h4><p>${e.o.desc}</p><h4>出 手</h4><p>${t.spdTxt(e.o)}</p>`;
+    dt.innerHTML = `<div class="pic">${sIco(e)}</div><h3>${e.o.name}</h3><span class="tg">武艺 · ${wn} · <b class="tr" style="color:${TCOL[e.o.tier || 0]}">${tierTx(e)}</b></span>${(() => { const p = SURV.wuParts ? SURV.wuParts(e.id) : null; if (!p) return `<h4>效 果</h4><p>${e.o.desc}</p>`; return `<h4>出招方式</h4><p>${p.shape}</p><h4>特殊效果</h4><p>${p.state}</p><h4>修炼效果</h4><ul class="lvl">${p.lv.filter(x => x.l === 1 || x.sp).map(x => `<li><b>LV${x.l}</b>　${x.sp || x.up}</li>`).join('')}</ul>`; })()}<h4>出 手</h4><p>${t.spdTxt(e.o)}</p>`;
   }
   function detail(e) {
     const dt = box.querySelector('.dt'); if (!e) { dt.innerHTML = '<p class="no">点左边的头像看详情。</p>'; return; }
