@@ -1819,6 +1819,11 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(900px,58v
 #survPrep .vf u{background:url(art/ui/hud2/bar_red.webp) left center/auto 100% repeat-x!important}#survPrep .vf.zq u{background-image:url(art/ui/hud2/bar_blue.webp)!important}
 #survPrep .mo{border:0!important;border-image:none!important;background:url(art/ui/hud2/money.webp) center/100% 100% no-repeat!important;box-shadow:none!important;height:calc(64px*var(--k))!important;min-width:calc(166px*var(--k))!important;padding:0 calc(30px*var(--k)) 0 calc(76px*var(--k))!important;justify-content:center}#survPrep .mo em{display:none!important}
 #survPrep .ar em{filter:none!important}
+/* 11/14 用户对比群侠：属性栏套黑漆金回纹长框（九宫格不拉花），气血/真气条套两头尖角金框 */
+#survPrep .ab .ar{border:calc(16px*var(--k)) solid transparent!important;border-image:url(art/ui/dlg/box.webp) 34 fill stretch!important;background:none!important;box-shadow:none!important;height:calc(104px*var(--k));padding:0 calc(14px*var(--k));margin:0 calc(-14px*var(--k))}
+#survPrep .vf{border:calc(5px*var(--k)) calc(15px*var(--k)) solid transparent!important;border-image:url(art/ui/hud2/barframe.webp) 16 52 fill stretch!important;background:none!important;height:calc(26px*var(--k))!important;padding:0!important;overflow:visible!important}
+#survPrep .vf u{top:calc(2px*var(--k))!important;bottom:calc(2px*var(--k))!important;left:0}
+#survPrep .vt{gap:calc(2px*var(--k))!important}
 /* 11/14 用户的 HUD 美术：页签用暗牌匾 / 金牌匾（压暗一点不刺眼），继续按钮用云纹木牌匾 */
 #survPrep .tb button{background:url(art/ui/hud2/pl_dark.webp) center/100% 100% no-repeat!important;border:0!important;box-shadow:none!important;height:calc(58px*var(--k));width:calc(176px*var(--k));color:#b9a684!important}
 #survPrep .tb button.on{background:url(art/ui/hud2/pl_gold.webp) center/112% 128% no-repeat!important;filter:brightness(.82) saturate(.85)!important;color:#2a1606!important;text-shadow:0 1px 0 rgba(255,236,190,.5)!important;box-shadow:none!important}
