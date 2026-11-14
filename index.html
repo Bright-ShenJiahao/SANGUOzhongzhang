@@ -62,7 +62,7 @@ body.szz-pro #help{display:none}
 .x-back{min-height:34px!important}
 }
 #rot small{display:block;margin-top:10px;font-size:14px;font-weight:600;color:#c9b691;line-height:1.6}
-</style><link rel="preload" href="pack/fonts/result.woff2?v=7736880c7d" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=7736880c7d)format("woff2");font-display:swap}</style><style>@font-face{font-family:"WenKai";src:url(pack/fonts/kai.woff2?v=ae1106ad08)format("woff2");font-display:swap}</style><link rel="preload" href="pack/fonts/pixel.woff2?v=ea0727515b" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"Pixel12";src:url(pack/fonts/pixel.woff2?v=ea0727515b)format("woff2");font-display:swap}@font-face{font-family:"Songti SC";src:url(pack/fonts/pixel.woff2?v=ea0727515b)format("woff2");font-display:swap}@font-face{font-family:"STSong";src:url(pack/fonts/pixel.woff2?v=ea0727515b)format("woff2");font-display:swap}@font-face{font-family:"Noto Serif SC";src:url(pack/fonts/pixel.woff2?v=ea0727515b)format("woff2");font-display:swap}@font-face{font-family:"SimSun";src:url(pack/fonts/pixel.woff2?v=ea0727515b)format("woff2");font-display:swap}@font-face{font-family:"PingFang SC";src:url(pack/fonts/pixel.woff2?v=ea0727515b)format("woff2");font-display:swap}@font-face{font-family:"Microsoft YaHei";src:url(pack/fonts/pixel.woff2?v=ea0727515b)format("woff2");font-display:swap}@font-face{font-family:"Noto Sans CJK SC";src:url(pack/fonts/pixel.woff2?v=ea0727515b)format("woff2");font-display:swap}@font-face{font-family:"STKaiti";src:url(pack/fonts/pixel.woff2?v=ea0727515b)format("woff2");font-display:swap}@font-face{font-family:"KaiTi";src:url(pack/fonts/pixel.woff2?v=ea0727515b)format("woff2");font-display:swap}*{font-synthesis:none}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
+</style><link rel="preload" href="pack/fonts/result.woff2?v=6bf1d16157" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=6bf1d16157)format("woff2");font-display:swap}</style><style>@font-face{font-family:"WenKai";src:url(pack/fonts/kai.woff2?v=eaf191ae8e)format("woff2");font-display:swap}</style><link rel="preload" href="pack/fonts/pixel.woff2?v=02789616ca" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"Pixel12";src:url(pack/fonts/pixel.woff2?v=02789616ca)format("woff2");font-display:swap}@font-face{font-family:"Songti SC";src:url(pack/fonts/pixel.woff2?v=02789616ca)format("woff2");font-display:swap}@font-face{font-family:"STSong";src:url(pack/fonts/pixel.woff2?v=02789616ca)format("woff2");font-display:swap}@font-face{font-family:"Noto Serif SC";src:url(pack/fonts/pixel.woff2?v=02789616ca)format("woff2");font-display:swap}@font-face{font-family:"SimSun";src:url(pack/fonts/pixel.woff2?v=02789616ca)format("woff2");font-display:swap}@font-face{font-family:"PingFang SC";src:url(pack/fonts/pixel.woff2?v=02789616ca)format("woff2");font-display:swap}@font-face{font-family:"Microsoft YaHei";src:url(pack/fonts/pixel.woff2?v=02789616ca)format("woff2");font-display:swap}@font-face{font-family:"Noto Sans CJK SC";src:url(pack/fonts/pixel.woff2?v=02789616ca)format("woff2");font-display:swap}@font-face{font-family:"STKaiti";src:url(pack/fonts/pixel.woff2?v=02789616ca)format("woff2");font-display:swap}@font-face{font-family:"KaiTi";src:url(pack/fonts/pixel.woff2?v=02789616ca)format("woff2");font-display:swap}*{font-synthesis:none}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
 <style>button{letter-spacing:.04em!important}</style></head><body>
 <style>
 #bootSplash{position:fixed;inset:0;z-index:99999;background:radial-gradient(ellipse at 50% 45%,#f3e4cf 0%,#ecd9c0 55%,#d9c09f 100%);transition:opacity .45s ease-out}
@@ -112,7 +112,7 @@ if(location.protocol==='https:'&&!/[?&]debug(?:=|&|$)/.test(location.search)&&'s
 })();
 // 自动更新：打开游戏、或从后台切回来时，查一下线上有没有新版本；有就在标题/整备页自动刷新（战斗中不打扰）
 (function(){
-var BUILD='434973b44628',busy=false;
+var BUILD='a4e024984d11',busy=false;
 if(location.protocol!=='https:'||/[?&]debug(?:=|&|$)/.test(location.search))return;
 function check(){
   if(busy)return;
@@ -5904,7 +5904,9 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     return hittable().filter(z => inArc(x, y, z, a0, half, r) && DH(z, m, kb, Object.assign({ x }, o)));
   }
   function dCircle(x, y, r, m, kb, o = {}) {   // 圆（r 用方案单位）
-    r *= DK * RM; fx.push({ k: 'burst', x, y, r, t: 0, T: .4, col: o.col || '255,200,120' });
+    r *= DK * RM;
+    if (typeof DGM !== 'undefined' && DGM[CK]) { const tr = SK[CK].tier || 1; fx.push({ k: 'cut', n: tr >= 3 ? 'dh2' : 'dg6', x, y: y - 14, a: -.6, L: r * (tr >= 3 ? .5 : .7), t: 0, T: .32, col: hexRgb(SK[CK].color) }); }
+    else fx.push({ k: 'burst', x, y, r, t: 0, T: .4, col: o.col || '255,200,120' });
     return near(x, y, r).filter(z => DH(z, m, kb, Object.assign({ x }, o)));
   }
   function dRect(x0, y0, a, L, w, f) {   // 从 (x0,y0) 朝 a 长 L、半宽 w 的矩形（已换算好的像素），对里面的人调 f(z)
@@ -5959,7 +5961,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   DAO('daobo', 2, 'chop', { name: '偃月斩', icon: '月', color: '#ff8a7a', need: 150, wu: .50, rc: .30, beam: true, len: 143,
     desc: '劈出一道月牙刀气，一路穿透，挂 1 层流血。LV3 流血 2 层；LV5 刀气更宽更远；LV7 飞得更快',
     cast() { const L = dlv(), a = aim(), sp = (L >= 7 ? 760 : 620) * DK, R = (L >= 5 ? 340 : 260) * DK * RM, hw = (L >= 5 ? 65 : 45) * DK * RM;
-      const b = { x: hero.x, y: hero.y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp / 2, a, t: 0, T: R / sp, hitSet: [], nohit: 1, big2: L >= 5 ? 1 : 0, col: ['255,120,110', '255,235,225'] }; bolts.push(b);
+      const b = { x: hero.x, y: hero.y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp / 2, a, t: 0, T: R / sp, hitSet: [], nohit: 1, big2: L >= 5 ? 1 : 0, col: ['255,120,110', '255,235,225'], img: 'dg4', iw: hw * 2.4, tc: hexRgb(SK.daobo.color) }; bolts.push(b);
       DKO.push(dmk({ T: b.T, hs: new Set(), tick(o) { for (const z of hittable()) if (!o.hs.has(z) && Math.hypot(z.x - b.x, (z.y - b.y) * 2) < hw + 10) { o.hs.add(z); DH(z, 1.80, 20, { bl: L >= 3 ? 2 : 1, x: b.x - b.vx }); } } }));
       sfx(SW, hero.x); shake = Math.max(shake, .08); } });
   DAO('lianzhan', 2, 'sweep', { name: '叠锋斩', icon: '叠', color: '#ff9a8a', need: 65, wu: .45, rc: .35, range: 74, half: 1.83,
@@ -5981,13 +5983,13 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       const angs = [a + Math.PI / 4, a - Math.PI / 4].concat(L >= 5 ? [a] : []);
       DKO.push(dmk({ T: angs.length * .15 + .05, i: 0, tick(o) {
         while (o.i < angs.length && o.t >= o.i * .15) { const g = angs[o.i], x0 = px - Math.cos(g) * Lh, y0 = py - Math.sin(g) * Lh / 2;
-          fx.push({ k: 'line', x: x0, y: y0, a: g, L: Lh * 2, w, t: 0, T: .3, col: '255,140,120' }); dRect(x0, y0, g, Lh * 2, w, z => DH(z, o.i < 2 ? 1.00 : .80, 20, { bl, x: px })); sfx(SW, px); o.i++;
+          fx.push({ k: 'cut', n: 'dg6', x: px, y: py - 18, a: g, L: Lh * .95, t: 0, T: .3, col: hexRgb(SK.cuofeng.color) }); dRect(x0, y0, g, Lh * 2, w, z => DH(z, o.i < 2 ? 1.00 : .80, 20, { bl, x: px })); sfx(SW, px); o.i++;
           if (o.i === angs.length) dCircle(px, py, L >= 5 ? 75 : 55, L >= 7 ? .70 : .40, 10, { col: '255,160,140' }); } } })); } });
   // ---- 地 ----
   DAO('feilunren', 3, 'sweep', { name: '飞轮刃', icon: '轮', color: '#d8f0ff', need: 130, wu: .55, rc: .35, none: true,
     desc: '刀脱手绕身飞一整圈再收回（先外扩再收回），去程、回程各打一次，回程更重并挂 1 层流血。LV3 回程流血 2 层；LV5 两把一正一反；LV7 飞得更快',
     cast() { const L = dlv(), a0 = aim(), T = 1.6 / (L >= 7 ? 1.25 : 1), n = L >= 5 ? 2 : 1, k = n > 1 ? 1 / 2.4 : 1; sfx(SW, hero.x);
-      for (let j = 0; j < n; j++) { const dir = j ? -1 : 1, b = { x: hero.x, y: hero.y, vx: 0, vy: 0, a: 0, t: 0, T, hitSet: [], nohit: 1, shape: 'wheel', col: ['216,240,255', '255,255,255'] }; bolts.push(b);
+      for (let j = 0; j < n; j++) { const dir = j ? -1 : 1, b = { x: hero.x, y: hero.y, vx: 0, vy: 0, a: 0, t: 0, T, hitSet: [], nohit: 1, shape: 'wheel', col: ['216,240,255', '255,255,255'], img: 'dg1', iw: 46 * o0rm(), spin: 1, tc: hexRgb(SK.feilunren.color) }; bolts.push(b);
         DKO.push(dmk({ T, h1: new Set(), h2: new Set(), tick(o) { const q = Math.min(1, o.t / T), r = (120 + 60 * Math.sin(q * Math.PI)) * DK * o.rm, an = a0 + dir * q * Math.PI * 2;
           b.x = hero.x + Math.cos(an) * r; b.y = hero.y + Math.sin(an) * r * .5; const back = q > .5, hs = back ? o.h2 : o.h1;
           for (const z of hittable()) if (!hs.has(z) && Math.hypot(z.x - b.x, (z.y - b.y) * 2) < 24 * o.rm) { hs.add(z); DH(z, (back ? 1.40 : 1.00) * k, 20, { bl: back ? (L >= 3 ? 2 : 1) : 0, x: b.x }); } } })); } } });
@@ -6015,7 +6017,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   DAO('wanren', 4, 'spin', { name: '万刃归宗', icon: '万', color: '#b8f0ff', need: 200, wu: .80, rc: .50, none: true,
     desc: '14 柄飞刃从四周射向最近的敌人，一路穿透（同一人最多吃 6 柄），汇聚后一记巨斩（对浮空目标 ×1.4），并引爆目标身上全部流血（每层 0.25×）。LV3 引爆每层 0.35×；LV5 20 柄；LV7 巨斩更大',
     cast() { const L = dlv(), t = nearest(260), a = aim(), px = t ? t.x : hero.x + Math.cos(a) * 80, py = t ? t.y : clampY(hero.y + Math.sin(a) * 40), N = L >= 5 ? 20 : 14, Rr = 420 * DK * RM, ft = .35;
-      const bs = []; for (let i = 0; i < N; i++) { const g = i * Math.PI * 2 / N, sx = px + Math.cos(g) * Rr, sy = py + Math.sin(g) * Rr * .5; const b = { x: sx, y: sy, vx: (px - sx) / ft, vy: (py - sy) / ft, a: g + Math.PI, t: 0, T: ft, hitSet: [], nohit: 1, shape: 'sword', col: ['170,235,255', '255,255,255'] }; bolts.push(b); bs.push(b); }
+      const bs = []; for (let i = 0; i < N; i++) { const g = i * Math.PI * 2 / N, sx = px + Math.cos(g) * Rr, sy = py + Math.sin(g) * Rr * .5; const b = { x: sx, y: sy, vx: (px - sx) / ft, vy: (py - sy) / ft, a: g + Math.PI, t: 0, T: ft, hitSet: [], nohit: 1, shape: 'sword', col: ['170,235,255', '255,255,255'], img: 'dg6', iw: 34, tc: hexRgb(SK.wanren.color) }; bolts.push(b); bs.push(b); }
       sfx(SW, hero.x); const cnt = new Map();
       DKO.push(dmk({ T: ft + .02, done: 0, tick(o) {
         for (const b of bs) for (const z of hittable()) { if (b.hitSet.includes(z) || Math.hypot(z.x - b.x, (z.y - b.y) * 2) > 16) continue; b.hitSet.push(z); const c = cnt.get(z) || 0; if (c >= 6) continue; cnt.set(z, c + 1); DH(z, .35, 8, { x: b.x }); }
@@ -6071,6 +6073,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   // [图, 宽度=范围的几倍, 锚点x, 锚点y（图上哪一点放在落点）, 落点前移, 落点高度]
   const DGM = { hengsao: ['dg1', 2.6, .5, .8, 14, -14], lianzhan: ['dg1', 2.6, .5, .8, 14, -14], tuodao: ['dg2', 2.4, .5, .5, 10, -14], tiaozhan: ['dg3', 1.6, .3, .6, 14, -24], daobo: ['dg4', 2.2, .45, .6, 10, -26], cuofeng: ['dg4', 2.2, .45, .6, 10, -26], huima: ['dg5', 2.4, .5, .55, 0, -24],
     xuehe: ['dd_xuehe', 2.6, .5, .75, 20, -16], feilunren: ['dd_feilun', 2.6, .35, .5, 30, -16], liedihuan: ['dd_liedi', 3.2, .55, .88, 24, 2], tianbeng: ['dt_tianbeng', 1.7, .5, .9, 30, 4], wanren: ['dt_wanren', 2.2, .5, .5, 0, -16, .65] };
+  const o0rm = () => RM;
   const hexRgb = h => { const c = (h || '#ffe0a0').replace('#', ''); return [0, 2, 4].map(i => parseInt(c.slice(i, i + 2), 16)).join(','); };
   function daoSlash(key, a1, x1, y1) {
     const m = DGM[key], o = SK[key]; if (!m || !o) return; daoSlash.t = DKT;
@@ -7077,6 +7080,9 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     }
     for (const b of bolts) {   // 月牙刀波；石子、黄符、豆兵另画
       const p = b.t / b.T, al = 1 - p * p;
+      if (b.img && DGI[b.img] && DGI[b.img].complete && DGI[b.img].naturalWidth) {   // 11/14：刀招的飞行物用刀光图（偃月斩刀气、万刃归宗飞刃、飞轮刃刀轮暂代）
+        const im = DGI[b.img], w = b.iw, h = w * im.naturalHeight / im.naturalWidth; ctx.save(); ctx.translate(b.x, b.y - 16); ctx.rotate(b.spin ? b.t * 14 : Math.atan2(b.vy * 2, b.vx)); if (b.spin) ctx.scale(1, .55); ctx.globalCompositeOperation = 'lighter';
+        ctx.globalAlpha = Math.min(1, al + .4); ctx.drawImage(dgTint(b.img, b.tc), -w / 2, -h / 2, w, h); ctx.globalAlpha *= .5; ctx.drawImage(im, -w / 2, -h / 2, w, h); ctx.restore(); continue; }
       if (b.shape || b.col === STN || b.col === FUC || b.big) {
         ctx.save(); ctx.translate(b.x, b.y - 16); ctx.globalAlpha = Math.min(1, al + .3); ctx.strokeStyle = 'rgba(40,30,20,.95)'; ctx.lineWidth = 1.5;
         if (b.big) { ctx.fillStyle = '#f2c94c'; ctx.beginPath(); ctx.arc(0, 0, 8, 0, 7); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#fff4c8'; ctx.beginPath(); ctx.arc(-2, -3, 3, 0, 7); ctx.fill(); }
