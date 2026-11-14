@@ -92,6 +92,7 @@
   #kaiju .slots div{aspect-ratio:1;max-width:calc(54px*var(--k));border:2px solid var(--rdd);background:var(--ink2) center/cover;position:relative;box-shadow:inset 0 0 0 2px #0b0a08;display:flex;align-items:center;justify-content:center;font-size:calc(18px*var(--k));color:var(--gl)}
   #kaiju .slots div:before,#kaiju .slots div:after{content:"";position:absolute;width:7px;height:7px;border:2px solid var(--rd);pointer-events:none}
   #kaiju .slots div:before{left:-2px;top:-2px;border-right:0;border-bottom:0}#kaiju .slots div:after{right:-2px;bottom:-2px;border-left:0;border-top:0}
+  #kaiju .slots div .tp{display:none;position:absolute;left:0;bottom:calc(100% + 8px);width:min(320px,60vw);padding:8px 12px;background:rgba(12,9,6,.97);border:1px solid #b08a4a;box-shadow:0 4px 14px rgba(0,0,0,.7);color:#e8dcc0;font:500 13px/1.55 "PingFang SC",sans-serif;text-align:left;z-index:30;cursor:default}#kaiju .slots div .tp b{font-size:15px}#kaiju .slots div .tp em{font-style:normal;color:#a8977a;font-size:12px;margin-left:8px}#kaiju .slots div.has:hover .tp,#kaiju .slots div.has:focus .tp{display:block}#kaiju .slots div.has{cursor:help;outline:none}   /* 11/14 用户：起手武艺移上去（手机点一下）看简介详情 */
   #kaiju .slots div.has{border-color:var(--gl);box-shadow:inset 0 0 0 2px #0b0a08,0 0 8px rgba(240,200,110,.3)}
   #kaiju .slots div i{position:absolute;right:3px;bottom:1px;font-style:normal;font-size:calc(10px*var(--k));color:var(--gl);text-shadow:0 1px 2px #000}
   #kaiju .skd{margin-top:7px;font-size:calc(12px*var(--k));color:#bfb196;line-height:1.6}#kaiju .skd b{font-weight:400;font-size:calc(14px*var(--k))}
@@ -136,7 +137,7 @@
           <div class="sec"><h4><i style="background-image:url('${K2('h_ge')}')"></i>兵器路数</h4>
           <div class="tiles wp">${(o.weps || [o.wep]).map(w => `<button data-w="${w}" class="tile wd ${w === curW ? 'on' : ''}"><div class="ico" ${ic(K2('w' + w))}></div><span><b>${SURV.WEPN[w]}</b><small>${w === curW ? '本门 · 伤害 +10%' : '出身兵器'}</small></span></button>`).join('')}</div>
           <div class="eff">效果：${SURV.WEPN[curW]} 武艺伤害 +10%　出身外的兵器 −15%</div>
-          <div class="eff">起手武艺：<em style="color:${sk ? sk.color : '#fff'}">${sk ? sk.name : '—'}</em>${sk ? '　' + sk.desc : ''}</div></div>
+          </div>
           <div class="sec"><h4><i style="background-image:url('${K2('h_gu')}')"></i>难度</h4>
           <div class="tiles diff"><button class="tile ${hard ? '' : 'on'}" data-h="0" title="标准"><div class="ico" ${ic(PIC.std)}></div><span><b>标准</b><small>小试牛刀，来去自如</small></span></button><button class="tile ${hard ? 'on' : ''}" data-h="1" title="困难"><div class="ico" ${ic(PIC.hard)}></div><span><b style="color:#e8826a">困难</b><small>敌人更强，积分×1.25</small></span></button></div></div>
         </div>
@@ -147,7 +148,7 @@
           <div class="att">${ai.map((r, i) => `<div class="${i === axSel ? 'sel' : ''} ${r[1] > 3 ? 'hi' : r[1] < 3 ? 'lo' : ''}" data-a="${i}" title="${r[2]}：${r[3]}"><span>${r[0]}</span><b>${pctOf(r[2])}</b></div>`).join('')}</div>
           <div class="axd">${axSel >= 0 && ai[axSel] ? '<b>' + ai[axSel][0] + '</b>　' + ai[axSel][2] + '　' + ai[axSel][3] : '点属性看它加的是什么'}</div></div>
           <div class="sec"><h4><i style="background-image:url('${K2('w' + curW)}')"></i>起手武艺</h4>
-          <div class="slots sk">${[0, 1, 2, 3, 4].map(i => i === 0 && sk ? (SKI[SURV.startSk ? SURV.startSk() : o.skill] ? `<div class="has" title="${sk.name}" ${ic(SKI[SURV.startSk ? SURV.startSk() : o.skill])}></div>` : `<div class="has" title="${sk.name}" style="color:${sk.color}">${sk.icon || sk.name[0]}</div>`) : '<div></div>').join('')}</div>
+          <div class="slots sk">${[0, 1, 2, 3, 4].map(i => i === 0 && sk ? (SKI[SURV.startSk ? SURV.startSk() : o.skill] ? `<div class="has" tabindex="0" ${ic(SKI[SURV.startSk ? SURV.startSk() : o.skill])}><span class="tp"><b style="color:${sk.color}">${sk.name}</b>${sk.tier ? '<em>' + ['', '黄', '玄', '地', '天'][sk.tier] + '阶 · 起手武艺</em>' : ''}<br>${sk.desc}</span></div>` : `<div class="has" tabindex="0" style="color:${sk.color}">${sk.icon || sk.name[0]}<span class="tp"><b style="color:${sk.color}">${sk.name}</b>${sk.tier ? '<em>' + ['', '黄', '玄', '地', '天'][sk.tier] + '阶 · 起手武艺</em>' : ''}<br>${sk.desc}</span></div>`) : '<div></div>').join('')}</div>
           <div class="skd">起手 1 个武艺，其余路上习得；5 格依次自动出手。</div></div>
           <div class="sec"><h4><i style="background-image:url('art/ui/kaiju/bag.webp')"></i>行囊</h4>
           <div class="slots bag"><div class="has" style="background-image:url('art/ui/kaiju/bag.webp')" title="盘缠"><i>0</i></div>${'<div></div>'.repeat(4)}</div></div>

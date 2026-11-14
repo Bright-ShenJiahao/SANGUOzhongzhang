@@ -98,7 +98,7 @@ var ready=false,failed=false,p=0,el=function(i){return document.getElementById(i
  say=setInterval(function(){if(failed)return;wi=(wi+1)%words.length;line();},2000);
 (function(){var place=function(){var w=innerWidth,h=innerHeight,pt=w<h*.9,btnH=Math.max(40,Math.min(54,h*.085)),g1=Math.max(pt?30:26,h*.045),tH,tW,cx,top;
   if(pt){tW=Math.min(w*.56,280,h*.36*984/1387);tH=tW*1387/984;cx=w/2;top=Math.max(h*.42,h-14-btnH-g1-tH);}else{tH=Math.min(h*.7,900,h-160);tW=tH*984/1387;cx=w*.77;top=Math.max(6,(h-tH-g1-btnH)/2);}
-  var o=el('bootSlot').style;o.left=cx+'px';o.top=(top+tH+g1+btnH)+'px';o.bottom='auto';o.transform='translate(-50%,-100%)';o.width=Math.max(200,tW*1.1)+'px';o.maxWidth='none';};   /* 11/14 用户：加载的「出征」和进度条放在首页标题+按钮那一块，和首页对齐 */
+  var bs=el('bootSlot');if(!bs)return;var o=bs.style;o.left=cx+'px';o.top=(top+tH+g1+btnH)+'px';o.bottom='auto';o.transform='translate(-50%,-100%)';o.width=Math.max(200,tW*1.1)+'px';o.maxWidth='none';};   /* 11/14 用户：加载的「出征」和进度条放在首页标题+按钮那一块，和首页对齐 */
  place();addEventListener('resize',place);})();
 (function(){var a=el('bootArt'),u=getComputedStyle(a).backgroundImage.replace(/^url\(["']?|["']?\)$/g,''),im=new Image();im.onload=function(){a.classList.add('on');};im.src=u;})();
 function error(message){if(ready)return;failed=true;el('bootText').textContent='加载出错';el('bootRefresh').hidden=false;el('bootError').textContent=String(message||'未知错误');}

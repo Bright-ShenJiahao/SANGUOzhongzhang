@@ -1387,9 +1387,17 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   // ---------- 节点结算：连选 n 次（武艺 / 强化 三选一）----------
   function rewardOptions(kind) {
     const owned = S.slots.filter(Boolean).concat(S.owned || []), free = true;   // 格子满了也能学（放进掌握武学）
-    const sk = (free ? Object.keys(SK).filter(k => !owned.includes(k) && tierOk(k) && !SK[k].off && (!ONLY_DAO || wepOk(k))) : []).sort(() => Math.random() - .5).slice(0, kind === 'skill' ? 3 : 2).map(k => ({ kind: 'skill', k, q: Math.min(3, SK[k].tier || 0), name: SK[k].name, icon: SK[k].icon, color: SK[k].color, desc: (SK[k].tier ? TIERN[SK[k].tier] + '阶 · ' : '') + SK[k].desc }));
+    const sk = (free ? Object.keys(SK).filter(k => !owned.includes(k) && tierOk(k) && !SK[k].off && (!ONLY_DAO || wepOk(k))) : []).sort(() => Math.random() - .5).slice(0, kind === 'skill' ? 3 : 2).map(k => ({ kind: 'skill', k, q: Math.min(3, SK[k].tier || 0), name: SK[k].name, icon: SK[k].icon, color: SK[k].color, desc: (SK[k].tier ? TIERN[SK[k].tier] + '阶 · ' : '') + SK[k].desc.split(/[；;]/)[0].replace(/[，,]?\s*LV\d.*$/, '') }));
     const gp = Object.keys(GF).filter(id => { const g = GF[id]; return !g.off && (!ONLY_DAO || g.c < 2) && !S.gf.includes(id) && S.qg !== id && !(S.owned || []).includes(id) && W.n >= TMIN[g.t + 1]; });
     const pk = gp.sort(() => Math.random() - .5).map(id => { const g = GF[id]; return { kind: 'gf', id, q: g.t, name: g.n, icon: g.qg ? '轻' : g.n[0], color: GTC[g.t], desc: GTN[g.t] + '阶 · ' + (g.qg ? '轻功 · ' : g.c >= 0 ? g.cn + ' · ' : '内功 · ') + gfText(g) }; });
+    {   // 11/14 用户定：三张里保底一张本门武艺；阶位按概率：黄七成、玄三成（有的话），不直接给玄
+      const mine = Object.keys(SK).filter(k => !owned.includes(k) && tierOk(k) && !SK[k].off && wepOf(k) === heldW());
+      if (mine.length && !sk.some(o => wepOf(o.k) === heldW())) {
+        const want = Math.random() < .3 ? 2 : 1, byT = t => mine.filter(k => (SK[k].tier || 1) === t), L = byT(want).length ? byT(want) : byT(1).length ? byT(1) : mine, k = L[(Math.random() * L.length) | 0];
+        const o = { kind: 'skill', k, q: Math.min(3, SK[k].tier || 0), name: SK[k].name, icon: SK[k].icon, color: SK[k].color, desc: (SK[k].tier ? TIERN[SK[k].tier] + '阶 · ' : '') + SK[k].desc.split(/[；;]/)[0].replace(/[，,]?\s*LV\d.*$/, '') };
+        if (sk.length) sk[0] = o; else sk.push(o);
+      }
+    }
     if (pk.length < 3) pk.push({ kind: 'heal', name: '回春', icon: '春', color: '#ff9a9a', desc: '立刻回复 40% 血量' });
     if (kind === 'perk') return pk.slice(0, 3);
     return sk.concat(pk).slice(0, 3).sort(() => Math.random() - .5);
@@ -1399,8 +1407,9 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     const kind = kinds && kinds[Math.min(i, kinds.length) - 1], opts = rewardOptions(kind); W.pick = true;
     const old = document.getElementById('survPick'); if (old) old.remove();
     const box = document.createElement('div'); box.id = 'survPick';
-    box.innerHTML = `<div class="p"><h3>战利 · ${kind === 'skill' ? '武艺 · ' : kind === 'perk' ? '心法 · ' : ''}${n > 1 ? '第 ' + i + '/' + n + ' 次 · ' : ''}三选一</h3><div class="row">${opts.map((o, j) => `<button data-j="${j}" class="q${o.q || 0}"><i style="font-style:normal;font-size:11px;opacity:.7">${o.kind === 'skill' ? '新武艺 · 主动' : o.kind === 'gf' ? '心法 · 被动' : '回血'}</i>${o.kind === 'skill' || o.kind === 'gf' ? `<div class="pkb">${bookOf(o)}</div>` : iconUrl(o.kind, o.k || o.id) ? `<em class="ic" style="background-image:url('${iconUrl(o.kind, o.k || o.id)}')"></em>` : `<b style="color:${o.color}">${o.icon}</b>`}<span>${o.name}</span><small>${o.desc}</small></button>`).join('')}</div>${S.slots.indexOf('') >= 0 ? '<p>新武艺放进空着的格子；格子满了就收进「掌握武学」，到整备屏「武学」页换上</p>' : ''}</div>`;
-    box.querySelectorAll('button').forEach(b => b.onclick = () => {
+    box.innerHTML = `<div class="p"><h3>战利 · ${kind === 'skill' ? '武艺 · ' : kind === 'perk' ? '心法 · ' : ''}${n > 1 ? '第 ' + i + '/' + n + ' 次 · ' : ''}三选一</h3><div class="row">${opts.map((o, j) => `<button data-j="${j}" class="q${o.q || 0}"><i style="font-style:normal;font-size:11px;opacity:.7">${o.kind === 'skill' ? '新武艺 · 主动' : o.kind === 'gf' ? '心法 · 被动' : '回血'}</i>${o.kind === 'skill' || o.kind === 'gf' ? `<div class="pkb">${bookOf(o)}</div>` : iconUrl(o.kind, o.k || o.id) ? `<em class="ic" style="background-image:url('${iconUrl(o.kind, o.k || o.id)}')"></em>` : `<b style="color:${o.color}">${o.icon}</b>`}<span>${o.name}</span><small>${o.desc}</small></button>`).join('')}</div><div style="text-align:center;margin-top:6px"><button class="skip">都不要 · 换 15 铜钱</button></div>${S.slots.indexOf('') >= 0 ? '<p>新武艺放进空着的格子；格子满了就收进「掌握武学」，到整备屏「武学」页换上</p>' : ''}</div>`;
+    box.querySelector('.skip').onclick = () => { S.money = (S.money || 0) + 15; if (window.SFX) SFX.play('j_coin'); box.remove(); offerReward(n, cb, i + 1, kinds); };   // 11/14 用户定：三张都不要就换钱
+    box.querySelectorAll('button[data-j]').forEach(b => b.onclick = () => {
       const o = opts[+b.dataset.j];
       if (o.kind === 'skill' || o.kind === 'gf') learn(o); else heal(maxHp() * .4);   // 11/11：格子满了以前会白选（学不进去），改走 learn：满了就进「掌握武学」
       box.remove(); offerReward(n, cb, i + 1, kinds);
@@ -2470,6 +2479,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     + '@media (pointer:fine){#bR:after{content:"空格";position:absolute;left:0;right:0;bottom:-18px;font:700 12px "PingFang SC",sans-serif;color:#f3dc9a;text-shadow:0 1px 2px #000}}'
     + '#bPause{background:url(art/ui/hud2/pause.webp) top center/100% auto no-repeat!important;border:0!important;width:42px!important;height:72px!important;box-shadow:none!important}#bPause .pause-icon-bar{display:none!important}'
     + '#survPick button.q0,#survPick button.q1,#survPick button.q2,#survPick button.q3{background:center/100% 100% no-repeat!important;border:0!important;width:156px!important;min-height:236px;padding:22px 14px 18px!important;justify-content:flex-start;gap:4px;border-radius:0!important}'
+    + '#survPick button.skip{display:inline-block!important;width:auto!important;min-height:0!important;padding:5px 22px!important;background:rgba(20,14,9,.92)!important;border:1px solid #8a6a32!important;color:#d8c49a!important;font:15px WenKai,serif!important;white-space:nowrap}#survPick button.skip:hover{border-color:#e2c27a!important;color:#fff0cc!important}'
     + '#survPick button small{min-height:3.1em;display:block;line-height:1.5;text-align:center}#survPick .row{align-items:stretch}'   // 11/14 用户：三张卡的名字、说明要横着对齐（从上往下排，说明留够两行）
     + '#survPick button.q0{background-image:url(art/ui/card/q0.webp)!important}#survPick button.q1{background-image:url(art/ui/card/q1.webp)!important}#survPick button.q2{background-image:url(art/ui/card/q2.webp)!important}#survPick button.q3{background-image:url(art/ui/card/q3.webp)!important}'
     + '#survPick button.q0:hover,#survPick button.q1:hover,#survPick button.q2:hover,#survPick button.q3:hover{transform:translateY(-4px);filter:brightness(1.15)}'
