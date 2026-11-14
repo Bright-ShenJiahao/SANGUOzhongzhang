@@ -2,13 +2,20 @@
 (function () {
   const POR = {
     hero: 'art/ui/npc/hero_lihui.webp', liubei: 'art/ui/npc/liubei_lihui.webp', guanyu: 'art/ui/npc/guanyu_lihui.webp', zhangfei: 'art/ui/npc/zhangfei_lihui.webp',
-    zhangjiao: 'art/ui/npc/zhangjiao_lihui.webp',
+    zhangjiao: 'art/ui/npc/zhangjiao_lihui.webp', zhang_jiao: 'art/ui/npc/zhangjiao_lihui.webp', cheng_yuanzhi: 'art/ui/npc/cheng_yuanzhi_lihui.webp',
   };
-  const NAME = { liubei: '刘备', guanyu: '关羽', zhangfei: '张飞', zhangjiao: '张角' };
+  const NAME = { liubei: '刘备', guanyu: '关羽', zhangfei: '张飞', zhangjiao: '张角', zhang_jiao: '张角', cheng_yuanzhi: '程远志' };
+  // 11/14 用户：只给大首领台词（登场一句、被打败一句），有立绘的才说
+  const BLINES = {
+    cheng_yuanzhi: ['涿郡的小子，敢挡黄天的路？老子这口大刀，正缺个磨刀石！', '这……这是哪来的狠角色……撤！快撤！'],
+    zhang_jiao: ['黄天当立！尔等蝼蚁，也敢登我祭台？', '苍天……竟不佑我黄天……'],
+  };
+  function boss(t, out, done) { const L = BLINES[t]; if (!L || !POR[t] || skipStory()) return false; play([{ who: t, t: L[out ? 1 : 0] }], done, 1); return true; }
   const HEAD = {};   // 只有头像的：缩小放进暗框
   const skipStory = () => { try { return localStorage.getItem('szz-skip-story') === '1'; } catch (e) { return false; } };
   const css = `
 #szzStory{position:fixed;inset:0;z-index:12500;background:#0b0806;overflow:hidden;font-family:WenKai,"STKaiti","KaiTi",serif;user-select:none;-webkit-user-select:none}
+#szzStory.see{background:rgba(6,4,2,.42)}#szzStory.see .sh{background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.55))}
 #szzStory .bg{position:absolute;inset:0;background:center/cover no-repeat;opacity:0;transition:opacity .6s}
 #szzStory .bg.on{opacity:1}
 #szzStory .sh{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.15),rgba(0,0,0,.05) 45%,rgba(0,0,0,.7))}
@@ -35,9 +42,9 @@
     if (!document.getElementById('szzStoryCss')) { const s = document.createElement('style'); s.id = 'szzStoryCss'; s.textContent = css; document.head.appendChild(s); }
   }
   // lines: [{ who:'liubei'|'hero'|'zhangjiao'|''(旁白), name?, bg?, t:'台词' }]
-  function play(lines, done) {
+  function play(lines, done, see) {
     ensure(); if (box) box.remove();
-    box = document.createElement('div'); box.id = 'szzStory';
+    box = document.createElement('div'); box.id = 'szzStory'; if (see) box.className = 'see';   // see：首领台词，战场半透明压暗露在后面
     box.innerHTML = '<div class="bg"></div><div class="bg"></div><div class="sh"></div><img class="pt" alt=""><div class="box"><div class="nm"></div><div class="bt"><button class="n" title="下一句"></button><button class="s" title="跳过剧情"></button></div><div class="tx"></div><div class="hn">点击<span class="k"> / 空格</span> 继续<span class="k">　长按空格 跳过</span><em></em></div></div>';
     document.body.appendChild(box);
     const bgs = box.querySelectorAll('.bg'), pt = box.querySelector('.pt'), nm = box.querySelector('.nm'), tx = box.querySelector('.tx');
@@ -85,5 +92,5 @@
       { who: 'liubei', bg: 'art/ui/story/bg2.webp', t: '出发之前，我兄弟三人，各有一份心意。' },
     ], done);
   }
-  window.STORY = { play, intro, active: () => !!st, skipStory };
+  window.STORY = { play, intro, boss, active: () => !!st, skipStory };
 })();
