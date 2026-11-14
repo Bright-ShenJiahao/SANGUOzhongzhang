@@ -540,7 +540,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const shotAt = (x, y, a, o) => bolts.push(Object.assign({ x, y, vx: Math.cos(a) * 270, vy: Math.sin(a) * 135, a, t: 0, T: .6, hitSet: [], dmg: 1.2, col: ['200,200,195', '245,245,240'] }, o));
   const STN = ['190,186,176', '240,236,226'], FUC = ['255,214,90', '255,248,200'];
   const stunz = (z, t) => { z.stun = Math.max(z.stun || 0, t); };
-  function chain(n, range, dmg, col, gap) {   // 在敌人之间连跳 n 次（跳石、掌心雷）
+  function chain(n, range, dmg, col, gap) {   // 在敌人之间连跳 n 次（掌心雷等）
     let x = hero.x, y = hero.y; const hitd = [];
     for (let i = 0; i < n; i++) later(i * (gap || .09), () => {
       let t = null, bd = range; for (const z of hittable()) { if (hitd.includes(z)) continue; const d = Math.hypot(z.x - x, (z.y - y) * 2); if (d < bd) { bd = d; t = z; } }
@@ -1211,8 +1211,8 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   }
   const openStone = () => true;
 
-  SG('feishi', 1, 'thrust', 340, .26, .20, .70, 1.3, '飞石',
-    '直掷一颗飞石，命中首个敌人；LV3 命中使敌人迟缓；LV5 命中后分出两颗碎石追击其他敌人；LV7 主石对迟缓目标伤害 +15%', () => {
+  SG('feishi', 1, 'thrust', 340, .26, .20, .70, 1.3, '惊鸿石',
+    '直掷一颗石子，命中首个敌人；LV3 命中使敌人迟缓；LV5 命中后分出两颗碎石追击其他敌人；LV7 主石对迟缓目标伤害 +15%', () => {
       const c = stoneCast(), L = dlv(), p = { x: hero.x, y: hero.y };
       stoneShot(p, stoneAim(p), stoneScale(380), stoneScale(28), openStone, z => {
         stoneHit(c, z, .80, p, { slow: L >= 3, bonus: L >= 7 ? .15 : 0 });
@@ -1222,7 +1222,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       });
     });
 
-  SG('sashi', 1, 'sweep', 260, .30, .22, .75, 1.3, '撒石',
+  SG('sashi', 1, 'sweep', 260, .30, .22, .75, 1.3, '散花石',
     '向前方扇形撒出五颗石子，每敌最多命中两次；LV3 命中施加迟缓；LV5 改撒七颗并展开扇面；LV7 对迟缓目标击退加强', () => {
       const c = stoneCast(), L = dlv(), p = { x: hero.x, y: hero.y }, a = stoneAim(p);
       const n = (L >= 5 ? 7 : 5) + (HAS('feihuangnang') ? 2 : 0), hits = new Map();
@@ -1235,8 +1235,8 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
         });
     });
 
-  SG('tiaoshi', 1, 'thrust', 300, .28, .22, .72, 1.3, '跳石',
-    '飞石在附近不同敌人之间弹射，无下一目标时可回击当前敌人一次；LV3 首击施加迟缓；LV5 多跳一人并扩大弹射范围；LV7 末次命中处爆开', () => {
+  SG('tiaoshi', 1, 'thrust', 300, .28, .22, .72, 1.3, '漂萍石',
+    '石子在附近不同敌人之间弹射，无下一目标时可回击当前敌人一次；LV3 首击施加迟缓；LV5 多跳一人并扩大弹射范围；LV7 末次命中处爆开', () => {
       const c = stoneCast(), L = dlv(), p = { x: hero.x, y: hero.y }, seen = new Set();
       const cap = (L >= 5 ? 5 : 4) + (HAS('feihuangnang') ? 1 : 0), range = stoneScale(L >= 5 ? 180 : 160);
       const explode = z => {
@@ -1283,8 +1283,8 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       });
     });
 
-  SG('xuanshi', 2, 'spin', 300, .32, .26, .72, 1.3, '回旋石',
-    '投出贯穿的回旋石，去程和回程分别结算；LV3 回程施加迟缓；LV5 展开成左右双轨，共享去程及回程伤害上限；LV7 折返时各分成两颗碎石', () => {
+  SG('xuanshi', 2, 'spin', 300, .32, .26, .72, 1.3, '回燕石',
+    '投出可贯穿敌人的石子，去程和回程分别结算；LV3 回程施加迟缓；LV5 展开成左右双轨，共享去程及回程伤害上限；LV7 折返时各分成两颗碎石', () => {
       const c = stoneCast(), L = dlv(), p = { x: hero.x, y: hero.y }, a = stoneAim(p);
       const out = new Map(), back = new Map(), range = stoneScale(340), w = stoneScale(36);
       const returnCap = L >= 7 ? 2 : 1;
@@ -1318,7 +1318,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       return .28;
     });
 
-  SG('paoshi', 2, 'sweep', 180, .28, .24, .75, 1.3, '缠足石',
+  SG('paoshi', 2, 'sweep', 180, .28, .24, .75, 1.3, '锁足石',
     '向附近最多四名敌人脚边各投一颗；命中施加迟缓；LV3 迟缓多半秒；LV5 最多攻击六名敌人；LV7 轻推已迟缓的目标', () => {
       const c = stoneCast(), L = dlv(), p = { x: hero.x, y: hero.y }, range = stoneScale(200);
       for (const z of stoneTargets(p, range).slice(0, L >= 5 ? 6 : 4)) {
@@ -1326,7 +1326,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       }
     });
 
-  SG('gunshi', 3, 'thrust', 380, .46, .34, .80, 1.7, '流星赶月',
+  SG('gunshi', 3, 'thrust', 380, .46, .34, .80, 1.7, '赶月石',
     '抛出贯穿主石，命中后分出追击碎石，每敌主石和碎石各最多命中一次；LV3 主石施加迟缓；LV5 每次最多分出两颗碎石，全招最多六颗；LV7 碎石对迟缓目标伤害 +20%', () => {
       const c = stoneCast(), L = dlv(), p = { x: hero.x, y: hero.y }, hits = new Set(), range = stoneScale(150);
       let chips = 0;
@@ -1343,7 +1343,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       }, null, 1.65);
     });
 
-  SG('luanshi', 3, 'sweep', 340, .55, .40, .73, 2.0, '乱石穿林',
+  SG('luanshi', 3, 'sweep', 340, .55, .40, .73, 2.0, '穿林石',
     '前方走廊内依次落下十二颗石子，每敌最多命中五次；LV3 命中施加迟缓；LV5 改为前后两段交错落点，共十六颗；LV7 迟缓多一秒', () => {
       const c = stoneCast(), L = dlv(), p = { x: hero.x, y: hero.y }, a = stoneAim(p);
       const n = L >= 5 ? 16 : 12, hits = new Map(), r = stoneScale(32), length = stoneScale(380), halfWidth = stoneScale(50);
@@ -1364,7 +1364,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       });
     });
 
-  SG('raoshen', 3, 'spin', 220, .40, .32, .75, 1.5, '飞蝗石阵',
+  SG('raoshen', 3, 'spin', 220, .40, .32, .75, 1.5, '流萤石',
     '六颗石子先绕身，随后飞向附近敌人；LV3 环绕命中施加迟缓；LV5 增至八颗并优先分散索敌；LV7 飞出后回到身边再绕一圈', () => {
       const c = stoneCast(), L = dlv(), n = L >= 5 ? 8 : 6, r = stoneScale(75), range = stoneScale(280);
       const roll = S.stoneRoll || 0, flightHits = new Map();
@@ -1822,7 +1822,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     hetan: { n: '河滩卵石', q: 0, w: 7, wd: .08, icon: 'muqiang', d: '石子武艺伤害 +8%' },
     bunangshi: { n: '布囊石袋', q: 0, w: 7, wd: 0, icon: 'wuzhu', d: '石子武艺出手快 10%（起手、收势都缩短）' },
     tiejishi: { n: '铁蒺石', q: 1, w: 7, wd: 0, icon: 'jili', d: '石子武艺对迟缓目标伤害 +18%', c: '移速 −5%' },
-    feihuangnang: { n: '飞蝗石囊', q: 1, w: 7, wd: 0, icon: 'muniu', d: '跳石多跳一名敌人；撒石、漫天飞蝗各多投两颗', c: '这三招的伤害 −15%' },
+    feihuangnang: { n: '飞蝗石囊', q: 1, w: 7, wd: 0, icon: 'muniu', d: '漂萍石多跳一名敌人；散花石、漫天飞蝗各多投两颗', c: '这三招的伤害 −15%' },
     liuxingshi: { n: '流星石', q: 2, w: 7, wd: 0, icon: 'longdan', d: '石子打中迟缓敌人时，碎星石追击附近另一名敌人，每次出招最多两颗', c: '石子以外的武艺伤害 −30%' },
     baipi: { n: '百辟刀', q: 2, w: 0, wd: .3, d: '刀的武艺伤害 +30%；流血最多叠 8 层、破甲最多 6 层', c: '刀以外的武艺伤害 −30%' },
     yuxi: { n: '传国玉玺', q: 2, d: '武艺伤害 +25%，每仗打完多回 15% 气血', c: '敌人血量 +15%' },
