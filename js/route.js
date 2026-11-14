@@ -214,6 +214,11 @@
   const EV_CSS = '.rtEv{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 45%,rgba(14,10,8,.55),rgba(6,4,3,.82));z-index:3;font-family:' + UI_Q + ';color:#efe2c6}'
     + '.rtEv .pn{position:relative;width:min(720px,94vw);box-sizing:border-box;padding:clamp(26px,5vh,46px) clamp(26px,4vw,48px) clamp(20px,4vh,36px);border:clamp(26px,5vh,40px) solid transparent;border-image:url(art/ui/prep/panel.webp) 90 fill stretch;text-align:center}'
     + '.rtEv .tt{position:absolute;left:50%;top:clamp(-30px,-4.5vh,-18px);transform:translateX(-50%);padding:0 clamp(28px,4vw,46px);height:clamp(36px,7vh,52px);display:flex;align-items:center;white-space:nowrap;border:12px solid transparent;border-image:url(art/ui/prep/btn.webp) 40 fill stretch;font:900 clamp(20px,3.6vh,30px) ' + FONT_Q + ';letter-spacing:.3em;text-indent:.3em;color:#f3d08a;text-shadow:0 2px 0 #2a1608}'
+    + '.rtEv.wi .pn{width:min(1060px,96vw);display:flex;gap:clamp(14px,2vw,26px);align-items:stretch;text-align:left}'
+    + '.rtEv.wi .im{flex:0 0 46%;min-height:clamp(150px,34vh,330px);background:#1a120c center/cover no-repeat;border:2px solid #8a6a32;box-shadow:inset 0 0 30px rgba(0,0,0,.55),0 3px 10px rgba(0,0,0,.6);border-radius:3px;filter:sepia(.12)}'
+    + '.rtEv.wi .rc{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center}'
+    + '.rtEv.wi .op{flex-direction:column;align-items:stretch}.rtEv.wi .op button{width:auto!important;max-width:none!important}'
+    + '@media (max-height:520px){.rtEv.wi .pn{padding:10px 14px 8px;border-width:18px;max-height:96vh}.rtEv.wi .im{min-height:0;flex-basis:40%}.rtEv.wi .pf{display:none}.rtEv.wi .bd{margin:4px 0 6px}.rtEv.wi .ds,.rtEv.wi .sy{font-size:12px!important;line-height:1.45}.rtEv.wi .hp{font-size:11px!important;margin:2px 0!important}.rtEv.wi .op{gap:5px}.rtEv.wi .op button{padding:4px 8px!important;font-size:13px!important}.rtEv.wi .op button small{min-height:0!important;font-size:11px}.rtEv.wi .tt{height:30px;font-size:17px;top:-16px}}'
     + '.rtEv .bd{display:flex;gap:clamp(12px,2vw,22px);align-items:center;text-align:left;margin:clamp(6px,1.5vh,14px) 0 clamp(12px,2.6vh,22px)}'
     + '.rtEv .pf{flex:none;width:clamp(72px,15vh,112px);height:clamp(72px,15vh,112px);border:10px solid transparent;border-image:url(art/ui/prep/pframe.webp) 50 stretch;background:#1a120c center/cover no-repeat}'
     + '.rtEv .ds{font:700 clamp(15px,2.6vh,19px)/1.55 ' + UI_Q + ';color:#efe2c6}.rtEv .sy{margin-top:.5em;font:700 clamp(14px,2.4vh,17px)/1.5 ' + UI_Q + ';color:#e8c47a}.rtEv .sy b{color:#ffd86e;margin-right:.4em}'
@@ -234,15 +239,15 @@
     + '.rtEv .op{align-items:stretch}.rtEv button{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:4px}.rtEv button small{min-height:2.9em;display:flex;align-items:flex-start;justify-content:center;text-align:center;line-height:1.45}'   // 人物、名字、说明三行对齐
     + '.rtEv button img{border:1px solid rgba(184,149,90,.6);object-fit:cover}.rtEv.bl .op{flex-wrap:nowrap}.rtEv.bl button{min-width:0;flex:1}.rtEv.bl button img{width:clamp(72px,12vh,96px)!important;height:clamp(72px,12vh,96px)!important;margin-bottom:8px!important}';
   { const st = document.createElement('style'); st.textContent = EV_CSS + EV_THIN + EV_KAI; document.head.appendChild(st); }
-  function popup(title, sub, desc, opts, pick, npc) {   // 通用选择弹窗（奇遇用）
-    const box = campBox = document.createElement('div'); box.className = 'rtEv';
+  function popup(title, sub, desc, opts, pick, npc, img) {   // 通用选择弹窗（奇遇用）；img：奇遇插图，放左侧（11/14 参考群侠）
+    const box = campBox = document.createElement('div'); box.className = 'rtEv' + (img ? ' wi' : '');
     const hp = window.SURV && SURV.routeHp ? SURV.routeHp() : null;
-    box.innerHTML = '<div class="pn thinp"><div class="tt">' + title + '</div><div class="bd">'
+    box.innerHTML = '<div class="pn thinp"><div class="tt">' + title + '</div>' + (img ? '<div class="im" style="background-image:url(' + img + ')"></div><div class="rc">' : '') + '<div class="bd">'
       + (npc ? '<div class="pf" style="background-image:url(' + npc[1] + ')"></div>' : '')
       + '<div><div class="ds">' + desc + '</div>' + (npc ? '<div class="sy"><b>' + npc[0] + '</b>' + npc[2] + '</div>' : '')
       + (hp ? '<div class="hp">当前气血 ' + Math.ceil(hp[0] * 10) + ' / ' + Math.round(hp[1] * 10) + '</div>' : '') + '</div></div>'
       + (window.SURV && SURV.money ? '<div class="hp" style="color:#e8c47a;margin:-.4em 0 .8em">铜钱 ' + SURV.money() + '</div>' : '')
-      + '<div class="op">' + opts.map((o, i) => { const poor = o[3] && window.SURV && SURV.money && SURV.money() < o[3]; return '<button data-i="' + i + '"' + (poor ? ' disabled style="opacity:.4;cursor:not-allowed"' : '') + '>' + (o[4] && /\//.test(o[4]) ? '<img src="' + o[4] + '" style="width:40px;height:40px;display:block;margin:0 auto 4px">' : '') + o[0] + '<small>' + (poor ? '铜钱不够' : o[1]) + '</small></button>'; }).join('') + '</div></div>';
+      + '<div class="op">' + opts.map((o, i) => { const poor = o[3] && window.SURV && SURV.money && SURV.money() < o[3]; return '<button data-i="' + i + '"' + (poor ? ' disabled style="opacity:.4;cursor:not-allowed"' : '') + '>' + (o[4] && /\//.test(o[4]) ? '<img src="' + o[4] + '" style="width:40px;height:40px;display:block;margin:0 auto 4px">' : '') + o[0] + '<small>' + (poor ? '铜钱不够' : o[1]) + '</small></button>'; }).join('') + '</div>' + (img ? '</div>' : '') + '</div>';
     box.querySelectorAll('button').forEach(b => b.onclick = () => { if (b.disabled) return; box.remove(); campBox = null; pick(opts[+b.dataset.i][2]); });
     root.appendChild(box);
   }
@@ -266,11 +271,12 @@
     let pool = EVENTS.map((e, i) => i).filter(i => !run.evSeen.includes(i)); if (!pool.length) { run.evSeen = []; pool = EVENTS.map((e, i) => i); }
     const idx = pool[(Math.random() * pool.length) | 0], ev = EVENTS[idx]; run.evSeen.push(idx);
     const org = window.SURV && SURV.origin ? SURV.origin() : '', opts = ev.o.filter(o => !o[4] || o[4] === org).map(o => o.slice(0, 4));
+    const evi = 'art/ui/ev/ev' + idx + '.webp';
     popup(ev.t, '', ev.d, opts, k => SURV.event(k, (msg, fight) => {
       if (fight === 'train') return train(n, ev.t);
       if (fight) return fightFrom(n, fight, msg, ev.t);
-      if (typeof msg === 'string' && msg) popup(ev.t, '', msg, [['继续', '', 'ok']], () => done(n, true)); else done(n, true);
-    }), ev.npc);
+      if (typeof msg === 'string' && msg) popup(ev.t, '', msg, [['继续', '', 'ok']], () => done(n, true), null, evi); else done(n, true);
+    }), ev.npc, evi);
   }
   function chest(n) { if (window.SFX) SFX.play('j_event'); const q = () => Math.random() < .3 ? 1 : 0; SURV.baoPick([q(), q(), q()], () => done(n, true), '宝 箱 · 选一件宝物'); }
   function bless() {   // 11/14 用户定：出征前·桃园三赠（刘备、关羽免费，张飞有代价），三选一
@@ -302,8 +308,8 @@
       + row('出身', st.origin) + row('铜钱', String(st.money)) + row('修为', 'LV.' + st.lv + '　' + st.pct + '%', st.bank ? '待修炼 ×' + st.bank : '') + row('气血', st.hp[0] + ' / ' + st.hp[1]) + (st.dmg > 1.001 ? row('武艺伤害', '+' + Math.round((st.dmg - 1) * 100) + '%', '磨刀/奇遇') : '')
       + h('属性') + st.attrs.map((r, i) => row(r[0], r[1] + (st.add[r[4]] ? ' <small style="color:#3f8a4a">(+' + st.add[r[4]] + ')</small>' : ''), r[2])).join('')
       + h('武艺') + (st.slots.filter(Boolean).map((k, i) => row((i + 1) + '. <i style="display:inline-block;width:9px;height:9px;border-radius:2px;background:' + k.color + ';box-shadow:0 0 0 1px rgba(0,0,0,.4);margin-right:4px"></i><b>' + k.name + '</b> LV' + k.lv, '', k.desc)).join('') || '<div style="opacity:.6">无</div>')
-      + h('宝物') + ((st.bao || []).map(b => row('<span style="color:' + SURV.BQC[b.q] + '">' + b.n + '</span>', SURV.BQN[b.q], b.d + (b.c ? '（代价：' + b.c + '）' : ''))).join('') || '<div style="opacity:.6">无</div>')
-      + ((st.shang || []).length ? h('伤势') + st.shang.map(x => row('<span style="color:#c0392b">' + x.n + '</span>', '', x.d + '（营地休整可治）')).join('') : '')
+      + h('宝物') + ((st.bao || []).map(b => row('<img src="art/ui/bao/' + b.k + '.webp" style="width:26px;height:26px;vertical-align:middle;margin-right:4px"><span style="color:' + SURV.BQC[b.q] + '">' + b.n + '</span>', SURV.BQN[b.q], b.d + (b.c ? '（代价：' + b.c + '）' : ''))).join('') || '<div style="opacity:.6">无</div>')
+      + ((st.shang || []).length ? h('伤势') + st.shang.map(x => row('<img src="art/ui/fx/sh_' + x.k + '.webp" style="height:26px;vertical-align:middle;margin-right:4px"><span style="color:#c0392b">' + x.n + '</span>', '', x.d + '（营地休整可治）')).join('') : '')
       + h('心法') + (st.gf.filter(Boolean).map(g => row(g.name + ' LV' + g.lv, '', g.desc)).join('') || '<div style="opacity:.6">无</div>')
       + (st.qg ? h('轻功') + row(st.qg.name, '', st.qg.desc) : '')
       + '</div>';
@@ -365,7 +371,9 @@
     } catch (_) { sheetG = false; }
     return { c: im, g: sheetG || null };
   }
+  const QIM = new Image(); QIM.src = 'art/ui/fx/node_q.webp';
   function icon(type, size, gray) {
+    if (type === 'event' && QIM.complete && QIM.naturalWidth) { g.save(); if (gray) g.filter = 'grayscale(1) brightness(.85)'; const s2 = size * .86; g.drawImage(QIM, -s2 / 2, -s2 / 2, s2, s2); g.restore(); return; }
     const sh = sheets(); if (!sh) return;
     const k = ICON[type] || 0, sx = (k % 4) * 256, sy = (k >> 2) * 256;
     try {
@@ -516,5 +524,7 @@
     },
     done, close, choose, posOf: n => pos(n),
     debug: () => run,
+    open: () => open(),
+    evTest(i) { const ev = EVENTS[i]; popup(ev.t, '', ev.d, ev.o.map(o => o.slice(0, 4)), () => {}, ev.npc, 'art/ui/ev/ev' + i + '.webp'); },   // 调试：直接弹第 i 个奇遇
   };
 })();
