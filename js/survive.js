@@ -2105,12 +2105,24 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   'hengsao tuodao tiaozhan daobo lianzhan huima cuofeng feilunren liedihuan xuehe tianbeng wanren'.split(' ').forEach(k => { IMGU[k] = 'art/ui/skill/' + k + '.webp'; himg(k, IMGU[k]); });   // 11/14 用户的刀 12 招图标（每招一把不同的中国刀 + 招式特效）
   const iconUrl = (kind, id) => kind === 'skill' ? IMGU[id] : kind === 'gf' && HIMG['gf_' + id] ? 'art/ui/gf/' + id + '.webp' : '';
   const hok = k => HIMG[k] && HIMG[k].complete && HIMG[k].naturalWidth;
-  function waveBanner(title, sub) {   // 每个节点开打时的卷轴横幅（照群侠幸存者「第 1 波 · 迎战」）
+  // 11/14 用户选 A：开打前的「军令竹简」——竹简展开写本关名，点一下（或按任意键）「令」字大印砸下，竹简收起才开战；等待时战斗冻结
+  let banHold = false;
+  function waveBanner(title, sub) {
     const old = document.getElementById('waveBan'); if (old) old.remove();
     const d = document.createElement('div'); d.id = 'waveBan';
-    d.innerHTML = '<div class="t">' + title + '</div><div class="s">' + sub + '</div>';
+    d.innerHTML = '<div class="jz">' + '<i></i>'.repeat(13) + '<div class="tx"><div class="t">' + title + '</div><div class="s">' + sub + '</div></div><b class="yin">令</b></div><div class="hn">点击下令</div>';
     if (window.SFX) SFX.play('j_banner');
-    document.body.appendChild(d); setTimeout(() => d.classList.add('out'), 1700); setTimeout(() => d.remove(), 2300);
+    document.body.appendChild(d); banHold = true;
+    let done = false;
+    const go = () => {
+      if (done) return; done = true; removeEventListener('keydown', key, true);
+      d.classList.add('seal'); setTimeout(() => { if (window.SFX) SFX.play('j_seal'); shake = Math.max(shake, .3); }, 150);
+      setTimeout(() => { d.classList.add('out'); banHold = false; }, 650); setTimeout(() => d.remove(), 1150);
+    };
+    const key = e => { if (d.isConnected && !e.repeat) { e.preventDefault(); e.stopPropagation(); go(); } };
+    d.addEventListener('pointerdown', e => { e.preventDefault(); go(); });
+    setTimeout(() => addEventListener('keydown', key, true), 350);
+    if (window.TRIAL_ON) setTimeout(go, 700);   // 武学试炼不用等
   }
   function hud(HW) {
     hudT = performance.now(); buildUi();
@@ -2244,9 +2256,19 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   const rooted = () => !!S.recov;
   // 隐藏普攻和换武器按钮
   const st = document.createElement('style'); st.textContent = '#bA,#bWeapon,#wp button[data-w]{display:none!important}'
-    + '#waveBan{position:fixed;left:50%;top:34%;transform:translate(-50%,-50%);width:min(70vw,620px);aspect-ratio:900/307;background:url(art/ui/hud/banner.webp) center/contain no-repeat;z-index:10010;pointer-events:none;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:3%;animation:wbIn .35s ease-out;transition:opacity .5s}'
-    + '#waveBan.out{opacity:0}#waveBan .t{font:900 clamp(24px,4.4vw,44px) "Songti SC","STSong","Noto Serif SC",serif;letter-spacing:.3em;text-indent:.3em;color:#f0c66a;text-shadow:0 2px 0 #3a2410,0 0 12px rgba(0,0,0,.8)}'
-    + '#waveBan .s{margin-top:0;padding:0 22px;font:700 clamp(13px,1.8vw,18px) "PingFang SC",sans-serif;letter-spacing:.4em;color:#fff2d8;background:radial-gradient(ellipse,rgba(200,200,200,.35),transparent 70%)}@keyframes wbIn{from{opacity:0;transform:translate(-50%,-50%) scale(.85)}}'
+    + '#waveBan{position:fixed;inset:0;z-index:10010;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:radial-gradient(ellipse at 50% 42%,rgba(0,0,0,.45),rgba(0,0,0,.15) 60%,transparent);cursor:pointer;transition:opacity .45s}#waveBan.out{opacity:0}'
+    + '#waveBan .jz{position:relative;width:min(78vw,600px);height:min(30vw,230px);display:flex;justify-content:center;filter:drop-shadow(0 10px 18px rgba(0,0,0,.7));animation:jzOpen .5s cubic-bezier(.2,.8,.3,1) both}#waveBan.out .jz{animation:jzClose .45s ease-in both}'
+    + '#waveBan .jz i{flex:1;margin:0 1px;border-radius:3px;background:linear-gradient(90deg,#8a6434,#d6b277 22%,#e6c78e 50%,#c79f62 78%,#7d5a2c);box-shadow:inset 0 0 0 1px rgba(60,35,10,.55);position:relative}'
+    + '#waveBan .jz i:first-child,#waveBan .jz i:last-of-type{flex:.7;background:linear-gradient(90deg,#5a3a18,#8b6230 50%,#5a3a18)}'
+    + '#waveBan .jz::before,#waveBan .jz::after{content:"";position:absolute;left:-1%;right:-1%;height:5px;background:#3a2410;box-shadow:0 1px 0 rgba(255,220,150,.25);z-index:1}#waveBan .jz::before{top:16%}#waveBan .jz::after{bottom:16%}'
+    + '#waveBan .tx{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;animation:jzTx .4s .3s both}'
+    + '#waveBan .t{font:400 clamp(34px,6.4vw,64px) MaShanZheng,"STKaiti",serif;letter-spacing:.18em;text-indent:.18em;color:#2a1608;text-shadow:0 1px 0 rgba(255,235,190,.4)}'
+    + '#waveBan .s{font:700 clamp(14px,2vw,19px) "PingFang SC",sans-serif;letter-spacing:.35em;text-indent:.35em;color:#4a2e14}'
+    + '#waveBan .yin{position:absolute;z-index:3;right:7%;bottom:9%;width:min(13vw,96px);height:min(13vw,96px);display:flex;align-items:center;justify-content:center;font:400 min(9vw,66px) MaShanZheng,"STKaiti",serif;color:#fff1dc;background:#b2241a;border:3px solid #7e140d;box-shadow:inset 0 0 0 3px #d8463a,0 0 0 2px rgba(120,20,10,.4);border-radius:6px;opacity:0;transform:rotate(-8deg) scale(2.6)}'
+    + '#waveBan.seal .yin{animation:yinIn .18s .0s cubic-bezier(.5,0,.9,.4) forwards}'
+    + '#waveBan .hn{font:700 clamp(15px,2vw,19px) "PingFang SC",sans-serif;letter-spacing:.5em;text-indent:.5em;color:#f0d89a;text-shadow:0 2px 4px #000;animation:hnB 1.2s .6s ease-in-out infinite both}#waveBan.seal .hn{visibility:hidden}'
+    + '@keyframes jzOpen{from{clip-path:inset(0 50% 0 50%)}to{clip-path:inset(0 0 0 0)}}@keyframes jzClose{from{clip-path:inset(0 0 0 0)}to{clip-path:inset(0 50% 0 50%)}}@keyframes jzTx{from{opacity:0}}'
+    + '@keyframes yinIn{0%{opacity:0;transform:rotate(-8deg) scale(2.6)}100%{opacity:1;transform:rotate(-8deg) scale(1)}}@keyframes hnB{0%,100%{opacity:.35}50%{opacity:1}}'
     + '@media (pointer:fine){#joy{display:none!important}}'
     + '#bR{background:#241812 url(art/ui/hud/dodge.webp) center/cover no-repeat!important;border-radius:8px!important;border:1px solid #c9a24a!important;font-size:0!important;width:60px!important;height:60px!important}'
     + '@media (pointer:fine){#bR:after{content:"空格";position:absolute;left:0;right:0;bottom:-18px;font:700 12px "PingFang SC",sans-serif;color:#f3dc9a;text-shadow:0 1px 2px #000}}'
@@ -2327,7 +2349,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     setGf(ids) { S.gf = ['', '', '']; ids.slice(0, 3).forEach((id, i) => { S.gf[i] = id; }); GM = gfCalc(); }, setQg(id) { S.qg = id || ''; GM = gfCalc(); }, gf: () => S.gf.slice(), qg: () => S.qg, mul: k => skillMul(k), lv: k => lvOf(k), spd: k => spdTxt(SK[k]), rs: k => SK[k] && SK[k].dk ? rsOf(k) : null, setRs(k, v) { DRS[k] = v; try { localStorage.setItem('szz-dao-rs', JSON.stringify(DRS)); } catch (e) {} },
     sp: k => spOf(k), setSp(k, v) { DSP[k] = v; try { localStorage.setItem('szz-dao-sp', JSON.stringify(DSP)); } catch (e) {} }, spAll(v) { Object.keys(SK).forEach(k => { if (SK[k].dk) DSP[k] = v; }); try { localStorage.setItem('szz-dao-sp', JSON.stringify(DSP)); } catch (e) {} },
     rsAll: () => Object.keys(SK).filter(k => SK[k].dk && !SK[k].off).sort((a, b) => SK[a].tier - SK[b].tier).map(k => `${TIERN[SK[k].tier]} ${SK[k].name}(${k}) 范围×${rsOf(k)} 速度×${spOf(k)}（${spdTxt(SK[k])}）`).join('\n'), setLv(k, l) { S.lvLock = {}; if (k && l) S.lvLock[k] = l; } };
-  window.SURV = { trial: TRIAL, curNode: () => RT.on && W.started ? RT.node : null, status, attrInfo, addXiu: n => addXiu(n), heldPre: () => heldPre(), dbg: () => ({ gf: S.gf.slice(), qg: S.qg, zq: S.zq, zqMax: zqMax(), exp: S.gfExp, GM }), giveGf: id => { if (GF[id]) { if (GF[id].qg) S.qg = id; else { const f = S.gf.indexOf(""); if (f >= 0) S.gf[f] = id; } } }, newHud: () => RT.on && !!RT.node, stunGate, noStun: () => RT.on, get slots() { return S.slots; }, SK, beginNode, frozen: () => RT.on && (ROUTE.shown() || buildOpen), routeHp: () => [hero.hp, maxHp()], camp(k) { if (k === 'heal') heal(maxHp() * .3); else RT.dmg *= 1.1; }, ORIGINS, setOrigin(k) { if (ORIGINS[k] && !ORIGINS[k].locked) { origin = k; startW = null; } }, origin: () => origin, setWep(w) { startW = w; }, wep: () => heldW(), startSk: () => startSk(), WEPN, takeMul: () => {
+  window.SURV = { trial: TRIAL, banner: (a, b) => waveBanner(a, b), curNode: () => RT.on && W.started ? RT.node : null, status, attrInfo, addXiu: n => addXiu(n), heldPre: () => heldPre(), dbg: () => ({ gf: S.gf.slice(), qg: S.qg, zq: S.zq, zqMax: zqMax(), exp: S.gfExp, GM }), giveGf: id => { if (GF[id]) { if (GF[id].qg) S.qg = id; else { const f = S.gf.indexOf(""); if (f >= 0) S.gf[f] = id; } } }, newHud: () => RT.on && !!RT.node, stunGate, noStun: () => RT.on, get slots() { return S.slots; }, SK, beginNode, frozen: () => RT.on && (ROUTE.shown() || buildOpen || (banHold && !!document.getElementById('waveBan'))), routeHp: () => [hero.hp, maxHp()], camp(k) { if (k === 'heal') heal(maxHp() * .3); else RT.dmg *= 1.1; }, ORIGINS, setOrigin(k) { if (ORIGINS[k] && !ORIGINS[k].locked) { origin = k; startW = null; } }, origin: () => origin, setWep(w) { startW = w; }, wep: () => heldW(), startSk: () => startSk(), WEPN, takeMul: () => {
       if (RT.on && GM.block && Math.random() < GM.block) { floaters.push({ x: hero.x, y: hero.y - 50, t: 0, txt: '格挡', color: '#bfe0ff' }); return 0; }
       const mv = Math.abs(hero.ix) > .1 || Math.abs(hero.iy) > .1, low = hero.hp / maxHp() < .3 ? 1 - .10 * GM.low : 1;
       return (OG().take || 1) / AFX.hp() * (1 - IT('take')) * RT.take * RES().take * GM.take / GM.hp * low * (S.qg === 'taxue' && mv ? .85 : 1) * (GM.still && S.stillT > 1 ? 1 - GM.still : 1);
