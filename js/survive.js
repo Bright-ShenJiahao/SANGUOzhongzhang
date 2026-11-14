@@ -2118,12 +2118,12 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   'hengsao tuodao tiaozhan daobo lianzhan huima cuofeng feilunren liedihuan xuehe tianbeng wanren'.split(' ').forEach(k => { IMGU[k] = 'art/ui/skill/' + k + '.webp'; himg(k, IMGU[k]); });   // 11/14 用户的刀 12 招图标（每招一把不同的中国刀 + 招式特效）
   const iconUrl = (kind, id) => kind === 'skill' ? IMGU[id] : kind === 'gf' && HIMG['gf_' + id] ? 'art/ui/gf/' + id + '.webp' : '';
   const hok = k => HIMG[k] && HIMG[k].complete && HIMG[k].naturalWidth;
-  // 11/14 用户选 A：开打前的「军令竹简」——竹简展开写本关名，点一下（或按任意键）「令」字大印砸下，竹简收起才开战；等待时战斗冻结
+  // 11/14 用户选 A：开打前的「军令」——（第三版：深色金边牌匾，和图鉴/整备一套）牌匾落下写本关名，点一下（或按任意键）「令」字大印砸下，竹简收起才开战；等待时战斗冻结
   let banHold = false;
   function waveBanner(title, sub) {
     const old = document.getElementById('waveBan'); if (old) old.remove();
     const d = document.createElement('div'); d.id = 'waveBan';
-    d.innerHTML = '<div class="wb"><div class="mo"></div><div class="jz"><div class="tx"><div class="t">' + title + '</div><div class="s">' + sub + '</div></div><b class="yin"></b></div></div><div class="hn">点击下令</div>';
+    d.innerHTML = '<div class="wb"><div class="jz"><div class="tx"><div class="t">' + title + '</div><div class="s">' + sub + '</div></div><b class="yin"></b></div></div><div class="hn">点击下令</div>';
     if (window.SFX) SFX.play('j_banner');
     document.body.appendChild(d); banHold = true;
     let done = false;
@@ -2271,15 +2271,14 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   const rooted = () => !!S.recov;
   // 隐藏普攻和换武器按钮
   const st = document.createElement('style'); st.textContent = '#bA,#bWeapon,#wp button[data-w]{display:none!important}'
-    + '#waveBan{position:fixed;inset:0;z-index:10010;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:rgba(0,0,0,.18);overflow:hidden;cursor:pointer;transition:opacity .45s}#waveBan.out{opacity:0}'
+    + '#waveBan{position:fixed;inset:0;z-index:10010;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:rgba(0,0,0,.38);overflow:hidden;cursor:pointer;transition:opacity .4s}#waveBan.out{opacity:0}'
     + '#waveBan .wb{position:relative;width:100%;display:flex;justify-content:center}'
-    + '#waveBan .mo{position:absolute;left:50%;top:50%;width:min(118vw,1100px);height:min(17vw,150px);transform:translate(-50%,-50%);background:url(art/ui/hud/mo.webp) center/100% 100% no-repeat;animation:moIn .35s ease-out both}#waveBan.out .mo{animation:moOut .4s ease-in both}'
-    + '#waveBan .jz{position:relative;width:min(62vw,460px);aspect-ratio:1400/505;background:url(art/ui/hud/jz.webp) center/100% 100% no-repeat;filter:drop-shadow(0 8px 14px rgba(0,0,0,.7));animation:jzOpen .45s .18s cubic-bezier(.2,.8,.3,1) both}#waveBan.out .jz{animation:jzClose .4s ease-in both}'
-    + '#waveBan .tx{position:absolute;left:8%;right:8%;top:17%;bottom:24%;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;animation:jzTx .35s .5s both}'
-    + '#waveBan .t{font:400 clamp(30px,5.2vw,52px) WenKai,MaShanZheng,"STKaiti",serif;letter-spacing:.16em;text-indent:.16em;color:#1a0e05;text-shadow:.5px 0 0 #1a0e05,-.5px 0 0 #1a0e05,0 1px 1px rgba(90,60,20,.3);line-height:1.25}'
-    + '#waveBan .s{display:flex;align-items:center;gap:.7em;font:400 clamp(13px,1.8vw,17px) WenKai,MaShanZheng,"STKaiti",serif;letter-spacing:.25em;text-indent:.25em;color:#3a2410}#waveBan .s::before,#waveBan .s::after{content:"";width:clamp(20px,3.6vw,44px);height:2px;background:linear-gradient(90deg,transparent,#9a7638 30%,#c9a35e 70%,transparent)}'
-    + '@keyframes moIn{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}@keyframes moOut{from{clip-path:inset(0 0 0 0)}to{clip-path:inset(0 0 0 100%)}}'
-    + '#waveBan .yin{position:absolute;z-index:3;right:7%;bottom:12%;width:19%;aspect-ratio:1;background:url(art/ui/hud/yin.webp) center/contain no-repeat;opacity:0;transform:rotate(-6deg) scale(2.6);mix-blend-mode:multiply}'
+    + '#waveBan .jz{position:relative;width:min(56vw,520px);aspect-ratio:1000/324;background:url(art/ui/hud/bian.webp) center/100% 100% no-repeat;filter:drop-shadow(0 12px 18px rgba(0,0,0,.75));animation:bianIn .5s cubic-bezier(.3,1.4,.5,1) both}#waveBan.out .jz{animation:bianOut .4s ease-in both}'
+    + '#waveBan .tx{position:absolute;left:11%;right:11%;top:12%;bottom:12%;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}'
+    + '#waveBan .t{font:400 clamp(28px,4.6vw,48px) WenKai,MaShanZheng,"STKaiti",serif;letter-spacing:.18em;text-indent:.18em;line-height:1.2;background:linear-gradient(180deg,#fff0bf,#f0c86a 55%,#b88a3a);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 0 #2a1608) drop-shadow(0 0 8px rgba(255,200,110,.25))}'
+    + '#waveBan .s{display:flex;align-items:center;gap:.7em;font:400 clamp(12px,1.7vw,16px) WenKai,MaShanZheng,"STKaiti",serif;letter-spacing:.25em;text-indent:.25em;color:#c9a35e}#waveBan .s::before,#waveBan .s::after{content:"";width:clamp(18px,3.4vw,40px);height:1px;background:linear-gradient(90deg,transparent,#9a7638 30%,#c9a35e 70%,transparent)}'
+    + '@keyframes bianIn{from{opacity:0;transform:translateY(-70px)}to{opacity:1;transform:none}}@keyframes bianOut{from{opacity:1;transform:none}to{opacity:0;transform:translateY(-80px)}}'
+    + '#waveBan .yin{position:absolute;z-index:3;right:6%;bottom:2%;width:15%;aspect-ratio:1;background:url(art/ui/hud/yin.webp) center/contain no-repeat;opacity:0;transform:rotate(-6deg) scale(2.6);filter:drop-shadow(0 2px 3px rgba(0,0,0,.6))}'
     + '#waveBan.seal .yin{animation:yinIn .18s .0s cubic-bezier(.5,0,.9,.4) forwards}'
     + '#waveBan .hn{font:400 clamp(16px,2.1vw,20px) WenKai,MaShanZheng,serif;letter-spacing:.5em;text-indent:.5em;color:#f0d89a;text-shadow:0 2px 4px #000;animation:hnB 1.2s .6s ease-in-out infinite both}#waveBan.seal .hn{visibility:hidden}'
     + '@keyframes jzOpen{from{clip-path:inset(0 50% 0 50%)}to{clip-path:inset(0 0 0 0)}}@keyframes jzClose{from{clip-path:inset(0 0 0 0)}to{clip-path:inset(0 50% 0 50%)}}@keyframes jzTx{from{opacity:0}}'
