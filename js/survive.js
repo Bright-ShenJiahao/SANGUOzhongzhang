@@ -1474,7 +1474,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     {   // 11/14 用户：局内不弹选择——精锐随机掉一件凡品/良品，首领随机掉一件传说，奇遇里的精锐战掉对应品级，直接拿到
       const q = af && af.bao != null ? af.bao : nd.type === 'elite' ? (Math.random() < .35 ? 1 : 0) : nd.type === 'boss' ? 2 : -1;
       const k = q >= 0 ? baoOpts([q])[0] : null;
-      if (k) { gainBao(k); floaters.push({ x: hero.x, y: hero.y - 90, t: 0, txt: '获得宝物：' + BAO[k].n, big: 1, color: BQC[BAO[k].q] }); R.bao = BAO[k].n; }
+      if (k) { gainBao(k); R.bao = k; }   // 11/14 用户：战斗里不写出来，打完在结算页看
     }
     report(R);
     W.pick = true;
@@ -1654,7 +1654,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   function report(R) {   // 左下角战报，2.6 秒后淡出
     const old = document.getElementById('survRep'); if (old) old.remove();
     const d = document.createElement('div'); d.id = 'survRep';
-    d.innerHTML = `<b>战报</b><span>击倒 ${R.kills}</span><span>铜钱 +${R.got + R.left}</span><span>受伤 ${R.taken}</span>${R.bao ? `<span style="color:#ffd36e">宝物：${R.bao}</span>` : ''}${R.stolen ? `<span style="color:#ff7a5a">被贼人顺走 ${R.stolen} 铜钱……</span>` : ''}`;
+    d.innerHTML = `<b>战报</b><span>击倒 ${R.kills}</span><span>铜钱 +${R.got + R.left}</span><span>受伤 ${R.taken}</span>${R.stolen ? `<span style="color:#ff7a5a">被贼人顺走 ${R.stolen} 铜钱……</span>` : ''}`;
     document.body.appendChild(d); setTimeout(() => d.classList.add('out'), 2600); setTimeout(() => d.remove(), 3200);
   }
 
@@ -1972,9 +1972,10 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       const tot = S.slots.filter(Boolean).reduce((t, k) => t + (S.dps[k] || 0), 0) || 1;
       const outs = S.slots.filter(Boolean).map(k => `<div class="pb"><em style="background-image:url('${IMGU[k] || ''}')"></em><div class="pbf"><u style="width:${(S.dps[k] || 0) / tot * 100}%"></u><b>${Math.round((S.dps[k] || 0) * 10)}</b><i>${((S.dps[k] || 0) / tot * 100).toFixed(1)}%</i></div></div>`).join('');
       body = `<div class="pn"><h4>总结</h4><div class="sm"><span><em style="background-image:url('${A('kill')}')"></em>斩敌</span><b>${R.kills}</b><span><em style="background-image:url('${A('coin')}')"></em>铜钱</span><b>${R.got + R.left}</b></div>${R.left ? `<p class="nt">地上没捡的钱袋，帮你收回了九成：+${R.left}</p>` : ''}
+          ${R.bao && BAO[R.bao] ? `<h4>战利宝物</h4><p class="ln"><b style="color:${BQC[BAO[R.bao].q]}">${BAO[R.bao].n}</b>　<span style="color:${BQC[BAO[R.bao].q]}">${BQN[BAO[R.bao].q]}</span><br>${BAO[R.bao].d}${BAO[R.bao].c ? `<br><span style="color:#ff8a7a">代价：${BAO[R.bao].c}</span>` : ''}</p>` : ''}
           <h4>输出统计</h4>${outs}
           <h4>真气回血</h4><p class="ln">剩余 <em style="background-image:url('${A('zq')}')"></em> 真气 <b class="c1">${R.zqLeft || 0}</b> 点</p><p class="ln">转换为 <b class="c2">${R.tiao}</b> 点 <em style="background-image:url('${A('hp')}')"></em> 气血</p><p class="ln"><em style="background-image:url('${A('huti')}')"></em> 护体 总共免除了 <b>${Math.round((S.hutiSum || 0) * 10)}</b> 点伤害</p></div>
-        <div class="pn"><h4>修为</h4>${bar(S.lv, Math.min(1, S.xiu / XIU_NEED(S.lv)), A('xiu'))}<h4>武艺</h4>${S.slots.filter(Boolean).map(k => bar(lvOf(k), mastR(k), IMGU[k])).join('')}<h4>心法</h4>${S.gf.concat([S.qg]).filter(Boolean).map(id => bar(gfLv(id), gfR(id), `art/ui/gf/${id}.webp`)).join('') || '<p class="em2" style="padding:6px 0">还没有心法</p>'}</div>`;
+        <div class="pn"><h4>修为</h4>${bar(S.lv, Math.min(1, S.xiu / XIU_NEED(S.lv)), A('xiu'))}<h4>武艺</h4>${S.slots.filter(Boolean).map(k => bar(lvOf(k), mastR(k), IMGU[k])).join('')}<h4>心法</h4>${S.gf.concat([S.qg]).filter(Boolean).map(id => bar(gfLv(id), gfR(id), `art/ui/gf/${id}.webp`)).join('') || '<p class="em2" style="padding:6px 0">还没有心法</p>'}<h4>宝物</h4>${(S.bao || []).map(k => `<p class="ln" title="${BAO[k].d}${BAO[k].c ? '；代价：' + BAO[k].c : ''}"><b style="color:${BQC[BAO[k].q]}">${BAO[k].n}</b>　<span style="opacity:.8">${BAO[k].d}</span></p>`).join('') || '<p class="em2" style="padding:6px 0">还没有宝物</p>'}${(S.shang || []).length ? `<h4>伤势</h4>${S.shang.map(k => `<p class="ln"><b style="color:#ff8a7a">${SHANG[k].n}</b>　${SHANG[k].d}（营地休整可治）</p>`).join('')}` : ''}</div>`;
     } else if (prepTab === 'shi') {   // 11/11：照群侠，一排竖卡，移上去看详情；按钮直接在卡上
       const L = S.loot.slice().sort((a, b) => S.sortDn === false ? (a.q || 0) - (b.q || 0) : (b.q || 0) - (a.q || 0)); S.loot = L; selLoot = Math.min(selLoot, L.length - 1);
       body = `<div class="pn wide sw"><h4>战利品<button class="so" data-a="sort">稀有度 ${S.sortDn === false ? '▲' : '▼'}</button></h4><div class="srow">${L.map((it, i) => card(it, i, 'sel', selLoot, `<button class="cbb" data-a="learn" data-i="${i}">${it.kind === 'item' ? '收下' : '学会'}</button><button class="cbb" data-a="sell" data-i="${i}">卖 ${it.sell}<em style="background-image:url('${A('coin')}')"></em></button>`)).join('')}</div>${L.length ? '<p class="em2 lkh">没处理的战利品，出发时自动按卖价换成铜钱</p>' : '<p class="em2" style="margin-top:12%">暂无战利品</p>'}</div>`;
@@ -2290,7 +2291,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   function waveBanner(title, sub) {
     const old = document.getElementById('waveBan'); if (old) old.remove();
     const d = document.createElement('div'); d.id = 'waveBan';
-    d.innerHTML = '<div class="wb"><div class="jz"><div class="tx"><div class="t">' + title + '</div><div class="s">' + sub + '</div></div><b class="yin"></b></div></div><div class="hn">点击下令</div>';
+    d.innerHTML = '<div class="wb"><div class="jz"><div class="tx"><div class="t">' + title + '</div><div class="s">' + sub + '</div></div><b class="yin">戰</b></div></div><div class="hn">点击战斗</div>';
     if (window.SFX) SFX.play('j_banner');
     document.body.appendChild(d); banHold = true;
     let done = false;
@@ -2447,7 +2448,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     + '#waveBan .t{font:400 clamp(28px,4.6vw,48px) WenKai,MaShanZheng,"STKaiti",serif;letter-spacing:.18em;text-indent:.18em;line-height:1.2;background:linear-gradient(180deg,#fff0bf,#f0c86a 55%,#b88a3a);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 0 #2a1608) drop-shadow(0 0 8px rgba(255,200,110,.25))}'
     + '#waveBan .s{display:flex;align-items:center;gap:.7em;font:400 clamp(12px,1.7vw,16px) WenKai,MaShanZheng,"STKaiti",serif;letter-spacing:.25em;text-indent:.25em;color:#c9a35e}#waveBan .s::before,#waveBan .s::after{content:"";width:clamp(18px,3.4vw,40px);height:1px;background:linear-gradient(90deg,transparent,#9a7638 30%,#c9a35e 70%,transparent)}'
     + '@keyframes bianIn{from{opacity:0;transform:translateY(-70px)}to{opacity:1;transform:none}}@keyframes bianOut{from{opacity:1;transform:none}to{opacity:0;transform:translateY(-80px)}}'
-    + '#waveBan .yin{position:absolute;z-index:3;right:6%;bottom:2%;width:15%;aspect-ratio:1;background:url(art/ui/hud/yin.webp) center/contain no-repeat;opacity:0;transform:rotate(-6deg) scale(2.6);filter:drop-shadow(0 2px 3px rgba(0,0,0,.6))}'
+    + '#waveBan .yin{position:absolute;z-index:3;right:6%;bottom:2%;width:15%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font:400 min(7.4vw,58px)/1 WenKai,MaShanZheng,serif;color:#fbe9d6;background:#b3281e;border:3px double #f4d6c4;box-shadow:inset 0 0 0 3px #b3281e,inset 0 0 12px rgba(60,0,0,.6);border-radius:5px;opacity:0;transform:rotate(-6deg) scale(2.6);filter:drop-shadow(0 2px 3px rgba(0,0,0,.6))}'
     + '#waveBan.seal .yin{animation:yinIn .18s .0s cubic-bezier(.5,0,.9,.4) forwards}'
     + '#waveBan .hn{font:400 clamp(16px,2.1vw,20px) WenKai,MaShanZheng,serif;letter-spacing:.5em;text-indent:.5em;color:#f0d89a;text-shadow:0 2px 4px #000;animation:hnB 1.2s .6s ease-in-out infinite both}#waveBan.seal .hn{visibility:hidden}'
     + '@keyframes jzOpen{from{clip-path:inset(0 50% 0 50%)}to{clip-path:inset(0 0 0 0)}}@keyframes jzClose{from{clip-path:inset(0 0 0 0)}to{clip-path:inset(0 50% 0 50%)}}@keyframes jzTx{from{opacity:0}}'

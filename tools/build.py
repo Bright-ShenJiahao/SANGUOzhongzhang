@@ -192,7 +192,7 @@ if os.path.exists(KAI_SRC):
             if 'floaters.push' in _ln:
                 for _m in __import__('re').findall(r"'([^'\\]*)'|`([^`\\]*)`", _ln):
                     for _t in _m: _kc |= set(_t)
-    _kc |= set('闪')
+    _kc |= set('闪戰')
     _kc = {c for c in _kc if c.strip()}
     _o = _sub.Options(); _o.name_IDs = ['*']
     _f = _sub.load_font(KAI_SRC, _o); _ss = _sub.Subsetter(_o); _ss.populate(text=''.join(sorted(_kc))); _ss.subset(_f); _sub.save_font(_f, KAI_OUT, _o)

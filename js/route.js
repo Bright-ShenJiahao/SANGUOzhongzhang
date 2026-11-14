@@ -73,7 +73,7 @@
       const bossN = mk(lb, s === SEGS - 1 ? 1 : 2, 'boss'); bossN.sec = s + 1;
       // 11/12 用户定：第 4 段是二选一的分岔——左边打张梁、右边打张宝，两条路不能都走；没打的那个会出现在最后的张角战里当小头目
       const bossB = s === SEGS - 1 ? mk(lb, 3, 'boss') : null; if (bossB) { bossN.br = 'liang'; bossB.br = 'bao'; bossB.sec = s + 1; }
-      const lanes = [0, 1, 2, 3, 4];   /* 11/12 用户：分支多一些 → 5 条路全开，下面再加横向岔路 */
+      const lanes = s === 0 ? [0, 1, 2, 3, 4].sort(() => rnd() - .5).slice(0, 3 + (rnd() < .5 ? 1 : 0)).sort() : [0, 1, 2, 3, 4];   // 11/14 用户：每局出发不要都一样——第一列随机 3~4 个节点   /* 11/12 用户：分支多一些 → 5 条路全开，下面再加横向岔路 */
       for (const ln of lanes) {
         let cur = cell(l0, ln); link(from, cur);
         for (let l = l0 + 1; l < lb; l++) {
@@ -101,7 +101,7 @@
       const k = (l - 1) % SEGLEN + 1, sg = (l - 1) / SEGLEN | 0; if (k === SEGLEN) continue;
       for (const n of byLayer[l] || []) {
         const r = rnd(); let t = 'battle';
-        if (k === 1) t = l > 1 && r > .84 ? 'event' : 'battle';
+        if (k === 1) t = l > 1 ? (r > .84 ? 'event' : 'battle') : (r < .2 ? 'event' : 'battle');   // 第一列也可能出奇遇
         else if (k === 2) t = r < .14 && sg >= 1 ? 'elite' : r < .32 ? 'event' : 'battle';
         else t = r < .5 ? 'elite' : r < .7 ? 'event' : 'battle';
         if ((t === 'camp' || t === 'elite') && n.prev.some(p => p.type === t)) t = 'battle';
@@ -230,6 +230,8 @@
     + '.rtEv .ds{font-size:clamp(17px,2.9vh,22px)!important;font-weight:400!important;line-height:1.6!important}.rtEv .sy{font-size:clamp(15px,2.6vh,19px)!important;font-weight:400!important}.rtEv .hp{font-weight:400!important}'
     + '.rtEv .tt{border:none!important;background:url(art/ui/hud/bian.webp) center/100% 100% no-repeat!important;height:clamp(48px,8.5vh,64px)!important;padding:0 clamp(48px,6vw,80px)!important;top:clamp(-38px,-6vh,-26px)!important;font:400 clamp(22px,3.8vh,30px) WenKai,MaShanZheng,serif!important;letter-spacing:.3em;color:#f0d89a!important;text-shadow:0 2px 0 #1a0e05}'
     + '.rtEv button{font-family:WenKai,MaShanZheng,"STKaiti",serif!important;font-weight:400!important}.rtEv button small{font-size:clamp(13px,2.3vh,16px)!important;color:#e2d4b6!important}'
+    + '.rtEv .pn.thinp{border:clamp(34px,6vh,52px) solid transparent!important;border-image:url(art/ui/prep/panel.webp) 72 fill stretch!important;background:none!important;box-shadow:0 14px 40px rgba(0,0,0,.65)!important;padding:clamp(14px,2.6vh,24px) clamp(16px,2.4vw,30px) clamp(10px,2vh,18px)!important}.rtEv .pn.thinp::before,.rtEv .pn.thinp::after{display:none!important}'   // 11/14 用户：大框要有美术——用整备屏的金边云纹面板
+    + '.rtEv .op{align-items:stretch}.rtEv button{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:4px}.rtEv button small{min-height:2.9em;display:flex;align-items:flex-start;justify-content:center;text-align:center;line-height:1.45}'   // 人物、名字、说明三行对齐
     + '.rtEv button img{border:1px solid rgba(184,149,90,.6);object-fit:cover}.rtEv.bl .op{flex-wrap:nowrap}.rtEv.bl button{min-width:0;flex:1}.rtEv.bl button img{width:clamp(72px,12vh,96px)!important;height:clamp(72px,12vh,96px)!important;margin-bottom:8px!important}';
   { const st = document.createElement('style'); st.textContent = EV_CSS + EV_THIN + EV_KAI; document.head.appendChild(st); }
   function popup(title, sub, desc, opts, pick, npc) {   // 通用选择弹窗（奇遇用）
@@ -474,13 +476,7 @@
       const [hp, mx] = SURV.routeHp(), bw = Math.min(220 * k, W * .34), x = 24, y = 100 * k, bh = 16 * k;
       g.fillStyle = 'rgba(40,28,18,.6)'; g.fillRect(x, y, bw + 4, bh); g.fillStyle = CINNABAR; g.fillRect(x + 2, y + 2, bw * Math.max(0, Math.min(1, hp / mx)), bh - 4);
       g.fillStyle = INK; g.font = `bold ${Math.round(14 * k)}px ${UI}`; g.textBaseline = 'middle'; g.fillText('气血 ' + Math.ceil(hp * 10) + ' / ' + Math.round(mx * 10), x + bw + 12, y + bh / 2); g.textBaseline = 'alphabetic';
-      if (SURV.status) {   // 11/14：宝物、伤势一排小牌（详细看兵籍牒）
-        const st = SURV.status(); let cx = x; const cy = y + bh + 8 * k, ch = 22 * k; g.font = `bold ${Math.round(13 * k)}px ${UI}`; g.textBaseline = 'middle';
-        const chip = (t, col, bg) => { const w = g.measureText(t).width + 14 * k; if (cx + w > W * .62) return; g.fillStyle = bg; g.fillRect(cx, cy, w, ch); g.strokeStyle = col; g.lineWidth = 1; g.strokeRect(cx + .5, cy + .5, w - 1, ch - 1); g.fillStyle = col; g.fillText(t, cx + 7 * k, cy + ch / 2 + 1); cx += w + 5 * k; };
-        for (const b of st.bao || []) chip(b.n, SURV.BQC[b.q], 'rgba(20,13,8,.85)');
-        for (const x2 of st.shang || []) chip(x2.n, '#ff8a7a', 'rgba(70,14,10,.85)');
-        g.textBaseline = 'alphabetic';
-      }
+      // 11/14 用户：宝物、伤势不在地图上写，打完在结算页 / 兵籍牒看
     }
     // 图例（手机竖屏放右上，避开右下印章）
     const lg = [['battle', '普通'], ['elite', '精英'], ['event', '奇遇'], ['camp', '营地'], ['chest', '宝箱'], ['boss', '首领']]; g.font = `bold ${Math.round(14 * k)}px ${UI}`; g.fillStyle = INK; g.textAlign = 'left'; g.textBaseline = 'middle';

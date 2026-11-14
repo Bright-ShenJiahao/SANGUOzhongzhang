@@ -69,7 +69,7 @@
     if (ask) { const ip = ask.querySelector('input'); if (ip && !ip.value) ip.value = '试炼'; const y = ask.querySelector('.yes'); if (y) y.click(); }
     const go = await wait(() => { const b = document.querySelector('#kaiju .bot .go'); return vis(b) && b; }); if (go) go.click();
     await wait(() => window.TITLE && TITLE.mode && TITLE.mode() === 'game'); await new Promise(r => setTimeout(r, 1200));
-    try { const r = ROUTE.debug(), n = (r.nodes || []).flat().find(x => x && x.layer === 1); ROUTE.choose(n); } catch (e) {}
+    try { const r = ROUTE.debug(), L = (r.nodes || []).flat().filter(x => x && x.layer === 1), n = L.find(x => x.type === 'battle') || L[0]; n.type = 'battle'; n.tag = n.tag || 'melee'; r.blessed = true; ROUTE.choose(n, 1); } catch (e) {}   // 11/14：第一列可能有奇遇；试炼直接进战斗、不弹三赠
     return !!(await wait(() => SURV.curNode && SURV.curNode()));
   }
   async function open() {

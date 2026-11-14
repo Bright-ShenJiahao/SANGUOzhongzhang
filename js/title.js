@@ -812,7 +812,7 @@
     const portrait = inkPortrait(), img = portrait ? INK.phone : INK.pc;
     c.fillStyle = INK_PAPER; c.fillRect(0, 0, W, H);
     if (!inkReady(img)) return;
-    const t = S.t, fade = Math.min(1, t / 1.3), e = 1 - Math.pow(1 - fade, 3);
+    const t = S.t, fade = window.bootRevealed ? 1 : Math.min(1, t / 1.3), e = 1 - Math.pow(1 - fade, 3);   // 11/14 用户：加载页已经显示了同一张图，揭幕后不再从白淡入（会闪）
     const iw = img.naturalWidth, ih = img.naturalHeight;
     const breathe = 1 + .02 * (.5 - .5 * Math.cos(t * .32));        // 缓慢呼吸式推近
     const s = Math.max(W / iw, H / ih) * breathe * (1.04 - .04 * e);
