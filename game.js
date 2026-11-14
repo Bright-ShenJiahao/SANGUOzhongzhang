@@ -227,7 +227,7 @@ const rnd = (a, b) => a + Math.random() * (b - a);
 // 读锦囊数值（没抽卡时就是默认值）
 const R_ = (k, d = 1) => { let value = window.ROGUE && ROGUE.S[k] != null ? ROGUE.S[k] : d; if (k === 'move' && window.ARTIFACT) value *= ARTIFACT.moveMult(); if (k === 'move' && window.SURV) value *= SURV.moveMul(); if (k === 'aspd' && window.SUPPLY) value *= SUPPLY.aspdMul();   // 太平飞剑：踩剑时移速 +10%
   return window.GEAR && (k === 'move' || k === 'aspd') ? GEAR.speed(k, value) : value; };
-const maxHeroHp = () => window.GEAR ? GEAR.maxHp() : 10;
+const maxHeroHp = () => window.GEAR ? GEAR.maxHp() : window.SURV && SURV.maxHp ? SURV.maxHp() : 10;
 // 播放音效，按世界坐标 x 计算左右声道
 function sfx(name, x) { if (window.SFX) SFX.play(name, x == null ? 0 : ((x - cam.x) / viewW()) * 2 - 1); }
 

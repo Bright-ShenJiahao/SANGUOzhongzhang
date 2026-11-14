@@ -74,7 +74,7 @@ function updateShots(dt) {
   eshots = eshots.filter(s => s.life > 0);
   for (const f of fires) {
     f.t -= dt;
-    if (Math.abs(hero.x - f.x) < f.r && Math.abs(hero.y - f.y) < f.r * .45) dmgHero(1, null);
+    if (Math.abs(hero.x - f.x) < f.r && Math.abs(hero.y - f.y) < f.r * .45) dmgHero(1, null, 'fire');
 
   }
   fires = fires.filter(f => f.t > 0);

@@ -344,7 +344,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     if (window.ARENA && ARENA.on()) { const p = ARENA.edge(); x = p.x; y = p.y; side = x < hero.x ? -1 : 1; }   // 俯视竞技场：四周都刷
     else { x = side < 0 ? cam.x + 6 : cam.x + vw - 6; x = Math.max(arenaL + 14, Math.min(lockR - 14, x)); y = R(M.top + 6, M.bot - 6); }
     spawn(type, x, y);
-    const z = zs[zs.length - 1]; z.f = -side; z.survMul = 1 + HP_SCALE * (W.n - 1);
+    const z = zs[zs.length - 1]; z.f = -side; z.survMul = (1 + HP_SCALE * (W.n - 1)) * (HAS('yuxi') ? 1.15 : 1) * (S.enemyHpK || 1);
     z.survTier = 0;
     if (!boss && (z.T.elite || ['yellow-heavy', 'yellow-shield', 'yellow-golem', 'cavalry'].includes(type))) { z.survTier = 1; z.hp = 7.5; z.maxHp = z.hp * z.survMul; }   // 四档：杂兵 ×1（3）、精英 ×2.5（7.5）
     z.hp *= z.survMul;
@@ -832,7 +832,8 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   let DKT = 0; const DKO = [];   // 刀的持续判定（飞刃、血河、裂地环等）不靠 later：翻滚也不会断
   const dmk = o => Object.assign({ t: 0, cm: CM, ck: CK, rm: RM }, o);
   // 易伤：破甲每层 +10%；浮空窗口 +25%（精锐/首领只吃一半）
-  const VUL = z => (1 + .1 * (z.pjT > 0 ? z.pj || 0 : 0)) * (z.fkT > 0 ? 1 + (z.fkV || .25) * (tough(z) ? .5 : 1) : 1);
+  const PJK = () => typeof HAS === 'function' && HAS('gudingdao') ? .15 : .1;
+  const VUL = z => (1 + PJK() * (z.pjT > 0 ? z.pj || 0 : 0)) * (z.fkT > 0 ? 1 + (z.fkV || .25) * (tough(z) ? .5 : 1) : 1);
   function addPJ(z, n, cap) { cap = Math.min(4, cap || 4); const c = z.pjT > 0 ? z.pj || 0 : 0; z.pjT = 5; if (c >= cap) return; z.pj = Math.min(cap, c + n); }
   function addBL(z, n, cap) { cap = Math.min(5, cap || 5); const c = z.blT > 0 ? z.bl || 0 : 0; z.blT = 4; z.blCM = CM; if (!(z.blTk > 0)) z.blTk = .5; if (c >= cap) return; z.bl = Math.min(cap, c + n); }
   function addFK(z, o) {   // 浮空：普通兵被挑飞，落地再吃一下并晕 0.5 秒；10 秒内第 2 次 ×0.7、第 3 次 ×0.5、之后免疫
@@ -843,7 +844,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   // 刀的一次命中：o.pj 破甲层数 / o.bl 流血层数（o.blMax 本招上限）/ o.up 挑飞 / o.fk 对浮空目标的倍率（代替 +25%）/ o.once 同一目标只挂一次状态
   function DH(z, m, kb, o = {}) {
     if (!z || z.dead || z.air || z.hidden) return false;
-    const pjm = 1 + .1 * (z.pjT > 0 ? z.pj || 0 : 0), fkm = z.fkT > 0 ? (o.fk ? (tough(z) ? 1 + (o.fk - 1) / 2 : o.fk) : 1 + (z.fkV || .25) * (tough(z) ? .5 : 1)) : 1;
+    const pjm = 1 + PJK() * (z.pjT > 0 ? z.pj || 0 : 0), fkm = z.fkT > 0 ? (o.fk ? (tough(z) ? 1 + (o.fk - 1) / 2 : o.fk) : 1 + (z.fkV || .25) * (tough(z) ? .5 : 1)) : 1;
     const d = m * DU * DM() * pjm * fkm, up = !!o.up && !tough(z), f0 = freeze, x0 = o.x != null ? o.x : hero.x;
     rec(d); hit(z, d, kb * (tough(z) ? .5 : 1), Math.sign(z.x - x0) || hero.f, up, 0, up ? .45 : .3, false, false, { secondary: true, survSkill: true });
     freeze = Math.min(freeze, Math.max(f0, .04));
@@ -1035,7 +1036,8 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const START_SK = { 0: 'hengsao', 2: 'zhendi', 3: 'qiang', 4: 'hengti', 7: 'feishi', 5: 'qishe', 8: 'huofu', 9: 'shanfeng', 1: 'jlianci', 10: 'chongquan' };
   const startSk = () => START_SK[heldW()] || OG().skill;
   const heldPre = () => HELDP[heldW()] || 'wd_';
-  const motFr = k => (FRM[heldPre()] || FRM.wd_)[MOT[k] || 'chop'];
+  const preOf = k => { const p = HELDP[wepOf(k)]; return p && FRM[p] ? p : heldPre(); };   // 11/14 用户：出什么武艺，就用那种兵器的动作图
+  const motFr = k => (FRM[preOf(k)] || FRM.wd_)[MOT[k] || 'chop'];
   // 11/14 用户的刀光图（白色发光体，art/ui/fx/）：游戏里按招式主色染色、用叠加发光画；黄/玄共用朴素刀光（玄阶加亮加残影），地/天各有专属图
   const DGI = {}; for (const n of ['dg1', 'dg2', 'dg3', 'dg4', 'dg5', 'dg6', 'dd_xuehe', 'dd_feilun', 'dd_liedi', 'dt_tianbeng', 'dt_wanren', 'dh2', 'fx_lun', 'fx_ring', 'fx_he', 'fx_aim', 'ic_pj', 'ic_bl', 'ic_fk']) { const im = new Image(); im.src = 'art/ui/fx/' + n + '.webp'; DGI[n] = im; }
   const DGT = {}; const dgTint = (n, rgb) => { const key = n + rgb, im = DGI[n]; if (DGT[key]) return DGT[key]; const c = document.createElement('canvas'); c.width = im.naturalWidth; c.height = im.naturalHeight; const g = c.getContext('2d'); g.drawImage(im, 0, 0); g.globalCompositeOperation = 'source-in'; g.fillStyle = 'rgb(' + rgb + ')'; g.fillRect(0, 0, c.width, c.height); return DGT[key] = c; };
@@ -1054,7 +1056,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const DPS1 = { hengsao: { a: 'chop1', b: 'sweep2' }, tuodao: { a: 'sweep1', b: 'sweep2' }, tiaozhan: { a: 'up1', b: 'up2' }, lianzhan: { a: 'chop1', b: 'sweep2' }, daobo: { a: 'chop1', b: 'chop2' }, huima: { a: 'spin1', b: 'up2' }, cuofeng: { a: 'chop1', b: 'chop2' }, liedihuan: { a: 'up2', b: 'chop2' }, feilunren: { a: 'sweep1', b: 'sweep2' }, xuehe: { a: 'chop1', b: 'sweep2' }, tianbeng: { a: 'spin2', b: 'chop2' }, wanren: { a: 'spin1', b: 'spin2' } };   // 11/14 用户在武学试炼里挑好的刀招动作（起手帧 → 出手帧）
   let DPS = {}; try { DPS = JSON.parse(localStorage.getItem('szz-dao-pose') || '{}') || {}; } catch (e) {}
   const dpsOf = k => SK[k] && SK[k].dk ? DPS[k] || DPS1[k] || null : null;
-  const dpsFr = (k, i) => { const o = dpsOf(k); if (!o) return motFr(k)[i]; const hp = heldPre(), n = i === 0 ? o.a : o.b, f = i === 0 ? o.fa : o.fb; return hp + n + (f ? '~' : ''); };
+  const dpsFr = (k, i) => { const o = dpsOf(k); if (!o) return motFr(k)[i]; const hp = preOf(k), n = i === 0 ? o.a : o.b, f = i === 0 ? o.fa : o.fb; return hp + n + (f ? '~' : ''); };
   for (const k of Object.keys(SK)) Object.defineProperties(SK[k], {
     pose: { get: () => [dpsFr(k, 0), dpsFr(k, 1)], set() {}, configurable: true },
     poseL: { get: () => dpsOf(k) ? dpsFr(k, 1) : motFr(k)[1], set() {}, configurable: true },
@@ -1076,7 +1078,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const XIU_NEED = lv => 70 + lv * 25;
   function addXiu(n) {
     if (!RT.on || !S.atAdd) return;
-    S.xiu += n * AFX.xp();
+    S.xiu += n * AFX.xp() * (HAS('sunzi') ? 1.2 : 1);
     while (S.xiu >= XIU_NEED(S.lv)) { S.xiu -= XIU_NEED(S.lv); S.lv++; S.bank++; S.lvFx = 1.6; if (window.SFX) SFX.play('j_lvup'); if (hero) floaters.push({ x: hero.x, y: hero.y - 100, t: 0, txt: '修为提升 LV.' + S.lv, color: '#ffd86e' }); }
   }
   const RAR = [['白', '#e8e0d0', 1], ['蓝', '#5aa8ff', 2], ['紫', '#c07cff', 3], ['橙', '#ff9a3a', 2]];
@@ -1103,7 +1105,8 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     document.body.appendChild(box);
   }
   // 11/13 用户定：出身两种本门兵器 ×1.2，剑、拳通用 ×1.0，其他兵器 ×0.85；短兵/长兵属性只算修炼加上去的那部分成长
-  const wmul = k => { const w = wepOf(k); return w === 1 || w === 10 ? 1 : (OG().weps || [OG().wep]).includes(w) ? 1.2 : .85; };
+  const wmul = k => { const w = wepOf(k); return w === heldW() ? 1.2 : (OG().weps || [OG().wep]).includes(w) ? 1 : .75; };   // 11/14 用户定：开局所选兵器 +20%（本门），出身另一种 ±0，其他兵器 −25%（外门）
+  const menTag = k => { const m = wmul(k); return m > 1 ? '<span style="color:#ffd36e">本门 +20%</span>' : m < 1 ? '<span style="color:#ff7a6a">外门 −25%</span>' : ''; };
   const ATW = { 0: 1, 1: 1, 2: 1, 10: 1, 3: 2, 4: 2, 5: 6, 7: 6, 8: 7, 9: 7 };   // 兵器 → 属性：短兵（刀锤剑拳）长兵（枪关刀）射艺（石子弓）术法（黄符羽扇）
   const attrMul = k => Math.max(.6, 1 + (AT()[ATW[wepOf(k)] != null ? ATW[wepOf(k)] : 1] - 3) * .06);
   const growOf = c => c === 0 ? profV(AT()[1]) / profV(AT0()[1]) : c === 1 ? profV(AT()[2]) / profV(AT0()[2]) : 1;
@@ -1119,15 +1122,16 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const mastMul = k => { if (SK[k] && SK[k].dk) return DLV.dmg[lvOf(k) - 1]; const l = lvOf(k); return 1 + .06 * Math.min(3, l - 1) + (l >= 5 ? .12 : 0) + .05 * Math.max(0, Math.min(l, 9) - 5); };   // LV2-4、6-9 递增，LV5 质变
   function skillMul(k) {
     const c = catOf(k), n = RES().cnt[wepOf(k)], low = hero.hp / maxHp() < .3 ? 1 + .25 * GM.low : 1;
-    return wmul(k) * attrMul(k) * (1 + RESD[Math.min(5, n)]) * mastMul(k) * GM.all * GM.cat[c] * low * (1 + .06 * S.xy);
+    const bw = (S.bao || []).reduce((t, b) => t + (BAO[b] && BAO[b].w === wepOf(k) ? BAO[b].wd : 0), 0);
+    return (1 + bw) * wmul(k) * attrMul(k) * (1 + RESD[Math.min(5, n)] * (HAS('xinshu') ? 2 : 1)) * mastMul(k) * GM.all * GM.cat[c] * low * (1 + .06 * S.xy) * baoMul();
   }
   function critRoll() {   // 暴击：基础 5% + 心法；伤害 ×1.5 + 心诀
     if (!CK || !SK[CK]) return 1;
     const c = catOf(CK);
-    if (S.lhjOn || Math.random() < .05 + AFX.crit() + IT('crit') + GM.crit + GM.critC[c]) { if (Math.random() < .35) floaters.push({ x: hero.x, y: hero.y - 54, t: 0, txt: '暴击', color: '#ff9a4a' }); return 1.5 + GM.critD[c]; }
+    if (S.lhjOn || Math.random() < .05 + AFX.crit() + IT('crit') + GM.crit + GM.critC[c] + (HAS('qixing') ? .08 : 0)) { if (Math.random() < .35) floaters.push({ x: hero.x, y: hero.y - 54, t: 0, txt: '暴击', color: '#ff9a4a' }); return 1.5 + GM.critD[c] + (HAS('qixing') ? .3 : 0); }
     return 1;
   }
-  const CDM = () => RT.cd * RES().cd;
+  const CDM = () => RT.cd * RES().cd * (HAS('hufu2') ? .9 : 1);
   // ---------- 心法（三国幸存者 38 个：20 心法 + 8 通用 + 5 杂项 + 5 轻功） ----------
   const GGEN = [.02, .03, .045, .065], GSPEC = [.08, .13, .19, .28], GLVM = [1, 1.3, 1.7], GFTH = [120, 300], GTN = ['黄', '玄', '地', '天'], GTC = ['#c9b27a', '#6fb8ff', '#c58cff', '#ffb347'];
   const GF = {};
@@ -1175,7 +1179,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     });
     r.still = Math.min(.7, r.still); return r;
   }
-  const zqMax = () => Math.round(maxHp() * (1 + .06 * GM.qh) * AFX.nl() * 10) / 10;
+  const zqMax = () => Math.round(maxHp() * (1 + .06 * GM.qh) * AFX.nl() * (HAS('hufu2') ? .5 : 1) * 10) / 10;
   function gfText(g) {
     const f = .85 * GLVM[gfLv(g.id) - 1], pc = v => (v * 100).toFixed(1).replace(/\.0$/, '') + '%';
     if (g.c >= 0) { const sm = SPECM[Math.max(1, gfSame(g.c))]; return `全部伤害 +${pc(GGEN[g.t] * f)}，${g.cn}武艺伤害 +${pc(GSPEC[g.t] * f * sm)}（同类心法越多越专精）` + (g.t >= 2 ? '；心诀：该类暴击 +10%' + (g.t === 3 ? '，暴击伤害 +50%' : '') : ''); }
@@ -1246,7 +1250,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       S.lk = kills;
     }
     if (RT.on) {
-      S.zq = Math.min(zqMax(), S.zq + zqMax() * (.005 + .004 * GM.hy) * (1 + IT('regen')) * AFX.nl() * dt);
+      S.zq = Math.min(zqMax(), S.zq + zqMax() * (.005 + .004 * GM.hy) * (1 + IT('regen')) * AFX.nl() * (HURT('nei') ? .7 : 1) * dt);
       if (hero.hp < S.hp0 - 1e-6) S.noHitT = 0; else S.noHitT += dt;
       S.hp0 = hero.hp;
       if (S.noHitT >= 3 && GM.lhj) S.lhjReady = true;
@@ -1294,6 +1298,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   }
   function onRoll() {
     hero.rollCd *= GM.dcd;
+    if (HAS('jili') && RT.on && W.started) { (S.jili = S.jili || []).push({ x: hero.x, y: hero.y, t: 3, hs: new Set() }); fx.push({ k: 'mark', x: hero.x, y: hero.y, r: 13, t: 0, T: 3 }); }
     if (S.qg === 'tiesha') for (const z of near(hero.x, hero.y, 64)) hit(z, .3 * RT.dmg, 110, Math.sign(z.x - hero.x) || hero.f, true, 0, .5, false, false, { secondary: true, survSkill: true });
     if (OG().roll) hero.rollCd *= OG().roll;   // 翻滚：前摇中 = 这一招作废、跳到下一招；后摇中 = 直接取消后摇
     if (S.wind) { S.skip[S.wind.i] = .35; S.wind = null; S.qi = (S.qi + 1) % 5; if (S.qi === 0) S.cycles++; S.qt = 0; S.brk = S.brk || [0, 0, 0, 0, 0]; S.brk[(S.qi + 4) % 5] = .45; }   // 11/14 用户：不再冒「打断」字，改成出招顺序那格灰一下、抖一下
@@ -1301,7 +1306,83 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   }
 
   // ---------- 路线模式 ----------
-  const maxHp = () => window.GEAR ? GEAR.maxHp() : 10;
+  const maxHp = () => (window.GEAR ? GEAR.maxHp() : 10) * (S.hpMul || 1);   // 11/14：宝物/祝福可改气血上限
+  // ===================== 11/14 用户定：宝物 / 伤势 / 出征前·桃园三赠 =====================
+  const BAO = {
+    caoxie: { n: '织席草鞋', q: 0, d: '移速 +8%' },
+    wuzhu: { n: '五铢钱串', q: 0, d: '每打完一仗多得 15 铜钱' },
+    sunzi: { n: '孙子兵法残简', q: 0, d: '修为获取 +20%' },
+    lingqi: { n: '缴获令旗', q: 0, d: '对精锐和首领伤害 +15%' },
+    taoyuan: { n: '桃园酒', q: 0, d: '每仗开打的头 10 秒，武艺伤害 +30%' },
+    jili: { n: '铁蒺藜', q: 0, d: '翻滚时撒下蒺藜，踩到的敌人受伤并晕 0.4 秒' },
+    huxin: { n: '护心镜', q: 0, d: '每仗第一次受到致命伤时，只剩 1 点血' },
+    qingnang: { n: '青囊书', q: 1, d: '每仗开打时回复 10% 气血' },
+    qixing: { n: '七星刀', q: 1, d: '暴击 +8%，暴击伤害 +30%' },
+    pojia: { n: '破甲锥', q: 1, d: '所有武艺命中都挂 1 层破甲' },
+    dilu: { n: '的卢马', q: 1, d: '每仗第一次气血低于 30% 时，一跃而起，无敌 2 秒' },
+    liannu: { n: '诸葛连弩', q: 1, d: '每 5 秒自动朝最近的敌人射三连箭' },
+    muniu: { n: '木牛流马', q: 1, d: '拾取多一件；行商价格 −15%' },
+    shuangji: { n: '典韦双戟', q: 1, d: '身边有 5 个以上敌人时，武艺伤害 +25%' },
+    xinshu: { n: '孟德新书', q: 1, d: '兵器精通的加成翻倍' },
+    // 兵器类宝物（11/14 用户：不要兵器栏，兵器就是宝物）：只加对应兵器的武艺伤害；做完一门兵器再加那一门的两把
+    jgdao: { n: '精钢刀', q: 0, w: 0, wd: .12, d: '刀的武艺伤害 +12%' },
+    gudingdao: { n: '古锭刀', q: 1, w: 0, wd: .2, d: '刀的武艺伤害 +20%；破甲每层增伤从 10% 提高到 15%' },
+    yuxi: { n: '传国玉玺', q: 2, d: '武艺伤害 +25%，每仗打完多回 15% 气血', c: '敌人血量 +15%' },
+    chitu: { n: '赤兔马', q: 2, d: '移速 +30%', c: '受到的伤害 +10%' },
+    tengjia: { n: '藤甲', q: 2, d: '受到的伤害 −25%', c: '被火烧伤害 ×2.5' },
+    hufu2: { n: '虎符', q: 2, d: '武艺伤害 +20%，出手快 10%', c: '真气上限减半' },
+    taiping: { n: '太平要术', q: 2, d: '每 15 秒天降一道雷，劈最近的敌人', c: '每次落雷自己扣 2% 气血' },
+  };
+  const BQN = ['凡品', '良品', '传说'], BQC = ['#d8c08a', '#6fb8ff', '#ffb347'];
+  const SHANG = { jian: { n: '箭伤', d: '移速 −10%' }, nei: { n: '内伤', d: '真气回复 −30%' }, mo: { n: '心魔', d: '受到的伤害 +10%' } };
+  const HAS = k => !!(S.bao && S.bao.includes(k)), HURT = k => !!(S.shang && S.shang.includes(k));
+  function gainBao(k) { if (!BAO[k] || HAS(k)) return; (S.bao = S.bao || []).push(k); if (window.SFX) SFX.play('j_lvup'); if (window.CODEX) CODEX.see('bao:' + k); }
+  function addShang(k) { if (SHANG[k] && !HURT(k)) (S.shang = S.shang || []).push(k); }
+  const baoPool = q => Object.keys(BAO).filter(k => BAO[k].q === q && !HAS(k) && (BAO[k].w == null || [...S.slots, ...(S.owned || [])].some(s => s && SK[s] && wepOf(s) === BAO[k].w)));
+  function baoOpts(qs) { const out = []; for (const q of qs) { const L = baoPool(q).filter(k => !out.includes(k)); if (L.length) out.push(L[(Math.random() * L.length) | 0]); } return out; }
+  function pickBao(qs, cb, title) {   // 宝物 N 选 1（qs：每个选项的品级）
+    const ks = baoOpts(qs); if (!ks.length) { if (cb) cb(); return; }
+    const old = document.getElementById('survPick'); if (old) old.remove(); W.pick = true;
+    const box = document.createElement('div'); box.id = 'survPick';
+    box.innerHTML = `<div class="p"><h3>${title || '宝物 · 选一件'}</h3><div class="row">${ks.map((k, j) => { const b = BAO[k]; return `<button data-j="${j}" class="q${b.q === 2 ? 3 : b.q}"><i style="font-style:normal;font-size:34px;line-height:1;color:${BQC[b.q]}">${b.n[0]}</i><b>${b.n}</b><span style="color:${BQC[b.q]};font-size:13px">${BQN[b.q]}</span><span>${b.d}</span>${b.c ? `<span style="color:#ff8a7a">代价：${b.c}</span>` : ''}</button>`; }).join('')}</div></div>`;
+    box.querySelectorAll('button').forEach(b => b.onclick = () => { gainBao(ks[+b.dataset.j]); box.remove(); W.pick = false; if (cb) cb(); });
+    document.body.appendChild(box);
+  }
+  const baoMul = () => (HAS('yuxi') ? 1.25 : 1) * (HAS('hufu2') ? 1.2 : 1) * (HAS('taoyuan') && W.started && W.t < 10 ? 1.3 : 1) * (HAS('shuangji') && near(hero.x, hero.y, 120).length >= 5 ? 1.25 : 1);
+  function baoDmg(z, m) { const c = CM, k = CK; CM = 1; CK = ''; HT(z, m, 15); CM = c; CK = k; }
+  function baoHit(z, d, traits) {   // 打中敌人时（g_combat_hit 调用）：令旗对精锐、破甲锥挂破甲
+    if (!traits || traits.dot || !traits.survSkill) return d;
+    if (HAS('pojia') && z && !z.dead) addPJ(z, 1, 4);
+    return d * (HAS('lingqi') && tough(z) ? 1.15 : 1);
+  }
+  function baoTick(dt) {
+    if (!RT.on || !W.started || W.pick || !hero) return;
+    if (HAS('dilu') && !S.diluUsed && hero.hp > 0 && hero.hp / maxHp() < .3) { S.diluUsed = 1; hero.inv = Math.max(hero.inv || 0, 2); floaters.push({ x: hero.x, y: hero.y - 60, t: 0, txt: '的卢一跃！', gold: true }); }
+    if (HAS('liannu') && (S.lnT = (S.lnT || 0) + dt) >= 5) { S.lnT = 0; for (let i = 0; i < 3; i++) later(i * .12, () => { const z = nearest(320); if (!z) return; fx.push({ k: 'line', x: hero.x, y: hero.y, a: Math.atan2((z.y - hero.y) * 2, z.x - hero.x), L: dist(z, hero), w: 3, t: 0, T: .18, col: '230,210,160' }); baoDmg(z, .55); }); }
+    if (HAS('taiping') && (S.tpT = (S.tpT || 0) + dt) >= 15) { const z = nearest(420); if (z) { S.tpT = 0; fx.push({ k: 'bolt', x: z.x, y: z.y, t: 0, T: .45 }); baoDmg(z, 3.2); for (const o of near(z.x, z.y, 50)) if (o !== z) baoDmg(o, 1.2); shake = Math.max(shake, .3); hero.hp = Math.max(1, hero.hp - maxHp() * .02); if (window.SFX) SFX.play('j_banner'); } }
+    if (S.jili && S.jili.length) for (let i = S.jili.length - 1; i >= 0; i--) { const o = S.jili[i]; o.t -= dt; for (const z of hittable()) if (!o.hs.has(z) && Math.hypot(z.x - o.x, (z.y - o.y) * 2) < 26) { o.hs.add(z); baoDmg(z, .25); stunz(z, .4); } if (o.t <= 0) S.jili.splice(i, 1); }
+  }
+  // 出征前·桃园三赠：刘备、关羽各一个免费，张飞一个有代价
+  const BLESS = {
+    lb: [['money', '盘缠', '得 100 铜钱'], ['hp', '宽厚', '气血上限 +10%'], ['caoxie', '织席草鞋', '得宝物「织席草鞋」']],
+    gy: [['lv3', '指点刀法', '起手的武艺直接升到 LV3'], ['gf', '赠书', '学一门心法（三选一）'], ['xiu', '夜读春秋', '修为 +60']],
+    zf: [['drink', '痛饮', '失去 30% 气血，得一件良品宝物'], ['dice', '赌酒', '失去全部铜钱，得一件奇品宝物（三选一）'], ['fight', '拼命', '气血上限 −15%，多学一招武艺（三选一）']],
+  };
+  function blessOpts() { const r = L => L[(Math.random() * L.length) | 0]; return [['刘备'].concat(r(BLESS.lb)), ['关羽'].concat(r(BLESS.gy)), ['张飞'].concat(r(BLESS.zf))]; }
+  function blessDo(k, cb) {
+    const done = () => { if (cb) cb(); };
+    if (k === 'money') { S.money += 100; done(); }
+    else if (k === 'hp') { S.hpMul = (S.hpMul || 1) * 1.1; hero.hp = maxHp(); done(); }
+    else if (k === 'caoxie') { gainBao('caoxie'); done(); }
+    else if (k === 'lv3') { const s0 = S.slots[0]; if (s0) S.mast[s0] = Math.max(S.mast[s0] || 0, MAST_T[2]); done(); }
+    else if (k === 'gf') offerReward(1, cb, 1, ['perk']);
+    else if (k === 'xiu') { addXiu(60); done(); }
+    else if (k === 'drink') { hero.hp = Math.max(1, hero.hp - maxHp() * .3); pickBao([1, 1, 1], cb, '张飞 · 痛饮 · 良品宝物'); }
+    else if (k === 'dice') { S.money = 0; pickBao([2, 2, 2], cb, '张飞 · 赌酒 · 奇品宝物'); }
+    else if (k === 'fight') { S.hpMul = (S.hpMul || 1) * .85; hero.hp = Math.min(hero.hp, maxHp()); offerReward(1, cb, 1, ['skill']); }
+    else done();
+  }
+
   const heal = v => { hero.hp = Math.min(maxHp(), hero.hp + v); };
   // ---------- 节点结算：连选 n 次（武艺 / 强化 三选一）----------
   function rewardOptions(kind) {
@@ -1335,22 +1416,43 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     else if (k === 'learn') offerReward(1, cb);
     else if (k === 'sharpen') { RT.dmg *= 1.1; done(); }
     else if (k === 'rest') { heal(maxHp() * .3); done(); }
-    // 11/14 新奇遇（cb 可带一句结果，路线图弹出来告诉玩家）
-    else if (k === 'feed') { S.money -= 30; addXiu(40); done(); }
-    else if (k === 'spare') { addXiu(20); done(); }
-    else if (k === 'press') { hero.hp = Math.max(1, hero.hp * .9); offerReward(1, cb); }
-    else if (k === 'medic') { S.money -= 40; heal(maxHp() * .5); done(); }
-    else if (k === 'ask') { addXiu(30); done(); }
-    else if (k === 'gamble') { S.money -= 40; const w = Math.random() < .5; if (w) S.money += 100; if (cb) cb(w ? '骰子开出满堂红，你赢回 100 铜钱！' : '三个幺，输了个精光。'); }
-    else if (k === 'tomb') { hero.hp = Math.max(1, hero.hp * .75); offerReward(2, cb); }
-    else if (k === 'ancestor') { heal(maxHp() * .25); addXiu(20); done(); }
-    else if (k === 'lodge') { heal(maxHp() * .4); done(); }
-    else if (k === 'rob') { S.money += 60; hero.hp = Math.max(1, hero.hp * .85); done(); }
-    else if (k === 'burn') { RT.dmg *= 1.06; done(); }
-    else if (k === 'story') { addXiu(50); done(); }
-    else if (k === 'tip') { S.money -= 20; RT.dmg *= 1.05; done(); }
-    else if (k === 'forge') { S.money -= 50; RT.dmg *= 1.12; done(); }
-    else if (k === 'rest2') { heal(maxHp() * .2); done(); }
+    // 11/14 三国奇遇（cb(结果一句话, 要打的仗)）
+    else if (k === 'e_wait') { addXiu(60); done(); }
+    else if (k === 'e_note') offerReward(1, cb, 1, ['perk']);
+    else if (k === 'e_hero') { addShang('mo'); pickBao([1, 1, 1], cb, '煮酒论英雄 · 良品宝物'); }
+    else if (k === 'e_drop') { addXiu(30); done(); }
+    else if (k === 'e_bone') { hero.hp = Math.max(1, hero.hp - maxHp() * .15); S.hpMul *= 1.1; S.shang = []; done(); }
+    else if (k === 'e_mafei') { S.money -= 50; hero.hp = maxHp(); done(); }
+    else if (k === 'e_arrow') { hero.hp = Math.max(1, hero.hp - maxHp() * .2); offerReward(1, cb, 1, ['skill']); }
+    else if (k === 'e_city') { if (Math.random() < .5) pickBao([1, 1, 1], () => cb && cb('城中空无一人，案上却摆着一件宝物。')); else { if (cb) cb('城中伏兵四起——中计了！', 'battle'); } }
+    else if (k === 'e_xiu20') { addXiu(20); done(); }
+    else if (k === 'e_xiu10') { addXiu(10); done(); }
+    else if (k === 'e_xiu25') { addXiu(25); done(); }
+    else if (k === 'e_dandao') { S.afterFight = { bao: 2 }; if (cb) cb('你单刀赴会，席间刀光一闪，伏兵杀出！', 'elite'); }
+    else if (k === 'e_coin40') { S.money += 40; done(); }
+    else if (k === 'e_coin50') { S.money += 50; done(); }
+    else if (k === 'e_coin60') { S.money += 60; done(); }
+    else if (k === 'e_path') { S.afterFight = { coin2: 1 }; if (cb) cb('林深路窄，一声梆子响，伏兵杀出！', 'battle'); }
+    else if (k === 'e_brother') { S.money -= 30; pickBao([0, 0, 0], cb, '结义 · 凡品宝物'); }
+    else if (k === 'e_heal20') { heal(maxHp() * .2); done(); }
+    else if (k === 'e_heal30') { heal(maxHp() * .3); done(); }
+    else if (k === 'e_meng') { gainBao('tengjia'); if (cb) cb(HAS('tengjia') ? '孟获拜谢而去，留下一副藤甲。' : '孟获拜谢而去。'); }
+    else if (k === 'e_bet') { const w = Math.random() < .5; if (w) S.money += 100; else hero.hp = Math.max(1, hero.hp - maxHp() * .1); if (cb) cb(w ? '一箭正中画戟小枝，众人喝彩，你赢了 100 铜钱！' : '箭擦着戟杆飞过，你输了，还被罚了几杯烈酒。'); }
+    else if (k === 'e_fire') { S.enemyHpK = .8; done(); }
+    else if (k === 'e_cover') { hero.hp = Math.max(1, hero.hp - maxHp() * .1); gainBao('qixing'); if (cb) cb('追兵过后，那将军解下佩刀相赠：「他日必报。」'); }
+    else if (k === 'e_baby') { S.afterFight = { xiu: 50, heal: .2 }; if (cb) cb('你提刀杀进乱军！', 'battle'); }
+    else if (k === 'e_flee') { addShang('mo'); done(); }
+    else if (k === 'e_letter') { if (Math.random() < .5) pickBao([1, 1, 1], () => cb && cb('是真信！你连夜带着密信和信中提到的宝物离开。')); else { if (cb) cb('是假信——帐外伏兵早已等着你！', 'battle'); } }
+    else if (k === 'e_work') { hero.hp = Math.max(1, hero.hp - maxHp() * .15); S.money += 80; done(); }
+    else if (k === 'e_teach') { if (cb) cb('', 'train'); }
+    else if (k === 'e_shoe') { S.money -= 20; gainBao('caoxie'); done(); }
+    else if (k === 'e_chat') { addXiu(15); heal(maxHp() * .1); done(); }
+    else if (k === 'e_maze') { hero.hp = Math.max(1, hero.hp - maxHp() * .2); pickBao([1, 1, 1], cb, '八阵图 · 良品宝物'); }
+    else if (k === 'e_rob') { S.money += 60; addShang('jian'); done(); }
+    else if (k === 'e_burn') { S.weakN = 2; done(); }
+    else if (k === 'e_debate') { addXiu(80); done(); }
+    else if (k === 'e_herb') { heal(maxHp() * .3); done(); }
+    else if (k === 'e_heal5') { heal(maxHp() * .05); done(); }
     else done();
   }
   function nodeClear() {   // 一个节点打完：敌人站定淡出 → 左下战报 → 整备屏（结算/拾取/修炼/行商/武艺）→ 回长卷
@@ -1365,11 +1467,19 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     R.xiu = nd.type === 'boss' ? 60 : nd.type === 'elite' ? 40 : 25; addXiu(R.xiu);
     if (nd.type === 'boss') heal(maxHp() * .3);
     S.loot = rollLoot(nd); S.shop = rollShop(nd); S.bought = [];
+    if (HAS('wuzhu')) S.money += 15; if (HAS('yuxi')) heal(maxHp() * .15);
+    if ((S.weakN || 0) > 0) S.weakN--; S.enemyHpK = 1;
+    const af = S.afterFight; S.afterFight = null;   // 奇遇里打的仗：打完的额外奖励
+    if (af) { if (af.xiu) addXiu(af.xiu); if (af.heal) heal(maxHp() * af.heal); if (af.coin2) { S.money += R.got + R.left; } }
     report(R);
-    W.pick = true; setTimeout(() => prepOpen(nd), 1000);
+    W.pick = true;
+    const baoQ = af && af.bao != null ? [af.bao, af.bao, af.bao] : nd.type === 'elite' ? [Math.random() < .35 ? 1 : 0, Math.random() < .35 ? 1 : 0, Math.random() < .35 ? 1 : 0] : nd.type === 'boss' ? [2, 2, 2] : null;   // 精锐必掉宝物（凡/良），首领给奇品三选一
+    setTimeout(() => baoQ ? pickBao(baoQ, () => { W.pick = true; prepOpen(nd); }, nd.type === 'boss' ? '首领战利 · 奇品宝物' : '战利 · 宝物') : prepOpen(nd), 1000);
   }
   function beginNode(nd) {
-    if (window.CODEX) for (const k of S.slots.concat(S.owned || [])) if (k) CODEX.see('sk:' + k);   // 11/14：学过的武艺进图鉴
+    if (window.CODEX) for (const k of S.slots.concat(S.owned || [])) if (k) CODEX.see('sk:' + k);
+    if (window.HERO_SKIN) for (const k of S.slots) if (k && SK[k]) HERO_SKIN.preload(HERO_SKIN.cur(), preOf(k));
+    S.diluUsed = 0; S.huxinUsed = 0; S.lnT = 0; S.tpT = 0; S.jili = []; if (HAS('qingnang')) heal(maxHp() * .1);   // 11/14：学过的武艺进图鉴
     if (!c2ok && typeof ensureAssets === 'function') ensureAssets('chapter2', { silent: true }).then(() => { c2ok = true; });
     GM = gfCalc(); S.zq = zqMax(); S.hp0 = hero.hp; S.noHitT = 0; S.xy = 0;
     S.k0 = typeof kills === 'number' ? kills : 0; S.coinGot = 0; S.taken = 0; S.hutiSum = 0; S.dps = {}; S.lastHp = hero.hp; S.coins = []; S.lvAt0 = S.lv; S.tutT = 0; S.stolen = 0; S.thiefCd = 8; S.catDone = false; TELE.length = 0; BOOM.length = 0;
@@ -1770,7 +1880,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   function itemFrom(o) { return o.kind === 'heal' ? null : Object.assign({}, o, { price: (o.kind === 'skill' ? 24 : 18) + (o.q || 0) * 15, sell: SELL[o.q || 0] }); }
   const ownedAll = () => S.slots.filter(Boolean).concat(S.gf.filter(Boolean), S.qg ? [S.qg] : [], S.owned || []);
   function rollLoot(nd) {   // 拾取：普通战斗 1 本（四成 2 本），精锐 2 本 + 1 件道具，敌将 3 本 + 1 件道具
-    const n = nd.type === 'boss' ? 3 : nd.type === 'elite' ? 2 : (Math.random() < .4 ? 2 : 1), out = [], seen = new Set(ownedAll());
+    const n = (nd.type === 'boss' ? 3 : nd.type === 'elite' ? 2 : (Math.random() < .4 ? 2 : 1)) + (HAS('muniu') ? 1 : 0), out = [], seen = new Set(ownedAll());
     for (let i = 0; i < 6 && out.length < n; i++) for (const o of rewardOptions(i % 2 ? 'perk' : undefined)) { const it = itemFrom(o); const key = it && (it.k || it.id); if (it && !seen.has(key) && out.length < n) { seen.add(key); out.push(it); } }
     if (nd.type !== 'battle') { const ks = Object.keys(ITEMS).filter(k => !ITEMS[k].use); out.push(itemOf(ks[Math.random() * ks.length | 0])); }
     return out;
@@ -1778,7 +1888,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   function rollShop(nd) {   // 行商：3 件道具 + 2 本秘籍（11/11 用户定 5 件），都能买，不能刷新；价格随层数涨（第 1 层 ×2，每 8 层再 +100%）
     const ks = Object.keys(ITEMS).sort(() => Math.random() - .5), out = ks.slice(0, 3).map(itemOf), seen = new Set(ownedAll().concat(S.loot.map(it => it.k || it.id)));
     let nb = 0; for (const o of rewardOptions(undefined).concat(rewardOptions('perk'), rewardOptions('skill'))) { const it = itemFrom(o); const key = it && (it.k || it.id); if (it && !seen.has(key) && nb < 2) { seen.add(key); out.push(it); nb++; } }
-    const m = 2 * (1 + ((nd && nd.layer || 1) - 1) / 8); for (const it of out) it.price = Math.round(it.price * m);   // 11/11 用户定：整体 ×2，平均每关只买得起三件里的两件左右
+    const m = 2 * (1 + ((nd && nd.layer || 1) - 1) / 8); for (const it of out) it.price = Math.round(it.price * m * (HAS('muniu') ? .85 : 1));   // 11/11 用户定：整体 ×2，平均每关只买得起三件里的两件左右
     if (S.shopLock) { const L = S.shopLock; S.shopLock = null; const k = L.k || L.id; const j = out.findIndex(o => (o.k || o.id) === k); out.splice(j >= 0 ? j : 0, 1, Object.assign({}, L, { kept: 1 })); }   // 上一关锁定的货：原价留到这一关（只留一关）
     return out.sort((a, b) => (a.kind === 'item') - (b.kind === 'item') || (b.q || 0) - (a.q || 0));   // 秘籍在前，道具在后
   }
@@ -1805,7 +1915,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   const dsOf = it => (it.desc || '').replace(/^[黄玄地天]阶 · /, '');
   const skIco = it => it.kind === 'gf' ? `<em class="sic" style="background-image:url('art/ui/gf/${it.id}.webp')"></em>` : IMGU[it.k] ? `<em class="sic" style="background-image:url('${IMGU[it.k]}')"></em>` : `<em class="sic" style="color:${SK[it.k].color}">${SK[it.k].icon}</em>`;
   const tipOf = (it, right) => it.kind === 'item' || it.kind === 'heal' ? '' : `<div class="tip${right ? ' r' : ''}"><div class="th">${skIco(it)}<div><h3>${it.name}</h3><p style="color:${rk(it).c}">${rk(it).n}</p><div class="tg">${tagsOf(it).map(t => `<span>${t}</span>`).join('')}</div></div></div><h5>${it.kind === 'skill' ? '武艺效果' : '心法效果'}</h5><p class="ds">${dsOf(it)}</p>${it.kind === 'skill' ? `<p class="sp2">${spdTxt(SK[it.k])}</p>` : ''}</div>`;
-  const tagsOf = it => it.kind === 'skill' ? ['武艺', '主动', WEPN[wepOf(it.k)]] : it.kind === 'gf' ? (GF[it.id].qg ? ['轻功', '被动'] : ['心法', '被动']) : ITEMS[it.id].use ? ['道具', '消耗'] : ['道具', '永久'];
+  const tagsOf = it => it.kind === 'skill' ? ['武艺', '主动', WEPN[wepOf(it.k)]].concat(menTag(it.k) ? [menTag(it.k)] : []) : it.kind === 'gf' ? (GF[it.id].qg ? ['轻功', '被动'] : ['心法', '被动']) : ITEMS[it.id].use ? ['道具', '消耗'] : ['道具', '永久'];
   function prepOpen(nd) { { const t = document.getElementById('survTut'); if (t) t.remove(); tutQ = []; }   // 战斗里没看完的提醒不带进整备屏
     prepNd = nd; prepTab = 'jie'; prepLastTab = ''; selLoot = 0; selWu = null; selShop = 0; if (window.SFX) SFX.play('j_shop'); prepRender(); tut('prep'); }
   function prepClose() {
@@ -1976,7 +2086,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   // ---------- 对外接口 ----------
   function forceBlade() { weapon = 'blade'; pendingWeapon = null; try { if (window.GEAR && GEAR.switch) GEAR.switch(); } catch (e) {} if (typeof ui === 'function') ui(); }
   function startRun() {
-    S.lv = 1; S.shopLock = null; S.xiu = 0; S.bank = 0; S.atAdd = [0, 0, 0, 0, 0, 0, 0, 0, 0]; S.lvFx = 0; S.money = 0; S.coins = []; S.loot = []; S.shop = []; S.items = []; S.owned = []; S.hutiSum = 0; S.slots = [startSk() || 'hengsao', '', '', '', '']; S.held = wepOf(S.slots[0]) < 7 ? wepOf(S.slots[0]) : null; S.mast = {}; S.dps = {}; S.gf = ['', '', '']; S.qg = ''; S.gfExp = {}; S.xy = 0; S.lhjReady = false; S.lhjOn = false; GM = GM0(); S.zq = zqMax(); S.hp0 = hero.hp; S.combo = 0; S.lk = typeof kills === 'number' ? kills : 0; S.chain = 0; S.lastCat = -1; S.lastI = -9; W.pick = false; const old = document.getElementById('survPick'); if (old) old.remove();
+    S.lv = 1; S.shopLock = null; S.xiu = 0; S.bank = 0; S.atAdd = [0, 0, 0, 0, 0, 0, 0, 0, 0]; S.lvFx = 0; S.money = 0; S.coins = []; S.loot = []; S.shop = []; S.items = []; S.owned = []; S.bao = []; S.shang = []; S.hpMul = 1; S.weakN = 0; S.enemyHpK = 1; S.afterFight = null; S.hutiSum = 0; S.slots = [startSk() || 'hengsao', '', '', '', '']; S.held = wepOf(S.slots[0]) < 7 ? wepOf(S.slots[0]) : null; S.mast = {}; S.dps = {}; S.gf = ['', '', '']; S.qg = ''; S.gfExp = {}; S.xy = 0; S.lhjReady = false; S.lhjOn = false; GM = GM0(); S.zq = zqMax(); S.hp0 = hero.hp; S.combo = 0; S.lk = typeof kills === 'number' ? kills : 0; S.chain = 0; S.lastCat = -1; S.lastI = -9; W.pick = false; const old = document.getElementById('survPick'); if (old) old.remove();
     W.started = true; W.between = 0; S.wind = null; S.recov = null; S.later = []; S.qi = 0; bolts.length = 0; zones.length = 0; DKO.length = 0; S.cycles = 0; fx.length = 0;
     forceBlade();
     const vw = viewW(); arenaL = M.gates[0] + 10; lockR = arenaL + vw * 1.5; gateI = 0;
@@ -2000,7 +2110,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
         z.moving = true; }
       if (S.windT > 0 && !tough(z)) moveEnt(z, Math.cos(S.windA) * 70 * dt, 0); }
     if (S.windT > 0) S.windT -= dt;
-    skillTick(dt); daoTick(dt); bossTick(dt);
+    skillTick(dt); daoTick(dt); baoTick(dt); bossTick(dt);
     for (const e of fx) e.t += dt;
     for (const b of bolts) {
       CM = b.cm || 1; CK = b.ck || ''; b.t += dt;
@@ -2408,7 +2518,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     const r = ADO.map(i => R0[i].concat([i]));
     origin = o0; S.atAdd = d0; return r; };
   const status = () => ({   // 路线长卷「兵籍牒」用：这一局的当前状态（11/11）
-    origin: OG().name, money: S.money || 0, lv: S.lv || 1, pct: Math.floor(Math.min(1, (S.xiu || 0) / XIU_NEED(S.lv || 1)) * 100), bank: S.bank || 0,
+    origin: OG().name, money: S.money || 0, bao: (S.bao || []).map(k => Object.assign({ k }, BAO[k])), shang: (S.shang || []).map(k => SHANG[k]), lv: S.lv || 1, pct: Math.floor(Math.min(1, (S.xiu || 0) / XIU_NEED(S.lv || 1)) * 100), bank: S.bank || 0,
     hp: hero ? [Math.ceil(hero.hp * 10), Math.round(maxHp() * 10)] : [0, 0], attrs: attrInfo(origin, true), base: AT0(), add: (S.atAdd || []).slice(),
     slots: S.slots.map(k => k && SK[k] ? { name: SK[k].name, icon: SK[k].icon, color: SK[k].color, desc: SK[k].desc, lv: lvOf(k) } : null),
     gf: S.gf.map(id => id && GF[id] ? { name: GF[id].n, desc: GF[id].d, lv: gfLv(id) } : null), qg: S.qg && GF[S.qg] ? { name: GF[S.qg].n, desc: GF[S.qg].d } : null,
@@ -2418,16 +2528,16 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     setGf(ids) { S.gf = ['', '', '']; ids.slice(0, 3).forEach((id, i) => { S.gf[i] = id; }); GM = gfCalc(); }, setQg(id) { S.qg = id || ''; GM = gfCalc(); }, gf: () => S.gf.slice(), qg: () => S.qg, mul: k => skillMul(k), lv: k => lvOf(k), spd: k => spdTxt(SK[k]), rs: k => SK[k] && SK[k].dk ? rsOf(k) : null, setRs(k, v) { DRS[k] = v; try { localStorage.setItem('szz-dao-rs', JSON.stringify(DRS)); } catch (e) {} },
     sp: k => spOf(k), setSp(k, v) { DSP[k] = v; try { localStorage.setItem('szz-dao-sp', JSON.stringify(DSP)); } catch (e) {} }, spAll(v) { Object.keys(SK).forEach(k => { if (SK[k].dk) DSP[k] = v; }); try { localStorage.setItem('szz-dao-sp', JSON.stringify(DSP)); } catch (e) {} },
     FRN: ['idle', 'walk1', 'walk2', 'walk3', 'roll1', 'roll2', 'roll3', 'roll4', 'hurt', 'down', 'chop1', 'chop2', 'sweep1', 'sweep2', 'thrust1', 'thrust2', 'spin1', 'spin2', 'up1', 'up2'],
-    getPose: k => { const o = dpsOf(k); if (o) return Object.assign({ fa: 0, fb: 0 }, o); const m = motFr(k), hp = heldPre(); return { a: m[0].slice(hp.length), b: m[1].slice(hp.length), fa: 0, fb: 0 }; },
+    getPose: k => { const o = dpsOf(k); if (o) return Object.assign({ fa: 0, fb: 0 }, o); const m = motFr(k), hp = preOf(k); return { a: m[0].slice(hp.length), b: m[1].slice(hp.length), fa: 0, fb: 0 }; },
     setPose: (k, o) => { DPS[k] = o; try { localStorage.setItem('szz-dao-pose', JSON.stringify(DPS)); } catch (e) {} },
     poseAll: () => Object.keys(SK).filter(k => SK[k].dk && !SK[k].off).sort((a, b) => SK[a].tier - SK[b].tier).map(k => { const o = TRIAL.getPose(k); return `${SK[k].name}(${k}) 起手 ${o.a}${o.fa ? '（翻转）' : ''} → 出手 ${o.b}${o.fb ? '（翻转）' : ''}`; }).join('\n'),
     rsAll: () => Object.keys(SK).filter(k => SK[k].dk && !SK[k].off).sort((a, b) => SK[a].tier - SK[b].tier).map(k => `${TIERN[SK[k].tier]} ${SK[k].name}(${k}) 范围×${rsOf(k)} 速度×${spOf(k)}（${spdTxt(SK[k])}）`).join('\n'), setLv(k, l) { S.lvLock = {}; if (k && l) S.lvLock[k] = l; } };
-  window.SURV = { trial: TRIAL, poseFlip: () => poseFlipNow, banner: (a, b) => waveBanner(a, b), curNode: () => RT.on && W.started ? RT.node : null, status, attrInfo, addXiu: n => addXiu(n), heldPre: () => heldPre(), dbg: () => ({ gf: S.gf.slice(), qg: S.qg, zq: S.zq, zqMax: zqMax(), exp: S.gfExp, GM }), giveGf: id => { if (GF[id]) { if (GF[id].qg) S.qg = id; else { const f = S.gf.indexOf(""); if (f >= 0) S.gf[f] = id; } } }, newHud: () => RT.on && !!RT.node, stunGate, noStun: () => RT.on, get slots() { return S.slots; }, SK, beginNode, frozen: () => RT.on && (ROUTE.shown() || buildOpen || (banHold && !!document.getElementById('waveBan'))), routeHp: () => [hero.hp, maxHp()], camp(k) { if (k === 'heal') heal(maxHp() * .3); else if (k && SK[k]) { const l = lvOf(k); if (l < 10) S.mast[k] = MAST_T[l]; } else RT.dmg *= 1.1; },   // 11/14 营地：休整回三成血；修炼 = 选一招直接升一级
-    money: () => S.money, campSkills: () => [...S.slots, ...(S.owned || [])].filter((k, i, a) => k && SK[k] && a.indexOf(k) === i).map(k => ({ k, name: SK[k].name, lv: lvOf(k), img: IMGU[k] || '', icon: SK[k].icon, color: SK[k].color })), ORIGINS, setOrigin(k) { if (ORIGINS[k] && !ORIGINS[k].locked) { origin = k; startW = null; } }, origin: () => origin, setWep(w) { startW = w; }, wep: () => heldW(), startSk: () => startSk(), WEPN, takeMul: () => {
+  window.SURV = { trial: TRIAL, BAO, BQN, BQC, SHANG, baoHit, blessOpts, bless: (k, cb) => blessDo(k, cb), baoPick: (qs, cb, t) => pickBao(qs, cb, t), maxHp: () => maxHp(), poseFlip: () => poseFlipNow, banner: (a, b) => waveBanner(a, b), curNode: () => RT.on && W.started ? RT.node : null, status, attrInfo, addXiu: n => addXiu(n), heldPre: () => heldPre(), dbg: () => ({ gf: S.gf.slice(), qg: S.qg, zq: S.zq, zqMax: zqMax(), exp: S.gfExp, GM }), giveGf: id => { if (GF[id]) { if (GF[id].qg) S.qg = id; else { const f = S.gf.indexOf(""); if (f >= 0) S.gf[f] = id; } } }, newHud: () => RT.on && !!RT.node, stunGate, noStun: () => RT.on, get slots() { return S.slots; }, SK, beginNode, frozen: () => RT.on && (ROUTE.shown() || buildOpen || (banHold && !!document.getElementById('waveBan'))), routeHp: () => [hero.hp, maxHp()], camp(k) { if (k === 'heal') { heal(maxHp() * .3); S.shang = []; } else if (k && SK[k]) { const l = lvOf(k); if (l < 10) S.mast[k] = MAST_T[l]; } else RT.dmg *= 1.1; },   // 11/14 营地：休整回三成血；修炼 = 选一招直接升一级
+    money: () => S.money, campSkills: () => [...S.slots, ...(S.owned || [])].filter((k, i, a) => k && SK[k] && a.indexOf(k) === i).map(k => ({ k, name: SK[k].name, lv: lvOf(k), img: IMGU[k] || '', icon: SK[k].icon, color: SK[k].color })), ORIGINS, setOrigin(k) { if (ORIGINS[k] && !ORIGINS[k].locked) { origin = k; startW = null; } }, origin: () => origin, setWep(w) { startW = w; }, wep: () => heldW(), startSk: () => startSk(), WEPN, takeMul: (from, kind) => { const fireK = kind === 'fire' || !!(from && (from.fire || (from.source && /fire|huo|jar/.test(String(from.source)))));
       if (RT.on && GM.block && Math.random() < GM.block) { floaters.push({ x: hero.x, y: hero.y - 50, t: 0, txt: '格挡', color: '#bfe0ff' }); return 0; }
       const mv = Math.abs(hero.ix) > .1 || Math.abs(hero.iy) > .1, low = hero.hp / maxHp() < .3 ? 1 - .10 * GM.low : 1;
-      return (OG().take || 1) / AFX.hp() * (1 - IT('take')) * RT.take * RES().take * GM.take / GM.hp * low * (S.qg === 'taxue' && mv ? .85 : 1) * (GM.still && S.stillT > 1 ? 1 - GM.still : 1);
+      return (HAS('chitu') ? 1.1 : 1) * (HAS('tengjia') ? (fireK ? 2.5 : .75) : 1) * (HURT('mo') ? 1.1 : 1) * ((S.weakN || 0) > 0 ? .85 : 1) * (OG().take || 1) / AFX.hp() * (1 - IT('take')) * RT.take * RES().take * GM.take / GM.hp * low * (S.qg === 'taxue' && mv ? .85 : 1) * (GM.still && S.stillT > 1 ? 1 - GM.still : 1);
     },
-    absorb: n => { if (!RT.on || S.zq <= 0) return n; const a = Math.min(S.zq, n * (.3 + IT('huti'))); S.zq -= a; S.hutiSum = (S.hutiSum || 0) + a; return n - a; },   // 护体（11/11 用户定，照群侠幸存者）：真气只挡 30% 伤害，其余直接扣血；真气空了全扣血
-     moveMul: () => (OG().move || 1) * AFX.move() * (1 + IT('move')) * RT.move * GM.spd, left: () => RT.on && RT.node && W.started ? Math.max(0, WT() - W.t) : null, reward: (n, cb) => offerReward(n, cb), event(k, cb) { eventDo(k, cb); }, SK, tick, drawWorld, hud, thief: thiefAI, unitAI: (z, dt) => unitAI(z, dt), startRun, waveFlow, pose, rooted, onRoll, skipWave() { if (W.retreat <= 0 && W.between <= 0 && W.started) endWave(); }, state: () => ({ wave: W.n, t: W.t, slots: S.slots.slice() }) };
+    absorb: n => { if (!RT.on) return n; if (S.zq > 0) { const a = Math.min(S.zq, n * (.3 + IT('huti'))); S.zq -= a; S.hutiSum = (S.hutiSum || 0) + a; n -= a; } if (HAS('huxin') && !S.huxinUsed && hero.hp - n <= 0 && n > 0) { S.huxinUsed = 1; n = Math.max(0, hero.hp - .1); floaters.push({ x: hero.x, y: hero.y - 60, t: 0, txt: '护心镜！', gold: true }); } return n; },   // 护体（11/11 用户定，照群侠幸存者）：真气只挡 30% 伤害，其余直接扣血；真气空了全扣血
+     moveMul: () => (OG().move || 1) * AFX.move() * (1 + IT('move') + (HAS('caoxie') ? .08 : 0) + (HAS('chitu') ? .3 : 0)) * (HURT('jian') ? .9 : 1) * RT.move * GM.spd, left: () => RT.on && RT.node && W.started ? Math.max(0, WT() - W.t) : null, reward: (n, cb) => offerReward(n, cb), event(k, cb) { eventDo(k, cb); }, SK, tick, drawWorld, hud, thief: thiefAI, unitAI: (z, dt) => unitAI(z, dt), startRun, waveFlow, pose, rooted, onRoll, skipWave() { if (W.retreat <= 0 && W.between <= 0 && W.started) endWave(); }, state: () => ({ wave: W.n, t: W.t, slots: S.slots.slice() }) };
 })();

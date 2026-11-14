@@ -12,20 +12,27 @@
   const SECT = [['field', 1, 4, '120,140,80', .13], ['town', 5, 8, '160,115,70', .13], ['forest', 9, 12, '110,130,70', .12], ['camp', 13, 16, '165,70,45', .12], ['altar', 17, 18, '70,55,95', .2]];   // 分段：地图、起止层、淡墨色调
   const hov = { n: null };
   const LABEL = { battle: '黄巾游兵', elite: '黄巾精锐', camp: '营地', boss: '张角祭坛', start: '涿郡', event: '奇遇', chest: '宝箱' };
-  const EVENTS = [   // 奇遇：几个小抉择，选完不打架直接回长卷
-    { t: '破庙神像', npc: ['刘备', 'art/ui/npc/liubei_face.webp', '神明面前，取舍由你。只是拿了供品，心里要过意得去。'], d: '路边一座破庙，神像前还摆着供品。', o: [['上香祈福', '回复 40% 血量', 'pray'], ['搜刮供品', '失去 20% 血量，换一次战利三选一', 'loot']] },
-    { t: '路边老兵', npc: ['关羽', 'art/ui/npc/guanyu_face.webp', '老卒阅阵无数，一碗酒换他一句话，不亏。'], d: '一个断了腿的老兵坐在树下，招呼你过去。', o: [['请他喝酒', '武艺伤害 +8%', 'wine'], ['向他求教', '一次战利三选一', 'learn']] },
-    { t: '溪边磨石', npc: ['张飞', 'art/ui/npc/zhangfei_face.webp', '磨快了刀，砍起贼来才痛快！不过歇歇脚也行。'], d: '溪水边有一块平整的磨刀石。', o: [['磨刀', '武艺伤害 +10%', 'sharpen'], ['歇脚', '回复 30% 血量', 'rest']] },
-    // 11/14 用户：奇遇扩充（第 4 个起；选项第 4 项是要花的铜钱，不够就点不了）
-    { t: '流民求食', npc: ['刘备', 'art/ui/npc/liubei_face.webp', '乱世之中，百姓最苦。能帮一把，就帮一把。'], d: '一群逃难的流民围上来，孩子饿得直哭。', o: [['分些干粮', '花 30 铜钱，修为 +40', 'feed', 30], ['赶路要紧', '什么也不发生', 'none']] },
-    { t: '逃兵求饶', npc: ['张飞', 'art/ui/npc/zhangfei_face.webp', '哼，这厮要是敢耍花样，俺一矛戳死他！'], d: '一个黄巾逃兵跪在路边，磕头求你放他一条生路。', o: [['放他走', '修为 +20', 'spare'], ['逼问军情', '失去 10% 血量，战利三选一', 'press']] },
-    { t: '江湖郎中', npc: ['关羽', 'art/ui/npc/guanyu_face.webp', '此人虽是走方郎中，药箱里倒有几样好东西。'], d: '一个背着药箱的郎中在树下歇脚。', o: [['买他的药', '花 40 铜钱，回复 50% 血量', 'medic', 40], ['向他讨教', '修为 +30', 'ask']] },
-    { t: '路边赌坊', npc: ['张飞', 'art/ui/npc/zhangfei_face.webp', '赌一把！输了算俺的……算了，俺也没钱。'], d: '一间赌坊，里面吆五喝六，骰子声响成一片。', o: [['押一把', '花 40 铜钱，一半机会赢回 100', 'gamble', 40], ['不赌了', '什么也不发生', 'none']] },
-    { t: '荒野古墓', npc: ['关羽', 'art/ui/npc/guanyu_face.webp', '墓里机关多，进去要小心。富贵险中求。'], d: '一座被盗过的古墓，墓门半开，里面黑漆漆的。', o: [['进墓探寻', '失去 25% 血量，战利三选一（品阶更好）', 'tomb'], ['绕开', '什么也不发生', 'none']] },
-    { t: '村中祠堂', npc: ['刘备', 'art/ui/npc/liubei_face.webp', '敬天法祖，不忘根本。在此歇一夜也好。'], d: '村子里一座祠堂，香火还没断。', o: [['祭拜祖先', '回复 25% 血量，修为 +20', 'ancestor'], ['借宿一夜', '回复 40% 血量', 'lodge']] },
-    { t: '黄巾粮车', npc: ['张飞', 'art/ui/npc/zhangfei_face.webp', '粮车！抢了它，或者一把火烧了，让贼兵饿肚子！'], d: '几辆黄巾的粮车停在路边，看守的只有几个人。', o: [['劫粮', '得 60 铜钱，失去 15% 血量', 'rob'], ['烧粮', '武艺伤害 +6%', 'burn']] },
-    { t: '说书老人', npc: ['刘备', 'art/ui/npc/liubei_face.webp', '老人家讲的是古之名将，听一听，长见识。'], d: '茶棚里一位老人正在讲古，说到兴头上一拍醒木。', o: [['听完这一段', '修为 +50', 'story'], ['打赏几文', '花 20 铜钱，武艺伤害 +5%', 'tip', 20]] },
-    { t: '乡间铁匠', npc: ['关羽', 'art/ui/npc/guanyu_face.webp', '好铁匠难得，兵刃淬一遍火，能利三分。'], d: '一间铁匠铺，炉火正旺，老铁匠在打一把农具。', o: [['请他淬刀', '花 50 铜钱，武艺伤害 +12%', 'forge', 50], ['烤火歇脚', '回复 20% 血量', 'rest2']] },
+  const EVENTS = [   // 11/14 用户定：20 个三国奇遇。选项 [名字, 说明, 键, 要花的铜钱, 限定出身]
+    { t: '隆中草庐', npc: ['关羽', 'art/ui/npc/guanyu_face.webp', '草庐里的书生，必是大才。等一等又何妨。'], d: '山坳里一间草庐，一个书生正在竹榻上午睡。', o: [['等他醒来', '修为 +60', 'e_wait'], ['留字离开', '学一门心法（三选一）', 'e_note']] },
+    { t: '煮酒论英雄', npc: ['刘备', 'art/ui/npc/liubei_face.webp', '此人目光如炬……言多必失，小心应对。'], d: '一位相貌威严的人请你喝酒，问你天下谁是英雄。', o: [['直言：唯使君与操耳', '得一件良品宝物，带上伤势「心魔」', 'e_hero'], ['闻雷失箸，装傻', '修为 +30', 'e_drop']] },
+    { t: '华佗行医', npc: ['关羽', 'art/ui/npc/guanyu_face.webp', '刮骨疗毒，某尚且谈笑自若。你也试试？'], d: '一位背着药箱的老医者在树下歇脚，自称姓华。', o: [['刮骨疗毒', '失去 15% 气血，气血上限 +10%，治好全部伤势', 'e_bone'], ['求麻沸散', '花 50 铜钱，回满气血', 'e_mafei', 50]] },
+    { t: '草船借箭', npc: ['刘备', 'art/ui/npc/liubei_face.webp', '江上雾大，借几支箭回来，便是兵器。'], d: '江面浓雾弥漫，对岸箭如雨下，岸边还泊着几条草船。', o: [['冒雨借箭', '失去 20% 气血，学一招武艺（三选一）', 'e_arrow'], ['撤回', '什么也不发生', 'none']] },
+    { t: '空城计', npc: ['张飞', 'art/ui/npc/zhangfei_face.webp', '城门大开？里面八成有诈！俺老张偏要进去看看！'], d: '一座小城城门大开，城头一位老者正在抚琴。', o: [['闯进城去', '一半机会得良品宝物，一半机会中伏打一仗', 'e_city'], ['退兵', '修为 +20', 'e_xiu20']] },
+    { t: '单刀赴会', npc: ['关羽', 'art/ui/npc/guanyu_face.webp', '某当年单刀赴会，也不过如此。'], d: '对方送来请帖：设宴江边，只请你一人。', o: [['只身赴会', '打一场精锐战，赢了得一件传说宝物', 'e_dandao'], ['带兵同去', '对方没敢动手，送你 40 铜钱', 'e_coin40']] },
+    { t: '落凤坡', npc: ['刘备', 'art/ui/npc/liubei_face.webp', '此地名叫落凤坡……总觉得不太吉利。'], d: '前面一条小路林深路窄，能少走半天路程。', o: [['走小路', '打一场伏击战，战后多得一倍铜钱', 'e_path'], ['走大路', '什么也不发生', 'none']] },
+    { t: '酒肆结义', npc: ['张飞', 'art/ui/npc/zhangfei_face.webp', '好汉子！喝了这碗酒，就是兄弟了！'], d: '酒肆里一个豪爽的汉子拉着你，非要和你结拜。', o: [['结拜', '花 30 铜钱，得一件凡品宝物', 'e_brother', 30], ['婉拒', '什么也不发生', 'none']] },
+    { t: '望梅止渴', npc: ['刘备', 'art/ui/npc/liubei_face.webp', '将士们又累又渴，得想个法子提提气。'], d: '大军走了一整天，水囊都空了，将士们嘴唇干裂。', o: [['「前有梅林！」', '回复 20% 气血', 'e_heal20'], ['找水源', '修为 +25', 'e_xiu25'], ['挖野菜', '回复 30% 气血（农夫）', 'e_herb', 0, 'nongfu']] },
+    { t: '七擒孟获', npc: ['关羽', 'art/ui/npc/guanyu_face.webp', '攻心为上。放他回去，他日自有回报。'], d: '你抓到一个南蛮首领，他却梗着脖子不服。', o: [['放了他', '得传说宝物「藤甲」', 'e_meng'], ['押走领赏', '得 60 铜钱', 'e_coin60']] },
+    { t: '辕门射戟', npc: ['张飞', 'art/ui/npc/zhangfei_face.webp', '射！射中了俺请你喝酒！'], d: '营门外，一位将军打赌你射不中辕门上画戟的小枝。', o: [['应赌', '一半机会得 100 铜钱，一半机会失去 10% 气血', 'e_bet'], ['不赌', '什么也不发生', 'none']] },
+    { t: '夜袭敌营', npc: ['张飞', 'art/ui/npc/zhangfei_face.webp', '趁夜摸过去，一把火烧他个干净！'], d: '前方敌营灯火稀疏，守夜的哨兵在打瞌睡。', o: [['放火', '下一仗敌人血量 −20%', 'e_fire'], ['不冒险', '什么也不发生', 'none']] },
+    { t: '割须弃袍', npc: ['刘备', 'art/ui/npc/liubei_face.webp', '此人虽然狼狈，看气度绝非常人。'], d: '一个割了胡须、丢了战袍的将军跌跌撞撞跑来，求你掩护。', o: [['掩护他', '失去 10% 气血，他赠你宝物「七星刀」', 'e_cover'], ['去报官', '得 50 铜钱', 'e_coin50']] },
+    { t: '长坂坡', npc: ['张飞', 'art/ui/npc/zhangfei_face.webp', '有俺在，谁也伤不了这孩子！'], d: '乱军之中传来婴儿的哭声。', o: [['杀进去救人', '打一仗，赢了修为 +50、回复 20% 气血', 'e_baby'], ['绕开', '带上伤势「心魔」', 'e_flee']] },
+    { t: '蒋干盗书', npc: ['关羽', 'art/ui/npc/guanyu_face.webp', '书信来得太巧，未必是真。'], d: '夜里你潜进敌营，在主帐案上发现一封密信。', o: [['偷走', '一半机会是真信（得良品宝物），一半机会是假信（中伏打一仗）', 'e_letter'], ['原样放回', '什么也不发生', 'none']] },
+    { t: '铜雀台', npc: ['刘备', 'art/ui/npc/liubei_face.webp', '出点力气换些盘缠，也是好事。'], d: '一座高台正在修建，工头在路边招短工。', o: [['出力干活', '失去 15% 气血，得 80 铜钱', 'e_work'], ['路过', '什么也不发生', 'none']] },
+    { t: '水镜先生', npc: ['关羽', 'art/ui/npc/guanyu_face.webp', '伏龙、凤雏，得一可安天下。此人知道他们在哪。'], d: '山中隐士请你坐下说话。', o: [['求教', '任选一招武艺，升一级', 'e_teach'], ['辩论', '修为 +80（书生）', 'e_debate', 0, 'shusheng'], ['喝茶听讲', '修为 +10', 'e_xiu10']] },
+    { t: '卖草鞋的小贩', npc: ['张飞', 'art/ui/npc/zhangfei_face.webp', '这卖鞋的大耳朵，倒是面善。'], d: '路边一个大耳朵的年轻人一边织席，一边卖草鞋。', o: [['买一双', '花 20 铜钱，得宝物「织席草鞋」', 'e_shoe', 20], ['和他聊聊', '修为 +15，回复 10% 气血', 'e_chat']] },
+    { t: '八阵图', npc: ['关羽', 'art/ui/npc/guanyu_face.webp', '此阵变化无穷，硬闯怕是要吃苦头。'], d: '江边乱石堆成一座迷阵，阵中隐约有光。', o: [['硬闯', '失去 20% 气血，得一件良品宝物', 'e_maze'], ['绕路', '修为 +10', 'e_xiu10']] },
+    { t: '黄巾粮车', npc: ['张飞', 'art/ui/npc/zhangfei_face.webp', '粮车！抢了它，或者一把火烧了！'], d: '几辆黄巾的粮车停在路边，看守只有几个人。', o: [['劫粮', '得 60 铜钱，带上伤势「箭伤」', 'e_rob'], ['烧粮', '之后两仗敌人伤害 −15%', 'e_burn']] },
   ];
   const FONT = '"WenKai","MaShanZheng","STKaiti","KaiTi","Songti SC",serif';   // 11/14 用户：字不够大气 → 粗楷书
   const UI = '"PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif';   // 小字用黑体加粗，毛笔字只用在标题和节点名（11/11：字太小太细）
@@ -137,7 +144,7 @@
     const c = lo + (n.lane + n.jx * .35) / (LANES - 1) * (hi - lo) + n.jy * 10;
     return port() ? { x: c, y: H - m } : { x: m, y: c };
   }
-  const nlabel = n => !n ? '' : n.type === 'boss' ? (n.final ? '张角祭坛' : (n.br === 'bao' ? '张宝' : n.br === 'liang' ? '张梁' : SECBOSS[n.sec - 1][0]) + ' 营垒') : (n.tag && (TAGNS[Math.min(3, ((n.layer - 1) / 4) | 0)] || TAGNS[0])[n.tag] + (n.cat ? '·投石车' : '')) || LABEL[n.type];
+  const nlabel = n => !n ? '' : n.type === 'boss' ? (n.final ? '张角祭坛' : (n.br === 'bao' ? '张宝' : n.br === 'liang' ? '张梁' : SECBOSS[n.sec - 1][0]) + ' 营垒') : (n.tag && (n.type === 'battle' || n.type === 'elite') && (TAGNS[Math.min(3, ((n.layer - 1) / 4) | 0)] || TAGNS[0])[n.tag] + (n.cat ? '·投石车' : '')) || LABEL[n.type];
   const radius = n => (n.type === 'boss' ? 42 : n.type === 'elite' ? 30 : n.type === 'start' ? 28 : 26) * (!port() && H < 560 ? Math.max(.6, H / 620) : 1);
   const reachable = n => !!run && (window.ROUTE_ALL ? n !== run.cur : run.cur.next.includes(n));   /* 11/12 开发者模式「解锁全部关卡」：任意节点都能点进去 */
   const visited = n => !!run && run.visited.has(n);
@@ -183,6 +190,7 @@
   function open() {
     if (!run) return;
     ensureDom(); fit(); focus(true); shown = true; root.style.display = ''; t0 = performance.now();
+    if (run.blessed === false && window.SURV && SURV.blessOpts) setTimeout(bless, 300);
     if (!raf) raf = requestAnimationFrame(frame);
   }
   function close() { shown = false; if (root) root.style.display = 'none'; if (campBox) { campBox.remove(); campBox = null; } cancelAnimationFrame(raf); raf = 0; }
@@ -227,19 +235,44 @@
       + '<div><div class="ds">' + desc + '</div>' + (npc ? '<div class="sy"><b>' + npc[0] + '</b>' + npc[2] + '</div>' : '')
       + (hp ? '<div class="hp">当前气血 ' + Math.ceil(hp[0] * 10) + ' / ' + Math.round(hp[1] * 10) + '</div>' : '') + '</div></div>'
       + (window.SURV && SURV.money ? '<div class="hp" style="color:#e8c47a;margin:-.4em 0 .8em">铜钱 ' + SURV.money() + '</div>' : '')
-      + '<div class="op">' + opts.map((o, i) => { const poor = o[3] && window.SURV && SURV.money && SURV.money() < o[3]; return '<button data-i="' + i + '"' + (poor ? ' disabled style="opacity:.4;cursor:not-allowed"' : '') + '>' + (o[4] ? '<img src="' + o[4] + '" style="width:40px;height:40px;display:block;margin:0 auto 4px">' : '') + o[0] + '<small>' + (poor ? '铜钱不够' : o[1]) + '</small></button>'; }).join('') + '</div></div>';
+      + '<div class="op">' + opts.map((o, i) => { const poor = o[3] && window.SURV && SURV.money && SURV.money() < o[3]; return '<button data-i="' + i + '"' + (poor ? ' disabled style="opacity:.4;cursor:not-allowed"' : '') + '>' + (o[4] && /\//.test(o[4]) ? '<img src="' + o[4] + '" style="width:40px;height:40px;display:block;margin:0 auto 4px">' : '') + o[0] + '<small>' + (poor ? '铜钱不够' : o[1]) + '</small></button>'; }).join('') + '</div></div>';
     box.querySelectorAll('button').forEach(b => b.onclick = () => { if (b.disabled) return; box.remove(); campBox = null; pick(opts[+b.dataset.i][2]); });
     root.appendChild(box);
   }
-  function happen(n) {
-    if (window.SFX) SFX.play('j_event');
-    const ev = EVENTS[(n.id * 7 + n.layer) % EVENTS.length];
-    popup(ev.t, '', ev.d, ev.o, k => SURV.event(k, msg => { if (typeof msg === 'string') popup(ev.t, '', msg, [['继续', '', 'ok']], () => done(n, true)); else done(n, true); }), ev.npc);
+  function fightFrom(n, kind, msg, title) {   // 奇遇里打仗：节点就地变成战斗（或精锐），打完照常走整备屏
+    n.type = kind === 'elite' ? 'elite' : 'battle'; n.tag = kind === 'elite' ? 'patrol' : 'melee';
+    const go = () => { close(); if (window.SURV && SURV.beginNode) SURV.beginNode(n); };
+    if (msg) popup(title || '遭 遇', '', msg, [['迎战', '', 'go']], go); else go();
   }
-  function chest(n) { SURV.reward(2, () => done(n, true)); }
+  function train(n, title) {
+    const L = SURV.campSkills ? SURV.campSkills() : [];
+    if (!L.length) return done(n, true);
+    popup(title || '修 炼', '', '选一招武艺，静心苦练。', L.map(o => [o.name, o.lv >= 10 ? '已满级' : 'LV' + o.lv + ' → LV' + (o.lv + 1), o.k, 0, o.img]), k2 => { SURV.camp(k2); done(n, true); });
+  }
+  function happen(n) {   // 11/14：「?」节点进去才知道——七成奇遇、一成五伏击战、一成宝箱、半成无事
+    if (window.SFX) SFX.play('j_event');
+    const r = Math.random();
+    if (r < .15) return fightFrom(n, 'battle', '林子里一声梆子响，黄巾伏兵四起！', '伏 击');
+    if (r < .25) return chest(n);
+    if (r < .30) return popup('一路无事', '', '这段路风平浪静，你停下来歇了口气。', [['继续赶路', '回复 5% 气血', 'ok']], () => SURV.event('e_heal5', () => done(n, true)));
+    run.evSeen = run.evSeen || [];
+    let pool = EVENTS.map((e, i) => i).filter(i => !run.evSeen.includes(i)); if (!pool.length) { run.evSeen = []; pool = EVENTS.map((e, i) => i); }
+    const idx = pool[(Math.random() * pool.length) | 0], ev = EVENTS[idx]; run.evSeen.push(idx);
+    const org = window.SURV && SURV.origin ? SURV.origin() : '', opts = ev.o.filter(o => !o[4] || o[4] === org).map(o => o.slice(0, 4));
+    popup(ev.t, '', ev.d, opts, k => SURV.event(k, (msg, fight) => {
+      if (fight === 'train') return train(n, ev.t);
+      if (fight) return fightFrom(n, fight, msg, ev.t);
+      if (typeof msg === 'string' && msg) popup(ev.t, '', msg, [['继续', '', 'ok']], () => done(n, true)); else done(n, true);
+    }), ev.npc);
+  }
+  function chest(n) { if (window.SFX) SFX.play('j_event'); const q = () => Math.random() < .3 ? 1 : 0; SURV.baoPick([q(), q(), q()], () => done(n, true), '宝 箱 · 选一件宝物'); }
+  function bless() {   // 11/14 用户定：出征前·桃园三赠（刘备、关羽免费，张飞有代价），三选一
+    run.blessed = true; const L = SURV.blessOpts();
+    popup('出征前 · 桃园三赠', '', '涿郡城外，三兄弟为你送行。各有一份心意，只能收下一份。', L.map(o => [o[0] + ' · ' + o[2], o[3], o[1]]), k => SURV.bless(k, () => { if (window.RUNSAVE) RUNSAVE.save(); }), ['张飞', 'art/ui/npc/zhangfei_face.webp', '大哥二哥给的都是好东西，俺老张这份……得拿点东西来换！']);
+  }
   function camp(n) {   // 11/14 用户：营地二选一——休整回三成血，或修炼（任选一招武艺直接升一级）
     if (window.SFX) SFX.play('j_event');
-    popup('营 地', '', '篝火噼啪作响，弟兄们围坐歇息。今夜做些什么？', [['休整', '回复 30% 血量', 'heal'], ['修炼', '任选一招武艺，熟练直接升一级', 'train']], k => {
+    popup('营 地', '', '篝火噼啪作响，弟兄们围坐歇息。今夜做些什么？', [['休整', '回复 30% 血量，治好伤势', 'heal'], ['修炼', '任选一招武艺，熟练直接升一级', 'train']], k => {
       if (k === 'heal') { SURV.camp('heal'); return done(n, true); }
       const L = SURV.campSkills ? SURV.campSkills() : [];
       if (!L.length) { SURV.camp('heal'); return done(n, true); }
@@ -260,6 +293,8 @@
       + row('出身', st.origin) + row('铜钱', String(st.money)) + row('修为', 'LV.' + st.lv + '　' + st.pct + '%', st.bank ? '待修炼 ×' + st.bank : '') + row('气血', st.hp[0] + ' / ' + st.hp[1]) + (st.dmg > 1.001 ? row('武艺伤害', '+' + Math.round((st.dmg - 1) * 100) + '%', '磨刀/奇遇') : '')
       + h('属性') + st.attrs.map((r, i) => row(r[0], r[1] + (st.add[r[4]] ? ' <small style="color:#3f8a4a">(+' + st.add[r[4]] + ')</small>' : ''), r[2])).join('')
       + h('武艺') + (st.slots.filter(Boolean).map((k, i) => row((i + 1) + '. <i style="display:inline-block;width:9px;height:9px;border-radius:2px;background:' + k.color + ';box-shadow:0 0 0 1px rgba(0,0,0,.4);margin-right:4px"></i><b>' + k.name + '</b> LV' + k.lv, '', k.desc)).join('') || '<div style="opacity:.6">无</div>')
+      + h('宝物') + ((st.bao || []).map(b => row('<span style="color:' + SURV.BQC[b.q] + '">' + b.n + '</span>', SURV.BQN[b.q], b.d + (b.c ? '（代价：' + b.c + '）' : ''))).join('') || '<div style="opacity:.6">无</div>')
+      + ((st.shang || []).length ? h('伤势') + st.shang.map(x => row('<span style="color:#c0392b">' + x.n + '</span>', '', x.d + '（营地休整可治）')).join('') : '')
       + h('心法') + (st.gf.filter(Boolean).map(g => row(g.name + ' LV' + g.lv, '', g.desc)).join('') || '<div style="opacity:.6">无</div>')
       + (st.qg ? h('轻功') + row(st.qg.name, '', st.qg.desc) : '')
       + '</div>';
@@ -432,6 +467,13 @@
       const [hp, mx] = SURV.routeHp(), bw = Math.min(220 * k, W * .34), x = 24, y = 100 * k, bh = 16 * k;
       g.fillStyle = 'rgba(40,28,18,.6)'; g.fillRect(x, y, bw + 4, bh); g.fillStyle = CINNABAR; g.fillRect(x + 2, y + 2, bw * Math.max(0, Math.min(1, hp / mx)), bh - 4);
       g.fillStyle = INK; g.font = `bold ${Math.round(14 * k)}px ${UI}`; g.textBaseline = 'middle'; g.fillText('气血 ' + Math.ceil(hp * 10) + ' / ' + Math.round(mx * 10), x + bw + 12, y + bh / 2); g.textBaseline = 'alphabetic';
+      if (SURV.status) {   // 11/14：宝物、伤势一排小牌（详细看兵籍牒）
+        const st = SURV.status(); let cx = x; const cy = y + bh + 8 * k, ch = 22 * k; g.font = `bold ${Math.round(13 * k)}px ${UI}`; g.textBaseline = 'middle';
+        const chip = (t, col, bg) => { const w = g.measureText(t).width + 14 * k; if (cx + w > W * .62) return; g.fillStyle = bg; g.fillRect(cx, cy, w, ch); g.strokeStyle = col; g.lineWidth = 1; g.strokeRect(cx + .5, cy + .5, w - 1, ch - 1); g.fillStyle = col; g.fillText(t, cx + 7 * k, cy + ch / 2 + 1); cx += w + 5 * k; };
+        for (const b of st.bao || []) chip(b.n, SURV.BQC[b.q], 'rgba(20,13,8,.85)');
+        for (const x2 of st.shang || []) chip(x2.n, '#ff8a7a', 'rgba(70,14,10,.85)');
+        g.textBaseline = 'alphabetic';
+      }
     }
     // 图例（手机竖屏放右上，避开右下印章）
     const lg = [['battle', '普通'], ['elite', '精英'], ['event', '奇遇'], ['camp', '营地'], ['chest', '宝箱'], ['boss', '首领']]; g.font = `bold ${Math.round(14 * k)}px ${UI}`; g.fillStyle = INK; g.textAlign = 'left'; g.textBaseline = 'middle';
@@ -457,16 +499,16 @@
     branch: () => branch(),   // 第 4 段走了哪边：'liang' / 'bao' / null
     tagOf: n => n.tag,
     shown: () => shown || pending,
-    start() { run = { ...gen(), visited: new Set() }; run.cur = run.start; run.visited.add(run.start); pending = true; if (shown) close(); },
+    start() { run = { ...gen(), visited: new Set(), blessed: false }; run.cur = run.start; run.visited.add(run.start); pending = true; if (shown) close(); },
     snap() {   // 存档用：节点之间的连线存成编号
       if (!run) return null;
-      return { nodes: run.nodes.map(n => ({ id: n.id, layer: n.layer, lane: n.lane, type: n.type, tag: n.tag, cat: n.cat, rw: n.rw, sec: n.sec, final: n.final, jx: n.jx, jy: n.jy, next: n.next.map(x => x.id) })), cur: run.cur.id, visited: [...run.visited].map(n => n.id) };
+      return { nodes: run.nodes.map(n => ({ id: n.id, layer: n.layer, lane: n.lane, type: n.type, tag: n.tag, cat: n.cat, rw: n.rw, sec: n.sec, final: n.final, jx: n.jx, jy: n.jy, next: n.next.map(x => x.id) })), cur: run.cur.id, visited: [...run.visited].map(n => n.id), blessed: run.blessed !== false, evSeen: run.evSeen || [] };
     },
     resume(o) {
       const nodes = o.nodes.map(n => ({ ...n, next: [], prev: [] })), byLayer = [];
       o.nodes.forEach((n, i) => n.next.forEach(j => { nodes[i].next.push(nodes[j]); nodes[j].prev.push(nodes[i]); }));
       for (const n of nodes) (byLayer[n.layer] || (byLayer[n.layer] = [])).push(n);
-      run = { nodes, byLayer, start: nodes.find(n => n.type === 'start') || nodes[0], visited: new Set(o.visited.map(i => nodes[i])) };
+      run = { nodes, byLayer, start: nodes.find(n => n.type === 'start') || nodes[0], visited: new Set(o.visited.map(i => nodes[i])), blessed: o.blessed !== false, evSeen: o.evSeen || [] };
       run.cur = nodes[o.cur]; pending = true; if (shown) close();
     },
     done, close, choose, posOf: n => pos(n),
