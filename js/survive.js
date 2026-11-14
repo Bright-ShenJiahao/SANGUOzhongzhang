@@ -1027,7 +1027,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const heldPre = () => HELDP[heldW()] || 'wd_';
   const motFr = k => (FRM[heldPre()] || FRM.wd_)[MOT[k] || 'chop'];
   // 11/14 用户：刀招的起手帧 / 出手帧可在武学试炼里挑（可水平翻转，帧名末尾加 ~ 表示翻转），存 localStorage szz-dao-pose，调好复制给 Claude 写死进 DPS1
-  const DPS1 = { daobo: { a: 'up2', b: 'chop2' }, cuofeng: { a: 'up2', b: 'chop2' }, liedihuan: { a: 'up2', b: 'chop2' }, tianbeng: { a: 'up2', b: 'chop2' } };   // 下劈：举刀（up2）→ 劈下（chop2）
+  const DPS1 = {};   // 11/14：皮肤里的 chop1 本来就是刀举到脑后（之前看的是旧回退图才误判），下劈仍用 chop1 → chop2
   let DPS = {}; try { DPS = JSON.parse(localStorage.getItem('szz-dao-pose') || '{}') || {}; } catch (e) {}
   const dpsOf = k => SK[k] && SK[k].dk ? DPS[k] || DPS1[k] || null : null;
   const dpsFr = (k, i) => { const o = dpsOf(k); if (!o) return motFr(k)[i]; const hp = heldPre(), n = i === 0 ? o.a : o.b, f = i === 0 ? o.fa : o.fb; return hp + n + (f ? '~' : ''); };
