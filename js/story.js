@@ -2,10 +2,10 @@
 (function () {
   const POR = {
     hero: 'art/ui/npc/hero_lihui.webp', liubei: 'art/ui/npc/liubei_lihui.webp', guanyu: 'art/ui/npc/guanyu_lihui.webp', zhangfei: 'art/ui/npc/zhangfei_lihui.webp',
-    zhangjiao: 'art/ui/boss/zhang_jiao.webp',
+    zhangjiao: 'art/ui/npc/zhangjiao_lihui.webp',
   };
   const NAME = { liubei: '刘备', guanyu: '关羽', zhangfei: '张飞', zhangjiao: '张角' };
-  const HEAD = { zhangjiao: 1 };   // 只有头像的：缩小放进暗框
+  const HEAD = {};   // 只有头像的：缩小放进暗框
   const skipStory = () => { try { return localStorage.getItem('szz-skip-story') === '1'; } catch (e) { return false; } };
   const css = `
 #szzStory{position:fixed;inset:0;z-index:12500;background:#0b0806;overflow:hidden;font-family:WenKai,"STKaiti","KaiTi",serif;user-select:none;-webkit-user-select:none}
