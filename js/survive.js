@@ -1260,6 +1260,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     }
     if ((S.comboT -= dt) <= 0) S.combo = 0;
     for (let i = 0; i < 5; i++) { S.skip[i] = Math.max(0, S.skip[i] - dt); S.flash[i] = Math.max(0, S.flash[i] - dt); }
+    if (S.brk) for (let i = 0; i < 5; i++) S.brk[i] = Math.max(0, S.brk[i] - dt);
     for (let i = S.later.length - 1; i >= 0; i--) { const q = S.later[i]; if ((q.t -= dt) <= 0) { S.later.splice(i, 1); if (!busy()) q.f(); } }
     if (S.poseOverride && (S.poseOverride.t -= dt) <= 0) S.poseOverride = null;
     if (W.retreat > 0 || W.between > 0) { S.wind = null; S.recov = null; return; }   // 鸣金后不再出手
@@ -1295,7 +1296,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     hero.rollCd *= GM.dcd;
     if (S.qg === 'tiesha') for (const z of near(hero.x, hero.y, 64)) hit(z, .3 * RT.dmg, 110, Math.sign(z.x - hero.x) || hero.f, true, 0, .5, false, false, { secondary: true, survSkill: true });
     if (OG().roll) hero.rollCd *= OG().roll;   // 翻滚：前摇中 = 这一招作废、跳到下一招；后摇中 = 直接取消后摇
-    if (S.wind) { S.skip[S.wind.i] = .35; S.wind = null; S.qi = (S.qi + 1) % 5; if (S.qi === 0) S.cycles++; S.qt = 0; floaters.push({ x: hero.x, y: hero.y - 50, t: 0, txt: '打断', color: '#9aa' }); }
+    if (S.wind) { S.skip[S.wind.i] = .35; S.wind = null; S.qi = (S.qi + 1) % 5; if (S.qi === 0) S.cycles++; S.qt = 0; S.brk = S.brk || [0, 0, 0, 0, 0]; S.brk[(S.qi + 4) % 5] = .45; }   // 11/14 用户：不再冒「打断」字，改成出招顺序那格灰一下、抖一下
     S.recov = null;
   }
 
@@ -2181,6 +2182,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     const lab = fine ? sz * .8 : 0, x0 = fine ? 16 + lab + 6 : (HW - w) / 2, y0 = fine ? HH - 16 - sz * 2 - 8 : (RT.on ? 60 : 44), labY = (fine ? 54 : y0 + sz + 4 + 26 + 18) + (RT.on ? 16 : 0);
     ctx.save();
     const slot = (x, y, k, cur, i, lbl, sz = sz0) => {
+      const bk = i >= 0 && S.brk && S.brk[i] > 0 ? S.brk[i] : 0; if (bk) x += Math.sin(bk * 70) * 3 * (bk / .45);
       ctx.fillStyle = 'rgba(8,7,6,.78)'; ctx.fillRect(x, y, sz, sz);   // 11/11：照群侠，格子近黑底 + 细暗金边，不再铺颜色
       if (k) {
         if (i >= 0 && S.flash[i] > 0) { ctx.fillStyle = k.color; ctx.globalAlpha = .45; ctx.fillRect(x, y, sz, sz); ctx.globalAlpha = 1; }
@@ -2190,6 +2192,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
         { const t = lbl != null ? lbl : 'LV' + lvOf(S.slots[i]); if (t) { ctx.font = '900 ' + (sz > 30 ? 9 : 8) + 'px "Arial Black",Impact,sans-serif'; ctx.textAlign = 'right'; ctx.textBaseline = 'alphabetic'; ctx.lineWidth = 2.5; ctx.lineJoin = 'round'; ctx.strokeStyle = 'rgba(8,6,4,.95)'; ctx.strokeText(t, x + sz - 2, y + sz - 2); ctx.fillStyle = '#e6d3a4'; ctx.fillText(t, x + sz - 2, y + sz - 2); ctx.textAlign = 'left'; } }
       } else if (hok('empty')) { ctx.fillStyle = '#0b0705'; ctx.fillRect(x, y, sz, sz); ctx.globalAlpha = .3; ctx.drawImage(HIMG.empty, x, y, sz, sz); ctx.globalAlpha = 1; }   // 空格压暗，和有图标的格子拉开 else { ctx.font = 'bold 18px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#4a3a2a'; ctx.fillText('+', x + sz / 2, y + sz / 2 + 1); }
       if (i >= 0 && S.skip[i] > 0) { ctx.fillStyle = 'rgba(160,160,170,.5)'; ctx.fillRect(x, y, sz, sz); }
+      if (bk) { ctx.fillStyle = `rgba(120,120,125,${.6 * bk / .45})`; ctx.fillRect(x, y, sz, sz); ctx.strokeStyle = `rgba(230,230,235,${bk / .45})`; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x + sz * .25, y + sz * .15); ctx.lineTo(x + sz * .55, y + sz * .5); ctx.lineTo(x + sz * .4, y + sz * .6); ctx.lineTo(x + sz * .75, y + sz * .88); ctx.stroke(); }   // 被打断：灰 + 一道裂纹
       if (!k) { ctx.strokeStyle = 'rgba(184,149,90,.28)'; ctx.lineWidth = 1; ctx.strokeRect(x + .5, y + .5, sz - 1, sz - 1); }
       else {   // 有东西的格子：细暗金边；轮到出手的那格换亮金边 + 柔光
         if (cur && i >= 0) { ctx.save(); ctx.shadowColor = 'rgba(255,220,150,.85)'; ctx.shadowBlur = 9; ctx.strokeStyle = '#ecd08e'; ctx.lineWidth = 1.5; ctx.strokeRect(x - .5, y - .5, sz + 1, sz + 1); ctx.restore(); }

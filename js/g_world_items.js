@@ -171,6 +171,13 @@ function drawFloaters() {
     const emph = f.big || f.dodge || f.gold;
     ctx.globalAlpha = Math.max(0, 1 - f.t / 1.1);
     ctx.font = 'bold ' + (emph ? 17 : 13) + 'px "PingFang SC","Noto Sans CJK SC",sans-serif';
+    if (window.SURV && SURV.noStun && SURV.noStun() && /[^\d\s+\-.%×x!！]/.test(String(f.txt))) {   // 11/14 用户：三国终章的文字提示用粗楷书 + 深色描边；纯数字仍用像素字
+      const txt = f.dodge ? '闪' : f.txt, pop = f.dodge ? 1 + .5 * Math.max(0, 1 - f.t / .14) : 1, sz = (f.dodge ? 18 : emph ? 15 : 12) * pop, yy = f.y - f.t * 26;
+      ctx.font = sz.toFixed(1) + 'px WenKai,MaShanZheng,"STKaiti",serif'; ctx.textAlign = 'center'; ctx.lineJoin = 'round';
+      ctx.lineWidth = f.dodge ? 3.5 : 3; ctx.strokeStyle = 'rgba(28,16,6,.92)'; ctx.strokeText(txt, f.x, yy);
+      ctx.fillStyle = f.dodge || f.gold ? '#ffe27a' : f.red ? '#ff5a4d' : f.color || (f.heal ? '#8ef07a' : f.big ? '#ffa94d' : '#f3e6c4'); ctx.fillText(txt, f.x, yy);
+      continue;
+    }
     ctx.textAlign = 'center';
     if(f.color){ctx.fillStyle=f.color;} else if (f.red) {
       ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(45,8,8,.9)'; ctx.lineJoin = 'round';
