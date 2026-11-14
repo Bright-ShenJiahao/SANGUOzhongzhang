@@ -2,12 +2,13 @@
 (function () {
   const POR = {
     hero: 'art/ui/npc/hero_lihui.webp', liubei: 'art/ui/npc/liubei_lihui.webp', guanyu: 'art/ui/npc/guanyu_lihui.webp', zhangfei: 'art/ui/npc/zhangfei_lihui.webp',
-    zhangjiao: 'art/ui/npc/zhangjiao_lihui.webp', zhang_jiao: 'art/ui/npc/zhangjiao_lihui.webp', cheng_yuanzhi: 'art/ui/npc/cheng_yuanzhi_lihui.webp',
+    zhangjiao: 'art/ui/npc/zhangjiao_lihui.webp', zhang_jiao: 'art/ui/npc/zhangjiao_lihui.webp', cheng_yuanzhi: 'art/ui/npc/cheng_yuanzhi_lihui.webp', bo_cai: 'art/ui/npc/bo_cai_lihui.webp',
   };
-  const NAME = { liubei: '刘备', guanyu: '关羽', zhangfei: '张飞', zhangjiao: '张角', zhang_jiao: '张角', cheng_yuanzhi: '程远志' };
+  const NAME = { liubei: '刘备', guanyu: '关羽', zhangfei: '张飞', zhangjiao: '张角', zhang_jiao: '张角', cheng_yuanzhi: '程远志', bo_cai: '波才' };
   // 11/14 用户：只给大首领台词（登场一句、被打败一句），有立绘的才说
   const BLINES = {
     cheng_yuanzhi: ['涿郡的小子，敢挡黄天的路？老子这口大刀，正缺个磨刀石！', '这……这是哪来的狠角色……撤！快撤！'],
+    bo_cai: ['颍川数万黄巾在此！小小乡勇，也敢来送死？', '令旗……我的令旗倒了……'],
     zhang_jiao: ['黄天当立！尔等蝼蚁，也敢登我祭台？', '苍天……竟不佑我黄天……'],
   };
   function boss(t, out, done) { const L = BLINES[t]; if (!L || !POR[t] || skipStory()) return false; play([{ who: t, t: L[out ? 1 : 0] }], done, 1); return true; }
