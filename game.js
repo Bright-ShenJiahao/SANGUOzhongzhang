@@ -1205,6 +1205,7 @@ function drawCombo(HW) {   // 屏幕坐标绘制（在 HUD 里调用）
   const scale = SC / DPR;
   const x = (hero.x - cam.x) * scale;
   const headY = (hero.y - 37 - (window.ARENA ? ARENA.camY() : 0)) * scale;
+  if (window.SURV && SURV.noStun && SURV.noStun()) { comboNotices = []; return; }   // 11/14 用户：三国终章主角头上不显示 HIT
   const visible = comboNotices.filter(n => gameT - n.born < .72);
   comboNotices = visible;
   if (!visible.length) return;
