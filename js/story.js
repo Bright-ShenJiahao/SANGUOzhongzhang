@@ -76,8 +76,9 @@
     addEventListener('pointerdown', pd, true);
     st.cleanup = () => { removeEventListener('keydown', kd, true); removeEventListener('keyup', ku, true); removeEventListener('pointerdown', pd, true); };
     let hold = 0;
-    const kd = e => { if (!st) return; if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); if (e.repeat) { if (++hold > 18) finish(); return; } hold = 0; next(); } else if (e.key === 'Escape') { e.preventDefault(); finish(); } };
-    const ku = e => { if (e.key === ' ') hold = 0; };
+    const isSp = e => e.code === 'Space' || e.key === ' ' || e.key === 'Spacebar' || e.keyCode === 32;   // 11/15 用户：中文输入法开着时空格的 key 是 Process，要看 code
+    const kd = e => { if (!st) return; if (isSp(e) || e.key === 'Enter' || e.code === 'Enter' || e.code === 'NumpadEnter') { e.preventDefault(); e.stopImmediatePropagation(); if (e.repeat) { if (++hold > 18) finish(); return; } hold = 0; next(); } else if (e.key === 'Escape') { e.preventDefault(); finish(); } };
+    const ku = e => { if (isSp(e)) { hold = 0; if (st) { e.preventDefault(); e.stopImmediatePropagation(); } } };
     addEventListener('keydown', kd, true); addEventListener('keyup', ku, true);
     show();
   }
