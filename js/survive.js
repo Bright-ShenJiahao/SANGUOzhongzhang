@@ -997,10 +997,10 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   for (const k of ['daolun', 'xuanfeng', 'dilie', 'shuanghuan', 'hongji', 'shuangyue', 'luanwu']) if (SK[k]) SK[k].off = true;
   // ---------- 出身（开局配置里选；起手只有 1 个武艺） ----------
   const ORIGINS = {
-    nongfu: { name: '农夫', tag: '刀 · 锤', wep: 0, weps: [0, 2], skill: 'hengsao', desc: '庄稼汉，挨得住打。受到伤害 -20%；刀、锤武艺 ×1.2', take: .8, oa: [5, 4, 2, 1, 1, 2, 1, 3], at: [6, 4, 2, 2, 3, 2, 2, 1, 3] },
-    xiaozu: { name: '小卒', tag: '枪 · 关刀', wep: 3, weps: [3, 4], skill: 'qiang', desc: '行伍出身，出手利落。武艺起手 -20%；枪、关刀武艺 ×1.2', wu: .8, oa: [4, 4, 5, 1, 1, 2, 1, 3], at: [4, 3, 4, 3, 2, 2, 2, 1, 3] },
-    liehu: { name: '猎户', tag: '石子 · 弓', wep: 7, weps: [7, 5], skill: 'feishi', desc: '山里跑惯了。移动速度 +12%；石子、弓武艺 ×1.2', move: 1.12, oa: [3, 4, 1, 5, 1, 4, 1, 3], at: [3, 2, 2, 5, 3, 2, 5, 2, 3] },
-    shusheng: { name: '书生', tag: '黄符 · 羽扇', wep: 8, weps: [8, 9], skill: 'huofu', desc: '手无缚鸡之力，却通术法。黄符、羽扇武艺 ×1.2', oa: [2, 1, 1, 1, 1, 2, 6, 4], at: [2, 1, 1, 2, 3, 6, 2, 6, 5] },
+    nongfu: { name: '农夫', tag: '刀 · 锤', wep: 0, weps: [0, 2], skill: 'hengsao', desc: '庄稼汉，挨得住打。受到伤害 -20%；本门刀或锤', take: .8, oa: [5, 4, 2, 1, 1, 2, 1, 3], at: [6, 4, 2, 2, 3, 2, 2, 1, 3] },
+    xiaozu: { name: '小卒', tag: '枪 · 关刀', wep: 3, weps: [3, 4], skill: 'qiang', desc: '行伍出身，出手利落。武艺起手 -20%；本门枪或关刀', wu: .8, oa: [4, 4, 5, 1, 1, 2, 1, 3], at: [4, 3, 4, 3, 2, 2, 2, 1, 3] },
+    liehu: { name: '猎户', tag: '石子 · 弓', wep: 7, weps: [7, 5], skill: 'feishi', desc: '山里跑惯了。移动速度 +12%；本门石子或弓', move: 1.12, oa: [3, 4, 1, 5, 1, 4, 1, 3], at: [3, 2, 2, 5, 3, 2, 5, 2, 3] },
+    shusheng: { name: '书生', tag: '黄符 · 羽扇', wep: 8, weps: [8, 9], skill: 'huofu', desc: '手无缚鸡之力，却通术法。本门黄符或羽扇', oa: [2, 1, 1, 1, 1, 2, 6, 4], at: [2, 1, 1, 2, 3, 6, 2, 6, 5] },
   };
   let origin = 'nongfu';
   const OG = () => ORIGINS[origin] || ORIGINS.nongfu;
@@ -1075,7 +1075,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   // ---------- 修为（11/11 用户定，照群侠幸存者）：杀敌和打完节点涨修为，满了升级攒一次「修炼」，节点打完后统一修炼（属性三选一），战斗中不打断 ----------
   const ATN = ['体魄', '短兵', '长兵', '身法', '运气', '悟性', '射艺', '术法', '内力'];
   const ADO = [0, 8, 1, 2, 6, 7, 3, 4, 5];   // 面板显示顺序：体魄 内力 短兵 长兵 射艺 术法 身法 运气 悟性
-  const XIU_NEED = lv => 70 + lv * 25;
+  const XIU_NEED = lv => 40 + lv * 20 + Math.max(0, lv - 5) * 15;   // 11/14 用户：照群侠，第一场基本能升一级（LV2 要 60，之前 95）；LV6 起每级多要一些
   function addXiu(n) {
     if (!RT.on || !S.atAdd) return;
     S.xiu += n * AFX.xp() * (HAS('sunzi') ? 1.2 : 1);
@@ -1105,7 +1105,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     document.body.appendChild(box);
   }
   // 11/13 用户定：出身两种本门兵器 ×1.2，剑、拳通用 ×1.0，其他兵器 ×0.85；短兵/长兵属性只算修炼加上去的那部分成长
-  const wmul = k => { const w = wepOf(k); return w === heldW() ? 1.2 : (OG().weps || [OG().wep]).includes(w) ? 1 : .75; };   // 11/14 用户定：开局所选兵器 +20%（本门），出身另一种 ±0，其他兵器 −25%（外门）
+  const wmul = k => { const w = wepOf(k); return w === heldW() ? 1.1 : (OG().weps || [OG().wep]).includes(w) ? 1 : .85; };   /* 11/14 用户：改小 +10% / −15% */   // 11/14 用户定：开局所选兵器 +20%（本门），出身另一种 ±0，其他兵器 −25%（外门）
   const menTag = k => { const m = wmul(k); return m > 1 ? '<span style="color:#ffd36e">本门 +20%</span>' : m < 1 ? '<span style="color:#ff7a6a">外门 −25%</span>' : ''; };
   const ATW = { 0: 1, 1: 1, 2: 1, 10: 1, 3: 2, 4: 2, 5: 6, 7: 6, 8: 7, 9: 7 };   // 兵器 → 属性：短兵（刀锤剑拳）长兵（枪关刀）射艺（石子弓）术法（黄符羽扇）
   const attrMul = k => Math.max(.6, 1 + (AT()[ATW[wepOf(k)] != null ? ATW[wepOf(k)] : 1] - 3) * .06);

@@ -134,7 +134,8 @@
           <div class="tiles og">${Object.keys(O).map(k => `<button data-o="${k}" class="tile ${k === cur ? 'on' : ''} ${O[k].locked ? 'lock' : ''}" title="${O[k].name}"><div class="ico" ${ic(OGI[k] || '')}></div><span><b>${O[k].name}</b><small>${O[k].locked ? '暂未开放' : (O[k].desc || '').split('。')[0]}</small></span></button>`).join('')}</div>
           <div class="eff">${(o.desc || '').split('。').slice(1).join('。') || o.desc}</div></div>
           <div class="sec"><h4><i style="background-image:url('${K2('h_ge')}')"></i>兵器路数</h4>
-          <div class="tiles wp">${(o.weps || [o.wep]).map(w => `<button data-w="${w}" class="tile wd ${w === curW ? 'on' : ''}"><div class="ico" ${ic(K2('w' + w))}></div><span><b>${SURV.WEPN[w]}</b><small>本门兵器 ×1.2</small></span></button>`).join('')}</div>
+          <div class="tiles wp">${(o.weps || [o.wep]).map(w => `<button data-w="${w}" class="tile wd ${w === curW ? 'on' : ''}"><div class="ico" ${ic(K2('w' + w))}></div><span><b>${SURV.WEPN[w]}</b><small>${w === curW ? '本门 · 伤害 +10%' : '出身兵器'}</small></span></button>`).join('')}</div>
+          <div class="eff">效果：${SURV.WEPN[curW]} 武艺伤害 +10%　出身外的兵器 −15%</div>
           <div class="eff">起手武艺：<em style="color:${sk ? sk.color : '#fff'}">${sk ? sk.name : '—'}</em>${sk ? '　' + sk.desc : ''}</div></div>
           <div class="sec"><h4><i style="background-image:url('${K2('h_gu')}')"></i>难度</h4>
           <div class="tiles diff"><button class="tile ${hard ? '' : 'on'}" data-h="0" title="标准"><div class="ico" ${ic(PIC.std)}></div><span><b>标准</b><small>小试牛刀，来去自如</small></span></button><button class="tile ${hard ? 'on' : ''}" data-h="1" title="困难"><div class="ico" ${ic(PIC.hard)}></div><span><b style="color:#e8826a">困难</b><small>敌人更强，积分×1.25</small></span></button></div></div>
