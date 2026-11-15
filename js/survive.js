@@ -2580,6 +2580,25 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   // [图, 宽度=范围的几倍, 锚点x, 锚点y（图上哪一点放在落点）, 落点前移, 落点高度]
   const DGM = { lansao: ['dg1', 2.6, .5, .8, 14, -14], hengsao: ['dg1', 2.6, .5, .8, 14, -14], lianzhan: ['dg1', 2.6, .5, .8, 14, -14], tuodao: ['dg2', 2.4, .5, .5, 10, -14], tiaozhan: ['dg3', 1.6, .3, .6, 14, -24], daobo: ['dg4', 2.2, .45, .6, 10, -26], cuofeng: ['dg4', 2.2, .45, .6, 10, -26], huima: ['dg5', 2.4, .5, .55, 0, -24],
     xuehe: ['dd_xuehe', 2.6, .5, .75, 20, -16], feilunren: ['dd_feilun', 2.6, .35, .5, 30, -16], liedihuan: ['dd_liedi', 3.2, .55, .88, 24, 2], tianbeng: ['dt_tianbeng', 1.7, .5, .9, 30, 4], wanren: ['dt_wanren', 2.2, .5, .5, 0, -16, .65] };
+  // 11/16 用户出的地/天阶专属特效（art/ui/fx2/，黑底白光，按招式颜色上色）：出招那一刻在 主角身上(s) / 出招方向(d) / 敌人最密处(t) 播一次
+  const FX2 = { touqiang: ['d', 200], qianglin: ['d', 180], qijin: ['d', 180], bainiao: ['t', 160], longyin: ['d', 260],
+    guowu: ['t', 120], yanyue: ['s', 160], tuodaoji: ['s', 140], shuiyan: ['d', 240], qinglong: ['t', 170],
+    zhichui: ['t', 120], wanjun: ['s', 170], leiting: ['t', 150], pocheng: ['t', 180], bengshan: ['s', 220],
+    gunshi: ['d', 170], luanshi: ['d', 180], raoshen: ['s', 130], feihuang: ['s', 220], luoshi: ['t', 170],
+    dianguang: ['d', 260], huoshi: ['t', 130], luori: ['t', 120], guanri: ['d', 300], wanjian: ['t', 200],
+    bazhen: ['s', 170], huoyu: ['t', 180], chibi: ['d', 120], dongfeng: ['s', 300], qimen: ['s', 220],
+    tianlei: ['t', 190], fuhuo: ['d', 220], sadou: ['t', 150], jiutian: ['s', 300], taiping: ['t', 200],
+    jianzhen: ['t', 170], xinjian: ['s', 150], jianlun: ['s', 170], yujian: ['t', 170], tianjian: ['s', 220],
+    lianhuan: ['d', 150], jingang: ['t', 150], qluanwu: ['s', 190], baji: ['s', 260], fengjuan: ['s', 180] };
+  for (const k in FX2) { const im = new Image(); im.src = 'art/ui/fx2/' + k + '.webp'; DGI['x_' + k] = im; }
+  function fx2Play(key) {
+    const m = FX2[key], o = SK[key]; if (!m || !o) return; const a = aim(), f = Math.cos(a) >= 0 ? 1 : -1, t4 = (o.tier || 3) >= 4;
+    let x = hero.x, y = hero.y, ax = .5, ay = .62;
+    if (m[0] === 't') { const cs = hittable().filter(z => dist(z, hero) < 260); const b = cs.length ? cs.reduce((b, z) => near(z.x, z.y, 60).length > near(b.x, b.y, 60).length ? z : b) : null; if (b) { x = b.x; y = b.y; } ay = .85; }
+    else if (m[0] === 'd') { x = hero.x + f * 8; y = hero.y - 14; ax = .06; ay = .55; }
+    fx.push({ k: 'dg', n: 'x_' + key, w: m[1], ax, ay, x, y, sy: 1, f, t: 0, T: t4 ? .75 : .55, col: hexRgb(o.color), al: .72, wh: t4 ? .3 : .22, ghost: false });
+    if (t4) shake = Math.max(shake, .2);
+  }
   const o0rm = () => RM;
   const hexRgb = h => { const c = (h || '#ffe0a0').replace('#', ''); return [0, 2, 4].map(i => parseInt(c.slice(i, i + 2), 16)).join(','); };
   function daoSlash(key, a1, x1, y1) {
@@ -2841,7 +2860,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
         const t = nearest(k.stone || k.hammer || k.bow ? k.need * DK * rsOf(key) : 200); if (t) hero.f = Math.sign(t.x - hero.x) || hero.f;
         CM = skillMul(key); RM = k.dk ? DLV.sz[lvOf(key) - 1] * rsOf(key) : lvOf(key) >= 5 ? 1.1 : 1; const ch = S.wind.ch; S.chain = ch; S.lastCat = wepOf(key); S.lastI = i;
                 S.lhjOn = S.lhjReady; S.lhjReady = false; if (S.lhjOn) S.noHitT = 0;
-        CK = key; const channel = k.cast(); if (k.dk && k.lv10 && lvOf(key) >= 10) { try { k.lv10(); } catch (e) { console.error(e); } } S.lhjOn = false;   // 11/16 LV10 突破
+        CK = key; const channel = k.cast(); if (k.dk && k.lv10 && lvOf(key) >= 10) { try { k.lv10(); } catch (e) { console.error(e); } } fx2Play(key); S.lhjOn = false;   // 11/16 LV10 突破
         const l0 = lvOf(key); S.mast[key] = (S.mast[key] || 0) + AFX.xp(); if (lvOf(key) > l0) floaters.push({ x: hero.x, y: hero.y - 76, t: 0, txt: k.name + ' LV' + lvOf(key), color: '#ffd86e' });
         if (!k.dk && lvOf(key) >= 10) later(.2, () => { CM *= .6; k.cast(); });   // LV10 质变：多出一击
         CM = 1; RM = 1; CK = '';
