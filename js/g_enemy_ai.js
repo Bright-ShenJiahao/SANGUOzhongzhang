@@ -155,6 +155,11 @@ function zUpdate(z, dt) {
   if (window.GEAR && !z.dead) { dt = GEAR.enemyTime(z, dt); if (!dt) return; }
   if (z.drumT > 0 && !z.dead) { z.drumT -= dt; dt *= 1.3; }   /* 11/12 鼓手的战鼓：附近黄巾 4 秒内动作快 30% */
   if (z.T.boss) return Boss.update(z, dt);
+  if (z.mlT > 0 && !z.dead) {   // 11/16 羽扇「迷乱」：乱走、不追主角、不出手
+    z.mlT -= dt; if (!(z.mlN > 0)) { z.mlA = Math.random() * Math.PI * 2; z.mlN = .5; } z.mlN -= dt;
+    const sp = (z.T.spd || 30) * .45; moveEnt(z, Math.cos(z.mlA) * sp * dt, Math.sin(z.mlA) * sp * .6 * dt); z.moving = true; if (Math.abs(Math.cos(z.mlA)) > .2) z.f = Math.sign(Math.cos(z.mlA)) || z.f;
+    return;
+  }
   if (z.T.mirror) { if (window.XINMO) XINMO.update(z, dt); return; }   // 心魔试炼
   const T = z.T;
   if (T.siege) { updateChapter2Catapult(z, dt); return; }
