@@ -3352,6 +3352,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
 #survPrep .ch{display:flex;align-items:center;gap:calc(4px*var(--k))}#survPrep .ch .sl{width:calc(78px*var(--k))}#survPrep .ar2{width:calc(14px*var(--k));height:calc(18px*var(--k));background:url(art/ui/prep/arrow.webp) center/contain no-repeat;flex:none}
 #survPrep .two{display:grid;grid-template-columns:3fr 1fr;gap:calc(16px*var(--k))}#survPrep .rw{display:flex;gap:calc(8px*var(--k))}#survPrep .rw .sl{width:calc(70px*var(--k))}
 #survPrep .t-wu .pn:first-child{flex:1.35;max-width:calc(820px*var(--k))}
+#survPrep .t-wu .sl{position:relative}#survPrep .t-wu .sl[data-k]{touch-action:none;cursor:grab}#survPrep .t-wu .sl.dz{outline:2px solid #ffd86e;outline-offset:-2px;box-shadow:0 0 12px rgba(255,216,110,.6)}#survPrep .t-wu .mv{position:absolute;top:50%;transform:translateY(-50%);width:22px;height:30px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#2a1608;background:linear-gradient(#ffe39a,#d9a640);border:1px solid #7a5420;border-radius:4px;box-shadow:0 2px 4px rgba(0,0,0,.6);cursor:pointer;z-index:2}#survPrep .t-wu .mv.l{left:-12px}#survPrep .t-wu .mv.r{right:-12px}#survPrep .t-wu .mv:hover{filter:brightness(1.15)}
 #survPrep .ab{position:absolute;left:1.5vw;right:1.5vw;bottom:calc(84px*var(--k));height:calc(140px*var(--k));display:flex;align-items:center}
 #survPrep .ab .md{width:calc(150px*var(--k));height:calc(150px*var(--k));flex:none;background:url(art/ui/prep/medal.webp) center/contain no-repeat;display:flex;align-items:center;justify-content:center;z-index:1}#survPrep .ab .md em{width:58%;height:58%}
 #survPrep .ar{flex:1;height:calc(124px*var(--k));margin:0 calc(-20px*var(--k));border:calc(22px*var(--k)) solid transparent;border-image:url(art/ui/prep/bar.webp) 60 90 fill stretch;display:flex;align-items:center;justify-content:space-around;padding:0 calc(26px*var(--k));box-sizing:border-box}
@@ -3656,8 +3657,8 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       if (!selWu || !all.includes(selWu)) selWu = S.slots[0];
       const isSk = id => !!SK[id], on = id => S.slots.includes(id) || S.gf.includes(id) || S.qg === id;
       const ic = id => isSk(id) ? IMGU[id] || '' : `art/ui/gf/${id}.webp`;
-      const chain = S.slots.map((k, i) => `${i ? `<i class="ar2"></i>` : ''}<div class="sl ${k === selWu ? 'on' : ''}" ${k ? `data-a="wsel" data-k="${k}"` : ''}><em style="background-image:url('${k ? ic(k) : A('e_wu')}')" class="${k ? '' : 'ghost'}"></em></div>`).join('');
-      const gfs = S.gf.map(id => `<div class="sl ${id && id === selWu ? 'on' : ''}" ${id ? `data-a="wsel" data-k="${id}"` : ''}><em class="${id ? '' : 'ghost'}" style="background-image:url('${id ? ic(id) : A('e_xin')}')"></em></div>`).join('');
+      const chain = S.slots.map((k, i) => `${i ? `<i class="ar2"></i>` : ''}<div class="sl ${k === selWu ? 'on' : ''}" data-ci="${i}" ${k ? `data-a="wsel" data-k="${k}"` : ''}><em style="background-image:url('${k ? ic(k) : A('e_wu')}')" class="${k ? '' : 'ghost'}"></em>${k && k === selWu ? `${i > 0 && S.slots[i - 1] ? '<b class="mv l" data-a="wl">◀</b>' : ''}${i < 4 && S.slots[i + 1] ? '<b class="mv r" data-a="wr">▶</b>' : ''}` : ''}</div>`).join('');   // 11/16 用户：上阵栏里也能前后移动（选中的格子两边出小箭头）；还能拖动
+      const gfs = S.gf.map((id, i) => `<div class="sl ${id && id === selWu ? 'on' : ''}" data-gi="${i}" ${id ? `data-a="wsel" data-k="${id}"` : ''}><em class="${id ? '' : 'ghost'}" style="background-image:url('${id ? ic(id) : A('e_xin')}')"></em></div>`).join('');
       const zt = S.slots.filter(Boolean).reduce((t, k) => t + SK[k].wu + SK[k].rc, 0);
       const wuDet = k => { const p = wuParts(k), pw = powParts(k), cur = lvOf(k);
         return `<div class="pw"><b>威力 ${pw.total}%</b>${pw.rows.map(([n, v]) => `<span>${n} <i class="${v >= 1 ? 'up' : 'dn'}">×${v.toFixed(2)}</i></span>`).join('')}</div>
@@ -3666,8 +3667,8 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       const sel = selWu, o = sel && (isSk(sel) ? SK[sel] : GF[sel]);
       const det = o ? `<div class="dt"><div class="dh"><em style="background-image:url('${ic(sel)}')"></em><div><h3>${isSk(sel) ? o.name : o.n}</h3><p>${isSk(sel) ? (o.tier ? TIERN[o.tier] + '阶' : '基础') : GTN[o.t] + '阶'}</p><div class="tg">${(isSk(sel) ? ['武艺', '主动', WEPN[wepOf(sel)]] : [o.qg ? '轻功' : '心法', '被动']).map(t => `<span>${t}</span>`).join('')}</div></div></div>${isSk(sel) ? bar(lvOf(sel), mastR(sel)) : bar(gfLv(sel), gfR(sel))}${isSk(sel) ? wuDet(sel) : `<h5>效果</h5><p class="ds">${o.d}</p>`}
         <div class="db">${on(sel) ? `<button data-a="woff">卸下</button>` : `<button data-a="won">上阵</button>`}${isSk(sel) && on(sel) ? `<button data-a="wl">◀ 提前</button><button data-a="wr">延后 ▶</button>` : ''}</div></div>` : '<p class="em2">选择一门武学</p>';
-      body = `<div class="pn"><h4>上阵武艺<small>按顺序循环出手</small></h4><div class="ch">${chain}</div><div class="two"><div><h4>心法</h4><div class="rw">${gfs}</div></div><div><h4>轻功</h4><div class="rw"><div class="sl ${S.qg && S.qg === selWu ? 'on' : ''}" ${S.qg ? `data-a="wsel" data-k="${S.qg}"` : ''}><em class="${S.qg ? '' : 'ghost'}" style="background-image:url('${S.qg ? ic(S.qg) : A('e_qing')}')"></em></div></div></div></div><h4>周天信息</h4><p class="ln">一轮出手总时长 <b class="c1">${zt.toFixed(1)}</b> 秒　真气回复 <b class="c1">${((.005 + .004 * GM.hy) * (1 + IT('regen')) * 100).toFixed(1)}%</b>/秒</p></div>
-        <div class="pn">${det}</div><div class="pn"><h4>掌握武学</h4><div class="gd">${Array.from({ length: Math.max(12, all.length) }, (_, i) => all[i] ? `<div class="sl ${all[i] === selWu ? 'on' : ''}" data-a="wsel" data-k="${all[i]}"><em style="background-image:url('${ic(all[i])}')"></em>${on(all[i]) ? '<i class="eq">装</i>' : ''}</div>` : '<div class="sl"></div>').join('')}</div><h4>道具</h4><div class="gd">${(S.items || []).map(id => `<div class="sl" title="${ITEMS[id].n}：${ITEMS[id].d}"><em style="background-image:url('art/ui/item/${id}.webp')"></em></div>`).join('') || '<p class="em2" style="padding:4px 0;font-size:13px">还没有道具</p>'}</div></div>`;
+      body = `<div class="pn"><h4>上阵武艺<small>按顺序循环出手</small></h4><div class="ch">${chain}</div><div class="two"><div><h4>心法</h4><div class="rw">${gfs}</div></div><div><h4>轻功</h4><div class="rw"><div class="sl ${S.qg && S.qg === selWu ? 'on' : ''}" data-qs="1" ${S.qg ? `data-a="wsel" data-k="${S.qg}"` : ''}><em class="${S.qg ? '' : 'ghost'}" style="background-image:url('${S.qg ? ic(S.qg) : A('e_qing')}')"></em></div></div></div></div><h4>周天信息</h4><p class="ln">一轮出手总时长 <b class="c1">${zt.toFixed(1)}</b> 秒　真气回复 <b class="c1">${((.005 + .004 * GM.hy) * (1 + IT('regen')) * 100).toFixed(1)}%</b>/秒</p></div>
+        <div class="pn">${det}</div><div class="pn" data-own="1"><h4>掌握武学</h4><div class="gd">${Array.from({ length: Math.max(12, all.length) }, (_, i) => all[i] ? `<div class="sl ${all[i] === selWu ? 'on' : ''}" data-a="wsel" data-k="${all[i]}"><em style="background-image:url('${ic(all[i])}')"></em>${on(all[i]) ? '<i class="eq">装</i>' : ''}</div>` : '<div class="sl"></div>').join('')}</div><h4>道具</h4><div class="gd">${(S.items || []).map(id => `<div class="sl" title="${ITEMS[id].n}：${ITEMS[id].d}"><em style="background-image:url('art/ui/item/${id}.webp')"></em></div>`).join('') || '<p class="em2" style="padding:4px 0;font-size:13px">还没有道具</p>'}</div></div>`;
     }
     const badge = k => k === 'xiu' && S.bank ? `<i>${S.bank}</i>` : k === 'shi' && S.loot.length ? `<i>${S.loot.length}</i>` : '';
     el.innerHTML = `<div class="mo"><em style="background-image:url('${A('coin')}')"></em><b>${S.money}</b></div>
@@ -3680,7 +3681,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     el.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { prepTab = b.dataset.t; if (window.SFX) SFX.play('tick'); prepRender(); tut({ shi: 'loot', xiu: 'xiu', shang: 'shop', wu: 'wu' }[prepTab]); });
     el.querySelector('.go').onclick = () => { const i = TABS.findIndex(t => t[0] === prepTab); if (i < TABS.length - 1) { prepTab = TABS[i + 1][0]; prepRender(); tut({ shi: 'loot', xiu: 'xiu', shang: 'shop', wu: 'wu' }[prepTab]); } else prepClose(); };   // 照原作：继续 = 下一页，最后一页「出发」
     el.querySelectorAll('[data-a]').forEach(b => b.onclick = e => {
-      e.preventDefault(); e.stopPropagation(); if (b.disabled) return; const a = b.dataset.a, i = +b.dataset.i, k = b.dataset.k;
+      e.preventDefault(); e.stopPropagation(); if (b.disabled) return; if (performance.now() - wuDragSup < 250) return; const a = b.dataset.a, i = +b.dataset.i, k = b.dataset.k;
       if (a === 'sel') selLoot = i;
       else if (a === 'ssel') selShop = i;
       else if (a === 'sort') { S.sortDn = S.sortDn === false; selLoot = 0; }
@@ -3696,6 +3697,40 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       else if (a === 'wl' || a === 'wr') { const j = S.slots.indexOf(selWu), t = a === 'wl' ? j - 1 : j + 1; if (t >= 0 && t < 5 && S.slots[t]) [S.slots[j], S.slots[t]] = [S.slots[t], S.slots[j]]; }
       prepRender();
     });
+    if (prepTab === 'wu') wuDrag(el);
+  }
+  // 11/16 用户：武学页可以拖动——掌握武学 ↔ 上阵 / 心法 / 轻功格；上阵栏里左右拖换出手顺序；拖回「掌握武学」就卸下（手指按住拖也行）
+  let wuDragSup = 0;
+  function wuDrag(el) {
+    let d = null;
+    const tgtAt = (x, y) => { const t = document.elementFromPoint(x, y); return t && (t.closest('[data-ci],[data-gi],[data-qs]') || t.closest('[data-own]')); };
+    const own = id => { S.owned = (S.owned || []).filter(x => x !== id); };
+    const drop = (id, t) => {
+      const inChain = S.slots.indexOf(id), inGf = S.gf.indexOf(id), isQg = S.qg === id;
+      if (t.dataset.ci != null && SK[id]) { const i = +t.dataset.ci, cur = S.slots[i];
+        if (inChain >= 0) { S.slots[inChain] = cur || ''; S.slots[i] = id; } else { own(id); if (cur) (S.owned = S.owned || []).push(cur); S.slots[i] = id; }
+        const L = S.slots.filter(Boolean); S.slots = L.concat(Array(5 - L.length).fill('')); }
+      else if (t.dataset.gi != null && GF[id] && !GF[id].qg) { const i = +t.dataset.gi, cur = S.gf[i];
+        if (inGf >= 0) { S.gf[inGf] = cur || ''; S.gf[i] = id; } else { own(id); if (cur) (S.owned = S.owned || []).push(cur); S.gf[i] = id; } GM = gfCalc(); }
+      else if (t.dataset.qs != null && GF[id] && GF[id].qg) { if (!isQg) { own(id); if (S.qg) (S.owned = S.owned || []).push(S.qg); S.qg = id; GM = gfCalc(); } }
+      else if (t.dataset.own != null) {
+        if (inChain >= 0) { if (S.slots.filter(Boolean).length <= 1) return; S.slots.splice(inChain, 1); S.slots.push(''); (S.owned = S.owned || []).push(id); }
+        else if (inGf >= 0) { S.gf[inGf] = ''; (S.owned = S.owned || []).push(id); GM = gfCalc(); }
+        else if (isQg) { S.qg = ''; (S.owned = S.owned || []).push(id); GM = gfCalc(); }
+        else return;
+      } else return;
+      selWu = id; if (window.SFX) SFX.play('j_pick0'); prepRender();
+    };
+    el.querySelectorAll('.sl[data-k]').forEach(sl => {
+      sl.addEventListener('pointerdown', e => { if (e.button > 0 || e.target.closest('.mv')) return; d = { id: sl.dataset.k, x: e.clientX, y: e.clientY, g: null, sl }; });
+    });
+    const mv = e => { if (!d) return; if (!d.g) { if (Math.hypot(e.clientX - d.x, e.clientY - d.y) < 8) return; const em = d.sl.querySelector('em'), r = d.sl.getBoundingClientRect();
+        d.g = document.createElement('div'); d.g.className = 'wuGhost'; d.g.style.cssText = `position:fixed;z-index:99999;pointer-events:none;width:${r.width}px;height:${r.height}px;background:${em ? getComputedStyle(em).backgroundImage : 'none'} center/88% no-repeat;opacity:.85;filter:drop-shadow(0 4px 10px rgba(0,0,0,.7));transform:translate(-50%,-50%) scale(1.08)`; document.body.appendChild(d.g); }
+      d.g.style.left = e.clientX + 'px'; d.g.style.top = e.clientY + 'px'; e.preventDefault();
+      el.querySelectorAll('.sl.dz').forEach(x => x.classList.remove('dz')); const t = tgtAt(e.clientX, e.clientY); if (t && t.classList.contains('sl')) t.classList.add('dz'); };
+    const up = e => { if (!d) return; const dd = d; d = null; if (!dd.g) return; dd.g.remove(); wuDragSup = performance.now(); const t = tgtAt(e.clientX, e.clientY); if (t) drop(dd.id, t); else prepRender(); };
+    if (wuDrag.mv) { removeEventListener('pointermove', wuDrag.mv); removeEventListener('pointerup', wuDrag.up); removeEventListener('pointercancel', wuDrag.up); }
+    wuDrag.mv = mv; wuDrag.up = up; addEventListener('pointermove', mv, { passive: false }); addEventListener('pointerup', up); addEventListener('pointercancel', up);
   }
 
   // ---- 刘关张轮流提醒（照原作：右下角弹出头像对话框，空格/点击继续；第一次进整备屏左边出半身立绘）----
@@ -4468,7 +4503,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     setPose: (k, o) => { DPS[k] = o; try { localStorage.setItem('szz-dao-pose', JSON.stringify(DPS)); } catch (e) {} },
     poseAll: () => Object.keys(SK).filter(k => SK[k].dk && !SK[k].off).sort((a, b) => SK[a].tier - SK[b].tier).map(k => { const o = TRIAL.getPose(k); return `${SK[k].name}(${k}) 起手 ${o.a}${o.fa ? '（翻转）' : ''} → 出手 ${o.b}${o.fb ? '（翻转）' : ''}`; }).join('\n'),
     rsAll: () => Object.keys(SK).filter(k => SK[k].dk && !SK[k].off).sort((a, b) => SK[a].tier - SK[b].tier).map(k => `${TIERN[SK[k].tier]} ${SK[k].name}(${k}) 范围×${rsOf(k)} 速度×${spOf(k)}（${spdTxt(SK[k])}）`).join('\n'), setLv(k, l) { S.lvLock = {}; if (k && l) S.lvLock[k] = l; } };
-  window.SURV = { slowMove, coinAt: (x, y, v) => { const n = Math.min(5, v), e = Math.ceil(v / n); for (let i = 0; i < n; i++) S.coins.push({ x: x + R(-14, 14), y: y + R(-6, 6), z: 8 + R(0, 10), vz: R(60, 110), vx: R(-40, 40), v: e, t: 0 }); }, wuParts, trial: TRIAL, BAO, BQN, BQC, SHANG, baoHit, blessOpts, bless: (k, cb) => blessDo(k, cb), baoPick: (qs, cb, t) => pickBao(qs, cb, t), maxHp: () => maxHp(), poseFlip: () => poseFlipNow, banner: (a, b) => waveBanner(a, b), curNode: () => RT.on && W.started ? RT.node : null, status, attrInfo, addXiu: n => addXiu(n), heldPre: () => heldPre(), dbg: () => ({ gf: S.gf.slice(), qg: S.qg, zq: S.zq, zqMax: zqMax(), exp: S.gfExp, GM }), giveGf: id => { if (GF[id]) { if (GF[id].qg) S.qg = id; else { const f = S.gf.indexOf(""); if (f >= 0) S.gf[f] = id; } } }, newHud: () => RT.on && !!RT.node, stunGate, noStun: () => RT.on, get slots() { return S.slots; }, SK, beginNode, frozen: () => RT.on && (ROUTE.shown() || buildOpen || talkHold || (banHold && !!document.getElementById('waveBan'))), routeHp: () => [hero.hp, maxHp()], camp(k) { if (k === 'heal') { heal(maxHp() * .3); S.shang = []; } else if (k && SK[k]) { const l = lvOf(k); if (l < 10) S.mast[k] = MAST_T[l]; } else RT.dmg *= 1.1; },   // 11/14 营地：休整回三成血；修炼 = 选一招直接升一级
+  window.SURV = { prepDbg: () => prepOpen(RT.node), slowMove, coinAt: (x, y, v) => { const n = Math.min(5, v), e = Math.ceil(v / n); for (let i = 0; i < n; i++) S.coins.push({ x: x + R(-14, 14), y: y + R(-6, 6), z: 8 + R(0, 10), vz: R(60, 110), vx: R(-40, 40), v: e, t: 0 }); }, wuParts, trial: TRIAL, BAO, BQN, BQC, SHANG, baoHit, blessOpts, bless: (k, cb) => blessDo(k, cb), baoPick: (qs, cb, t) => pickBao(qs, cb, t), maxHp: () => maxHp(), poseFlip: () => poseFlipNow, banner: (a, b) => waveBanner(a, b), curNode: () => RT.on && W.started ? RT.node : null, status, attrInfo, addXiu: n => addXiu(n), heldPre: () => heldPre(), dbg: () => ({ gf: S.gf.slice(), qg: S.qg, zq: S.zq, zqMax: zqMax(), exp: S.gfExp, GM }), giveGf: id => { if (GF[id]) { if (GF[id].qg) S.qg = id; else { const f = S.gf.indexOf(""); if (f >= 0) S.gf[f] = id; } } }, newHud: () => RT.on && !!RT.node, stunGate, noStun: () => RT.on, get slots() { return S.slots; }, SK, beginNode, frozen: () => RT.on && (ROUTE.shown() || buildOpen || talkHold || (banHold && !!document.getElementById('waveBan'))), routeHp: () => [hero.hp, maxHp()], camp(k) { if (k === 'heal') { heal(maxHp() * .3); S.shang = []; } else if (k && SK[k]) { const l = lvOf(k); if (l < 10) S.mast[k] = MAST_T[l]; } else RT.dmg *= 1.1; },   // 11/14 营地：休整回三成血；修炼 = 选一招直接升一级
     money: () => S.money, campSkills: () => [...S.slots, ...(S.owned || [])].filter((k, i, a) => k && SK[k] && a.indexOf(k) === i).map(k => ({ k, name: SK[k].name, lv: lvOf(k), img: IMGU[k] || '', icon: SK[k].icon, color: SK[k].color })), ORIGINS, setOrigin(k) { if (ORIGINS[k] && !ORIGINS[k].locked) { origin = k; startW = null; } }, origin: () => origin, setWep(w) { startW = w; }, wep: () => heldW(), startSk: () => startSk(), WEPN, takeMul: (from, kind) => { const fireK = kind === 'fire' || !!(from && (from.fire || (from.source && /fire|huo|jar/.test(String(from.source)))));
       if (RT.on && GM.block && Math.random() < GM.block) { floaters.push({ x: hero.x, y: hero.y - 50, t: 0, txt: '格挡', color: '#bfe0ff' }); return 0; }
       const mv = Math.abs(hero.ix) > .1 || Math.abs(hero.iy) > .1, low = hero.hp / maxHp() < .3 ? 1 - .10 * GM.low : 1;

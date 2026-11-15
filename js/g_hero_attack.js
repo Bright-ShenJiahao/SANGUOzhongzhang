@@ -379,13 +379,14 @@ function dmgHero(n, from, kind = 'basic') {
   const dir = from ? Math.sign(h.x - from.x) || -h.f : -h.f;
   if (steadyHold || (h.hp > 0 && window.SURV && SURV.noStun && SURV.noStun())) { /* 蓄力韧性 / 三国终章：受击没有僵直、不击倒，招式照常放（死亡除外） */ }
   else if ((raw >= 2 * (window.MERIDIAN ? MERIDIAN.x('knock', 1) : 1) && !(h.hp > 0 && window.GOODS && GOODS.useAmulet())) || h.hp <= 0) {   // 护身符：第一次重击不倒地
-    launch(h, h.hp <= 0 ? dir * 48 : dir * 85, h.hp <= 0 ? 145 : 120); h.f = -dir; h.inv = 9;
+    if (h.hp <= 0 && window.SURV && SURV.noStun && SURV.noStun()) { set(h, 'down'); h.air = false; h.z = 0; h.vx = dir * 30; h.f = -dir; h.inv = 9; h.deathFall = true; }   // 11/16 用户：三国终章是俯视战场，被打死原地倒地，不再飞上天
+    else launch(h, h.hp <= 0 ? dir * 48 : dir * 85, h.hp <= 0 ? 145 : 120); h.f = -dir; h.inv = 9;
     if (window.ARTIFACT) ARTIFACT.onKnock(dir);   // 被击倒：从飞剑上摔下
     if (h.hp <= 0) h.deathArc = true;
   } else { set(h, 'hurt'); h.vx = dir * 80; if (window.ARTIFACT && ARTIFACT.onHit && from && from.T) ARTIFACT.onHit(dir); }   // 踩剑被近战连击会摔下（箭石不算）
   if (h.hp <= 0) {
-    if (window.GEAR && GEAR.tryRevive()) return;
-    over = true; deathLandedAt = null; enemiesCelebrating = false; say(chapter2Run && chapter2Run.battle === 6 ? '张角：“蝼蚁，也敢逆天。”' : '倒下了……', chapter2Run && chapter2Run.battle === 6 ? 3 : 1.4);
+    if (window.GEAR && GEAR.tryRevive()) { if (h.deathFall) { h.deathFall = false; set(h, 'idle'); } return; }
+    over = true; deathLandedAt = h.deathFall ? gameT : null; enemiesCelebrating = false; if (h.deathFall) { h.deathFall = false; startEnemyCelebration(); } say(chapter2Run && chapter2Run.battle === 6 ? '张角：“蝼蚁，也敢逆天。”' : '倒下了……', chapter2Run && chapter2Run.battle === 6 ? 3 : 1.4);
     zs.forEach(z => { if (!z.dead && !z.T.boss) { set(z, 'idle'); z.vx = 0; z.qi = null; } });
   }
 }
