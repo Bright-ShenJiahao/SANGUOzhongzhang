@@ -746,7 +746,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const DSP1 = { hengsao: 1.3, tuodao: 1.2, tiaozhan: 1.3, lianzhan: 1.2, daobo: 1.4, huima: 1.4, cuofeng: 1.4, liedihuan: 1.51, feilunren: 2.29, xuehe: 1.7, tianbeng: 2.2, wanren: 1.9 };
   const rsOf = k => DRS[k] != null ? DRS[k] : DRS1[k] != null ? DRS1[k] : DRS0[(SK[k] && SK[k].tier) || 1] || 1;
   let DSP = {}; try { DSP = JSON.parse(localStorage.getItem('szz-dao-sp') || '{}') || {}; } catch (e) {}   // 起手/收势倍率（越大越慢），同样在武学试炼里拖动调
-  const spOf = k => (DSP[k] != null ? DSP[k] : DSP1[k] != null ? DSP1[k] : 1) * (typeof HAS === 'function' && SK[k] && SK[k].dk && ((HAS('huanshou') && WOFX[k] === 0) || (HAS('muqiang') && WOFX[k] === 3) || (HAS('qingshizi') && WOFX[k] === 7) || (HAS('qingtongchui') && WOFX[k] === 2) || (HAS('sangmugong') && WOFX[k] === 5) || (HAS('mugandao') && WOFX[k] === 4) || (HAS('pukui') && WOFX[k] === 9)) ? .9 : 1) * (typeof HAS === 'function' && HAS('qinglongdao') && WOFX[k] === 4 && S.gdSui != null && DKT - S.gdSui < 3 ? .85 : 1);   // 环首刀：刀的武艺快 10%
+  const spOf = k => (DSP[k] != null ? DSP[k] : DSP1[k] != null ? DSP1[k] : 1) * (typeof HAS === 'function' && SK[k] && SK[k].dk && ((HAS('huanshou') && WOFX[k] === 0) || (HAS('muqiang') && WOFX[k] === 3) || (HAS('qingshizi') && WOFX[k] === 7) || (HAS('qingtongchui') && WOFX[k] === 2) || (HAS('sangmugong') && WOFX[k] === 5) || (HAS('mugandao') && WOFX[k] === 4) || (HAS('pukui') && WOFX[k] === 9) || (HAS('zhusha') && WOFX[k] === 8)) ? .9 : 1) * (typeof HAS === 'function' && HAS('qinglongdao') && WOFX[k] === 4 && S.gdSui != null && DKT - S.gdSui < 3 ? .85 : 1);   // 环首刀：刀的武艺快 10%
   const SPDN = [[.62, '极快'], [.85, '快'], [1.05, '中'], [1.25, '慢'], [99, '极慢']];
   const spdTxt = o => { const m = o.dk ? spOf(o.key) : 1, wu = (o.dk ? o.wu : o.wu * 1.2) * m, rc = o.rc * m, t = wu * weaponWindMul(o.key) + rc; return `出手${SPDN.find(q => t <= q[0])[1]}　起手 ${(wu * weaponWindMul(o.key)).toFixed(2)} 秒 · 收势 ${rc.toFixed(2)} 秒`; };
   let DKT = 0; const DKO = [];   // 刀的持续判定（飞刃、血河、裂地环等）不靠 later：翻滚也不会断
@@ -756,7 +756,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const VUL = z => (1 + PJK() * (z.pjT > 0 ? z.pj || 0 : 0)) * (z.fkT > 0 ? 1 + (z.fkV || .25) * (tough(z) ? .5 : 1) : 1);
   const slowGrade = z => z.survBoss || z.T.boss || z.T.chapterBoss ? 2 : z.survTier === 1 || z.T.elite ? 1 : 0;
   const slowMove = (z, legacy = 1) => Math.min(z.survSlow > 0 ? legacy : 1,
-    z.slT > 0 ? [.80, .88, .92][slowGrade(z)] : 1);
+    z.slT > 0 ? [.80, .88, .92][slowGrade(z)] : 1, z.wetT > 0 ? .9 : 1);
   function addSL(z, extra = 0) {
     const mul = HAS('yuhua') && (CK === 'zashi' || CK === 'paoshi') ? 1.3 : 1;
     z.slT = Math.max(z.slT || 0, ((slowGrade(z) === 2 ? 2 : 2.5) + extra) * mul);
@@ -808,7 +808,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     for (const z of hittable()) { const dx = z.x - x0, dy = (z.y - y0) * 2, al = dx * Math.cos(a) + dy * Math.sin(a), pe = Math.abs(-dx * Math.sin(a) + dy * Math.cos(a)); if (al > -10 && al < L && pe < w + 6) f(z); }
   }
   function daoTick(dt) {
-    DKT += dt; fanTick(dt);
+    DKT += dt; fanTick(dt); fuTick(dt);
     for (const z of zs) {
       if (z.dead) continue;
       if (z.pjT > 0 && (z.pjT -= dt) <= 0) z.pj = 0;
@@ -1375,6 +1375,156 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
           for (const z of near(c.x, c.y, R + 40)) { FH(z, 1.80 * (L >= 7 ? 1.3 : 1), 0); pushAway(z, c.x, c.y, FS(90), .3, { force: L >= 7 }); } } } })); } });
   Object.assign(DRS1, { shanfeng: .75, liuying: .75, huifeng: .75, longjuan: .75, mihun: .75, shuangxue: .75, lianying: .75, bazhen: .80, huoyu: .80, chibi: .80, dongfeng: 1.0, qimen: 1.0 });
   Object.assign(DSP1, { shanfeng: 1.30, liuying: 1.30, huifeng: 1.30, longjuan: 1.35, mihun: 1.35, shuangxue: 1.35, lianying: 1.35, bazhen: 1.80, huoyu: 1.80, chibi: 1.80, dongfeng: 2.20, qimen: 2.20 });
+  // ---------- 黄符（11/16 用户定）：火 / 雷 / 雨三系；配合只在黄符内部（导电、蒸腾），不和别的兵器联动 ----------
+  //   黄：炎爆符 引雷符 唤雨符　玄：掌心雷 流火符 火蛇符 甘霖符　地：天雷阵 燎原符 行云符　天：五雷天罚 三昧真火
+  //   灼烧：每 0.5 秒每层 0.06 倍，最多 3 层（离火珠 4），3 秒，刷新；带灼烧的敌人死了把 1 层溅给身边
+  //   湿身：4 秒（太平要术 6），移速 −10%，受到黄符伤害 +12%
+  //   导电：雷打湿身 → 这一下 ×1.5（太平要术 ×2），再跳到 120 内所有湿身的敌人（0.5 倍）
+  //   蒸腾：火打湿身 → 照样灼烧，另炸一团白雾（半径 50，0.6 倍；太平要术 ×2），清掉湿身
+  const FUCOL = { huofu: '#ff8a2a', feifu: '#ffe9a0', dingshen: '#5fb8ff', zhangxin: '#c070ff', wulei: '#ff3b2f', yaoshu: '#ff5a3a', huangtian: '#3fd8a0', tianlei: '#8f7aff', fuhuo: '#c8302a', sadou: '#7f9ccf', jiutian: '#fff0b0', taiping: '#ffb030' };
+  const FU = (k, tier, mot, o) => { add(k, Object.assign({ tier, dk: 1, key: k, color: FUCOL[k] }, o)); WOFX[k] = 8; MOTX[k] = mot; };
+  const isLei = o => o.el === 'lei' || o.el === 'both', isHuo = o => o.el === 'huo' || o.el === 'both';
+  const fuR = () => HAS('lihuozhu') ? 1.25 : 1;                         // 离火珠：火区半径 +25%
+  const fuPt = n => { const t = nearest(FS(n)); if (t) return { x: t.x, y: t.y }; const a = aim(); return { x: hero.x + Math.cos(a) * FS(n) * .7, y: clampY(hero.y + Math.sin(a) * FS(n) * .35) }; };
+  const fuDense = n => { const cs = hittable().filter(z => dist(z, hero) < FS(n)); if (!cs.length) return fuPt(n); const b = cs.reduce((b, z) => near(z.x, z.y, FS(80)).length > near(b.x, b.y, FS(80)).length ? z : b); return { x: b.x, y: b.y }; };
+  const fuChainLine = (a, b, col) => fx.push({ k: 'line', x: a.x, y: a.y, a: Math.atan2((b.y - a.y) * 2, b.x - a.x), L: Math.hypot(b.x - a.x, (b.y - a.y) * 2), w: 3, t: 0, T: .22, col: col || '220,210,255' });
+  function fuBurn(z, n) {
+    if (!z || z.dead) return; const cap = HAS('lihuozhu') ? 4 : 3, c = z.fbT > 0 ? z.fbN || 0 : 0;
+    z.fbN = Math.min(cap, c + n); z.fbT = 3; z.fbCM = CM; z.fbCK = CK; if (!(z.fbTk > 0)) z.fbTk = .5;
+  }
+  function fuWet(z, x) { if (z && !z.dead) z.wetT = Math.max(z.wetT || 0, 4 + (HAS('taipingshu') ? 2 : 0) + (x || 0)); }
+  let fuTxtT = 0;
+  // 黄符的一次命中：o.el 火/雷/雨/both、o.burn 灼烧层数、o.wet 挂湿身、o.nc 不导电（导电本身那一跳）
+  function FUH(z, m, kb, o = {}) {
+    if (!z || z.dead) return false;
+    const wet = z.wetT > 0, tp = HAS('taipingshu'), lei = isLei(o), huo = isHuo(o);
+    let mm = m * (wet ? 1.12 : 1);
+    if (lei) { mm *= (HAS('leijimu') ? 1.25 : 1) * (z.glB > 0 ? 1.2 : 1) * (o.wetUp && wet ? o.wetUp : 1); if (wet && !o.nc) mm *= tp ? 2 : 1.5; }
+    const r = DH(z, mm, kb, o); if (!r) return r;
+    const now = performance.now();
+    if (lei && wet && !o.nc) {
+      if (now - fuTxtT > 250) { fuTxtT = now; floaters.push({ x: z.x, y: z.y - 64, t: 0, txt: '导电', color: '#c8b8ff' }); }
+      const R = FS(120) * (HAS('leijimu') ? 1.3 : 1);
+      for (const q of near(z.x, z.y, R)) if (q !== z && q.wetT > 0 && !q.dead) { fuChainLine(z, q); DH(q, m * .5 * (tp ? 1.5 : 1), 0); }
+    }
+    if (huo && wet && !z.dead) {
+      if (now - fuTxtT > 250) { fuTxtT = now; floaters.push({ x: z.x, y: z.y - 64, t: 0, txt: '蒸腾', color: '#f0f4ff' }); }
+      fx.push({ k: 'burst', x: z.x, y: z.y, r: FS(50), t: 0, T: .45, col: '235,240,250' });
+      for (const q of near(z.x, z.y, FS(50))) DH(q, .6 * (tp ? 2 : 1), 20);
+      z.wetT = 0;
+    }
+    if (o.burn && !z.dead) fuBurn(z, o.burn);
+    if (o.wet && !z.dead) fuWet(z, o.wetx);
+    return r;
+  }
+  function fuTick(dt) {
+    for (const z of zs) {
+      if (z.wetT > 0) z.wetT -= dt;
+      if (z.glB > 0) z.glB -= dt;
+      if (z.fbT > 0) {
+        if (z.dead) { if (!z.fbDone) { z.fbDone = 1; const c = CM, k = CK; CM = z.fbCM || 1; CK = z.fbCK || ''; for (const q of near(z.x, z.y, FS(60))) if (q !== z) fuBurn(q, z.fbSp || 1); CM = c; CK = k; } continue; }
+        z.fbT -= dt;
+        if ((z.fbTk -= dt) <= 0) { z.fbTk += .5; const d = .06 * (z.fbN || 0) * DU * RT.dmg * (z.fbCM || 1) * VUL(z) * (z.wetT > 0 ? 1.12 : 1); if (d > 0) { const k = CK; CK = z.fbCK || ''; rec(d); CK = k; hit(z, d, 0, 1, false, 0, 0, false, false, { dot: true, secondary: true, survSkill: true }); } }
+        if (z.fbT <= 0) z.fbN = 0;
+      }
+    }
+  }
+  // 地面区域（火区/雨区）：每 0.5 秒对区内的人调 each(z)；move(o,dt) 可让区域移动；end(o) 结束时
+  function fuZone(o) {
+    const e = gBand(o.x, o.y, 0, Math.PI, 0, o.r, o.T, 1); e.col = o.col || (o.kind === 'huo' ? '255,110,40' : '110,170,255');
+    const sw = o.kind === 'yu' ? fSwirl(o.x, o.y, o.r * .9, o.T, 1) : null; if (sw) sw.col = '170,210,255';
+    DKO.push(dmk({ T: o.T + .02, nx: .5, end: 0, tick(q, dt) { if (o.move) o.move(o, dt); e.x = o.x; e.y = o.y; if (sw) { sw.x = o.x; sw.y = o.y; }
+      if (q.t >= q.nx && q.t < o.T) { q.nx += .5; const cs = near(o.x, o.y, o.r); if (o.each) cs.forEach(z => o.each(z)); if (o.after) o.after(cs); }
+      if (o.every) o.every(q, dt);
+      if (!q.end && q.t >= o.T) { q.end = 1; if (o.end) o.end(o); } } }));
+    return o;
+  }
+  const fuBolt = (x, y, r, m, o = {}) => { fx.push({ k: 'bolt', x, y, t: 0, T: .32 }); sfx(CR, x); const hs = []; for (const z of near(x, y, r)) if (!o.ok || o.ok(z)) { FUH(z, m, 20, Object.assign({ el: 'lei' }, o)); hs.push(z); } return hs; };
+  const fuBoom = (x, y, r, m, o = {}) => { fx.push({ k: 'burst', x, y, r, t: 0, T: .4, col: o.col || '255,150,60' }); for (const z of near(x, y, r)) if (!o.ok || o.ok(z)) FUH(z, m, 30, Object.assign({ el: 'huo' }, o)); };
+  const fuThrow = (x, y, T, cb) => { fx.push({ k: 'line', x: hero.x, y: hero.y, a: Math.atan2((y - hero.y) * 2, x - hero.x), L: Math.hypot(x - hero.x, (y - hero.y) * 2), w: 2, t: 0, T, col: '255,220,120' }); DKO.push(dmk({ T: T + .01, d: 0, tick(q) { if (!q.d && q.t >= T) { q.d = 1; cb(); } } })); };
+  // ---- 黄 ----
+  FU('huofu', 1, 'thrust', { name: '炎爆符', icon: '炎', need: 120, wu: .40, rc: .25, el: 'huo',
+    desc: '把火符掷到最近的敌人脚下，炸开半径 45。LV3 挂 1 层灼烧；LV5 炸开后留 1.5 秒小火区；LV7 炸开半径 +30%',
+    cast() { const L = dlv(), p = fuPt(160), r = FS(45) * (L >= 7 ? 1.3 : 1) * fuR(); sfx(SW, hero.x);
+      fuThrow(p.x, p.y, .18, () => { fuBoom(p.x, p.y, r, .90, { burn: L >= 3 ? 1 : 0 }); if (L >= 5) fuZone({ x: p.x, y: p.y, r, T: 1.5, kind: 'huo', each: z => FUH(z, .10, 0, { el: 'huo', burn: L >= 3 ? 1 : 0 }) }); }); } });
+  FU('feifu', 1, 'up', { name: '引雷符', icon: '引', need: 130, wu: .40, rc: .25, el: 'lei',
+    desc: '一道落雷劈 180 内最近的敌人。LV3 再跳 1 人（0.5 倍）；LV5 跳 2 人；LV7 劈中湿身的敌人再 +20%',
+    cast() { const L = dlv(), t = nearest(FS(180)); if (!t) return; const wu = L >= 7 ? 1.2 : 1; fuBolt(t.x, t.y, FS(20), 1.40, { wetUp: wu });
+      let prev = t; const hs = new Set([t]); for (let i = 0; i < (L >= 5 ? 2 : L >= 3 ? 1 : 0); i++) { const q = hittable().filter(z => !hs.has(z) && dist(z, prev) < FS(120) * (HAS('leijimu') ? 1.3 : 1)).sort((a, b) => dist(a, prev) - dist(b, prev))[0]; if (!q) break; hs.add(q); fuChainLine(prev, q, '255,240,170'); FUH(q, .70, 10, { el: 'lei', wetUp: wu }); prev = q; } } });
+  FU('dingshen', 1, 'up', { name: '唤雨符', icon: '雨', need: 130, wu: .40, rc: .25, el: 'yu',
+    desc: '在前方 140 处下一片小雨（半径 70），持续 3 秒，每 0.5 秒淋一次并挂湿身（湿身：移速 −10%，受到黄符伤害 +12%）。LV3 雨区半径 +25%；LV5 持续 4 秒；LV7 雨停时再淋一下（0.5 倍）',
+    cast() { const L = dlv(), p = fuPt(140), r = FS(70) * (L >= 3 ? 1.25 : 1); sfx(SW, hero.x);
+      fuZone({ x: p.x, y: p.y, r, T: L >= 5 ? 4 : 3, kind: 'yu', each: z => FUH(z, .25, 0, { el: 'yu', wet: 1 }), end: o => { if (L >= 7) for (const z of near(o.x, o.y, r)) FUH(z, .50, 0, { el: 'yu', wet: 1 }); } }); } });
+  // ---- 玄 ----
+  FU('zhangxin', 2, 'thrust', { name: '掌心雷', icon: '掌', need: 130, wu: .50, rc: .30, el: 'lei',
+    desc: '闪电在 180 内的敌人之间连锁跳 5 次（每跳 120 内找下一个），每人一次。LV3 跳 7 次；LV5 湿身的敌人优先跳；LV7 最后一跳炸开（半径 40，0.8 倍）',
+    cast() { const L = dlv(), n = L >= 3 ? 7 : 5, hs = new Set(), R = FS(120) * (HAS('leijimu') ? 1.3 : 1); let prev = hero, t = nearest(FS(180)); if (!t) return; sfx(CR, hero.x);
+      DKO.push(dmk({ T: n * .07 + .05, i: 0, tick(o) { while (o.i < n && o.t >= o.i * .07) { if (!t) { o.i = n; break; } hs.add(t); fuChainLine(prev, t); FUH(t, .70, 10, { el: 'lei' });
+        if (L >= 7 && o.i === n - 1) fuBolt(t.x, t.y, FS(40), .80);
+        prev = t; const cs = hittable().filter(z => !hs.has(z) && dist(z, prev) < R); t = cs.sort((a, b) => (L >= 5 ? ((b.wetT > 0) - (a.wetT > 0)) * 1e4 : 0) + dist(a, prev) - dist(b, prev))[0] || null; o.i++; } } })); } });
+  FU('wulei', 2, 'thrust', { name: '流火符', icon: '流', need: 130, wu: .50, rc: .30, el: 'huo',
+    desc: '扔出 3 张符，分别落在 3 个不同的敌人脚下，各起一片火区（半径 35）留 2.5 秒，挂 1 层灼烧。LV3 灼烧 2 层；LV5 改成 5 张；LV7 火区留 4 秒',
+    cast() { const L = dlv(), n = L >= 5 ? 5 : 3, cs = hittable().filter(z => dist(z, hero) < FS(180)).sort((a, b) => dist(a, hero) - dist(b, hero)).slice(0, n), r = FS(35) * fuR(), bn = L >= 3 ? 2 : 1; sfx(SW, hero.x);
+      const pts0 = cs.map(z => ({ x: z.x, y: z.y })); while (pts0.length < n) { const a = aim() + (Math.random() - .5) * 1.4; pts0.push({ x: hero.x + Math.cos(a) * FS(130), y: clampY(hero.y + Math.sin(a) * FS(65)) }); }
+      pts0.forEach((p, i) => later(i * .06, () => fuThrow(p.x, p.y, .2, () => { fuBoom(p.x, p.y, r, .50, { burn: bn }); fuZone({ x: p.x, y: p.y, r, T: L >= 7 ? 4 : 2.5, kind: 'huo', each: z => FUH(z, .10, 0, { el: 'huo', burn: 1 }) }); }))); } });
+  FU('yaoshu', 2, 'sweep', { name: '火蛇符', icon: '蛇', need: 150, wu: .55, rc: .30, el: 'huo', beam: true, len: 240,
+    desc: '符贴地，一条火线沿直线蔓延 240（宽 30），留 2 秒，挂 1 层灼烧。LV3 灼烧 2 层；LV5 改成三条（20° 扇形）；LV7 火线燃尽时整条炸一次（0.6 倍）',
+    cast() { const L = dlv(), a0 = aim(), x0 = hero.x, y0 = hero.y, Lp = FS(240), w = FS(30) / 2 * fuR(), dirs = L >= 5 ? [a0 - .35, a0, a0 + .35] : [a0], hs = new Set(); sfx(SW, hero.x);
+      dirs.forEach(a => fx.push({ k: 'gd', m: 'rect', x: x0, y: y0, a, L: Lp, w, grow: .4, t: 0, T: 2.4, col: '255,90,40', hold: 1 }));
+      DKO.push(dmk({ T: 2.45, nx: .9, fin: 0, tick(o) { const reach = Math.min(1, o.t / .4) * Lp;
+        for (const a of dirs) dRect(x0, y0, a, reach, w, z => { if (!hs.has(z)) { hs.add(z); FUH(z, .80, 20, { el: 'huo', burn: L >= 3 ? 2 : 1, x: x0 }); } });
+        if (o.t >= o.nx && o.t < 2.4) { o.nx += .5; const t2 = new Set(); for (const a of dirs) dRect(x0, y0, a, Lp, w, z => { if (!t2.has(z)) { t2.add(z); FUH(z, .10, 0, { el: 'huo', burn: 1, x: x0 }); } }); }
+        if (L >= 7 && !o.fin && o.t >= 2.4) { o.fin = 1; const t3 = new Set(); for (const a of dirs) { for (let i = 1; i <= 4; i++) fx.push({ k: 'burst', x: x0 + Math.cos(a) * Lp * i / 4, y: y0 + Math.sin(a) * Lp * i / 8, r: w * 2, t: 0, T: .35, col: '255,120,50' }); dRect(x0, y0, a, Lp, w * 1.5, z => { if (!t3.has(z)) { t3.add(z); FUH(z, .60, 30, { el: 'huo', x: x0 }); } }); } } } })); } });
+  FU('huangtian', 2, 'up', { name: '甘霖符', icon: '霖', need: 150, wu: .55, rc: .30, el: 'yu',
+    desc: '在 200 内敌人最密的地方下一场大雨（半径 110），持续 4 秒，每 0.5 秒淋一次并挂湿身。LV3 雨里的敌人受雷伤 +20%；LV5 雨区跟着最近的敌群走；LV7 雨停时湿身再延长 3 秒',
+    cast() { const L = dlv(), p = fuDense(200), r = FS(110); sfx(SW, hero.x);
+      fuZone({ x: p.x, y: p.y, r, T: 4, kind: 'yu', col: '90,220,170', each: z => { FUH(z, .25, 0, { el: 'yu', wet: 1 }); if (L >= 3) z.glB = .6; },
+        move: L >= 5 ? (o, dt) => { const t = hittable().sort((a, b) => dist(a, o) - dist(b, o))[0]; if (t) { const d = Math.hypot(t.x - o.x, (t.y - o.y) * 2); if (d > 6) { const k = Math.min(1, 50 * dt / d); o.x += (t.x - o.x) * k; o.y += (t.y - o.y) * k; } } } : null,
+        end: o => { if (L >= 7) for (const z of near(o.x, o.y, r)) fuWet(z, 3); } }); } });
+  // ---- 地 ----
+  FU('tianlei', 3, 'up', { name: '天雷阵', icon: '阵', need: 150, wu: .65, rc: .40, el: 'lei',
+    desc: '在敌人最密的地方画一圈雷阵（半径 120），3 秒内每 0.4 秒往阵里落一道雷（半径 30），湿身的敌人优先挨劈；同一人最多 3 道。LV3 阵变成 4 秒；LV5 每次落两道；LV7 阵结束时中心落大雷（半径 80，2.0 倍）',
+    cast() { const L = dlv(), c = fuDense(200), R = FS(120), T = L >= 3 ? 4 : 3, cnt = new Map(), e = gBand(c.x, c.y, 0, Math.PI, R - 4, R + 4, T, 1); e.col = '160,140,255'; sfx(CR, c.x);
+      DKO.push(dmk({ T: T + .05, nx: 0, fin: 0, tick(o) { while (o.t >= o.nx && o.nx < T) { o.nx += .4;
+          for (let k = 0; k < (L >= 5 ? 2 : 1); k++) { const cs = near(c.x, c.y, R).filter(z => (cnt.get(z) || 0) < 3).sort((a, b) => (b.wetT > 0) - (a.wetT > 0) || Math.random() - .5); const t = cs[0];
+            const p = t ? { x: t.x, y: t.y } : { x: c.x + (Math.random() - .5) * R * 1.6, y: clampY(c.y + (Math.random() - .5) * R * .8) };
+            fuBolt(p.x, p.y, FS(30), 1.00, { ok: z => { const n = cnt.get(z) || 0; if (n >= 3) return false; cnt.set(z, n + 1); return true; } }); } }
+        if (L >= 7 && !o.fin && o.t >= T) { o.fin = 1; shake = Math.max(shake, .3); fuBolt(c.x, c.y, FS(80), 2.00); } } })); } });
+  FU('fuhuo', 3, 'sweep', { name: '燎原符', icon: '燎', need: 150, wu: .65, rc: .40, el: 'huo',
+    desc: '扇形飞出 6 张符，落地各起一片火区（半径 40）留 3 秒，挂 2 层灼烧，相邻火区连成一大片。LV3 灼烧 3 层；LV5 改成 8 张；LV7 火区里有敌人死掉就再炸一次（0.8 倍）',
+    cast() { const L = dlv(), n = L >= 5 ? 8 : 6, a0 = aim(), r = FS(40) * fuR(), bn = L >= 3 ? 3 : 2; sfx(SW, hero.x);
+      for (let i = 0; i < n; i++) { const a = a0 + (i / (n - 1) - .5) * 1.75, D = FS(120 + (i % 2) * 70), p = { x: hero.x + Math.cos(a) * D, y: clampY(hero.y + Math.sin(a) * D * .5) };
+        later(i * .04, () => fuThrow(p.x, p.y, .22, () => { const tick1 = new Set(); fuBoom(p.x, p.y, r, .60, { burn: bn }); let inside = new Set();
+          fuZone({ x: p.x, y: p.y, r, T: 3, kind: 'huo', each: z => { if (!tick1.has(z)) FUH(z, .12, 0, { el: 'huo', burn: 1 }); }, after: cs => { tick1.clear();
+            if (L >= 7) for (const z of inside) if (z.dead && !z.lyBoom) { z.lyBoom = 1; fuBoom(z.x, z.y, r, .80); } inside = new Set(cs); } }); })); } } });
+  FU('sadou', 3, 'up', { name: '行云符', icon: '云', need: 150, wu: .65, rc: .40, el: 'yu',
+    desc: '召来一朵云，4 秒内跟着最近的敌群走：云下一直下雨（半径 90，挂湿身），每 1 秒从云里落一道雷（1.0 倍，打湿身自带导电）；同一人最多挨 4 道雷。LV3 每 0.7 秒落一道雷；LV5 云的半径 +30%；LV7 云散时落一道大雷（2.0 倍）',
+    cast() { const L = dlv(), p = fuDense(200), r = FS(90) * (L >= 5 ? 1.3 : 1), cnt = new Map(), iv = L >= 3 ? .7 : 1; sfx(SW, hero.x);
+      const zo = fuZone({ x: p.x, y: p.y, r, T: 4, kind: 'yu', col: '130,150,200', each: z => FUH(z, .10, 0, { el: 'yu', wet: 1 }),
+        move: (o, dt) => { const t = hittable().sort((a, b) => dist(a, o) - dist(b, o))[0]; if (t) { const d = Math.hypot(t.x - o.x, (t.y - o.y) * 2); if (d > 6) { const k = Math.min(1, 60 * dt / d); o.x += (t.x - o.x) * k; o.y += (t.y - o.y) * k; } } },
+        end: o => { if (L >= 7) { shake = Math.max(shake, .25); fuBolt(o.x, o.y, FS(60), 2.00); } } });
+      DKO.push(dmk({ T: 4, nb: .3, tick(q) { while (q.t >= q.nb && q.nb < 4) { q.nb += iv; const cs = near(zo.x, zo.y, r).filter(z => (cnt.get(z) || 0) < 4).sort((a, b) => (b.wetT > 0) - (a.wetT > 0) || Math.random() - .5); const t = cs[0]; if (!t) continue; cnt.set(t, (cnt.get(t) || 0) + 1); fuBolt(t.x, t.y, FS(20), 1.00, { ok: z => z === t }); } } })); } });
+  // ---- 天 ----
+  FU('jiutian', 4, 'up', { name: '五雷天罚', icon: '罚', need: 170, wu: .90, rc: .50, el: 'lei', none: true,
+    desc: '全场下雨 6 秒，画面里所有敌人湿身；期间落 12 道天雷，每道劈一个随机敌人（半径 40），全部打湿身自带导电；同一人最多 4 道。LV3 增至 16 道；LV5 每道天雷劈完再跳一次；LV7 最后全场落一道大雷（1.5 倍）',
+    cast() { const L = dlv(), T = 6, n = L >= 3 ? 16 : 12, cnt = new Map(); shake = Math.max(shake, .25); sfx(CR, hero.x); floaters.push({ x: hero.x, y: hero.y - 80, t: 0, txt: '五雷天罚', color: '#fff0b0' });
+      const e = fSwirl(hero.x, hero.y, 220, T, 1); e.col = '150,190,255';
+      DKO.push(dmk({ T: T + .05, nw: 0, nb: .3, fin: 0, tick(o) { e.x = hero.x; e.y = hero.y;
+        if (o.t >= o.nw && o.t < T) { o.nw += .5; for (const z of near(hero.x, hero.y, 420)) fuWet(z); }
+        while (o.t >= o.nb && o.nb < T) { o.nb += (T - .3) / n; const cs = near(hero.x, hero.y, 420).filter(z => (cnt.get(z) || 0) < 4); const t = cs[(Math.random() * cs.length) | 0]; if (!t) continue; cnt.set(t, (cnt.get(t) || 0) + 1);
+          fuBolt(t.x, t.y, FS(40), 1.60, { ok: z => z === t || (cnt.get(z) || 0) < 4 });
+          if (L >= 5) { const q = hittable().filter(z => z !== t && dist(z, t) < FS(140)).sort((a, b) => dist(a, t) - dist(b, t))[0]; if (q) { fuChainLine(t, q, '255,245,200'); FUH(q, .80, 10, { el: 'lei' }); } } }
+        if (L >= 7 && !o.fin && o.t >= T) { o.fin = 1; shake = Math.max(shake, .4); for (const z of near(hero.x, hero.y, 420)) { fx.push({ k: 'bolt', x: z.x, y: z.y, t: 0, T: .32 }); FUH(z, 1.50, 20, { el: 'lei', nc: 1 }); } } } })); } });
+  FU('taiping', 4, 'chop', { name: '三昧真火', icon: '昧', need: 170, wu: .90, rc: .50, el: 'both', none: true,
+    desc: '3 道雷火柱砸向 3 处敌群，每处炸开半径 80（雷火两系：打湿身同时导电和蒸腾），挂 3 层灼烧，然后烧成火海（半径 100）留 4 秒。LV3 改成 4 道；LV5 火海留 6 秒；LV7 火海里的敌人死掉时扩散 2 层灼烧',
+    cast() { const L = dlv(), n = L >= 3 ? 4 : 3, cs = hittable().filter(z => dist(z, hero) < FS(220)).sort((a, b) => near(b.x, b.y, FS(80)).length - near(a.x, a.y, FS(80)).length), used = []; sfx(CR, hero.x);
+      for (const z of cs) { if (used.length >= n) break; if (used.every(u => Math.hypot(u.x - z.x, (u.y - z.y) * 2) > FS(100))) used.push({ x: z.x, y: z.y }); }
+      while (used.length < n) { const a = aim() + (used.length - (n - 1) / 2) * .6; used.push({ x: hero.x + Math.cos(a) * FS(150), y: clampY(hero.y + Math.sin(a) * FS(75)) }); }
+      used.forEach((p, i) => { fx.push({ k: 'mark', x: p.x, y: p.y, r: FS(80), t: 0, T: .4 + i * .12 });
+        later(.4 + i * .12, () => { shake = Math.max(shake, .3); fx.push({ k: 'bolt', x: p.x, y: p.y, t: 0, T: .4 }); fuBoom(p.x, p.y, FS(80), 2.00, { el: 'both', burn: 3, col: '255,190,80' });
+          fuZone({ x: p.x, y: p.y, r: FS(100) * fuR(), T: L >= 5 ? 6 : 4, kind: 'huo', col: '255,140,40', each: z => { FUH(z, .15, 0, { el: 'huo', burn: 1 }); if (L >= 7) z.fbSp = 2; } }); }); }); } });
+  Object.assign(DRS1, { huofu: .75, feifu: .75, dingshen: .75, zhangxin: .75, wulei: .75, yaoshu: .75, huangtian: .75, tianlei: .80, fuhuo: .80, sadou: .80, jiutian: 1.0, taiping: 1.0 });
+  Object.assign(DSP1, { huofu: 1.30, feifu: 1.30, dingshen: 1.30, zhangxin: 1.40, wulei: 1.40, yaoshu: 1.40, huangtian: 1.40, tianlei: 1.90, fuhuo: 1.90, sadou: 1.90, jiutian: 2.20, taiping: 2.20 });
   // 石子：每次施放持有自己的命中计数及宝物触发次数。
   const SG = (key, tier, mot, need, wu, rc, rs, sp, name, desc, cast) => {
     const color = ['#c9b992', '#e0c49a', '#edab63', '#ffd477'][tier - 1];
@@ -2200,7 +2350,8 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     qiang: { a: 'thrust1', b: 'thrust2' }, lansao: { a: 'sweep1', b: 'sweep2' }, lianci: { a: 'thrust1', b: 'thrust2' }, tiaoqiang: { a: 'thrust2', b: 'up2' }, lihua: { a: 'spin1', b: 'spin2' }, chong: { a: 'thrust1', b: 'thrust2' }, huimaq: { a: 'thrust1', b: 'thrust2' }, touqiang: { a: 'up1', b: 'thrust2' }, qianglin: { a: 'up2', b: 'chop2' }, qijin: { a: 'thrust1', b: 'thrust2' }, bainiao: { a: 'thrust1', b: 'thrust2' }, longyin: { a: 'up2', b: 'chop2' } };   // 11/15 枪招动作（先按动作分配，试炼里可再挑）   // 11/14 用户在武学试炼里挑好的刀招动作（起手帧 → 出手帧）
   for (const k of Object.keys(SK).filter(k => SK[k].stone || SK[k].hammer || SK[k].bow)) DPS1[k] = { a: MOTX[k] + '1', b: MOTX[k] + '2' };
   Object.assign(DPS1, { hengti: { a: 'sweep1', b: 'sweep2' }, pidao: { a: 'chop1', b: 'chop2' }, xiongshou: { a: 'up1', b: 'up2' }, xuanfengd: { a: 'spin1', b: 'spin2' }, daoqi: { a: 'sweep1', b: 'sweep2' }, handi: { a: 'chop1', b: 'chop2' }, zhanjiang: { a: 'up2', b: 'chop2' }, guowu: { a: 'thrust1', b: 'thrust2' }, yanyue: { a: 'chop1', b: 'chop2' }, tuodaoji: { a: 'spin1', b: 'spin2' }, shuiyan: { a: 'up2', b: 'chop2' }, qinglong: { a: 'up1', b: 'up2' }, tuodao: { a: 'chop1', b: 'sweep2' },
-    shanfeng: { a: 'sweep1', b: 'sweep2' }, liuying: { a: 'thrust1', b: 'thrust2' }, huifeng: { a: 'up1', b: 'up2' }, longjuan: { a: 'spin1', b: 'spin2' }, mihun: { a: 'sweep1', b: 'sweep2' }, shuangxue: { a: 'sweep1', b: 'sweep2' }, lianying: { a: 'thrust1', b: 'thrust2' }, bazhen: { a: 'spin1', b: 'spin2' }, huoyu: { a: 'up1', b: 'up2' }, chibi: { a: 'up1', b: 'up2' }, dongfeng: { a: 'up1', b: 'up2' }, qimen: { a: 'spin1', b: 'spin2' } });   // 11/16 关刀动作（试炼里可再挑）
+    shanfeng: { a: 'sweep1', b: 'sweep2' }, liuying: { a: 'thrust1', b: 'thrust2' }, huifeng: { a: 'up1', b: 'up2' }, longjuan: { a: 'spin1', b: 'spin2' }, mihun: { a: 'sweep1', b: 'sweep2' }, shuangxue: { a: 'sweep1', b: 'sweep2' }, lianying: { a: 'thrust1', b: 'thrust2' }, bazhen: { a: 'spin1', b: 'spin2' }, huoyu: { a: 'up1', b: 'up2' }, chibi: { a: 'up1', b: 'up2' }, dongfeng: { a: 'up1', b: 'up2' }, qimen: { a: 'spin1', b: 'spin2' },
+    huofu: { a: 'chop1', b: 'thrust2' }, feifu: { a: 'up1', b: 'up2' }, dingshen: { a: 'up1', b: 'up2' }, zhangxin: { a: 'thrust1', b: 'thrust2' }, wulei: { a: 'chop1', b: 'thrust2' }, yaoshu: { a: 'chop1', b: 'chop2' }, huangtian: { a: 'up1', b: 'up2' }, tianlei: { a: 'up1', b: 'up2' }, fuhuo: { a: 'sweep1', b: 'sweep2' }, sadou: { a: 'up1', b: 'up2' }, jiutian: { a: 'up1', b: 'up2' }, taiping: { a: 'up2', b: 'chop2' } });   // 11/16 关刀动作（试炼里可再挑）
   Object.assign(DGM, { hengti: ['dg1', 2.6, .5, .8, 14, -14], xiongshou: ['dg3', 1.8, .3, .6, 14, -24], handi: ['dg2', 2.4, .5, .5, 10, -14], guowu: ['dg5', 2.4, .5, .55, 0, -24] });
   let DPS = {}; try { DPS = JSON.parse(localStorage.getItem('szz-dao-pose') || '{}') || {}; } catch (e) {}
   const dpsOf = k => SK[k] && SK[k].dk ? DPS[k] || DPS1[k] || null : null;
@@ -2269,7 +2420,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const lvOf = k => { if (S.lvLock && S.lvLock[k]) return S.lvLock[k]; const m = S.mast[k] || 0; let l = 1; while (l < 10 && m >= MAST_T[l]) l++; return l; };
   const mastMul = k => { if (SK[k] && SK[k].dk) return DLV.dmg[lvOf(k) - 1]; const l = lvOf(k); return 1 + .06 * Math.min(3, l - 1) + (l >= 5 ? .12 : 0) + .05 * Math.max(0, Math.min(l, 9) - 5); };   // LV2-4、6-9 递增，LV5 质变
   // 11/14 参考群侠详情页：把说明拆成「出招方式 / 特殊效果 / 逐级修炼」，威力拆成各项乘数
-  const STW = /迷乱|风撞|碎甲|破甲|流血|浮空|挑飞|击飞|晕|定住|定身|迟缓|减速|灼烧|起火|着火|推开|拉回|卷/;
+  const STW = /湿身|导电|蒸腾|迷乱|风撞|碎甲|破甲|流血|浮空|挑飞|击飞|晕|定住|定身|迟缓|减速|灼烧|起火|着火|推开|拉回|卷/;
   function wuParts(k) {
     const o = SK[k]; if (!o) return null;
     const d = String(o.desc || ''), i = d.search(/LV\d/), base = (i < 0 ? d : d.slice(0, i)).replace(/[。；;，,\s]+$/, '');
@@ -2282,14 +2433,14 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   function powParts(k) {   // 威力 = 各项乘数，100 = 无加成
     const c = catOf(k), at = ATW[wepOf(k)] != null ? ATW[wepOf(k)] : 1, AN = ['体魄', '短兵', '长兵', '射艺', '术法', '身法', '射艺', '术法'];
     const w = wmul(k), am = attrMul(k), lm = mastMul(k), n = RES().cnt[wepOf(k)], rs = 1 + RESD[Math.min(5, n)] * (HAS('xinshu') ? 2 : 1);
-    const bw = 1 + (S.bao || []).reduce((t, b) => t + (BAO[b] && BAO[b].w === wepOf(k) ? BAO[b].wd : 0), 0), other = GM.all * GM.cat[c] * (1 + .06 * S.xy) * baoMul() * bw * rs * (HAS('baipi') && wepOf(k) !== 0 ? .7 : 1) * (HAS('longdan') && wepOf(k) !== 3 ? .7 : 1) * (HAS('yunxing') && wepOf(k) !== 7 ? .7 : 1) * (HAS('zhenyuechui') && wepOf(k) !== 2 ? .7 : 1) * (HAS('zhurigong') && wepOf(k) !== 5 ? .7 : 1) * (HAS('qinglongdao') && wepOf(k) !== 4 ? .7 : 1) * (HAS('qixingshan') && wepOf(k) !== 9 ? .7 : 1);
+    const bw = 1 + (S.bao || []).reduce((t, b) => t + (BAO[b] && BAO[b].w === wepOf(k) ? BAO[b].wd : 0), 0), other = GM.all * GM.cat[c] * (1 + .06 * S.xy) * baoMul() * bw * rs * (HAS('baipi') && wepOf(k) !== 0 ? .7 : 1) * (HAS('longdan') && wepOf(k) !== 3 ? .7 : 1) * (HAS('yunxing') && wepOf(k) !== 7 ? .7 : 1) * (HAS('zhenyuechui') && wepOf(k) !== 2 ? .7 : 1) * (HAS('zhurigong') && wepOf(k) !== 5 ? .7 : 1) * (HAS('qinglongdao') && wepOf(k) !== 4 ? .7 : 1) * (HAS('qixingshan') && wepOf(k) !== 9 ? .7 : 1) * (HAS('taipingshu') && wepOf(k) !== 8 ? .7 : 1);
     const r = [['等级', lm], [(AN[at] || '属性') + ' ' + AT()[at], am], [w > 1.05 ? '本门' : w < .95 ? '外门' : '出身兵器', w], ['心法·宝物·同门', other]].filter(x => Math.abs(x[1] - 1) > .005);
     return { total: Math.round(100 * lm * am * w * other), rows: r };
   }
   function skillMul(k) {
     const c = catOf(k), n = RES().cnt[wepOf(k)], low = hero.hp / maxHp() < .3 ? 1 + .25 * GM.low : 1;
     const bw = (S.bao || []).reduce((t, b) => t + (BAO[b] && BAO[b].w === wepOf(k) ? BAO[b].wd : 0), 0);
-    return (1 + bw) * (HAS('baipi') && wepOf(k) !== 0 ? .7 : 1) * (HAS('longdan') && wepOf(k) !== 3 ? .7 : 1) * (HAS('yunxing') && wepOf(k) !== 7 ? .7 : 1) * (HAS('zhenyuechui') && wepOf(k) !== 2 ? .7 : 1) * (HAS('zhurigong') && wepOf(k) !== 5 ? .7 : 1) * (HAS('qinglongdao') && wepOf(k) !== 4 ? .7 : 1) * (HAS('qixingshan') && wepOf(k) !== 9 ? .7 : 1) * wmul(k) * attrMul(k) * (1 + RESD[Math.min(5, n)] * (HAS('xinshu') ? 2 : 1)) * mastMul(k) * GM.all * GM.cat[c] * low * (1 + .06 * S.xy) * baoMul();
+    return (1 + bw) * (HAS('baipi') && wepOf(k) !== 0 ? .7 : 1) * (HAS('longdan') && wepOf(k) !== 3 ? .7 : 1) * (HAS('yunxing') && wepOf(k) !== 7 ? .7 : 1) * (HAS('zhenyuechui') && wepOf(k) !== 2 ? .7 : 1) * (HAS('zhurigong') && wepOf(k) !== 5 ? .7 : 1) * (HAS('qinglongdao') && wepOf(k) !== 4 ? .7 : 1) * (HAS('qixingshan') && wepOf(k) !== 9 ? .7 : 1) * (HAS('taipingshu') && wepOf(k) !== 8 ? .7 : 1) * wmul(k) * attrMul(k) * (1 + RESD[Math.min(5, n)] * (HAS('xinshu') ? 2 : 1)) * mastMul(k) * GM.all * GM.cat[c] * low * (1 + .06 * S.xy) * baoMul();
   }
   function critRoll() {   // 暴击：基础 5% + 心法；伤害 ×1.5 + 心诀
     if (!CK || !SK[CK]) return 1;
@@ -2498,6 +2649,11 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     shuangji: { n: '典韦双戟', q: 1, d: '身边有 5 个以上敌人时，武艺伤害 +25%' },
     xinshu: { n: '孟德新书', q: 1, d: '兵器精通的加成翻倍' },
     // 兵器类宝物（11/14 用户：不要兵器栏，兵器就是宝物）：只加对应兵器的武艺伤害；做完一门兵器再加那一门的两把
+    zhusha: { image: 'art/ui/bao/zhusha.webp', n: '朱砂笔', q: 0, w: 8, wd: 0, d: '黄符武艺起手、收势 ×0.9' },   // 11/16 用户定：黄符 5 件宝物
+    huangbiao: { image: 'art/ui/bao/huangbiao.webp', n: '黄表纸', q: 0, w: 8, wd: .12, d: '黄符武艺伤害 +12%' },
+    leijimu: { image: 'art/ui/bao/leijimu.webp', n: '雷击木', q: 1, w: 8, wd: 0, d: '黄符雷系伤害 +25%；连锁、导电的跳跃范围 +30%' },
+    lihuozhu: { image: 'art/ui/bao/lihuozhu.webp', n: '离火珠', q: 1, w: 8, wd: 0, d: '黄符灼烧最多 4 层；火区半径 +25%' },
+    taipingshu: { image: 'art/ui/bao/taipingshu.webp', n: '太平要术', q: 2, w: 8, wd: .3, d: '黄符武艺伤害 +30%；导电这一下 ×2（原 ×1.5）、跳出去的伤害 ×1.5；蒸腾伤害 ×2；湿身多 2 秒', c: '黄符以外的武艺伤害 −30%' },
     pukui: { image: 'art/ui/bao/pukui.webp', n: '蒲葵扇', q: 0, w: 9, wd: 0, d: '羽扇武艺起手、收势 ×0.9' },   // 11/16 用户定：羽扇 5 件宝物
     zhugu: { image: 'art/ui/bao/zhugu.webp', n: '竹骨扇', q: 0, w: 9, wd: .12, d: '羽扇武艺伤害 +12%' },
     heyu: { image: 'art/ui/bao/heyu.webp', n: '鹤羽扇', q: 1, w: 9, wd: 0, d: '羽扇推开、拉回、吸的距离 +25%；风撞伤害从 0.3 倍提高到 0.5 倍' },
@@ -3584,7 +3740,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   const tex = (k, x, y, w, h) => { if (w <= 0) return false; const im = HIMG['h2_' + k]; if (!hok('h2_' + k)) return false; const sw = Math.min(im.naturalWidth, im.naturalWidth * w / (h * im.naturalWidth / im.naturalHeight)); ctx.drawImage(im, 0, 0, Math.max(1, sw), im.naturalHeight, x, y, w, h); return true; };   // 纹理条按高度缩放、从左往右截取，不拉花
   ['tuna','yangqi','tieyi','tayun','guanxing','taiping','hunyuan','gf00','gf01','gf02','gf03','gf30','gf31','gf32','gf33','qingshen','juqi','shixue','beishui','lhj','caoshang','xingyun','taxue','tiesha','yufeng'].forEach(id => himg('gf_' + id, 'art/ui/gf/' + id + '.webp'));
   const IMGU = { daolun: 'art/ui/kaiju/sk_daolun.webp' };
-  'hengsao tuodao tiaozhan daobo lianzhan huima cuofeng feilunren liedihuan xuehe tianbeng wanren hengti pidao xiongshou xuanfengd daoqi handi zhanjiang guowu yanyue tuodaoji shuiyan qinglong shanfeng liuying huifeng longjuan mihun shuangxue lianying bazhen huoyu chibi dongfeng qimen qiang lansao lianci tiaoqiang lihua chong huimaq touqiang qianglin qijin bainiao longyin'.split(' ').forEach(k => { IMGU[k] = 'art/ui/skill/' + k + '.webp'; himg(k, IMGU[k]); });   // 11/14 用户的刀 12 招图标（每招一把不同的中国刀 + 招式特效）
+  'hengsao tuodao tiaozhan daobo lianzhan huima cuofeng feilunren liedihuan xuehe tianbeng wanren hengti pidao xiongshou xuanfengd daoqi handi zhanjiang guowu yanyue tuodaoji shuiyan qinglong shanfeng liuying huifeng longjuan mihun shuangxue lianying bazhen huoyu chibi dongfeng qimen huofu feifu dingshen zhangxin wulei yaoshu huangtian tianlei fuhuo sadou jiutian taiping qiang lansao lianci tiaoqiang lihua chong huimaq touqiang qianglin qijin bainiao longyin'.split(' ').forEach(k => { IMGU[k] = 'art/ui/skill/' + k + '.webp'; himg(k, IMGU[k]); });   // 11/14 用户的刀 12 招图标（每招一把不同的中国刀 + 招式特效）
   Object.assign(IMGU, {
     feishi: 'art/ui/skill/feishi.webp',
     sashi: 'art/ui/skill/sashi.webp',
