@@ -746,7 +746,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const DSP1 = { hengsao: 1.3, tuodao: 1.2, tiaozhan: 1.3, lianzhan: 1.2, daobo: 1.4, huima: 1.4, cuofeng: 1.4, liedihuan: 1.51, feilunren: 2.29, xuehe: 1.7, tianbeng: 2.2, wanren: 1.9 };
   const rsOf = k => DRS[k] != null ? DRS[k] : DRS1[k] != null ? DRS1[k] : DRS0[(SK[k] && SK[k].tier) || 1] || 1;
   let DSP = {}; try { DSP = JSON.parse(localStorage.getItem('szz-dao-sp') || '{}') || {}; } catch (e) {}   // 起手/收势倍率（越大越慢），同样在武学试炼里拖动调
-  const spOf = k => (DSP[k] != null ? DSP[k] : DSP1[k] != null ? DSP1[k] : 1) * (typeof HAS === 'function' && SK[k] && SK[k].dk && ((HAS('huanshou') && WOFX[k] === 0) || (HAS('muqiang') && WOFX[k] === 3) || (HAS('qingshizi') && WOFX[k] === 7) || (HAS('qingtongchui') && WOFX[k] === 2) || (HAS('sangmugong') && WOFX[k] === 5) || (HAS('mugandao') && WOFX[k] === 4) || (HAS('pukui') && WOFX[k] === 9) || (HAS('zhusha') && WOFX[k] === 8)) ? .9 : 1) * (typeof HAS === 'function' && HAS('qinglongdao') && WOFX[k] === 4 && S.gdSui != null && DKT - S.gdSui < 3 ? .85 : 1);   // 环首刀：刀的武艺快 10%
+  const spOf = k => (DSP[k] != null ? DSP[k] : DSP1[k] != null ? DSP1[k] : 1) * (typeof HAS === 'function' && SK[k] && SK[k].dk && ((HAS('huanshou') && WOFX[k] === 0) || (HAS('muqiang') && WOFX[k] === 3) || (HAS('qingshizi') && WOFX[k] === 7) || (HAS('qingtongchui') && WOFX[k] === 2) || (HAS('sangmugong') && WOFX[k] === 5) || (HAS('mugandao') && WOFX[k] === 4) || (HAS('pukui') && WOFX[k] === 9) || (HAS('zhusha') && WOFX[k] === 8) || (HAS('qingtongjian') && WOFX[k] === 1)) ? .9 : 1) * (typeof HAS === 'function' && HAS('qinglongdao') && WOFX[k] === 4 && S.gdSui != null && DKT - S.gdSui < 3 ? .85 : 1);   // 环首刀：刀的武艺快 10%
   const SPDN = [[.62, '极快'], [.85, '快'], [1.05, '中'], [1.25, '慢'], [99, '极慢']];
   const spdTxt = o => { const m = o.dk ? spOf(o.key) : 1, wu = (o.dk ? o.wu : o.wu * 1.2) * m, rc = o.rc * m, t = wu * weaponWindMul(o.key) + rc; return `出手${SPDN.find(q => t <= q[0])[1]}　起手 ${(wu * weaponWindMul(o.key)).toFixed(2)} 秒 · 收势 ${rc.toFixed(2)} 秒`; };
   let DKT = 0; const DKO = [];   // 刀的持续判定（飞刃、血河、裂地环等）不靠 later：翻滚也不会断
@@ -1088,6 +1088,14 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   }
   function gdDraw(e) {
     if (e.m === 'swirl') return fanDraw(e);
+    if (e.m === 'swords') {   // 11/16 剑：飞剑 / 剑阵（屏幕坐标画，剑身不被压扁）
+      const p = e.t / e.T, al = e.hold ? (p < .85 ? 1 : (1 - p) / .15) : 1 - p; ctx.save(); ctx.lineCap = 'round';
+      if (e.segs) { ctx.strokeStyle = `rgba(${e.col},${.55 * al})`; ctx.lineWidth = 1.5; for (const [a, b] of e.segs) { ctx.beginPath(); ctx.moveTo(a.x, a.y - 6); ctx.lineTo(b.x, b.y - 6); ctx.stroke(); } }
+      for (const q of e.pts) { const sa = Math.atan2(Math.sin(q.r) * .5, Math.cos(q.r)), L = 9 * (q.big || 1), dx = Math.cos(sa) * L, dy = Math.sin(sa) * L;
+        ctx.strokeStyle = `rgba(${e.col},${.75 * al})`; ctx.lineWidth = 5 * (q.big || 1); ctx.beginPath(); ctx.moveTo(q.x - dx, q.y - dy); ctx.lineTo(q.x + dx, q.y + dy); ctx.stroke();
+        ctx.strokeStyle = `rgba(255,255,255,${.95 * al})`; ctx.lineWidth = 1.6 * (q.big || 1); ctx.beginPath(); ctx.moveTo(q.x - dx * .5, q.y - dy * .5); ctx.lineTo(q.x + dx, q.y + dy); ctx.stroke(); }
+      ctx.restore(); return;
+    }
     const p = e.t / e.T, al = e.hold ? (p < .8 ? 1 : (1 - p) / .2) : 1 - p;
     ctx.save(); ctx.translate(e.x, e.y - 6); ctx.scale(1, .5); ctx.lineCap = 'round';
     if (e.m === 'band') {
@@ -1525,6 +1533,126 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
           fuZone({ x: p.x, y: p.y, r: FS(100) * fuR(), T: L >= 5 ? 6 : 4, kind: 'huo', col: '255,140,40', each: z => { FUH(z, .15, 0, { el: 'huo', burn: 1 }); if (L >= 7) z.fbSp = 2; } }); }); }); } });
   Object.assign(DRS1, { huofu: .75, feifu: .75, dingshen: .75, zhangxin: .75, wulei: .75, yaoshu: .75, huangtian: .75, tianlei: .80, fuhuo: .80, sadou: .80, jiutian: 1.0, taiping: 1.0 });
   Object.assign(DSP1, { huofu: 1.30, feifu: 1.30, dingshen: 1.30, zhangxin: 1.40, wulei: 1.40, yaoshu: 1.40, huangtian: 1.40, tianlei: 1.90, fuhuo: 1.90, sadou: 1.90, jiutian: 2.20, taiping: 2.20 });
+  // ---------- 剑（11/16 用户定）：快、多段、剑气飞出；主打流血，专属「剑痕」 ----------
+  //   黄：流星刺 断金斩 白虹剑　玄：落英剑 穿花剑 四象剑 飞雨剑　地：九宫阵 雌雄剑 旋光轮　天：御剑凌霄 万剑归宗
+  //   剑痕：同一敌人 2 秒内被剑招打中 3 下（龙泉剑 2 下）→ 追加 0.4 倍（倚天剑 0.8）+ 1 层流血，重新计数
+  const JCOL = { jlianci: '#5fb8ff', zhantie: '#ffc83a', jianqi: '#e8f4ff', liefeng: '#ff6aa8', feijian: '#4fe08a', sixiang: '#3fe0d0', jinghong: '#8a6aff', jianzhen: '#c060ff', xinjian: '#ffd870', jianlun: '#ff9a2a', yujian: '#9fe8ff', tianjian: '#ffd040' };
+  const JN = (k, tier, mot, o) => { add(k, Object.assign({ tier, dk: 1, key: k, color: JCOL[k] }, o)); WOFX[k] = 1; MOTX[k] = mot; };
+  const jW = () => HAS('yitian') ? 1.2 : 1;                              // 倚天剑：剑气宽 +20%
+  const jFly = () => HAS('shuanggu') ? 1.2 : 1;                          // 双股剑：飞剑类 +20%
+  function JH(z, m, kb, o = {}) {
+    if (!z || z.dead) return false;
+    const r = DH(z, m, kb, o); if (!r || z.dead) return r;
+    z.jhN = z.jhT > 0 ? (z.jhN || 0) + 1 : 1; z.jhT = 2;
+    if (z.jhN >= (HAS('longquan') ? 2 : 3) || o.jhForce) {
+      z.jhN = 0; DH(z, .4 * (HAS('yitian') ? 2 : 1), 0, { bl: 1 });
+      if (!z.dead) { floaters.push({ x: z.x, y: z.y - 62, t: 0, txt: '剑痕', color: '#ffd0e0' }); fx.push({ k: 'cut', n: 'dh2', x: z.x, y: z.y - 20, a: Math.random() * 3, L: 22, t: 0, T: .25, col: gCol() }); }
+    }
+    return r;
+  }
+  const jSweep = (x, y, a, half, R0, R1, m, kb, o = {}) => { gBand(x, y, a, Math.min(Math.PI, half), R0, R1, .25); return hittable().filter(z => inBand(x, y, z, a, Math.min(Math.PI, half), R0, R1)).filter(z => JH(z, typeof m === 'function' ? m(z) : m, kb, Object.assign({ x }, o))); };
+  // 飞行的剑气 / 飞剑：从 (x0,y0) 朝 a 飞 L（像素），T 秒，宽 w；hs 共享命中；onEnd(x,y)
+  function jBolt(x0, y0, a, L, T, w, m, o, hs, onEnd, back) {
+    const e = { k: 'gd', m: 'swords', x: x0, y: y0, pts: [], t: 0, T: (back ? T * 2 : T) + .02, col: gCol(), hold: 1 }; fx.push(e); const hb = new Set();
+    DKO.push(dmk({ T: (back ? T * 2 : T) + .02, fin: 0, tick(q) { const out = q.t <= T, p = out ? q.t / T : Math.max(0, 1 - (q.t - T) / T), x = x0 + Math.cos(a) * L * p, y = y0 + Math.sin(a) * L * p * .5;
+      e.pts = [{ x, y, r: a + (out ? 0 : Math.PI) }];
+      for (const z of near(x, y, w)) { const H = out ? hs : hb; if (H.has(z)) continue; H.add(z); JH(z, out ? m : m * (o.backM || .5), 15, o); }
+      if (!q.fin && q.t >= T) { q.fin = 1; if (onEnd) onEnd(x, y); } } }));
+  }
+  // ---- 黄 ----
+  JN('jlianci', 1, 'thrust', { name: '流星刺', icon: '星', need: 90, wu: .30, rc: .20, beam: true, len: 140,
+    desc: '向前连刺三剑（长 140），第三剑带出一道小剑气再飞 100。LV3 挂 1 层流血；LV5 改成四连刺；LV7 第三剑伤害 ×1.5',
+    cast() { const L = dlv(), a = aim(), n = L >= 5 ? 4 : 3, bl = L >= 3 ? 1 : 0;
+      DKO.push(dmk({ T: n * .08 + .02, i: 0, tick(o) { while (o.i < n && o.t >= o.i * .08) { const i = o.i, Lp = FS(140), w = FS(24) / 2 * jW(), m = .45 * (i === 2 && L >= 7 ? 1.5 : 1);
+        fx.push({ k: 'line', x: hero.x, y: hero.y, a, L: Lp, w: 3, t: 0, T: .16, col: gCol() }); dRect(hero.x, hero.y, a, Lp, w, z => JH(z, m, 15, { bl, x: hero.x }));
+        if (i === 2) jBolt(hero.x + Math.cos(a) * Lp, hero.y + Math.sin(a) * Lp * .5, a, FS(100), .18, FS(14) * jW(), .40, { bl }, new Set());
+        S.poseOverride = { f: SK.jlianci.pose[i % 2], t: .08 }; sfx(SW, hero.x); o.i++; } } })); } });
+  JN('zhantie', 1, 'sweep', { name: '断金斩', icon: '断', need: 70, wu: .35, rc: .20, range: 100, half: 1.05,
+    desc: '身前 120° 横斩（离身 20~100）。LV3 挂 1 层流血；LV5 扇面扩到 180°；LV7 对流血的敌人 +15%',
+    cast() { const L = dlv(), a = aim(); jSweep(hero.x, hero.y, a, (L >= 5 ? 90 : 60) * Math.PI / 180, FS(20), FS(100), z => 1.20 * (L >= 7 && z.blT > 0 && z.bl > 0 ? 1.15 : 1), 40, { bl: L >= 3 ? 1 : 0 }); if (DKT - (daoSlash.t || -9) > .06) daoSlash('zhantie', a); sfx(SW, hero.x); } });
+  JN('jianqi', 1, 'thrust', { name: '白虹剑', icon: '虹', need: 160, wu: .30, rc: .20, beam: true, len: 260,
+    desc: '一道剑气直飞 260（宽 30），穿透。LV3 挂 1 层流血；LV5 剑气宽 50；LV7 飞到尽头分成左右两道小剑气（0.4 倍）',
+    cast() { const L = dlv(), a = aim(), bl = L >= 3 ? 1 : 0; sfx(SW, hero.x);
+      jBolt(hero.x, hero.y, a, FS(260), .35, FS(L >= 5 ? 25 : 15) * jW(), .90, { bl }, new Set(), L >= 7 ? (x, y) => { for (const s of [-.5, .5]) jBolt(x, y, a + s, FS(120), .2, FS(12) * jW(), .40, {}, new Set()); } : null); } });
+  // ---- 玄 ----
+  JN('liefeng', 2, 'sweep', { name: '落英剑', icon: '英', need: 70, wu: .40, rc: .25, range: 110, half: .79,
+    desc: '绕身连斩 4 段，每段 90° 扇面（离身 20~110），挂 1 层流血。LV3 流血 2 层；LV5 改成 6 段；LV7 最后一段变成整圈（0.8 倍）',
+    cast() { const L = dlv(), a = aim(), n = L >= 5 ? 6 : 4, bl = L >= 3 ? 2 : 1;
+      DKO.push(dmk({ T: n * .1 + .12, i: 0, fin: 0, tick(o) { while (o.i < n && o.t >= o.i * .1) { jSweep(hero.x, hero.y, a + o.i * Math.PI / 2, Math.PI / 4, FS(20), FS(110), .40, 20, { bl }); S.poseOverride = { f: SK.liefeng.pose[o.i % 2], t: .1 }; sfx(SW, hero.x); o.i++; }
+        if (L >= 7 && !o.fin && o.t >= n * .1 + .05) { o.fin = 1; jSweep(hero.x, hero.y, 0, Math.PI, FS(20), FS(110), .80, 50, { bl }); } } })); } });
+  JN('feijian', 2, 'thrust', { name: '穿花剑', icon: '穿', need: 160, wu: .40, rc: .25,
+    desc: '放出 1 柄飞剑，2.5 秒内自己追着最近的敌人连砍 5 下，挂流血；同一人最多 3 下。LV3 流血 2 层；LV5 改成 2 柄；LV7 飞剑每砍 3 下必出剑痕',
+    cast() { const L = dlv(), k = (L >= 5 ? 2 : 1) + (HAS('shuanggu') ? 1 : 0), cnt = new Map(), bl = L >= 3 ? 2 : 1; sfx(SW, hero.x);
+      for (let s = 0; s < k; s++) { const sw = { x: hero.x, y: hero.y - 10, n: 0, cd: 0, r: 0 }, e = { k: 'gd', m: 'swords', x: sw.x, y: sw.y, pts: [], t: 0, T: 2.5, col: gCol(), hold: 1 }; fx.push(e);
+        DKO.push(dmk({ T: 2.5, tick(q, dt) { if (sw.n >= 5) { e.T = Math.min(e.T, e.t + .1); return; } sw.cd -= dt;
+          const t = hittable().filter(z => (cnt.get(z) || 0) < 3).sort((a, b) => dist(a, sw) - dist(b, sw))[0]; if (!t) return;
+          const d = Math.hypot(t.x - sw.x, (t.y - 14 - sw.y) * 2), sp = 320 * dt; sw.r = Math.atan2((t.y - 14 - sw.y) * 2, t.x - sw.x);
+          if (d > 10) { sw.x += (t.x - sw.x) / d * sp; sw.y += (t.y - 14 - sw.y) / d * sp; }
+          else if (sw.cd <= 0) { sw.cd = .3; sw.n++; cnt.set(t, (cnt.get(t) || 0) + 1); JH(t, .50 * jFly(), 15, { bl, jhForce: L >= 7 && sw.n % 3 === 0 }); sw.x -= Math.cos(sw.r) * 20; }
+          e.x = sw.x; e.y = sw.y; e.pts = [{ x: sw.x, y: sw.y, r: sw.r }]; } })); } } });
+  JN('sixiang', 2, 'thrust', { name: '四象剑', icon: '象', need: 120, wu: .40, rc: .25, beam: true, len: 220,
+    desc: '前后左右 4 个方向各飞一道剑气（长 220，宽 26），穿透，挂 1 层流血。LV3 流血 2 层；LV5 改成 8 个方向；LV7 剑气飞到尽头再飞回来一次（0.5 倍）',
+    cast() { const L = dlv(), a = aim(), n = L >= 5 ? 8 : 4, bl = L >= 3 ? 2 : 1; sfx(SW, hero.x);
+      for (let i = 0; i < n; i++) jBolt(hero.x, hero.y, a + i * Math.PI * 2 / n, FS(220), .3, FS(13) * jW(), .80, { bl }, new Set(), null, L >= 7); } });
+  JN('jinghong', 2, 'up', { name: '飞雨剑', icon: '雨', need: 160, wu: .45, rc: .25,
+    desc: '6 柄剑从天落在 200 内的 6 个敌人身上（每柄半径 25），挂流血；同一人最多 2 柄。LV3 流血 2 层；LV5 改成 9 柄；LV7 剑插在地上留 1 秒，碰到再挨一下（0.3 倍）',
+    cast() { const L = dlv(), n = L >= 5 ? 9 : 6, bl = L >= 3 ? 2 : 1, cnt = new Map(), cs = hittable().filter(z => dist(z, hero) < FS(200)).sort((a, b) => dist(a, hero) - dist(b, hero)); sfx(SW, hero.x);
+      for (let i = 0; i < n; i++) { const t = cs.length ? cs[i % cs.length] : null, p = t ? { x: t.x, y: t.y } : fuPt(200);
+        later(.05 + i * .06, () => { fx.push({ k: 'gd', m: 'swords', x: p.x, y: p.y - 40, pts: [{ x: p.x, y: p.y - 6, r: Math.PI / 2 }], t: 0, T: L >= 7 ? 1.2 : .35, col: gCol(), hold: L >= 7 }); fx.push({ k: 'burst', x: p.x, y: p.y, r: FS(25), t: 0, T: .3, col: gCol() });
+          for (const z of near(p.x, p.y, FS(25))) { const c = cnt.get(z) || 0; if (c >= 2) continue; cnt.set(z, c + 1); JH(z, .70, 10, { bl }); }
+          if (L >= 7) { const once = new Set(near(p.x, p.y, FS(25))); DKO.push(dmk({ T: 1, tick() { for (const z of near(p.x, p.y, FS(25))) if (!once.has(z)) { once.add(z); JH(z, .30, 0, {}); } } })); } }); } } });
+  // ---- 地 ----
+  JN('jianzhen', 3, 'up', { name: '九宫阵', icon: '宫', need: 150, wu: .60, rc: .40,
+    desc: '在敌人最密的地方插下 9 柄剑排成 3×3 的阵（宽 160），剑与剑之间连着剑丝，3 秒内走过剑丝的人每 0.3 秒挨一下（每人最多 6 下），结束时 9 柄一起炸开。LV3 剑丝挂流血；LV5 阵宽 220；LV7 炸开后每柄剑向外射出一道剑气（0.5 倍）',
+    cast() { const L = dlv(), c = fuDense(180), W = FS(L >= 5 ? 220 : 160), g = [-1, 0, 1], P = []; for (const j of g) for (const i of g) P.push({ x: c.x + i * W / 2, y: clampY(c.y + j * W / 4) });
+      const seg = []; for (let j = 0; j < 3; j++) for (let i = 0; i < 3; i++) { const k = j * 3 + i; if (i < 2) seg.push([P[k], P[k + 1]]); if (j < 2) seg.push([P[k], P[k + 3]]); }
+      const e = { k: 'gd', m: 'swords', x: c.x, y: c.y, pts: P.map(p => ({ x: p.x, y: p.y - 6, r: Math.PI / 2 })), segs: seg, t: 0, T: 3.1, col: gCol(), hold: 1 }; fx.push(e); sfx(SW, hero.x);
+      const onSeg = z => seg.some(([a, b]) => { const ax = a.x, ay = a.y * 2, bx = b.x, by = b.y * 2, px = z.x, py = z.y * 2, vx = bx - ax, vy = by - ay, t = Math.max(0, Math.min(1, ((px - ax) * vx + (py - ay) * vy) / (vx * vx + vy * vy))); return Math.hypot(px - ax - vx * t, py - ay - vy * t) < 12; });
+      const cnt = new Map();
+      DKO.push(dmk({ T: 3.05, nx: .3, fin: 0, tick(o) { if (o.t >= o.nx && o.t < 3) { o.nx += .3; for (const z of hittable()) if (onSeg(z)) { const n = cnt.get(z) || 0; if (n >= 6) continue; cnt.set(z, n + 1); JH(z, .20, 0, { bl: L >= 3 ? 1 : 0 }); } }
+        if (!o.fin && o.t >= 3) { o.fin = 1; shake = Math.max(shake, .2); const hs = new Set(); for (const p of P) { fx.push({ k: 'burst', x: p.x, y: p.y, r: FS(30), t: 0, T: .35, col: gCol() }); for (const z of near(p.x, p.y, FS(30))) if (!hs.has(z)) { hs.add(z); JH(z, 1.00, 40, { bl: 1 }); }
+          if (L >= 7) jBolt(p.x, p.y, Math.atan2((p.y - c.y) * 2, p.x - c.x) || Math.random() * 6, FS(120), .2, FS(12) * jW(), .50, {}, new Set()); } } } })); } });
+  JN('xinjian', 3, 'spin', { name: '雌雄剑', icon: '雌', need: 150, wu: .55, rc: .35,
+    desc: '一雌一雄两柄飞剑绕身转 4 秒，轮流冲向敌人再飞回来，挂流血（同一人每 0.5 秒一下）。LV3 流血 2 层；LV5 两剑同时冲向同一人时追加一次交叉斩（1.2 倍）；LV7 持续 6 秒',
+    cast() { const L = dlv(), T = L >= 7 ? 6 : 4, R = FS(60), bl = L >= 3 ? 2 : 1, last = new Map(), e = { k: 'gd', m: 'swords', x: hero.x, y: hero.y, pts: [], t: 0, T, col: gCol(), hold: 1 }; fx.push(e); sfx(SW, hero.x);
+      const sw = [0, 1].map(i => ({ ph: i * Math.PI, dash: null }));
+      DKO.push(dmk({ T, nd: .3, tick(o, dt) { e.x = hero.x; e.y = hero.y;
+        if (o.t >= o.nd) { o.nd += .5; const t = nearest(FS(150)); if (t) { const both = L >= 5 && Math.floor(o.nd / .5) % 2 === 0; (both ? sw : [sw[Math.floor(o.nd / .5) % 2]]).forEach(s => { s.dash = { t: 0, tx: t.x, ty: t.y - 12, z: t }; }); if (both) later(.24, () => { if (!t.dead) { fx.push({ k: 'cut', n: 'dh2', x: t.x, y: t.y - 20, a: .8, L: 30, t: 0, T: .3, col: gCol() }); JH(t, 1.20 * jFly(), 30, { bl }); } }); } }
+        e.pts = sw.map(s => { const ox = hero.x + Math.cos(o.t * 3 + s.ph) * R, oy = hero.y - 10 + Math.sin(o.t * 3 + s.ph) * R * .5; if (!s.dash) return { x: ox, y: oy, r: o.t * 3 + s.ph + Math.PI / 2 };
+          s.dash.t += dt; const p = s.dash.t < .25 ? s.dash.t / .25 : Math.max(0, 1 - (s.dash.t - .25) / .25), x = ox + (s.dash.tx - ox) * p, y = oy + (s.dash.ty - oy) * p;
+          for (const z of near(x, y + 12, 14)) if (DKT - (last.get(z) || -9) >= .5) { last.set(z, DKT); JH(z, .60 * jFly(), 20, { bl }); }
+          if (s.dash.t >= .5) s.dash = null; return { x, y, r: Math.atan2((s.dash ? s.dash.ty - oy : 0) * 2, s.dash ? s.dash.tx - ox : 1) }; }); } })); } });
+  JN('jianlun', 3, 'spin', { name: '旋光轮', icon: '轮', need: 120, wu: .55, rc: .35,
+    desc: '6 个剑光轮向四周飞出 180 再飞回身边，去程、回程各算一次，挂流血。LV3 流血 2 层；LV5 改成 8 个；LV7 回程变大一圈',
+    cast() { const L = dlv(), n = L >= 5 ? 8 : 6, a0 = aim(), bl = L >= 3 ? 2 : 1, D = FS(180), T = .45; sfx(SW, hero.x);
+      for (let i = 0; i < n; i++) { const a = a0 + i * Math.PI * 2 / n, h1 = new Set(), h2 = new Set(), e = { k: 'gd', m: 'blades', x: hero.x, y: hero.y, pts: [], t: 0, T: T * 2 + .02, col: gCol(), hold: 1 }; fx.push(e);
+        DKO.push(dmk({ T: T * 2 + .02, tick(q) { const out = q.t <= T, p = out ? q.t / T : Math.max(0, 1 - (q.t - T) / T), x = hero.x + Math.cos(a) * D * p, y = hero.y + Math.sin(a) * D * p * .5;
+          e.x = x; e.y = y; e.pts = [{ x, y, r: q.t * 18 }, { x, y, r: q.t * 18 + Math.PI }];
+          for (const z of near(x, y, out ? 12 : L >= 7 ? 20 : 12)) { const H = out ? h1 : h2; if (H.has(z)) continue; H.add(z); JH(z, .55, 15, { bl }); } } })); } } });
+  // ---- 天 ----
+  JN('yujian', 4, 'thrust', { name: '御剑凌霄', icon: '霄', need: 200, wu: .85, rc: .50,
+    desc: '5 秒内从身后一排排射出飞剑（每 0.2 秒一柄），追最近的敌人、穿过一人（同一人最多 8 下）；结束时一柄巨剑从天插进敌人最密的地方（半径 90，2.0 倍），挂 3 层流血。LV3 每 0.15 秒一柄；LV5 每次射两柄；LV7 巨剑插下后向 8 个方向射出剑气（0.8 倍）',
+    cast() { const L = dlv(), iv = L >= 3 ? .15 : .2, cnt = new Map(); sfx(SW, hero.x); floaters.push({ x: hero.x, y: hero.y - 80, t: 0, txt: '御剑凌霄', color: '#bfefff' });
+      DKO.push(dmk({ T: 5.05, nx: 0, fin: 0, tick(o) { while (o.t >= o.nx && o.nx < 5) { o.nx += iv;
+          for (let k = 0; k < (L >= 5 ? 2 : 1); k++) { const t = hittable().filter(z => (cnt.get(z) || 0) < 8 && dist(z, hero) < FS(220)).sort((a, b) => dist(a, hero) - dist(b, hero))[k] || nearest(FS(220)); if (!t) continue;
+            const x0 = hero.x - hero.f * 14 + (Math.random() - .5) * 20, y0 = hero.y - 18 + (Math.random() - .5) * 10, a = Math.atan2((t.y - y0) * 2, t.x - x0), D = Math.hypot(t.x - x0, (t.y - y0) * 2) + FS(60), hs = new Set();
+            jBolt(x0, y0, a, D, D / 420, 12, .35 * jFly(), { once: null }, { has: z => hs.size >= 1 || (cnt.get(z) || 0) >= 8, add: z => { hs.add(z); cnt.set(z, (cnt.get(z) || 0) + 1); } }); } }
+        if (!o.fin && o.t >= 5) { o.fin = 1; const p = fuDense(240); fx.push({ k: 'mark', x: p.x, y: p.y, r: FS(90), t: 0, T: .3 });
+          later(.3, () => { shake = Math.max(shake, .35); fx.push({ k: 'gd', m: 'swords', x: p.x, y: p.y, pts: [{ x: p.x, y: p.y - 10, r: Math.PI / 2, big: 3 }], t: 0, T: .6, col: gCol() }); fx.push({ k: 'burst', x: p.x, y: p.y, r: FS(90), t: 0, T: .45, col: gCol() });
+            for (const z of near(p.x, p.y, FS(90))) JH(z, 2.00, 60, { bl: 3 }); if (L >= 7) for (let i = 0; i < 8; i++) jBolt(p.x, p.y, i * Math.PI / 4, FS(240), .3, FS(14) * jW(), .80, {}, new Set()); }); } } })); } });
+  JN('tianjian', 4, 'spin', { name: '万剑归宗', icon: '宗', need: 120, wu: .90, rc: .50,
+    desc: '一排 24 柄剑贴身围成一圈转 5 秒，半径像呼吸一样在 90~180 之间扩缩，碰到就伤（同一人每 0.4 秒一下）；结束时 24 柄剑一齐扎向敌人最密的地方（半径 100，2.4 倍），挂 3 层流血。LV3 改成 32 柄；LV5 最大扩到 220；LV7 归宗时每个敌人都必出剑痕',
+    cast() { const L = dlv(), n = L >= 3 ? 32 : 24, r0 = FS(90), r1 = FS(L >= 5 ? 220 : 180), last = new Map(), e = { k: 'gd', m: 'swords', x: hero.x, y: hero.y, pts: [], t: 0, T: 5.5, col: gCol(), hold: 1 }; fx.push(e); sfx(SW, hero.x); shake = Math.max(shake, .2);
+      let tgt = null;
+      DKO.push(dmk({ T: 5.5, fin: 0, tick(o) {
+        if (o.t < 5) { const R = r0 + (r1 - r0) * (.5 - .5 * Math.cos(o.t * Math.PI * 2 / 2.5)), th = o.t * 2.2; e.x = hero.x; e.y = hero.y;
+          e.pts = Array.from({ length: n }, (_, i) => { const b = th + i * Math.PI * 2 / n; return { x: hero.x + Math.cos(b) * R, y: hero.y - 8 + Math.sin(b) * R * .5, r: b }; });
+          for (const z of hittable()) { const d = Math.hypot(z.x - hero.x, (z.y - hero.y) * 2); if (Math.abs(d - R) > 14 || DKT - (last.get(z) || -9) < .4) continue; last.set(z, DKT); JH(z, .35 * jFly(), 25, { bl: 1 }); } return; }
+        if (!tgt) { tgt = fuDense(260); o.s = e.pts.map(p => ({ x: p.x, y: p.y })); }
+        const p = Math.min(1, (o.t - 5) / .3); e.pts = o.s.map(s => ({ x: s.x + (tgt.x - s.x) * p, y: s.y + (tgt.y - 8 - s.y) * p, r: Math.atan2((tgt.y - s.y) * 2, tgt.x - s.x) }));
+        if (!o.fin && p >= 1) { o.fin = 1; shake = Math.max(shake, .4); fx.push({ k: 'burst', x: tgt.x, y: tgt.y, r: FS(100), t: 0, T: .5, col: gCol() }); for (const z of near(tgt.x, tgt.y, FS(100))) JH(z, 2.40, 80, { bl: 3, jhForce: L >= 7 }); e.T = Math.min(e.T, e.t + .1); } } })); } });
+  Object.assign(DRS1, { jlianci: .75, zhantie: .75, jianqi: .75, liefeng: .75, feijian: .75, sixiang: .75, jinghong: .75, jianzhen: .80, xinjian: .80, jianlun: .80, yujian: 1.0, tianjian: 1.0 });
+  Object.assign(DSP1, { jlianci: 1.20, zhantie: 1.20, jianqi: 1.20, liefeng: 1.30, feijian: 1.30, sixiang: 1.30, jinghong: 1.30, jianzhen: 1.70, xinjian: 1.70, jianlun: 1.70, yujian: 2.10, tianjian: 2.10 });
   // 石子：每次施放持有自己的命中计数及宝物触发次数。
   const SG = (key, tier, mot, need, wu, rc, rs, sp, name, desc, cast) => {
     const color = ['#c9b992', '#e0c49a', '#edab63', '#ffd477'][tier - 1];
@@ -2293,6 +2421,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     nongfu: { name: '农夫', tag: '刀 · 锤', wep: 0, weps: [0, 2], skill: 'hengsao', desc: '庄稼汉，挨得住打。受到伤害 -20%；本门刀或锤', take: .8, oa: [5, 4, 2, 1, 1, 2, 1, 3], at: [6, 4, 2, 2, 3, 2, 2, 1, 3] },
     xiaozu: { name: '小卒', tag: '枪 · 关刀', wep: 3, weps: [3, 4], skill: 'qiang', desc: '行伍出身，出手利落。武艺起手 -20%；本门枪或关刀', wu: .8, oa: [4, 4, 5, 1, 1, 2, 1, 3], at: [4, 3, 4, 3, 2, 2, 2, 1, 3] },
     liehu: { name: '猎户', tag: '石子 · 弓', wep: 7, weps: [7, 5], skill: 'feishi', desc: '山里跑惯了。移动速度 +12%；本门石子或弓', move: 1.12, oa: [3, 4, 1, 5, 1, 4, 1, 3], at: [3, 2, 2, 5, 3, 2, 5, 2, 3] },
+    youxia: { name: '游侠', tag: '剑 · 拳', wep: 1, weps: [1, 10], skill: 'jlianci', desc: '仗剑任侠，四海为家。暴击 +10%；本门剑或拳', crit: .1, oa: [5, 4, 2, 2, 1, 3, 1, 3], at: [3, 5, 2, 4, 4, 3, 2, 1, 3] },   // 11/16 用户定：第 5 个出身
     shusheng: { name: '书生', tag: '黄符 · 羽扇', wep: 8, weps: [8, 9], skill: 'huofu', desc: '手无缚鸡之力，却通术法。本门黄符或羽扇', oa: [2, 1, 1, 1, 1, 2, 6, 4], at: [2, 1, 1, 2, 3, 6, 2, 6, 5] },
   };
   let origin = 'nongfu';
@@ -2351,7 +2480,8 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   for (const k of Object.keys(SK).filter(k => SK[k].stone || SK[k].hammer || SK[k].bow)) DPS1[k] = { a: MOTX[k] + '1', b: MOTX[k] + '2' };
   Object.assign(DPS1, { hengti: { a: 'sweep1', b: 'sweep2' }, pidao: { a: 'chop1', b: 'chop2' }, xiongshou: { a: 'up1', b: 'up2' }, xuanfengd: { a: 'spin1', b: 'spin2' }, daoqi: { a: 'sweep1', b: 'sweep2' }, handi: { a: 'chop1', b: 'chop2' }, zhanjiang: { a: 'up2', b: 'chop2' }, guowu: { a: 'thrust1', b: 'thrust2' }, yanyue: { a: 'chop1', b: 'chop2' }, tuodaoji: { a: 'spin1', b: 'spin2' }, shuiyan: { a: 'up2', b: 'chop2' }, qinglong: { a: 'up1', b: 'up2' }, tuodao: { a: 'chop1', b: 'sweep2' },
     shanfeng: { a: 'sweep1', b: 'sweep2' }, liuying: { a: 'thrust1', b: 'thrust2' }, huifeng: { a: 'up1', b: 'up2' }, longjuan: { a: 'spin1', b: 'spin2' }, mihun: { a: 'sweep1', b: 'sweep2' }, shuangxue: { a: 'sweep1', b: 'sweep2' }, lianying: { a: 'thrust1', b: 'thrust2' }, bazhen: { a: 'spin1', b: 'spin2' }, huoyu: { a: 'up1', b: 'up2' }, chibi: { a: 'up1', b: 'up2' }, dongfeng: { a: 'up1', b: 'up2' }, qimen: { a: 'spin1', b: 'spin2' },
-    huofu: { a: 'chop1', b: 'thrust2' }, feifu: { a: 'up1', b: 'up2' }, dingshen: { a: 'up1', b: 'up2' }, zhangxin: { a: 'thrust1', b: 'thrust2' }, wulei: { a: 'chop1', b: 'thrust2' }, yaoshu: { a: 'chop1', b: 'chop2' }, huangtian: { a: 'up1', b: 'up2' }, tianlei: { a: 'up1', b: 'up2' }, fuhuo: { a: 'sweep1', b: 'sweep2' }, sadou: { a: 'up1', b: 'up2' }, jiutian: { a: 'up1', b: 'up2' }, taiping: { a: 'up2', b: 'chop2' } });   // 11/16 关刀动作（试炼里可再挑）
+    huofu: { a: 'chop1', b: 'thrust2' }, feifu: { a: 'up1', b: 'up2' }, dingshen: { a: 'up1', b: 'up2' }, zhangxin: { a: 'thrust1', b: 'thrust2' }, wulei: { a: 'chop1', b: 'thrust2' }, yaoshu: { a: 'chop1', b: 'chop2' }, huangtian: { a: 'up1', b: 'up2' }, tianlei: { a: 'up1', b: 'up2' }, fuhuo: { a: 'sweep1', b: 'sweep2' }, sadou: { a: 'up1', b: 'up2' }, jiutian: { a: 'up1', b: 'up2' }, taiping: { a: 'up2', b: 'chop2' },
+    jlianci: { a: 'thrust1', b: 'thrust2' }, zhantie: { a: 'sweep1', b: 'sweep2' }, jianqi: { a: 'thrust1', b: 'thrust2' }, liefeng: { a: 'spin1', b: 'spin2' }, feijian: { a: 'up1', b: 'thrust2' }, sixiang: { a: 'spin1', b: 'spin2' }, jinghong: { a: 'up1', b: 'up2' }, jianzhen: { a: 'up1', b: 'chop2' }, xinjian: { a: 'spin1', b: 'spin2' }, jianlun: { a: 'spin1', b: 'spin2' }, yujian: { a: 'thrust1', b: 'thrust2' }, tianjian: { a: 'spin1', b: 'up2' } });   // 11/16 关刀动作（试炼里可再挑）
   Object.assign(DGM, { hengti: ['dg1', 2.6, .5, .8, 14, -14], xiongshou: ['dg3', 1.8, .3, .6, 14, -24], handi: ['dg2', 2.4, .5, .5, 10, -14], guowu: ['dg5', 2.4, .5, .55, 0, -24] });
   let DPS = {}; try { DPS = JSON.parse(localStorage.getItem('szz-dao-pose') || '{}') || {}; } catch (e) {}
   const dpsOf = k => SK[k] && SK[k].dk ? DPS[k] || DPS1[k] || null : null;
@@ -2420,7 +2550,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const lvOf = k => { if (S.lvLock && S.lvLock[k]) return S.lvLock[k]; const m = S.mast[k] || 0; let l = 1; while (l < 10 && m >= MAST_T[l]) l++; return l; };
   const mastMul = k => { if (SK[k] && SK[k].dk) return DLV.dmg[lvOf(k) - 1]; const l = lvOf(k); return 1 + .06 * Math.min(3, l - 1) + (l >= 5 ? .12 : 0) + .05 * Math.max(0, Math.min(l, 9) - 5); };   // LV2-4、6-9 递增，LV5 质变
   // 11/14 参考群侠详情页：把说明拆成「出招方式 / 特殊效果 / 逐级修炼」，威力拆成各项乘数
-  const STW = /湿身|导电|蒸腾|迷乱|风撞|碎甲|破甲|流血|浮空|挑飞|击飞|晕|定住|定身|迟缓|减速|灼烧|起火|着火|推开|拉回|卷/;
+  const STW = /剑痕|湿身|导电|蒸腾|迷乱|风撞|碎甲|破甲|流血|浮空|挑飞|击飞|晕|定住|定身|迟缓|减速|灼烧|起火|着火|推开|拉回|卷/;
   function wuParts(k) {
     const o = SK[k]; if (!o) return null;
     const d = String(o.desc || ''), i = d.search(/LV\d/), base = (i < 0 ? d : d.slice(0, i)).replace(/[。；;，,\s]+$/, '');
@@ -2433,19 +2563,19 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   function powParts(k) {   // 威力 = 各项乘数，100 = 无加成
     const c = catOf(k), at = ATW[wepOf(k)] != null ? ATW[wepOf(k)] : 1, AN = ['体魄', '短兵', '长兵', '射艺', '术法', '身法', '射艺', '术法'];
     const w = wmul(k), am = attrMul(k), lm = mastMul(k), n = RES().cnt[wepOf(k)], rs = 1 + RESD[Math.min(5, n)] * (HAS('xinshu') ? 2 : 1);
-    const bw = 1 + (S.bao || []).reduce((t, b) => t + (BAO[b] && BAO[b].w === wepOf(k) ? BAO[b].wd : 0), 0), other = GM.all * GM.cat[c] * (1 + .06 * S.xy) * baoMul() * bw * rs * (HAS('baipi') && wepOf(k) !== 0 ? .7 : 1) * (HAS('longdan') && wepOf(k) !== 3 ? .7 : 1) * (HAS('yunxing') && wepOf(k) !== 7 ? .7 : 1) * (HAS('zhenyuechui') && wepOf(k) !== 2 ? .7 : 1) * (HAS('zhurigong') && wepOf(k) !== 5 ? .7 : 1) * (HAS('qinglongdao') && wepOf(k) !== 4 ? .7 : 1) * (HAS('qixingshan') && wepOf(k) !== 9 ? .7 : 1) * (HAS('taipingshu') && wepOf(k) !== 8 ? .7 : 1);
+    const bw = 1 + (S.bao || []).reduce((t, b) => t + (BAO[b] && BAO[b].w === wepOf(k) ? BAO[b].wd : 0), 0), other = GM.all * GM.cat[c] * (1 + .06 * S.xy) * baoMul() * bw * rs * (HAS('baipi') && wepOf(k) !== 0 ? .7 : 1) * (HAS('longdan') && wepOf(k) !== 3 ? .7 : 1) * (HAS('yunxing') && wepOf(k) !== 7 ? .7 : 1) * (HAS('zhenyuechui') && wepOf(k) !== 2 ? .7 : 1) * (HAS('zhurigong') && wepOf(k) !== 5 ? .7 : 1) * (HAS('qinglongdao') && wepOf(k) !== 4 ? .7 : 1) * (HAS('qixingshan') && wepOf(k) !== 9 ? .7 : 1) * (HAS('taipingshu') && wepOf(k) !== 8 ? .7 : 1) * (HAS('yitian') && wepOf(k) !== 1 ? .7 : 1);
     const r = [['等级', lm], [(AN[at] || '属性') + ' ' + AT()[at], am], [w > 1.05 ? '本门' : w < .95 ? '外门' : '出身兵器', w], ['心法·宝物·同门', other]].filter(x => Math.abs(x[1] - 1) > .005);
     return { total: Math.round(100 * lm * am * w * other), rows: r };
   }
   function skillMul(k) {
     const c = catOf(k), n = RES().cnt[wepOf(k)], low = hero.hp / maxHp() < .3 ? 1 + .25 * GM.low : 1;
     const bw = (S.bao || []).reduce((t, b) => t + (BAO[b] && BAO[b].w === wepOf(k) ? BAO[b].wd : 0), 0);
-    return (1 + bw) * (HAS('baipi') && wepOf(k) !== 0 ? .7 : 1) * (HAS('longdan') && wepOf(k) !== 3 ? .7 : 1) * (HAS('yunxing') && wepOf(k) !== 7 ? .7 : 1) * (HAS('zhenyuechui') && wepOf(k) !== 2 ? .7 : 1) * (HAS('zhurigong') && wepOf(k) !== 5 ? .7 : 1) * (HAS('qinglongdao') && wepOf(k) !== 4 ? .7 : 1) * (HAS('qixingshan') && wepOf(k) !== 9 ? .7 : 1) * (HAS('taipingshu') && wepOf(k) !== 8 ? .7 : 1) * wmul(k) * attrMul(k) * (1 + RESD[Math.min(5, n)] * (HAS('xinshu') ? 2 : 1)) * mastMul(k) * GM.all * GM.cat[c] * low * (1 + .06 * S.xy) * baoMul();
+    return (1 + bw) * (HAS('baipi') && wepOf(k) !== 0 ? .7 : 1) * (HAS('longdan') && wepOf(k) !== 3 ? .7 : 1) * (HAS('yunxing') && wepOf(k) !== 7 ? .7 : 1) * (HAS('zhenyuechui') && wepOf(k) !== 2 ? .7 : 1) * (HAS('zhurigong') && wepOf(k) !== 5 ? .7 : 1) * (HAS('qinglongdao') && wepOf(k) !== 4 ? .7 : 1) * (HAS('qixingshan') && wepOf(k) !== 9 ? .7 : 1) * (HAS('taipingshu') && wepOf(k) !== 8 ? .7 : 1) * (HAS('yitian') && wepOf(k) !== 1 ? .7 : 1) * wmul(k) * attrMul(k) * (1 + RESD[Math.min(5, n)] * (HAS('xinshu') ? 2 : 1)) * mastMul(k) * GM.all * GM.cat[c] * low * (1 + .06 * S.xy) * baoMul();
   }
   function critRoll() {   // 暴击：基础 5% + 心法；伤害 ×1.5 + 心诀
     if (!CK || !SK[CK]) return 1;
     const c = catOf(CK);
-    if (S.lhjOn || Math.random() < .05 + AFX.crit() + IT('crit') + GM.crit + GM.critC[c] + (HAS('qixing') ? .08 : 0)) { if (Math.random() < .35) floaters.push({ x: hero.x, y: hero.y - 54, t: 0, txt: '暴击', color: '#ff9a4a' }); return 1.5 + GM.critD[c] + (HAS('qixing') ? .3 : 0); }
+    if (S.lhjOn || Math.random() < .05 + (OG().crit || 0) + AFX.crit() + IT('crit') + GM.crit + GM.critC[c] + (HAS('qixing') ? .08 : 0)) { if (Math.random() < .35) floaters.push({ x: hero.x, y: hero.y - 54, t: 0, txt: '暴击', color: '#ff9a4a' }); return 1.5 + GM.critD[c] + (HAS('qixing') ? .3 : 0); }
     return 1;
   }
   const CDM = () => RT.cd * RES().cd * (HAS('hufu2') ? .9 : 1);
@@ -2649,6 +2779,11 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     shuangji: { n: '典韦双戟', q: 1, d: '身边有 5 个以上敌人时，武艺伤害 +25%' },
     xinshu: { n: '孟德新书', q: 1, d: '兵器精通的加成翻倍' },
     // 兵器类宝物（11/14 用户：不要兵器栏，兵器就是宝物）：只加对应兵器的武艺伤害；做完一门兵器再加那一门的两把
+    qingtongjian: { image: 'art/ui/bao/qingtongjian.webp', n: '青铜剑', q: 0, w: 1, wd: 0, d: '剑武艺起手、收势 ×0.9' },   // 11/16 用户定：剑 5 件宝物
+    tiejian: { image: 'art/ui/bao/tiejian.webp', n: '铁剑', q: 0, w: 1, wd: .12, d: '剑武艺伤害 +12%' },
+    shuanggu: { image: 'art/ui/bao/shuanggu.webp', n: '双股剑', q: 1, w: 1, wd: 0, d: '飞剑类（穿花剑、雌雄剑、御剑凌霄、万剑归宗）伤害 +20%；穿花剑多 1 柄' },
+    longquan: { image: 'art/ui/bao/longquan.webp', n: '龙泉剑', q: 1, w: 1, wd: 0, d: '剑痕只要打中 2 下就触发（原来 3 下）' },
+    yitian: { image: 'art/ui/bao/yitian.webp', n: '倚天剑', q: 2, w: 1, wd: .3, d: '剑武艺伤害 +30%；剑气宽度 +20%；剑痕伤害 ×2', c: '剑以外的武艺伤害 −30%' },
     zhusha: { image: 'art/ui/bao/zhusha.webp', n: '朱砂笔', q: 0, w: 8, wd: 0, d: '黄符武艺起手、收势 ×0.9' },   // 11/16 用户定：黄符 5 件宝物
     huangbiao: { image: 'art/ui/bao/huangbiao.webp', n: '黄表纸', q: 0, w: 8, wd: .12, d: '黄符武艺伤害 +12%' },
     leijimu: { image: 'art/ui/bao/leijimu.webp', n: '雷击木', q: 1, w: 8, wd: 0, d: '黄符雷系伤害 +25%；连锁、导电的跳跃范围 +30%' },
@@ -3740,7 +3875,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   const tex = (k, x, y, w, h) => { if (w <= 0) return false; const im = HIMG['h2_' + k]; if (!hok('h2_' + k)) return false; const sw = Math.min(im.naturalWidth, im.naturalWidth * w / (h * im.naturalWidth / im.naturalHeight)); ctx.drawImage(im, 0, 0, Math.max(1, sw), im.naturalHeight, x, y, w, h); return true; };   // 纹理条按高度缩放、从左往右截取，不拉花
   ['tuna','yangqi','tieyi','tayun','guanxing','taiping','hunyuan','gf00','gf01','gf02','gf03','gf30','gf31','gf32','gf33','qingshen','juqi','shixue','beishui','lhj','caoshang','xingyun','taxue','tiesha','yufeng'].forEach(id => himg('gf_' + id, 'art/ui/gf/' + id + '.webp'));
   const IMGU = { daolun: 'art/ui/kaiju/sk_daolun.webp' };
-  'hengsao tuodao tiaozhan daobo lianzhan huima cuofeng feilunren liedihuan xuehe tianbeng wanren hengti pidao xiongshou xuanfengd daoqi handi zhanjiang guowu yanyue tuodaoji shuiyan qinglong shanfeng liuying huifeng longjuan mihun shuangxue lianying bazhen huoyu chibi dongfeng qimen huofu feifu dingshen zhangxin wulei yaoshu huangtian tianlei fuhuo sadou jiutian taiping qiang lansao lianci tiaoqiang lihua chong huimaq touqiang qianglin qijin bainiao longyin'.split(' ').forEach(k => { IMGU[k] = 'art/ui/skill/' + k + '.webp'; himg(k, IMGU[k]); });   // 11/14 用户的刀 12 招图标（每招一把不同的中国刀 + 招式特效）
+  'hengsao tuodao tiaozhan daobo lianzhan huima cuofeng feilunren liedihuan xuehe tianbeng wanren hengti pidao xiongshou xuanfengd daoqi handi zhanjiang guowu yanyue tuodaoji shuiyan qinglong shanfeng liuying huifeng longjuan mihun shuangxue lianying bazhen huoyu chibi dongfeng qimen huofu feifu dingshen zhangxin wulei yaoshu huangtian tianlei fuhuo sadou jiutian taiping jlianci zhantie jianqi liefeng feijian sixiang jinghong jianzhen xinjian jianlun yujian tianjian qiang lansao lianci tiaoqiang lihua chong huimaq touqiang qianglin qijin bainiao longyin'.split(' ').forEach(k => { IMGU[k] = 'art/ui/skill/' + k + '.webp'; himg(k, IMGU[k]); });   // 11/14 用户的刀 12 招图标（每招一把不同的中国刀 + 招式特效）
   Object.assign(IMGU, {
     feishi: 'art/ui/skill/feishi.webp',
     sashi: 'art/ui/skill/sashi.webp',

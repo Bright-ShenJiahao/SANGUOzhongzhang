@@ -87,6 +87,7 @@
     xiaozu: '退伍好几年了，没想到还得上战场……拼了！',
     liehu: '荒野求生我在行，打仗……就当打猎。算我一个。',
     shusheng: '这段历史我背得滚瓜烂熟……这一次，我要亲手改写！',
+    youxia: '穿越前练过几年武术，本以为是强身健体……原来是为了今天。',
   };
   function intro(done) {
     if (skipStory()) return done && done();
