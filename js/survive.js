@@ -761,7 +761,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     const mul = HAS('yuhua') && (CK === 'zashi' || CK === 'paoshi') ? 1.3 : 1;
     z.slT = Math.max(z.slT || 0, ((slowGrade(z) === 2 ? 2 : 2.5) + extra) * mul);
   }
-  function addPJ(z, n, cap) { const CP = HAS('baipi') ? 6 : HAS('fengzui') && WOFX[CK] === 4 ? 5 : 4;   /* 凤嘴刀：关刀挂的破甲最多 5 层 */ cap = cap ? Math.min(CP, cap + (CP - 4)) : CP; const c = z.pjT > 0 ? z.pj || 0 : 0; z.pjT = 5; if (c >= cap) return; z.pj = Math.min(cap, c + n); }
+  function addPJ(z, n, cap) { const CP = HAS('baipi') ? 6 : 4; cap = cap ? Math.min(CP, cap + (CP - 4)) : CP; const c = z.pjT > 0 ? z.pj || 0 : 0; z.pjT = 5; if (c >= cap) return; z.pj = Math.min(cap, c + n); }
   function addBL(z, n, cap) { const CB = HAS('baipi') ? 8 : 5; cap = cap ? Math.min(CB, cap + (CB - 5)) : CB;   /* 百辟刀：流血上限 8、破甲上限 6 */ const c = z.blT > 0 ? z.bl || 0 : 0; z.blT = 4; z.blCM = CM; if (!(z.blTk > 0)) z.blTk = .5; if (c >= cap) return; z.bl = Math.min(cap, c + n); }
   function addFK(z, o) {   // 浮空：普通兵被挑飞，落地再吃一下并晕 0.5 秒；10 秒内第 2 次 ×0.7、第 3 次 ×0.5、之后免疫
     z.fkH = (z.fkH || []).filter(t => DKT - t < 10); const n = z.fkH.length; if (n >= 3) return; const m = [1, .7, .5][n]; z.fkH.push(DKT);
@@ -1052,7 +1052,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   Object.assign(DSP1, { qiang: 1.12, lianci: 1.36, lansao: 1.16, tiaoqiang: 1.36, lihua: 1.20, chong: 1.36, huimaq: 1.40, touqiang: 1.80, qianglin: 2.08, qijin: 2.30, bainiao: 2.12, longyin: 2.20 });
   // ---------- 关刀（11/16 用户定）：大扇面、慢而重；刀头带吃满伤害、贴身刀杆 50%；主打破甲，满层「碎甲」 ----------
   //   黄：横云斩 开山斩 拖刀计　玄：车轮斩 破浪斩 立马斩 擒王斩　地：五关斩 卧月斩 旋刃阵　天：水淹七军 青龙偃月
-  //   碎甲：关刀打中已满层破甲（4 层，凤嘴刀 5 层）的敌人 → 追加 0.5 倍（凤嘴刀 0.8 倍）、清掉破甲、震开；青龙偃月刀：碎甲后 3 秒关刀起手 ×0.85
+  //   碎甲：关刀打中已有 3 层破甲的敌人 → 追加 0.5 倍（凤嘴刀 0.8 倍）、清掉破甲（凤嘴刀留 1 层）、震开；青龙偃月刀：碎甲后 3 秒关刀起手 ×0.85
   //   翻滚：前摇里翻滚 = 这招作废；已经放出去的刀浪、刀痕、残影、刀阵都挂在 DKO 上，照常结算
   const GDCOL = { hengti: '#4fb8ff', pidao: '#ffa030', xiongshou: '#ff4a3a', xuanfengd: '#3fe0b0', daoqi: '#4f8cff', handi: '#cfe0ff', zhanjiang: '#ffc24a', guowu: '#b46cff', yanyue: '#a8a8ff', tuodaoji: '#ff8a2a', shuiyan: '#7fd0ff', qinglong: '#4fe07a' };
   const GD = (k, tier, mot, o) => { add(k, Object.assign({ tier, dk: 1, key: k, color: GDCOL[k] }, o)); WOFX[k] = 4; MOTX[k] = mot; };
@@ -1060,14 +1060,14 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const gCol = () => hexRgb(SK[CK] ? SK[CK].color : '#ffe0a0');
   const gEl = (z, on) => on && HAS('qinglongdao') && tough(z) ? 1.25 : 1;   // 青龙偃月刀：擒王斩、五关斩、青龙偃月打精锐首领 +25%
   function gSui(z, m) {   // 碎甲
-    z.pj = 0; z.pjT = 0; DH(z, m * (HAS('fengzui') ? .8 : .5), 110, { x: hero.x });
+    const fz = HAS('fengzui'); z.pj = 0; z.pjT = 0; DH(z, m * (fz ? .8 : .5), 110, { x: hero.x }); if (fz && !z.dead) { z.pj = 1; z.pjT = 5; }   // 凤嘴刀：碎甲后留 1 层
     floaters.push({ x: z.x, y: z.y - 70, t: 0, txt: '碎甲', color: '#9fd8ff' });
     fx.push({ k: 'burst', x: z.x, y: z.y, r: 26, t: 0, T: .35, col: '170,220,255' });
     if (HAS('qinglongdao')) S.gdSui = DKT;
   }
   function GH(z, m, kb, o = {}) {   // 关刀的一次命中（会触发碎甲）
     if (!z || z.dead) return false;
-    const cap = o.suiAt || (HAS('fengzui') ? 5 : 4), had = z.pjT > 0 ? z.pj || 0 : 0, mm = m * gEl(z, o.el);
+    const cap = o.suiAt || 3,   /* 11/16 用户：碎甲门槛 3 层（只带一两招关刀也能打出来） */ had = z.pjT > 0 ? z.pj || 0 : 0, mm = m * gEl(z, o.el);
     const r = DH(z, mm, kb, o);
     if (r && !z.dead && (had >= cap || o.suiForce)) gSui(z, mm);
     return r;
@@ -1114,21 +1114,21 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   }
   // ---- 黄 ----
   GD('hengti', 1, 'sweep', { name: '横云斩', icon: '云', need: 70, wu: .50, rc: .30, range: 120, half: 1.4,
-    desc: '关刀横扫身前 160° 大扇面，刀头带（离身 40~120）吃满伤害，贴身的刀杆只有一半。LV3 挂 1 层破甲；LV5 扇面扩到 220°；LV7 击退加强',
-    cast() { const L = dlv(), a = aim(); gSweep(hero.x, hero.y, a, (L >= 5 ? 110 : 80) * Math.PI / 180, 40, 120, 1.30, L >= 7 ? 110 : 70, { pj: L >= 3 ? 1 : 0 }); sfx(SW, hero.x); shake = Math.max(shake, .12); } });
+    desc: '关刀横扫身前 160° 大扇面，刀头带（离身 40~120）吃满伤害，贴身的刀杆只有一半，挂 1 层破甲。LV3 破甲 2 层；LV5 扇面扩到 220°；LV7 击退加强',
+    cast() { const L = dlv(), a = aim(); gSweep(hero.x, hero.y, a, (L >= 5 ? 110 : 80) * Math.PI / 180, 40, 120, 1.30, L >= 7 ? 110 : 70, { pj: L >= 3 ? 2 : 1 }); sfx(SW, hero.x); shake = Math.max(shake, .12); } });
   GD('pidao', 1, 'chop', { name: '开山斩', icon: '山', need: 100, wu: .55, rc: .30, beam: true, len: 200,
-    desc: '向前竖劈，地上裂开一道长 200 的刀痕，由近到远依次判定，每人一次。LV3 挂 1 层破甲；LV5 刀痕尽头炸开一个小圆；LV7 刀痕留 1 秒，之后踩进去的敌人再吃一下',
+    desc: '向前竖劈，地上裂开一道长 200 的刀痕，由近到远依次判定，每人一次，挂 1 层破甲。LV3 破甲 2 层；LV5 刀痕尽头炸开一个小圆；LV7 刀痕留 1 秒，之后踩进去的敌人再吃一下',
     cast() { const L = dlv(), a = aim(), x0 = hero.x, y0 = hero.y, Lp = GS(200), w = GS(40) / 2, hs = new Set(), hs2 = new Set(), ex = x0 + Math.cos(a) * Lp, ey = clampY(y0 + Math.sin(a) * Lp * .5);
       fx.push({ k: 'gd', m: 'rect', x: x0, y: y0, a, L: Lp, w, grow: .3, t: 0, T: L >= 7 ? 1.3 : .5, col: gCol(), hold: L >= 7 }); sfx(SW, hero.x); shake = Math.max(shake, .14);
       DKO.push(dmk({ T: L >= 7 ? 1.3 : .32, b: 0, tick(o) { const reach = Math.min(1, o.t / .3) * Lp;
-        dRect(x0, y0, a, reach, w, z => { if (!hs.has(z)) { hs.add(z); GH(z, 1.30, 40, { pj: L >= 3 ? 1 : 0, x: x0 }); } else if (L >= 7 && o.t > .35 && !hs2.has(z)) { hs2.add(z); GH(z, .30, 10, { x: x0 }); } });
+        dRect(x0, y0, a, reach, w, z => { if (!hs.has(z)) { hs.add(z); GH(z, 1.30, 40, { pj: L >= 3 ? 2 : 1, x: x0 }); } else if (L >= 7 && o.t > .35 && !hs2.has(z)) { hs2.add(z); GH(z, .30, 10, { x: x0 }); } });
         if (L >= 7 && o.t > .35) dRect(x0, y0, a, Lp, w, z => { if (!hs.has(z) && !hs2.has(z)) { hs2.add(z); GH(z, .30, 10, { x: x0 }); } });
         if (L >= 5 && !o.b && o.t >= .3) { o.b = 1; fx.push({ k: 'burst', x: ex, y: ey, r: GS(50), t: 0, T: .4, col: gCol() }); for (const z of near(ex, ey, GS(50))) GH(z, .60, 60, { x: ex }); } } })); } });
   GD('xiongshou', 1, 'up', { name: '拖刀计', icon: '拖', need: 70, wu: .55, rc: .35, range: 140, half: 1.57,
-    desc: '佯装败退：往后撤一步（撤的时候短暂无敌），再回身向上撩出 180° 重斩，刀头带离身 40~140，击退很强。LV3 挂 2 层破甲；LV5 撤得更远、回身扇面扩到 240°；LV7 被撩中的敌人停住 0.3 秒',
+    desc: '佯装败退：往后撤一步（撤的时候短暂无敌），再回身向上撩出 180° 重斩，刀头带离身 40~140，击退很强，挂 1 层破甲。LV3 破甲 2 层；LV5 撤得更远、回身扇面扩到 240°；LV7 被撩中的敌人停住 0.3 秒',
     cast() { const L = dlv(), a = aim(), back = (L >= 5 ? 100 : 70) * DK; hero.inv = Math.max(hero.inv || 0, L >= 5 ? .3 : .22);
       DKO.push(dmk({ T: .26, done: 0, tick(o, dt) { if (o.t <= .2) { hero.x -= Math.cos(a) * back * dt / .2; hero.y = clampY(hero.y - Math.sin(a) * back * .5 * dt / .2); }
-        if (!o.done && o.t >= .22) { o.done = 1; const hs = gSweep(hero.x, hero.y, a, (L >= 5 ? 120 : 90) * Math.PI / 180, 40, 140, 1.70, 140, { pj: L >= 3 ? 2 : 0 }); if (L >= 7) for (const z of hs) if (!tough(z)) stunz(z, .3); sfx(SW, hero.x); shake = Math.max(shake, .18); } } })); } });
+        if (!o.done && o.t >= .22) { o.done = 1; const hs = gSweep(hero.x, hero.y, a, (L >= 5 ? 120 : 90) * Math.PI / 180, 40, 140, 1.70, 140, { pj: L >= 3 ? 2 : 1 }); if (L >= 7) for (const z of hs) if (!tough(z)) stunz(z, .3); sfx(SW, hero.x); shake = Math.max(shake, .18); } } })); } });
   // ---- 玄 ----
   GD('xuanfengd', 2, 'spin', { name: '车轮斩', icon: '轮', need: 60, wu: .50, rc: .40, range: 130, half: Math.PI,
     desc: '关刀绕身抡两整圈，刀头带离身 50~130，每圈每人一次，每圈挂 1 层破甲。LV3 第二圈挂 2 层；LV5 抡三圈；LV7 每圈都往外推',
@@ -1145,8 +1145,8 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
           for (const z of hittable()) { const d = Math.hypot(z.x - x0, (z.y - y0) * 2); if (d < r0 - 6 || d > r1 + 8 || angDiff(Math.atan2((z.y - y0) * 2, z.x - x0), w[0]) > es[i].half) continue;
             if (out) { if (!hs.has(z)) { hs.add(z); GH(z, w[2], 50, { pj, x: x0 }); } } else if (!o.back.has(z)) { o.back.add(z); GH(z, .4, 20, { x: x0 }); } } }); } })); } });
   GD('handi', 2, 'chop', { name: '立马斩', icon: '马', need: 75, wu: .75, rc: .35, range: 150, half: .87,
-    desc: '原地站定重劈 100° 扇面，刀头带离身 40~150，伤害很高；对已有 2 层以上破甲的敌人再 +30%，挂 1 层破甲。LV3 破甲 2 层；LV5 扇面扩到 140°；LV7 只要 3 层破甲就能碎甲',
-    cast() { const L = dlv(), a = aim(); gSweep(hero.x, hero.y, a, (L >= 5 ? 70 : 50) * Math.PI / 180, 40, 150, z => 1.80 * ((z.pjT > 0 ? z.pj || 0 : 0) >= 2 ? 1.3 : 1), 100, { pj: L >= 3 ? 2 : 1, suiAt: L >= 7 ? 3 : 0 }); sfx(SW, hero.x); shake = Math.max(shake, .22); } });
+    desc: '原地站定重劈 100° 扇面，刀头带离身 40~150，伤害很高；对已有 2 层以上破甲的敌人再 +30%，挂 1 层破甲。LV3 破甲 2 层；LV5 扇面扩到 140°；LV7 只要 2 层破甲就能碎甲',
+    cast() { const L = dlv(), a = aim(); gSweep(hero.x, hero.y, a, (L >= 5 ? 70 : 50) * Math.PI / 180, 40, 150, z => 1.80 * ((z.pjT > 0 ? z.pj || 0 : 0) >= 2 ? 1.3 : 1), 100, { pj: L >= 3 ? 2 : 1, suiAt: L >= 7 ? 2 : 0 }); sfx(SW, hero.x); shake = Math.max(shake, .22); } });
   GD('zhanjiang', 2, 'chop', { name: '擒王斩', icon: '王', need: 110, wu: .65, rc: .35, range: 60, half: .8,
     desc: '锁定 220 内血最多的敌人（首领、精锐优先），一道刀光落在它身上，身边 50 内的人也挨一下。本体挂 1 层破甲。LV3 本体破甲 2 层；LV5 再追砍血第二多的敌人（0.6 倍）；LV7 本体伤害 +20%',
     cast() { const L = dlv(), rng = GS(220), pri = z => (tough(z) ? 1e6 : 0) + (z.hp || 0), cs = hittable().filter(z => dist(z, hero) < rng).sort((p, q) => pri(q) - pri(p));
@@ -1358,7 +1358,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       SCR.push({ t: 0, T, a, half, R, L, e, last: new Map(), cm: CM, ck: CK, rm: RM }); } });
   // ---- 天 ----
   FA('dongfeng', 4, 'up', { name: '借东风', icon: '东', need: 200, wu: .90, rc: .50, none: true,
-    desc: '全场大风 5 秒：画面里所有敌人被吹离你、挂迟缓，每 0.5 秒受伤一次；期间黄符的灼烧伤害 ×2。LV3 期间风撞伤害 ×2；LV5 风停时全场再吹飞一次（1.0 倍）；LV7 风停时回 6% 气血（春风化雨）',
+    desc: '全场大风 5 秒：画面里所有敌人被吹离你、挂迟缓，每 0.5 秒受伤一次。LV3 期间风撞伤害 ×2；LV5 风停时全场再吹飞一次（1.0 倍）；LV7 风停时回 6% 气血（春风化雨）',
     cast() { const L = dlv(), T = 5 + fDur(); S.dfT = T; shake = Math.max(shake, .25); sfx(SW, hero.x); floaters.push({ x: hero.x, y: hero.y - 80, t: 0, txt: '借东风', color: '#bff0ff' });
       DKO.push(dmk({ T: T + .02, tk: 0, fin: 0, tick(o) {
         if (o.t >= o.tk && o.t < T) { o.tk += .5; for (const z of near(hero.x, hero.y, 420)) { FH(z, .25, 0, { sl: 1 }); pushAway(z, hero.x, hero.y, FS(30), .45); fx.push({ k: 'cut', n: 'dg6', x: z.x, y: z.y - 16, a: Math.atan2((z.y - hero.y) * 2, z.x - hero.x) * .3, L: 14, t: 0, T: .3, col: '200,240,255' }); } }
@@ -2506,7 +2506,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     mugandao: { image: 'art/ui/bao/mugandao.webp', n: '木杆大刀', q: 0, w: 4, wd: 0, d: '关刀武艺起手、收势 ×0.9' },   // 11/16 用户定：关刀 5 件宝物
     chunqiu: { image: 'art/ui/bao/chunqiu.webp', n: '春秋大刀', q: 0, w: 4, wd: .12, d: '关刀武艺伤害 +12%' },
     meijian: { image: 'art/ui/bao/meijian.webp', n: '眉尖刀', q: 1, w: 4, wd: 0, d: '关刀贴身的刀杆部分也吃满伤害（原来只有一半）；关刀扇面 +10%' },
-    fengzui: { image: 'art/ui/bao/fengzui.webp', n: '凤嘴刀', q: 1, w: 4, wd: 0, d: '关刀挂的破甲最多 5 层；碎甲追加的伤害从 0.5 倍提高到 0.8 倍' },
+    fengzui: { image: 'art/ui/bao/fengzui.webp', n: '凤嘴刀', q: 1, w: 4, wd: 0, d: '碎甲追加的伤害从 0.5 倍提高到 0.8 倍，碎甲后敌人身上留 1 层破甲（更快打出下一次碎甲）' },
     qinglongdao: { image: 'art/ui/bao/qinglongdao.webp', n: '青龙偃月刀', q: 2, w: 4, wd: .3, d: '关刀武艺伤害 +30%；擒王斩、五关斩、青龙偃月打精锐和首领再 +25%；每次碎甲后 3 秒内，关刀起手 ×0.85', c: '关刀以外的武艺伤害 −30%' },
     jgdao: { n: '精钢刀', q: 0, w: 0, wd: .12, d: '刀的武艺伤害 +12%' },
     gudingdao: { n: '古锭刀', q: 1, w: 0, wd: .2, d: '刀的武艺伤害 +20%；破甲每层增伤从 10% 提高到 15%' },
