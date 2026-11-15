@@ -54,13 +54,18 @@
     document.body.appendChild(box);
     const bgs = box.querySelectorAll('.bg'), pt = box.querySelector('.pt'), nm = box.querySelector('.nm'), tx = box.querySelector('.tx');
     st = { i: -1, lines, done, typing: 0, full: '', bgi: 0, bg: '' };
+    for (const L of lines) { const u = L.who && POR[L.who]; if (u) { const im = new Image(); im.src = u; } if (L.bg) { const im = new Image(); im.src = L.bg; } }   // 一开始就把这段剧情要用的立绘、背景都预载
     const finish = () => { if (!st) return; clearInterval(st.typing); holdEnd(); const d = st.done; st = null; removeEventListener('keydown', kd, true); removeEventListener('keyup', ku, true); removeEventListener('pointerdown', pd, true); box.style.transition = 'opacity .3s'; box.style.opacity = '0'; const b = box; setTimeout(() => b.remove(), 320); box = null; if (d) d(); };
     const show = () => {
       st.i++; if (st.i >= st.lines.length) return finish();
       const L = st.lines[st.i];
       if (L.bg && L.bg !== st.bg) { st.bg = L.bg; const nb = bgs[st.bgi ^= 1], ob = bgs[st.bgi ^ 1]; nb.style.backgroundImage = 'url(' + L.bg + ')'; nb.classList.add('on'); ob.classList.remove('on'); }
       const src = L.who && POR[L.who];
-      if (src) { if (pt.getAttribute('src') !== src) { pt.classList.remove('on'); pt.src = src; } pt.classList.toggle('hd', !!HEAD[L.who]); requestAnimationFrame(() => pt.classList.add('on')); } else pt.classList.remove('on');
+      if (src) {   // 11/16 用户：人物和字对不上——新立绘没下载完时旧立绘会先亮出来；改成新图加载好才显示
+        pt.classList.toggle('hd', !!HEAD[L.who]);
+        if (pt.getAttribute('src') !== src) { pt.classList.remove('on'); pt.onload = () => { if (pt.getAttribute('src') === src) requestAnimationFrame(() => pt.classList.add('on')); }; pt.src = src; if (pt.complete && pt.naturalWidth) pt.onload(); }
+        else requestAnimationFrame(() => pt.classList.add('on'));
+      } else { pt.classList.remove('on'); pt.removeAttribute('src'); }
       nm.textContent = L.who ? (L.name || NAME[L.who] || '') : '';
       tx.className = 'tx' + (L.who ? '' : ' nar');
       st.full = L.t; let k = 0; clearInterval(st.typing);

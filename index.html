@@ -62,7 +62,7 @@ body.szz-pro #help{display:none}
 .x-back{min-height:34px!important}
 }
 #rot small{display:block;margin-top:10px;font-size:14px;font-weight:600;color:#c9b691;line-height:1.6}
-</style><link rel="preload" href="pack/fonts/result.woff2?v=fbf1c6d20a" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=fbf1c6d20a)format("woff2");font-display:swap}</style><style>@font-face{font-family:"WenKai";src:url(pack/fonts/kai.woff2?v=e32edf3924)format("woff2");font-display:swap}</style><link rel="preload" href="pack/fonts/pixel.woff2?v=c841c77cff" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"Pixel12";src:url(pack/fonts/pixel.woff2?v=c841c77cff)format("woff2");font-display:swap}@font-face{font-family:"Songti SC";src:url(pack/fonts/pixel.woff2?v=c841c77cff)format("woff2");font-display:swap}@font-face{font-family:"STSong";src:url(pack/fonts/pixel.woff2?v=c841c77cff)format("woff2");font-display:swap}@font-face{font-family:"Noto Serif SC";src:url(pack/fonts/pixel.woff2?v=c841c77cff)format("woff2");font-display:swap}@font-face{font-family:"SimSun";src:url(pack/fonts/pixel.woff2?v=c841c77cff)format("woff2");font-display:swap}@font-face{font-family:"PingFang SC";src:url(pack/fonts/pixel.woff2?v=c841c77cff)format("woff2");font-display:swap}@font-face{font-family:"Microsoft YaHei";src:url(pack/fonts/pixel.woff2?v=c841c77cff)format("woff2");font-display:swap}@font-face{font-family:"Noto Sans CJK SC";src:url(pack/fonts/pixel.woff2?v=c841c77cff)format("woff2");font-display:swap}@font-face{font-family:"STKaiti";src:url(pack/fonts/pixel.woff2?v=c841c77cff)format("woff2");font-display:swap}@font-face{font-family:"KaiTi";src:url(pack/fonts/pixel.woff2?v=c841c77cff)format("woff2");font-display:swap}*{font-synthesis:none}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
+</style><link rel="preload" href="pack/fonts/result.woff2?v=ee5bc07db8" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=ee5bc07db8)format("woff2");font-display:swap}</style><style>@font-face{font-family:"WenKai";src:url(pack/fonts/kai.woff2?v=f41930d8af)format("woff2");font-display:swap}</style><link rel="preload" href="pack/fonts/pixel.woff2?v=020b3365dd" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"Pixel12";src:url(pack/fonts/pixel.woff2?v=020b3365dd)format("woff2");font-display:swap}@font-face{font-family:"Songti SC";src:url(pack/fonts/pixel.woff2?v=020b3365dd)format("woff2");font-display:swap}@font-face{font-family:"STSong";src:url(pack/fonts/pixel.woff2?v=020b3365dd)format("woff2");font-display:swap}@font-face{font-family:"Noto Serif SC";src:url(pack/fonts/pixel.woff2?v=020b3365dd)format("woff2");font-display:swap}@font-face{font-family:"SimSun";src:url(pack/fonts/pixel.woff2?v=020b3365dd)format("woff2");font-display:swap}@font-face{font-family:"PingFang SC";src:url(pack/fonts/pixel.woff2?v=020b3365dd)format("woff2");font-display:swap}@font-face{font-family:"Microsoft YaHei";src:url(pack/fonts/pixel.woff2?v=020b3365dd)format("woff2");font-display:swap}@font-face{font-family:"Noto Sans CJK SC";src:url(pack/fonts/pixel.woff2?v=020b3365dd)format("woff2");font-display:swap}@font-face{font-family:"STKaiti";src:url(pack/fonts/pixel.woff2?v=020b3365dd)format("woff2");font-display:swap}@font-face{font-family:"KaiTi";src:url(pack/fonts/pixel.woff2?v=020b3365dd)format("woff2");font-display:swap}*{font-synthesis:none}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
 <style>button{letter-spacing:.04em!important}</style></head><body>
 <style>
 #bootSplash{position:fixed;inset:0;z-index:99999;background:radial-gradient(ellipse at 50% 45%,#f3e4cf 0%,#ecd9c0 55%,#d9c09f 100%);transition:opacity .45s ease-out}
@@ -119,7 +119,7 @@ if(location.protocol==='https:'&&!/[?&]debug(?:=|&|$)/.test(location.search)&&'s
 })();
 // 自动更新：打开游戏、或从后台切回来时，查一下线上有没有新版本；有就在标题/整备页自动刷新（战斗中不打扰）
 (function(){
-var BUILD='b24ac29389af',busy=false;
+var BUILD='54e1dae6cb3a',busy=false;
 if(location.protocol!=='https:'||/[?&]debug(?:=|&|$)/.test(location.search))return;
 function check(){
   if(busy)return;
@@ -5284,13 +5284,18 @@ function resultKey(e) {
     document.body.appendChild(box);
     const bgs = box.querySelectorAll('.bg'), pt = box.querySelector('.pt'), nm = box.querySelector('.nm'), tx = box.querySelector('.tx');
     st = { i: -1, lines, done, typing: 0, full: '', bgi: 0, bg: '' };
+    for (const L of lines) { const u = L.who && POR[L.who]; if (u) { const im = new Image(); im.src = u; } if (L.bg) { const im = new Image(); im.src = L.bg; } }   // 一开始就把这段剧情要用的立绘、背景都预载
     const finish = () => { if (!st) return; clearInterval(st.typing); holdEnd(); const d = st.done; st = null; removeEventListener('keydown', kd, true); removeEventListener('keyup', ku, true); removeEventListener('pointerdown', pd, true); box.style.transition = 'opacity .3s'; box.style.opacity = '0'; const b = box; setTimeout(() => b.remove(), 320); box = null; if (d) d(); };
     const show = () => {
       st.i++; if (st.i >= st.lines.length) return finish();
       const L = st.lines[st.i];
       if (L.bg && L.bg !== st.bg) { st.bg = L.bg; const nb = bgs[st.bgi ^= 1], ob = bgs[st.bgi ^ 1]; nb.style.backgroundImage = 'url(' + L.bg + ')'; nb.classList.add('on'); ob.classList.remove('on'); }
       const src = L.who && POR[L.who];
-      if (src) { if (pt.getAttribute('src') !== src) { pt.classList.remove('on'); pt.src = src; } pt.classList.toggle('hd', !!HEAD[L.who]); requestAnimationFrame(() => pt.classList.add('on')); } else pt.classList.remove('on');
+      if (src) {   // 11/16 用户：人物和字对不上——新立绘没下载完时旧立绘会先亮出来；改成新图加载好才显示
+        pt.classList.toggle('hd', !!HEAD[L.who]);
+        if (pt.getAttribute('src') !== src) { pt.classList.remove('on'); pt.onload = () => { if (pt.getAttribute('src') === src) requestAnimationFrame(() => pt.classList.add('on')); }; pt.src = src; if (pt.complete && pt.naturalWidth) pt.onload(); }
+        else requestAnimationFrame(() => pt.classList.add('on'));
+      } else { pt.classList.remove('on'); pt.removeAttribute('src'); }
       nm.textContent = L.who ? (L.name || NAME[L.who] || '') : '';
       tx.className = 'tx' + (L.who ? '' : ' nar');
       st.full = L.t; let k = 0; clearInterval(st.typing);
