@@ -2841,7 +2841,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
         const t = nearest(k.stone || k.hammer || k.bow ? k.need * DK * rsOf(key) : 200); if (t) hero.f = Math.sign(t.x - hero.x) || hero.f;
         CM = skillMul(key); RM = k.dk ? DLV.sz[lvOf(key) - 1] * rsOf(key) : lvOf(key) >= 5 ? 1.1 : 1; const ch = S.wind.ch; S.chain = ch; S.lastCat = wepOf(key); S.lastI = i;
                 S.lhjOn = S.lhjReady; S.lhjReady = false; if (S.lhjOn) S.noHitT = 0;
-        CK = key; const channel = k.cast(); S.lhjOn = false;
+        CK = key; const channel = k.cast(); if (k.dk && k.lv10 && lvOf(key) >= 10) { try { k.lv10(); } catch (e) { console.error(e); } } S.lhjOn = false;   // 11/16 LV10 突破
         const l0 = lvOf(key); S.mast[key] = (S.mast[key] || 0) + AFX.xp(); if (lvOf(key) > l0) floaters.push({ x: hero.x, y: hero.y - 76, t: 0, txt: k.name + ' LV' + lvOf(key), color: '#ffd86e' });
         if (!k.dk && lvOf(key) >= 10) later(.2, () => { CM *= .6; k.cast(); });   // LV10 质变：多出一击
         CM = 1; RM = 1; CK = '';
@@ -4289,6 +4289,158 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     gf: S.gf.map(id => id && GF[id] ? { name: GF[id].n, desc: GF[id].d, lv: gfLv(id) } : null), qg: S.qg && GF[S.qg] ? { name: GF[S.qg].n, desc: GF[S.qg].d } : null,
     dmg: RT.dmg });
   // 11/13 武学试炼（开发者面板）：看招用
+  // ===================== 11/16 用户定：LV10 突破（照群侠传，每招一个专属质变；放完本招后紧接着打出） =====================
+  const L10T = (t, fn) => DKO.push(dmk({ T: t + .02, d: 0, tick(o) { if (!o.d && o.t >= t) { o.d = 1; fn(); } } }));   // 带着本招倍率延时
+  const L10P = (n, r) => { const cs = hittable().filter(z => dist(z, hero) < r).sort((a, b) => dist(a, hero) - dist(b, hero)); const out = []; for (let i = 0; i < n; i++) { const z = cs[i % Math.max(1, cs.length)]; if (z) out.push({ x: z.x, y: z.y, z }); else { const a = Math.random() * 6.28; out.push({ x: hero.x + Math.cos(a) * r * .5, y: clampY(hero.y + Math.sin(a) * r * .25) }); } } return out; };
+  const L10ring = (x, y, R0, R1, H, m, o = {}) => { gBand(x, y, 0, Math.PI, R0, R1, .3); for (const z of hittable()) { const d = Math.hypot(z.x - x, (z.y - y) * 2); if (d >= R0 - 6 && d <= R1 + 8) H(z, m, o); } };
+  const L10fan = (x, y, a, half, R0, R1, H, m, o = {}) => { gBand(x, y, a, half, R0, R1, .3); for (const z of hittable().filter(z => inBand(x, y, z, a, half, R0, R1))) H(z, m, o); };
+  const L10line = (x, y, a, L, w, H, m, o = {}) => { fx.push({ k: 'gd', m: 'rect', x, y, a, L, w, grow: .12, t: 0, T: .3, col: gCol() }); const hs = new Set(); dRect(x, y, a, L, w, z => { if (!hs.has(z)) { hs.add(z); H(z, m, o); } }); };
+  const L10boom = (x, y, r, H, m, o = {}, bolt) => { fx.push({ k: bolt ? 'bolt' : 'burst', x, y, r, t: 0, T: .35, col: gCol() }); if (bolt) fx.push({ k: 'burst', x, y, r, t: 0, T: .3, col: gCol() }); for (const z of near(x, y, r)) H(z, m, o); };
+  const L10zone = (x, y, r, T, H, m, o = {}) => { gBand(x, y, 0, Math.PI, 0, r, T, 1); DKO.push(dmk({ T, nx: .5, tick(q) { if (q.t >= q.nx && q.t < T) { q.nx += .5; for (const z of near(x, y, r)) H(z, m, o); } } })); };
+  // 各兵器的命中
+  const Hd = (z, m, o) => DH(z, m, 40, o), Hg = (z, m, o) => GH(z, m, 60, o), Hj = (z, m, o) => JH(z, m, 15, o), Hqn = (z, m, o) => QH(z, m, 15, o), Hfu = (z, m, o) => FUH(z, m, 10, o);
+  const Hc = (z, m, o) => { DH(z, m, 30, o); if (o && o.st) qStun(z, o.st); };
+  const Hs = (z, m, o) => { DH(z, m, 10, o); if (!z.dead) addSL(z, (o && o.slx) || 0); };
+  const Hb = (z, m, o) => { DH(z, m, 10, o); if (!z.dead && o && o.burn) bowBurn(z, .10, o.burn); if (!z.dead && o && o.sl) addSL(z, 0); };
+  const Hf = (z, m, o) => { FH(z, m, 0, o); if (!z.dead && o && o.push) pushAway(z, o.px != null ? o.px : hero.x, o.py != null ? o.py : hero.y, FS(o.push), .25, { force: !!o.force }); };
+  const S10 = (k, n10, d, f) => { const s = SK[k]; if (!s) return; let base = s.name; s.n10 = n10; s.lv10 = f; s.desc = (s.desc || '') + `；LV10 突破「${n10}」：${d}`;
+    Object.defineProperty(s, 'name', { get: () => lvOf(k) >= 10 ? n10 : base, set: v => { base = v; }, configurable: true, enumerable: true }); };
+  const A10 = () => aim(), HX = () => hero.x, HY = () => hero.y;
+  // ---------- 刀 ----------
+  S10('hengsao', '截江断流', '扫完再绕身横扫一整圈（0.6 倍，破甲），地上刀痕 1 秒后再割一次（0.3 倍）', () => L10T(.3, () => { L10ring(HX(), HY(), 0, FS(110), Hd, .6, { pj: 1 }); const x = HX(), y = HY(); L10T(1, () => L10ring(x, y, 0, FS(110), Hd, .3, { pj: 1 })); }));
+  S10('tuodao', '秋风扫叶', '刀光化作落叶，追着附近 5 个敌人各补一刀（0.4 倍，流血）', () => L10T(.45, () => L10P(5, FS(220)).forEach(p => p.z && (fx.push({ k: 'cut', n: 'dg6', x: p.x, y: p.y - 18, a: Math.random() * 3, L: 18, t: 0, T: .25, col: gCol() }), Hd(p.z, .4, { bl: 1 })))));
+  S10('tiaozhan', '挑袍连环', '落地前再挑一次，第二次落地震一圈（0.6 倍）', () => L10T(.45, () => { dSweep(HX(), HY(), A10(), .7, 95, .6, 20, { up: 1, fkV: .3 }); L10T(.6, () => L10ring(HX(), HY(), 0, FS(80), Hd, .6, {})); }));
+  S10('lianzhan', '叠浪千重', '第三刀之后再接一刀 360° 整圈（0.9 倍，流血 2 层）', () => L10T(.5, () => L10ring(HX(), HY(), 0, FS(130), Hd, .9, { bl: 2 })));
+  S10('daobo', '双月交辉', '上下两道月牙飞到尽头交叉，在交叉点炸开（半径 50，0.8 倍）', () => { const a = A10(), x = HX(), y = HY(); L10line(x, y, a - .12, FS(200), FS(16), Hd, .5, { bl: 1 }); L10line(x, y, a + .12, FS(200), FS(16), Hd, .5, { bl: 1 }); L10T(.3, () => L10boom(x + Math.cos(a) * FS(210), clampY(y + Math.sin(a) * FS(105)), FS(50), Hd, .8, {})); });
+  S10('huima', '八面回锋', '绕身依次斩出 8 刀（每刀 45°，0.5 倍，击退）', () => { const a = A10(); for (let i = 0; i < 8; i++) L10T(.35 + i * .06, () => L10fan(HX(), HY(), a + i * Math.PI / 4, Math.PI / 8, 0, FS(110), Hd, .5, { pj: 1 })); });
+  S10('cuofeng', '万字错锋', '在最近的敌人身上斩出米字交叉，并留下 1 秒刀阵持续切割（0.25 倍 ×3）', () => L10T(.3, () => { const t = nearest(FS(200)); if (!t) return; const x = t.x, y = t.y; for (let i = 0; i < 4; i++) fx.push({ k: 'cut', n: 'dh2', x, y: y - 18, a: i * Math.PI / 4, L: 30, t: 0, T: .3, col: gCol() }); L10boom(x, y, FS(60), Hd, .8, { bl: 1 }); L10zone(x, y, FS(50), 1.1, Hd, .25, {}); }));
+  S10('liedihuan', '地裂天惊', '环裂到最外圈后再从外往内收回一次（0.8 倍）', () => L10T(.9, () => { const x = HX(), y = HY(); for (let i = 0; i < 4; i++) L10T(i * .12, () => L10ring(x, y, FS(140 - i * 30) - 10, FS(140 - i * 30) + 10, Hd, .8 / 2, { pj: 1 })); }));
+  S10('feilunren', '三轮绕月', '再放出三层刀轮（大中小）绕身 1.2 秒（0.35 倍，同一人 0.3 秒一次）', () => { const e = { k: 'gd', m: 'blades', x: HX(), y: HY(), pts: [], t: 0, T: 1.2, col: gCol(), hold: 1 }, last = new Map(); fx.push(e);
+    DKO.push(dmk({ T: 1.2, tick(o) { e.x = HX(); e.y = HY(); e.pts = [50, 80, 110].map((r, i) => { const b = o.t * (6 - i) * (i % 2 ? -1 : 1); return { x: HX() + Math.cos(b) * FS(r), y: HY() + Math.sin(b) * FS(r) * .5, r: b }; });
+      for (const p of e.pts) for (const z of near(p.x, p.y, FS(20))) if (DKT - (last.get(z) || -9) >= .3) { last.set(z, DKT); Hd(z, .35, { bl: 1 }); } } })); });
+  S10('xuehe', '血流成河', '血河变成十字，前后左右各一条 2 秒；结束时整片引爆流血（每层 0.2 倍）', () => { const x = HX(), y = HY(), a = A10(); for (let i = 0; i < 4; i++) { const b = a + i * Math.PI / 2; fx.push({ k: 'gd', m: 'rect', x, y, a: b, L: FS(160), w: FS(20), t: 0, T: 2, col: '200,30,40', hold: 1 }); }
+    DKO.push(dmk({ T: 2.05, nx: .5, fin: 0, tick(o) { const hit = (m, f) => { const hs = new Set(); for (let i = 0; i < 4; i++) dRect(x, y, a + i * Math.PI / 2, FS(160), FS(20), z => { if (!hs.has(z)) { hs.add(z); f(z); } }); };
+      if (o.t >= o.nx && o.t < 2) { o.nx += .5; hit(.25, z => Hd(z, .25, { bl: 1 })); } if (!o.fin && o.t >= 2) { o.fin = 1; hit(0, z => { if (z.blT > 0 && z.bl > 0) DH(z, .2 * z.bl, 0); }); } } })); });
+  S10('tianbeng', '天崩地陷', '落点再陷成 3 个坑 2 秒，把人往坑心拉并持续伤害（0.3 倍）', () => L10T(1.3, () => L10P(3, FS(240)).forEach(p => { const x = p.x, y = p.y, r = FS(60); gBand(x, y, 0, Math.PI, 0, r, 2, 1);
+    DKO.push(dmk({ T: 2, nx: .5, tick(o, dt) { for (const z of near(x, y, r)) if (!tough(z)) { z.x += (x - z.x) * Math.min(1, 2 * dt); z.y = clampY(z.y + (y - z.y) * Math.min(1, 2 * dt)); } if (o.t >= o.nx) { o.nx += .5; for (const z of near(x, y, r)) Hd(z, .3, { pj: 1 }); } } })); })));
+  S10('wanren', '万流归海', '巨斩后飞刃从目标身上向四周再爆射 20 柄（0.4 倍），每柄引爆它打中的人身上的流血', () => L10T(1.0, () => { const t = nearest(FS(260)); const x = t ? t.x : HX(), y = t ? t.y : HY(); for (let i = 0; i < 20; i++) L10line(x, y, i * Math.PI / 10, FS(170), FS(8), (z, m) => { Hd(z, m, {}); if (!z.dead && z.blT > 0 && z.bl > 0) { DH(z, .25 * z.bl, 0); z.bl = 0; z.blT = 0; } }, .4); }));
+  // ---------- 枪 ----------
+  S10('qiang', '穿云裂石', '再并排刺出三道白虹（0.6 倍，流血）', () => L10T(.15, () => { for (const s of [-.2, 0, .2]) L10line(HX(), HY(), A10() + s, FS(320), FS(16), Hd, .6, { bl: 1 }); }));
+  S10('lianci', '七星连珠', '再连点最近的 7 个敌人各一枪（0.4 倍，流血）', () => L10T(.3, () => L10P(7, FS(280)).forEach((p, i) => p.z && L10T(i * .05, () => { fx.push({ k: 'cut', n: 'dg6', x: p.z.x, y: p.z.y - 18, a: 0, L: 16, t: 0, T: .2, col: gCol() }); Hd(p.z, .4, { bl: 1 }); }))));
+  S10('lansao', '拦江断水', '再横扫一整圈，强击退（0.8 倍，流血）', () => L10T(.3, () => L10ring(HX(), HY(), 0, FS(140), (z, m, o) => DH(z, m, 140, o), .8, { bl: 1 })));
+  S10('tiaoqiang', '挑月摘星', '在更远处（离身 170~300）再撩起一排枪尖，把人挑飞', () => L10T(.35, () => { const a = A10(); L10line(HX() + Math.cos(a) * FS(170), HY() + Math.sin(a) * FS(85), a, FS(130), FS(120), Hd, .7, { up: 1, fkV: .3 }); }));
+  S10('lihua', '梨花暴雨', '再向四面八方乱扎 16 枪（0.25 倍，流血）', () => L10T(.3, () => { for (let i = 0; i < 16; i++) L10T(i * .03, () => L10line(HX(), HY(), Math.random() * Math.PI * 2, FS(110), FS(8), Hd, .25, { bl: 1 })); }));
+  S10('chong', '破阵穿营', '冲到底后炸开一圈（半径 70，0.8 倍）并沿来路震一道冲击（0.6 倍）', () => { const x = HX(), y = HY(), a = A10(); L10T(.45, () => { L10boom(HX(), HY(), FS(70), Hd, .8, { bl: 1 }); L10line(HX(), HY(), Math.atan2((y - HY()) * 2, x - HX()), Math.hypot(x - HX(), (y - HY()) * 2) + 4, FS(20), Hd, .6, {}); }); void a; });
+  S10('huimaq', '回马三叠', '回身后再连刺两枪（长 260，0.7 倍，流血 2 层）', () => { for (let i = 0; i < 2; i++) L10T(.4 + i * .12, () => L10line(HX(), HY(), A10(), FS(260), FS(14), Hd, .7, { bl: 2 })); });
+  S10('touqiang', '七彩贯虹', '掷出的枪在尽头裂成 6 支小枪向四周飞出（0.5 倍）', () => L10T(.5, () => { const t = nearest(FS(400)); const a = A10(), x = t ? t.x : HX() + Math.cos(a) * FS(300), y = t ? t.y : HY(); for (let i = 0; i < 6; i++) L10line(x, y, i * Math.PI / 3, FS(120), FS(10), Hd, .5, { bl: 1 }); }));
+  S10('qianglin', '林海涛生', '枪林再向左右两侧各涌出一排（0.6 倍，挑飞）', () => L10T(.5, () => { const a = A10(); for (const s of [-1, 1]) L10line(HX(), HY(), a + s * Math.PI / 2, FS(170), FS(60), Hd, .6, { up: 1, fkV: .25 }); }));
+  S10('qijin', '游龙出海', '最后一段落点炸开（半径 90，1.0 倍，挑飞）', () => L10T(.7, () => L10boom(HX(), HY(), FS(90), Hd, 1.0, { up: 1, fkV: .3, bl: 1 })));
+  S10('bainiao', '百鸟归巢', '百鸟从四周飞回身边，收拢的环一路扫过（0.5 倍，流血）', () => L10T(.8, () => { for (let i = 0; i < 5; i++) L10T(i * .08, () => L10ring(HX(), HY(), FS(200 - i * 40) - 12, FS(200 - i * 40) + 12, Hd, .5 / 2, { bl: 1 })); }));
+  S10('longyin', '双龙吟', '身后再轰出第二条龙（0.8 倍，挑飞，流血 3 层）', () => L10T(.4, () => L10line(HX(), HY(), A10() + Math.PI, FS(400), FS(70), Hd, .8, { up: 1, fkV: .3, bl: 3 })));
+  // ---------- 关刀 ----------
+  S10('hengti', '横云出岫', '再绕身横扫一整圈（刀头带 40~150，0.8 倍）', () => L10T(.3, () => L10ring(HX(), HY(), FS(40), FS(150), Hg, .8, { pj: 1 })));
+  S10('pidao', '开山断岳', '再劈出左右两道斜刀痕（0.9 倍）', () => L10T(.35, () => { for (const s of [-.4, .4]) L10line(HX(), HY(), A10() + s, FS(200), FS(20), Hg, .9, { pj: 1 }); }));
+  S10('xiongshou', '拖刀斩将', '撩完再向前重劈一刀（长 200、宽 60，1.2 倍）', () => L10T(.45, () => L10line(HX(), HY(), A10(), FS(200), FS(30), Hg, 1.2, { pj: 1 })));
+  S10('xuanfengd', '车轮滚滚', '抡完放出一个刀轮向前滚 220（0.8 倍）', () => L10T(.6, () => { const a = A10(), x0 = HX(), y0 = HY(), hs = new Set(), e = fSwirl(x0, y0, FS(45), .7, 1); DKO.push(dmk({ T: .7, tick(o) { const p = o.t / .7, x = x0 + Math.cos(a) * FS(220) * p, y = y0 + Math.sin(a) * FS(110) * p; e.x = x; e.y = y; for (const z of near(x, y, FS(45))) if (!hs.has(z)) { hs.add(z); Hg(z, .8, { pj: 1 }); } } })); }));
+  S10('daoqi', '破浪千重', '再连推两道刀浪（0.6 倍）', () => { for (let i = 1; i <= 2; i++) L10T(i * .3, () => L10fan(HX(), HY(), A10(), Math.PI / 4, FS(60), FS(260), Hg, .6, { pj: 1 })); });
+  S10('handi', '立马横刀', '劈完再横刀扫一整圈（刀头带 40~150，1.0 倍，破甲 2 层）', () => L10T(.35, () => L10ring(HX(), HY(), FS(40), FS(150), Hg, 1.0, { pj: 2 })));
+  S10('zhanjiang', '擒王夺帅', '再劈血最多的另外 3 个敌人（0.8 倍）', () => L10T(.3, () => hittable().filter(z => dist(z, hero) < FS(260)).sort((a, b) => (b.hp || 0) - (a.hp || 0)).slice(1, 4).forEach(z => { fx.push({ k: 'cut', n: 'dh2', x: z.x, y: z.y - 20, a: .8, L: 26, t: 0, T: .3, col: gCol() }); Hg(z, .8, { pj: 1, el: 1 }); })));
+  S10('guowu', '过关斩将', '再连闯 3 关（0.9 倍），最后在原地斩出十字（1.0 倍）', () => L10T(.7, () => { L10P(3, FS(260)).forEach((p, i) => p.z && L10T(i * .1, () => L10fan(p.x, p.y, Math.random() * 6, Math.PI / 3, 0, FS(70), Hg, .9, { pj: 1, el: 1 }))); L10T(.4, () => { for (const b of [0, Math.PI / 2]) { L10line(HX(), HY(), b, FS(120), FS(14), Hg, .5, {}); L10line(HX(), HY(), b + Math.PI, FS(120), FS(14), Hg, .5, {}); } }); }));
+  S10('yanyue', '四月同辉', '前后左右各留一道月牙刀痕 1.5 秒（每 0.5 秒 0.25 倍）', () => { const x = HX(), y = HY(), a = A10(); for (let i = 0; i < 4; i++) { const b = a + i * Math.PI / 2; gBand(x, y, b, Math.PI / 4, FS(170), FS(230), 1.5, 1); } DKO.push(dmk({ T: 1.5, nx: .5, tick(o) { if (o.t >= o.nx) { o.nx += .5; for (let i = 0; i < 4; i++) for (const z of hittable().filter(z => inBand(x, y, z, a + i * Math.PI / 2, Math.PI / 4, FS(170), FS(230)))) Hg(z, .25, { pj: 1 }); } } })); });
+  S10('tuodaoji', '旋刃风暴', '刀阵结束后扩成大圈再转 2 秒（半径 180，0.45 倍）', () => L10T(3.1, () => { const e = { k: 'gd', m: 'blades', x: HX(), y: HY(), pts: [], t: 0, T: 2, col: gCol(), hold: 1 }, last = new Map(); fx.push(e); DKO.push(dmk({ T: 2, tick(o) { e.x = HX(); e.y = HY(); e.pts = [0, 1, 2, 3].map(i => { const b = o.t * 2.6 + i * Math.PI / 2; return { x: HX() + Math.cos(b) * FS(180), y: HY() + Math.sin(b) * FS(90), r: b }; }); for (const p of e.pts) for (const z of near(p.x, p.y, FS(28))) if (DKT - (last.get(z) || -9) >= .5) { last.set(z, DKT); Hg(z, .45, { pj: 1 }); } } })); }));
+  S10('shuiyan', '洪涛倒卷', '浪碎后从尽头倒卷回来一道浪（1.2 倍）', () => L10T(1.1, () => { const a = A10() + Math.PI, x = HX() - Math.cos(a) * FS(260), y = clampY(HY() - Math.sin(a) * FS(130)); L10line(x, y, a, FS(260), FS(140), Hg, 1.2, { pj: 1 }); }));
+  S10('qinglong', '青龙出水', '青龙炸开后再腾起，扎向第二处敌群（2.0 倍，破甲 3 层）', () => L10T(1.9, () => { const cs = hittable().filter(z => dist(z, hero) < FS(320)); if (!cs.length) return; const t = cs[(Math.random() * cs.length) | 0]; L10boom(t.x, t.y, FS(100), Hg, 2.0, { pj: 3, el: 1 }); shake = Math.max(shake, .3); }));
+  // ---------- 锤（普通兵吃满眩晕，精锐减半，首领免疫） ----------
+  S10('zhidao', '磐石不移', '落锤处 0.4 秒后再震一次（0.6 倍，眩晕 0.3 秒）', () => { const a = A10(), x = HX() + Math.cos(a) * FS(60), y = clampY(HY() + Math.sin(a) * FS(30)); L10T(.4, () => L10boom(x, y, FS(60), Hc, .6, { st: .3 })); });
+  S10('lunchui', '松涛阵阵', '再抡一整圈（0.7 倍）', () => L10T(.3, () => L10ring(HX(), HY(), 0, FS(110), Hc, .7, {})));
+  S10('zhendi', '伏雷惊蛰', '身边 4 处同时炸起地雷（0.5 倍，眩晕 0.3 秒）', () => L10T(.3, () => { for (let i = 0; i < 4; i++) { const b = i * Math.PI / 2 + .78; L10boom(HX() + Math.cos(b) * FS(80), clampY(HY() + Math.sin(b) * FS(40)), FS(35), Hc, .5, { st: .3 }, 1); } }));
+  S10('kaishan', '断碑裂石', '砸完向前裂出一道地缝（长 200，0.8 倍，眩晕 0.3 秒）', () => L10T(.4, () => L10line(HX(), HY(), A10(), FS(200), FS(20), Hc, .8, { st: .3 })));
+  S10('tiaotian', '叠浪三重', '在更远处（200）再砸第三下（0.9 倍，眩晕 0.4 秒）', () => L10T(.6, () => { const a = A10(); L10boom(HX() + Math.cos(a) * FS(200), clampY(HY() + Math.sin(a) * FS(100)), FS(60), Hc, .9, { st: .4 }); }));
+  S10('dizhen', '裂堤决口', '再放出呈扇形的 3 道震波（0.6 倍）', () => L10T(.4, () => { for (const s of [-.4, 0, .4]) L10line(HX(), HY(), A10() + s, FS(240), FS(16), Hc, .6, { st: .2 }); }));
+  S10('xuanchui', '回岚四起', '再向四个方向各震出一道冲击（0.6 倍）', () => L10T(.45, () => { for (let i = 0; i < 4; i++) L10line(HX(), HY(), i * Math.PI / 2 + .78, FS(160), FS(18), Hc, .6, { st: .2 }); }));
+  S10('zhichui', '飞崖坠石', '落地后周围砸下 5 块落石（0.5 倍，眩晕 0.3 秒）', () => L10T(.8, () => { for (let i = 0; i < 5; i++) { const b = Math.random() * 6.28, r = FS(40 + Math.random() * 80); L10T(i * .08, () => L10boom(HX() + Math.cos(b) * r, clampY(HY() + Math.sin(b) * r * .5), FS(30), Hc, .5, { st: .3 })); } }));
+  S10('wanjun', '回潮倒卷', '震环扩到最外后再收回一次（0.6 倍）', () => L10T(1.0, () => { const x = HX(), y = HY(); for (let i = 0; i < 4; i++) L10T(i * .12, () => L10ring(x, y, FS(170 - i * 35) - 10, FS(170 - i * 35) + 10, Hc, .3, { st: .1 })); }));
+  S10('leiting', '追霆万里', '余震化作雷霆，在 5 个敌人之间连跳（0.6 倍）', () => L10T(.6, () => { let prev = hero; L10P(5, FS(260)).forEach((p, i) => p.z && L10T(i * .08, () => { fx.push({ k: 'line', x: prev.x, y: prev.y, a: Math.atan2((p.z.y - prev.y) * 2, p.z.x - prev.x), L: Math.hypot(p.z.x - prev.x, (p.z.y - prev.y) * 2), w: 3, t: 0, T: .2, col: '230,220,255' }); fx.push({ k: 'bolt', x: p.z.x, y: p.z.y, t: 0, T: .25 }); Hc(p.z, .6, { st: .2 }); prev = p.z; })); }));
+  S10('pocheng', '五岳镇顶', '再从天压下 5 座山影，砸在 5 处敌群（1.2 倍，眩晕 0.6 秒）', () => L10T(1.0, () => L10P(5, FS(280)).forEach((p, i) => L10T(i * .12, () => { shake = Math.max(shake, .25); L10boom(p.x, p.y, FS(70), Hc, 1.2, { st: .6 }); }))));
+  S10('bengshan', '八荒六合', '再向 16 个方向放射雷动（0.8 倍，眩晕 0.3 秒）', () => L10T(.7, () => { for (let i = 0; i < 16; i++) L10line(HX(), HY(), i * Math.PI / 8, FS(220), FS(10), Hc, .8, { st: .3 }); shake = Math.max(shake, .3); }));
+  // ---------- 石子（命中挂迟缓） ----------
+  S10('feishi', '惊鸿掠影', '石子再在 3 个敌人之间弹跳（0.5 倍）', () => L10T(.25, () => L10P(3, FS(220)).forEach((p, i) => p.z && L10T(i * .08, () => { fx.push({ k: 'burst', x: p.z.x, y: p.z.y, r: 10, t: 0, T: .2, col: gCol() }); Hs(p.z, .5, {}); }))));
+  S10('sashi', '天女散花', '再向四周撒出 12 颗石子（0.3 倍）', () => L10T(.25, () => { for (let i = 0; i < 12; i++) L10line(HX(), HY(), i * Math.PI / 6, FS(150), FS(8), Hs, .3); }));
+  S10('tiaoshi', '浮萍万点', '再在附近随机敌人身上连弹 6 次（0.4 倍）', () => L10T(.3, () => { for (let i = 0; i < 6; i++) L10T(i * .07, () => { const p = L10P(6, FS(200))[i]; if (p && p.z) Hs(p.z, .4, {}); }); }));
+  S10('zashi', '绊马连环', '身周再铺一圈碎石 2 秒（每 0.5 秒 0.2 倍）', () => L10T(.2, () => L10zone(HX(), HY(), FS(110), 2, Hs, .2, {})));
+  S10('xuanshi', '燕返双回', '左右再各飞一颗回燕石（0.5 倍）', () => { for (const s of [-.5, .5]) L10line(HX(), HY(), A10() + s, FS(220), FS(12), Hs, .5); });
+  S10('shici', '连珠十发', '再对最近的敌人快投 10 颗（0.25 倍）', () => L10T(.4, () => { for (let i = 0; i < 10; i++) L10T(i * .05, () => { const t = nearest(FS(260)); if (t) L10line(HX(), HY(), Math.atan2((t.y - HY()) * 2, t.x - HX()), dist(t, hero) + 10, FS(6), Hs, .25); }); }));
+  S10('paoshi', '锁足千里', '200 内所有敌人迟缓并受一下（0.3 倍）', () => L10T(.3, () => L10ring(HX(), HY(), 0, FS(200), Hs, .3, { slx: 1 })));
+  S10('gunshi', '追星赶月', '再分出 6 颗碎石追最近的敌人（0.4 倍）', () => L10T(.4, () => L10P(6, FS(260)).forEach(p => p.z && L10line(HX(), HY(), Math.atan2((p.z.y - HY()) * 2, p.z.x - HX()), dist(p.z, hero) + 10, FS(8), Hs, .4))));
+  S10('luanshi', '落石成林', '再沿横向走廊落一排石雨（0.5 倍）', () => L10T(.8, () => { const a = A10() + Math.PI / 2; for (let i = -4; i <= 4; i++) L10T((i + 4) * .05, () => L10boom(HX() + Math.cos(a) * FS(i * 30), clampY(HY() + Math.sin(a) * FS(i * 15)), FS(25), Hs, .5, {})); }));
+  S10('raoshen', '流萤满天', '再放 12 颗萤石向四周飞出（0.4 倍）', () => L10T(1.0, () => { for (let i = 0; i < 12; i++) L10line(HX(), HY(), i * Math.PI / 6, FS(180), FS(10), Hs, .4); }));
+  S10('feihuang', '蝗灾蔽日', '再连撒 3 波，每波 14 颗（0.3 倍）', () => { for (let w = 1; w <= 3; w++) L10T(w * .3, () => { for (let i = 0; i < 14; i++) L10line(HX(), HY(), i * Math.PI / 7 + w * .2, FS(180), FS(8), Hs, .3); }); });
+  S10('luoshi', '星落如雨', '再落下 5 颗小陨石砸向敌人（0.8 倍）', () => L10T(1.0, () => L10P(5, FS(280)).forEach((p, i) => L10T(i * .1, () => L10boom(p.x, p.y, FS(40), Hs, .8, {})))));
+  // ---------- 弓 ----------
+  S10('qishe', '掠风三矢', '左右再各射一箭（0.6 倍）', () => { for (const s of [-.15, .15]) L10line(HX(), HY(), A10() + s, FS(380), FS(8), Hb, .6); });
+  S10('lianzhu', '百步穿杨', '再射一支贯穿整条直线的长箭（长 420，0.8 倍）', () => L10T(.15, () => L10line(HX(), HY(), A10(), FS(420), FS(10), Hb, .8)));
+  S10('luoyue', '平沙落雁', '再从天落 4 支箭到附近敌人身上（0.6 倍）', () => L10T(.4, () => L10P(4, FS(300)).forEach((p, i) => L10T(i * .08, () => L10boom(p.x, p.y, FS(30), Hb, .6, {}, 1)))));
+  S10('zhuihun', '满月流星', '重箭到尽头炸开（半径 50，0.8 倍）', () => L10T(.3, () => { const t = nearest(FS(400)); const a = A10(), x = t ? t.x : HX() + Math.cos(a) * FS(300), y = t ? t.y : HY(); L10boom(x, y, FS(50), Hb, .8, {}); }));
+  S10('liannu', '叠影千重', '再连射 4 箭（0.4 倍）', () => { for (let i = 0; i < 4; i++) L10T(.25 + i * .08, () => L10line(HX(), HY(), A10() + (i - 1.5) * .06, FS(360), FS(8), Hb, .4)); });
+  S10('xuanshe', '寒芒冰封', '箭落处结出一圈寒霜（半径 60，0.4 倍，迟缓）', () => L10T(.3, () => { const t = nearest(FS(300)); if (t) L10boom(t.x, t.y, FS(60), Hb, .4, { sl: 1 }); }));
+  S10('jianyu', '疏雨连天', '再多落 8 处箭雨（0.4 倍，迟缓）', () => L10T(.6, () => L10P(8, FS(300)).forEach((p, i) => L10T(i * .06, () => L10boom(p.x, p.y, FS(28), Hb, .4, { sl: 1 }, 1)))));
+  S10('dianguang', '穿云破日', '再射出呈扇形的 3 道穿云重箭（0.7 倍）', () => L10T(.25, () => { for (const s of [-.25, 0, .25]) L10line(HX(), HY(), A10() + s, FS(420), FS(12), Hb, .7); }));
+  S10('huoshi', '燎原烈火', '命中处烧成一片火地 2 秒（每 0.5 秒 0.15 倍，灼烧）', () => L10T(.35, () => { const t = nearest(FS(380)); if (t) L10zone(t.x, t.y, FS(70), 2, Hb, .15, { burn: 1 }); }));
+  S10('luori', '坠星如雨', '再从天坠下 4 支重箭（0.8 倍）', () => L10T(.6, () => L10P(4, FS(320)).forEach((p, i) => L10T(i * .1, () => L10boom(p.x, p.y, FS(45), Hb, .8, {}, 1)))));
+  S10('guanri', '贯日长虹', '长箭的轨迹留下一道光痕 1 秒（每 0.25 秒 0.3 倍）', () => { const x = HX(), y = HY(), a = A10(); fx.push({ k: 'gd', m: 'rect', x, y, a, L: FS(480), w: FS(24), t: 0, T: 1.2, col: gCol(), hold: 1 }); DKO.push(dmk({ T: 1.2, nx: .25, tick(o) { if (o.t >= o.nx) { o.nx += .25; const hs = new Set(); dRect(x, y, a, FS(480), FS(24), z => { if (!hs.has(z)) { hs.add(z); Hb(z, .3, {}); } }); } } })); });
+  S10('wanjian', '万箭归心', '三波之后，第四波箭雨落在敌人最密的地方（半径 90，1.5 倍）', () => L10T(1.8, () => { const p = fuDense(300); L10boom(p.x, p.y, FS(90), Hb, 1.5, {}, 1); shake = Math.max(shake, .3); }));
+  // ---------- 羽扇 ----------
+  S10('shanfeng', '清风徐来', '再向四周扇一圈风，把人推开（0.6 倍）', () => L10T(.3, () => L10ring(HX(), HY(), FS(20), FS(130), Hf, .6, { push: 80 })));
+  S10('liuying', '双蝶飞舞', '反方向再扔出一把扇子（0.6 倍，去回各一次）', () => L10line(HX(), HY(), A10() + Math.PI, FS(180), FS(16), Hf, .6, {}));
+  S10('huifeng', '回风引浪', '吸完向前推出一道风浪（长 160，0.8 倍，推开）', () => L10T(.35, () => L10line(HX(), HY(), A10(), FS(160), FS(40), Hf, .8, { push: 100 })));
+  S10('longjuan', '飞沙走石', '龙卷沿途扬起三道沙石带（0.3 倍，迟缓）', () => L10T(.5, () => { for (const s of [-.3, 0, .3]) L10line(HX(), HY(), A10() + s, FS(220), FS(14), Hf, .3, { sl: 1 }); }));
+  S10('mihun', '庄周梦蝶', '160 内所有敌人都迷乱 1.5 秒（0.3 倍）', () => L10T(.3, () => L10ring(HX(), HY(), 0, FS(160), Hf, .3, { ml: 1.5 })));
+  S10('shuangxue', '千里冰封', '180 内所有敌人受寒（0.5 倍，迟缓多 1 秒）', () => L10T(.3, () => L10ring(HX(), HY(), 0, FS(180), Hf, .5, { sl: 1, slx: 1 })));
+  S10('lianying', '穿堂贯巷', '再向四个方向各吹一道风柱（0.5 倍，推开）', () => L10T(.4, () => { for (let i = 0; i < 4; i++) { const b = i * Math.PI / 2 + A10(); L10line(HX(), HY(), b, FS(220), FS(20), Hf, .5, { push: 120 }); } }));
+  S10('bazhen', '八阵连环', '八阵点爆完后，外圈再爆一轮（半径 190，0.6 倍，迷乱 0.6 秒）', () => L10T(1.8, () => { for (let i = 0; i < 8; i++) { const b = i * Math.PI / 4 + .39; L10boom(HX() + Math.cos(b) * FS(190), clampY(HY() + Math.sin(b) * FS(95)), FS(40), Hf, .6, { ml: .6 }); } }));
+  S10('huoyu', '风眼连环', '风眼炸完，在第二处敌群再炸一次（1.0 倍，推开）', () => L10T(2.7, () => { const p = fuDense(260); L10boom(p.x, p.y, FS(120), Hf, 1.0, { push: 90, px: p.x, py: p.y }); }));
+  S10('chibi', '乾坤倒转', '风屏收起时把 120 内所有人推出去（0.6 倍）', () => L10T(3.0 + fDur(), () => L10ring(HX(), HY(), 0, FS(120), Hf, .6, { push: 120, force: true })));
+  S10('dongfeng', '东风浩荡', '风停时最后一阵狂风把全场吹飞（1.2 倍，必定风撞）', () => L10T(5.1 + fDur(), () => { shake = Math.max(shake, .3); for (const z of near(HX(), HY(), 420)) Hf(z, 1.2, { push: 120, force: true }); }));
+  S10('qimen', '八门金锁', '阵结束后，外圈八门再爆一轮（1.0 倍，迷乱 1 秒）', () => L10T(5.2 + fDur(), () => { for (let i = 0; i < 8; i++) { const b = i * Math.PI / 4 + .39; L10boom(HX() + Math.cos(b) * FS(230), clampY(HY() + Math.sin(b) * FS(115)), FS(50), Hf, 1.0, { ml: 1 }); } }));
+  // ---------- 黄符 ----------
+  S10('huofu', '炎爆连珠', '炸点附近再连炸 3 次（0.5 倍，灼烧）', () => L10T(.35, () => L10P(3, FS(200)).forEach((p, i) => L10T(i * .1, () => fuBoom(p.x + (Math.random() - .5) * 20, p.y, FS(40), .5, { burn: 1 })))));
+  S10('feifu', '引雷连劈', '再随机劈下 3 道雷（0.8 倍）', () => L10T(.3, () => L10P(3, FS(240)).forEach((p, i) => L10T(i * .1, () => fuBolt(p.x, p.y, FS(25), .8)))));
+  S10('dingshen', '春雨绵绵', '一片小雨跟着你 3 秒（每 0.5 秒 0.2 倍，湿身）', () => fuZone({ x: HX(), y: HY(), r: FS(100), T: 3, kind: 'yu', move: o => { o.x = HX(); o.y = HY(); }, each: z => FUH(z, .2, 0, { el: 'yu', wet: 1 }) }));
+  S10('zhangxin', '掌心五雷', '闪电再多跳 5 次（0.5 倍）', () => L10T(.6, () => { let prev = hero; L10P(5, FS(240)).forEach((p, i) => p.z && L10T(i * .07, () => { fuChainLine(prev, p.z); FUH(p.z, .5, 10, { el: 'lei' }); prev = p.z; })); }));
+  S10('wulei', '流火遍野', '再扔 3 张符到随机敌人脚下起火（0.4 倍，火区 2 秒）', () => L10T(.5, () => L10P(3, FS(220)).forEach(p => { fuBoom(p.x, p.y, FS(35), .4, { burn: 1 }); fuZone({ x: p.x, y: p.y, r: FS(35) * fuR(), T: 2, kind: 'huo', each: z => FUH(z, .1, 0, { el: 'huo', burn: 1 }) }); })));
+  S10('yaoshu', '火龙绕身', '火线燃尽后在身边烧成一圈火环 2 秒（每 0.5 秒 0.2 倍，灼烧）', () => L10T(2.5, () => fuZone({ x: HX(), y: HY(), r: FS(110) * fuR(), T: 2, kind: 'huo', move: o => { o.x = HX(); o.y = HY(); }, each: z => FUH(z, .2, 0, { el: 'huo', burn: 1 }) })));
+  S10('huangtian', '甘霖普降', '300 内所有敌人湿身，并受一下（0.3 倍）', () => L10T(.3, () => { for (const z of near(HX(), HY(), FS(300))) FUH(z, .3, 0, { el: 'yu', wet: 1 }); }));
+  S10('tianlei', '天雷滚滚', '阵结束后阵里再随机落 6 道雷（1.0 倍）', () => L10T(4.2, () => L10P(6, FS(260)).forEach((p, i) => L10T(i * .08, () => fuBolt(p.x, p.y, FS(30), 1.0)))));
+  S10('fuhuo', '燎原万里', '身边燃起一圈火环 3 秒（每 0.5 秒 0.15 倍，灼烧）', () => L10T(.5, () => fuZone({ x: HX(), y: HY(), r: FS(150) * fuR(), T: 3, kind: 'huo', each: z => FUH(z, .15, 0, { el: 'huo', burn: 1 }) })));
+  S10('sadou', '云行雨施', '再召来第二朵云，劈雷 3 道（1.0 倍）', () => L10T(1.0, () => { const p = fuDense(260); fuZone({ x: p.x, y: p.y, r: FS(90), T: 3, kind: 'yu', each: z => FUH(z, .1, 0, { el: 'yu', wet: 1 }) }); for (let i = 0; i < 3; i++) L10T(.5 + i * .8, () => { const t = near(p.x, p.y, FS(90))[0]; if (t) fuBolt(t.x, t.y, FS(20), 1.0); }); }));
+  S10('jiutian', '五雷轰顶', '最后劈血最多的 5 个敌人（2.0 倍）', () => L10T(6.2, () => hittable().sort((a, b) => (b.hp || 0) - (a.hp || 0)).slice(0, 5).forEach((z, i) => L10T(i * .1, () => fuBolt(z.x, z.y, FS(30), 2.0)))));
+  S10('taiping', '三昧焚天', '火海之外，身边再烧起一大圈火（半径 200，2 秒，每 0.5 秒 0.2 倍，灼烧 2 层）', () => L10T(.8, () => fuZone({ x: HX(), y: HY(), r: FS(200) * fuR(), T: 2, kind: 'huo', col: '255,140,40', each: z => FUH(z, .2, 0, { el: 'huo', burn: 2 }) })));
+  // ---------- 剑 ----------
+  S10('jlianci', '七星连刺', '再呈扇形连刺 7 剑（0.35 倍）', () => { for (let i = 0; i < 7; i++) L10T(.3 + i * .04, () => L10line(HX(), HY(), A10() + (i - 3) * .15, FS(150), FS(10), Hj, .35, { bl: 1 })); });
+  S10('zhantie', '断金切玉', '再绕身横斩一整圈（0.8 倍，流血）', () => L10T(.25, () => L10ring(HX(), HY(), FS(20), FS(110), Hj, .8, { bl: 1 })));
+  S10('jianqi', '白虹三叠', '再并排飞出三道剑气（0.6 倍）', () => L10T(.2, () => { for (const s of [-.15, 0, .15]) jBolt(HX(), HY(), A10() + s, FS(260), .35, FS(14) * jW(), .6, { bl: 1 }, new Set()); }));
+  S10('liefeng', '落英缤纷', '剑舞落下的花瓣化作 8 道小剑气向四周飞出（0.4 倍）', () => L10T(.6, () => { for (let i = 0; i < 8; i++) jBolt(HX(), HY(), i * Math.PI / 4, FS(150), .25, FS(10), .4, { bl: 1 }, new Set()); }));
+  S10('feijian', '穿花引蝶', '再放出一柄飞剑，追着附近的敌人连刺 5 下（0.5 倍）', () => L10T(.2, () => { let n = 0; DKO.push(dmk({ T: 2, nx: 0, tick(o) { if (o.t >= o.nx && n < 5) { o.nx += .3; const t = nearest(FS(220)); if (t) { n++; fx.push({ k: 'gd', m: 'swords', x: t.x, y: t.y, pts: [{ x: t.x, y: t.y - 14, r: Math.random() * 6 }], t: 0, T: .2, col: gCol() }); Hj(t, .5, { bl: 1 }); } } } })); }));
+  S10('sixiang', '四象归一', '八方剑气从四周飞回身边，一路切割（0.6 倍）', () => L10T(.5, () => { for (let i = 0; i < 8; i++) { const b = i * Math.PI / 4; jBolt(HX() + Math.cos(b) * FS(220), HY() + Math.sin(b) * FS(110), b + Math.PI, FS(220), .3, FS(12), .6, {}, new Set()); } }));
+  S10('jinghong', '飞雨连绵', '再落 6 柄剑到附近敌人身上（0.6 倍）', () => L10T(.6, () => L10P(6, FS(220)).forEach((p, i) => L10T(i * .06, () => { fx.push({ k: 'gd', m: 'swords', x: p.x, y: p.y, pts: [{ x: p.x, y: p.y - 6, r: Math.PI / 2 }], t: 0, T: .35, col: gCol() }); for (const z of near(p.x, p.y, FS(25))) Hj(z, .6, { bl: 1 }); }))));
+  S10('jianzhen', '九宫连环', '剑阵炸完后，剑丝再绷紧一次，切过整阵（1.0 倍）', () => L10T(3.2, () => { const c = fuDense(200), W = FS(lvOf('jianzhen') >= 5 ? 220 : 160); for (const s of [-1, 0, 1]) { L10line(c.x - W / 2, c.y + s * W / 4, 0, W, 6, Hj, 1.0 / 3, {}); L10line(c.x + s * W / 2, c.y - W / 4, Math.PI / 2, W / 2 * 2, 6, Hj, 1.0 / 3, {}); } }));
+  S10('xinjian', '雌雄合璧', '最后两剑合一，在最近的敌人身上斩出巨大十字（半径 60，2.0 倍）', () => L10T((lvOf('xinjian') >= 7 ? 6 : 4) + .1, () => { const t = nearest(FS(220)); if (!t) return; fx.push({ k: 'cut', n: 'dh2', x: t.x, y: t.y - 20, a: .8, L: 40, t: 0, T: .35, col: gCol() }); fx.push({ k: 'cut', n: 'dh2', x: t.x, y: t.y - 20, a: -.8, L: 40, t: 0, T: .35, col: gCol() }); L10boom(t.x, t.y, FS(60), Hj, 2.0, { bl: 2 }); }));
+  S10('jianlun', '光轮千转', '光轮回来后再飞出第二波（8 个，0.5 倍）', () => L10T(.95, () => { for (let i = 0; i < 8; i++) jBolt(HX(), HY(), i * Math.PI / 4 + .39, FS(180), .45, 12, .5, { bl: 1 }, new Set(), null, true); }));
+  S10('yujian', '御剑长虹', '巨剑插下后，再插下 3 柄巨剑到 3 处敌群（1.5 倍）', () => L10T(5.6, () => L10P(3, FS(280)).forEach((p, i) => L10T(i * .15, () => { fx.push({ k: 'gd', m: 'swords', x: p.x, y: p.y, pts: [{ x: p.x, y: p.y - 10, r: Math.PI / 2, big: 2.5 }], t: 0, T: .5, col: gCol() }); L10boom(p.x, p.y, FS(70), Hj, 1.5, { bl: 2 }); }))));
+  S10('tianjian', '剑气纵横', '归宗之后，24 柄剑从落点向四周爆射（0.5 倍，流血）', () => L10T(5.4, () => { const p = fuDense(260); for (let i = 0; i < 24; i++) jBolt(p.x, p.y, i * Math.PI / 12, FS(200), .3, FS(10), .5, { bl: 1 }, new Set()); }));
+  // ---------- 拳 ----------
+  S10('chongquan', '破风连环', '再呈扇形打出 5 道拳风，最后一道是收尾（0.3 倍）', () => { for (let i = 0; i < 5; i++) L10T(.3 + i * .06, () => L10line(HX(), HY(), A10() + (i - 2) * .2, FS(170), FS(12), Hqn, .3, i === 4 ? { fin: 1 } : {})); });
+  S10('saotui', '扫堂千军', '再扫一圈大的（半径 120，收尾，0.8 倍）', () => L10T(.35, () => L10ring(HX(), HY(), 0, FS(120), Hqn, .8, { fin: 1, st: .3 })));
+  S10('shanggou', '托天摘星', '附近 3 处再冲起拳柱（0.9 倍，收尾）', () => L10T(.3, () => L10P(3, FS(200)).forEach((p, i) => L10T(i * .08, () => L10boom(p.x, p.y, FS(40), Hqn, .9, { fin: 1, st: .3 }, 1)))));
+  S10('xuanfengtui', '旋风连踢', '再旋踢一圈更大的（半径 120，收尾，0.8 倍）', () => L10T(.45, () => L10ring(HX(), HY(), FS(30), FS(120), Hqn, .8, { fin: 1, st: .4 })));
+  S10('tieshan', '角抵连摔', '摔完落点再震一圈（半径 90，0.8 倍，收尾）', () => L10T(.45, () => { const a = A10(); L10boom(HX() + Math.cos(a) * FS(140), clampY(HY() + Math.sin(a) * FS(70)), FS(90), Hqn, .8, { fin: 1, st: .4 }); }));
+  S10('dahe', '长坂断桥', '吼声化成一道直线声浪，冲断前方（长 260、宽 80，1.0 倍，眩晕 0.8 秒，收尾）', () => L10T(.3, () => L10line(HX(), HY(), A10(), FS(260), FS(40), Hqn, 1.0, { fin: 1, st: .8, push: 0 })));
+  S10('huxiao', '虎啸山林', '再呈扇形扑出 3 道虎形冲击波（0.8 倍，收尾）', () => L10T(.35, () => { for (const s of [-.35, 0, .35]) L10line(HX(), HY(), A10() + s, FS(240), FS(30), Hqn, .8, { fin: 1, st: .3 }); }));
+  S10('lianhuan', '灵猿百变', '再向四面八方连打 12 拳（0.2 倍），最后一拳是收尾', () => { for (let i = 0; i < 12; i++) L10T(.7 + i * .04, () => L10line(HX(), HY(), i * Math.PI / 6, FS(120), FS(10), Hqn, i === 11 ? .8 : .2, i === 11 ? { fin: 1 } : {})); });
+  S10('jingang', '巨灵开山', '再向前依次拍下 3 掌（0.9 倍，收尾）', () => { const a = A10(); for (let i = 1; i <= 3; i++) L10T(.4 + i * .15, () => L10boom(HX() + Math.cos(a) * FS(70 * i), clampY(HY() + Math.sin(a) * FS(35 * i)), FS(50), Hqn, .9, { fin: 1, st: .4 })); });
+  S10('qluanwu', '崩星裂地', '再错开半格裂出第二颗星（0.8 倍，收尾）', () => L10T(.35, () => { for (let i = 0; i < 8; i++) L10line(HX(), HY(), A10() + i * Math.PI / 4 + Math.PI / 8, FS(180), FS(14), Hqn, .8, { fin: 1, st: .3 }); }));
+  S10('baji', '力拔山兮', '再砸一次（全屏，1.2 倍，收尾，必定爆劲）', () => L10T(.9, () => { shake = Math.max(shake, .5); fx.push({ k: 'ring', x: HX(), y: HY(), t: 0, T: .7, r: 420 }); for (const z of near(HX(), HY(), 420)) Hqn(z, 1.2, { fin: 1, st: .6, boom: 1 }); }));
+  S10('fengjuan', '五禽归一', '五禽合一，最后再爆出五兽光影（半径 150，2.0 倍，收尾，必定爆劲）', () => L10T(5.6, () => { shake = Math.max(shake, .4); L10boom(HX(), HY(), FS(150), Hqn, 2.0, { fin: 1, boom: 1 }); }));
   const TRIAL = { SK, GF, MOT, WEPN, TIERN, wepOf, IMGU, spdTxt, spawn: t => edgeSpawn(t), count: t => zs.filter(z => !z.dead && z.type === t).length, long() { W.tot = 9999; if (W.t > W.tot - 5) W.t = 0; },
     setGf(ids) { S.gf = ['', '', '']; ids.slice(0, 3).forEach((id, i) => { S.gf[i] = id; }); GM = gfCalc(); }, setQg(id) { S.qg = id || ''; GM = gfCalc(); }, gf: () => S.gf.slice(), qg: () => S.qg, mul: k => skillMul(k), lv: k => lvOf(k), spd: k => spdTxt(SK[k]), rs: k => SK[k] && SK[k].dk ? rsOf(k) : null, setRs(k, v) { DRS[k] = v; try { localStorage.setItem('szz-dao-rs', JSON.stringify(DRS)); } catch (e) {} },
     sp: k => spOf(k), setSp(k, v) { DSP[k] = v; try { localStorage.setItem('szz-dao-sp', JSON.stringify(DSP)); } catch (e) {} }, spAll(v) { Object.keys(SK).forEach(k => { if (SK[k].dk) DSP[k] = v; }); try { localStorage.setItem('szz-dao-sp', JSON.stringify(DSP)); } catch (e) {} },
