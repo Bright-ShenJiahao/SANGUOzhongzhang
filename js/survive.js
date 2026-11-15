@@ -2591,6 +2591,16 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     tianlei: ['t', 190], fuhuo: ['d', 220], sadou: ['t', 150], jiutian: ['s', 300], taiping: ['t', 200],
     jianzhen: ['t', 170], xinjian: ['s', 150], jianlun: ['s', 170], yujian: ['t', 170], tianjian: ['s', 220],
     lianhuan: ['d', 150], jingang: ['t', 150], qluanwu: ['s', 190], baji: ['s', 260], fengjuan: ['s', 180] };
+  // 11/16 用户出的黄阶/玄阶特效图（9 种兵器各 7 张，同样黑底白光）：s 主角身上 / d 出招方向 / t 敌人最密处
+  Object.assign(FX2, { zhidao: ['t', 90], lunchui: ['d', 130], zhendi: ['s', 130], kaishan: ['t', 100], tiaotian: ['d', 170], dizhen: ['d', 220], xuanchui: ['s', 150],
+    jlianci: ['d', 160], zhantie: ['d', 120], jianqi: ['d', 260], sixiang: ['d', 120], liefeng: ['d', 120], feijian: ['d', 110], jinghong: ['t', 70],
+    chongquan: ['d', 150], saotui: ['s', 140], shanggou: ['t', 80], xuanfengtui: ['s', 160], tieshan: ['t', 120], dahe: ['s', 200], huxiao: ['d', 200],
+    shanfeng: ['d', 140], liuying: ['d', 120], huifeng: ['s', 150], longjuan: ['t', 90], mihun: ['d', 160], shuangxue: ['d', 170], lianying: ['d', 280],
+    huofu: ['t', 100], feifu: ['t', 70], dingshen: ['t', 140], zhangxin: ['t', 200], wulei: ['t', 90], huangtian: ['t', 220], yaoshu: ['d', 240],
+    feishi: ['d', 120], sashi: ['d', 140], tiaoshi: ['d', 160], zashi: ['t', 140], xuanshi: ['d', 160], shici: ['d', 160], paoshi: ['t', 100],
+    qishe: ['d', 150], lianzhu: ['d', 170], luoyue: ['t', 60], zhuihun: ['d', 180], liannu: ['d', 160], xuanshe: ['d', 160], jianyu: ['t', 160],
+    hengti: ['d', 170], pidao: ['d', 200], xiongshou: ['d', 170], xuanfengd: ['s', 200], daoqi: ['d', 220], handi: ['d', 170], zhanjiang: ['t', 110],
+    qiang: ['d', 300], lianci: ['d', 140], lansao: ['d', 120], chong: ['d', 170], tiaoqiang: ['d', 190], lihua: ['s', 170], huimaq: ['d', 300] });
   for (const k in FX2) { const im = new Image(); im.src = 'art/ui/fx2/' + k + '.webp'; DGI['x_' + k] = im; }
   function fx2Play(key) {
     const m = FX2[key], o = SK[key]; if (!m || !o) return; const a = aim(), f = Math.cos(a) >= 0 ? 1 : -1, t4 = (o.tier || 3) >= 4;
