@@ -498,6 +498,7 @@
   function frame(now) {
     if (!shown) { raf = 0; return; }
     raf = requestAnimationFrame(frame);
+    if (campBox) { if (frame.under > 2) return; frame.under = (frame.under || 0) + 1; } else frame.under = 0;   /* 11/16 用户：弹窗开着时地图还在每帧重画，掉到十几帧，有卡顿感——弹窗下面的地图画两帧就停 */
     if (!drag || !drag.moved) scroll += (tScroll - scroll) * .1;
     // 静态底图（纸、淡墨分段、远山、路径）缓存成一张图：只在滚动/状态变化时重画，平时每帧只贴图 + 画发光的节点
     const key = W + 'x' + H + 'x' + DPR + '|' + scroll.toFixed(1) + '|' + (run.cur ? run.cur.id : -1) + '|' + run.visited.size + '|' + (port() ? 1 : 0);

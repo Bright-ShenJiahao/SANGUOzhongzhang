@@ -62,7 +62,7 @@ body.szz-pro #help{display:none}
 .x-back{min-height:34px!important}
 }
 #rot small{display:block;margin-top:10px;font-size:14px;font-weight:600;color:#c9b691;line-height:1.6}
-</style><link rel="preload" href="pack/fonts/result.woff2?v=f1fd1adbe1" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=f1fd1adbe1)format("woff2");font-display:swap}</style><style>@font-face{font-family:"WenKai";src:url(pack/fonts/kai.woff2?v=cd9615553f)format("woff2");font-display:swap}</style><link rel="preload" href="pack/fonts/pixel.woff2?v=e4b57db151" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"Pixel12";src:url(pack/fonts/pixel.woff2?v=e4b57db151)format("woff2");font-display:swap}@font-face{font-family:"Songti SC";src:url(pack/fonts/pixel.woff2?v=e4b57db151)format("woff2");font-display:swap}@font-face{font-family:"STSong";src:url(pack/fonts/pixel.woff2?v=e4b57db151)format("woff2");font-display:swap}@font-face{font-family:"Noto Serif SC";src:url(pack/fonts/pixel.woff2?v=e4b57db151)format("woff2");font-display:swap}@font-face{font-family:"SimSun";src:url(pack/fonts/pixel.woff2?v=e4b57db151)format("woff2");font-display:swap}@font-face{font-family:"PingFang SC";src:url(pack/fonts/pixel.woff2?v=e4b57db151)format("woff2");font-display:swap}@font-face{font-family:"Microsoft YaHei";src:url(pack/fonts/pixel.woff2?v=e4b57db151)format("woff2");font-display:swap}@font-face{font-family:"Noto Sans CJK SC";src:url(pack/fonts/pixel.woff2?v=e4b57db151)format("woff2");font-display:swap}@font-face{font-family:"STKaiti";src:url(pack/fonts/pixel.woff2?v=e4b57db151)format("woff2");font-display:swap}@font-face{font-family:"KaiTi";src:url(pack/fonts/pixel.woff2?v=e4b57db151)format("woff2");font-display:swap}*{font-synthesis:none}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
+</style><link rel="preload" href="pack/fonts/result.woff2?v=e0a8342689" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=e0a8342689)format("woff2");font-display:swap}</style><style>@font-face{font-family:"WenKai";src:url(pack/fonts/kai.woff2?v=06c5c5d6d4)format("woff2");font-display:swap}</style><link rel="preload" href="pack/fonts/pixel.woff2?v=c41820629b" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"Pixel12";src:url(pack/fonts/pixel.woff2?v=c41820629b)format("woff2");font-display:swap}@font-face{font-family:"Songti SC";src:url(pack/fonts/pixel.woff2?v=c41820629b)format("woff2");font-display:swap}@font-face{font-family:"STSong";src:url(pack/fonts/pixel.woff2?v=c41820629b)format("woff2");font-display:swap}@font-face{font-family:"Noto Serif SC";src:url(pack/fonts/pixel.woff2?v=c41820629b)format("woff2");font-display:swap}@font-face{font-family:"SimSun";src:url(pack/fonts/pixel.woff2?v=c41820629b)format("woff2");font-display:swap}@font-face{font-family:"PingFang SC";src:url(pack/fonts/pixel.woff2?v=c41820629b)format("woff2");font-display:swap}@font-face{font-family:"Microsoft YaHei";src:url(pack/fonts/pixel.woff2?v=c41820629b)format("woff2");font-display:swap}@font-face{font-family:"Noto Sans CJK SC";src:url(pack/fonts/pixel.woff2?v=c41820629b)format("woff2");font-display:swap}@font-face{font-family:"STKaiti";src:url(pack/fonts/pixel.woff2?v=c41820629b)format("woff2");font-display:swap}@font-face{font-family:"KaiTi";src:url(pack/fonts/pixel.woff2?v=c41820629b)format("woff2");font-display:swap}*{font-synthesis:none}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
 <style>button{letter-spacing:.04em!important}</style></head><body>
 <style>
 #bootSplash{position:fixed;inset:0;z-index:99999;background:radial-gradient(ellipse at 50% 45%,#f3e4cf 0%,#ecd9c0 55%,#d9c09f 100%);transition:opacity .45s ease-out}
@@ -119,7 +119,7 @@ if(location.protocol==='https:'&&!/[?&]debug(?:=|&|$)/.test(location.search)&&'s
 })();
 // 自动更新：打开游戏、或从后台切回来时，查一下线上有没有新版本；有就在标题/整备页自动刷新（战斗中不打扰）
 (function(){
-var BUILD='bb3decfa5a2f',busy=false;
+var BUILD='28f06cc28698',busy=false;
 if(location.protocol!=='https:'||/[?&]debug(?:=|&|$)/.test(location.search))return;
 function check(){
   if(busy)return;
@@ -4727,6 +4727,7 @@ function resultKey(e) {
   function frame(now) {
     if (!shown) { raf = 0; return; }
     raf = requestAnimationFrame(frame);
+    if (campBox) { if (frame.under > 2) return; frame.under = (frame.under || 0) + 1; } else frame.under = 0;   /* 11/16 用户：弹窗开着时地图还在每帧重画，掉到十几帧，有卡顿感——弹窗下面的地图画两帧就停 */
     if (!drag || !drag.moved) scroll += (tScroll - scroll) * .1;
     // 静态底图（纸、淡墨分段、远山、路径）缓存成一张图：只在滚动/状态变化时重画，平时每帧只贴图 + 画发光的节点
     const key = W + 'x' + H + 'x' + DPR + '|' + scroll.toFixed(1) + '|' + (run.cur ? run.cur.id : -1) + '|' + run.visited.size + '|' + (port() ? 1 : 0);
