@@ -39,6 +39,7 @@
 @media (pointer:coarse){#szzStory .hn .k{display:none}}
 @keyframes szzTri{50%{transform:translateY(4px)}}
 #szzStory .nar{color:#e6d6b0}
+#szzStory .hb{position:absolute;right:4vw;bottom:calc(2.2vh + 2.2em);display:flex;align-items:center;gap:8px;opacity:0;transition:opacity .15s;pointer-events:none;color:#f3d08a;font-size:clamp(12px,1.8vh,16px);letter-spacing:.2em;text-shadow:0 1px 0 #000}#szzStory .hb.on{opacity:1}#szzStory .hb b{display:block;width:clamp(120px,16vw,220px);height:clamp(12px,1.8vh,18px);padding:3px 5px;box-sizing:border-box;background:url(art/ui/hud2/barframe.webp) center/100% 100% no-repeat}#szzStory .hb i{display:block;height:100%;width:0;background:url(art/ui/hud2/bar_gold.webp) left center/100% 100% no-repeat;box-shadow:0 0 6px rgba(255,210,120,.6)}
 @media (max-height:520px){#szzStory .box{height:34vh;min-height:0;font-size:15px;line-height:1.55;padding:calc(3vh + 22px) 5vw 1.5vh}#szzStory .pt{height:70vh;bottom:30vh}#szzStory .hn{font-size:11px}}
 @media (orientation:portrait){#szzStory .pt{max-width:80vw;height:52vh;bottom:30vh}#szzStory .box{height:26vh}}`;
   let st = null, box = null;
@@ -49,11 +50,11 @@
   function play(lines, done, see) {
     ensure(); if (st && st.cleanup) st.cleanup(); if (box) box.remove();   // 上一段没放完就被新的一段顶掉：先把旧的键盘/点击监听拆掉
     box = document.createElement('div'); box.id = 'szzStory'; if (see) box.className = 'see';   // see：首领台词，战场半透明压暗露在后面
-    box.innerHTML = '<div class="bg"></div><div class="bg"></div><div class="sh"></div><img class="pt" alt=""><div class="box"><div class="nm"></div><div class="bt"><button class="n" title="下一句"></button><button class="s" title="跳过剧情"></button></div><div class="tx"></div><div class="hn">点击<span class="k"> / 空格</span> 继续<span class="k">　长按空格 跳过</span><em></em></div></div>';
+    box.innerHTML = '<div class="bg"></div><div class="bg"></div><div class="sh"></div><img class="pt" alt=""><div class="box"><div class="nm"></div><div class="bt"><button class="n" title="下一句"></button><button class="s" title="跳过剧情"></button></div><div class="tx"></div><div class="hb"><span>跳过</span><b><i></i></b></div><div class="hn">点击<span class="k"> / 空格</span> 继续<span class="k">　长按 跳过</span><em></em></div></div>';
     document.body.appendChild(box);
     const bgs = box.querySelectorAll('.bg'), pt = box.querySelector('.pt'), nm = box.querySelector('.nm'), tx = box.querySelector('.tx');
     st = { i: -1, lines, done, typing: 0, full: '', bgi: 0, bg: '' };
-    const finish = () => { if (!st) return; const d = st.done; st = null; removeEventListener('keydown', kd, true); removeEventListener('keyup', ku, true); removeEventListener('pointerdown', pd, true); box.style.transition = 'opacity .3s'; box.style.opacity = '0'; const b = box; setTimeout(() => b.remove(), 320); box = null; if (d) d(); };
+    const finish = () => { if (!st) return; clearInterval(st.typing); holdEnd(); const d = st.done; st = null; removeEventListener('keydown', kd, true); removeEventListener('keyup', ku, true); removeEventListener('pointerdown', pd, true); box.style.transition = 'opacity .3s'; box.style.opacity = '0'; const b = box; setTimeout(() => b.remove(), 320); box = null; if (d) d(); };
     const show = () => {
       st.i++; if (st.i >= st.lines.length) return finish();
       const L = st.lines[st.i];
@@ -72,13 +73,18 @@
     const pd = e => { if (!st || !box || !box.contains(e.target)) return; e.preventDefault(); e.stopPropagation(); const now = performance.now(); if (now - lastP < 120) return; lastP = now;
       if (e.target.closest('.s')) return finish();
       if (e.target.closest('.n')) { if (st.typing) { clearInterval(st.typing); st.typing = 0; } return show(); }
-      next(); };
+      next(); holdStart(); };
     addEventListener('pointerdown', pd, true);
-    st.cleanup = () => { removeEventListener('keydown', kd, true); removeEventListener('keyup', ku, true); removeEventListener('pointerdown', pd, true); };
-    let hold = 0;
+    st.cleanup = () => { holdEnd(); removeEventListener('pointerup', pu, true); removeEventListener('pointercancel', pu, true); removeEventListener('keydown', kd, true); removeEventListener('keyup', ku, true); removeEventListener('pointerdown', pd, true); };
+    // 11/16 用户：长按跳过加进度条——按住 0.15 秒后出现金色进度条，0.75 秒填满即跳过整段（空格或手指按住都算）
+    let holdT0 = 0; const hb = box.querySelector('.hb'), hbi = hb && hb.querySelector('i');
+    const holdTick = () => { if (!holdT0 || !st) return; const el = performance.now() - holdT0; if (el > 150 && hb) hb.classList.add('on'); const p = Math.max(0, (el - 150) / 600); if (hbi) hbi.style.width = Math.min(100, p * 100) + '%'; if (p >= 1) { holdEnd(); finish(); return; } requestAnimationFrame(holdTick); };
+    const holdStart = () => { if (holdT0) return; holdT0 = performance.now(); requestAnimationFrame(holdTick); };
+    const holdEnd = () => { holdT0 = 0; if (hb) hb.classList.remove('on'); if (hbi) hbi.style.width = '0'; };
+    const pu = () => holdEnd(); addEventListener('pointerup', pu, true); addEventListener('pointercancel', pu, true);
     const isSp = e => e.code === 'Space' || e.key === ' ' || e.key === 'Spacebar' || e.keyCode === 32;   // 11/15 用户：中文输入法开着时空格的 key 是 Process，要看 code
-    const kd = e => { if (!st) return; if (isSp(e) || e.key === 'Enter' || e.code === 'Enter' || e.code === 'NumpadEnter') { e.preventDefault(); e.stopImmediatePropagation(); if (e.repeat) { if (++hold > 18) finish(); return; } hold = 0; next(); } else if (e.key === 'Escape') { e.preventDefault(); finish(); } };
-    const ku = e => { if (isSp(e)) { hold = 0; if (st) { e.preventDefault(); e.stopImmediatePropagation(); } } };
+    const kd = e => { if (!st) return; if (isSp(e) || e.key === 'Enter' || e.code === 'Enter' || e.code === 'NumpadEnter') { e.preventDefault(); e.stopImmediatePropagation(); if (e.repeat) return; next(); if (isSp(e)) holdStart(); } else if (e.key === 'Escape') { e.preventDefault(); finish(); } };
+    const ku = e => { if (isSp(e)) { holdEnd(); if (st) { e.preventDefault(); e.stopImmediatePropagation(); } } };
     addEventListener('keydown', kd, true); addEventListener('keyup', ku, true);
     show();
   }

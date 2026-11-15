@@ -2536,7 +2536,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     xiaozu: { name: '小卒', tag: '枪 · 关刀', wep: 3, weps: [3, 4], skill: 'qiang', desc: '行伍出身，出手利落。武艺起手 -20%；本门枪或关刀', wu: .8, oa: [4, 4, 5, 1, 1, 2, 1, 3], at: [4, 3, 4, 3, 2, 2, 2, 1, 3] },
     liehu: { name: '猎户', tag: '石子 · 弓', wep: 7, weps: [7, 5], skill: 'feishi', desc: '山里跑惯了。移动速度 +12%；本门石子或弓', move: 1.12, oa: [3, 4, 1, 5, 1, 4, 1, 3], at: [3, 2, 2, 5, 3, 2, 5, 2, 3] },
     youxia: { name: '游侠', tag: '剑 · 拳', wep: 1, weps: [1, 10], skill: 'jlianci', desc: '仗剑任侠，四海为家。暴击 +10%；本门剑或拳', crit: .1, oa: [5, 4, 2, 2, 1, 3, 1, 3], at: [3, 5, 2, 4, 4, 3, 2, 1, 3] },   // 11/16 用户定：第 5 个出身
-    shusheng: { name: '书生', tag: '黄符 · 羽扇', wep: 8, weps: [8, 9], skill: 'huofu', desc: '手无缚鸡之力，却通术法。本门黄符或羽扇', oa: [2, 1, 1, 1, 1, 2, 6, 4], at: [2, 1, 1, 2, 3, 6, 2, 6, 5] },
+    shusheng: { name: '书生', tag: '黄符 · 羽扇', wep: 8, weps: [8, 9], skill: 'huofu', desc: '饱读诗书，通晓术法。熟练度 +25%；本门黄符或羽扇', xp: 1.25, oa: [2, 1, 1, 1, 1, 2, 6, 4], at: [2, 1, 1, 2, 3, 6, 2, 6, 5] },
   };
   let origin = 'nongfu';
   const OG = () => ORIGINS[origin] || ORIGINS.nongfu;
@@ -2632,7 +2632,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     hp: () => 1 + (AT()[0] - 3) * .07,          // 体魄：气血（以受伤减免折算）
     move: () => 1 + (AT()[3] - 3) * .04,        // 身法：移动速度
     crit: () => (AT()[4] - 3) * .03,            // 运气：暴击率
-    xp: () => Math.max(.5, 1 + (AT()[5] - 3) * .1),   // 悟性：武艺/心法熟练度获取
+    xp: () => Math.max(.5, 1 + (AT()[5] - 3) * .1) * (OG().xp || 1),   /* 书生：熟练 +25% */   // 悟性：武艺/心法熟练度获取
     nl: () => Math.max(.5, 1 + (AT()[8] - 3) * .06),   // 内力：真气上限、真气回复（11/13）
   };
   // ---------- 修为（11/11 用户定，照群侠幸存者）：杀敌和打完节点涨修为，满了升级攒一次「修炼」，节点打完后统一修炼（属性三选一），战斗中不打断 ----------
@@ -3613,7 +3613,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     if (it.kind === 'item' || it.kind === 'heal') return `<em class="ico" style="background-image:url('${icoOf(it)}')"></em>`;
     const t = it.kind === 'skill' ? 'wy' : 'xf', q = rk(it).i, im = BOOK_IMG[t + q];
     const sym = it.kind === 'skill' ? 'art/ui/attr/duan.webp' : GF[it.id] && GF[it.id].qg ? 'art/ui/attr/shen.webp' : 'art/ui/attr/tiaoxi.webp';   // 11/11 用户定 B：照群侠，书上不画各招的图，武艺统一画兵器（现在只开刀），心法画打坐，轻功画身法
-    return `<div class="bk ${t}${im ? ' im' : ''}" style="--rc:${GTC[q]}${im ? `;background-image:url('${im}')` : ''}">${im ? '' : `<em style="background-image:url('${sym}')"></em>`}<span>${it.name}</span></div>`;
+    return `<div class="bk ${t}${im ? ' im' : ''}" style="--rc:${GTC[q]}${im ? `;background-image:url('${im}')` : ''}">${im ? '' : `<em style="background-image:url('${sym}')"></em>`}</div>`;   // 11/16 用户：书上不写字
   }
   function card(it, i, mode, onI, btns, extra) {   // 一张竖卡：秘籍/道具图 + 名字 + 品质 + 按钮；鼠标移上去（手机点一下）浮出详情
     const r = rk(it), right = i >= 3;
