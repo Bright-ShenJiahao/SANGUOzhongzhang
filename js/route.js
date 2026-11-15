@@ -211,7 +211,8 @@
   function open() {
     if (!run) return;
     ensureDom(); fit(); focus(true); shown = true; root.style.display = ''; t0 = performance.now();
-    if (run.blessed === false && window.SURV && SURV.blessOpts) { if (!run.storyDone && window.STORY) { run.storyDone = true; ['art/ui/prep/panel.webp', 'art/ui/prep/btn.webp', 'art/ui/npc/liubei_face.webp', 'art/ui/npc/guanyu_face.webp', 'art/ui/npc/zhangfei_face.webp'].forEach(u => { const i = new Image(); i.src = u; }); STORY.intro(bless); }   /* 11/16 用户：剧情最后一句到桃园三赠很慢——弹窗的图先在剧情里预载，并去掉等待 */ else setTimeout(bless, 300); }   // 11/14 用户：出征先放开局剧情，再桃园三赠
+    if (!evPre) { evPre = 1; setTimeout(() => { ['art/ui/prep/panel_big.webp', 'art/ui/hud/bian.webp'].concat(EVENTS.map((e, i) => 'art/ui/ev/ev' + i + '.webp'), EVENTS.filter(e => e.npc).map(e => e.npc[1])).forEach(u => { const i = new Image(); i.src = u; }); }, 800); }   // 11/16 用户：奇遇弹窗图片空白——进地图就后台预载插图和头像
+    if (run.blessed === false && window.SURV && SURV.blessOpts) { if (!run.storyDone && window.STORY) { run.storyDone = true; ['art/ui/prep/panel_big.webp', 'art/ui/prep/btn.webp', 'art/ui/npc/liubei_face.webp', 'art/ui/npc/guanyu_face.webp', 'art/ui/npc/zhangfei_face.webp'].forEach(u => { const i = new Image(); i.src = u; }); STORY.intro(bless); }   /* 11/16 用户：剧情最后一句到桃园三赠很慢——弹窗的图先在剧情里预载，并去掉等待 */ else setTimeout(bless, 300); }   // 11/14 用户：出征先放开局剧情，再桃园三赠
     if (!raf) raf = requestAnimationFrame(frame);
   }
   function close() { shown = false; if (root) root.style.display = 'none'; if (campBox) { campBox.remove(); campBox = null; } cancelAnimationFrame(raf); raf = 0; }
@@ -257,10 +258,11 @@
     + '.rtEv .ds{font-size:clamp(17px,2.9vh,22px)!important;font-weight:400!important;line-height:1.6!important}.rtEv .sy{font-size:clamp(15px,2.6vh,19px)!important;font-weight:400!important}.rtEv .hp{font-weight:400!important}'
     + '.rtEv .tt{border:none!important;background:url(art/ui/hud/bian.webp) center/100% 100% no-repeat!important;height:clamp(48px,8.5vh,64px)!important;padding:0 clamp(48px,6vw,80px)!important;top:clamp(-38px,-6vh,-26px)!important;font:400 clamp(22px,3.8vh,30px) WenKai,MaShanZheng,serif!important;letter-spacing:.3em;color:#f0d89a!important;text-shadow:0 2px 0 #1a0e05}'
     + '.rtEv button{font-family:WenKai,MaShanZheng,"STKaiti",serif!important;font-weight:400!important}.rtEv button small{font-size:clamp(13px,2.3vh,16px)!important;color:#e2d4b6!important}'
-    + '.rtEv .pn.thinp{border:clamp(34px,6vh,52px) solid transparent!important;border-image:url(art/ui/prep/panel.webp) 72 fill stretch!important;background:none!important;box-shadow:0 14px 40px rgba(0,0,0,.65)!important;padding:clamp(14px,2.6vh,24px) clamp(16px,2.4vw,30px) clamp(10px,2vh,18px)!important}.rtEv .pn.thinp::before,.rtEv .pn.thinp::after{display:none!important}'   // 11/14 用户：大框要有美术——用整备屏的金边云纹面板
+    + '.rtEv .pn.thinp{border:clamp(36px,7.5vh,66px) solid transparent!important;border-image:url(art/ui/prep/panel_big.webp) 110 fill stretch!important;background:none!important;box-shadow:0 14px 40px rgba(0,0,0,.65)!important;padding:clamp(8px,1.6vh,16px) clamp(10px,1.6vw,20px) clamp(6px,1.2vh,12px)!important}.rtEv .pn.thinp::before,.rtEv .pn.thinp::after{display:none!important}@media (max-height:520px){.rtEv .pn.thinp{border-width:24px!important;padding-top:24px!important}}'   // 11/14 用户：大框要有美术——用整备屏的金边云纹面板
     + '.rtEv .op{align-items:stretch}.rtEv button{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:4px}.rtEv button small{min-height:2.9em;display:flex;align-items:flex-start;justify-content:center;text-align:center;line-height:1.45}'   // 人物、名字、说明三行对齐
     + '.rtEv button img{border:1px solid rgba(184,149,90,.6);object-fit:cover}.rtEv.bl .op{flex-wrap:nowrap}.rtEv.bl button{min-width:0;flex:1}.rtEv.bl button img{width:clamp(72px,12vh,96px)!important;height:clamp(72px,12vh,96px)!important;margin-bottom:8px!important}';
   { const st = document.createElement('style'); st.textContent = EV_CSS + EV_THIN + EV_KAI; document.head.appendChild(st); }
+  let evPre = 0;
   function popup(title, sub, desc, opts, pick, npc, img) {   // 通用选择弹窗（奇遇用）；img：奇遇插图，放左侧（11/14 参考群侠）
     const box = campBox = document.createElement('div'); box.className = 'rtEv' + (img ? ' wi' : '');
     const hp = window.SURV && SURV.routeHp ? SURV.routeHp() : null;
