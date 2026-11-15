@@ -4400,8 +4400,8 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   const status = () => ({   // 路线长卷「兵籍牒」用：这一局的当前状态（11/11）
     origin: OG().name, money: S.money || 0, bao: (S.bao || []).map(k => Object.assign({ k }, BAO[k])), shang: (S.shang || []).map(k => Object.assign({ k }, SHANG[k])), lv: S.lv || 1, pct: Math.floor(Math.min(1, (S.xiu || 0) / XIU_NEED(S.lv || 1)) * 100), bank: S.bank || 0,
     hp: hero ? [Math.ceil(hero.hp * 10), Math.round(maxHp() * 10)] : [0, 0], attrs: attrInfo(origin, true), base: AT0(), add: (S.atAdd || []).slice(),
-    slots: S.slots.map(k => k && SK[k] ? { name: SK[k].name, icon: SK[k].icon, color: SK[k].color, desc: SK[k].desc, lv: lvOf(k) } : null),
-    gf: S.gf.map(id => id && GF[id] ? { name: GF[id].n, desc: GF[id].d, lv: gfLv(id) } : null), qg: S.qg && GF[S.qg] ? { name: GF[S.qg].n, desc: GF[S.qg].d } : null,
+    slots: S.slots.map(k => k && SK[k] ? { img: IMGU[k] || '', fj: !!(S.fj && S.fj[k]), name: SK[k].name, icon: SK[k].icon, color: SK[k].color, desc: SK[k].desc, lv: lvOf(k) } : null),
+    gf: S.gf.map(id => id && GF[id] ? { img: `art/ui/gf/${id}.webp`, name: GF[id].n, desc: GF[id].d, lv: gfLv(id) } : null), qg: S.qg && GF[S.qg] ? { img: `art/ui/gf/${S.qg}.webp`, name: GF[S.qg].n, desc: GF[S.qg].d } : null,
     dmg: RT.dmg });
   // 11/13 武学试炼（开发者面板）：看招用
   // ===================== 11/16 用户定：LV10 突破（照群侠传，每招一个专属质变；放完本招后紧接着打出） =====================
