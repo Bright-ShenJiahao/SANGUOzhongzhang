@@ -2833,7 +2833,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       }
       S.lk = kills;
     }
-    if (RT.on) {
+    if (RT.on && !W.pick) {   // 11/16 用户：整备屏里真气不该自己涨
       S.zq = Math.min(zqMax(), S.zq + zqMax() * (.005 + .004 * GM.hy) * (1 + IT('regen')) * AFX.nl() * (HURT('nei') ? .7 : 1) * dt);
       if (!S.lijie && S.zq <= .01) { S.lijie = true; floaters.push({ x: hero.x, y: hero.y - 70, t: 0, txt: '力竭', color: '#7fb8ff' }); } else if (S.lijie && S.zq >= zqMax() * .2) S.lijie = false;   // 力竭：真气见底，护体和发劲都停，回到两成才恢复
       if (hero.hp < S.hp0 - 1e-6) S.noHitT = 0; else S.noHitT += dt;
@@ -3355,7 +3355,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
 #survPrep .ch{display:flex;align-items:center;gap:calc(4px*var(--k))}#survPrep .ch .sl{width:calc(78px*var(--k))}#survPrep .ar2{width:calc(14px*var(--k));height:calc(18px*var(--k));background:url(art/ui/prep/arrow.webp) center/contain no-repeat;flex:none}
 #survPrep .two{display:grid;grid-template-columns:3fr 1fr;gap:calc(16px*var(--k))}#survPrep .rw{display:flex;gap:calc(8px*var(--k))}#survPrep .rw .sl{width:calc(70px*var(--k))}
 #survPrep .t-wu .pn:first-child{flex:1.35;max-width:calc(820px*var(--k))}
-#survPrep .t-wu .sl{position:relative}#survPrep .t-wu .sl[data-k]{touch-action:none;cursor:grab}#survPrep .t-wu .sl.dz{outline:none;box-shadow:none}#survPrep .t-wu .sl .fj{position:absolute;right:calc(-6px*var(--k));bottom:calc(-6px*var(--k));width:calc(24px*var(--k));height:calc(24px*var(--k));border-radius:50%;background:#111 url(art/ui/hud2/md_zq.webp) center/120% no-repeat;filter:grayscale(1) brightness(.55);box-shadow:0 0 0 1px #6a5a40;cursor:pointer;z-index:3}#survPrep .t-wu .sl .fj.on{filter:none;box-shadow:0 0 0 1px #9fd8ff,0 0 calc(10px*var(--k)) rgba(120,200,255,.9)}#survPrep .t-wu .sl .fj:hover{filter:brightness(1.2)}#survPrep .t-wu .sl.on::after,#survPrep .t-wu .sl.dz::after{content:"";position:absolute;inset:calc(-7px*var(--k));background:url(art/ui/prep/selglow.webp) center/100% 100% no-repeat;pointer-events:none}#survPrep .t-wu .sl.dz::after{background-image:url(art/ui/prep/dropbox.webp);inset:calc(-4px*var(--k));animation:wuDz .8s ease-in-out infinite alternate}@keyframes wuDz{from{opacity:.55}to{opacity:1}}#survPrep .t-wu .sl.on{box-shadow:none!important}#survPrep .t-wu h4::before{display:none}#survPrep .t-wu h4{background:url(art/ui/prep/h4.webp) left center/auto 100% no-repeat!important;min-height:calc(34px*var(--k));padding:0 0 0 calc(34px*var(--k));align-items:center;color:#ecd6a2}#survPrep .t-wu .db button{border:calc(10px*var(--k)) solid transparent!important;border-image:url(art/ui/prep/dbtn.webp) 36 fill stretch!important;background:none!important;box-shadow:none!important;border-radius:0;color:#f0dcae;padding:calc(2px*var(--k)) calc(16px*var(--k))}#survPrep .t-wu .db button:hover:not(:disabled){border-image-source:url(art/ui/prep/dbtn_on.webp)!important;color:#fff4d6;box-shadow:none!important}#survPrep .t-wu .db button:disabled{border-image-source:url(art/ui/prep/dbtn_off.webp)!important;color:#9a9086;opacity:1!important}#survPrep .t-wu .mv{position:absolute;top:50%;transform:translateY(-50%);width:22px;height:30px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#2a1608;background:linear-gradient(#ffe39a,#d9a640);border:1px solid #7a5420;border-radius:4px;box-shadow:0 2px 4px rgba(0,0,0,.6);cursor:pointer;z-index:2}#survPrep .t-wu .mv.l{left:-12px}#survPrep .t-wu .mv.r{right:-12px}#survPrep .t-wu .mv:hover{filter:brightness(1.15)}
+#survPrep .t-wu .sl{position:relative}#survPrep .t-wu .sl[data-k]{touch-action:none;cursor:grab}#survPrep .t-wu .sl.dz{outline:none;box-shadow:none}#survPrep .t-wu .sl .fj{position:absolute;right:calc(-6px*var(--k));bottom:calc(-6px*var(--k));width:calc(24px*var(--k));height:calc(24px*var(--k));border-radius:50%;background:#111 url(art/ui/hud2/md_zq.webp) center/120% no-repeat;filter:grayscale(1) brightness(.55);box-shadow:0 0 0 1px #6a5a40;cursor:pointer;z-index:3}#survPrep .t-wu .sl .fj.on{filter:none;box-shadow:0 0 0 1px #9fd8ff,0 0 calc(10px*var(--k)) rgba(120,200,255,.9)}#survPrep .t-wu .sl .fj:hover{filter:brightness(1.2)}#survPrep .t-wu .sl.on::after,#survPrep .t-wu .sl.dz::after{content:"";position:absolute;inset:calc(-7px*var(--k));background:url(art/ui/prep/selglow.webp) center/100% 100% no-repeat;pointer-events:none}#survPrep .t-wu .sl.dz::after{background-image:url(art/ui/prep/dropbox.webp);inset:calc(-4px*var(--k));animation:wuDz .8s ease-in-out infinite alternate}@keyframes wuDz{from{opacity:.55}to{opacity:1}}#survPrep .t-wu .sl.on{box-shadow:none!important}#survPrep .t-wu h4::before{display:none}#survPrep .t-wu h4{background:url(art/ui/prep/h4.webp) left center/auto 100% no-repeat!important;min-height:calc(34px*var(--k));padding:0 0 0 calc(34px*var(--k));align-items:center;color:#ecd6a2}#survPrep .t-wu .db button{border:calc(10px*var(--k)) solid transparent!important;border-image:url(art/ui/prep/dbtn.webp) 36 fill stretch!important;background:none!important;box-shadow:none!important;border-radius:0;color:#f0dcae;padding:calc(2px*var(--k)) calc(16px*var(--k))}#survPrep .t-wu .db button:hover:not(:disabled){border-image-source:url(art/ui/prep/dbtn_on.webp)!important;color:#fff4d6;box-shadow:none!important}#survPrep .t-wu .db button:disabled{border-image-source:url(art/ui/prep/dbtn_off.webp)!important;color:#9a9086;opacity:1!important}#survPrep .t-wu .mv{position:absolute;top:50%;transform:translateY(-50%);width:calc(13px*var(--k));height:calc(20px*var(--k));display:flex;align-items:center;justify-content:center;font-size:calc(9px*var(--kt));color:#ffe39a;background:rgba(20,12,6,.85);border:1px solid #b08a4a;border-radius:2px;box-shadow:0 2px 4px rgba(0,0,0,.6);cursor:pointer;z-index:2}#survPrep .t-wu .mv.l{left:calc(-7px*var(--k))}#survPrep .t-wu .mv.r{right:calc(-7px*var(--k))}#survPrep .t-wu .mv:hover{filter:brightness(1.15)}
 #survPrep .ab{position:absolute;left:1.5vw;right:1.5vw;bottom:calc(84px*var(--k));height:calc(140px*var(--k));display:flex;align-items:center}
 #survPrep .ab .md{width:calc(150px*var(--k));height:calc(150px*var(--k));flex:none;background:url(art/ui/prep/medal.webp) center/contain no-repeat;display:flex;align-items:center;justify-content:center;z-index:1}#survPrep .ab .md em{width:58%;height:58%}
 #survPrep .ar{flex:1;height:calc(124px*var(--k));margin:0 calc(-20px*var(--k));border:calc(22px*var(--k)) solid transparent;border-image:url(art/ui/prep/bar.webp) 60 90 fill stretch;display:flex;align-items:center;justify-content:space-around;padding:0 calc(26px*var(--k));box-sizing:border-box}
@@ -3374,6 +3374,17 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
 #survTut .tskip{position:fixed;right:calc(20px*var(--k));top:calc(18px*var(--k));padding:calc(4px*var(--k)) calc(14px*var(--k));background:linear-gradient(90deg,transparent,rgba(0,0,0,.7) 30%);font:600 calc(22px*var(--kt)) "PingFang SC",sans-serif;color:#9a8a70}#survTut .tskip b{color:#efe2c6}
 @media (max-height:520px){#survPrep .ac span{display:none}}
 #survPrep .tuthi{z-index:6;outline:2px solid #ffd86e;outline-offset:calc(4px*var(--k));border-radius:3px;animation:tutHi 1s ease-in-out infinite alternate}#survPrep .fj.tuthi{border-radius:50%}@keyframes tutHi{from{box-shadow:0 0 0 0 rgba(255,216,110,.0),0 0 calc(8px*var(--k)) rgba(255,216,110,.35)}to{box-shadow:0 0 0 calc(3px*var(--k)) rgba(255,216,110,.25),0 0 calc(22px*var(--k)) rgba(255,216,110,.75)}}
+#survTut.sty{left:0!important;right:0!important;top:0!important;bottom:0!important;width:auto!important;padding:0!important;display:block!important;pointer-events:auto;background:none!important;border:0!important;animation:none!important}
+#survTut.sty .lh2{position:fixed;left:1vw;bottom:calc(3vh + 22vh);height:min(60vh,560px);max-width:40vw;object-fit:contain;object-position:bottom left;image-rendering:pixelated;filter:drop-shadow(0 6px 18px rgba(0,0,0,.7));pointer-events:none;animation:biIn .35s ease-out both}
+#survTut.sty .bx2{position:fixed;left:3vw;right:3vw;bottom:3vh;height:22vh;min-height:110px;box-sizing:border-box;background:url(art/ui/dlg/box.webp) center/100% 100% no-repeat;padding:calc(2.6vh + 16px) 4.5vw 2vh;color:#f3e8cf;font-size:clamp(16px,2.6vh,27px);line-height:1.65;letter-spacing:.05em;text-shadow:0 2px 0 #000;animation:tutIn .25s ease-out}
+#survTut.sty.top .bx2{bottom:auto;top:13vh}
+#survTut.sty .bx2 p{margin:0;font:inherit}
+#survTut.sty .nm2{position:absolute;left:3vw;top:-3vh;height:clamp(36px,6.4vh,60px);min-width:clamp(140px,15vw,230px);padding:0 2vw;box-sizing:border-box;background:url(art/ui/dlg/name.webp) center/100% 100% no-repeat;display:flex;align-items:center;justify-content:center;color:#f3d08a;font-size:clamp(17px,2.8vh,28px);letter-spacing:.2em;text-indent:.2em}
+#survTut.sty .hn2{position:absolute;right:4vw;bottom:1.8vh;font-size:clamp(11px,1.7vh,16px);color:#a8977a}#survTut.sty .hn2 b{color:#efe2c6}
+#survTut.sty .fc2{position:absolute;right:1.4vw;top:50%;transform:translateY(-50%);width:16vh;height:16vh;background:center/cover no-repeat;border:2px solid #8a6a32;box-shadow:0 0 0 2px #000}
+#survTut.sty.top .bx2{padding-right:calc(4.5vw + 17vh)}#survTut.sty.top .hn2{right:calc(2.5vw + 17vh)}
+#survTut.sty .tskip{position:fixed}
+@media (max-height:520px){#survTut.sty .bx2{height:30vh;font-size:14px;line-height:1.5;padding:calc(2vh + 14px) 4vw 1vh}#survTut.sty .lh2{bottom:calc(3vh + 30vh);height:56vh}#survTut.sty.top .bx2{top:16vh}#survTut.sty .nm2{font-size:15px}}
 #survTut{position:fixed;right:1vw;bottom:calc(16vh + 60px);z-index:10040;display:flex;align-items:stretch;width:min(820px,60vw);cursor:pointer;animation:tutIn .3s ease-out}
 @keyframes tutIn{from{transform:translateY(16px);opacity:0}}
 #survTut .bx{position:relative;flex:1;border:calc(18px*var(--k)) solid transparent;border-image:url(art/ui/prep/dialog.webp) 40 fill stretch;padding:calc(6px*var(--k)) calc(18px*var(--k));color:#f6ecd6;display:flex;flex-direction:column;justify-content:center}
@@ -3768,20 +3779,30 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   };
   let tutSeen = {}; try { tutSeen = JSON.parse(localStorage.getItem(TUT_KEY) || '{}') || {}; } catch (e) {}
   let tutQ = [], tutSel = '';
+  const TUT_PG = { prep: 'jie', loot: 'shi', xiu: 'xiu', shop: 'shang', wu: 'wu' };   // 11/16 用户：指引跟着当前页走，换了页，上一页没讲完的就不讲了
   const tutHi = () => { if (!tutSel) return; const p = document.getElementById('survPrep'); const t = p && p.querySelector(tutSel); if (t) t.classList.add('tuthi'); };
   function tut(k) {
     if (!RT.on || tutSeen[k] || !TUT[k]) return; try { if (localStorage.getItem('szz-skip-tut') === '1') return; } catch (e) {}   // 11/14 用户：可设置跳过指引
     tutSeen[k] = 1; try { localStorage.setItem(TUT_KEY, JSON.stringify(tutSeen)); } catch (e) {}   // 11/16 修：这句以前被写进了注释里，指引会反复弹
-    const v = TUT[k]; for (const st of Array.isArray(v[0]) ? v : [v]) tutQ.push(st); if (!document.getElementById('survTut')) tutNext();
+    const v = TUT[k], pg = TUT_PG[k] || ''; for (const st of Array.isArray(v[0]) ? v : [v]) tutQ.push(Object.assign(st.slice(), { pg }));
+    if (!document.getElementById('survTut')) tutNext();   // 每句记着属于哪一页
   }
   function tutNext() {
     const old = document.getElementById('survTut'); if (old) old.remove();
     document.querySelectorAll('.tuthi').forEach(x => x.classList.remove('tuthi')); tutSel = '';
+    if (document.getElementById('survPrep')) tutQ = tutQ.filter(q => !q.pg || q.pg === prepTab);
     if (!tutQ.length) return;
     if (!document.getElementById('survPrep') && (banHold || talkHold || document.getElementById('waveBan') || document.getElementById('szzStory'))) { setTimeout(() => { if (!document.getElementById('survTut')) tutNext(); }, 600); return; }   // 11/16 用户：首领出场、横幅、对话时先等着，不叠在上面
-    const st = tutQ.shift(), [who, txt, sel] = st, [nm, face] = NPC[who], big = st === (TUT.prep && TUT.prep[0]);
+    const st = tutQ.shift(), [who, txt, sel] = st, [nm, face] = NPC[who], big = st.pg === 'jie' && txt === TUT.prep[0][1];
     tutSel = sel || ''; tutHi();
     const d = document.createElement('div'); d.id = 'survTut'; if (big) d.className = 'big'; setK(d);
+    const PREP = document.getElementById('survPrep');
+    if (PREP) {   // 11/16 用户：整备屏的指引照群侠/开场剧情那么大：底部大对话框 + 立绘；讲的东西在下半屏时，对话框挪到上面不挡住
+      const LH = { liu: 'liubei', guan: 'guanyu', zhang: 'zhangfei' }[who];
+      const tg = sel && PREP.querySelector(sel), r = tg && tg.getBoundingClientRect(), top = !!r && r.top + r.height / 2 > innerHeight * .55;
+      d.className = 'sty' + (top ? ' top' : '');
+      d.innerHTML = `${top ? '' : `<img class="lh2" src="art/ui/npc/${LH}_lihui.webp">`}<div class="bx2"><b class="nm2">${nm}</b><p>${txt}</p><small class="hn2">按 <b>空格键</b> 或点一下 继续</small>${top ? `<em class="fc2" style="background-image:url('${face}')"></em>` : ''}</div>`;
+    } else
     d.innerHTML = (big ? `<div class="lh" style="background-image:url('art/ui/npc/liubei_lihui.webp')"></div>` : '') + `<div class="bx"><b class="nm">${nm}</b><p>${txt}</p><small>${document.getElementById('survPrep') ? '按 <b>空格键</b> 或点一下 继续' : '点一下关闭'}</small></div>${big ? '' : `<em style="background-image:url('${face}')"></em>`}`;
     const go = () => { removeEventListener('keydown', key, true); if (!d.parentNode) return; d.remove(); tutNext(); };
     let holdT = 0; const up = e => { if (e.code === 'Space') clearTimeout(holdT); };
