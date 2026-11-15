@@ -55,7 +55,7 @@
     const bgs = box.querySelectorAll('.bg'), pt = box.querySelector('.pt'), nm = box.querySelector('.nm'), tx = box.querySelector('.tx');
     st = { i: -1, lines, done, typing: 0, full: '', bgi: 0, bg: '' };
     for (const L of lines) { const u = L.who && POR[L.who]; if (u) { const im = new Image(); im.src = u; } if (L.bg) { const im = new Image(); im.src = L.bg; } }   // 一开始就把这段剧情要用的立绘、背景都预载
-    const finish = () => { if (!st) return; clearInterval(st.typing); holdEnd(); const d = st.done; st = null; removeEventListener('keydown', kd, true); removeEventListener('keyup', ku, true); removeEventListener('pointerdown', pd, true); box.style.transition = 'opacity .3s'; box.style.opacity = '0'; box.style.pointerEvents = 'none'; const b = box; setTimeout(() => { b.remove(); document.querySelectorAll('#szzStory').forEach(x => x.remove()); }, 320); box = null; if (d) { try { d(); } catch (e) { console.error('story done', e); } } };   // 11/16 用户：最后一句不消失——收尾时把所有剧情层都清掉，回调出错也不卡
+    const finish = () => { if (!st) return; clearInterval(st.typing); holdEnd(); const d = st.done; st = null; removeEventListener('keydown', kd, true); removeEventListener('keyup', ku, true); removeEventListener('pointerdown', pd, true); box.style.transition = 'opacity .12s'; box.style.opacity = '0'; box.style.pointerEvents = 'none'; const b = box; setTimeout(() => { b.remove(); document.querySelectorAll('#szzStory').forEach(x => x.remove()); }, 130); /* 11/16 用户：最后一句到三赠有卡顿感，淡出缩到 0.12 秒 */ box = null; if (d) { try { d(); } catch (e) { console.error('story done', e); } } };   // 11/16 用户：最后一句不消失——收尾时把所有剧情层都清掉，回调出错也不卡
     const show = () => {
       st.i++; if (st.i >= st.lines.length) return finish();
       const L = st.lines[st.i];
