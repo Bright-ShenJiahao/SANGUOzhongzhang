@@ -3,7 +3,7 @@
   const MOTN = { chop: '劈', sweep: '横扫', thrust: '刺', spin: '转', up: '挑' };
   const ORDER = [0, 2, 3, 4, 7, 5, 8, 9, 1, 10];   // 刀 锤 枪 关刀 石子 弓 黄符 羽扇 剑 拳
   const TC = ['#c9b27a', '#c9b27a', '#6fb8ff', '#c58cff', '#ffb347'];
-  let box = null, tab = 0, sel = null, godT = 0;
+  let box = null, tab = 0, sel = null, godT = 0, rng = true, rngT = 0;   // 11/16 用户：试炼里常驻弓手、投石手（看乾坤屏挡箭等）
   const T = () => window.SURV && SURV.trial;
   const css = `#szzTrial{position:fixed;z-index:10040;left:8px;top:56px;width:min(330px,46vw);max-height:calc(100vh - 70px);display:flex;flex-direction:column;background:rgba(14,10,7,.93);border:1px solid #8a6a3a;color:#efe2c4;font-size:13px;box-shadow:0 6px 20px rgba(0,0,0,.6)}
 #szzTrial .hd{display:flex;align-items:center;justify-content:space-between;padding:6px 8px;border-bottom:1px solid rgba(184,149,90,.35);color:#ffd86e}
@@ -36,8 +36,9 @@
       ls = ids.map(id => { const g = t.GF[id]; return `<button data-g="${id}" class="${on.includes(id) ? 'on' : ''}"><span style="color:${TC[g.t + 1]}">${t.TIERN[g.t + 1]}</span> ${g.n}<small>${g.cn || (qg ? '轻功' : '内功')}</small></button>`; }).join('');
       const g = sel && t.GF[sel]; dt = g ? `<b>${g.n}</b>　${t.TIERN[g.t + 1]}阶<br>${g.d || ''}` : `<span style="opacity:.6">${qg ? '点一个轻功装上（只能装一个）' : '点心法装上（最多 3 个，再点取消）'}；武艺照常放。</span>`;
     }
-    box.innerHTML = `<div class="hd"><span>武学试炼</span><button class="x">关闭</button></div><div class="tabs">${tabs}</div><div class="ls">${ls}</div><div class="dt">${dt}</div>`;
+    box.innerHTML = `<div class="hd"><span>武学试炼</span><span><button class="rg">远程兵：${rng ? '开' : '关'}</button> <button class="x">关闭</button></span></div><div class="tabs">${tabs}</div><div class="ls">${ls}</div><div class="dt">${dt}</div>`;
     box.querySelector('.x').onclick = close;
+    box.querySelector('.rg').onclick = () => { rng = !rng; render(); };
     box.querySelectorAll('.tabs button').forEach(b => b.onclick = () => { const v = b.dataset.t; tab = v === 'gf' || v === 'qg' ? v : +v; sel = null; render(); });
     box.querySelectorAll('[data-k]').forEach(b => b.onclick = () => { sel = b.dataset.k; t.setLv(sel, 1); SURV.slots.splice(0, 5, sel, '', '', '', ''); render(); });
     box.querySelectorAll('[data-lv]').forEach(b => b.onclick = () => { t.setLv(sel, +b.dataset.lv); render(); });
@@ -55,7 +56,8 @@
   }
   function keep() {   // 无敌 + 关卡不结束
     if (!box) return;
-    try { if (typeof hero !== 'undefined' && hero && typeof maxHeroHp === 'function') hero.hp = maxHeroHp(); if (T()) T().long(); } catch (e) {}
+    try { if (typeof hero !== 'undefined' && hero && typeof maxHeroHp === 'function') hero.hp = maxHeroHp(); if (T()) T().long();
+      if (rng && T() && T().spawn && Date.now() - rngT > 3000) { rngT = Date.now(); for (const u of ['archer', 'slinger']) if (T().count(u) < 2) T().spawn(u); } } catch (e) {}
     godT = setTimeout(keep, 400);
   }
   const wait = (f, ms = 6000) => new Promise(res => { const t0 = Date.now(); const k = () => { const v = f(); if (v) res(v); else if (Date.now() - t0 > ms) res(null); else setTimeout(k, 120); }; k(); });
