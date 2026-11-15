@@ -211,7 +211,7 @@
   function open() {
     if (!run) return;
     ensureDom(); fit(); focus(true); shown = true; root.style.display = ''; t0 = performance.now();
-    if (run.blessed === false && window.SURV && SURV.blessOpts) { if (!run.storyDone && window.STORY) { run.storyDone = true; STORY.intro(() => setTimeout(bless, 200)); } else setTimeout(bless, 300); }   // 11/14 用户：出征先放开局剧情，再桃园三赠
+    if (run.blessed === false && window.SURV && SURV.blessOpts) { if (!run.storyDone && window.STORY) { run.storyDone = true; ['art/ui/prep/panel.webp', 'art/ui/prep/btn.webp', 'art/ui/npc/liubei_face.webp', 'art/ui/npc/guanyu_face.webp', 'art/ui/npc/zhangfei_face.webp'].forEach(u => { const i = new Image(); i.src = u; }); STORY.intro(bless); }   /* 11/16 用户：剧情最后一句到桃园三赠很慢——弹窗的图先在剧情里预载，并去掉等待 */ else setTimeout(bless, 300); }   // 11/14 用户：出征先放开局剧情，再桃园三赠
     if (!raf) raf = requestAnimationFrame(frame);
   }
   function close() { shown = false; if (root) root.style.display = 'none'; if (campBox) { campBox.remove(); campBox = null; } cancelAnimationFrame(raf); raf = 0; }
