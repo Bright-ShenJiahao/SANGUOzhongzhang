@@ -1047,7 +1047,8 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
           else if (!o.done) { o.done = 1; if (last) { dCircle(b.x, b.y, 150, 1.05, 80, { x: b.x }); if (L >= 7) hs.forEach(z => qBoom(z, .35, 3)); sfx(CR, b.x); shake = Math.max(shake, .3); } }
           if (o.t >= o.ny && o.t < T + 2) { o.ny += .5; dRect(x0, y0, a, Ln, hw * .8, z => DH(z, .15, 0, { x: x0 })); } } })); };
       if (L >= 5) { dragon(a0, 640, 1.55, 1); dragon(a0 - .31, 520, 1.55, 0); dragon(a0 + .31, 520, 1.55, 0); } else dragon(a0, 640, L >= 3 ? 2.45 : 2.15, 1); } });
-  for (const k of ['luoxuan', 'erduan', 'qianhou', 'sifang']) if (SK[k]) SK[k].off = true;   // 11/15：旧的枪招下架，枪只留这 12 招
+  for (const k of ['luoxuan', 'erduan', 'qianhou', 'sifang']) if (SK[k]) SK[k].off = true;
+  for (const k of ['pili', 'huogong', 'jushi']) if (SK[k]) SK[k].off = true;   // 11/16 用户：没美术的旧招（黄符/羽扇/石子各多出来的一招）下架，每种兵器只留新做的 12 招   // 11/15：旧的枪招下架，枪只留这 12 招
   Object.assign(DRS1, { qiang: .70, lianci: .60, lansao: .75, tiaoqiang: .72, lihua: .75, chong: .58, huimaq: .62, touqiang: .78, qianglin: .80, qijin: .60, bainiao: 1.10, longyin: .90 });
   Object.assign(DSP1, { qiang: 1.12, lianci: 1.36, lansao: 1.16, tiaoqiang: 1.36, lihua: 1.20, chong: 1.36, huimaq: 1.40, touqiang: 1.80, qianglin: 2.08, qijin: 2.30, bainiao: 2.12, longyin: 2.20 });
   // ---------- 关刀（11/16 用户定）：大扇面、慢而重；刀头带吃满伤害、贴身刀杆 50%；主打破甲，满层「碎甲」 ----------
