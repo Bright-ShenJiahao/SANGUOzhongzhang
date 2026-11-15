@@ -384,7 +384,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
         if (RT.on) {
           if (W.k >= W.N) { nodeClear(); return; }
         } else if (W.n >= WAVES) { won = true; return; }
-        hero.hp = Math.min(window.GEAR ? GEAR.maxHp() : 10, hero.hp + 2);   // 波间调息：回一点血
+        if (!RT.on) hero.hp = Math.min(window.GEAR ? GEAR.maxHp() : 10, hero.hp + 2);   // 波间调息：回一点血（11/16 用户：路线图里取消，回血靠调息/营地）
         W.between = .8;
         if (!offerSkill() && window.ROGUE) ROGUE.offer();   // 波间：还有没学会的武艺就先选武艺，否则选锦囊
       }
@@ -2760,6 +2760,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     });
     r.still = Math.min(.7, r.still); return r;
   }
+  const FJ_DMG = 1.35, fjCost = () => zqMax() * .05;   // 发劲：每次出手耗 5% 真气上限
   const zqMax = () => Math.round(maxHp() * (1 + .06 * GM.qh) * AFX.nl() * (HAS('hufu2') ? .5 : 1) * 10) / 10;
   function gfText(g) {
     const f = .85 * GLVM[gfLv(g.id) - 1], pc = v => (v * 100).toFixed(1).replace(/\.0$/, '') + '%';
@@ -2826,7 +2827,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
         if (RT.on) {
           S.gf.forEach(id => { if (id) { const l0 = gfLv(id); S.gfExp[id] = (S.gfExp[id] || 0) + d * AFX.xp() * (GF[id].c >= 0 ? XPM[Math.max(1, gfSame(GF[id].c))] : 1); if (gfLv(id) > l0) floaters.push({ x: hero.x, y: hero.y - 90, t: 0, txt: GF[id].n + ' LV' + gfLv(id), color: '#ffd86e' }); } });
           if (GM.kh) heal(maxHp() * GM.kh * d);
-          S.zq = Math.min(zqMax(), S.zq + zqMax() * .006 * d);
+          S.zq = Math.min(zqMax(), S.zq + zqMax() * .003 * d);
           addXiu(d);
         }
       }
@@ -2834,6 +2835,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     }
     if (RT.on) {
       S.zq = Math.min(zqMax(), S.zq + zqMax() * (.005 + .004 * GM.hy) * (1 + IT('regen')) * AFX.nl() * (HURT('nei') ? .7 : 1) * dt);
+      if (!S.lijie && S.zq <= .01) { S.lijie = true; floaters.push({ x: hero.x, y: hero.y - 70, t: 0, txt: '力竭', color: '#7fb8ff' }); } else if (S.lijie && S.zq >= zqMax() * .2) S.lijie = false;   // 力竭：真气见底，护体和发劲都停，回到两成才恢复
       if (hero.hp < S.hp0 - 1e-6) S.noHitT = 0; else S.noHitT += dt;
       S.hp0 = hero.hp;
       if (S.noHitT >= 3 && GM.lhj) S.lhjReady = true;
@@ -2860,6 +2862,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
         const t = nearest(k.stone || k.hammer || k.bow ? k.need * DK * rsOf(key) : 200); if (t) hero.f = Math.sign(t.x - hero.x) || hero.f;
         CM = skillMul(key); RM = k.dk ? DLV.sz[lvOf(key) - 1] * rsOf(key) : lvOf(key) >= 5 ? 1.1 : 1; const ch = S.wind.ch; S.chain = ch; S.lastCat = wepOf(key); S.lastI = i;
                 S.lhjOn = S.lhjReady; S.lhjReady = false; if (S.lhjOn) S.noHitT = 0;
+        if (S.fj && S.fj[key] && !S.lijie) { const fc = fjCost(); if (S.zq >= fc) { S.zq -= fc; CM *= FJ_DMG; RM *= 1.12; S.fjN = (S.fjN || 0) + 1; if (S.fjN % 3 === 1) floaters.push({ x: hero.x + R(-10, 10), y: hero.y - 62, t: 0, txt: '发劲', color: '#8fd0ff' }); } }   // 11/16 用户定：发劲（照群侠）——点亮的武艺每次出手多耗真气，伤害 ×1.35
         CK = key; const channel = k.cast(); if (k.dk && k.lv10 && lvOf(key) >= 10) { try { k.lv10(); } catch (e) { console.error(e); } } fx2Play(key); S.lhjOn = false;   // 11/16 LV10 突破
         const l0 = lvOf(key); S.mast[key] = (S.mast[key] || 0) + AFX.xp(); if (lvOf(key) > l0) floaters.push({ x: hero.x, y: hero.y - 76, t: 0, txt: k.name + ' LV' + lvOf(key), color: '#ffd86e' });
         if (!k.dk && lvOf(key) >= 10) later(.2, () => { CM *= .6; k.cast(); });   // LV10 质变：多出一击
@@ -3106,7 +3109,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     setTimeout(() => { zs.length = 0; }, 950);
     const R = S.rep = { stolen: S.stolen || 0, kills: (typeof kills === 'number' ? kills : 0) - (S.k0 || 0), got: S.coinGot || 0, left: 0, taken: Math.round((S.taken || 0) * 10), tiao: 0, lv0: S.lvAt0 || S.lv, xiu: 0 };
     { let sum = 0; for (const c of S.coins) sum += c.v; R.left = Math.floor(sum * .9); S.money += R.left; S.coins.length = 0; }   // 地上没捡的铜钱：收回九成
-    { R.zqLeft = Math.round(S.zq * 10); const c = S.zq * (.3 + IT('tiao')); if (c > .05) { heal(c); R.tiao = Math.round(c * 10); } S.zq = 0; if (IT('after')) heal(maxHp() * IT('after')); }   // 调息：剩余真气 30% 化成气血
+    { R.zqLeft = Math.round(S.zq * 10); const c = S.zq * (.2 + .1 * Math.max(0, AFX.nl() - 1) + IT('tiao')); if (c > .05) { heal(c); R.tiao = Math.round(c * 10); } S.zq = 0; if (IT('after')) heal(maxHp() * IT('after')); }   // 调息：剩余真气 30% 化成气血
     if (nd.type === 'boss' && nd.final) { won = true; return; }
     if (window.SFX) SFX.play('j_win');
     R.xiu = nd.type === 'boss' ? 60 : nd.type === 'elite' ? 40 : 25; addXiu(R.xiu);
@@ -3130,7 +3133,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     if (window.HERO_SKIN) for (const k of S.slots) if (k && SK[k]) HERO_SKIN.preload(HERO_SKIN.cur(), preOf(k));
     S.diluUsed = 0; S.huxinUsed = 0; S.lnT = 0; S.tpT = 0; S.jili = []; if (HAS('qingnang')) heal(maxHp() * .1);   // 11/14：学过的武艺进图鉴
     if (!c2ok && typeof ensureAssets === 'function') ensureAssets('chapter2', { silent: true }).then(() => { c2ok = true; });
-    GM = gfCalc(); S.zq = zqMax(); S.hp0 = hero.hp; S.noHitT = 0; S.xy = 0;
+    GM = gfCalc(); S.zq = zqMax(); S.lijie = false; S.fjN = 0; S.hp0 = hero.hp; S.noHitT = 0; S.xy = 0;
     S.k0 = typeof kills === 'number' ? kills : 0; S.coinGot = 0; S.taken = 0; S.hutiSum = 0; S.dps = {}; S.lastHp = hero.hp; S.coins = []; S.lvAt0 = S.lv; S.tutT = 0; S.stolen = 0; S.thiefCd = 8; S.catDone = false; TELE.length = 0; BOOM.length = 0;
     RT.node = nd; W.N = ROUTE.waves(nd); W.started = true; W.between = 0; W.pick = false; S.wind = null; S.recov = null; S.later = []; bolts.length = 0; zones.length = 0; DKO.length = 0; fx.length = 0;
     zs.length = 0; eshots.length = 0; if (window.ARENA) ARENA.start(ROUTE.mapOf(nd));
@@ -3352,7 +3355,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
 #survPrep .ch{display:flex;align-items:center;gap:calc(4px*var(--k))}#survPrep .ch .sl{width:calc(78px*var(--k))}#survPrep .ar2{width:calc(14px*var(--k));height:calc(18px*var(--k));background:url(art/ui/prep/arrow.webp) center/contain no-repeat;flex:none}
 #survPrep .two{display:grid;grid-template-columns:3fr 1fr;gap:calc(16px*var(--k))}#survPrep .rw{display:flex;gap:calc(8px*var(--k))}#survPrep .rw .sl{width:calc(70px*var(--k))}
 #survPrep .t-wu .pn:first-child{flex:1.35;max-width:calc(820px*var(--k))}
-#survPrep .t-wu .sl{position:relative}#survPrep .t-wu .sl[data-k]{touch-action:none;cursor:grab}#survPrep .t-wu .sl.dz{outline:none;box-shadow:none}#survPrep .t-wu .sl.on::after,#survPrep .t-wu .sl.dz::after{content:"";position:absolute;inset:calc(-7px*var(--k));background:url(art/ui/prep/selglow.webp) center/100% 100% no-repeat;pointer-events:none}#survPrep .t-wu .sl.dz::after{background-image:url(art/ui/prep/dropbox.webp);inset:calc(-4px*var(--k));animation:wuDz .8s ease-in-out infinite alternate}@keyframes wuDz{from{opacity:.55}to{opacity:1}}#survPrep .t-wu .sl.on{box-shadow:none!important}#survPrep .t-wu h4::before{display:none}#survPrep .t-wu h4{background:url(art/ui/prep/h4.webp) left center/auto 100% no-repeat!important;min-height:calc(34px*var(--k));padding:0 0 0 calc(34px*var(--k));align-items:center;color:#ecd6a2}#survPrep .t-wu .db button{border:calc(10px*var(--k)) solid transparent!important;border-image:url(art/ui/prep/dbtn.webp) 36 fill stretch!important;background:none!important;box-shadow:none!important;border-radius:0;color:#f0dcae;padding:calc(2px*var(--k)) calc(16px*var(--k))}#survPrep .t-wu .db button:hover:not(:disabled){border-image-source:url(art/ui/prep/dbtn_on.webp)!important;color:#fff4d6;box-shadow:none!important}#survPrep .t-wu .db button:disabled{border-image-source:url(art/ui/prep/dbtn_off.webp)!important;color:#9a9086;opacity:1!important}#survPrep .t-wu .mv{position:absolute;top:50%;transform:translateY(-50%);width:22px;height:30px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#2a1608;background:linear-gradient(#ffe39a,#d9a640);border:1px solid #7a5420;border-radius:4px;box-shadow:0 2px 4px rgba(0,0,0,.6);cursor:pointer;z-index:2}#survPrep .t-wu .mv.l{left:-12px}#survPrep .t-wu .mv.r{right:-12px}#survPrep .t-wu .mv:hover{filter:brightness(1.15)}
+#survPrep .t-wu .sl{position:relative}#survPrep .t-wu .sl[data-k]{touch-action:none;cursor:grab}#survPrep .t-wu .sl.dz{outline:none;box-shadow:none}#survPrep .t-wu .sl .fj{position:absolute;right:calc(-6px*var(--k));bottom:calc(-6px*var(--k));width:calc(24px*var(--k));height:calc(24px*var(--k));border-radius:50%;background:#111 url(art/ui/hud2/md_zq.webp) center/120% no-repeat;filter:grayscale(1) brightness(.55);box-shadow:0 0 0 1px #6a5a40;cursor:pointer;z-index:3}#survPrep .t-wu .sl .fj.on{filter:none;box-shadow:0 0 0 1px #9fd8ff,0 0 calc(10px*var(--k)) rgba(120,200,255,.9)}#survPrep .t-wu .sl .fj:hover{filter:brightness(1.2)}#survPrep .t-wu .sl.on::after,#survPrep .t-wu .sl.dz::after{content:"";position:absolute;inset:calc(-7px*var(--k));background:url(art/ui/prep/selglow.webp) center/100% 100% no-repeat;pointer-events:none}#survPrep .t-wu .sl.dz::after{background-image:url(art/ui/prep/dropbox.webp);inset:calc(-4px*var(--k));animation:wuDz .8s ease-in-out infinite alternate}@keyframes wuDz{from{opacity:.55}to{opacity:1}}#survPrep .t-wu .sl.on{box-shadow:none!important}#survPrep .t-wu h4::before{display:none}#survPrep .t-wu h4{background:url(art/ui/prep/h4.webp) left center/auto 100% no-repeat!important;min-height:calc(34px*var(--k));padding:0 0 0 calc(34px*var(--k));align-items:center;color:#ecd6a2}#survPrep .t-wu .db button{border:calc(10px*var(--k)) solid transparent!important;border-image:url(art/ui/prep/dbtn.webp) 36 fill stretch!important;background:none!important;box-shadow:none!important;border-radius:0;color:#f0dcae;padding:calc(2px*var(--k)) calc(16px*var(--k))}#survPrep .t-wu .db button:hover:not(:disabled){border-image-source:url(art/ui/prep/dbtn_on.webp)!important;color:#fff4d6;box-shadow:none!important}#survPrep .t-wu .db button:disabled{border-image-source:url(art/ui/prep/dbtn_off.webp)!important;color:#9a9086;opacity:1!important}#survPrep .t-wu .mv{position:absolute;top:50%;transform:translateY(-50%);width:22px;height:30px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#2a1608;background:linear-gradient(#ffe39a,#d9a640);border:1px solid #7a5420;border-radius:4px;box-shadow:0 2px 4px rgba(0,0,0,.6);cursor:pointer;z-index:2}#survPrep .t-wu .mv.l{left:-12px}#survPrep .t-wu .mv.r{right:-12px}#survPrep .t-wu .mv:hover{filter:brightness(1.15)}
 #survPrep .ab{position:absolute;left:1.5vw;right:1.5vw;bottom:calc(84px*var(--k));height:calc(140px*var(--k));display:flex;align-items:center}
 #survPrep .ab .md{width:calc(150px*var(--k));height:calc(150px*var(--k));flex:none;background:url(art/ui/prep/medal.webp) center/contain no-repeat;display:flex;align-items:center;justify-content:center;z-index:1}#survPrep .ab .md em{width:58%;height:58%}
 #survPrep .ar{flex:1;height:calc(124px*var(--k));margin:0 calc(-20px*var(--k));border:calc(22px*var(--k)) solid transparent;border-image:url(art/ui/prep/bar.webp) 60 90 fill stretch;display:flex;align-items:center;justify-content:space-around;padding:0 calc(26px*var(--k));box-sizing:border-box}
@@ -3370,6 +3373,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
 #survPrep h4 .so{padding:0 calc(10px*var(--k));height:calc(26px*var(--k));border:calc(6px*var(--k)) solid transparent;border-image:url(art/ui/prep/sbtn.webp) 30 fill stretch;background:none;color:#cbb894;font:600 calc(14px*var(--kt)) sans-serif;letter-spacing:0;cursor:pointer;line-height:1}
 #survTut .tskip{position:fixed;right:calc(20px*var(--k));top:calc(18px*var(--k));padding:calc(4px*var(--k)) calc(14px*var(--k));background:linear-gradient(90deg,transparent,rgba(0,0,0,.7) 30%);font:600 calc(22px*var(--kt)) "PingFang SC",sans-serif;color:#9a8a70}#survTut .tskip b{color:#efe2c6}
 @media (max-height:520px){#survPrep .ac span{display:none}}
+#survPrep .tuthi{z-index:6;outline:2px solid #ffd86e;outline-offset:calc(4px*var(--k));border-radius:3px;animation:tutHi 1s ease-in-out infinite alternate}#survPrep .fj.tuthi{border-radius:50%}@keyframes tutHi{from{box-shadow:0 0 0 0 rgba(255,216,110,.0),0 0 calc(8px*var(--k)) rgba(255,216,110,.35)}to{box-shadow:0 0 0 calc(3px*var(--k)) rgba(255,216,110,.25),0 0 calc(22px*var(--k)) rgba(255,216,110,.75)}}
 #survTut{position:fixed;right:1vw;bottom:calc(16vh + 60px);z-index:10040;display:flex;align-items:stretch;width:min(820px,60vw);cursor:pointer;animation:tutIn .3s ease-out}
 @keyframes tutIn{from{transform:translateY(16px);opacity:0}}
 #survTut .bx{position:relative;flex:1;border:calc(18px*var(--k)) solid transparent;border-image:url(art/ui/prep/dialog.webp) 40 fill stretch;padding:calc(6px*var(--k)) calc(18px*var(--k));color:#f6ecd6;display:flex;flex-direction:column;justify-content:center}
@@ -3599,7 +3603,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     const need = XIU_NEED(S.lv);
     return `<div class="ab"><div class="md"><em style="background-image:url('${A('bag')}')"></em></div><div class="ar">${ai.map((r, i) => col(r[0], ATI[r[4]], r[1], T(r[0], ATD[r[4]] + '', '当前效果：' + r[2]))).join('')}<i class="sp"></i>`
       + col('气血', 'hp', Math.round(mh * 10), T('气血', '归零就倒下。打完一关不会自动回满，靠打完一关时剩下的真气换成气血，和道具回血。', `当前 ${Math.ceil(hero.hp * 10)} / ${Math.round(mh * 10)}`))
-      + col('真气', 'zq', Math.round(zqMax() * 10), T('真气', '第二条血：挨打时先扣真气，替你挡掉三成伤害（护身）。打完一关，剩下的真气三成换成气血。战斗中会慢慢回复。', `当前 ${Math.round(S.zq * 10)} / ${Math.round(zqMax() * 10)}`))
+      + col('真气', 'zq', Math.round(zqMax() * 10), T('真气', '挨打时先扣真气替你挡三成伤害（护体）；在「武学」页点亮武艺右下角的灯，出手时耗真气加大威力（发劲）。真气见底就【力竭】，护体、发劲都停。每仗开打回满，打完剩下的两成换成气血（调息）。', `当前 ${Math.round(S.zq * 10)} / ${Math.round(zqMax() * 10)}`))
       + col('暴击', 'crit', Math.round(cr * 100) + '%', T('暴击', '出手有几率打出暴击，造成加倍伤害。运气、道具和心法都能提高。', `当前会心几率 ${Math.round(cr * 100)}%`))
       + col('修为', 'xiu', 'LV' + S.lv, T('修为', '杀敌和过关都会涨修为，每升一级攒一次「修炼」机会，在整备屏「修炼」页三选一提升属性。', `LV${S.lv}${need ? '，本级进度 ' + Math.round(S.xiu / need * 100) + '%' : ''}，待修炼 ${S.bank || 0} 次`))
       + `</div><div class="md"><em style="background-image:url('${A('wuxue')}')"></em></div></div>`;
@@ -3637,7 +3641,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       body = `<div class="pn"><h4>总结</h4><div class="sm"><span><em style="background-image:url('${A('kill')}')"></em>斩敌</span><b>${R.kills}</b><span><em style="background-image:url('${A('coin')}')"></em>铜钱</span><b>${R.got + R.left}</b></div>${R.left ? `<p class="nt">地上没捡的钱袋，帮你收回了九成：+${R.left}</p>` : ''}
           ${R.bao && BAO[R.bao] ? `<h4>战利宝物</h4><div class="bq"><img src="${BAO[R.bao].image || `art/ui/bao/${R.bao}.webp`}"><div><p><b style="color:${BQC[BAO[R.bao].q]}">${BAO[R.bao].n}</b><i style="color:${BQC[BAO[R.bao].q]};border-color:${BQC[BAO[R.bao].q]}">${BQN[BAO[R.bao].q]}</i></p><p>${BAO[R.bao].d}</p>${BAO[R.bao].c ? `<p class="c">代价：${BAO[R.bao].c}</p>` : ''}<p class="h">之后在地图右上「兵籍牒」和图鉴「宝物」里都能看</p></div></div>` : ''}
           <h4>输出统计</h4>${outs}
-          <h4>真气回血</h4><p class="ln">剩余 <em style="background-image:url('${A('zq')}')"></em> 真气 <b class="c1">${R.zqLeft || 0}</b> 点</p><p class="ln">转换为 <b class="c2">${R.tiao}</b> 点 <em style="background-image:url('${A('hp')}')"></em> 气血</p><p class="ln"><em style="background-image:url('${A('huti')}')"></em> 护体 总共免除了 <b>${Math.round((S.hutiSum || 0) * 10)}</b> 点伤害</p></div>
+          <div class="tx"><h4>调息</h4><p class="ln">剩余 <em style="background-image:url('${A('zq')}')"></em> 真气 <b class="c1">${R.zqLeft || 0}</b> 点</p><p class="ln">转换为 <b class="c2">${R.tiao}</b> 点 <em style="background-image:url('${A('hp')}')"></em> 气血</p><p class="ln"><em style="background-image:url('${A('huti')}')"></em> 护体 总共免除了 <b>${Math.round((S.hutiSum || 0) * 10)}</b> 点伤害</p></div></div>
         <div class="pn"><h4>修为</h4>${bar(S.lv, Math.min(1, S.xiu / XIU_NEED(S.lv)), A('xiu'))}<h4>武艺</h4>${S.slots.filter(Boolean).map(k => bar(lvOf(k), mastR(k), IMGU[k])).join('')}<h4>心法</h4>${S.gf.concat([S.qg]).filter(Boolean).map(id => bar(gfLv(id), gfR(id), `art/ui/gf/${id}.webp`)).join('') || '<p class="em2" style="padding:6px 0">还没有心法</p>'}<h4>宝物</h4>${(S.bao || []).map(k => `<p class="ln" style="display:flex;gap:6px;align-items:center" title="${BAO[k].d}${BAO[k].c ? '；代价：' + BAO[k].c : ''}"><img src="art/ui/bao/${k}.webp" style="width:30px;height:30px;flex:none"><b style="color:${BQC[BAO[k].q]};flex:none">${BAO[k].n}</b><span style="opacity:.8">${BAO[k].d}</span></p>`).join('') || '<p class="em2" style="padding:6px 0">还没有宝物</p>'}${(S.shang || []).length ? `<h4>伤势</h4>${S.shang.map(k => `<p class="ln" style="display:flex;gap:6px;align-items:center"><img src="art/ui/fx/sh_${k}.webp" style="height:30px;flex:none"><b style="color:#ff8a7a;flex:none">${SHANG[k].n}</b>　${SHANG[k].d}（营地休整可治）</p>`).join('')}` : ''}</div>`;
     } else if (prepTab === 'shi') {   // 11/11：照群侠，一排竖卡，移上去看详情；按钮直接在卡上
       const L = S.loot.slice().sort((a, b) => S.sortDn === false ? (a.q || 0) - (b.q || 0) : (b.q || 0) - (a.q || 0)); S.loot = L; selLoot = Math.min(selLoot, L.length - 1);
@@ -3645,7 +3649,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     } else if (prepTab === 'xiu') {
       if (!S.bank) body = `<div class="pn wide"><p class="em2">修为 LV.${S.lv} · 暂无修炼机会<br><small>斩敌、打完仗都会攒修为，每升一层得一次修炼</small></p></div>`;
       else { S.xopts = S.xopts || rollXiu(); body = S.xopts.map((o, j) => { const [a0, v0] = o.adds[0]; return `<div class="pn cd"><em class="bi" style="background-image:url('${A(ATI[a0])}')"></em><h3>${ATN[a0]}修炼</h3><p style="color:${RAR[o.q][1]}">${['普通', '精良', '稀有', '绝世'][o.q]}</p><i class="dv"></i>${o.adds.map(([a, v]) => `<p class="up"><b>+${v}</b> ${ATN[a]}</p>`).join('')}<p class="sd">${ATD[a0]}</p><button class="bb" data-a="xiu" data-i="${j}">修 炼</button></div>`; }).join('');
-        left = `<button class="bb rf" data-a="xrr" ${S.xrr ? 'disabled' : ''}>刷新<span>${S.xrr ? 0 : 1}/1</span></button>`; }
+        left = `<button class="bb rf" data-a="xrr" ${(+S.xrr || 0) >= 2 ? 'disabled' : ''}>刷新<span>${2 - (+S.xrr || 0)}/2</span></button>`; }   // 11/16 用户：每次修炼机会能刷新 2 次
     } else if (prepTab === 'shang') {   // 11/11：照群侠，5 件货一排排开，移上去看详情；购买、锁定在卡上
       const L = S.shop, bt = [].concat(S.bought ?? []);
       body = `<div class="pn wide sw"><h4>行商<small>可买多件 · 不刷新 · 越往后越贵</small></h4><div class="srow">${L.map((it, i) => { const sb = bt.includes(i);
@@ -3657,7 +3661,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       if (!selWu || !all.includes(selWu)) selWu = S.slots[0];
       const isSk = id => !!SK[id], on = id => S.slots.includes(id) || S.gf.includes(id) || S.qg === id;
       const ic = id => isSk(id) ? IMGU[id] || '' : `art/ui/gf/${id}.webp`;
-      const chain = S.slots.map((k, i) => `${i ? `<i class="ar2"></i>` : ''}<div class="sl ${k === selWu ? 'on' : ''}" data-ci="${i}" ${k ? `data-a="wsel" data-k="${k}"` : ''}><em style="background-image:url('${k ? ic(k) : A('e_wu')}')" class="${k ? '' : 'ghost'}"></em>${k && k === selWu ? `${i > 0 && S.slots[i - 1] ? '<b class="mv l" data-a="wl">◀</b>' : ''}${i < 4 && S.slots[i + 1] ? '<b class="mv r" data-a="wr">▶</b>' : ''}` : ''}</div>`).join('');   // 11/16 用户：上阵栏里也能前后移动（选中的格子两边出小箭头）；还能拖动
+      const chain = S.slots.map((k, i) => `${i ? `<i class="ar2"></i>` : ''}<div class="sl ${k === selWu ? 'on' : ''}" data-ci="${i}" ${k ? `data-a="wsel" data-k="${k}"` : ''}><em style="background-image:url('${k ? ic(k) : A('e_wu')}')" class="${k ? '' : 'ghost'}"></em>${k ? `<i class="fj${S.fj && S.fj[k] ? ' on' : ''}" data-a="fj" data-k="${k}" title="发劲：点亮后这一路每次出手多耗真气，威力 ×1.35"></i>` : ''}${k && k === selWu ? `${i > 0 && S.slots[i - 1] ? '<b class="mv l" data-a="wl">◀</b>' : ''}${i < 4 && S.slots[i + 1] ? '<b class="mv r" data-a="wr">▶</b>' : ''}` : ''}</div>`).join('');   // 11/16 用户：上阵栏里也能前后移动（选中的格子两边出小箭头）；还能拖动
       const gfs = S.gf.map((id, i) => `<div class="sl ${id && id === selWu ? 'on' : ''}" data-gi="${i}" ${id ? `data-a="wsel" data-k="${id}"` : ''}><em class="${id ? '' : 'ghost'}" style="background-image:url('${id ? ic(id) : A('e_xin')}')"></em></div>`).join('');
       const zt = S.slots.filter(Boolean).reduce((t, k) => t + SK[k].wu + SK[k].rc, 0);
       const wuDet = k => { const p = wuParts(k), pw = powParts(k), cur = lvOf(k);
@@ -3667,7 +3671,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       const sel = selWu, o = sel && (isSk(sel) ? SK[sel] : GF[sel]);
       const det = o ? `<div class="dt"><div class="dh"><em style="background-image:url('${ic(sel)}')"></em><div><h3>${isSk(sel) ? o.name : o.n}</h3><p>${isSk(sel) ? (o.tier ? TIERN[o.tier] + '阶' : '基础') : GTN[o.t] + '阶'}</p><div class="tg">${(isSk(sel) ? ['武艺', '主动', WEPN[wepOf(sel)]] : [o.qg ? '轻功' : '心法', '被动']).map(t => `<span>${t}</span>`).join('')}</div></div></div>${isSk(sel) ? bar(lvOf(sel), mastR(sel)) : bar(gfLv(sel), gfR(sel))}${isSk(sel) ? wuDet(sel) : `<h5>效果</h5><p class="ds">${o.d}</p>`}
         <div class="db">${on(sel) ? `<button data-a="woff">卸下</button>` : `<button data-a="won">上阵</button>`}${isSk(sel) && on(sel) ? `<button data-a="wl">◀ 提前</button><button data-a="wr">延后 ▶</button>` : ''}</div></div>` : '<p class="em2">选择一门武学</p>';
-      body = `<div class="pn"><h4>上阵武艺<small>按顺序循环出手</small></h4><div class="ch">${chain}</div><div class="two"><div><h4>心法</h4><div class="rw">${gfs}</div></div><div><h4>轻功</h4><div class="rw"><div class="sl ${S.qg && S.qg === selWu ? 'on' : ''}" data-qs="1" ${S.qg ? `data-a="wsel" data-k="${S.qg}"` : ''}><em class="${S.qg ? '' : 'ghost'}" style="background-image:url('${S.qg ? ic(S.qg) : A('e_qing')}')"></em></div></div></div></div><h4>周天信息</h4><p class="ln">一轮出手总时长 <b class="c1">${zt.toFixed(1)}</b> 秒　真气回复 <b class="c1">${((.005 + .004 * GM.hy) * (1 + IT('regen')) * 100).toFixed(1)}%</b>/秒</p></div>
+      body = `<div class="pn"><h4>上阵武艺<small>点右下角的小灯开启【发劲】</small></h4><div class="ch">${chain}</div><div class="two"><div><h4>心法</h4><div class="rw">${gfs}</div></div><div><h4>轻功</h4><div class="rw"><div class="sl ${S.qg && S.qg === selWu ? 'on' : ''}" data-qs="1" ${S.qg ? `data-a="wsel" data-k="${S.qg}"` : ''}><em class="${S.qg ? '' : 'ghost'}" style="background-image:url('${S.qg ? ic(S.qg) : A('e_qing')}')"></em></div></div></div></div><div class="zt"><h4>周天信息</h4><p class="ln">一轮出手总时长 <b class="c1">${zt.toFixed(1)}</b> 秒</p><p class="ln">发劲每轮耗真气 <b class="c1">${Math.round(S.slots.filter(k => k && S.fj && S.fj[k]).length * fjCost() * 10)}</b>　真气回复 <b class="c1">${(zqMax() * (.005 + .004 * GM.hy) * (1 + IT('regen')) * AFX.nl() * 10).toFixed(1)}</b>/秒</p></div></div>
         <div class="pn">${det}</div><div class="pn" data-own="1"><h4>掌握武学</h4><div class="gd">${Array.from({ length: Math.max(12, all.length) }, (_, i) => all[i] ? `<div class="sl ${all[i] === selWu ? 'on' : ''}" data-a="wsel" data-k="${all[i]}"><em style="background-image:url('${ic(all[i])}')"></em>${on(all[i]) ? '<i class="eq">装</i>' : ''}</div>` : '<div class="sl"></div>').join('')}</div><h4>道具</h4><div class="gd">${(S.items || []).map(id => `<div class="sl" title="${ITEMS[id].n}：${ITEMS[id].d}"><em style="background-image:url('art/ui/item/${id}.webp')"></em></div>`).join('') || '<p class="em2" style="padding:4px 0;font-size:13px">还没有道具</p>'}</div></div>`;
     }
     const badge = k => k === 'xiu' && S.bank ? `<i>${S.bank}</i>` : k === 'shi' && S.loot.length ? `<i>${S.loot.length}</i>` : '';
@@ -3689,15 +3693,17 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       else if (a === 'sell') { S.money += S.loot[i].sell; S.loot.splice(i, 1); if (window.SFX) SFX.play('coin'); }
       else if (a === 'lock') { const it = S.shop[i]; S.shopLock = S.shopLock && S.shopLock === it ? null : it; if (window.SFX) SFX.play('j_pick0'); }
       else if (a === 'buy') { const it = S.shop[i]; if (S.money >= it.price) { S.money -= it.price; learn(it); S.bought = [].concat(S.bought ?? [], i); if (S.shopLock === it) S.shopLock = null; if (window.SFX) SFX.play('j_shop'); } }
-      else if (a === 'xiu') { const o = S.xopts[i]; if (window.SFX) SFX.play('j_pick' + o.q); for (const [q, v] of o.adds) S.atAdd[q] += v; S.bank--; S.xopts = null; S.xrr = false; }
-      else if (a === 'xrr') { S.xopts = null; S.xrr = true; }
+      else if (a === 'xiu') { const o = S.xopts[i]; if (window.SFX) SFX.play('j_pick' + o.q); for (const [q, v] of o.adds) S.atAdd[q] += v; S.bank--; S.xopts = null; S.xrr = 0; }
+      else if (a === 'xrr') { if ((+S.xrr || 0) < 2) { S.xopts = null; S.xrr = (+S.xrr || 0) + 1; } }
       else if (a === 'wsel') selWu = k;
+      else if (a === 'fj') { S.fj = S.fj || {}; S.fj[k] = !S.fj[k]; if (window.SFX) SFX.play(S.fj[k] ? 'j_pick1' : 'tick'); }
       else if (a === 'won') { const id = selWu; S.owned = (S.owned || []).filter(x => x !== id); if (SK[id]) { const f = S.slots.indexOf(''); if (f >= 0) S.slots[f] = id; else { S.owned.push(S.slots[4]); S.slots[4] = id; } } else if (GF[id].qg) { if (S.qg) S.owned.push(S.qg); S.qg = id; } else { const f = S.gf.indexOf(''); if (f >= 0) S.gf[f] = id; else { S.owned.push(S.gf[2]); S.gf[2] = id; } } GM = gfCalc(); }
       else if (a === 'woff') { const id = selWu; if (SK[id]) { if (S.slots.filter(Boolean).length <= 1) return; const j = S.slots.indexOf(id); S.slots.splice(j, 1); S.slots.push(''); } else if (S.qg === id) S.qg = ''; else S.gf[S.gf.indexOf(id)] = ''; (S.owned = S.owned || []).push(id); GM = gfCalc(); }
       else if (a === 'wl' || a === 'wr') { const j = S.slots.indexOf(selWu), t = a === 'wl' ? j - 1 : j + 1; if (t >= 0 && t < 5 && S.slots[t]) [S.slots[j], S.slots[t]] = [S.slots[t], S.slots[j]]; }
       prepRender();
     });
     if (prepTab === 'wu') wuDrag(el);
+    tutHi();
   }
   // 11/16 用户：武学页可以拖动——掌握武学 ↔ 上阵 / 心法 / 轻功格；上阵栏里左右拖换出手顺序；拖回「掌握武学」就卸下（手指按住拖也行）
   let wuDragSup = 0;
@@ -3735,30 +3741,46 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
 
   // ---- 刘关张轮流提醒（照原作：右下角弹出头像对话框，空格/点击继续；第一次进整备屏左边出半身立绘）----
   const NPC = { liu: ['刘备', 'art/ui/npc/liubei_face.webp'], guan: ['关羽', 'art/ui/npc/guanyu_face.webp'], zhang: ['张飞', 'art/ui/npc/zhangfei_face.webp'] };
-  const TUT_KEY = 'szz-tut2', TUT = {
+  const TUT_KEY = 'szz-tut3', TUT = {
     start: ['liu', '贤弟，兵器自己会出手，你只管走位，别让贼兵围住。'],
     roll: ['guan', matchMedia('(pointer:coarse)').matches ? '被围了就点右下角翻滚，滚的时候刀枪不入。' : '被围了就按空格翻滚，滚的时候刀枪不入。'],
-    zq: ['guan', '血条上面的蓝条是真气：挨打时替你挡下三成伤害，过半时出手更重。'],
+    zq: ['guan', '血条上面的蓝条是真气：挨打时替你挡下三成伤害。真气见底就【力竭】，护体也没了。'],
     coin: ['zhang', '哈哈！这袋钱掉地上了，走过去捡！不捡的话，打完只能收回九成！'],
     catapult: ['guan', '远处那台投石车会一直往你这边砸。石头落地前地上有影子，躲开，再绕过去把它拆了！'],
     thief: ['zhang', '有个背麻袋的贼在偷地上的钱！快去砍他，打死了钱袋会破，连本带利吐出来！'],
-    prep: ['liu', '打完一仗先歇口气。从「结算」看起，再去「拾取」「修炼」「行商」，最后在「武学」排好出手顺序。'],
-    loot: ['zhang', '这些都是从贼兵身上扒下来的！用得上就学，用不上就卖给行商换钱！'],
-    xiu: ['liu', '你在阵上攒下的修为，每升一层就能修炼一次，三选一，挑你最缺的。'],
-    shop: ['zhang', '行商的货不能换，钱够就都买下！越往后走，东西越贵！'],
-    wu: ['guan', '武艺最多同使五路，照你排好的顺序循环出手。学会的武学都在右边，随时可以换上。'],
+    // 11/16 用户：照群侠，整备屏每页第一次打开时一步步讲，讲到哪就把哪块框亮（第三项是要框亮的元素）
+    prep: [['liu', '打完一仗先歇口气。上面五页从左往右看：结算、拾取、修炼、行商、武学。', '.tb'],
+      ['guan', '这是【调息】：剩下的真气按两成换成气血。可真气留着不用就是浪费，阵上该花就花。', '.tx'],
+      ['liu', '下面这一排是你的属性。鼠标停上去（手机点一下）能看每项管什么。', '.ab'],
+      ['liu', '蓝条是真气，红条是气血。真气每仗开打都会回满，气血可不会。', '.vt'],
+      ['liu', '看完点「继续」翻到下一页。', '.go']],
+    loot: [['zhang', '这些都是从贼兵身上扒下来的！用得上就学，用不上就卖给行商换钱！', '.srow'],
+      ['zhang', '没处理的东西，出发时自动按卖价换成铜钱，不会亏！', '.lkh']],
+    xiu: [['liu', '你在阵上攒下的修为，每升一层就能修炼一次，三选一，挑你最缺的。', '.bd'],
+      ['liu', '三样都不合心意，就点左下角刷新，每次修炼能刷两回。', '.rf']],
+    shop: [['zhang', '行商的货不能换，钱够就都买下！越往后走，东西越贵！', '.srow'],
+      ['zhang', '这回买不起的，点下面的小锁锁住，下一关原价还在！', '.lkh']],
+    wu: [['guan', '武艺最多同使五路，照你排好的顺序循环出手。可以直接拖动换位置。', '.ch'],
+      ['guan', '每路武艺右下角都有一盏灯。点亮它，就把真气灌进这一路，以【发劲】之势加大威力。', '.ch .fj'],
+      ['guan', '发劲以后每次出手都多耗真气。真气耗光就【力竭】，护体也跟着没了——别一口气打得太急。', '.zt'],
+      ['guan', '学会的武学都在右边，拖到左边就能换上。', '[data-own]']],
     learn: ['guan', '学会了新武艺。去「武学」页看看出手顺序。'],
   };
   let tutSeen = {}; try { tutSeen = JSON.parse(localStorage.getItem(TUT_KEY) || '{}') || {}; } catch (e) {}
-  let tutQ = [];
+  let tutQ = [], tutSel = '';
+  const tutHi = () => { if (!tutSel) return; const p = document.getElementById('survPrep'); const t = p && p.querySelector(tutSel); if (t) t.classList.add('tuthi'); };
   function tut(k) {
-    if (!RT.on || tutSeen[k] || !TUT[k]) return; try { if (localStorage.getItem('szz-skip-tut') === '1') return; } catch (e) {}   // 11/14 用户：可设置跳过指引 tutSeen[k] = 1; try { localStorage.setItem(TUT_KEY, JSON.stringify(tutSeen)); } catch (e) {}
-    tutQ.push(k); if (!document.getElementById('survTut')) tutNext();
+    if (!RT.on || tutSeen[k] || !TUT[k]) return; try { if (localStorage.getItem('szz-skip-tut') === '1') return; } catch (e) {}   // 11/14 用户：可设置跳过指引
+    tutSeen[k] = 1; try { localStorage.setItem(TUT_KEY, JSON.stringify(tutSeen)); } catch (e) {}   // 11/16 修：这句以前被写进了注释里，指引会反复弹
+    const v = TUT[k]; for (const st of Array.isArray(v[0]) ? v : [v]) tutQ.push(st); if (!document.getElementById('survTut')) tutNext();
   }
   function tutNext() {
     const old = document.getElementById('survTut'); if (old) old.remove();
-    const k = tutQ.shift(); if (!k) return;
-    const [who, txt] = TUT[k], [nm, face] = NPC[who], big = k === 'prep';
+    document.querySelectorAll('.tuthi').forEach(x => x.classList.remove('tuthi')); tutSel = '';
+    if (!tutQ.length) return;
+    if (!document.getElementById('survPrep') && (banHold || talkHold || document.getElementById('waveBan') || document.getElementById('szzStory'))) { setTimeout(() => { if (!document.getElementById('survTut')) tutNext(); }, 600); return; }   // 11/16 用户：首领出场、横幅、对话时先等着，不叠在上面
+    const st = tutQ.shift(), [who, txt, sel] = st, [nm, face] = NPC[who], big = st === (TUT.prep && TUT.prep[0]);
+    tutSel = sel || ''; tutHi();
     const d = document.createElement('div'); d.id = 'survTut'; if (big) d.className = 'big'; setK(d);
     d.innerHTML = (big ? `<div class="lh" style="background-image:url('art/ui/npc/liubei_lihui.webp')"></div>` : '') + `<div class="bx"><b class="nm">${nm}</b><p>${txt}</p><small>${document.getElementById('survPrep') ? '按 <b>空格键</b> 或点一下 继续' : '点一下关闭'}</small></div>${big ? '' : `<em style="background-image:url('${face}')"></em>`}`;
     const go = () => { removeEventListener('keydown', key, true); if (!d.parentNode) return; d.remove(); tutNext(); };
@@ -4300,7 +4322,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       <h4>兵器精通</h4>${res}${ex ? `<div style="font-size:11px;opacity:.7;margin-top:2px">额外：${ex}</div>` : ''}
       <h4>内功（同类心法装得越多，专精越高、升级越快）</h4>${gfRows}
       <h4>轻功</h4>${qgRow}
-      <h4>真气</h4><div style="font-size:12px">${Math.round(S.zq * 10)} / ${Math.round(zqMax() * 10)}　<span style="opacity:.65">护身：受伤时真气挡 30%；打完一关剩下的真气三成换成气血</span></div></div>`;
+      <h4>真气</h4><div style="font-size:12px">${Math.round(S.zq * 10)} / ${Math.round(zqMax() * 10)}　<span style="opacity:.65">护体挡三成伤害；发劲耗真气加威力；打完剩下的两成换成气血</span></div></div>`;
   }
   function toggleBuild(on) {
     buildOpen = on != null ? on : !buildOpen;
@@ -4509,6 +4531,6 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       const mv = Math.abs(hero.ix) > .1 || Math.abs(hero.iy) > .1, low = hero.hp / maxHp() < .3 ? 1 - .10 * GM.low : 1;
       return (HAS('chitu') ? 1.1 : 1) * (HAS('tengjia') ? (fireK ? 2.5 : .75) : 1) * (HURT('mo') ? 1.1 : 1) * ((S.weakN || 0) > 0 ? .85 : 1) * (OG().take || 1) / AFX.hp() * (1 - IT('take')) * RT.take * RES().take * GM.take / GM.hp * low * (S.qg === 'taxue' && mv ? .85 : 1) * (GM.still && S.stillT > 1 ? 1 - GM.still : 1) * (S.qDR && DKT < S.qDR ? .8 : 1) * (S.wqT > 0 ? S.wqDR || 1 : 1);
     },
-    absorb: n => { if (!RT.on) return n; if (S.zq > 0) { const a = Math.min(S.zq, n * (.3 + IT('huti'))); S.zq -= a; S.hutiSum = (S.hutiSum || 0) + a; n -= a; } if (HAS('huxin') && !S.huxinUsed && hero.hp - n <= 0 && n > 0) { S.huxinUsed = 1; n = Math.max(0, hero.hp - .1); floaters.push({ x: hero.x, y: hero.y - 60, t: 0, txt: '护心镜！', gold: true }); } return n; },   // 护体（11/11 用户定，照群侠幸存者）：真气只挡 30% 伤害，其余直接扣血；真气空了全扣血
+    absorb: n => { if (!RT.on) return n; if (S.zq > 0 && !S.lijie) { const a = Math.min(S.zq, n * (.3 + IT('huti'))); S.zq -= a; S.hutiSum = (S.hutiSum || 0) + a; n -= a; } if (HAS('huxin') && !S.huxinUsed && hero.hp - n <= 0 && n > 0) { S.huxinUsed = 1; n = Math.max(0, hero.hp - .1); floaters.push({ x: hero.x, y: hero.y - 60, t: 0, txt: '护心镜！', gold: true }); } return n; },   // 护体（11/11 用户定，照群侠幸存者）：真气只挡 30% 伤害，其余直接扣血；真气空了全扣血
      moveMul: () => (OG().move || 1) * AFX.move() * (1 + IT('move') + (HAS('caoxie') ? .08 : 0) + (HAS('chitu') ? .3 : 0)) * (HURT('jian') ? .9 : 1) * RT.move * GM.spd * (S.wqSpd && DKT < S.wqSpd ? 1.3 : 1), left: () => RT.on && RT.node && W.started ? Math.max(0, WT() - W.t) : null, reward: (n, cb) => offerReward(n, cb), event(k, cb) { eventDo(k, cb); }, SK, tick, drawWorld, hud, thief: thiefAI, unitAI: (z, dt) => unitAI(z, dt), startRun, waveFlow, pose, rooted, onRoll, skipWave() { if (W.retreat <= 0 && W.between <= 0 && W.started) endWave(); }, state: () => ({ wave: W.n, t: W.t, slots: S.slots.slice() }) };
 })();
