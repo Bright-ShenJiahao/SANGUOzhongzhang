@@ -211,8 +211,8 @@
   function open() {
     if (!run) return;
     ensureDom(); fit(); focus(true); shown = true; root.style.display = ''; t0 = performance.now();
-    if (!evPre) { evPre = 1; setTimeout(() => { ['art/ui/prep/panel_big.webp', 'art/ui/hud/bian.webp'].concat(EVENTS.map((e, i) => 'art/ui/ev/ev' + i + '.webp'), EVENTS.filter(e => e.npc).map(e => e.npc[1])).forEach(u => { const i = new Image(); i.src = u; }); }, 800); }   // 11/16 用户：奇遇弹窗图片空白——进地图就后台预载插图和头像
-    if (run.blessed === false && window.SURV && SURV.blessOpts) { if (!run.storyDone && window.STORY) { run.storyDone = true; ['art/ui/prep/panel_big.webp', 'art/ui/prep/btn.webp', 'art/ui/npc/liubei_face.webp', 'art/ui/npc/guanyu_face.webp', 'art/ui/npc/zhangfei_face.webp'].forEach(u => { const i = new Image(); i.src = u; }); STORY.intro(bless); }   /* 11/16 用户：剧情最后一句到桃园三赠很慢——弹窗的图先在剧情里预载，并去掉等待 */ else setTimeout(bless, 300); }   // 11/14 用户：出征先放开局剧情，再桃园三赠
+    if (!evPre && run.blessed !== false) { evPre = 1; setTimeout(() => { ['art/ui/prep/panel_big.webp', 'art/ui/hud/bian.webp'].concat(EVENTS.map((e, i) => 'art/ui/ev/ev' + i + '.webp'), EVENTS.filter(e => e.npc).map(e => e.npc[1])).forEach(u => { const i = new Image(); i.src = u; }); }, 800); }   // 11/16 用户：奇遇弹窗图片空白——进地图就后台预载插图和头像
+    if (run.blessed === false && window.SURV && SURV.blessOpts) { if (!run.storyDone && window.STORY) { run.storyDone = true; ['art/ui/prep/panel_big.webp', 'art/ui/hud/bian.webp', 'art/ui/prep/btn.webp', 'art/ui/npc/liubei_face.webp', 'art/ui/npc/guanyu_face.webp', 'art/ui/npc/zhangfei_face.webp'].forEach(u => { const i = new Image(); i.src = u; }); STORY.intro(bless); }   /* 11/16 用户：剧情最后一句到桃园三赠很慢——弹窗的图先在剧情里预载，并去掉等待 */ else setTimeout(bless, 300); }   // 11/14 用户：出征先放开局剧情，再桃园三赠
     if (!raf) raf = requestAnimationFrame(frame);
   }
   function close() { shown = false; if (root) root.style.display = 'none'; if (campBox) { campBox.remove(); campBox = null; } cancelAnimationFrame(raf); raf = 0; }
@@ -306,7 +306,7 @@
   function bless() {   // 11/14 用户定：出征前·桃园三赠（刘备、关羽免费，张飞有代价），三选一
     run.blessed = true; const L = SURV.blessOpts();
     const FACE = { 刘备: 'liubei', 关羽: 'guanyu', 张飞: 'zhangfei' };
-    popup('桃 园 三 赠', '', '涿郡城外，刘关张三兄弟为你送行。各有一份心意，只能收下一份。<br><span style="color:#e8c47a">张飞：大哥二哥给的都是好东西，俺老张这份……得拿点东西来换！</span>', L.map(o => [o[2], o[0] + '：' + o[3], o[1], 0, 'art/ui/npc/' + FACE[o[0]] + '_face.webp']), k => SURV.bless(k, () => { if (window.RUNSAVE) RUNSAVE.save(); }));
+    popup('桃 园 三 赠', '', '涿郡城外，刘关张三兄弟为你送行。各有一份心意，只能收下一份。<br><span style="color:#e8c47a">张飞：大哥二哥给的都是好东西，俺老张这份……得拿点东西来换！</span>', L.map(o => [o[2], o[0] + '：' + o[3], o[1], 0, 'art/ui/npc/' + FACE[o[0]] + '_face.webp']), k => SURV.bless(k, () => { if (window.RUNSAVE) RUNSAVE.save(); if (!evPre) { evPre = 1; EVENTS.map((e, i) => 'art/ui/ev/ev' + i + '.webp').concat(EVENTS.filter(e => e.npc).map(e => e.npc[1])).forEach(u => { const i = new Image(); i.src = u; }); } }));   // 11/16：奇遇插图等桃园三赠选完再预载，别和剧情抢网速
     if (campBox) campBox.classList.add('bl');
   }
   function camp(n) {   // 11/14 用户：营地二选一——休整回三成血，或修炼（任选一招武艺直接升一级）
