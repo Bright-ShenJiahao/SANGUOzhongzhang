@@ -916,7 +916,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       for (let i = 0; i < N; i++) { if (i < 2 && t) P.push([t.x + R(-10, 10), t.y + R(-6, 6)]); else { const g = Math.random() * 7, rr = R(100, 240) * DK * RM; P.push([hero.x + Math.cos(g) * rr, clampY(hero.y + Math.sin(g) * rr * .5)]); } }
       P.forEach(([x, y], i) => fx.push({ k: 'img', n: 'fx_aim', x, y, w: pr * DK * 2.4, t: 0, T: .2 + i * .15, col: '255,120,70', warn: 1 }));
       DKO.push(dmk({ T: .2 + N * .15, i: 0, tick(o) { while (o.i < N && o.t >= .2 + o.i * .15) { const [x, y] = P[o.i]; dCircle(x, y, pr, 1.00, 50, { up: 1, x }); sfx(CR, x); shake = Math.max(shake, .15); o.i++; } } })); } });
-  DAO('wanren', 4, 'spin', { name: '万刃归宗', icon: '万', color: '#b8f0ff', need: 200, wu: .80, rc: .50, none: true,
+  DAO('wanren', 4, 'spin', { name: '归海一刀', icon: '海', color: '#b8f0ff', need: 200, wu: .80, rc: .50, none: true,
     desc: '14 柄飞刃从四周射向最近的敌人，一路穿透（同一人最多吃 6 柄），汇聚后一记巨斩（对浮空目标 ×1.4），并引爆目标身上全部流血（每层 0.25×）。LV3 引爆每层 0.35×；LV5 20 柄；LV7 巨斩更大',
     cast() { const L = dlv(), t = nearest(260), a = aim(), px = t ? t.x : hero.x + Math.cos(a) * 80, py = t ? t.y : clampY(hero.y + Math.sin(a) * 40), N = L >= 5 ? 20 : 14, Rr = 420 * DK * RM, ft = .35;
       const bs = []; for (let i = 0; i < N; i++) { const g = i * Math.PI * 2 / N, sx = px + Math.cos(g) * Rr, sy = py + Math.sin(g) * Rr * .5; const b = { x: sx, y: sy, vx: (px - sx) / ft, vy: (py - sy) / ft, a: g + Math.PI, t: 0, T: ft, hitSet: [], nohit: 1, shape: 'sword', col: ['170,235,255', '255,255,255'], img: 'dg6', iw: 34, tc: hexRgb(SK.wanren.color) }; bolts.push(b); bs.push(b); }
