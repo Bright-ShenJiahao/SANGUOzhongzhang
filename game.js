@@ -39,7 +39,7 @@ if (BG.arena) load('arena', BG.arena);
 if (BG.field && /[?&]bg=field(?:&|$)/.test(location.search)) load('arena', BG.field);
 if (BG.town && /[?&]bg=town(?:&|$)/.test(location.search)) load('arena', BG.town);
 if (BG.altar && /[?&]bg=altar(?:&|$)/.test(location.search)) load('arena', BG.altar);   // 张角祭坛
-{ load('map_field', BG.field); ['sang', 'du', 'town', 'forest', 'camp', 'altar'].forEach(k => { if (BG[k]) load('map_' + k, BG[k]); }); }   // 11/16：第一段的图和旧图先载；新图按段提前载（ARENA.preload）   // 路线图：四张战斗地图都先载入（测试用，以后改成按需）   // 县城街巷   // 打谷场：不规则可走区域 + 高台（用同一个 IMG.arena 槽位）   // 俯视竞技场（js/arena.js，试玩对比）
+{ load('map_field', BG.field); ['sang', 'du'].forEach(k => { if (BG[k]) load('map_' + k, BG[k]); }); }   // 11/16：第一段的图和旧图先载；新图按段提前载（ARENA.preload）   // 路线图：四张战斗地图都先载入（测试用，以后改成按需）   // 县城街巷   // 打谷场：不规则可走区域 + 高台（用同一个 IMG.arena 槽位）   // 俯视竞技场（js/arena.js，试玩对比）
 Object.entries(ASSETS.props).forEach(([k, v]) => load('p_' + k, v[0]));
 Object.entries(ASSETS.food || {}).forEach(([k, v]) => load('food_' + k, v[0]));
 
