@@ -25,7 +25,7 @@ function heroUpdate(dt) {
   if (charging) { h.comboWin = 0; if (h.st === 'hurt' || h.st === 'down' || h.air) charging = false; }
   if (pressRoll && h.rollCd === 0 && h.st !== 'roll') {
     sfx('roll', h.x);
-    set(h, 'roll'); h.inv = IS_TOUCH ? .45 : .4; h.rollCd = .75; h.atk = null; h.q = 0; h.rollId = (h.rollId || 0) + 1;
+    set(h, 'roll'); h.inv = IS_TOUCH ? .45 : .4; h.rollCd = .75 * (window.SURV && SURV.rollK ? SURV.rollK() : 1); h.atk = null; h.q = 0; h.rollId = (h.rollId || 0) + 1;
     if (!(charging && window.ROGUE && ROGUE.has('藏势'))) cancelCharge();   // 藏势：蓄力中翻滚，进度保留
     if (window.ROGUE && ROGUE.onRoll) ROGUE.onRoll(h.x, h.y);
     if (window.SURV) SURV.onRoll();

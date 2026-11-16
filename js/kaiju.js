@@ -137,7 +137,7 @@
           <div class="tiles og">${Object.keys(O).map(k => `<button data-o="${k}" class="tile ${k === cur ? 'on' : ''} ${O[k].locked ? 'lock' : ''}" title="${O[k].name}"><div class="ico" ${ic(OGI[k] || '')}></div><span><b>${O[k].name}</b><small>${O[k].locked ? '暂未开放' : (O[k].desc || '').split('。')[0]}</small></span></button>`).join('')}</div>
           <div class="eff">${(o.desc || '').split('。').slice(1).join('。') || o.desc}</div></div>
           <div class="sec"><h4><i style="background-image:url('${K2('h_ge')}')"></i>兵器路数</h4>
-          <div class="tiles wp">${(o.weps || [o.wep]).map(w => `<button data-w="${w}" class="tile wd ${w === curW ? 'on' : ''}"><div class="ico" ${ic(K2('w' + w))}></div><span><b>${SURV.WEPN[w]}</b><small>${w === curW ? '本门 · 伤害 +10%' : '出身兵器'}</small></span></button>`).join('')}</div>
+          <div class="tiles wp">${(o.weps || [o.wep]).map(w => { const op = !SURV.wepOpen || SURV.wepOpen(w); return `<button data-w="${w}" class="tile wd ${w === curW ? 'on' : ''} ${op ? '' : 'lock'}" ${op ? '' : 'disabled'}><div class="ico" ${[6, 11, 12].includes(w) ? '' : ic(K2('w' + w))}>${[6, 11, 12].includes(w) ? `<b style="font-size:28px;color:#8a7a5c">${SURV.WEPN[w]}</b>` : ''}</div><span><b>${SURV.WEPN[w]}</b><small>${!op ? '未开放' : w === curW ? '本门 · 伤害 +10%' : '出身兵器'}</small></span></button>`; }).join('')}</div>
           <div class="eff">效果：${SURV.WEPN[curW]} 武艺伤害 +10%　出身外的兵器 −15%</div>
           </div>
           <div class="sec"><h4><i style="background-image:url('${K2('h_gu')}')"></i>难度</h4>
