@@ -3408,7 +3408,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
 #survTut.sty.top .bx2{padding-right:calc(4.5vw + 17vh)}#survTut.sty.top .hn2{right:calc(2.5vw + 17vh)}
 #survTut.sty .tskip{position:fixed}
 @media (max-height:520px){#survTut.sty .bx2{height:30vh;font-size:14px;line-height:1.5;padding:calc(2vh + 14px) 4vw 1vh}#survTut.sty .lh2{bottom:calc(3vh + 30vh);height:56vh}#survTut.sty.top .bx2{top:16vh}#survTut.sty .nm2{font-size:15px}}
-#survTut.bt{right:1.5vw!important;bottom:calc(16vh + 30px)!important;width:min(46vw,860px)!important}#survTut.bt .bx{min-height:calc(15vh);border:calc(16px*var(--k)) solid transparent!important;border-image:url(art/ui/prep/dialog.webp) 40 fill stretch!important;background:none!important;padding:calc(10px*var(--k)) calc(24px*var(--k))}#survTut.bt p{font:500 clamp(15px,2.6vh,25px)/1.6 "PingFang SC",sans-serif!important;margin:0}#survTut.bt>em{width:calc(15vh + 20px)!important;border:2px solid #8a6a32!important;box-shadow:0 0 0 2px #000}#survTut.bt .nm{font-size:clamp(14px,2.2vh,20px)!important}@media (max-height:520px){#survTut.bt{width:60vw!important;bottom:26vh!important}#survTut.bt p{font-size:13px!important}}
+#survTut.bt{right:1.2vw!important;bottom:calc(16vh + 20px)!important;width:min(30vw,520px)!important}#survTut.bt .bx{min-height:0;border:calc(10px*var(--k)) solid transparent!important;border-image:url(art/ui/prep/dialog.webp) 40 fill stretch!important;background:none!important;padding:calc(4px*var(--k)) calc(14px*var(--k))}#survTut.bt p{font:500 clamp(13px,2vh,18px)/1.5 "PingFang SC",sans-serif!important;margin:0}#survTut.bt>em{width:calc(9vh + 12px)!important;border:2px solid #8a6a32!important;box-shadow:0 0 0 2px #000}#survTut.bt .nm{font-size:clamp(12px,1.8vh,16px)!important}@media (max-height:520px){#survTut.bt{width:44vw!important;bottom:24vh!important}#survTut.bt p{font-size:12px!important}}
 body:has(#szzStory) #survTut,body:has(#szzStory) #survNote,body:has(#waveBan) #survTut{display:none!important}   /* 11/16 用户：首领对话/横幅时左下刘备小框不要叠上来 */
 #survTut{position:fixed;right:1vw;bottom:calc(16vh + 60px);z-index:10040;display:flex;align-items:stretch;width:min(820px,60vw);cursor:pointer;animation:tutIn .3s ease-out}
 @keyframes tutIn{from{transform:translateY(16px);opacity:0}}
@@ -3839,7 +3839,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       if (e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); e.stopImmediatePropagation(); go(); } };
     d.onclick = go; addEventListener('keydown', key, true); addEventListener('keyup', up, true); document.body.appendChild(d);
     if (document.getElementById('survPrep')) { const sk = document.createElement('div'); sk.className = 'tskip'; sk.innerHTML = '长按 <b>空格键</b> 跳过本段'; d.appendChild(sk); }
-    if (!document.getElementById('survPrep')) setTimeout(() => { if (d.parentNode && !document.getElementById('survPrep')) go(); }, 9000);   // 战斗中 9 秒自动收起
+    if (!document.getElementById('survPrep')) setTimeout(() => { if (d.parentNode && !document.getElementById('survPrep')) go(); }, 5000);   // 战斗中 5 秒自动收起（11/16 用户：9 秒太久）
   }
   // ---------- 局内存档（11/11 用户定：回到长卷自动存；主界面「继续」读档） ----------
   const RUN_KEY = 'szz-run';
