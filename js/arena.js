@@ -131,7 +131,8 @@
   const POOL = { field: ['field', 'sang', 'du'], town: ['yamen', 'shi', 'weng'], forest: ['zhu', 'miao', 'guan'], camp: ['yuanmen', 'liang', 'fushui'], altar: ['altar'] };
   const hasMap = k => typeof BG !== 'undefined' && !!BG[k] && !!MAPS[k];
   function pick(seg, seed) { const ok = (POOL[seg] || []).filter(hasMap); if (!ok.length) return seg; return ok[seed % ok.length]; }
-  function want(k) { if (typeof IMG !== 'undefined' && !IMG['map_' + k] && typeof BG !== 'undefined' && BG[k] && typeof load === 'function') load('map_' + k, BG[k]); }
+  function want(k) { if (typeof IMG !== 'undefined' && !IMG['map_' + k] && typeof BG !== 'undefined' && BG[k]) { const i = new Image(); i.src = BG[k]; IMG['map_' + k] = i; } }   // 直接载，不排队（排队的话开发者模式跳关时图永远轮不到）
+  let pendKey = null;
   window.ARENA = {
     available: () => ON_URL && typeof BG !== 'undefined' && !!(BG.arena || BG.field || BG.town || BG.altar),
     map: () => MSEL,
@@ -140,7 +141,7 @@
     on: () => active && ready(),
     start(key) {
       if (!this.available()) return;
-      want(key); const im = typeof IMG !== 'undefined' && IMG['map_' + key]; if (!(im && im.complete && im.width)) key = 'field';   // 图还没载完就先用村口
+      want(key); const im = typeof IMG !== 'undefined' && IMG['map_' + key]; pendKey = null; if (!(im && im.complete && im.width)) { pendKey = key; key = 'field'; }   // 图还没载完就先用村口，载好了马上换过去
       setMap(key || MSEL || 'field');
       active = true;
       const g = apply(); if (!g) return;
@@ -149,7 +150,7 @@
       this.cam(true);   // 出生在城门前方（上中），不在正中间
     },
     stop() { active = false; },
-    tick() { if (!this.on()) return; apply(); this.clamp(hero); for (const z of zs) this.clamp(z); },
+    tick() { if (!this.on()) return; if (pendKey) { const im = IMG['map_' + pendKey]; if (im && im.complete && im.width) { setMap(pendKey); pendKey = null; const g = apply(); if (g) { hero.x = g.ox + MAP.hero[0] * g.w; hero.y = g.oy + MAP.hero[1] * g.h; hero._ax = null; this.cam(true); } } } apply(); this.clamp(hero); for (const z of zs) this.clamp(z); },
     camY: () => camTop,
     cam(snap) {   // 镜头：Z=1 固定居中；Z>1 跟随人物，被限制在场地图范围内
       if (!this.on()) return;
