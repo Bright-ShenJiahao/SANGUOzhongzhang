@@ -3612,8 +3612,8 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   let prepLastTab = '', prepNd = null, prepTab = 'jie', selLoot = 0, selWu = null, selShop = 0;
   const TABS = [['jie', '结算'], ['shi', '拾取'], ['xiu', '修炼'], ['shang', '行商'], ['wu', '武学']];
   const A = n => `art/ui/attr/${n}.webp`, PU = n => `art/ui/prep/${n}.webp`;
-  const ATI = ['bili', 'daojian', 'qiang', 'jiao', 'yun', 'wuxing', 'gong', 'fu', 'neili', 'tipo'];   // 11/14 用户的新属性图标（运气等新福缘图）
-  const ATD = ['提高气血，受到的伤害按比例减少', '提高刀、锤、剑、拳等短兵武艺伤害', '提高枪、关刀等长兵武艺伤害', '提高移动速度', '提高暴击率，修炼更容易出好品阶', '武艺、心法熟练度和修为涨得更快', '提高石子、弓等射艺武艺伤害', '提高黄符、羽扇等术法武艺伤害', '提高真气上限和真气回复速度'];
+  const ATI = ['bili', 'daojian', 'qiang', 'jiao', 'yun', 'wuxing', 'gong', 'fu', 'neili', 'out'];   // 11/14 用户的新属性图标（运气等新福缘图）
+  const ATD = ['提高气血，受到的伤害按比例减少', '提高刀、锤、剑等短兵武艺伤害', '提高枪、关刀、长戟等长兵武艺伤害', '提高移动速度', '提高暴击率，修炼更容易出好品阶', '武艺、心法熟练度和修为涨得更快', '提高石子、弓、弩等射艺武艺伤害', '提高黄符、羽扇等术法武艺伤害', '提高真气上限和真气回复速度', '提高拳、腿武艺伤害'];
   const icoOf = it => it.kind === 'item' ? `art/ui/item/${it.id}.webp` : iconUrl(it.kind, it.k || it.id) || '';
   const RQ = ['普通', '精良', '稀有', '绝世'], RQC = ['#e8e0d0', '#6fb8ff', '#c58cff', '#ffb347'];
   const rk = it => {   // 11/14 用户定：武艺/心法只写黄/玄/地/天阶（颜色同心法品阶色），道具才用普通/精良/稀有/绝世
