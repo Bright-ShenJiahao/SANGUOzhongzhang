@@ -944,14 +944,14 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const qBleedUp = (k, cap) => z => (z.blT > 0 ? 1 + k * Math.min(cap, z.bl || 0) : 1);   // 按目标身上的流血层数增伤
   function qBoom(z, per, max) { if (z.dead || !(z.blT > 0 && z.bl > 0)) return; const n = Math.min(max, z.bl), d = n * per * DU * RT.dmg * CM; rec(d); hit(z, d, 0, 1, false, 0, 0, false, false, { dot: true, secondary: true, survSkill: true }); floaters.push({ x: z.x, y: z.y - 70, t: 0, txt: '引爆', color: '#ff6a5a' }); z.bl -= n; if (z.bl <= 0) { z.bl = 0; z.blT = 0; } }
   // 冲刺：T 秒内朝 a 冲 D（方案单位）；路上判定宽 W；inv 秒内无敌；落点附近 ≥6 个敌人就提前停在 60 处（不上头）
-  function qDash(a, D, T, W, m, kb, o, inv, done) {
+  function qDash(a, D, T, W, m, kb, o, inv, done, mv) {   // mv：带着主角走（标了「位移」的招）
     let Dp = QS(D) * QD(); const x0 = hero.x, y0 = hero.y, tx = x0 + Math.cos(a) * Dp, ty = y0 + Math.sin(a) * Dp * .5;
     if (near(tx, ty, QS(80)).length >= 6) Dp = Math.min(Dp, QS(60) * QD());
     const x1 = x0 + Math.cos(a) * Dp, y1 = clampY(y0 + Math.sin(a) * Dp * .5), hs = new Set(), w = QS(W) / 2;
     if (inv) hero.inv = Math.max(hero.inv || 0, inv);
     if (Dp > 4) ghost(x0, y0, x1, y1, a, SK[CK] ? SK[CK].pose[1] : null, T + .1);
     // 11/17 用户：不要拖着主角走（影响走位）——主角留在原地，残影冲出去打，命中跟着残影算
-    DKO.push(dmk({ T: T + .01, fin: 0, tick(q) { const p = Math.min(1, q.t / T), px = x0 + (x1 - x0) * p, py = clampY(y0 + (y1 - y0) * p); if (Math.abs(Math.cos(a)) > .2) hero.f = Math.cos(a) >= 0 ? 1 : -1;
+    DKO.push(dmk({ T: T + .01, fin: 0, tick(q) { const p = Math.min(1, q.t / T), px = x0 + (x1 - x0) * p, py = clampY(y0 + (y1 - y0) * p); if (mv) { hero.x = px; hero.y = py; } if (Math.abs(Math.cos(a)) > .2) hero.f = Math.cos(a) >= 0 ? 1 : -1;
       for (const z of hittable()) if (!hs.has(z) && Math.hypot(z.x - px, (z.y - py) * 2) < w + 12) { hs.add(z); DH(z, (typeof m === 'function' ? m(z) : m) * QDM(), kb, Object.assign({ x: px - Math.cos(a) * 20 }, o)); }
       if (!q.fin && p >= 1) { q.fin = 1; if (done) done(hs, x1, y1); } } }));
     return Dp;
@@ -991,18 +991,18 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       const mf = z => { const c = cnt.get(z) || 0; if (c >= cap) return 0; cnt.set(z, c + 1); return m0 * (L >= 7 ? qBleedUp(.04, 4)(z) : 1); };
       for (let i = 0; i < N; i++) qT(hero.x, hero.y, a0 + i * Math.PI * 2 / N, 150, 36, mf, 25, { bl, blMax }); sfx(SW, hero.x); shake = Math.max(shake, .1); } });
   QG('chong', 2, 'thrust', { name: '破阵突', icon: '突', need: 116, wu: .34, rc: .28, beam: true, len: 116,
-    desc: '残影平端长枪向前冲 150（主角原地不动），一路穿透撞开两侧的人，挂 2 层流血；冲刺头 0.15 秒无敌，落点人太多会提前停下。LV3 流血 3 层；LV5 冲到头回身横扫身后 180°；LV7 冲过的路上留 3 秒枪痕，每 0.5 秒扎一下并挂流血',
+    desc: '【位移】平端长枪向前冲 150，一路穿透撞开两侧的人，挂 2 层流血；冲刺头 0.15 秒无敌，落点人太多会提前停下。LV3 流血 3 层；LV5 冲到头回身横扫身后 180°；LV7 冲过的路上留 3 秒枪痕，每 0.5 秒扎一下并挂流血',
     cast() { const L = dlv(), a = aim(), x0 = hero.x, y0 = hero.y; sfx(SW, hero.x); shake = Math.max(shake, .12);
       const Dp = qDash(a, 150, .18, 66, 1.70, 50, { bl: L >= 3 ? 3 : 2 }, .15, (hs, ex, ey) => {
         if (L >= 5) { dSweep(ex, ey, a + Math.PI, Math.PI / 2, 140, .95, 90, { rev: true }); sfx(SW, ex); }
-        if (L >= 7) DKO.push(dmk({ T: 3, nx: .5, tick(o) { if (o.t >= o.nx) { o.nx += .5; qFx(x0, y0, a, Dp, .25); dRect(x0, y0, a, Dp, QS(66) / 2, z => DH(z, .22, 0, { bl: 1, x: x0 })); } } })); }); } });
+        if (L >= 7) DKO.push(dmk({ T: 3, nx: .5, tick(o) { if (o.t >= o.nx) { o.nx += .5; qFx(x0, y0, a, Dp, .25); dRect(x0, y0, a, Dp, QS(66) / 2, z => DH(z, .22, 0, { bl: 1, x: x0 })); } } })); }, 1); } });
   QG('huimaq', 2, 'thrust', { name: '回马枪', icon: '马', need: 140, wu: .30, rc: .30, beam: true, len: 140,
-    desc: '残影后撤 100（主角原地不动，这一下无敌），枪尾顺手扫开身后的人，停一下再往前直刺一条长 360 的枪线，把人挑飞（浮空）。LV3 后撤 130、无敌更久；LV5 直刺变三道平行枪影；LV7 被挑飞的人落地时再炸一圈',
+    desc: '【位移】先后撤 100（后撤时无敌），枪尾顺手扫开身后的人，停一下再往前直刺一条长 360 的枪线，把人挑飞（浮空）。LV3 后撤 130、无敌更久；LV5 直刺变三道平行枪影；LV7 被挑飞的人落地时再炸一圈',
     cast() { const L = dlv(), a = aim(), back = a + Math.PI, fo = { up: 1, fkBoom: L >= 7 ? .90 : 0 }; sfx(SW, hero.x);
       qT(hero.x, hero.y, back, 90, 50, .30, 80, { noL: 1 });
       qDash(back, L >= 3 ? 130 : 100, .12, 40, 0, 0, {}, L >= 3 ? .18 : .12, (hs, ex, ey) => later(.06, () => { S.poseOverride = { f: SK.huimaq.pose2, t: .2 }; const ca = Math.cos(a), sa = Math.sin(a), px = -sa * QS(55), py = ca * QS(55) * .5;
-        ghost(ex, ey, ex + ca * QS(40), ey + sa * QS(20), a, SK.huimaq.pose2, .25); qT(ex, ey, a, 360, 34, 1.40, 20, fo); if (L >= 5) for (const s of [-1, 1]) qT(ex + px * s, ey + py * s, a, 360, 30, .70, 20, fo);
-        sfx(SW, hero.x); shake = Math.max(shake, .12); })); } });
+        qT(ex, ey, a, 360, 34, 1.40, 20, fo); if (L >= 5) for (const s of [-1, 1]) qT(ex + px * s, ey + py * s, a, 360, 30, .70, 20, fo);
+        sfx(SW, hero.x); shake = Math.max(shake, .12); }), 1); } });
   // ---- 地 ----
   QG('touqiang', 3, 'thrust', { name: '掷虹枪', icon: '虹', need: 190, wu: .55, rc: .35, beam: true, len: 190,
     desc: '掷出一杆光枪，直飞 440、一路穿透，挂 2 层流血（本招最多 3 层），飞到头炸开一圈。LV3 流血 3 层；LV5 三杆扇形齐掷，各自落点炸开；LV7 落点留 2.5 秒枪坑，每 0.5 秒扎一下并挂流血',
@@ -1135,10 +1135,9 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
         if (L >= 7 && o.t > .35) dRect(x0, y0, a, Lp, w, z => { if (!hs.has(z) && !hs2.has(z)) { hs2.add(z); GH(z, .30, 10, { x: x0 }); } });
         if (L >= 5 && !o.b && o.t >= .3) { o.b = 1; fx.push({ k: 'burst', x: ex, y: ey, r: GS(50), t: 0, T: .4, col: gCol() }); for (const z of near(ex, ey, GS(50))) GH(z, .60, 60, { x: ex }); } } })); } });
   GD('xiongshou', 1, 'up', { name: '拖刀计', icon: '拖', need: 70, wu: .55, rc: .35, range: 140, half: 1.57,
-    desc: '佯装败退：残影往后撤一步（主角原地不动，这一下短暂无敌），再回身向上撩出 180° 重斩，刀头带离身 40~140，击退很强，挂 1 层破甲。LV3 破甲 2 层；LV5 撤得更远、回身扇面扩到 240°；LV7 被撩中的敌人停住 0.3 秒',
+    desc: '【位移】佯装败退：往后撤一步（撤的时候短暂无敌），再回身向上撩出 180° 重斩，刀头带离身 40~140，击退很强，挂 1 层破甲。LV3 破甲 2 层；LV5 撤得更远、回身扇面扩到 240°；LV7 被撩中的敌人停住 0.3 秒',
     cast() { const L = dlv(), a = aim(), back = (L >= 5 ? 100 : 70) * DK; hero.inv = Math.max(hero.inv || 0, L >= 5 ? .3 : .22);
-      ghost(hero.x, hero.y, hero.x - Math.cos(a) * back, hero.y - Math.sin(a) * back * .5, a, null, .25);   /* 11/17：只让残影后撤，主角不被拖动 */
-      DKO.push(dmk({ T: .26, done: 0, tick(o, dt) {
+      DKO.push(dmk({ T: .26, done: 0, tick(o, dt) { if (o.t <= .2) { hero.x -= Math.cos(a) * back * dt / .2; hero.y = clampY(hero.y - Math.sin(a) * back * .5 * dt / .2); }
         if (!o.done && o.t >= .22) { o.done = 1; const hs = gSweep(hero.x, hero.y, a, (L >= 5 ? 120 : 90) * Math.PI / 180, 40, 140, 1.70, 140, { pj: L >= 3 ? 2 : 1 }); if (L >= 7) for (const z of hs) if (!tough(z)) stunz(z, .3); sfx(SW, hero.x); shake = Math.max(shake, .18); } } })); } });
   // ---- 玄 ----
   GD('xuanfengd', 2, 'spin', { name: '车轮斩', icon: '轮', need: 60, wu: .50, rc: .40, range: 130, half: Math.PI,
@@ -1724,11 +1723,14 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       gBand(hero.x, hero.y, 0, Math.PI, R - 6, R + 6, .35); hitR(R);
       if (L >= 5) { const e = gBand(hero.x, hero.y, 0, Math.PI, R, R + 8, .45, 1); DKO.push(dmk({ T: .42, tick(o) { const r = R + (FS(180) - R) * Math.min(1, o.t / .4); e.r0 = r - 6; e.r1 = r + 6; e.x = hero.x; e.y = hero.y; hitR(r); } })); } } });
   QN('huxiao', 2, 'thrust', { name: '虎扑拳', icon: '虎', need: 160, wu: .38, rc: .25, beam: true, len: 240,
-    desc: '五禽戏的虎戏：一拳打出虎形冲击波，直线推 240（宽 60），推开并眩晕 0.3 秒，这一下就是收尾。LV3 眩晕 0.5 秒；LV5 冲击波宽 90；LV7 冲击波走到尽头炸一下（0.6 倍）',
-    cast() { const L = dlv(), a = aim(), x0 = hero.x, y0 = hero.y, Lp = FS(240), w = FS(L >= 5 ? 90 : 60) / 2, hs = new Set(), T = .35; sfx(SW, hero.x);
+    desc: '【位移】五禽戏的虎戏：先往前扑一小步，再一拳打出虎形冲击波，直线推 240（宽 60），推开并眩晕 0.3 秒，这一下就是收尾。LV3 眩晕 0.5 秒；LV5 冲击波宽 90；LV7 冲击波走到尽头炸一下（0.6 倍）',
+    cast() { const L = dlv(), a = aim(), t0 = nearest(FS(200)); let D = t0 ? Math.max(0, Math.min(FS(70), dist(t0, hero) - FS(30))) : FS(50); if (near(hero.x + Math.cos(a) * D, hero.y + Math.sin(a) * D * .5, FS(70)).length >= 6) D = Math.min(D, FS(30));
+      const sx = hero.x, sy = hero.y; hero.inv = Math.max(hero.inv || 0, .18);   // 11/17 用户定：虎扑拳带位移——先往前扑一小步（扑的时候无敌，前面人太多就少扑一点），再打出冲击波
+      const go = () => { const x0 = hero.x, y0 = hero.y, Lp = FS(240), w = FS(L >= 5 ? 90 : 60) / 2, hs = new Set(), T = .35; sfx(SW, hero.x);
       const e = { k: 'gd', m: 'wall', x: x0, y: y0, a, d: 0, hw: w, t: 0, T: T + .1, col: gCol(), hold: 1 }; fx.push(e);
       DKO.push(dmk({ T: T + .02, fin: 0, tick(o) { const d = Math.min(1, o.t / T) * Lp; e.d = d; dRect(x0, y0, a, d, w, z => { if (!hs.has(z)) { hs.add(z); QH(z, 1.00, 20, { fin: 1, st: L >= 3 ? .5 : .3, px: x0, py: y0 }); } });
-        if (L >= 7 && !o.fin && o.t >= T) { o.fin = 1; const ex = x0 + Math.cos(a) * Lp, ey = clampY(y0 + Math.sin(a) * Lp * .5); fx.push({ k: 'burst', x: ex, y: ey, r: FS(50), t: 0, T: .35, col: gCol() }); for (const z of near(ex, ey, FS(50))) QH(z, .60, 20, {}); } } })); } });
+        if (L >= 7 && !o.fin && o.t >= T) { o.fin = 1; const ex = x0 + Math.cos(a) * Lp, ey = clampY(y0 + Math.sin(a) * Lp * .5); fx.push({ k: 'burst', x: ex, y: ey, r: FS(50), t: 0, T: .35, col: gCol() }); for (const z of near(ex, ey, FS(50))) QH(z, .60, 20, {}); } } })); };
+      DKO.push(dmk({ T: .13, d: 0, tick(o) { const p = Math.min(1, o.t / .12); hero.x = sx + Math.cos(a) * D * p; hero.y = clampY(sy + Math.sin(a) * D * .5 * p); if (!o.d && p >= 1) { o.d = 1; go(); } } })); } });
   // ---- 地 ----
   QN('lianhuan', 3, 'thrust', { name: '灵猿拳', icon: '猿', need: 100, wu: .45, rc: .35, range: 120, half: .79,
     desc: '五禽戏的猿戏：前方 90° 扇面连打 12 拳，每拳的拳影飞 120（同一人最多 6 下）；第 12 拳是收尾大拳影（宽 60，推开）。LV3 收尾眩晕 0.6 秒；LV5 改成 16 拳；LV7 收尾拳影变成三道',
@@ -3634,7 +3636,8 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   const dsOf = it => (it.desc || '').replace(/^[黄玄地天]阶 · /, '');
   const skIco = it => it.kind === 'gf' ? `<em class="sic" style="background-image:url('art/ui/gf/${it.id}.webp')"></em>` : IMGU[it.k] ? `<em class="sic" style="background-image:url('${IMGU[it.k]}')"></em>` : `<em class="sic" style="color:${SK[it.k].color}">${SK[it.k].icon}</em>`;
   const tipOf = (it, right) => it.kind === 'item' || it.kind === 'heal' ? '' : `<div class="tip${right ? ' r' : ''}"><div class="th">${skIco(it)}<div><h3>${it.name}</h3><p style="color:${rk(it).c}">${rk(it).n}</p><div class="tg">${tagsOf(it).map(t => `<span>${t}</span>`).join('')}</div></div></div><h5>${it.kind === 'skill' ? '武艺效果' : '心法效果'}</h5><p class="ds">${dsOf(it)}</p>${it.kind === 'skill' ? `<p class="sp2">${spdTxt(SK[it.k])}</p>` : ''}</div>`;
-  const tagsOf = it => it.kind === 'skill' ? ['武艺', '主动', WEPN[wepOf(it.k)]] : it.kind === 'gf' ? (GF[it.id].qg ? ['轻功', '被动'] : ['心法', '被动']) : ITEMS[it.id].use ? ['道具', '消耗'] : ['道具', '永久'];
+  const MVT = k => SK[k] && /^【位移】/.test(SK[k].desc || '') ? ['<b style="color:#ff9a6a">位移</b>'] : [];   // 11/17 用户：会带着主角走的招明确标「位移」
+  const tagsOf = it => it.kind === 'skill' ? ['武艺', '主动', WEPN[wepOf(it.k)]].concat(MVT(it.k)) : it.kind === 'gf' ? (GF[it.id].qg ? ['轻功', '被动'] : ['心法', '被动']) : ITEMS[it.id].use ? ['道具', '消耗'] : ['道具', '永久'];
   function prepOpen(nd) { { const t = document.getElementById('survTut'); if (t) t.remove(); tutQ = []; }   // 战斗里没看完的提醒不带进整备屏
     prepNd = nd; prepTab = 'jie'; prepLastTab = ''; selLoot = 0; selWu = null; selShop = 0; if (window.SFX) SFX.play('j_shop'); prepRender(); tut('prep'); }
   function prepClose() {
@@ -3718,7 +3721,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
         <h5>出招方式</h5><p class="ds">${p.shape}</p><p class="ds2">${spdTxt(SK[k])}</p><h5>特殊效果</h5><p class="ds">${p.state}</p>
         <h5>修炼效果</h5><div class="lvl">${p.lv.map(x => `<p class="${x.l <= cur ? 'on' : ''}"><em>LV${x.l}</em><span>${x.up}${x.sp ? `<br><b>${x.sp}</b>` : ''}</span></p>`).join('')}</div>`; };
       const sel = selWu, o = sel && (isSk(sel) ? SK[sel] : GF[sel]);
-      const det = o ? `<div class="dt"><div class="dh"><em style="background-image:url('${ic(sel)}')"></em><div><h3>${isSk(sel) ? o.name : o.n}</h3><p>${isSk(sel) ? (o.tier ? TIERN[o.tier] + '阶' : '基础') : GTN[o.t] + '阶'}</p><div class="tg">${(isSk(sel) ? ['武艺', '主动', WEPN[wepOf(sel)]] : [o.qg ? '轻功' : '心法', '被动']).map(t => `<span>${t}</span>`).join('')}</div></div></div>${isSk(sel) ? bar(lvOf(sel), mastR(sel)) : bar(gfLv(sel), gfR(sel))}${isSk(sel) ? wuDet(sel) : `<h5>效果</h5><p class="ds">${o.d}</p>`}
+      const det = o ? `<div class="dt"><div class="dh"><em style="background-image:url('${ic(sel)}')"></em><div><h3>${isSk(sel) ? o.name : o.n}</h3><p>${isSk(sel) ? (o.tier ? TIERN[o.tier] + '阶' : '基础') : GTN[o.t] + '阶'}</p><div class="tg">${(isSk(sel) ? ['武艺', '主动', WEPN[wepOf(sel)]].concat(MVT(sel)) : [o.qg ? '轻功' : '心法', '被动']).map(t => `<span>${t}</span>`).join('')}</div></div></div>${isSk(sel) ? bar(lvOf(sel), mastR(sel)) : bar(gfLv(sel), gfR(sel))}${isSk(sel) ? wuDet(sel) : `<h5>效果</h5><p class="ds">${o.d}</p>`}
         <div class="db">${on(sel) ? `<button data-a="woff">卸下</button>` : `<button data-a="won">上阵</button>`}${isSk(sel) && on(sel) ? `<button data-a="wl">◀ 提前</button><button data-a="wr">延后 ▶</button>` : ''}</div></div>` : '<p class="em2">选择一门武学</p>';
       body = `<div class="pn"><h4>上阵武艺<small>点右下角的小灯开启【发劲】</small></h4><div class="ch">${chain}</div><div class="two"><div><h4>心法</h4><div class="rw">${gfs}</div></div><div><h4>轻功</h4><div class="rw"><div class="sl ${S.qg && S.qg === selWu ? 'on' : ''}" data-qs="1" ${S.qg ? `data-a="wsel" data-k="${S.qg}"` : ''}><em class="${S.qg ? '' : 'ghost'}" style="background-image:url('${S.qg ? ic(S.qg) : A('e_qing')}')"></em></div></div></div></div><div class="zt"><h4>周天信息</h4><p class="ln">一轮出手总时长 <b class="c1">${zt.toFixed(1)}</b> 秒</p>${(() => { const n = S.slots.filter(k => k && S.fj && S.fj[k]).length, cost = n * fjCost() * 10, reg = zqMax() * (.005 + .004 * GM.hy) * (1 + IT('regen')) * AFX.nl() * 10, back = reg * zt, net = cost - back, full = zqMax() * 10;   /* 11/16 用户：照群侠，开发劲时算给玩家看——一轮耗多少、回多少、能撑几轮 */
         return `<p class="ln">真气回复 <b class="c1">${reg.toFixed(1)}</b>/秒，一轮回 <b class="c1">${Math.round(back)}</b></p><p class="ln">发劲 ${n} 路，一轮耗 <b class="c1">${Math.round(cost)}</b></p>` + (!n ? '<p class="ln dim">还没有开发劲。点武艺右下角的灯试试。</p>' : net <= 0 ? '<p class="ln ok">回复跟得上，可以一直开着。</p>' : `<p class="ln warn">一轮净耗 <b>${Math.round(net)}</b>，满真气约能撑 <b>${Math.max(1, Math.floor(full / net))}</b> 轮（约 ${Math.round(Math.floor(full / net) * zt)} 秒）后力竭。</p>`); })()}</div></div>
