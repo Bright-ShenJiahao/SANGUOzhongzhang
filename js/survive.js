@@ -3406,7 +3406,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
 @keyframes fjOn{from{box-shadow:0 0 0 1px #000,0 0 calc(6px*var(--k)) rgba(110,200,255,.7)}to{box-shadow:0 0 0 1px #000,0 0 calc(16px*var(--k)) rgba(140,220,255,1)}}
 #survPrep .t-wu .pbf{border:0;border-image:none;background:url(art/ui/top/expf.webp) center/100% 100% no-repeat}#survPrep .t-wu .pbf u{left:2.5%;top:22%;bottom:22%;max-width:95%;background:url(art/ui/top/xiufill.webp) left center/100% 100% no-repeat;opacity:1}@keyframes tutHi{from{box-shadow:0 0 0 0 rgba(255,216,110,.0),0 0 calc(8px*var(--k)) rgba(255,216,110,.35)}to{box-shadow:0 0 0 calc(3px*var(--k)) rgba(255,216,110,.25),0 0 calc(22px*var(--k)) rgba(255,216,110,.75)}}
 #survTut.sty{left:0!important;right:0!important;top:0!important;bottom:0!important;width:auto!important;padding:0!important;display:block!important;pointer-events:auto;background:none!important;border:0!important;animation:none!important}
-#survTut.sty .lh2{position:fixed;left:1vw;bottom:calc(3vh + 22vh);height:min(60vh,560px);max-width:40vw;object-fit:contain;object-position:bottom left;image-rendering:pixelated;filter:drop-shadow(0 6px 18px rgba(0,0,0,.7));pointer-events:none;animation:biIn .35s ease-out both}
+#survTut.sty .lh2.wd{max-width:62vw}.sty .lh2{position:fixed;left:1vw;bottom:calc(3vh + 22vh);height:min(60vh,560px);max-width:40vw;object-fit:contain;object-position:bottom left;image-rendering:pixelated;filter:drop-shadow(0 6px 18px rgba(0,0,0,.7));pointer-events:none;animation:biIn .35s ease-out both}
 #survTut.sty .bx2{position:fixed;left:3vw;right:3vw;bottom:3vh;height:22vh;min-height:110px;box-sizing:border-box;background:url(art/ui/dlg/box.webp) center/100% 100% no-repeat;padding:calc(2.6vh + 16px) 4.5vw 2vh;color:#f3e8cf;font-size:clamp(16px,2.6vh,27px);line-height:1.65;letter-spacing:.05em;text-shadow:0 2px 0 #000;animation:tutIn .25s ease-out}
 #survTut.sty.top .bx2{bottom:auto;top:13vh}
 #survTut.sty .bx2 p{margin:0;font:inherit}
@@ -3840,7 +3840,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       const LH = { liu: 'liubei', guan: 'guanyu', zhang: 'zhangfei' }[who];
       const tg = sel && PREP.querySelector(sel), r = tg && tg.getBoundingClientRect(), top = !!r && r.top + r.height / 2 > innerHeight * .55;
       d.className = 'sty' + (top ? ' top' : '');
-      d.innerHTML = `${top ? '' : `<img class="lh2" src="art/ui/npc/${LH}_lihui.webp">`}<div class="bx2"><b class="nm2">${nm}</b><p>${txt}</p><small class="hn2">按 <b>空格键</b> 或点一下 继续</small>${top ? `<em class="fc2" style="background-image:url('${face}')"></em>` : ''}</div>`;
+      d.innerHTML = `${top ? '' : `<img class="lh2 ${LH === 'zhangfei' ? 'wd' : ''}" src="art/ui/npc/${LH}_lihui.webp">`}<div class="bx2"><b class="nm2">${nm}</b><p>${txt}</p><small class="hn2">按 <b>空格键</b> 或点一下 继续</small>${top ? `<em class="fc2" style="background-image:url('${face}')"></em>` : ''}</div>`;
     } else d.className = 'bt';
     if (!PREP) d.innerHTML = (big ? `<div class="lh" style="background-image:url('art/ui/npc/liubei_lihui.webp')"></div>` : '') + `<div class="bx"><b class="nm">${nm}</b><p>${txt}</p><small>${document.getElementById('survPrep') ? '按 <b>空格键</b> 或点一下 继续' : '点一下关闭'}</small></div>${big ? '' : `<em style="background-image:url('${face}')"></em>`}`;
     const go = () => { removeEventListener('keydown', key, true); if (!d.parentNode) return; d.remove(); tutNext(); };

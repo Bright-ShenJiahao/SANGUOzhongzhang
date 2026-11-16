@@ -25,6 +25,7 @@
 #szzStory .sh{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.15),rgba(0,0,0,.05) 45%,rgba(0,0,0,.7))}
 #szzStory .pt{position:absolute;left:2vw;bottom:14vh;height:76vh;max-width:46vw;object-fit:contain;object-position:bottom left;filter:drop-shadow(0 6px 18px rgba(0,0,0,.6));opacity:0;transform:translateX(-30px);transition:opacity .25s,transform .25s}
 #szzStory .pt.on{opacity:1;transform:none}
+#szzStory .pt.wd{max-width:66vw}
 #szzStory .pt.hd{height:auto;width:min(30vw,360px);bottom:31vh;left:5vw;border:3px solid #8a6a32;background:#1a120c;box-shadow:0 0 0 2px #000,0 8px 24px rgba(0,0,0,.7)}
 #szzStory .box{position:absolute;left:3vw;right:3vw;bottom:3vh;height:28vh;min-height:130px;background:url(art/ui/dlg/box.webp) center/100% 100% no-repeat;padding:calc(3.2vh + 18px) 4.5vw 2vh;box-sizing:border-box;color:#f3e8cf;font-size:clamp(17px,2.6vh,28px);line-height:1.7;letter-spacing:.06em;text-shadow:0 2px 0 #000}
 #szzStory .nm{position:absolute;left:3.5vw;top:-3.2vh;height:clamp(40px,7vh,64px);min-width:clamp(150px,16vw,240px);padding:0 2.4vw;box-sizing:border-box;background:url(art/ui/dlg/name.webp) center/100% 100% no-repeat;display:flex;align-items:center;justify-content:center;color:#f3d08a;font-size:clamp(18px,3vh,30px);letter-spacing:.2em;text-indent:.2em}
@@ -62,7 +63,7 @@
       if (L.bg && L.bg !== st.bg) { st.bg = L.bg; const nb = bgs[st.bgi ^= 1], ob = bgs[st.bgi ^ 1]; nb.style.backgroundImage = 'url(' + L.bg + ')'; nb.classList.add('on'); ob.classList.remove('on'); }
       const src = L.who && POR[L.who];
       if (src) {   // 11/16 用户：人物和字对不上——新立绘没下载完时旧立绘会先亮出来；改成新图加载好才显示
-        pt.classList.toggle('hd', !!HEAD[L.who]);
+        pt.classList.toggle('hd', !!HEAD[L.who]); pt.classList.toggle('wd', L.who === 'zhangfei');   // 11/17 张飞立绘带长蛇矛，是横长图，放宽
         if (pt.getAttribute('src') !== src) { pt.classList.remove('on'); pt.onload = () => { if (pt.getAttribute('src') === src) requestAnimationFrame(() => pt.classList.add('on')); }; pt.src = src; if (pt.complete && pt.naturalWidth) pt.onload(); }
         else requestAnimationFrame(() => pt.classList.add('on'));
       } else { pt.classList.remove('on'); pt.removeAttribute('src'); }
