@@ -4661,14 +4661,17 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       const ai = attrInfo(origin, true).map(r => `<span class="at"><em style="background-image:url('${A(ATI[r[4]])}')"></em>${r[0]} <b>${r[1]}</b></span>`).join('');
       const dk = Object.keys(st.dmg).filter(k => st.dmg[k] > 0).sort((a, b) => st.dmg[b] - st.dmg[a]), tot = dk.reduce((a, k) => a + st.dmg[k], 0) || 1;
       const dm = dk.slice(0, 8).map(k => `<div class="dr"><em style="background-image:url('${IMGU[k] || ''}')"></em><div class="db"><u style="width:${st.dmg[k] / tot * 100}%"></u><span>${SK[k] ? SK[k].name : k}　${(st.dmg[k] / tot * 100).toFixed(1)}%</span><b>${Math.round(st.dmg[k] * 10).toLocaleString()}</b></div></div>`).join('') || '<small>没有出手记录</small>';
-      h = `<div class="hd"><div class="etl ${endWin ? 'w' : ''}">${endWin ? '黄巾平定' : '壮志未酬'}<i class="seal" style="background-image:url(art/ui/end/seal_${endWin ? 'sheng' : 'bai'}.webp)"></i></div>
-        <div class="tags"><span>${og.name}</span><span>${og.tag || ''}</span><span class="tt">${sc.title}</span></div>
-        ${badgeH(sc.ti, sc.title, false, true)}</div>
-        <div class="cells">${cell('用时', 'out', mm(T))}${cell('斩敌', 'kill', K.toLocaleString())}${cell('铜钱', 'coin', C.toLocaleString())}${cell('修为', 'xiu', Math.round(S.xiuTot || 0).toLocaleString())}${cell('等级', 'wuxue', 'LV' + S.lv)}
-          <div class="cl pr"><span>路线进度</span><div class="pb"><u style="width:${sc.reach / sc.tot * 100}%"></u><b>${sc.reach} / ${sc.tot}</b></div></div></div>
-        <div class="two"><div class="pn"><h4>构筑详情</h4><div class="rw"><label>武艺</label>${sk}</div><div class="rw"><label>心法</label>${gf}</div><div class="rw"><label>宝物</label><div class="sc">${bq}</div></div><div class="rw"><label>属性</label><div class="ats">${ai}</div></div></div>
-          <div class="pn"><h4>伤害统计</h4>${dm}<div class="sum">总计 <b>${Math.round(tot * 10).toLocaleString()}</b></div></div></div>
-        <div class="bt"><button data-e="p2">查看战报</button><button data-e="home">返回主界面</button><button class="go" data-e="again">再来一局</button></div>`;
+      const dm3 = dk.slice(0, innerWidth < 900 || innerHeight < 500 ? 2 : 3).map(k => `<div class="d3"><em style="background-image:url('${IMGU[k] || ''}')"></em><div class="db"><u style="width:${st.dmg[k] / tot * 100}%"></u><span>${SK[k] ? SK[k].name : k}</span><b>${Math.round(st.dmg[k] * 10).toLocaleString()}</b></div></div>`).join('');
+      const bld = [S.slots.filter(k => k && SK[k]).map(k => ic(IMGU[k] || '', SK[k].name + ' LV' + lvOf(k), lvOf(k), S.fj && S.fj[k] ? 'fj' : '')).join(''), S.gf.filter(id => id && GF[id]).map(id => ic(`art/ui/gf/${id}.webp`, GF[id].n + ' LV' + gfLv(id), gfLv(id))).join('') + (S.qg && GF[S.qg] ? ic(`art/ui/gf/${S.qg}.webp`, GF[S.qg].n, '') : ''), (S.bao || []).filter(k => BAO[k]).map(k => `<div class="ic bq" style="--q:${BQC[BAO[k].q]};background-image:url('${BAO[k].image || 'art/ui/bao/' + k + '.webp'}')" title="${BAO[k].n}"></div>`).join('')].filter(Boolean).join('<i class="sep"></i>');
+      const kv = (a, b) => `<div class="kv0"><span>${a}</span><b>${b}</b></div>`;
+      // 11/16 用户：结算照之前那版——左半屏大立绘 + 右边大字标题；新版的评定、构筑、伤害挑重要的放进右边，属性和完整明细进「查看战报」
+      h = `<div class="art" style="background-image:url(art/ui/result/${endWin ? 'win' : 'lose'}.webp)"></div><div class="rc">
+        <div class="t0"><div class="tw0"><div class="bg0 ${endWin ? 'w' : ''}">${endWin ? '平 乱' : '倒 下'}</div><div class="sb0">${endWin ? '张角伏诛，黄巾之乱平定' : '黄巾未平，壮志未酬'}　·　${og.name}</div></div>
+          <div class="bd0">${badgeH(sc.ti, sc.title, false, true)}<i class="gd0" style="background-image:url(art/ui/end/g${GI[GRADE(sc.sum / 1000)]}.webp)"></i></div></div>
+        <div class="box0"><div class="g2">${kv('斩敌', K.toLocaleString() + ' 名')}${kv('用时', mm(T))}${kv('修为', Math.round(S.xiuTot || 0).toLocaleString())}${kv('铜钱', C.toLocaleString())}${kv('等级', 'LV.' + S.lv)}${kv('评分', sc.sum + ' / 1000')}</div>
+          <div class="pr0"><span>抵达</span><div class="pb"><u style="width:${sc.reach / sc.tot * 100}%"></u><b>${endWin ? '张角祭坛' : '倒在第 ' + Math.min(sc.tot, sc.reach + 1) + ' / ' + sc.tot + ' 层'}</b></div></div></div>
+        ${bld ? `<div class="bl0">${bld}</div>` : ''}${dm3 ? `<div class="dm0">${dm3}</div>` : ''}
+        <div class="bt"><button data-e="p2">查看战报</button><button data-e="home">返回首页</button><button class="go" data-e="again">再来一局</button></div></div>`;
     } else if (endPage === 1) {
       const row = (n, ic, sub, v, max) => `<div class="sr"><em style="background-image:url('art/ui/end/${ic}.webp')"></em><div class="sn"><b>${n}</b><small>${sub}</small></div><div class="sb"><u style="width:${v / max * 100}%"></u></div><span class="sv">+${v}</span><span class="sp">${Math.round(v / max * 100)}%</span><i class="gd" style="background-image:url(art/ui/end/g${GI[GRADE(v / max)]}.webp)"></i></div>`;
       const fights = sc.hard.map(r => `<tr><td>第 ${r.L} 层</td><td>${ENDTY[r.ty]}</td><td>${(r.met && r.met.length ? r.met.join(' / ') : r.nm)}</td><td>${r.t} 秒</td><td class="rf">参考 ${r.ty === 'boss' ? 60 : 40} 秒</td></tr>`).join('') || '<tr><td colspan="5" class="no">还没有打过精锐或首领</td></tr>';
@@ -4681,9 +4684,46 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
         <td class="en">${r.dead ? `<b class="bad">× 败于 ${r.met && r.met.length ? r.met[r.met.length - 1] : r.nm}</b>` : [r.met && r.met.length ? r.met.join(' / ') : r.nm, r.ev, r.bao && BAO[r.bao] ? '得 ' + BAO[r.bao].n : ''].filter(Boolean).join('　')}</td><td class="up">${r.up > 0 ? '▲ 升 ' + r.up + ' 级' : ''}</td></tr>`).join('');
       h = `<div class="ti">逐关战报</div>${close}<div class="pn wide"><div class="tb2"><table><thead><tr><th>层</th><th>节点</th><th>用时</th><th>斩敌</th><th>铜钱</th><th>修为</th><th>遭遇</th><th>进度</th></tr></thead><tbody>${rows || '<tr><td colspan="8" class="no">还没有走过任何一关</td></tr>'}</tbody></table></div></div>${back}`;
     }
-    d.innerHTML = `<div class="fr p${endPage}">${h}</div>`;
+    d.innerHTML = endPage === 0 ? `<div class="z0">${h}</div>` : `<div class="fr p${endPage}">${h}</div>`;
   }
-  const END_CSS = `#survEnd{position:fixed;inset:0;z-index:10040;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 40%,rgba(30,10,8,.93),rgba(4,3,3,.98));color:#e6dccb;font-family:"PingFang SC","Microsoft YaHei",sans-serif;user-select:none}
+  const END_CSS = `#survEnd .z0{position:absolute;inset:0;overflow:hidden;background:#0c0806;animation:z0in .6s ease-out}
+@keyframes z0in{from{opacity:0}to{opacity:1}}
+#survEnd .z0 .art{position:absolute;inset:0;background:25% center/cover no-repeat;animation:z0art 4s ease-out}
+@keyframes z0art{from{transform:scale(1.06)}to{transform:none}}
+#survEnd .z0 .art::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(10,6,4,0) 35%,rgba(10,6,4,.6) 55%,rgba(10,6,4,.82))}
+#survEnd .rc{position:absolute;right:4vw;top:50%;transform:translateY(-50%);width:min(50vw,calc(600px*var(--k)));display:flex;flex-direction:column;gap:calc(12px*var(--k));animation:z0rc .5s .35s both ease-out}
+@keyframes z0rc{from{opacity:0;transform:translateY(-46%)}to{opacity:1;transform:translateY(-50%)}}
+#survEnd .t0{display:flex;align-items:center;justify-content:center;gap:calc(14px*var(--k))}
+#survEnd .tw0{text-align:center}
+#survEnd .bg0{background:none;border:0;padding:0;font:400 calc(110px*var(--kt)) MaShanZheng,KaiTi,STKaiti,serif;color:#e8dccb;line-height:1.05;-webkit-text-stroke:calc(2px*var(--k)) rgba(0,0,0,.6);text-shadow:0 4px 10px rgba(0,0,0,.8)}
+#survEnd .bg0.w{color:#ffd27a}
+#survEnd .sb0{font:600 calc(17px*var(--kt)) "PingFang SC",sans-serif;color:rgba(255,240,215,.85);margin-top:calc(6px*var(--k))}
+#survEnd .bd0{position:relative;flex:none}
+#survEnd .bd0 .badge{width:calc(104px*var(--k))}
+#survEnd .bd0 .badge b{font-size:calc(28px*var(--kt))}
+#survEnd .bd0 .gd0{z-index:2;position:absolute;right:calc(-10px*var(--k));bottom:calc(-4px*var(--k));width:calc(42px*var(--k));height:calc(42px*var(--k));background:center/contain no-repeat;transform:rotate(-10deg);pointer-events:none}
+#survEnd .box0{border:calc(26px*var(--k)) solid transparent;border-image:url(art/ui/kaiju2/panel.webp) 100 fill stretch;padding:0 calc(8px*var(--k))}
+#survEnd .g2{display:grid;grid-template-columns:1fr 1fr;column-gap:calc(26px*var(--k))}
+#survEnd .kv0{display:flex;justify-content:space-between;align-items:baseline;padding:calc(7px*var(--k)) 0;border-bottom:1px dashed rgba(201,164,92,.32);font-size:calc(17px*var(--kt))}
+#survEnd .kv0 span{color:rgba(214,196,160,.8)}
+#survEnd .kv0 b{color:#f6e6c4;font-weight:700}
+#survEnd .pr0{display:flex;align-items:center;gap:calc(12px*var(--k));padding-top:calc(9px*var(--k));font-size:calc(17px*var(--kt))}
+#survEnd .pr0 span{color:rgba(214,196,160,.8);flex:none}
+#survEnd .pr0 .pb{flex:1;margin:0}
+#survEnd .bl0{display:flex;flex-wrap:wrap;gap:calc(6px*var(--k));align-items:center;justify-content:center}
+#survEnd .bl0 .ic{width:calc(40px*var(--k));height:calc(40px*var(--k))}
+#survEnd .bl0 .sep{width:1px;height:calc(30px*var(--k));background:rgba(201,164,92,.45);margin:0 calc(4px*var(--k))}
+#survEnd .dm0{display:flex;flex-direction:column;gap:calc(5px*var(--k))}
+#survEnd .d3{display:flex;align-items:center;gap:calc(8px*var(--k))}
+#survEnd .d3 em{width:calc(28px*var(--k));height:calc(28px*var(--k));background:center/cover;border:1px solid #8a6a3a;flex:none}
+#survEnd .d3 .db{position:relative;flex:1;height:calc(24px*var(--k));background:rgba(0,0,0,.55);border:1px solid rgba(201,164,92,.4);overflow:hidden}
+#survEnd .d3 .db u{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(#e8b84a,#a8741e);opacity:.85}
+#survEnd .d3 .db span{position:absolute;left:calc(8px*var(--k));top:50%;transform:translateY(-50%);font-size:calc(14px*var(--kt));color:#fff3d6;text-shadow:0 1px 2px #000}
+#survEnd .d3 .db b{position:absolute;right:calc(8px*var(--k));top:50%;transform:translateY(-50%);font-size:calc(14px*var(--kt));color:#fff;text-shadow:0 1px 2px #000}
+#survEnd .rc .bt{justify-content:center;margin-top:calc(4px*var(--k))}
+#survEnd .rc button{min-width:0;flex:1;font-size:calc(19px*var(--kt));letter-spacing:.08em}
+@media (max-aspect-ratio:1/1){#survEnd .rc{left:4vw;right:4vw;width:auto;top:auto;bottom:3vh;transform:none;animation:none}#survEnd .z0 .art{background-position:center top}}
+#survEnd{position:fixed;inset:0;z-index:10040;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 40%,rgba(30,10,8,.93),rgba(4,3,3,.98));color:#e6dccb;font-family:"PingFang SC","Microsoft YaHei",sans-serif;user-select:none}
 #survEnd .fr{position:relative;background:#0e0a07;background-clip:padding-box;width:min(96vw,1280px);max-height:94vh;overflow:auto;box-sizing:border-box;border:calc(40px*var(--k)) solid transparent;border-image:url(art/ui/prep/panel_big.webp) 110 fill stretch;padding:calc(6px*var(--k)) calc(14px*var(--k))}
 #survEnd .hd{display:flex;align-items:center;gap:calc(20px*var(--k));min-height:calc(110px*var(--k))}
 #survEnd .etl{position:relative;font:400 calc(78px*var(--kt)) WenKai,MaShanZheng,STKaiti,serif;color:#d8402e;text-shadow:0 3px 0 #000,0 0 calc(24px*var(--k)) rgba(220,60,30,.45);letter-spacing:.06em;line-height:1}
