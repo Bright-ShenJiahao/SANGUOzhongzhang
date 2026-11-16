@@ -177,9 +177,9 @@
     root.style.cssText = 'position:fixed;inset:0;z-index:10010;background:' + PAPER + ';touch-action:none;user-select:none;-webkit-user-select:none';
     cv = document.createElement('canvas'); cv.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;display:block';
     root.appendChild(cv); document.body.appendChild(root); g = cv.getContext('2d');
-    const exit = document.createElement('button'); exit.textContent = '退出';
+    const exit = document.createElement('button'); exit.textContent = '退出'; exit.className = 'rtBtn';
     const bk = Math.max(1, Math.min(1.45, Math.min(innerWidth / 1280, innerHeight / 720)));
-    const card = document.createElement('button'); card.textContent = '兵籍牒';   // 11/11：这一局的当前属性、修为、武艺
+    const card = document.createElement('button'); card.textContent = '兵籍牒'; card.className = 'rtBtn';   // 11/11：这一局的当前属性、修为、武艺
     card.style.cssText = 'position:absolute;right:' + Math.round(84 * bk) + 'px;top:' + Math.round(Math.max(44, Math.min(64, innerHeight * .075)) / 2) + 'px;transform:translateY(-50%);z-index:3;padding:6px 14px;font:700 ' + Math.round(16 * bk) + 'px ' + UI + ';letter-spacing:2px;color:#3b2a1c;background:#f3e6c8;border:1px solid #7a5a2c;border-radius:6px;cursor:pointer;z-index:2';
     card.onclick = () => sheet();
     root.appendChild(card);
@@ -227,20 +227,25 @@
     + '#rtTop .ic{position:relative;width:calc(var(--th)*.62);height:calc(var(--th)*.62);background:#1a120c center/cover no-repeat;border:1px solid #8a6a3a;flex:none}#rtTop .ic i{position:absolute;right:-1px;bottom:-1px;font:700 calc(var(--th)*.18) sans-serif;font-style:normal;background:rgba(0,0,0,.8);color:#ffe9b8;padding:0 2px;line-height:1.1}#rtTop .ic.fj{box-shadow:0 0 0 1px #9fd8ff,0 0 6px rgba(120,200,255,.8)}#rtTop .ic.e{opacity:.25}'
     + '#rtTop .bq{border-color:var(--q)}#rtTop .sh{border-color:#d0443a;background-color:#3a1210;display:flex;align-items:center;justify-content:center;color:#ff8a7a;font:900 calc(var(--th)*.26) ' + FONT_Q + '}'
     + '#rtTop .em2{opacity:.55;font-size:calc(var(--th)*.22)}'
+    + '#rtTop{background:none;border-style:solid;border-width:0;border-image:url(art/ui/top/bar.webp) 24 70 fill / calc(var(--th)*.2) calc(var(--th)*.8) stretch;box-shadow:0 4px 12px rgba(0,0,0,.45)}'
+    + '#rtTop .bar{height:calc(var(--th)*.16);background:url(art/ui/top/xiuf.webp) center/100% 100% no-repeat;border:0;position:relative}#rtTop .bar u{position:absolute;left:4%;top:18%;bottom:18%;background:url(art/ui/top/xiufill.webp) left center/calc(var(--th)*1.5) 100% no-repeat}'
+    + '#rtTop .hpb{height:calc(var(--th)*.42);background:url(art/ui/top/hpf.webp) center/100% 100% no-repeat;border:0}#rtTop .hpb u{left:3.5%;top:14%;bottom:14%;background:url(art/ui/top/hpfill.webp) left center/calc(var(--th)*2.45) 100% no-repeat}#rtTop .hpb b{line-height:calc(var(--th)*.42)}'
+    + '#rtTop .ic{border:0;background-color:transparent;background-position:center,center;background-size:72%,100% 100%;background-repeat:no-repeat}#rtTop .ic.e{opacity:.6}#rtTop .ic.bq{box-shadow:inset 0 0 0 1px var(--q)}#rtTop .ic.fj{box-shadow:0 0 6px rgba(120,200,255,.9)}'
+    + '.rtBtn{background:url(art/ui/top/btn.webp) center/100% 100% no-repeat!important;border:0!important;border-radius:0!important;color:#f0dcae!important;padding:8px 20px!important;text-shadow:0 1px 0 #000}.rtBtn:hover{background-image:url(art/ui/top/btn_on.webp)!important;color:#fff!important}'   // 11/16 用户出的顶栏美术
     + '@media (max-aspect-ratio:9/10){#rtTop .wx,#rtTop .sp,#rtTop .lv .bar{display:none}#rtTop{padding-right:calc(var(--th)*1.9);gap:calc(var(--th)*.18)}#rtTop .hpb{width:calc(var(--th)*1.9)}#rtTop .og{font-size:calc(var(--th)*.3)}#rtTop .bq{display:none}#rtTop .bqn{display:flex!important}}';
   function topRefresh() {
     if (!topBar || !window.SURV || !SURV.status) return;
     const st = SURV.status(), key = JSON.stringify([st.lv, st.pct, st.hp, st.money, st.slots, st.gf, st.qg, st.bao.map(b => b.k), st.shang.map(b => b.k), innerWidth, innerHeight]); if (key === topKey) return; topKey = key;
     const th = Math.round(Math.max(40, Math.min(64, innerHeight * .075, innerWidth * .11))); topBar.style.setProperty('--th', th + 'px');
     const esc = t => String(t || '').replace(/"/g, '&quot;').replace(/<[^>]+>/g, '');
-    const ic = (img, tip, extra, cls) => '<div class="ic ' + (cls || '') + '" title="' + esc(tip) + '" style="background-image:url(\'' + img + '\')">' + (extra || '') + '</div>';
-    const sk = st.slots.map(o => o ? ic(o.img, o.name + ' LV' + o.lv + '：' + o.desc, '<i>' + o.lv + '</i>', o.fj ? 'fj' : '') : '<div class="ic e"></div>').join('');
+    const ic = (img, tip, extra, cls) => '<div class="ic ' + (cls || '') + '" title="' + esc(tip) + '" style="background-image:url(\'' + img + '\'),url(art/ui/top/slot.webp)">' + (extra || '') + '</div>';
+    const sk = st.slots.map(o => o ? ic(o.img, o.name + ' LV' + o.lv + '：' + o.desc, '<i>' + o.lv + '</i>', o.fj ? 'fj' : '') : '<div class="ic e" style="background-image:url(art/ui/top/slot.webp)"></div>').join('');
     const gf = st.gf.filter(Boolean).map(o => ic(o.img, o.name + ' LV' + o.lv + '：' + o.desc, '<i>' + o.lv + '</i>')).join('') + (st.qg ? ic(st.qg.img, st.qg.name + '：' + st.qg.desc) : '');
-    const bq = st.bao.map(b => '<div class="ic bq" style="--q:' + SURV.BQC[b.q] + ';background-image:url(\'' + (b.image || 'art/ui/bao/' + b.k + '.webp') + '\')" title="' + esc(b.n + '（' + SURV.BQN[b.q] + '）：' + b.d + (b.c ? '；代价：' + b.c : '')) + '"></div>').join('');
+    const bq = st.bao.map(b => '<div class="ic bq" style="--q:' + SURV.BQC[b.q] + ';background-image:url(\'' + (b.image || 'art/ui/bao/' + b.k + '.webp') + '\'),url(art/ui/top/slot.webp)" title="' + esc(b.n + '（' + SURV.BQN[b.q] + '）：' + b.d + (b.c ? '；代价：' + b.c : '')) + '"></div>').join('');
     const sh = st.shang.map(b => '<div class="ic sh" title="' + esc('伤势·' + b.n + '：' + b.d) + '">伤</div>').join('');
-    topBar.innerHTML = '<div class="g"><span class="og">' + st.origin + '</span><div class="lv"><b>修为 LV.' + st.lv + '</b><div class="bar"><u style="width:' + st.pct + '%"></u></div></div></div><i class="sp"></i>'
-      + '<div class="g"><em style="background-image:url(\'art/ui/attr/hp.webp\')"></em><div class="hpb"><u style="width:' + Math.max(0, Math.min(100, st.hp[0] / st.hp[1] * 100)) + '%"></u><b>' + st.hp[0] + ' / ' + st.hp[1] + '</b></div></div>'
-      + '<div class="g mo"><em style="background-image:url(\'art/ui/attr/coin.webp\')"></em><b>' + st.money + '</b></div><i class="sp"></i>'
+    topBar.innerHTML = '<div class="g"><span class="og">' + st.origin + '</span><div class="lv"><b>修为 LV.' + st.lv + '</b><div class="bar"><u style="width:' + st.pct * .92 + '%"></u></div></div></div><i class="sp"></i>'
+      + '<div class="g"><em style="background-image:url(\'art/ui/top/blood.webp\')"></em><div class="hpb"><u style="width:' + Math.max(0, Math.min(100, st.hp[0] / st.hp[1] * 100)) * .93 + '%"></u><b>' + st.hp[0] + ' / ' + st.hp[1] + '</b></div></div>'
+      + '<div class="g mo"><em style="background-image:url(\'art/ui/top/coin.webp\')"></em><b>' + st.money + '</b></div><i class="sp"></i>'
       + '<div class="g wx">' + sk + '</div><div class="g wx">' + (gf || '') + '</div><i class="sp wx"></i>'
       + '<div class="g">' + (bq || '<span class="em2 wx">暂无宝物</span>') + (st.bao.length ? '<span class="bqn g" style="display:none"><em style="background-image:url(\'art/ui/bao/' + st.bao[0].k + '.webp\')"></em>×' + st.bao.length + '</span>' : '') + sh + '</div>';
   }
