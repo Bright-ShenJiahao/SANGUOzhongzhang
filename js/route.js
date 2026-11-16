@@ -214,7 +214,7 @@
     if (!run) return;
     ensureDom(); fit(); focus(true); shown = true; root.style.display = ''; t0 = performance.now(); topKey = ''; topRefresh();
     if (!evPre && run.blessed !== false) { evPre = 1; setTimeout(() => { ['art/ui/prep/panel_big.webp', 'art/ui/hud/bian.webp'].concat(EVENTS.map((e, i) => 'art/ui/ev/ev' + i + '.webp'), EVENTS.filter(e => e.npc).map(e => e.npc[1])).forEach(u => { const i = new Image(); i.src = u; }); }, 800); }   // 11/16 用户：奇遇弹窗图片空白——进地图就后台预载插图和头像
-    if (run.blessed === false && window.SURV && SURV.blessOpts) { if (!run.storyDone && window.STORY) { run.storyDone = true; ['art/ui/prep/panel_big.webp', 'art/ui/hud/bian.webp', 'art/ui/prep/btn.webp', 'art/ui/npc/liubei_face.webp', 'art/ui/npc/guanyu_face.webp', 'art/ui/npc/zhangfei_face.webp'].forEach(u => { const i = new Image(); i.src = u; }); STORY.intro(bless); }   /* 11/16 用户：剧情最后一句到桃园三赠很慢——弹窗的图先在剧情里预载，并去掉等待 */ else setTimeout(bless, 300); }   // 11/14 用户：出征先放开局剧情，再桃园三赠
+    if (run.blessed === false && window.SURV && SURV.blessOpts) { if (!run.storyDone && window.STORY && !window.TRIAL_ON) { run.storyDone = true; ['art/ui/prep/panel_big.webp', 'art/ui/hud/bian.webp', 'art/ui/prep/btn.webp', 'art/ui/npc/liubei_face.webp', 'art/ui/npc/guanyu_face.webp', 'art/ui/npc/zhangfei_face.webp'].forEach(u => { const i = new Image(); i.src = u; }); STORY.intro(bless); }   /* 11/16 用户：剧情最后一句到桃园三赠很慢——弹窗的图先在剧情里预载，并去掉等待 */ else setTimeout(bless, 300); }   // 11/14 用户：出征先放开局剧情，再桃园三赠
     if (!raf) raf = requestAnimationFrame(frame);
   }
   // 11/16 用户：照杀戮尖塔，兵籍牒的要点挪到最上面一排（出身/修为/气血/铜钱/武艺/心法/宝物/伤势），点一下打开完整兵籍牒
