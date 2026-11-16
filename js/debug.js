@@ -101,8 +101,8 @@
     const heroGroup = addGroup('hero', '主角');
     btn(heroGroup, '回到主界面', 'alt', () => { if (typeof returnFromPausedGame === 'function') returnFromPausedGame(true); else if (window.TITLE && TITLE.show) TITLE.show(); });
     btn(heroGroup, '回到整军备战', 'alt', () => { if (typeof returnFromPausedGame === 'function') returnFromPausedGame(false); else if (window.TITLE && TITLE.openPreparation) TITLE.openPreparation(1); });
-    btn(heroGroup, '武艺：刀（4招）', 'alt', () => { if (window.SURV) { SURV.slots.splice(0, 5, 'hengsao', 'daobo', 'huima', 'daolun', ''); tipLine('武艺栏换成刀：横扫 刀波 回马 刀轮'); } });
-    btn(heroGroup, '武艺：剑（3招）', 'alt', () => { if (window.SURV) { SURV.slots.splice(0, 5, 'lianzhan', 'sixiang', 'wanren', '', ''); tipLine('武艺栏换成剑：连斩 四象 万刃'); } });
+    btn(heroGroup, '武艺：刀（3招）', 'alt', () => { if (window.SURV) { SURV.slots.splice(0, 5, 'hengsao', 'tuodao', 'tiaozhan', '', ''); tipLine('武艺栏换成刀的黄阶 3 招'); } });   /* 11/17：旧按钮里的招名已过时，改成各兵器黄阶 3 招 */
+    btn(heroGroup, '武艺：剑（3招）', 'alt', () => { if (window.SURV) { SURV.slots.splice(0, 5, 'jlianci', 'zhantie', 'jianqi', '', ''); tipLine('武艺栏换成剑的黄阶 3 招：流星刺 断金斩 白虹剑'); } });
     btn(heroGroup, '回满血', '', () => { if (typeof hero !== 'undefined') hero.hp = maxHeroHp(); });
     btn(heroGroup, '修为 +100', '', () => { if (window.SURV && SURV.addXiu) SURV.addXiu(100); });
     // 面板底部临时提示（主界面、整备页时游戏内文字看不到）

@@ -1,7 +1,7 @@
 // 11/13 武学试炼（开发者模式）：进一场不会结束的战斗，主角无敌，点哪招就只放哪招，一招一招看；心法、轻功点一下就装上
 (() => {
   const MOTN = { chop: '劈', sweep: '横扫', thrust: '刺', spin: '转', up: '挑' };
-  const ORDER = [0, 2, 3, 4, 7, 5, 8, 9, 1, 10];   // 刀 锤 枪 关刀 石子 弓 黄符 羽扇 剑 拳
+  const ORDER = [0, 2, 3, 4, 12, 7, 5, 8, 9, 1, 10, 11];   // 刀 锤 枪 关刀 长戟 石子 弓 黄符 羽扇 剑 拳 腿
   const TC = ['#c9b27a', '#c9b27a', '#6fb8ff', '#c58cff', '#ffb347'];
   let box = null, tab = 0, sel = null, godT = 0, rng = true, rngT = 0;   // 11/16 用户：试炼里常驻弓手、投石手（看乾坤屏挡箭等）
   const T = () => window.SURV && SURV.trial;
