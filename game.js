@@ -727,6 +727,7 @@ function update(dt) {
       line: won ? (chapter2Run ? '黄巾决战告捷，战利品已收入整备仓库。' : '获得管亥的长戟，可在整备界面选择装备。') : deathLine(), s1: 0, s2: 0 };
     if (won && !debugRun0() && window.WALLET && WALLET.bonus) { const first = !(window.TITLE && TITLE.hasCleared && TITLE.hasCleared(chapter2Run ? 2 : 1)); WALLET.bonus((chapter2Run ? 120 : 60) + (first ? 300 : 0)); }   // 通关奖励（用户定金币经济）：每次通关 +60/+120，首通再 +300
     if (window.WALLET) WALLET.flush();
+    if (window.SURV && SURV.endShow) SURV.endShow(!!won);   // 11/16 路线模式：换成三页新结算（照群侠），旧画布结算不画
     const debugRun = /[?&]debug(?:=|&|$)/.test(location.search);   // 开发者模式：不记录成绩
     if (window.ARMORY) ARMORY.markPlayed();
     if (won && !debugRun && window.TITLE && TITLE.markCleared) TITLE.markCleared(chapter2Run ? 2 : 1);
@@ -1157,7 +1158,7 @@ function draw() {
     ctx.fillStyle = 'rgba(20,14,30,.78)'; ctx.fillRect(HW / 2 - tw / 2 - 12, by, tw + 24, bh);
     ctx.fillStyle = '#ffd86e'; lines.forEach((line, i) => ctx.fillText(line, HW / 2, by + 22 + i * 23)); ctx.textAlign = 'left';
   }
-  drawResult(HW, HH);
+  if (!(window.SURV && SURV.endOn && SURV.endOn())) drawResult(HW, HH);
   if (chapter2Run && chapter2Run.mode === 'choice') drawChapter2Choice(HW, HH);
   if (window.CHAPTER2_INTRO && CHAPTER2_INTRO.active()) CHAPTER2_INTRO.draw();
 }

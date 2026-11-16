@@ -254,6 +254,7 @@
   }
   function choose(n, now) {
     if (!reachable(n)) return;
+    if (now) { run.picks = []; run.pt = ''; }   // 11/16 结算·逐关战报：记下这一关弹窗里选了什么
     if (!now) { if (run.circ) return; run.circ = { n, t: performance.now() }; if (window.SFX) SFX.play('j_banner'); setTimeout(() => { run.circ = null; choose(n, 1); }, 420); return; }
     if (n.type === 'camp') return camp(n);
     if (n.type === 'chest') return chest(n);
@@ -301,7 +302,7 @@
       + (hp ? '<div class="hp">当前气血 ' + Math.ceil(hp[0] * 10) + ' / ' + Math.round(hp[1] * 10) + '</div>' : '') + '</div></div>'
       + (window.SURV && SURV.money ? '<div class="hp" style="color:#e8c47a;margin:-.4em 0 .8em">铜钱 ' + SURV.money() + '</div>' : '')
       + '<div class="op">' + opts.map((o, i) => { const poor = o[3] && window.SURV && SURV.money && SURV.money() < o[3]; return '<button data-i="' + i + '"' + (poor ? ' disabled style="opacity:.4;cursor:not-allowed"' : '') + '>' + (o[4] && /\//.test(o[4]) ? '<img src="' + o[4] + '" style="width:40px;height:40px;display:block;margin:0 auto 4px">' : '') + o[0] + '<small>' + (poor ? '铜钱不够' : o[1]) + '</small></button>'; }).join('') + '</div>' + (img ? '</div>' : '') + '</div>';
-    box.querySelectorAll('button').forEach(b => b.onclick = () => { if (b.disabled) return; box.remove(); campBox = null; pick(opts[+b.dataset.i][2]); });
+    box.querySelectorAll('button').forEach(b => b.onclick = () => { if (b.disabled) return; box.remove(); campBox = null; if (run) { if (!run.pt) run.pt = String(title).replace(/\s+/g, ''); (run.picks = run.picks || []).push(String(opts[+b.dataset.i][0]).replace(/<[^>]+>/g, '')); } pick(opts[+b.dataset.i][2]); });
     root.appendChild(box);
   }
   function fightFrom(n, kind, msg, title) {   // 奇遇里打仗：节点就地变成战斗（或精锐），打完照常走整备屏
@@ -371,6 +372,7 @@
     root.appendChild(box);
   }
   function done(n, keepOpen) {
+    if (n && n !== run.cur && window.SURV && SURV.logEv && /event|camp|chest/.test(n.type)) SURV.logEv(n, run.pt || nlabel(n), run.picks || []);
     run.cur = n; run.visited.add(n);
     if (window.RUNSAVE) RUNSAVE.save();   // 自动存档（11/11 用户定）：每打完一个节点、回到长卷时存一次；战斗中途不存
     ensureDom(); fit(); focus(false); shown = true; root.style.display = ''; t0 = performance.now();
@@ -560,7 +562,7 @@
     mapOf: n => MAP_OF(n.layer), segLen: SEGLEN,
     on: () => ON, TIME_K, layers: () => LAYERS,
     waves: n => WAVES_OF[n.type] || 3,
-    name: n => nlabel(n),
+    name: n => nlabel(n), total: () => LAYERS,
     secBoss: n => n && n.final ? [['张角', 'zhang_jiao'], [branch() === 'bao' ? '张梁' : '张宝', '']] : n && n.br ? [[n.br === 'bao' ? '张宝' : '张梁', ''], ['马元义', '']] : n && n.sec ? SECBOSS[n.sec - 1] : [],
     branch: () => branch(),   // 第 4 段走了哪边：'liang' / 'bao' / null
     tagOf: n => n.tag,
@@ -581,6 +583,7 @@
     done, close, choose, posOf: n => pos(n),
     debug: () => run,
     open: () => open(),
+    go: n => { pending = false; close(); if (window.SURV) SURV.beginNode(n); },   // 调试：直接进某个节点开打
     evTest(i) { const ev = EVENTS[i]; popup(ev.t, '', ev.d, ev.o.map(o => o.slice(0, 4)), () => {}, ev.npc, 'art/ui/ev/ev' + i + '.webp'); },   // 调试：直接弹第 i 个奇遇
   };
 })();
