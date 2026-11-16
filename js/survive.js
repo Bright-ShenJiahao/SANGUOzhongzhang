@@ -3879,7 +3879,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     if (!window.__RESUME) { tutSeen = {}; tutQ = []; try { localStorage.removeItem(TUT_KEY); } catch (e) {} }   // 11/16 用户：「跳过指引」没勾时，每开一局新游戏教学从头再放（勾了就整个不出现）
     S.lv = 1; S.shopLock = null; S.xiu = 0; S.bank = 0; S.atAdd = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; S.lvFx = 0; S.money = 0; S.coins = []; S.loot = []; S.shop = []; S.items = []; S.owned = []; S.bao = []; S.shang = []; S.hpMul = 1; S.weakN = 0; S.enemyHpK = 1; S.afterFight = null; S.hutiSum = 0; S.slots = [startSk() || 'hengsao', '', '', '', '']; S.held = wepOf(S.slots[0]) < 7 ? wepOf(S.slots[0]) : null; S.mast = {}; S.dps = {}; S.gf = ['', '', '']; S.qg = ''; S.gfExp = {}; S.xy = 0; S.lhjReady = false; S.lhjOn = false; GM = GM0(); S.zq = zqMax(); S.hp0 = hero.hp; S.combo = 0; S.lk = typeof kills === 'number' ? kills : 0; S.chain = 0; S.lastCat = -1; S.lastI = -9; W.pick = false; const old = document.getElementById('survPick'); if (old) old.remove();
     W.started = true; W.between = 0; S.wind = null; S.recov = null; S.later = []; S.qi = 0; bolts.length = 0; zones.length = 0; DKO.length = 0; S.cycles = 0; fx.length = 0;
-    forceBlade();
+    forceBlade(); if (!window.__RESUME) hero.hp = maxHp();   // 11/17 修：出身加气血上限（小兵 ×1.2）时开局要满血，原来是 100/120
     const vw = viewW(); arenaL = M.gates[0] + 10; lockR = arenaL + vw * 1.5; gateI = 0;
     hero.x = arenaL + vw * .5; cam.x = arenaL;
     if (window.ARENA) ARENA.start();   // 竞技场试玩：重设边界、镜头和出生点
