@@ -169,6 +169,14 @@ function drawDrop(d) {
 }
 function drawFloaters() {
   for (const f of floaters) {
+    if (f.num) {   // 11/16 用户：照群侠——黄橙粗数字 + 深色描边，弹一下再往上飘；伤害越大字越大
+      const pop = 1 + .45 * Math.max(0, 1 - f.t / .12), sz = Math.min(22, 12 + Math.log10(Math.max(1, f.v)) * 3) * pop, yy = f.y - f.t * 22;
+      ctx.globalAlpha = Math.max(0, Math.min(1, (1.1 - f.t) / .35));
+      ctx.font = '900 ' + sz.toFixed(1) + 'px "Arial Black",Impact,sans-serif'; ctx.textAlign = 'center'; ctx.lineJoin = 'round';
+      ctx.lineWidth = 3.5; ctx.strokeStyle = 'rgba(40,18,4,.95)'; ctx.strokeText(f.txt, f.x, yy);
+      const g = ctx.createLinearGradient(0, yy - sz * .8, 0, yy); g.addColorStop(0, '#fff2a0'); g.addColorStop(1, f.v >= 300 ? '#ff7a2a' : '#ffc23a');
+      ctx.fillStyle = g; ctx.fillText(f.txt, f.x, yy); continue;
+    }
     const emph = f.big || f.dodge || f.gold;
     ctx.globalAlpha = Math.max(0, 1 - f.t / 1.1);
     ctx.font = 'bold ' + (emph ? 17 : 13) + 'px "PingFang SC","Noto Sans CJK SC",sans-serif';
@@ -286,7 +294,7 @@ function drawPropFx() {
     ctx.globalAlpha = Math.max(0, Math.min(1, f.life / f.max * 1.8));
     // 先画一圈深色描边，否则黄稻草落在黄土地上根本看不见（和像素角色的描边风格一致）
     ctx.fillStyle = '#2a1c0c';
-    ctx.fillRect(f.x - f.w / 2 - .5, f.y - f.h / 2 - .5, f.w + 1, f.h + 1);
+    if (!f.noOl) ctx.fillRect(f.x - f.w / 2 - .5, f.y - f.h / 2 - .5, f.w + 1, f.h + 1);
     ctx.fillStyle = f.c;
     ctx.fillRect(f.x - f.w / 2, f.y - f.h / 2, f.w, f.h);
   }

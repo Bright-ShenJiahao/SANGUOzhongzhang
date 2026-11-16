@@ -16,6 +16,11 @@ function hit(z, dmg, kb, dir, knock, daze = 0, stun = .35, interrupt = false, ra
   const armor=z&&ch2Armored(z),old=armor?{st:z.st,t:z.t}:null;
   const hp0=z&&z.hp;
   const outcome=window.GEAR ? GEAR.hit(z,dmg,kb,dir,knock,daze,stun,interrupt,ranged,traits) : rawHit(z,dmg,kb,dir,knock,daze,stun,interrupt,ranged,traits);
+  if (window.SURV && SURV.noStun && SURV.noStun() && z && !traits.dot && hp0 > z.hp) {   // 11/16 用户：照群侠跳整数伤害（×10，跟结算页一致）；同一只怪 0.12 秒内的几下合成一个数
+    const v = (hp0 - Math.max(0, z.hp)) * 10, m = floaters.find(f => f.num && f.src === z && f.t < .12);
+    if (m) { m.v += v; m.txt = String(Math.round(m.v)); m.t = 0; }
+    else if (v >= .5) { let x = z.x + rnd(-8, 8), y = z.y - 46; for (let k = 0; k < 6 && floaters.some(f => f.num && f.t < .35 && Math.abs(f.x - x) < 24 && Math.abs((f.y - f.t * 22) - y) < 13); k++) { y -= 13; x += rnd(-6, 6); }   /* 一群怪挨着时数字往上错开，不叠成一坨 */ floaters.push({ x, y, t: 0, num: 1, src: z, v, txt: String(Math.max(1, Math.round(v))) }); }
+  }
   if(armor&&!z.dead){z.st=old.st;z.t=old.t;z.air=false;z.z=0;z.vz=0;z.vx=0;z.stun=0;z.daze=0;}
   if (z && !traits.dot && !traits.secondary) window.__lastHit = `${z.type} 伤害${(+dmg).toFixed(2)} 血${(+hp0).toFixed(1)}→${(+z.hp).toFixed(1)} 击退${Math.round(kb)} ${outcome || ''}${z.air ? ' 空中' : ''}${z.hidden ? ' 隐身' : ''}${window.XIAOCHANG && XIAOCHANG.active() ? ' 校场' : ''}`;   // 排查「打了没伤害」
   return outcome;
@@ -104,7 +109,9 @@ function rawHit(z, dmg, kb, dir, knock, daze = 0, stun = .35, interrupt = false,
   freeze = Math.min(.11, W0.freeze != null ? W0.freeze : .02 + dmg * .018);   // 棍子有单独的定格时长，打起来更"实"
   shake = Math.max(shake, .12);
   // 命中火花：几粒白/金色小碎块朝被击退方向溅出（复用碎屑系统）
-  for (let i = 0; i < 6; i++) {
+  const survFx = window.SURV && SURV.noStun && SURV.noStun();   // 11/16 用户：三国终章不要亮黄带黑边的碎块（"小黄方块"），换成两三粒不起眼的土渣
+  if (survFx) for (let i = 0; i < 2 + (Math.random() < .5); i++) { const life = rnd(.18, .32); propFx.push({ x: z.x + rnd(-6, 6), y: z.y - rnd(0, 4), vx: rnd(-50, 50), vy: rnd(-90, -40), w: rnd(1.2, 2), h: rnd(1.2, 2), life, max: life, c: Math.random() < .5 ? '#6e5a44' : '#8a7458', noOl: 1 }); }
+  else for (let i = 0; i < 6; i++) {
     const life = rnd(.1, .26);
     propFx.push({ x: z.x - dir * 6, y: z.y - rnd(12, 26), vx: rnd(-70, 70) - dir * 45, vy: rnd(-110, -20),
       w: rnd(1, 2.2), h: rnd(1, 2.2), life, max: life, c: Math.random() < .5 ? '#fffbe6' : '#ffdd7a' });

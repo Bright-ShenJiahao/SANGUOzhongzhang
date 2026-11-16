@@ -62,7 +62,7 @@ body.szz-pro #help{display:none}
 .x-back{min-height:34px!important}
 }
 #rot small{display:block;margin-top:10px;font-size:14px;font-weight:600;color:#c9b691;line-height:1.6}
-</style><link rel="preload" href="pack/fonts/result.woff2?v=d1c1a468ad" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=d1c1a468ad)format("woff2");font-display:swap}</style><style>@font-face{font-family:"WenKai";src:url(pack/fonts/kai.woff2?v=f236ba48cd)format("woff2");font-display:swap}</style><link rel="preload" href="pack/fonts/pixel.woff2?v=2d71df86ab" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"Pixel12";src:url(pack/fonts/pixel.woff2?v=2d71df86ab)format("woff2");font-display:swap}@font-face{font-family:"Songti SC";src:url(pack/fonts/pixel.woff2?v=2d71df86ab)format("woff2");font-display:swap}@font-face{font-family:"STSong";src:url(pack/fonts/pixel.woff2?v=2d71df86ab)format("woff2");font-display:swap}@font-face{font-family:"Noto Serif SC";src:url(pack/fonts/pixel.woff2?v=2d71df86ab)format("woff2");font-display:swap}@font-face{font-family:"SimSun";src:url(pack/fonts/pixel.woff2?v=2d71df86ab)format("woff2");font-display:swap}@font-face{font-family:"PingFang SC";src:url(pack/fonts/pixel.woff2?v=2d71df86ab)format("woff2");font-display:swap}@font-face{font-family:"Microsoft YaHei";src:url(pack/fonts/pixel.woff2?v=2d71df86ab)format("woff2");font-display:swap}@font-face{font-family:"Noto Sans CJK SC";src:url(pack/fonts/pixel.woff2?v=2d71df86ab)format("woff2");font-display:swap}@font-face{font-family:"STKaiti";src:url(pack/fonts/pixel.woff2?v=2d71df86ab)format("woff2");font-display:swap}@font-face{font-family:"KaiTi";src:url(pack/fonts/pixel.woff2?v=2d71df86ab)format("woff2");font-display:swap}*{font-synthesis:none}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
+</style><link rel="preload" href="pack/fonts/result.woff2?v=feeac90cdb" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=feeac90cdb)format("woff2");font-display:swap}</style><style>@font-face{font-family:"WenKai";src:url(pack/fonts/kai.woff2?v=634361e0d5)format("woff2");font-display:swap}</style><link rel="preload" href="pack/fonts/pixel.woff2?v=82424a7473" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"Pixel12";src:url(pack/fonts/pixel.woff2?v=82424a7473)format("woff2");font-display:swap}@font-face{font-family:"Songti SC";src:url(pack/fonts/pixel.woff2?v=82424a7473)format("woff2");font-display:swap}@font-face{font-family:"STSong";src:url(pack/fonts/pixel.woff2?v=82424a7473)format("woff2");font-display:swap}@font-face{font-family:"Noto Serif SC";src:url(pack/fonts/pixel.woff2?v=82424a7473)format("woff2");font-display:swap}@font-face{font-family:"SimSun";src:url(pack/fonts/pixel.woff2?v=82424a7473)format("woff2");font-display:swap}@font-face{font-family:"PingFang SC";src:url(pack/fonts/pixel.woff2?v=82424a7473)format("woff2");font-display:swap}@font-face{font-family:"Microsoft YaHei";src:url(pack/fonts/pixel.woff2?v=82424a7473)format("woff2");font-display:swap}@font-face{font-family:"Noto Sans CJK SC";src:url(pack/fonts/pixel.woff2?v=82424a7473)format("woff2");font-display:swap}@font-face{font-family:"STKaiti";src:url(pack/fonts/pixel.woff2?v=82424a7473)format("woff2");font-display:swap}@font-face{font-family:"KaiTi";src:url(pack/fonts/pixel.woff2?v=82424a7473)format("woff2");font-display:swap}*{font-synthesis:none}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
 <style>button{letter-spacing:.04em!important}</style></head><body>
 <style>
 #bootSplash{position:fixed;inset:0;z-index:99999;background:radial-gradient(ellipse at 50% 45%,#f3e4cf 0%,#ecd9c0 55%,#d9c09f 100%);transition:opacity .45s ease-out}
@@ -119,7 +119,7 @@ if(location.protocol==='https:'&&!/[?&]debug(?:=|&|$)/.test(location.search)&&'s
 })();
 // 自动更新：打开游戏、或从后台切回来时，查一下线上有没有新版本；有就在标题/整备页自动刷新（战斗中不打扰）
 (function(){
-var BUILD='195e5043f87a',busy=false;
+var BUILD='0180532c88c9',busy=false;
 if(location.protocol!=='https:'||/[?&]debug(?:=|&|$)/.test(location.search))return;
 function check(){
   if(busy)return;
@@ -1489,6 +1489,11 @@ function hit(z, dmg, kb, dir, knock, daze = 0, stun = .35, interrupt = false, ra
   const armor=z&&ch2Armored(z),old=armor?{st:z.st,t:z.t}:null;
   const hp0=z&&z.hp;
   const outcome=window.GEAR ? GEAR.hit(z,dmg,kb,dir,knock,daze,stun,interrupt,ranged,traits) : rawHit(z,dmg,kb,dir,knock,daze,stun,interrupt,ranged,traits);
+  if (window.SURV && SURV.noStun && SURV.noStun() && z && !traits.dot && hp0 > z.hp) {   // 11/16 用户：照群侠跳整数伤害（×10，跟结算页一致）；同一只怪 0.12 秒内的几下合成一个数
+    const v = (hp0 - Math.max(0, z.hp)) * 10, m = floaters.find(f => f.num && f.src === z && f.t < .12);
+    if (m) { m.v += v; m.txt = String(Math.round(m.v)); m.t = 0; }
+    else if (v >= .5) { let x = z.x + rnd(-8, 8), y = z.y - 46; for (let k = 0; k < 6 && floaters.some(f => f.num && f.t < .35 && Math.abs(f.x - x) < 24 && Math.abs((f.y - f.t * 22) - y) < 13); k++) { y -= 13; x += rnd(-6, 6); }   /* 一群怪挨着时数字往上错开，不叠成一坨 */ floaters.push({ x, y, t: 0, num: 1, src: z, v, txt: String(Math.max(1, Math.round(v))) }); }
+  }
   if(armor&&!z.dead){z.st=old.st;z.t=old.t;z.air=false;z.z=0;z.vz=0;z.vx=0;z.stun=0;z.daze=0;}
   if (z && !traits.dot && !traits.secondary) window.__lastHit = `${z.type} 伤害${(+dmg).toFixed(2)} 血${(+hp0).toFixed(1)}→${(+z.hp).toFixed(1)} 击退${Math.round(kb)} ${outcome || ''}${z.air ? ' 空中' : ''}${z.hidden ? ' 隐身' : ''}${window.XIAOCHANG && XIAOCHANG.active() ? ' 校场' : ''}`;   // 排查「打了没伤害」
   return outcome;
@@ -1577,7 +1582,9 @@ function rawHit(z, dmg, kb, dir, knock, daze = 0, stun = .35, interrupt = false,
   freeze = Math.min(.11, W0.freeze != null ? W0.freeze : .02 + dmg * .018);   // 棍子有单独的定格时长，打起来更"实"
   shake = Math.max(shake, .12);
   // 命中火花：几粒白/金色小碎块朝被击退方向溅出（复用碎屑系统）
-  for (let i = 0; i < 6; i++) {
+  const survFx = window.SURV && SURV.noStun && SURV.noStun();   // 11/16 用户：三国终章不要亮黄带黑边的碎块（"小黄方块"），换成两三粒不起眼的土渣
+  if (survFx) for (let i = 0; i < 2 + (Math.random() < .5); i++) { const life = rnd(.18, .32); propFx.push({ x: z.x + rnd(-6, 6), y: z.y - rnd(0, 4), vx: rnd(-50, 50), vy: rnd(-90, -40), w: rnd(1.2, 2), h: rnd(1.2, 2), life, max: life, c: Math.random() < .5 ? '#6e5a44' : '#8a7458', noOl: 1 }); }
+  else for (let i = 0; i < 6; i++) {
     const life = rnd(.1, .26);
     propFx.push({ x: z.x - dir * 6, y: z.y - rnd(12, 26), vx: rnd(-70, 70) - dir * 45, vy: rnd(-110, -20),
       w: rnd(1, 2.2), h: rnd(1, 2.2), life, max: life, c: Math.random() < .5 ? '#fffbe6' : '#ffdd7a' });
@@ -3313,6 +3320,14 @@ function drawDrop(d) {
 }
 function drawFloaters() {
   for (const f of floaters) {
+    if (f.num) {   // 11/16 用户：照群侠——黄橙粗数字 + 深色描边，弹一下再往上飘；伤害越大字越大
+      const pop = 1 + .45 * Math.max(0, 1 - f.t / .12), sz = Math.min(22, 12 + Math.log10(Math.max(1, f.v)) * 3) * pop, yy = f.y - f.t * 22;
+      ctx.globalAlpha = Math.max(0, Math.min(1, (1.1 - f.t) / .35));
+      ctx.font = '900 ' + sz.toFixed(1) + 'px "Arial Black",Impact,Pixel12,sans-serif'; ctx.textAlign = 'center'; ctx.lineJoin = 'round';
+      ctx.lineWidth = 3.5; ctx.strokeStyle = 'rgba(40,18,4,.95)'; ctx.strokeText(f.txt, f.x, yy);
+      const g = ctx.createLinearGradient(0, yy - sz * .8, 0, yy); g.addColorStop(0, '#fff2a0'); g.addColorStop(1, f.v >= 300 ? '#ff7a2a' : '#ffc23a');
+      ctx.fillStyle = g; ctx.fillText(f.txt, f.x, yy); continue;
+    }
     const emph = f.big || f.dodge || f.gold;
     ctx.globalAlpha = Math.max(0, 1 - f.t / 1.1);
     ctx.font = 'bold ' + (emph ? 17 : 13) + 'px "PingFang SC","Noto Sans CJK SC",Pixel12,sans-serif';
@@ -3430,7 +3445,7 @@ function drawPropFx() {
     ctx.globalAlpha = Math.max(0, Math.min(1, f.life / f.max * 1.8));
     // 先画一圈深色描边，否则黄稻草落在黄土地上根本看不见（和像素角色的描边风格一致）
     ctx.fillStyle = '#2a1c0c';
-    ctx.fillRect(f.x - f.w / 2 - .5, f.y - f.h / 2 - .5, f.w + 1, f.h + 1);
+    if (!f.noOl) ctx.fillRect(f.x - f.w / 2 - .5, f.y - f.h / 2 - .5, f.w + 1, f.h + 1);
     ctx.fillStyle = f.c;
     ctx.fillRect(f.x - f.w / 2, f.y - f.h / 2, f.w, f.h);
   }
