@@ -228,6 +228,8 @@ bg = {'arena': uri(P('art', 'bg', 'arena.webp')),
       'forest': uri(P('art', 'bg', 'forest.webp')),
       'camp': uri(P('art', 'bg', 'camp.webp')),
       'altar': uri(P('art', 'bg', 'altar.webp'))}
+for _k in ['sang', 'du', 'yamen', 'shi', 'weng', 'zhu', 'miao', 'guan', 'yuanmen', 'liang', 'fushui']:   # 11/16 新地图：出了图就自动带上
+    if os.path.exists(P('art', 'bg', _k + '.webp')): bg[_k] = uri(P('art', 'bg', _k + '.webp'))
 assets['chapter2'] = {
     'altar': uri(P('art', 'bg', 'chapter2_altar.webp')),
     'altarFar': uri(P('art', 'bg', 'chapter2_altar_far.webp')),

@@ -3150,7 +3150,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     GM = gfCalc(); S.zq = zqMax(); S.lijie = false; S.fjN = 0; S.hp0 = hero.hp; S.noHitT = 0; S.xy = 0;
     S.k0 = typeof kills === 'number' ? kills : 0; S.coinGot = 0; S.taken = 0; S.hutiSum = 0; S.dps = {}; S.lastHp = hero.hp; S.coins = []; S.lvAt0 = S.lv; S.tutT = 0; S.stolen = 0; S.thiefCd = 8; S.catDone = false; TELE.length = 0; BOOM.length = 0;
     RT.node = nd; W.N = ROUTE.waves(nd); W.started = true; W.between = 0; W.pick = false; S.wind = null; S.recov = null; S.later = []; bolts.length = 0; zones.length = 0; DKO.length = 0; fx.length = 0;
-    zs.length = 0; eshots.length = 0; if (window.ARENA) ARENA.start(ROUTE.mapOf(nd));
+    zs.length = 0; eshots.length = 0; if (window.ARENA) { ARENA.start(ROUTE.mapOf(nd)); if (ARENA.preload && ROUTE.segOf) ARENA.preload(ROUTE.segOf(nd)); }
     startWave(1);
   }
 

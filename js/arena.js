@@ -10,7 +10,7 @@
   const Z0 = FIELD && !/[?&]bg=arena(?:&|$)/.test(location.search) ? 1.25 : 1; let Z = Z0;   // 11/16 用户：照群侠，新村口缩到约一屏，四周的屋子土墙一直看得见
   // 可走区域（都是占整张图的比例）：地面多边形 − 障碍（椭圆、土台整块）+ 土台台面 + 斜坡
   const MAPS = {
-    field: { fc: {"ground":[[0.21,0.255],[0.78,0.255],[0.83,0.36],[0.9,0.52],[0.955,0.66],[0.97,0.79],[0.03,0.79],[0.03,0.6],[0.09,0.47],[0.15,0.36]],"block":[],"top":[],"ramp":[],"ell":[]}, z: 1.15, hero: [.5, .5], sp: [.5, .55], lights: [[.057,.69],[.368,.815],[.912,.755]] },   // 11/16 新村口（围合打谷场）
+    field: { fc: {"ground":[[0.21,0.255],[0.78,0.255],[0.83,0.36],[0.9,0.52],[0.955,0.66],[0.97,0.79],[0.03,0.79],[0.03,0.6],[0.09,0.47],[0.15,0.36]],"block":[],"top":[],"ramp":[],"ell":[]}, z: 1.15, hero: [.5, .5], sp: [.5, .55], fx: [['fire', .057, .69], ['fire', .368, .815], ['fire', .912, .755], ['leaf', 0, 0, .3, .32, '#d99a3a']] },   // 11/16 新村口（围合打谷场）
     altar: { fc: {"ground":[[0.326,0.2582],[0.6788,0.2582],[0.7057,0.2317],[0.7715,0.2508],[0.8612,0.3029],[0.9151,0.356],[0.9569,0.4251],[0.9809,0.4995],[0.9868,0.5951],[0.9689,0.6801],[0.933,0.7651],[0.8612,0.8502],[0.7775,0.9033],[0.7416,0.9267],[0.7386,1.0],[0.2721,1.0],[0.2691,0.9267],[0.1794,0.8629],[0.0897,0.7885],[0.0359,0.6908],[0.015,0.5951],[0.0179,0.4995],[0.0359,0.4357],[0.0598,0.3613],[0.1196,0.2976],[0.1734,0.255],[0.2392,0.2359]],"block":[[[0.0239,0.3889],[0.1423,0.3889],[0.1495,0.4293],[0.1148,0.4718],[0.1124,0.5058],[0.0239,0.5058]]],"top":[[[0.0467,0.3911],[0.1388,0.3911],[0.1286,0.4272],[0.1136,0.4591],[0.0275,0.4612]]],"ramp":[[[0.1148,0.4166],[0.1447,0.4187],[0.1483,0.44],[0.1292,0.4718],[0.1112,0.4718]]],"ell":[]}, hero: [.5, .6], sp: [.502, .5] },
     forest: { fc: {"ground": [[0.0233, 0.3865], [0.1165, 0.2899], [0.1825, 0.2277], [0.2717, 0.2277], [0.3882, 0.207], [0.5823, 0.207], [0.7376, 0.1967], [0.8346, 0.2277], [0.9123, 0.2899], [0.9433, 0.4831], [0.9394, 0.6901], [0.9045, 0.8144], [0.8346, 0.8765], [0.6988, 0.8972], [0.5047, 0.911], [0.3106, 0.911], [0.1553, 0.8903], [0.0582, 0.8075], [0.0233, 0.6901], [0.0116, 0.5521]], "block": [], "top": [], "ramp": [], "ell": [[0.132, 0.7177, 0.0699, 0.038], [0.823, 0.207, 0.0621, 0.0311]]}, hero: [.5, .45], sp: [.5, .5] },
     camp: { fc: {"ground": [[0.0116, 0.4279], [0.0776, 0.3451], [0.1281, 0.2968], [0.1708, 0.283], [0.3494, 0.2312], [0.4581, 0.2174], [0.6988, 0.2243], [0.7958, 0.2657], [0.854, 0.2968], [0.9123, 0.3451], [0.955, 0.4831], [0.9627, 0.6556], [0.9394, 0.7591], [0.8929, 0.8144], [0.757, 0.8523], [0.5823, 0.8489], [0.5047, 0.8972], [0.427, 0.8282], [0.2174, 0.8213], [0.1165, 0.8282], [0.0388, 0.7937], [0.0116, 0.6556]], "block": [], "top": [], "ramp": [], "ell": [[0.854, 0.2692, 0.0543, 0.0414], [0.9045, 0.3451, 0.0505, 0.0483], [0.1514, 0.8627, 0.0446, 0.0518], [0.0893, 0.766, 0.0543, 0.0345]]}, hero: [.5, .45], sp: [.5, .5] },
@@ -70,12 +70,66 @@
     arenaL = g.L - 12; lockR = g.R + 12;
     return g;
   }
+
+  // 11/16 用户：每张地图都要有会动的东西，而且要合这张图——底图静止，下面这些按图内比例坐标叠上去
+  // fx 写法：['fire',x,y] 火把/火盆 | ['lamp',x,y] 灯笼(摇晃光晕) | ['smoke',x,y] 炊烟/香烟 | ['steam',x,y] 蒸笼白汽 | ['purple',x,y] 紫火
+  //          ['leaf',x0,y0,x1,y1,色] 落叶 | ['paper',x0,y0,x1,y1] 符纸 | ['fly',x0,y0,x1,y1] 萤火虫 | ['water',x0,y0,x1,y1] 水面波光 | ['fog',y0,y1] 地面流雾 | ['shaft',x,y] 光柱 | ['wind'] 风沙
+  let fxP = [], fxKey = '', fxLast = 0;
+  const FR = Math.random;
+  function mapFx(g) {
+    const now = performance.now() / 1000, dt = Math.min(.05, fxLast ? now - fxLast : .016); fxLast = now;
+    if (fxKey !== MSEL) { fxKey = MSEL; fxP = []; }
+    const X = x => g.ox + x * g.w, Y = y => g.oy + y * g.h, U = g.h / 1000;   // U：图高 1000 时的 1 像素
+    const glow = (x, y, r, c0, c1) => { const gr = ctx.createRadialGradient(x, y, 0, x, y, r); gr.addColorStop(0, c0); gr.addColorStop(.4, c1); gr.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill(); };
+    const add = o => { if (fxP.length < 260) fxP.push(o); };
+    ctx.save();
+    MAP.fx.forEach((e, k) => {
+      const [kind] = e, f = .75 + .15 * Math.sin(now * 9 + k * 2) + .1 * Math.sin(now * 23 + k * 5);
+      ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 1;
+      if (kind === 'fire') { glow(X(e[1]), Y(e[2]), 70 * U * f, 'rgba(255,170,70,.55)', 'rgba(255,120,40,.18)'); if (FR() < dt * 9) add({ k: 'ember', x: e[1] + (FR() - .5) * .006, y: e[2] - .01, vx: (FR() - .5) * .01, vy: -.05 - FR() * .05, t: 0, T: .8 + FR() * .9 }); }
+      else if (kind === 'lamp') { const sw = Math.sin(now * 1.6 + k) * 4 * U; glow(X(e[1]) + sw, Y(e[2]), 55 * U * (.9 + .1 * f), 'rgba(255,190,110,.5)', 'rgba(255,120,60,.14)'); }
+      else if (kind === 'purple') { const p = .75 + .25 * Math.sin(now * 2.4 + k); glow(X(e[1]), Y(e[2]), 110 * U * p, 'rgba(200,120,255,.55)', 'rgba(130,60,220,.2)'); if (FR() < dt * 7) add({ k: 'pember', x: e[1] + (FR() - .5) * .02, y: e[2] - .01, vx: (FR() - .5) * .01, vy: -.04 - FR() * .04, t: 0, T: 1 + FR() }); }
+      else if (kind === 'smoke' && FR() < dt * 2.5) add({ k: 'smoke', x: e[1] + (FR() - .5) * .006, y: e[2], vx: .006 + FR() * .006, vy: -.025 - FR() * .015, t: 0, T: 3 + FR() * 2, c: e[3] || '150,140,130' });
+      else if (kind === 'steam' && FR() < dt * 4) add({ k: 'smoke', x: e[1] + (FR() - .5) * .01, y: e[2], vx: (FR() - .5) * .008, vy: -.05 - FR() * .02, t: 0, T: 1.4 + FR(), c: '235,235,230' });
+      else if (kind === 'leaf' && FR() < dt * 1.2) add({ k: 'leaf', x: e[1] + FR() * (e[3] - e[1]), y: e[2] + FR() * (e[4] - e[2]) * .5, vx: .012 + FR() * .015, vy: .025 + FR() * .02, t: 0, T: 6 + FR() * 3, c: e[5] || '#c98a3a', ph: FR() * 7 });
+      else if (kind === 'paper' && FR() < dt * .9) add({ k: 'leaf', x: e[1] + FR() * (e[3] - e[1]), y: e[2], vx: (FR() - .5) * .02, vy: .02 + FR() * .015, t: 0, T: 7 + FR() * 3, c: '#e8c25a', ph: FR() * 7, paper: 1 });
+      else if (kind === 'fly' && fxP.filter(p => p.k === 'fly').length < 14 && FR() < dt * 3) add({ k: 'fly', x: e[1] + FR() * (e[3] - e[1]), y: e[2] + FR() * (e[4] - e[2]), vx: 0, vy: 0, t: 0, T: 5 + FR() * 4, ph: FR() * 7 });
+      else if (kind === 'water' && FR() < dt * 12) add({ k: 'glint', x: e[1] + FR() * (e[3] - e[1]), y: e[2] + FR() * (e[4] - e[2]), vx: .004, vy: 0, t: 0, T: .6 + FR() * .8, w: 6 + FR() * 14 });
+      else if (kind === 'fog') { ctx.globalCompositeOperation = 'source-over'; for (let i = 0; i < 7; i++) { const x = ((i * .19 + now * .008) % 1.3) - .15, y = e[1] + (e[2] - e[1]) * ((i * .37) % 1); ctx.globalAlpha = .12; glow(X(x), Y(y), 260 * U, 'rgba(200,215,225,.9)', 'rgba(200,215,225,.4)'); } }
+      else if (kind === 'shaft') { const a = .1 + .07 * Math.sin(now * .7 + k * 3); ctx.globalAlpha = a; ctx.save(); ctx.translate(X(e[1]), Y(e[2])); ctx.rotate(.35); const gr = ctx.createLinearGradient(0, 0, 0, 420 * U); gr.addColorStop(0, 'rgba(255,230,170,.9)'); gr.addColorStop(1, 'rgba(255,230,170,0)'); ctx.fillStyle = gr; ctx.fillRect(-24 * U, 0, 48 * U, 420 * U); ctx.restore(); }
+      else if (kind === 'wind' && FR() < dt * 10) add({ k: 'dust', x: -.02, y: .25 + FR() * .6, vx: .12 + FR() * .1, vy: (FR() - .5) * .02, t: 0, T: 6 });
+    });
+    for (const p of fxP) {
+      p.t += dt; let vx = p.vx;
+      if (p.k === 'leaf') vx += Math.sin(p.t * 2.2 + p.ph) * .02;
+      if (p.k === 'fly') { p.vx += (FR() - .5) * .02 * dt * 60 * .05; p.vy += (FR() - .5) * .02 * dt * 60 * .05; p.vx *= .98; p.vy *= .98; vx = p.vx; }
+      p.x += vx * dt; p.y += p.vy * dt;
+      const a = Math.min(1, p.t / .3, (p.T - p.t) / .6), x = X(p.x), y = Y(p.y);
+      if (a <= 0) continue;
+      if (p.k === 'ember' || p.k === 'pember') { ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = a * .9; ctx.fillStyle = p.k === 'ember' ? '#ffb24a' : '#d08cff'; ctx.fillRect(x, y, 2.2 * U * 1.6, 2.2 * U * 1.6); }
+      else if (p.k === 'smoke') { ctx.globalCompositeOperation = 'source-over'; const r = (14 + p.t * 22) * U * 1.4; ctx.globalAlpha = a * .22; glow(x, y, r, `rgba(${p.c},.8)`, `rgba(${p.c},.4)`); }
+      else if (p.k === 'leaf') { ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = a * .9; ctx.save(); ctx.translate(x, y); ctx.rotate(Math.sin(p.t * 3 + p.ph) * 1.2); ctx.fillStyle = p.c; ctx.scale(1, Math.abs(Math.cos(p.t * 2.5 + p.ph)) * .8 + .2); if (p.paper) ctx.fillRect(-5 * U * 1.5, -7 * U * 1.5, 10 * U * 1.5, 14 * U * 1.5); else { ctx.beginPath(); ctx.ellipse(0, 0, 7 * U * 1.5, 3.2 * U * 1.5, 0, 0, 7); ctx.fill(); } ctx.restore(); }
+      else if (p.k === 'fly') { ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = a * (.5 + .5 * Math.sin(p.t * 3 + p.ph)); glow(x, y, 12 * U * 1.5, 'rgba(220,255,140,.9)', 'rgba(160,230,80,.3)'); }
+      else if (p.k === 'glint') { ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = a * .55 * Math.sin(Math.PI * p.t / p.T); ctx.fillStyle = '#fff3d0'; ctx.fillRect(x, y, p.w * U * 1.5, 1.6 * U * 1.5); }
+      else if (p.k === 'dust') { ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = a * .35; ctx.fillStyle = '#c8b090'; ctx.fillRect(x, y, 10 * U, 1.5 * U); }
+    }
+    fxP = fxP.filter(p => p.t < p.T && p.y > -.1 && p.y < 1.1 && p.x < 1.1);
+    ctx.restore();
+  }
+  // 地图池：每段 3 张，按节点挑一张（没出图的先跳过，用旧图顶上）
+  const POOL = { field: ['field', 'sang', 'du'], town: ['yamen', 'shi', 'weng'], forest: ['zhu', 'miao', 'guan'], camp: ['yuanmen', 'liang', 'fushui'], altar: ['altar'] };
+  const hasMap = k => typeof BG !== 'undefined' && !!BG[k] && !!MAPS[k];
+  function pick(seg, seed) { const ok = (POOL[seg] || []).filter(hasMap); if (!ok.length) return seg; return ok[seed % ok.length]; }
+  function want(k) { if (typeof IMG !== 'undefined' && !IMG['map_' + k] && typeof BG !== 'undefined' && BG[k] && typeof load === 'function') load('map_' + k, BG[k]); }
   window.ARENA = {
     available: () => ON_URL && typeof BG !== 'undefined' && !!(BG.arena || BG.field || BG.town || BG.altar),
     map: () => MSEL,
+    pick, pool: POOL, want,
+    preload(seg) { const segs = Object.keys(POOL), i = segs.indexOf(seg); [seg, segs[i + 1]].forEach(s2 => (POOL[s2] || []).filter(hasMap).forEach(want)); },
     on: () => active && ready(),
     start(key) {
       if (!this.available()) return;
+      want(key); const im = typeof IMG !== 'undefined' && IMG['map_' + key]; if (!(im && im.complete && im.width)) key = 'field';   // 图还没载完就先用村口
       setMap(key || MSEL || 'field');
       active = true;
       const g = apply(); if (!g) return;
@@ -188,15 +242,7 @@
       if (!ready()) return;
       const g = geo(); ctx.imageSmoothingEnabled = true;
       ctx.drawImage(img(), g.ox, g.oy, g.w, g.h);
-      if (MAP.lights) {   // 火把：火光一明一暗地跳
-        const t = performance.now() / 1000; ctx.save(); ctx.globalCompositeOperation = 'lighter';
-        MAP.lights.forEach(([lx, ly], k) => {
-          const x = g.ox + lx * g.w, y = g.oy + ly * g.h, f = .75 + .15 * Math.sin(t * 9 + k * 2) + .1 * Math.sin(t * 23 + k * 5), r = g.h * .07 * f;
-          const gr = ctx.createRadialGradient(x, y, 0, x, y, r); gr.addColorStop(0, 'rgba(255,170,70,.55)'); gr.addColorStop(.4, 'rgba(255,120,40,.18)'); gr.addColorStop(1, 'rgba(255,90,20,0)');
-          ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill();
-        });
-        ctx.restore();
-      }
+      if (MAP.fx) mapFx(g);
     },
   };
 })();
