@@ -1817,6 +1817,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     return b;
   };
   // 用每帧扫过的线段判定，按命中先后处理，避免快石穿过近处敌人。
+  const ARIMG = new Image(); ARIMG.src = 'art/ui/arrow_shot.webp';   // 弓箭飞行图（切自兵器表的箭）
   function stoneShot(p, a, length, width, accept, contact, end, size = 1, pierce = HAS('yunxing') ? 1 : 0, arrowColor = null) {
     const b = stoneBolt(p, a, length, size);
     if (arrowColor) Object.assign(b, { stone: 0, shape: 'arrow', col: arrowColor });
@@ -4002,6 +4003,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       if (b.shape || b.col === STN || b.col === FUC || b.big) {
         ctx.save(); ctx.translate(b.x, b.y - 16); ctx.globalAlpha = Math.min(1, al + .3); ctx.strokeStyle = 'rgba(40,30,20,.95)'; ctx.lineWidth = 1.5;
         if (b.big) { ctx.fillStyle = '#f2c94c'; ctx.beginPath(); ctx.arc(0, 0, 8, 0, 7); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#fff4c8'; ctx.beginPath(); ctx.arc(-2, -3, 3, 0, 7); ctx.fill(); }
+        else if (b.shape === 'arrow' && ARIMG.complete && ARIMG.naturalWidth) { ctx.rotate(Math.atan2(b.vy * 2, b.vx)); const w = 34, h = w * ARIMG.naturalHeight / ARIMG.naturalWidth; if (b.col && b.col[0] !== ARW.col[0]) { ctx.shadowColor = `rgb(${b.col[0]})`; ctx.shadowBlur = 8; } ctx.drawImage(ARIMG, -w / 2, -h / 2, w, h); ctx.shadowBlur = 0; }   // 11/17 用户：弓箭用兵器图里的箭，不再用代码画的线
         else if (b.shape === 'arrow' || b.shape === 'sword') { ctx.rotate(Math.atan2(b.vy * 2, b.vx)); const L = b.shape === 'sword' ? 18 : 14; ctx.strokeStyle = `rgb(${b.col[0]})`; ctx.lineWidth = b.shape === 'sword' ? 3 : 2; ctx.beginPath(); ctx.moveTo(-L, 0); ctx.lineTo(L - 4, 0); ctx.stroke(); ctx.fillStyle = `rgb(${b.col[1]})`; ctx.beginPath(); ctx.moveTo(L + 2, 0); ctx.lineTo(L - 5, -3); ctx.lineTo(L - 5, 3); ctx.closePath(); ctx.fill(); if (b.shape === 'sword') { ctx.fillStyle = '#d8b050'; ctx.fillRect(-L, -4, 3, 8); } }
         else if (b.shape === 'feather') { ctx.rotate(Math.atan2(b.vy * 2, b.vx)); ctx.fillStyle = '#ff8a40'; ctx.beginPath(); ctx.ellipse(0, 0, 10, 3.5, 0, 0, 7); ctx.fill(); ctx.fillStyle = '#ffe0a0'; ctx.fillRect(-8, -1, 14, 2); }
         else if (b.shape === 'firefly' || b.shape === 'ember') { const g = ctx.createRadialGradient(0, 0, 1, 0, 0, 9); g.addColorStop(0, `rgba(${b.col[1]},1)`); g.addColorStop(1, `rgba(${b.col[0]},0)`); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, 9, 0, 7); ctx.fill(); }
@@ -4064,7 +4066,8 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
         for (let i = 0; i < e.arrows; i++) {
           const a = i * 2.39996, spread = i ? e.r * .58 : 0, h = (1 - p * p) * (75 + i * 5);
           const x = Math.cos(a) * spread, y = Math.sin(a) * spread / 2;
-          ctx.beginPath(); ctx.moveTo(x - 12, y - h - 32); ctx.lineTo(x, y - h); ctx.stroke();
+          if (ARIMG.complete && ARIMG.naturalWidth) { const w = 36, hh = w * ARIMG.naturalHeight / ARIMG.naturalWidth; ctx.save(); ctx.translate(x - 6, y - h - 16); ctx.rotate(Math.atan2(32, 12)); ctx.drawImage(ARIMG, -w / 2, -hh / 2, w, hh); ctx.restore(); }
+          else { ctx.beginPath(); ctx.moveTo(x - 12, y - h - 32); ctx.lineTo(x, y - h); ctx.stroke(); }
         }
         ctx.restore(); continue;
       }
@@ -4598,7 +4601,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   S10('qluanwu', '崩星裂地', '再错开半格裂出第二颗星（0.8 倍，收尾）', () => L10T(.35, () => { for (let i = 0; i < 8; i++) L10line(HX(), HY(), A10() + i * Math.PI / 4 + Math.PI / 8, FS(180), FS(14), Hqn, .8, { fin: 1, st: .3 }); }));
   S10('baji', '力拔山兮', '再砸一次（全屏，1.2 倍，收尾，必定爆劲）', () => L10T(.9, () => { shake = Math.max(shake, .5); fx.push({ k: 'ring', x: HX(), y: HY(), t: 0, T: .7, r: 420 }); for (const z of near(HX(), HY(), 420)) Hqn(z, 1.2, { fin: 1, st: .6, boom: 1 }); }));
   S10('fengjuan', '五禽归一', '五禽合一，最后再爆出五兽光影（半径 150，2.0 倍，收尾，必定爆劲）', () => L10T(5.6, () => { shake = Math.max(shake, .4); L10boom(HX(), HY(), FS(150), Hqn, 2.0, { fin: 1, boom: 1 }); }));
-  const TRIAL = { SK, GF, MOT, WEPN, TIERN, wepOf, IMGU, spdTxt, spawn: t => edgeSpawn(t), count: t => zs.filter(z => !z.dead && z.type === t).length, long() { W.tot = 9999; if (W.t > W.tot - 5) W.t = 0; },
+  const TRIAL = { slot(i, k) { S.slots[i] = k; }, SK, GF, MOT, WEPN, TIERN, wepOf, IMGU, spdTxt, spawn: t => edgeSpawn(t), count: t => zs.filter(z => !z.dead && z.type === t).length, long() { W.tot = 9999; if (W.t > W.tot - 5) W.t = 0; },
     setGf(ids) { S.gf = ['', '', '']; ids.slice(0, 3).forEach((id, i) => { S.gf[i] = id; }); GM = gfCalc(); }, setQg(id) { S.qg = id || ''; GM = gfCalc(); }, gf: () => S.gf.slice(), qg: () => S.qg, mul: k => skillMul(k), lv: k => lvOf(k), spd: k => spdTxt(SK[k]), rs: k => SK[k] && SK[k].dk ? rsOf(k) : null, setRs(k, v) { DRS[k] = v; try { localStorage.setItem('szz-dao-rs', JSON.stringify(DRS)); } catch (e) {} },
     sp: k => spOf(k), setSp(k, v) { DSP[k] = v; try { localStorage.setItem('szz-dao-sp', JSON.stringify(DSP)); } catch (e) {} }, spAll(v) { Object.keys(SK).forEach(k => { if (SK[k].dk) DSP[k] = v; }); try { localStorage.setItem('szz-dao-sp', JSON.stringify(DSP)); } catch (e) {} },
     FRN: ['idle', 'walk1', 'walk2', 'walk3', 'roll1', 'roll2', 'roll3', 'roll4', 'hurt', 'down', 'chop1', 'chop2', 'sweep1', 'sweep2', 'thrust1', 'thrust2', 'spin1', 'spin2', 'up1', 'up2'],
