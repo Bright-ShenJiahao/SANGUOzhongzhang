@@ -3126,7 +3126,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     if (window.SFX) SFX.play('j_win');
     R.xiu = nd.type === 'boss' ? 60 : nd.type === 'elite' ? 40 : 25; addXiu(R.xiu);
     if (nd.type === 'boss') heal(maxHp() * .3);
-    S.loot = rollLoot(nd); S.shop = rollShop(nd); S.bought = [];
+    S.loot = rollLoot(nd); S.shop = rollShop(nd); S.bought = []; S.srr = 0;
     if (HAS('wuzhu')) S.money += 15; if (HAS('yuxi')) heal(maxHp() * .15);
     if ((S.weakN || 0) > 0) S.weakN--; S.enemyHpK = 1;
     const af = S.afterFight; S.afterFight = null;   // 奇遇里打的仗：打完的额外奖励
@@ -3592,6 +3592,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     if (nd.type !== 'battle') { const ks = Object.keys(ITEMS).filter(k => !ITEMS[k].use); out.push(itemOf(ks[Math.random() * ks.length | 0])); }
     return out;
   }
+  const srrCost = () => Math.round((3 + ((prepNd && prepNd.layer) || 1) * 1.5) * (1 + (S.srr || 0)));   // 刷新价：第 1 层 5 → 9 → 14…，层数越高越贵
   function rollShop(nd) {   // 行商：3 件道具 + 2 本秘籍（11/11 用户定 5 件），都能买，不能刷新；价格随层数涨（第 1 层 ×2，每 8 层再 +100%）
     const ks = Object.keys(ITEMS).sort(() => Math.random() - .5), out = ks.slice(0, 3).map(itemOf), seen = new Set(ownedAll().concat(S.loot.map(it => it.k || it.id)));
     let nb = 0; for (const o of rewardOptions(undefined).concat(rewardOptions('perk'), rewardOptions('skill'))) { const it = itemFrom(o); const key = it && (it.k || it.id); if (it && !seen.has(key) && nb < 2) { seen.add(key); out.push(it); nb++; } }
@@ -3689,10 +3690,11 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
         left = `<button class="bb rf" data-a="xrr" ${(+S.xrr || 0) >= 2 + (OG().xrr || 0) ? 'disabled' : ''}>刷新<span>${2 + (OG().xrr || 0) - (+S.xrr || 0)}/${2 + (OG().xrr || 0)}</span></button>`; }   // 11/16 用户：每次修炼机会能刷新 2 次
     } else if (prepTab === 'shang') {   // 11/11：照群侠，5 件货一排排开，移上去看详情；购买、锁定在卡上
       const L = S.shop, bt = [].concat(S.bought ?? []);
-      body = `<div class="pn wide sw"><h4>行商<small>可买多件 · 不刷新 · 越往后越贵</small></h4><div class="srow">${L.map((it, i) => { const sb = bt.includes(i);
+      body = `<div class="pn wide sw"><h4>行商<small>可买多件 · 花铜钱刷新，越刷越贵 · 锁住的货刷新也留着</small></h4><div class="srow">${L.map((it, i) => { const sb = bt.includes(i);
         return card(it, i, 'ssel', selShop, sb ? '<button class="cbb" disabled>已买下</button>' : `<button class="cbb buy" data-a="buy" data-i="${i}" ${S.money < it.price ? 'disabled' : ''}><b>${it.price}</b><em style="background-image:url('${A('coin')}')"></em></button>`, (sb ? ' sold' : '') + (S.shopLock === it || it.kept ? ' lkd' : ''))
           .replace(/<\/div>$/, '') + (sb ? '<i class="lkb lki"></i>' : it.kept ? '<i class="lkb lki on" title="上一关锁定的货，原价保留">🔒</i>' : `<button class="lkb${S.shopLock === it ? ' on' : ''}" data-a="lock" data-i="${i}" title="锁定：这一关买不起就锁上，下一关原价还在（只留一关）">${S.shopLock === it ? '🔒' : '🔓'}</button>`) + '</div>'; }).join('')}</div>
         <p class="em2 lkh">买不起的货点下面的小锁锁定一件，下一关原价还在（只留一关）</p></div>`;
+      { const c = srrCost(); left = `<button class="bb rf" data-a="srr" ${S.money < c ? 'disabled' : ''}>刷新<span>${c}</span><em style="background-image:url('${A('coin')}');display:inline-block;width:1.1em;height:1.1em;background-size:contain;vertical-align:middle"></em></button>`; }   // 11/16 用户（照土豆兄弟）：行商可以花钱刷新，每刷一次涨价
     } else if (prepTab === 'wu') {
       const all = S.slots.filter(Boolean).concat(S.gf.filter(Boolean), S.qg ? [S.qg] : [], S.owned || []);
       if (!selWu || !all.includes(selWu)) selWu = S.slots[0];
@@ -3732,6 +3734,8 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       else if (a === 'lock') { const it = S.shop[i]; S.shopLock = S.shopLock && S.shopLock === it ? null : it; if (window.SFX) SFX.play('j_pick0'); }
       else if (a === 'buy') { const it = S.shop[i]; if (S.money >= it.price) { S.money -= it.price; learn(it); S.bought = [].concat(S.bought ?? [], i); if (S.shopLock === it) S.shopLock = null; if (window.SFX) SFX.play('j_shop'); } }
       else if (a === 'xiu') { const o = S.xopts[i]; if (window.SFX) SFX.play('j_pick' + o.q); for (const [q, v] of o.adds) S.atAdd[q] += v; S.bank--; S.xopts = null; S.xrr = 0; }
+      else if (a === 'srr') { const c = srrCost(); if (S.money >= c) { S.money -= c; S.srr = (S.srr || 0) + 1; const keep = S.shop.filter((it, j) => (it === S.shopLock || it.kept) && !(S.bought || []).includes(j)); const lk = S.shopLock; S.shopLock = null; let out = rollShop(prepNd); S.shopLock = lk;
+          keep.forEach((it, j) => { const at = out.findIndex(o => (o.k || o.id) === (it.k || it.id)); out.splice(at >= 0 ? at : j, 1, it); }); S.shop = out; S.bought = []; selShop = 0; if (window.SFX) SFX.play('j_pick0'); } }
       else if (a === 'xrr') { if ((+S.xrr || 0) < 2 + (OG().xrr || 0)) { S.xopts = null; S.xrr = (+S.xrr || 0) + 1; } }
       else if (a === 'wsel') selWu = k;
       else if (a === 'fj') { S.fj = S.fj || {}; S.fj[k] = !S.fj[k]; if (window.SFX) SFX.play(S.fj[k] ? 'j_pick1' : 'tick'); }

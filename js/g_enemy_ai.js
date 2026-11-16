@@ -129,11 +129,25 @@ function ch2Telegraph(z){
 }
 
 // 敌人互相让位：两人几乎站在同一点时，沿上下方向（为主）慢慢错开，站成并排，不叠在一起
+// 11/16 用户：小怪排队——路线模式里近战小兵按离主角远近分三圈：最近 8 个贴身围一圈出手，后面的在外圈等着补位
+let ringStamp = -1;
+function ringOf(z) {
+  if (ringStamp !== gameT) { ringStamp = gameT;
+    zs.filter(o => !o.dead && !o.T.ranged && !o.T.boss && !o.T.chapterBoss && !o.static).map(o => [o, Math.hypot(o.x - hero.x, (o.y - hero.y) / .6)]).sort((a, b) => a[1] - b[1]).forEach(([o], i) => { o.ring = i < 8 ? 0 : i < 22 ? 1 : 2; });
+  }
+  return z.ring || 0;
+}
 function separateEnemies(dt) {
   const L = zs.filter(z => !z.dead && !z.air && !z.static && z.st !== 'sleep' && z.st !== 'down' && !z.T.boss);
-  const RX = 18, RY = 12, push = 60 * dt;
+  const RX = 18, RY = 12, push = 60 * dt, RM = !!(window.SURV && SURV.curNode && SURV.curNode());
   for (let i = 0; i < L.length; i++) for (let j = i + 1; j < L.length; j++) {
     const a = L[i], b = L[j], dx = b.x - a.x, dy = b.y - a.y;
+    if (RM) {   // 路线模式：沿两人连线推开（不再只往上下推，否则排成一竖条）
+      const d = Math.hypot(dx, dy / .6); if (d >= 20) continue;
+      const ux = d > .01 ? dx / d : (i % 2 ? 1 : -1), uy = d > .01 ? dy / d : 0, k = (20 - d) * .5 * Math.min(1, dt * 10);
+      for (const [e, m] of [[a, -1], [b, 1]]) { const nx = e.x + m * ux * k, ny = Math.max(M.top, Math.min(M.bot, e.y + m * uy * k * .6)); if (!blocked(nx, ny)) { e.x = nx; e.y = ny; } }
+      continue;
+    }
     if (Math.abs(dx) >= RX || Math.abs(dy) >= RY) continue;
     // 主要上下分开；完全重合时按序号决定谁上谁下，避免两人一起抖
     let sy = Math.sign(dy) || (i % 2 ? 1 : -1);
@@ -327,7 +341,7 @@ function zUpdate(z, dt) {
           eshots.push({k:'fire',enemyVolley:ch2Troops(),x0:z.x+z.f*16,y0:z.y,tx:z.x+dx*Math.cos(angle)-dy*Math.sin(angle),ty:z.y+dx*Math.sin(angle)+dy*Math.cos(angle),t:0,T:.9});
         }
       }
-      else if (Math.abs(dx) < T.reach && Math.abs(hero.y - z.y) < 14 && Math.sign(dx) === z.f) dmgHero(T.dmg, z);   // 上下判定 9→14，和主角攻击范围对齐
+      else if (window.SURV && SURV.curNode && SURV.curNode() && !T.elite ? Math.hypot(hero.x - z.x, (hero.y - z.y) / .6) < T.reach + 8 : Math.abs(dx) < T.reach && Math.abs(hero.y - z.y) < 14 && Math.sign(dx) === z.f) dmgHero(T.dmg, z);   // 上下判定 9→14，和主角攻击范围对齐
     }
     return;
   }
@@ -338,6 +352,7 @@ function zUpdate(z, dt) {
   if (T.ranged) {   // 远程：和主角保持距离，站到差不多同一条线上
     const side = Math.sign(z.x - hero.x) || 1, want = (T.range[0] + T.range[1]) / 2;
     tx = hero.x + side * want; ty = hero.y + (z.slot % 2 ? 10 : -10);
+    if (window.SURV && SURV.curNode && SURV.curNode()) { tx = hero.x + side * (want + (z.slot % 4) * 24); ty = hero.y + ((Math.floor(z.slot / 4) % 3) - 1) * 11 + (z.slot % 2 ? 4 : -4); }   // 11/16 小怪排队：远程兵按序号错开站成几排，不叠成一坨
     tx = Math.max(cam.x + 30, Math.min(tx, (lockR < Infinity ? lockR : cam.x + viewW()) - 30));
     if (z.siegeArcher && z.guard) { tx = z.guard.x; ty = z.guard.y; }   // 投石车弓手：站岗不动，远处也射（抛射）
     const ad = Math.abs(dx);
@@ -347,11 +362,17 @@ function zUpdate(z, dt) {
     if (!z.tok && (window.SURV && SURV.curNode && SURV.curNode())) z.tok = true;   // 11/14 用户：路线模式删掉「出手名额」，小兵一窝蜂直接围上来
     if (!z.tok && tokens < (window.XIAOCHANG && XIAOCHANG.tokenCap ? XIAOCHANG.tokenCap() : M.token) && Math.abs(dx) < 200) z.tok = true;
     tx = hero.x - z.f * (z.tok ? T.reach - 6 : 26 + (z.slot % 3) * 8); ty = hero.y + (z.tok ? 0 : (z.slot % 2 ? 16 : -16));
+    const RING = window.SURV && SURV.curNode && SURV.curNode() && !T.elite;
+    if (RING) {   // 围成一圈：沿着自己所在的方向站到对应那一圈上
+      const rg = ringOf(z), r = [T.reach - 4, T.reach + 34, T.reach + 70][rg], a = Math.atan2((z.y - hero.y) / .6, z.x - hero.x) + (rg ? (z.slot % 2 ? .12 : -.12) : 0);
+      tx = hero.x + Math.cos(a) * r; ty = hero.y + Math.sin(a) * r * .6;
+      if (rg === 0 && Math.hypot(dx, dy / .6) < T.reach + 5) { z.f = Math.sign(dx) || z.f; set(z, 'wind'); if (T.heavy) sfx('bladeAlert', z.x); return; }
+    }
     // 老卒专属：站到中距离就蓄力放剑气（6.5 秒一次）
     if (T.elite && !z.qi && (z.qiCd || 0) <= 0 && Math.abs(dx) < 130 && Math.abs(dy) < 26) {
       set(z, 'wind'); z.qi = 0; z.qiCd = 6.5; sfx('bladeAlert', z.x); return;
     }
-    if (z.tok && !(ch2Troops() && z.type==='yellow-heavy' && ch2Formation(z) && Math.abs(z.x-ch2Formation(z).x)>18) && Math.abs(dx) < T.reach + (T.elite || T.chapterBoss ? 0 : 5) && Math.abs(dy) < 12) { set(z, 'wind'); if (T.heavy) sfx('bladeAlert', z.x); return; }
+    if (z.tok && !RING && !(ch2Troops() && z.type==='yellow-heavy' && ch2Formation(z) && Math.abs(z.x-ch2Formation(z).x)>18) && Math.abs(dx) < T.reach + (T.elite || T.chapterBoss ? 0 : 5) && Math.abs(dy) < 12) { set(z, 'wind'); if (T.heavy) sfx('bladeAlert', z.x); return; }
   }
   const formation=ch2Formation(z);if(formation){tx=formation.x;ty=formation.y;}
   const mx = tx - z.x, my = ty - z.y, l = Math.hypot(mx, my);
