@@ -106,10 +106,19 @@
     ctx.save();
     const bim = img();   // 11/16 用户：旗子/布幡/招牌/树冠——不另出图，直接让底图上那块像素按风轻轻扭动（只动一点点，盖住原图，不会对不上）
     if (bim && bim.width) for (const [k0, e] of MAP.fx.entries()) { if (e[0] !== 'sway') continue;
-      const [, x0, y0, x1, y1, md, am] = e, sx = x0 * bim.width, sy = y0 * bim.height, sw = (x1 - x0) * bim.width, sh = (y1 - y0) * bim.height, dx0 = X(x0), dy0 = Y(y0), dw = (x1 - x0) * g.w, dh = (y1 - y0) * g.h, A = (am || 1) * g.h * .004;
+      const [, x0, y0, x1, y1, md, am] = e;
+      let src = bim, sx = x0 * bim.width, sy = y0 * bim.height; const sw = (x1 - x0) * bim.width, sh = (y1 - y0) * bim.height;
+      if (md !== 'b') {   // 11/16 用户：杆子不能跟着动——只把布（黄/白）抠出来扭动，旗杆、横木、墙都留在原图不动
+        if (!e._c || e._c.k !== MSEL) { const c = document.createElement('canvas'); c.width = Math.ceil(sw); c.height = Math.ceil(sh); const x = c.getContext('2d'); x.drawImage(bim, sx, sy, sw, sh, 0, 0, c.width, c.height);
+          const d = x.getImageData(0, 0, c.width, c.height), a = d.data, wh = MSEL === 'shi';
+          for (let i = 0; i < a.length; i += 4) { const r = a[i], gg = a[i + 1], b = a[i + 2], mx = Math.max(r, gg, b), mn = Math.min(r, gg, b);
+            const cloth = wh ? (mx > 120 && mx - mn < 70) : (r > 120 && gg > 80 && r - b > 70 && gg - b > 35); if (!cloth) a[i + 3] = 0; }
+          x.putImageData(d, 0, 0); c.k = MSEL; e._c = c; }
+        src = e._c; sx = 0; sy = 0; }
+      const dx0 = X(x0), dy0 = Y(y0), dw = (x1 - x0) * g.w, dh = (y1 - y0) * g.h, A = (am || 1) * g.h * .004;
       ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
-      if (md === 'l') { const n = Math.max(4, Math.ceil(dw / 2)); for (let i = 0; i < n; i++) { const f = i / n, o = Math.sin(now * 3.2 - f * 6 + k0) * A * f; ctx.drawImage(bim, sx + sw * f, sy, sw / n + .5, sh, dx0 + dw * f, dy0 + o, dw / n + .6, dh); } }
-      else { const n = Math.max(4, Math.ceil(dh / 2)); for (let i = 0; i < n; i++) { const f = i / n, w = md === 'b' ? 1 - f : f, o = (md === 'b' ? Math.sin(now * 1.1 + k0) + .35 * Math.sin(now * 2.7 + f * 3 + k0) : Math.sin(now * 2.4 + f * 4 + k0)) * A * w; ctx.drawImage(bim, sx, sy + sh * f, sw, sh / n + .5, dx0 + o, dy0 + dh * f, dw, dh / n + .6); } } }
+      if (md === 'l') { const n = Math.max(4, Math.ceil(dw / 2)); for (let i = 0; i < n; i++) { const f = i / n, o = Math.sin(now * 3.2 - f * 6 + k0) * A * f; ctx.drawImage(src, sx + sw * f, sy, sw / n + .5, sh, dx0 + dw * f, dy0 + o, dw / n + .6, dh); } }
+      else { const n = Math.max(4, Math.ceil(dh / 2)); for (let i = 0; i < n; i++) { const f = i / n, w = md === 'b' ? 1 - f : f, o = (md === 'b' ? Math.sin(now * 1.1 + k0) + .35 * Math.sin(now * 2.7 + f * 3 + k0) : Math.sin(now * 2.4 + f * 4 + k0)) * A * w; ctx.drawImage(src, sx, sy + sh * f, sw, sh / n + .5, dx0 + o, dy0 + dh * f, dw, dh / n + .6); } } }
     MAP.fx.forEach((e, k) => {
       const [kind] = e, f = .75 + .15 * Math.sin(now * 9 + k * 2) + .1 * Math.sin(now * 23 + k * 5);
       ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 1;
