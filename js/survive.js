@@ -950,9 +950,10 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     const x1 = x0 + Math.cos(a) * Dp, y1 = clampY(y0 + Math.sin(a) * Dp * .5), hs = new Set(), w = QS(W) / 2;
     if (inv) hero.inv = Math.max(hero.inv || 0, inv);
     if (Dp > 4) ghost(x0, y0, x1, y1, a, SK[CK] ? SK[CK].pose[1] : null, T + .1);
-    DKO.push(dmk({ T: T + .01, fin: 0, tick(q) { const p = Math.min(1, q.t / T); hero.x = x0 + (x1 - x0) * p; hero.y = clampY(y0 + (y1 - y0) * p); if (Math.abs(Math.cos(a)) > .2) hero.f = Math.cos(a) >= 0 ? 1 : -1;
-      for (const z of hittable()) if (!hs.has(z) && Math.hypot(z.x - hero.x, (z.y - hero.y) * 2) < w + 12) { hs.add(z); DH(z, (typeof m === 'function' ? m(z) : m) * QDM(), kb, Object.assign({ x: hero.x - Math.cos(a) * 20 }, o)); }
-      if (!q.fin && p >= 1) { q.fin = 1; if (done) done(hs); } } }));
+    // 11/17 用户：不要拖着主角走（影响走位）——主角留在原地，残影冲出去打，命中跟着残影算
+    DKO.push(dmk({ T: T + .01, fin: 0, tick(q) { const p = Math.min(1, q.t / T), px = x0 + (x1 - x0) * p, py = clampY(y0 + (y1 - y0) * p); if (Math.abs(Math.cos(a)) > .2) hero.f = Math.cos(a) >= 0 ? 1 : -1;
+      for (const z of hittable()) if (!hs.has(z) && Math.hypot(z.x - px, (z.y - py) * 2) < w + 12) { hs.add(z); DH(z, (typeof m === 'function' ? m(z) : m) * QDM(), kb, Object.assign({ x: px - Math.cos(a) * 20 }, o)); }
+      if (!q.fin && p >= 1) { q.fin = 1; if (done) done(hs, x1, y1); } } }));
     return Dp;
   }
   // ---- 黄 ----
@@ -990,17 +991,17 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       const mf = z => { const c = cnt.get(z) || 0; if (c >= cap) return 0; cnt.set(z, c + 1); return m0 * (L >= 7 ? qBleedUp(.04, 4)(z) : 1); };
       for (let i = 0; i < N; i++) qT(hero.x, hero.y, a0 + i * Math.PI * 2 / N, 150, 36, mf, 25, { bl, blMax }); sfx(SW, hero.x); shake = Math.max(shake, .1); } });
   QG('chong', 2, 'thrust', { name: '破阵突', icon: '突', need: 116, wu: .34, rc: .28, beam: true, len: 116,
-    desc: '平端长枪向前冲 150，一路穿透撞开两侧的人，挂 2 层流血；冲刺头 0.15 秒无敌，落点人太多会提前停下。LV3 流血 3 层；LV5 冲到头回身横扫身后 180°；LV7 冲过的路上留 3 秒枪痕，每 0.5 秒扎一下并挂流血',
+    desc: '残影平端长枪向前冲 150（主角原地不动），一路穿透撞开两侧的人，挂 2 层流血；冲刺头 0.15 秒无敌，落点人太多会提前停下。LV3 流血 3 层；LV5 冲到头回身横扫身后 180°；LV7 冲过的路上留 3 秒枪痕，每 0.5 秒扎一下并挂流血',
     cast() { const L = dlv(), a = aim(), x0 = hero.x, y0 = hero.y; sfx(SW, hero.x); shake = Math.max(shake, .12);
-      const Dp = qDash(a, 150, .18, 66, 1.70, 50, { bl: L >= 3 ? 3 : 2 }, .15, () => {
-        if (L >= 5) { dSweep(hero.x, hero.y, a + Math.PI, Math.PI / 2, 140, .95, 90, { rev: true }); sfx(SW, hero.x); }
+      const Dp = qDash(a, 150, .18, 66, 1.70, 50, { bl: L >= 3 ? 3 : 2 }, .15, (hs, ex, ey) => {
+        if (L >= 5) { dSweep(ex, ey, a + Math.PI, Math.PI / 2, 140, .95, 90, { rev: true }); sfx(SW, ex); }
         if (L >= 7) DKO.push(dmk({ T: 3, nx: .5, tick(o) { if (o.t >= o.nx) { o.nx += .5; qFx(x0, y0, a, Dp, .25); dRect(x0, y0, a, Dp, QS(66) / 2, z => DH(z, .22, 0, { bl: 1, x: x0 })); } } })); }); } });
   QG('huimaq', 2, 'thrust', { name: '回马枪', icon: '马', need: 140, wu: .30, rc: .30, beam: true, len: 140,
-    desc: '先后撤 100（后撤时无敌），枪尾顺手扫开身后的人，停一下再往前直刺一条长 360 的枪线，把人挑飞（浮空）。LV3 后撤 130、无敌更久；LV5 直刺变三道平行枪影；LV7 被挑飞的人落地时再炸一圈',
+    desc: '残影后撤 100（主角原地不动，这一下无敌），枪尾顺手扫开身后的人，停一下再往前直刺一条长 360 的枪线，把人挑飞（浮空）。LV3 后撤 130、无敌更久；LV5 直刺变三道平行枪影；LV7 被挑飞的人落地时再炸一圈',
     cast() { const L = dlv(), a = aim(), back = a + Math.PI, fo = { up: 1, fkBoom: L >= 7 ? .90 : 0 }; sfx(SW, hero.x);
       qT(hero.x, hero.y, back, 90, 50, .30, 80, { noL: 1 });
-      qDash(back, L >= 3 ? 130 : 100, .12, 40, 0, 0, {}, L >= 3 ? .18 : .12, () => later(.06, () => { S.poseOverride = { f: SK.huimaq.pose2, t: .2 }; const ca = Math.cos(a), sa = Math.sin(a), px = -sa * QS(55), py = ca * QS(55) * .5;
-        qT(hero.x, hero.y, a, 360, 34, 1.40, 20, fo); if (L >= 5) for (const s of [-1, 1]) qT(hero.x + px * s, hero.y + py * s, a, 360, 30, .70, 20, fo);
+      qDash(back, L >= 3 ? 130 : 100, .12, 40, 0, 0, {}, L >= 3 ? .18 : .12, (hs, ex, ey) => later(.06, () => { S.poseOverride = { f: SK.huimaq.pose2, t: .2 }; const ca = Math.cos(a), sa = Math.sin(a), px = -sa * QS(55), py = ca * QS(55) * .5;
+        ghost(ex, ey, ex + ca * QS(40), ey + sa * QS(20), a, SK.huimaq.pose2, .25); qT(ex, ey, a, 360, 34, 1.40, 20, fo); if (L >= 5) for (const s of [-1, 1]) qT(ex + px * s, ey + py * s, a, 360, 30, .70, 20, fo);
         sfx(SW, hero.x); shake = Math.max(shake, .12); })); } });
   // ---- 地 ----
   QG('touqiang', 3, 'thrust', { name: '掷虹枪', icon: '虹', need: 190, wu: .55, rc: .35, beam: true, len: 190,
@@ -1134,9 +1135,10 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
         if (L >= 7 && o.t > .35) dRect(x0, y0, a, Lp, w, z => { if (!hs.has(z) && !hs2.has(z)) { hs2.add(z); GH(z, .30, 10, { x: x0 }); } });
         if (L >= 5 && !o.b && o.t >= .3) { o.b = 1; fx.push({ k: 'burst', x: ex, y: ey, r: GS(50), t: 0, T: .4, col: gCol() }); for (const z of near(ex, ey, GS(50))) GH(z, .60, 60, { x: ex }); } } })); } });
   GD('xiongshou', 1, 'up', { name: '拖刀计', icon: '拖', need: 70, wu: .55, rc: .35, range: 140, half: 1.57,
-    desc: '佯装败退：往后撤一步（撤的时候短暂无敌），再回身向上撩出 180° 重斩，刀头带离身 40~140，击退很强，挂 1 层破甲。LV3 破甲 2 层；LV5 撤得更远、回身扇面扩到 240°；LV7 被撩中的敌人停住 0.3 秒',
+    desc: '佯装败退：残影往后撤一步（主角原地不动，这一下短暂无敌），再回身向上撩出 180° 重斩，刀头带离身 40~140，击退很强，挂 1 层破甲。LV3 破甲 2 层；LV5 撤得更远、回身扇面扩到 240°；LV7 被撩中的敌人停住 0.3 秒',
     cast() { const L = dlv(), a = aim(), back = (L >= 5 ? 100 : 70) * DK; hero.inv = Math.max(hero.inv || 0, L >= 5 ? .3 : .22);
-      DKO.push(dmk({ T: .26, done: 0, tick(o, dt) { if (o.t <= .2) { hero.x -= Math.cos(a) * back * dt / .2; hero.y = clampY(hero.y - Math.sin(a) * back * .5 * dt / .2); }
+      ghost(hero.x, hero.y, hero.x - Math.cos(a) * back, hero.y - Math.sin(a) * back * .5, a, null, .25);   /* 11/17：只让残影后撤，主角不被拖动 */
+      DKO.push(dmk({ T: .26, done: 0, tick(o, dt) {
         if (!o.done && o.t >= .22) { o.done = 1; const hs = gSweep(hero.x, hero.y, a, (L >= 5 ? 120 : 90) * Math.PI / 180, 40, 140, 1.70, 140, { pj: L >= 3 ? 2 : 1 }); if (L >= 7) for (const z of hs) if (!tough(z)) stunz(z, .3); sfx(SW, hero.x); shake = Math.max(shake, .18); } } })); } });
   // ---- 玄 ----
   GD('xuanfengd', 2, 'spin', { name: '车轮斩', icon: '轮', need: 60, wu: .50, rc: .40, range: 130, half: Math.PI,
@@ -1755,12 +1757,12 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       for (const z of near(hero.x, hero.y, 420)) QH(z, 1.40, 20, { fin: 1, st: L >= 5 ? 1.3 : 1.0, boom: L >= 7 });
       if (L >= 3) later(.45, () => { fx.push({ k: 'ring', x: hero.x, y: hero.y, t: 0, T: .6, r: 420 }); shake = Math.max(shake, .3); for (const z of near(hero.x, hero.y, 420)) QH(z, .60, 10, {}); }); } });
   QN('fengjuan', 4, 'spin', { name: '五禽通神', icon: '禽', need: 70, wu: .80, rc: .45, none: true,
-    desc: '华佗五禽戏：5 秒内每秒换一种身法，期间受伤 −30%——虎扑（扑向最近的敌人 1.0 倍）→ 鹿奔（移速 +30%）→ 熊撼（砸地半径 90，0.8 倍，眩晕 0.4 秒）→ 猿击（对最近的敌人快打 6 下，每下 0.2 倍）→ 鸟翔（跃起 0.5 秒无敌，落地冲击波半径 120，1.5 倍，收尾）。LV3 受伤 −45%；LV5 五种身法伤害 +30%；LV7 鸟翔落地必定爆劲',
+    desc: '华佗五禽戏：5 秒内每秒换一种身法，期间受伤 −30%——虎扑（残影扑向最近的敌人 1.0 倍）→ 鹿奔（移速 +30%）→ 熊撼（砸地半径 90，0.8 倍，眩晕 0.4 秒）→ 猿击（对最近的敌人快打 6 下，每下 0.2 倍）→ 鸟翔（跃起 0.5 秒无敌，落地冲击波半径 120，1.5 倍，收尾）。LV3 受伤 −45%；LV5 五种身法伤害 +30%；LV7 鸟翔落地必定爆劲',
     cast() { const L = dlv(), k = L >= 5 ? 1.3 : 1, NM = ['虎扑', '鹿奔', '熊撼', '猿击', '鸟翔']; S.wqT = 5; S.wqDR = L >= 3 ? .55 : .7; sfx(SW, hero.x);
       const e = fSwirl(hero.x, hero.y, FS(70), 5.1, 1); e.col = '150,230,110';
       DKO.push(dmk({ T: 5.1, i: 0, tick(o, dt) { e.x = hero.x; e.y = hero.y; if (S.wqT > 0) S.wqT -= dt;
         while (o.i < 5 && o.t >= o.i) { const i = o.i; floaters.push({ x: hero.x, y: hero.y - 70, t: 0, txt: NM[i], color: '#c8ff9a' });
-          if (i === 0) { const t = nearest(FS(160)); if (t) { const a = Math.atan2((t.y - hero.y) * 2, t.x - hero.x), D = Math.max(0, dist(t, hero) - 14); ghost(hero.x, hero.y, hero.x + Math.cos(a) * D, hero.y + Math.sin(a) * D * .5, a, SK.fengjuan.pose[1], .3); hero.x += Math.cos(a) * D; hero.y = clampY(hero.y + Math.sin(a) * D * .5); QH(t, 1.0 * k, 30, {}); } }
+          if (i === 0) { const t = nearest(FS(160)); if (t) { const a = Math.atan2((t.y - hero.y) * 2, t.x - hero.x), D = Math.max(0, dist(t, hero) - 14); ghost(hero.x, hero.y, hero.x + Math.cos(a) * D, hero.y + Math.sin(a) * D * .5, a, SK.fengjuan.pose[1], .3); QH(t, 1.0 * k, 30, {}); /* 11/17：残影扑过去，主角不动 */ } }
           if (i === 1) S.wqSpd = DKT + 1;
           if (i === 2) { gBand(hero.x, hero.y, 0, Math.PI, 0, FS(90), .3); shake = Math.max(shake, .2); for (const z of near(hero.x, hero.y, FS(90))) QH(z, .80 * k, 20, { st: .4 }); }
           if (i === 3) { const t = nearest(FS(120)); if (t) for (let j = 0; j < 6; j++) later(j * .07, () => { if (!t.dead) { fx.push({ k: 'cut', n: 'dg6', x: t.x, y: t.y - 16, a: Math.random() * 3, L: 12, t: 0, T: .15, col: gCol() }); QH(t, .20 * k, 5, {}); } }); }
