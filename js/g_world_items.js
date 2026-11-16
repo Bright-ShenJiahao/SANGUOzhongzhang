@@ -173,9 +173,8 @@ function drawFloaters() {
       const pop = 1 + .45 * Math.max(0, 1 - f.t / .12), sz = Math.min(22, 12 + Math.log10(Math.max(1, f.v)) * 3) * pop, yy = f.y - f.t * 22;
       ctx.globalAlpha = Math.max(0, Math.min(1, (1.1 - f.t) / .35));
       ctx.font = '900 ' + sz.toFixed(1) + 'px "Arial Black",Impact,sans-serif'; ctx.textAlign = 'center'; ctx.lineJoin = 'round';
-      ctx.lineWidth = 3.5; ctx.strokeStyle = 'rgba(40,18,4,.95)'; ctx.strokeText(f.txt, f.x, yy);
-      const g = ctx.createLinearGradient(0, yy - sz * .8, 0, yy); g.addColorStop(0, '#fff2a0'); g.addColorStop(1, f.v >= 300 ? '#ff7a2a' : '#ffc23a');
-      ctx.fillStyle = g; ctx.fillText(f.txt, f.x, yy); continue;
+      ctx.lineWidth = 4; ctx.strokeStyle = '#000'; ctx.strokeText(f.txt, f.x, yy);   // 11/16 用户：白字黑边粗体
+      ctx.fillStyle = '#fff'; ctx.fillText(f.txt, f.x, yy); continue;
     }
     const emph = f.big || f.dodge || f.gold;
     ctx.globalAlpha = Math.max(0, 1 - f.t / 1.1);
