@@ -786,6 +786,7 @@ function drawChar(name, f, x, y, flip, alpha = 1, white = false, sc = 1, dark = 
   const sp = Math.max(.5, SC * PX) * sc;
   const sx = Math.round(x * SC + OXs), sy = Math.round(y * SC + OYs);
   ctx.save(); ctx.setTransform(1, 0, 0, 1, sx, sy); if (flip) ctx.scale(-1, 1); if (fr.skin) ctx.imageSmoothingEnabled = false;
+  const xf = name === 'hero' && window._HXF; if (xf) { const cy = fr.ay * sp * .45; ctx.translate((xf.dx || 0) * SC, -(xf.dy || 0) * SC - cy); ctx.rotate(xf.rot || 0); ctx.scale(xf.sx || 1, xf.sy || 1); ctx.translate(0, cy); }   // 11/17 腿法：主角图的前探/跳起/倾斜/压扁（只是画面，位置不动）
   ctx.globalAlpha = alpha;
   const im = white && fr.white ? fr.white : (dark && fr.dark ? fr.dark : fr.img);
   if (dark && !fr.dark) {

@@ -1889,73 +1889,109 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const tFan = (x, y, a, half, R0, R1, m, o = {}) => { gBand(x, y, a, half, FS(R0), FS(R1), .28); return hittable().filter(z => inBand(x, y, z, a, half, FS(R0), FS(R1))).filter(z => TH(z, m, 10, Object.assign({ x, px: x, py: y }, o))); };
   const tRing = (x, y, R, m, o = {}) => { fx.push({ k: 'ring', x, y, t: 0, T: .45, r: FS(R) * 1.1 }); gBand(x, y, 0, Math.PI, 0, FS(R), .3); return near(x, y, FS(R)).filter(z => TH(z, m, 10, Object.assign({ x, px: x, py: y }, o))); };
   const tKick = (x, y) => fx.push({ k: 'cut', n: 'dg6', x, y: y - 20, a: Math.random() * 3, L: 18, t: 0, T: .2, col: gCol() });
+  // 11/17 用户：腿只用现有的帧（提膝、侧踢、下蹲、扫腿 + 翻滚当空翻），靠帧序列、旋转、翻面、跳起、压扁、前探、残影拖尾做出每招的区别；全是画面效果，主角位置不变（凌空坠除外）
+  const TF = { knee: 'quan_spin1', kick: 'quan_spin2', crouch: 'quan_sweep1', sweep: 'quan_sweep2', r1: 'quan_roll1', r2: 'quan_roll2', r3: 'quan_roll3', r4: 'quan_roll4' };
+  let TA = null, TL = null;
+  const tAnim = (steps, xf) => { TA = { t0: DKT, T: steps.reduce((a, b) => a + b[0], 0), steps, xf }; };   // steps：[[秒, 帧]]，帧名后加 ~ 表示翻面；xf(t) → {dx,dy,rot,sx,sy}
+  const tLean = (d, T) => { TL = { t0: DKT, T: T || .14, d }; };   // 踢中那一下往前探 d 再弹回
+  const tSpinSteps = (fr, n, dt) => Array.from({ length: n }, (_, i) => [dt, fr + (i % 2 ? '~' : '')]);   // 快速左右翻面 = 转圈
+  const tRoll = T => [TF.r1, TF.r2, TF.r3, TF.r4].map(f => [T / 4, f]);
+  const tArc = (t0, T, H) => t => t < t0 || t > t0 + T ? 0 : H * 4 * ((t - t0) / T) * (1 - (t - t0) / T);
+  function tTrail(a, fr, n, d) {   // 出腿方向留几个渐隐残影
+    const f = Math.cos(a) < 0; for (let i = 1; i <= (n || 2); i++) fx.push({ k: 'ghost', x0: hero.x, y0: hero.y, x1: hero.x + Math.cos(a) * FS(d || 26) * i, y1: hero.y + Math.sin(a) * FS(d || 26) * i * .5, fr: fr || TF.kick, flip: f, t: 0, T: .16 + i * .04, mt: .05 });
+  }
+  function tShade(x0, y0, x1, y1, fr, T, o = {}) { fx.push(Object.assign({ k: 'ghost', x0, y0, x1, y1, fr, flip: x1 < x0 || (x1 === x0 && hero.f < 0), t: 0, T, mt: o.mt || T * .6 }, o)); }   // 残影（可带抛物线 hop、倾斜 rot）
+  function heroXf() {
+    let dx = 0, dy = 0, rot = 0, sx = 1, sy = 1;
+    if (TA && DKT - TA.t0 < TA.T && TA.xf) { const o = TA.xf(DKT - TA.t0) || {}; dx += o.dx || 0; dy += o.dy || 0; rot += o.rot || 0; sx *= o.sx || 1; sy *= o.sy || 1; }
+    if (TL && DKT - TL.t0 < TL.T) dx += TL.d * Math.sin(Math.PI * (DKT - TL.t0) / TL.T);
+    return dx || dy || rot || sx !== 1 || sy !== 1 ? { dx, dy, rot, sx, sy } : null;
+  }
   // ---- 黄 ----
   TG('chuanxin', 1, 'spin', { name: '穿心踢', icon: '穿', need: 140, wu: .26, rc: .20, beam: true, len: 140,
     desc: '一记正蹬，踢出一道直飞 220 的腿风（宽 40），穿透不限，击退 40。LV3 击退 70；LV5 左右脚各一道；LV7 腿风宽 70',
-    cast() { const L = dlv(), a = aim(), W = L >= 7 ? 70 : 40, o = { push: L >= 3 ? 70 : 40 }; tLine(hero.x, hero.y, a, 220, W, 1.1, o); sfx(SW, hero.x);
-      if (L >= 5) later(.12, () => { S.poseOverride = { f: SK.chuanxin.pose[0], t: .1 }; tLine(hero.x, hero.y, a, 220, W, .8, o); sfx(SW, hero.x); }); } });
+    cast() { const L = dlv(), a = aim(), W = L >= 7 ? 70 : 40, o = { push: L >= 3 ? 70 : 40 };
+      tAnim([[.05, TF.knee], [.17, TF.kick]].concat(L >= 5 ? [[.05, TF.knee], [.15, TF.kick]] : [])); later(.05, () => { tLean(10); tTrail(a); tLine(hero.x, hero.y, a, 220, W, 1.1, o); sfx(SW, hero.x); });
+      if (L >= 5) later(.27, () => { tLean(12); tTrail(a, TF.kick, 3); tLine(hero.x, hero.y, a, 220, W, .8, o); sfx(SW, hero.x); }); } });
   TG('qiufeng', 1, 'sweep', { name: '秋风扫', icon: '秋', need: 110, wu: .26, rc: .20, range: 110, half: 1.75,
     desc: '一腿横扫身前 200°（半径 110），击退 50。LV3 半径 130；LV5 回身再扫身后；LV7 扫中的人被踢飞（浮空）',
-    cast() { const L = dlv(), a = aim(), R = L >= 3 ? 130 : 110, o = { push: 50, up: L >= 7 ? 1 : 0 }; tFan(hero.x, hero.y, a, 1.75, 0, R, 1.0, o); sfx(SW, hero.x);
-      if (L >= 5) later(.16, () => { tFan(hero.x, hero.y, a + Math.PI, 1.75, 0, R, .7, o); sfx(SW, hero.x); }); } });
+    cast() { const L = dlv(), a = aim(), R = L >= 3 ? 130 : 110, o = { push: 50, up: L >= 7 ? 1 : 0 };
+      tAnim([[.05, TF.crouch], [.16, TF.sweep]].concat(L >= 5 ? [[.16, TF.sweep + '~']] : []), t => ({ sy: t < .05 ? .92 : 1 }));
+      later(.05, () => { tLean(8); tFan(hero.x, hero.y, a, 1.75, 0, R, 1.0, o); sfx(SW, hero.x); });
+      if (L >= 5) later(.21, () => { tFan(hero.x, hero.y, a + Math.PI, 1.75, 0, R, .7, o); sfx(SW, hero.x); }); } });
   TG('dengtian', 1, 'spin', { name: '蹬天脚', icon: '蹬', need: 90, wu: .28, rc: .22, range: 90, half: .6,
     desc: '一脚蹬在身前 70 处（半径 55），把那一小撮人沿着出脚方向蹬飞 150。LV3 蹬飞 200；LV5 被蹬飞的人撞到别人，被撞的人也吃一下；LV7 蹬中的人浮空',
-    cast() { const L = dlv(), a = aim(), x = hero.x + Math.cos(a) * FS(70), y = clampY(hero.y + Math.sin(a) * FS(35)); fx.push({ k: 'burst', x, y, r: FS(55), t: 0, T: .3, col: gCol() });
-      for (const z of near(x, y, FS(55))) TH(z, 1.35, 10, { x: hero.x, push: L >= 3 ? 200 : 150, dir: a, crash: L >= 5, up: L >= 7 ? 1 : 0 }); sfx(SW, hero.x); shake = Math.max(shake, .1); } });
+    cast() { const L = dlv(), a = aim();
+      tAnim([[.08, TF.knee], [.24, TF.kick]], t => t < .08 ? { sy: .94 } : { rot: -.38 * Math.min(1, (t - .08) / .05), dy: 4 });
+      later(.08, () => { const x = hero.x + Math.cos(a) * FS(70), y = clampY(hero.y + Math.sin(a) * FS(35)); fx.push({ k: 'burst', x, y, r: FS(55), t: 0, T: .3, col: gCol() }); tLean(12, .18);
+        for (const z of near(x, y, FS(55))) TH(z, 1.35, 10, { x: hero.x, push: L >= 3 ? 200 : 150, dir: a, crash: L >= 5, up: L >= 7 ? 1 : 0 }); sfx(SW, hero.x); shake = Math.max(shake, .12); }); } });
   // ---- 玄 ----
   TG('jiandao', 2, 'sweep', { name: '剪刀脚', icon: '剪', need: 130, wu: .36, rc: .26, range: 130, half: 1.4,
     desc: '两腿一开一合，先扫左右两侧扇面（半径 130），0.15 秒后再合一下，第二下把人踢飞（浮空）。LV3 半径 150；LV5 再前后剪一次；LV7 浮空的人受伤 +40%',
     cast() { const L = dlv(), a = aim(), R = L >= 3 ? 150 : 130, up = { up: 1, fkV: L >= 7 ? .4 : .25 };
+      tAnim([[.15, TF.kick], [.17, TF.kick + '~']].concat(L >= 5 ? [[.08, TF.knee], [.14, TF.kick]] : []), t => ({ rot: t < .32 ? -.15 : 0 }));
       const cut = (b, m, o) => { for (const s of [-1, 1]) tFan(hero.x, hero.y, b + s * Math.PI / 2, .7, 0, R, m, o); };
-      cut(a, .9, { push: 30 }); sfx(SW, hero.x); later(.15, () => { cut(a, .9, up); sfx(SW, hero.x); });
-      if (L >= 5) later(.32, () => { for (const s of [0, Math.PI]) tFan(hero.x, hero.y, a + s, .7, 0, R, .7, up); sfx(SW, hero.x); }); } });
+      cut(a, .9, { push: 30 }); tTrail(a + Math.PI / 2, TF.kick, 1, 30); sfx(SW, hero.x); later(.15, () => { cut(a, .9, up); tTrail(a - Math.PI / 2, TF.kick, 1, 30); sfx(SW, hero.x); });
+      if (L >= 5) later(.4, () => { for (const s of [0, Math.PI]) tFan(hero.x, hero.y, a + s, .7, 0, R, .7, up); tLean(10); sfx(SW, hero.x); }); } });
   TG('dielang', 2, 'spin', { name: '叠浪踢', icon: '浪', need: 240, wu: .34, rc: .26, beam: true, len: 240,
     desc: '连踢三脚，腿风一浪比一浪远（120 → 180 → 240，宽 60），最后一脚把人踢飞（浮空）。LV3 连踢四脚；LV5 腿风宽 90；LV7 最后一脚 ×1.5 并击退 80',
     cast() { const L = dlv(), a = aim(), n = L >= 3 ? 4 : 3, W = L >= 5 ? 90 : 60, Ls = [120, 180, 240, 290];
-      DKO.push(dmk({ T: n * .1 + .02, i: 0, tick(o) { while (o.i < n && o.t >= o.i * .1) { const last = o.i === n - 1; tLine(hero.x, hero.y, a, Ls[o.i], W, last ? (L >= 7 ? 1.3 : .9) : .55, last ? { up: 1, push: L >= 7 ? 80 : 20 } : { push: 15 });
-        S.poseOverride = { f: SK.dielang.pose[o.i % 2], t: .1 }; sfx(SW, hero.x); o.i++; } } })); } });
+      tAnim([].concat(...Array.from({ length: n }, (_, i) => [[.04, TF.knee], [i === n - 1 ? .16 : .06, TF.kick]])), t => ({ rot: -.08 * Math.min(n - 1, Math.floor(t / .1)) }));
+      DKO.push(dmk({ T: n * .1 + .02, i: 0, tick(o) { while (o.i < n && o.t >= o.i * .1 + .04) { const last = o.i === n - 1; tLean(6 + o.i * 4, .09); tTrail(a, TF.kick, last ? 3 : 1, 18 + o.i * 6);
+        tLine(hero.x, hero.y, a, Ls[o.i], W, last ? (L >= 7 ? 1.3 : .9) : .55, last ? { up: 1, push: L >= 7 ? 80 : 20 } : { push: 15 }); sfx(SW, hero.x); o.i++; } } })); } });
   TG('lingkong', 2, 'spin', { name: '凌空坠', icon: '凌', need: 180, wu: .40, rc: .30, range: 150, half: Math.PI, ring: true,
     desc: '【位移】纵身跃起，0.3 秒后落在身前 150 处（空中无敌），落地一脚震出一圈（半径 100），把人踢飞（浮空）。LV3 半径 120；LV5 落地后 0.25 秒再震一圈更大的（半径 160，0.7 倍）；LV7 跃出 200，浮空的人落地时再炸一圈',
     cast() { const L = dlv(), a = aim(), D = FS(L >= 7 ? 200 : 150), x0 = hero.x, y0 = hero.y, x1 = x0 + Math.cos(a) * D, y1 = clampY(y0 + Math.sin(a) * D * .5), T = .3; hero.inv = Math.max(hero.inv || 0, T + .1); sfx(SW, hero.x);
-      ghost(x0, y0, x1, y1, a, SK.lingkong.pose[1], T + .1);
-      DKO.push(dmk({ T: T + .01, fin: 0, tick(o) { const p = Math.min(1, o.t / T); hero.x = x0 + (x1 - x0) * p; hero.y = clampY(y0 + (y1 - y0) * p); if (Math.abs(Math.cos(a)) > .2) hero.f = Math.cos(a) >= 0 ? 1 : -1;
-        if (!o.fin && p >= 1) { o.fin = 1; shake = Math.max(shake, .25); sfx(CR, hero.x); tRing(hero.x, hero.y, L >= 3 ? 120 : 100, 1.6, { up: 1, push: 30, fkBoom: L >= 7 ? .8 : 0 });
+      const jump = tArc(0, T, 46);
+      tAnim([[.06, TF.crouch]].concat(tRoll(T - .1), [[.1, TF.kick], [.16, TF.crouch]]), t => t < .06 ? { sy: .82, sx: 1.12 } : t < T + .06 ? { dy: jump(t - .06) + (t > T - .04 ? 0 : 0), rot: t > T - .04 ? .45 : 0 } : t < T + .14 ? { sy: .78, sx: 1.18 } : { sy: .92 });
+      DKO.push(dmk({ T: T + .07, fin: 0, tick(o) { const p = Math.min(1, Math.max(0, o.t - .06) / T); hero.x = x0 + (x1 - x0) * p; hero.y = clampY(y0 + (y1 - y0) * p); if (Math.abs(Math.cos(a)) > .2) hero.f = Math.cos(a) >= 0 ? 1 : -1;
+        if (!o.fin && p >= 1) { o.fin = 1; shake = Math.max(shake, .3); sfx(CR, hero.x); tRing(hero.x, hero.y, L >= 3 ? 120 : 100, 1.6, { up: 1, push: 30, fkBoom: L >= 7 ? .8 : 0 });
           if (L >= 5) later(.25, () => tRing(hero.x, hero.y, 160, .7, { push: 50 })); } } })); } });
-  TG('panlong', 2, 'spin', { name: '盘龙腿', icon: '盘', need: 120, wu: .38, rc: .28, range: 120, half: Math.PI, ring: true,
+  TG('panlong', 2, 'sweep', { name: '盘龙腿', icon: '盘', need: 120, wu: .38, rc: .28, range: 120, half: Math.PI, ring: true,
     desc: '伏身贴地旋踢一整圈（半径 120），把人向外踢开 80。LV3 旋两圈；LV5 半径 150；LV7 第二圈把人踢飞（浮空）',
-    cast() { const L = dlv(), R = L >= 5 ? 150 : 120; tFan(hero.x, hero.y, 0, Math.PI, 0, R, 1.25, { push: 80 }); sfx(SW, hero.x); shake = Math.max(shake, .1);
+    cast() { const L = dlv(), R = L >= 5 ? 150 : 120; tAnim([[.04, TF.crouch]].concat(tSpinSteps(TF.sweep, L >= 3 ? 8 : 4, .05)), () => ({ sy: .94 }));
+      tFan(hero.x, hero.y, 0, Math.PI, 0, R, 1.25, { push: 80 }); sfx(SW, hero.x); shake = Math.max(shake, .1);
       if (L >= 3) later(.2, () => { tFan(hero.x, hero.y, 0, Math.PI, 0, R, .8, { push: 60, up: L >= 7 ? 1 : 0 }); sfx(SW, hero.x); }); } });
   // ---- 地 ----
   TG('juanyun', 3, 'spin', { name: '风卷残云', icon: '卷', need: 230, wu: .55, rc: .36, range: 230, half: Math.PI, ring: true,
     desc: '连环旋踢卷起三圈旋风，由内向外扩开（0～90 → 80～160 → 150～230），最后一圈把人踢飞（浮空）。LV3 每圈更重；LV5 四圈（最外到 300）；LV7 最后一圈击退 120',
     cast() { const L = dlv(), bands = [[0, 90], [80, 160], [150, 230], [220, 300]].slice(0, L >= 5 ? 4 : 3), m = L >= 3 ? 1.15 : 1.0; shake = Math.max(shake, .15);
-      bands.forEach((b, i) => later(i * .15, () => { const last = i === bands.length - 1; fx.push({ k: 'ring', x: hero.x, y: hero.y, t: 0, T: .4, r: FS(b[1]) }); tFan(hero.x, hero.y, 0, Math.PI, b[0], b[1], m, last ? { up: 1, push: L >= 7 ? 120 : 40 } : { push: 30 }); sfx(SW, hero.x); })); } });
+      tAnim(tSpinSteps(TF.kick, bands.length * 3 + 1, .05), t => ({ dy: 6 * Math.abs(Math.sin(t * 20)), rot: -.12 }));
+      bands.forEach((b, i) => later(i * .15, () => { const last = i === bands.length - 1; tTrail(i * 2.1, TF.kick, 2, 22); fx.push({ k: 'ring', x: hero.x, y: hero.y, t: 0, T: .4, r: FS(b[1]) }); tFan(hero.x, hero.y, 0, Math.PI, b[0], b[1], m, last ? { up: 1, push: L >= 7 ? 120 : 40 } : { push: 30 }); sfx(SW, hero.x); })); } });
   TG('feihong', 3, 'spin', { name: '飞鸿掠影', icon: '鸿', need: 300, wu: .50, rc: .36, range: 300, half: Math.PI, ring: true,
     desc: '残影在附近 4 个敌人之间连环飞踢（主角不动），每脚 1.4 倍、击退 40。LV3 踢 5 个；LV5 踢 6 个，每脚带一圈小冲击（半径 50）；LV7 最后一脚 ×1.5 并把人踢飞（浮空）',
     cast() { const L = dlv(), n = L >= 5 ? 6 : L >= 3 ? 5 : 4, ts = hittable().filter(z => dist(z, hero) < FS(300)).sort((p, q) => dist(p, hero) - dist(q, hero)).slice(0, n); sfx(SW, hero.x);
-      let px = hero.x, py = hero.y; ts.forEach((t, i) => { const fx0 = px, fy0 = py; px = t.x; py = t.y; later(i * .1, () => { if (t.dead) return; const a = Math.atan2((t.y - fy0) * 2, t.x - fx0), last = i === ts.length - 1; ghost(fx0, fy0, t.x, t.y, a, SK.feihong.pose[i % 2], .22); tKick(t.x, t.y);
+      tAnim([[.08, TF.knee], [Math.max(.2, ts.length * .1), TF.knee]], () => ({ sy: .96 }));
+      let px = hero.x, py = hero.y; ts.forEach((t, i) => { const fx0 = px, fy0 = py; px = t.x; py = t.y; later(i * .1, () => { if (t.dead) return; const last = i === ts.length - 1;
+        tShade(fx0, fy0, t.x - Math.sign(t.x - fx0) * 14, t.y, TF.kick, .3, { mt: .07, hop: 10, rot: -.2 }); tShade(fx0, fy0, fx0, fy0, TF.knee, .18, { mt: .01 }); tKick(t.x, t.y);
         TH(t, last && L >= 7 ? 2.1 : 1.4, 10, { x: fx0, px: fx0, py: fy0, push: 40, up: last && L >= 7 ? 1 : 0 }); if (L >= 5) for (const z of near(t.x, t.y, FS(50))) if (z !== t) TH(z, .5, 10, { x: t.x, px: t.x, py: t.y, push: 30 }); if (i % 2 === 0) sfx(SW, t.x); }); }); } });
   TG('zhuishi', 3, 'spin', { name: '坠石震岳', icon: '坠', need: 260, wu: .58, rc: .38, range: 260, half: Math.PI, ring: true,
     desc: '残影腾空而起，0.35 秒后如坠石一般踏在最密的人堆上，震出一圈冲击（半径 150），把人踢飞（浮空）（主角不动）。LV3 半径 170；LV5 0.5 秒后余震一圈（半径 220，0.8 倍）；LV7 余震也把人踢飞',
     cast() { const L = dlv(), t = jDense(FS(260)), a = aim(), x = t ? t.x : hero.x + Math.cos(a) * FS(140), y = t ? t.y : clampY(hero.y + Math.sin(a) * FS(70)); sfx(SW, hero.x);
-      ghost(hero.x, hero.y, x, y, a, SK.zhuishi.pose[1], .4); fx.push({ k: 'img', n: 'fx_aim', x, y, w: FS(L >= 3 ? 170 : 150) * 2.3, t: 0, T: .35, col: '230,170,110', warn: 1 });
+      tAnim([[.08, TF.crouch], [.3, TF.knee], [.14, TF.crouch]], t => t < .08 ? { sy: .85, sx: 1.1 } : t > .38 ? { sy: .9 } : null);
+      tShade(hero.x, hero.y, x, y, TF.r2, .3, { mt: .26, hop: 70 }); later(.26, () => tShade(x, y, x, y, TF.kick, .25, { mt: .01, rot: .5 }));
+      fx.push({ k: 'img', n: 'fx_aim', x, y, w: FS(L >= 3 ? 170 : 150) * 2.3, t: 0, T: .35, col: '230,170,110', warn: 1 });
       later(.35, () => { shake = Math.max(shake, .35); sfx(CR, x); tRing(x, y, L >= 3 ? 170 : 150, 2.0, { up: 1, push: 50 });
         if (L >= 5) later(.5, () => { shake = Math.max(shake, .2); tRing(x, y, 220, .8, { push: 60, up: L >= 7 ? 1 : 0 }); }); }); } });
   // ---- 天 ----
   TG('lingyun', 4, 'spin', { name: '凌云踏阵', icon: '云', need: 360, wu: .68, rc: .40, range: 360, half: Math.PI, ring: true,
     desc: '残影踏着敌人的头连跳 6 下（主角不动），每落一脚震一圈（半径 70，1.0 倍），最后一脚从高处踏下，震遍全屏（半径 400，1.2 倍），把人全部踢飞（浮空）。LV3 连跳 8 下；LV5 每一脚都击退；LV7 最后一脚 ×1.5',
     cast() { const L = dlv(), n = L >= 3 ? 8 : 6, ts = hittable().filter(z => dist(z, hero) < FS(360)).sort((p, q) => dist(p, hero) - dist(q, hero)); let px = hero.x, py = hero.y; sfx(SW, hero.x);
-      for (let i = 0; i < n; i++) { const t = ts.length ? ts[(i * 3) % ts.length] : null; if (!t) break; const fx0 = px, fy0 = py, tx = t.x, ty = t.y; px = tx; py = ty;
-        later(i * .14, () => { ghost(fx0, fy0, tx, ty, Math.atan2((ty - fy0) * 2, tx - fx0), SK.lingyun.pose[i % 2], .2); tRing(tx, ty, 70, 1.0, { push: L >= 5 ? 50 : 0 }); if (i % 2 === 0) sfx(SW, tx); }); }
-      later(n * .14 + .2, () => { shake = Math.max(shake, .5); sfx(CR, hero.x); fx.push({ k: 'ring', x: hero.x, y: hero.y, t: 0, T: .7, r: FS(400) }); for (const z of near(hero.x, hero.y, FS(400))) TH(z, L >= 7 ? 1.8 : 1.2, 10, { up: 1, fkV: .3 }); }); } });
+      const n2 = Math.min(n, ts.length), tEnd = n2 * .14 + .2, up = tEnd - .32, jump = tArc(up, .32, 80);
+      tAnim([[up, TF.knee], [.06, TF.crouch]].concat(tRoll(.2), [[.1, TF.kick], [.16, TF.crouch]]), t => t < up ? { sy: .96 } : t < up + .06 ? { sy: .8, sx: 1.15 } : t < tEnd + .02 ? { dy: jump(t), rot: t > tEnd - .1 ? .5 : 0 } : t < tEnd + .12 ? { sy: .75, sx: 1.2 } : { sy: .92 });
+      for (let i = 0; i < n2; i++) { const t = ts[(i * 3) % ts.length], fx0 = px, fy0 = py, tx = t.x, ty = t.y; px = tx; py = ty;
+        later(i * .14, () => { tShade(fx0, fy0, tx, ty, i % 2 ? TF.kick : TF.r3, .22, { mt: .12, hop: 34, rot: i % 2 ? .4 : 0 }); tRing(tx, ty, 70, 1.0, { push: L >= 5 ? 50 : 0 }); if (i % 2 === 0) sfx(SW, tx); }); }
+      later(tEnd, () => { shake = Math.max(shake, .5); sfx(CR, hero.x); fx.push({ k: 'ring', x: hero.x, y: hero.y, t: 0, T: .7, r: FS(400) }); for (const z of near(hero.x, hero.y, FS(400))) TH(z, L >= 7 ? 1.8 : 1.2, 10, { up: 1, fkV: .3 }); }); } });
   TG('wanying', 4, 'spin', { name: '万影追风', icon: '影', need: 220, wu: .70, rc: .42, range: 220, half: Math.PI, ring: true,
     desc: '身周一大圈（半径 220）里 2 秒内涌出几十道腿影乱踢，每道踢中附近的人（0.35 倍，小击退），收势时整圈一震把人踢飞（浮空，1.0 倍）。LV3 持续 2.5 秒；LV5 半径 280；LV7 收势一震 ×1.6',
     cast() { const L = dlv(), T = L >= 3 ? 2.5 : 2, R = FS(L >= 5 ? 280 : 220), cnt = new Map(); sfx(SW, hero.x);
-      const e = fSwirl(hero.x, hero.y, R, T + .1, 1);
-      DKO.push(dmk({ T: T + .02, nx: 0, fin: 0, tick(o) { e.x = hero.x; e.y = hero.y;
+      const e = fSwirl(hero.x, hero.y, R, T + .1, 1); tAnim(tSpinSteps(TF.kick, Math.round(T / .08), .08).concat([[.1, TF.crouch], [.16, TF.kick]]), t => t > T && t < T + .1 ? { sy: .85, sx: 1.1 } : { rot: -.1 });
+      DKO.push(dmk({ T: T + .12, nx: 0, ns: 0, fin: 0, tick(o) { e.x = hero.x; e.y = hero.y;
         while (o.t >= o.nx && o.nx < T) { o.nx += .06; const g = Math.random() * Math.PI * 2, d = Math.sqrt(Math.random()) * R, x = hero.x + Math.cos(g) * d, y = clampY(hero.y + Math.sin(g) * d * .5), b = Math.random() * Math.PI * 2;
           fx.push({ k: 'cut', n: 'dg6', x, y: y - 16, a: b, L: FS(26), t: 0, T: .22, col: gCol() }); for (const z of near(x, y, FS(40))) { const c = cnt.get(z) || 0; if (c >= 14) continue; cnt.set(z, c + 1); TH(z, .35, 5, { x, px: x, py: y, push: 12 }); } }
-        if (!o.fin && o.t >= T) { o.fin = 1; shake = Math.max(shake, .4); sfx(CR, hero.x); tRing(hero.x, hero.y, R / (DK * RM), L >= 7 ? 1.6 : 1.0, { up: 1, push: 40 }); } } })); } });
+        while (o.t >= o.ns && o.ns < T) { o.ns += .11; const g = Math.random() * Math.PI * 2, d = (.35 + .65 * Math.random()) * R, x = hero.x + Math.cos(g) * d, y = clampY(hero.y + Math.sin(g) * d * .5), fr = [TF.kick, TF.kick, TF.sweep, TF.knee][(Math.random() * 4) | 0];
+          fx.push({ k: 'ghost', x0: x - 14, y0: y, x1: x + 14, y1: y, fr, flip: Math.random() < .5, t: 0, T: .28, mt: .1, rot: fr === TF.kick ? -.3 * Math.random() : 0 }); }
+        if (!o.fin && o.t >= T + .1) { o.fin = 1; shake = Math.max(shake, .4); sfx(CR, hero.x); tRing(hero.x, hero.y, R / (DK * RM), L >= 7 ? 1.6 : 1.0, { up: 1, push: 40 }); } } })); } });
   Object.assign(DRS1, { chuanxin: .75, qiufeng: .75, dengtian: .75, jiandao: .75, dielang: .70, lingkong: .70, panlong: .75, juanyun: .78, feihong: .80, zhuishi: .80, lingyun: 1.0, wanying: 1.0 });
   Object.assign(DSP1, { chuanxin: 1.10, qiufeng: 1.10, dengtian: 1.15, jiandao: 1.30, dielang: 1.35, lingkong: 1.50, panlong: 1.30, juanyun: 1.90, feihong: 1.90, zhuishi: 2.00, lingyun: 2.30, wanying: 2.30 });
   // 石子：每次施放持有自己的命中计数及宝物触发次数。
@@ -4321,8 +4357,8 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       if (e.k === 'gd') { gdDraw(e); continue; }
       if (e.k === 'ghost') {   // 残影：半透明主角，带一道拖尾
         const q = Math.min(1, e.t / e.mt), x = e.x0 + (e.x1 - e.x0) * q, y = e.y0 + (e.y1 - e.y0) * q, al = .6 * (1 - Math.max(0, (e.t - e.mt) / (e.T - e.mt)));
-        ctx.save(); ctx.strokeStyle = `rgba(200,225,255,${al * .5})`; ctx.lineWidth = 8; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(e.x0, e.y0 - 22); ctx.lineTo(x, y - 22); ctx.stroke(); ctx.restore();
-        if (typeof drawChar === 'function') { ctx.save(); ctx.filter = 'brightness(1.6) saturate(.4)'; drawChar('hero', e.fr, x, y, e.flip, al, false, typeof HERO_SC === 'number' ? HERO_SC : 1); ctx.restore(); }
+        if (!e.hop) { ctx.save(); ctx.strokeStyle = `rgba(200,225,255,${al * .5})`; ctx.lineWidth = 8; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(e.x0, e.y0 - 22); ctx.lineTo(x, y - 22); ctx.stroke(); ctx.restore(); }
+        if (typeof drawChar === 'function') { ctx.save(); ctx.filter = 'brightness(1.6) saturate(.4)'; window._HXF = e.hop || e.rot ? { dy: (e.hop || 0) * 4 * q * (1 - q), rot: e.rot || 0 } : null; drawChar('hero', e.fr, x, y, e.flip, al, false, typeof HERO_SC === 'number' ? HERO_SC : 1); window._HXF = null; ctx.restore(); }
         continue;
       }
       if (e.k === 'ring') {   // 震地：地上一圈冲击波 + 裂纹
@@ -4548,6 +4584,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   let poseFlipNow = false;
   function pose() { const f = pose0(); poseFlipNow = !!f && f.endsWith('~'); return poseFlipNow ? f.slice(0, -1) : f; }
   function pose0() {
+    if (TA && DKT - TA.t0 < TA.T) { let t = DKT - TA.t0; for (const st of TA.steps) { if (t < st[0]) return st[1]; t -= st[0]; } }   // 11/17 腿法动作序列
     if (S.poseOverride) return S.poseOverride.f;
     if (S.recov) return S.recov.late && S.recov.t > S.recov.dur * .55 ? S.recov.late : S.recov.pose;
     if (S.wind && (hero.st !== 'walk' || S.wind.dur - S.wind.t < (S.wind.k.dk ? .32 : .16))) return S.wind.k.pose[0];   // 11/14：刀招举刀至少露 0.32 秒   // 边走边打时，出手前 0.16 秒也露一下起手帧
@@ -5042,7 +5079,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
 #survEnd .kv{display:grid;grid-template-columns:auto 1fr auto 1fr;gap:calc(8px*var(--k)) calc(12px*var(--k));text-align:left;margin-top:calc(14px*var(--k));padding:calc(12px*var(--k));border:1px solid #6a5434;font-size:calc(16px*var(--kt))}#survEnd .kv span{color:#a8977a}
 @media (max-aspect-ratio:1/1){#survEnd .cells{grid-template-columns:repeat(3,1fr)}#survEnd .cl.pr{grid-column:span 3}#survEnd .two,#survEnd .ev{grid-template-columns:1fr}#survEnd .tags{margin-left:0;order:3;flex-basis:100%}#survEnd .hd{flex-wrap:wrap;justify-content:space-between}}
 @media (max-height:520px){#survEnd .fr{border-width:22px;max-height:98vh}}`;
-  window.SURV = { rollK: () => RT.on ? OG().roll || 1 : 1, wepOpen: w => Object.keys(SK).some(k => !SK[k].off && wepOf(k) === w), endShow, endOn: () => !!document.getElementById('survEnd'), logEv, endPage: n => { endPage = n; endRender(); }, prepDbg: () => prepOpen(RT.node), repTest: R => report(R), slowMove, coinAt: (x, y, v) => { const n = Math.min(5, v), e = Math.ceil(v / n); for (let i = 0; i < n; i++) S.coins.push({ x: x + R(-14, 14), y: y + R(-6, 6), z: 8 + R(0, 10), vz: R(60, 110), vx: R(-40, 40), v: e, t: 0 }); }, wuParts, trial: TRIAL, BAO, BQN, BQC, SHANG, baoHit, blessOpts, bless: (k, cb) => blessDo(k, cb), baoPick: (qs, cb, t) => pickBao(qs, cb, t), maxHp: () => maxHp(), poseFlip: () => poseFlipNow, banner: (a, b) => waveBanner(a, b), curNode: () => RT.on && W.started ? RT.node : null, status, attrInfo, addXiu: n => addXiu(n), heldPre: () => heldPre(), dbg: () => ({ gf: S.gf.slice(), qg: S.qg, zq: S.zq, zqMax: zqMax(), exp: S.gfExp, GM }), giveGf: id => { if (GF[id]) { if (GF[id].qg) S.qg = id; else { const f = S.gf.indexOf(""); if (f >= 0) S.gf[f] = id; } } }, newHud: () => RT.on && !!RT.node, stunGate, noStun: () => RT.on, get slots() { return S.slots; }, SK, beginNode, frozen: () => RT.on && (ROUTE.shown() || buildOpen || talkHold || (banHold && !!document.getElementById('waveBan'))), routeHp: () => [hero.hp, maxHp()], camp(k) { if (k === 'heal') { heal(maxHp() * .3); S.shang = []; } else if (k && SK[k]) { const l = lvOf(k); if (l < 10) S.mast[k] = MAST_T[l]; } else RT.dmg *= 1.1; },   // 11/14 营地：休整回三成血；修炼 = 选一招直接升一级
+  window.SURV = { heroXf, rollK: () => RT.on ? OG().roll || 1 : 1, wepOpen: w => Object.keys(SK).some(k => !SK[k].off && wepOf(k) === w), endShow, endOn: () => !!document.getElementById('survEnd'), logEv, endPage: n => { endPage = n; endRender(); }, prepDbg: () => prepOpen(RT.node), repTest: R => report(R), slowMove, coinAt: (x, y, v) => { const n = Math.min(5, v), e = Math.ceil(v / n); for (let i = 0; i < n; i++) S.coins.push({ x: x + R(-14, 14), y: y + R(-6, 6), z: 8 + R(0, 10), vz: R(60, 110), vx: R(-40, 40), v: e, t: 0 }); }, wuParts, trial: TRIAL, BAO, BQN, BQC, SHANG, baoHit, blessOpts, bless: (k, cb) => blessDo(k, cb), baoPick: (qs, cb, t) => pickBao(qs, cb, t), maxHp: () => maxHp(), poseFlip: () => poseFlipNow, banner: (a, b) => waveBanner(a, b), curNode: () => RT.on && W.started ? RT.node : null, status, attrInfo, addXiu: n => addXiu(n), heldPre: () => heldPre(), dbg: () => ({ gf: S.gf.slice(), qg: S.qg, zq: S.zq, zqMax: zqMax(), exp: S.gfExp, GM }), giveGf: id => { if (GF[id]) { if (GF[id].qg) S.qg = id; else { const f = S.gf.indexOf(""); if (f >= 0) S.gf[f] = id; } } }, newHud: () => RT.on && !!RT.node, stunGate, noStun: () => RT.on, get slots() { return S.slots; }, SK, beginNode, frozen: () => RT.on && (ROUTE.shown() || buildOpen || talkHold || (banHold && !!document.getElementById('waveBan'))), routeHp: () => [hero.hp, maxHp()], camp(k) { if (k === 'heal') { heal(maxHp() * .3); S.shang = []; } else if (k && SK[k]) { const l = lvOf(k); if (l < 10) S.mast[k] = MAST_T[l]; } else RT.dmg *= 1.1; },   // 11/14 营地：休整回三成血；修炼 = 选一招直接升一级
     money: () => S.money, campSkills: () => [...S.slots, ...(S.owned || [])].filter((k, i, a) => k && SK[k] && a.indexOf(k) === i).map(k => ({ k, name: SK[k].name, lv: lvOf(k), img: IMGU[k] || '', icon: SK[k].icon, color: SK[k].color })), ORIGINS, setOrigin(k) { if (ORIGINS[k] && !ORIGINS[k].locked) { origin = k; startW = null; } }, origin: () => origin, setWep(w) { startW = w; }, wep: () => heldW(), startSk: () => startSk(), WEPN, takeMul: (from, kind) => { const fireK = kind === 'fire' || !!(from && (from.fire || (from.source && /fire|huo|jar/.test(String(from.source)))));
       if (RT.on && GM.block && Math.random() < GM.block) { floaters.push({ x: hero.x, y: hero.y - 50, t: 0, txt: '格挡', color: '#bfe0ff' }); return 0; }
       const mv = Math.abs(hero.ix) > .1 || Math.abs(hero.iy) > .1, low = hero.hp / maxHp() < .3 ? 1 - .10 * GM.low : 1;
