@@ -137,7 +137,7 @@
           <div class="tiles og">${Object.keys(O).map(k => `<button data-o="${k}" class="tile ${k === cur ? 'on' : ''} ${O[k].locked ? 'lock' : ''}" title="${O[k].name}"><div class="ico" ${ic(OGI[k] || '')}></div><span><b>${O[k].name}</b><small>${O[k].locked ? '暂未开放' : (O[k].desc || '').split('。')[0]}</small></span></button>`).join('')}</div>
           <div class="eff">${(o.desc || '').split('。').slice(1).join('。') || o.desc}</div></div>
           <div class="sec"><h4><i style="background-image:url('${K2('h_ge')}')"></i>兵器路数</h4>
-          <div class="tiles wp">${(o.weps || [o.wep]).map(w => { const op = !SURV.wepOpen || SURV.wepOpen(w); return `<button data-w="${w}" class="tile wd ${w === curW ? 'on' : ''} ${op ? '' : 'lock'}" ${op ? '' : 'disabled'}><div class="ico" ${[6, 11, 12].includes(w) ? '' : ic(K2('w' + w))}>${[6, 11, 12].includes(w) ? `<b style="font-size:28px;color:#8a7a5c">${SURV.WEPN[w]}</b>` : ''}</div><span><b>${SURV.WEPN[w]}</b><small>${!op ? '未开放' : w === curW ? '本门 · 伤害 +10%' : '出身兵器'}</small></span></button>`; }).join('')}</div>
+          <div class="tiles wp">${(o.weps || [o.wep]).map(w => { const op = !SURV.wepOpen || SURV.wepOpen(w); return `<button data-w="${w}" class="tile wd ${w === curW ? 'on' : ''} ${op ? '' : 'lock'}" ${op ? '' : 'disabled'}><div class="ico" ${w === 6 ? '' : ic(K2('w' + w))}>${w === 6 ? `<b style="font-size:28px;color:#8a7a5c">${SURV.WEPN[w]}</b>` : ''}</div><span><b>${SURV.WEPN[w]}</b><small>${!op ? '未开放' : w === curW ? '本门 · 伤害 +10%' : '出身兵器'}</small></span></button>`; }).join('')}</div>
           <div class="eff">效果：${SURV.WEPN[curW]} 武艺伤害 +10%　出身外的兵器 −15%</div>
           </div>
           <div class="sec"><h4><i style="background-image:url('${K2('h_gu')}')"></i>难度</h4>
@@ -180,7 +180,7 @@
     document.body.appendChild(el); render();
     if (!figRaf) figRaf = requestAnimationFrame(figLoop);
   }
-  const HELDP = { 0: 'wd_', 1: 'jian_', 2: 'chui_', 3: 'qiang_', 4: 'guandao_', 5: 'bow_', 7: 'stone_', 8: 'huangfu_', 9: 'fan_', 10: 'quan_' };
+  const HELDP = { 0: 'wd_', 1: 'jian_', 2: 'chui_', 3: 'qiang_', 4: 'guandao_', 5: 'bow_', 7: 'stone_', 8: 'huangfu_', 9: 'fan_', 10: 'quan_', 11: 'quan_', 12: 'ji_' };
   let figRaf = 0;
   function figLoop(t) {   // 人像：原地循环走路
     figRaf = 0; if (!el || !el.parentNode) return;
