@@ -18,7 +18,7 @@ def bake_frame(f,r,c):
         if len(ys):
             head=np.zeros_like(ba);head[ys[0]:ys[0]+int((ys[-1]-ys[0])*0.45)]=True
             string=m&(W[...,:3].min(-1)>140)&(W[...,0]>190)
-            m&=~(ndimage.binary_dilation(string,iterations=1)&(W[...,:3].min(-1)>110)&ba&head)
+            m&=~(ndimage.binary_dilation(string,iterations=1)&(W[...,:3].min(-1)>110)&ba&(head|(True if __import__('os').environ.get('STRBACK','1')=='1' else head)))   # 11/17 用户：弓弦在手和身体后面，弓身在手前面
     if f['front']:
         if f['cover']>0:
             yy,xx=np.mgrid[:CAN,:CAN];a=math.radians(f['a']);dx,dy=math.cos(a),math.sin(a)
