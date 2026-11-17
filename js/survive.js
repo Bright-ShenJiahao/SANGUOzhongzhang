@@ -409,9 +409,20 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const PVR = {}, PVM = {}; let PVREC = null;   // PVM：这一招实际打到的最远距离（前摇手动形状的默认大小）
   fx.push = function (...a) { if (PVREC) for (const e of a) try { pvRec(e); } catch (er) { if (!window.__pvE) { window.__pvE = 1; console.error('pvRec', er); } } return Array.prototype.push.apply(this, a); };
   function pvStart(key) { pvEnd(); PVREC = { key, t0: DKT, hx: hero.x, hy: hero.y, a: aim(), sh: [] }; }
-  function pvEnd() { const R = PVREC; PVREC = null; if (!R) return; { let m = R.reach || 0; for (const q of R.sh) m = Math.max(m, Math.hypot(q.dx, q.dy) + (q.r || q.L || 0)); if (m > 10) PVM[R.key] = m; } if (!R.sh.length) return; const sh = R.sh.sort((p, q) => (q.r || q.L || 0) - (p.r || p.L || 0)), out = [];
+  function pvEnd() { const R = PVREC; PVREC = null; if (!R) return; { let m = R.reach || 0; for (const q of R.sh) m = Math.max(m, Math.hypot(q.dx, q.dy) + (q.r || q.L || 0)); if (m > 10) PVM[R.key] = m; } if (R.geo && R.geo.length) { R.sh = R.geo; let m = 0; for (const q of R.geo) m = Math.max(m, Math.hypot(q.dx, q.dy) + (q.r || q.L || 0)); PVM[R.key] = m; } if (!R.sh.length) return; const sh = R.sh.sort((p, q) => (q.r || q.L || 0) - (p.r || p.L || 0)), out = [];
     for (const q of sh) { if (out.length >= 10) break; if (q.t === 'c' && out.some(o => o.t === 'c' && Math.hypot(o.dx - q.dx, o.dy - q.dy) < Math.max(12, o.r * .5) && o.r >= q.r * .7)) continue; out.push(q); }
     PVR[R.key] = out; }
+  // 真正判定用的形状（扇形 / 圆 / 长条）：比特效更准，有就优先用它
+  let PVNO = 0;
+  function pvGeo(t, x, y, a, half, r, w) {
+    const R = PVREC; if (!R || PVNO || !(r > 4)) return; if (DKT - R.t0 > .9) return;
+    const k = t + Math.round(x / 4) + ',' + Math.round(y / 4) + ',' + Math.round((a || 0) * 20) + ',' + Math.round(r / 3); R.gk = R.gk || new Set(); if (R.gk.has(k) || R.gk.size > 40) return; R.gk.add(k);
+    const q = t === 'rect' ? { t: 'rect', x, y, a, L: r, w: w || 10 } : t === 'fan' ? (half >= Math.PI - .05 ? { t: 'c', x, y, r } : { t: 'fan', x, y, a, half, r }) : { t: 'c', x, y, r };
+    const ca = Math.cos(-R.a), sa = Math.sin(-R.a), ux = q.x - R.hx, uy = (q.y - R.hy) * 2;
+    q.dx = ux * ca - uy * sa; q.dy = ux * sa + uy * ca; if (q.a != null) q.ar = q.a - R.a;
+    q.tgt = Math.hypot(ux, uy) > 20 && zs.some(z => !z.dead && Math.hypot(z.x - q.x, (z.y - q.y) * 2) < 24);
+    (R.geo = R.geo || []).push(q);
+  }
   function pvRec(e) {
     const R = PVREC; if (!R) return; if (DKT - R.t0 > .9) { pvEnd(); return; }
     let q = null;
@@ -505,11 +516,11 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const TIERN = ['基础', '黄', '玄', '地', '天'], TMIN = [0, 0, 2, 4, 6];
   const tierOk = k => W.n >= TMIN[SK[k].tier || 0];
   const HT = (z, dmg, kb, dir, fr) => { const v = VUL(z); rec(dmg * DM() * v); const f0 = freeze; hit(z, dmg * DM() * v, kb, dir || hero.f, false, 0, .3, false, false, { secondary: true, survSkill: true }); freeze = Math.min(freeze, Math.max(f0, fr || .04)); };
-  const near = (x, y, r) => hittable().filter(z => Math.hypot(z.x - x, (z.y - y) * 2) < r + 6);
+  const near = (x, y, r) => (pvGeo('c', x, y, 0, 0, r + 6), hittable()).filter(z => Math.hypot(z.x - x, (z.y - y) * 2) < r + 6);
   function blast(x, y, r, dmg, kb, col) { r *= RM; fx.push({ k: 'burst', x, y, r, t: 0, T: .4, col: col || '255,210,120' }); for (const z of near(x, y, r)) HT(z, dmg, kb, Math.sign(z.x - x) || hero.f); }
   function lineHit(a, L, w, dmg, kb, col, ox, oy) {
     L *= RM;   // 朝 a 方向一条宽 w 的直线（清版透视：y 压一半）；ox/oy 给了就从那里出手（残影用）
-    const vx = Math.cos(a), vy = Math.sin(a) / 2, x0 = ox != null ? ox : hero.x, y0 = oy != null ? oy : hero.y;
+    const vx = Math.cos(a), vy = Math.sin(a) / 2, x0 = ox != null ? ox : hero.x, y0 = oy != null ? oy : hero.y; pvGeo('rect', x0, y0, a, 0, L, w);
     fx.push({ k: 'line', x: x0, y: y0, a, L, w, t: 0, T: .3, col: col || '255,240,190' });
     for (const z of hittable()) { const dx = z.x - x0, dy = (z.y - y0) * 2, al = dx * Math.cos(a) + dy * Math.sin(a), pe = Math.abs(-dx * Math.sin(a) + dy * Math.cos(a)); if (al > -10 && al < L && pe < w + 6) HT(z, dmg, kb, Math.sign(dx) || hero.f); }
   }
@@ -638,7 +649,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const tough = z => z.T && (z.T.boss || z.T.chapterBoss || z.T.elite);
   const conf = (z, t) => { if (tough(z)) { stunz(z, t * .3); return; } if (!(z.conf > 0)) floaters.push({ x: z.x, y: z.y - 64, t: 0, txt: '乱', color: '#d79bff' }); z.conf = Math.max(z.conf || 0, t); };
   const rout = (z, t) => { if (tough(z)) { stunz(z, t * .3); return; } if (!(z.rout > 0)) floaters.push({ x: z.x, y: z.y - 64, t: 0, txt: '逃', color: '#ffd27a' }); z.rout = Math.max(z.rout || 0, t); };
-  const cone = (a, r, half) => hittable().filter(z => { const dx = z.x - hero.x, dy = (z.y - hero.y) * 2, d = Math.hypot(dx, dy); let da = Math.abs(Math.atan2(dy, dx) - a); if (da > Math.PI) da = Math.PI * 2 - da; return d < r * RM && (d < 14 || da < half); });
+  const cone = (a, r, half) => (pvGeo('fan', hero.x, hero.y, a, half, r), hittable()).filter(z => { const dx = z.x - hero.x, dy = (z.y - hero.y) * 2, d = Math.hypot(dx, dy); let da = Math.abs(Math.atan2(dy, dx) - a); if (da > Math.PI) da = Math.PI * 2 - da; return d < r * RM && (d < 14 || da < half); });
   const fan = (a0, n, spread, o) => { for (let i = 0; i < n; i++) { const a = a0 - spread / 2 + (n > 1 ? spread * i / (n - 1) : spread / 2); shot(a, Object.assign({ vx: Math.cos(a) * (o.sp || 300), vy: Math.sin(a) * (o.sp || 300) / 2 }, o)); } };
   const ring = (n, o, x, y) => { for (let i = 0; i < n; i++) { const a = i * Math.PI * 2 / n + (o.off || 0); (x != null ? shotAt(x, y, a, Object.assign({ vx: Math.cos(a) * (o.sp || 270), vy: Math.sin(a) * (o.sp || 270) / 2 }, o)) : shot(a, Object.assign({ vx: Math.cos(a) * (o.sp || 270), vy: Math.sin(a) * (o.sp || 270) / 2 }, o))); } };
   const front = (d) => { const a = aim(); return [hero.x + Math.cos(a) * d, clampY(hero.y + Math.sin(a) * d * .5), a]; };
@@ -857,7 +868,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   }
   const inArc = (x, y, z, a0, half, r) => { const dx = z.x - x, dy = (z.y - y) * 2, d = Math.hypot(dx, dy); return d <= r + 8 && (d < 14 || angDiff(Math.atan2(dy, dx), a0) <= half); };
   function dSweep(x, y, a0, half, r, m, kb, o = {}) {   // 扇形（r 用方案单位）
-    r *= DK * RM;
+    r *= DK * RM; pvGeo('fan', x, y, a0, half, r);
     // 11/14 用户：有刀光图的招不再画代码扇形；出手那一下已由 daoSlash 播过，之后的追加刀（回锋、叠锋第二三刀等）按这一刀的方向再播一道刀光
     if (typeof DGM !== 'undefined' && DGM[CK]) { if (DKT - (daoSlash.t || -9) > .06) daoSlash(CK, a0, x, y); }
     else fx.push({ k: 'arc', x, y, a0, half, r, t: 0, T: .26, color: o.col || C.dao, rev: !!o.rev });
@@ -870,6 +881,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     return near(x, y, r).filter(z => DH(z, m, kb, Object.assign({ x }, o)));
   }
   function dRect(x0, y0, a, L, w, f) {   // 从 (x0,y0) 朝 a 长 L、半宽 w 的矩形（已换算好的像素），对里面的人调 f(z)
+    pvGeo('rect', x0, y0, a, 0, L, w);
     for (const z of hittable()) { const dx = z.x - x0, dy = (z.y - y0) * 2, al = dx * Math.cos(a) + dy * Math.sin(a), pe = Math.abs(-dx * Math.sin(a) + dy * Math.cos(a)); if (al > -10 && al < L && pe < w + 6) f(z); }
   }
   function daoTick(dt) {
@@ -1312,7 +1324,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     if (o.ml) addML(z, o.ml);
     return r;
   }
-  const inBand = (x, y, z, a, half, R0, R1) => { const d = Math.hypot(z.x - x, (z.y - y) * 2); return d >= R0 - 6 && d <= R1 + 8 && (half >= Math.PI || d < 10 || angDiff(Math.atan2((z.y - y) * 2, z.x - x), a) <= half); };
+  const inBand = (x, y, z, a, half, R0, R1) => { pvGeo('fan', x, y, a, half, R1); const d = Math.hypot(z.x - x, (z.y - y) * 2); return d >= R0 - 6 && d <= R1 + 8 && (half >= Math.PI || d < 10 || angDiff(Math.atan2((z.y - y) * 2, z.x - x), a) <= half); };
   const PUSH = [], SCR = [];
   // 推：沿 (ax,ay)（未压扁的单位向量）推 D 像素，T 秒；o.cmul 风撞倍率，o.force 结束时没撞到也算一次风撞
   function fPush(z, ax, ay, D, T, o = {}) {
@@ -2956,7 +2968,8 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     fx2Put(key, m[0], hero.x, hero.y, m[1] * rm, a);
   }
   function fxpFire() {
-    const P = FXP; FXP = null; if (!P) return; const m = FX2[P.key]; let x = hero.x, y = hero.y, w = m[1] * P.rm;
+    const P = FXP; FXP = null; if (!P) return; PVNO = 1; try { fxpFire2(P); } finally { PVNO = 0; } }
+  function fxpFire2(P) { const m = FX2[P.key]; let x = hero.x, y = hero.y, w = m[1] * P.rm;
     if (P.hits.length) { x = P.hits.reduce((s, h) => s + h[0], 0) / P.hits.length; y = P.hits.reduce((s, h) => s + h[1], 0) / P.hits.length; const sp = Math.max(...P.hits.map(h => Math.hypot(h[0] - x, (h[1] - y) * 2))); w = Math.max(w * .8, Math.min(w * 1.6, sp * 2.2)); }
     else { const cs = hittable().filter(z => dist(z, hero) < 260); const b = cs.length ? cs.reduce((b, z) => near(z.x, z.y, 60).length > near(b.x, b.y, 60).length ? z : b) : null; if (b) { x = b.x; y = b.y; } }
     fx2Put(P.key, 't', x, y, w, P.a);
