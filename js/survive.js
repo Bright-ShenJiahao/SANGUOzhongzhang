@@ -948,10 +948,10 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     let Dp = QS(D) * QD(); const x0 = hero.x, y0 = hero.y, tx = x0 + Math.cos(a) * Dp, ty = y0 + Math.sin(a) * Dp * .5;
     if (near(tx, ty, QS(80)).length >= 6) Dp = Math.min(Dp, QS(60) * QD());
     const x1 = x0 + Math.cos(a) * Dp, y1 = clampY(y0 + Math.sin(a) * Dp * .5), hs = new Set(), w = QS(W) / 2;
-    if (inv) hero.inv = Math.max(hero.inv || 0, inv);
+    if (inv) hero.inv = Math.max(hero.inv || 0, inv); const gfr = SK[CK] ? SK[CK].pose[1] : null;
     if (Dp > 4) ghost(x0, y0, x1, y1, a, SK[CK] ? SK[CK].pose[1] : null, T + .1);
     // 11/17 用户：不要拖着主角走（影响走位）——主角留在原地，残影冲出去打，命中跟着残影算
-    DKO.push(dmk({ T: T + .01, fin: 0, tick(q) { const p = Math.min(1, q.t / T), px = x0 + (x1 - x0) * p, py = clampY(y0 + (y1 - y0) * p); if (mv) { hero.x = px; hero.y = py; } if (Math.abs(Math.cos(a)) > .2) hero.f = Math.cos(a) >= 0 ? 1 : -1;
+    DKO.push(dmk({ T: T + .01, fin: 0, tick(q) { const p = Math.min(1, q.t / T), px = x0 + (x1 - x0) * p, py = clampY(y0 + (y1 - y0) * p); if (mv) { hero.x = px; hero.y = py; if (gfr && q.t >= (q.gn || 0)) { q.gn = q.t + .035; fx.push({ k: 'ghost', x0: px, y0: py, x1: px, y1: py, fr: gfr, flip: Math.cos(a) < 0, t: 0, T: .2, mt: .01, rot: -.1 }); } } if (Math.abs(Math.cos(a)) > .2) hero.f = Math.cos(a) >= 0 ? 1 : -1;
       for (const z of hittable()) if (!hs.has(z) && Math.hypot(z.x - px, (z.y - py) * 2) < w + 12) { hs.add(z); DH(z, (typeof m === 'function' ? m(z) : m) * QDM(), kb, Object.assign({ x: px - Math.cos(a) * 20 }, o)); }
       if (!q.fin && p >= 1) { q.fin = 1; if (done) done(hs, x1, y1); } } }));
     return Dp;
@@ -1901,8 +1901,41 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     const f = Math.cos(a) < 0; for (let i = 1; i <= (n || 2); i++) fx.push({ k: 'ghost', x0: hero.x, y0: hero.y, x1: hero.x + Math.cos(a) * FS(d || 26) * i, y1: hero.y + Math.sin(a) * FS(d || 26) * i * .5, fr: fr || TF.kick, flip: f, t: 0, T: .16 + i * .04, mt: .05 });
   }
   function tShade(x0, y0, x1, y1, fr, T, o = {}) { fx.push(Object.assign({ k: 'ghost', x0, y0, x1, y1, fr, flip: x1 < x0 || (x1 === x0 && hero.f < 0), t: 0, T, mt: o.mt || T * .6 }, o)); }   // 残影（可带抛物线 hop、倾斜 rot）
+  // 11/17 用户：腿的做法推到全部兵器——不出新图，拿各兵器现有的起手/出手帧拼一小段，加倾斜、翻面、跳起、压扁、前探、残影
+  //   类型：stab 刺（前探+拖尾）combo 连段 slash 劈扫（挥过去的倾斜+弧形残影）heavy 重击（起手时在画面上跳起，落地压扁）spin 旋（翻面转圈）rise 上挑（往上一顶）flip 回身（先翻面再转回来）cast 远程（后坐）
+  const ANIM_K = { lianci: 'combo', jlianci: 'combo', lianzhan: 'combo', lianhuan: 'combo', cuofeng: 'combo', fengci: 'combo',
+    huima: 'flip', huimaq: 'flip', xuanchui: 'spin', lunchui: 'slash', tiaoqiang: 'rise', tiaozhan: 'rise', shanggou: 'rise', xiongshou: 'rise', paoji: 'rise', dahe: 'heavy',
+    tianbeng: 'heavy', liedihuan: 'heavy', qianglin: 'heavy', longyin: 'heavy', pidao: 'heavy', handi: 'heavy', zhanjiang: 'heavy', yanyue: 'heavy', shuiyan: 'heavy', qinglong: 'heavy',
+    yuezhan: 'heavy', yuanmenji: 'heavy', touyu: 'heavy', jingang: 'heavy', qluanwu: 'heavy', baji: 'heavy', tieshan: 'heavy', jianzhen: 'heavy' };
+  function animOf(key) {
+    if (ANIM_K[key]) return ANIM_K[key]; const w = wepOf(key), f1 = (SK[key].pose || [])[1] || '';
+    if ([5, 7, 8, 9].includes(w)) return 'cast';
+    if (w === 2 && /chop2|up2/.test(f1)) return 'heavy';
+    return /thrust2/.test(f1) ? 'stab' : /spin2/.test(f1) ? 'spin' : /up2/.test(f1) ? 'rise' : /sweep2|chop2/.test(f1) ? 'slash' : 'stab';
+  }
+  function windXf() {   // 起手阶段：重击在画面上跳起、落地正好出手；其余近战微微下蹲蓄力
+    const W = S.wind; if (!W || !W.k.dk || wepOf(W.key) === 11) return null; const win = Math.min(W.dur, W.k.dk ? .32 : .16), p = (W.t - (W.dur - win)) / win; if (p < 0) return null;
+    const ty = animOf(W.key); if (ty === 'cast') return { dx: -3 * p };
+    if (ty === 'heavy') { const H = W.k.tier >= 4 ? 40 : W.k.tier >= 3 ? 30 : 22; return p < .2 ? { sy: 1 - p * .6, sx: 1 + p * .4 } : { dy: H * Math.sin(Math.PI * (p - .2) / .8), rot: .12 * (p - .2) }; }
+    return { sy: 1 - .06 * p, dx: -3 * p, rot: ty === 'slash' ? .12 * p : 0 };
+  }
+  function autoAnim(key) {   // 出手那一刻
+    const k = SK[key], w = wepOf(key); if (!k || !k.dk || w === 11 || !k.pose || (TA && TA.t0 === DKT)) return;
+    const f0 = k.pose[0], f1 = k.pose[1], ty = animOf(key), a = aim(), tr = k.tier || 1, sw = /sweep/.test(f1) ? -1 : 1;
+    if (ty === 'stab') { tAnim([[.16, f1]], t => ({ rot: -.05 })); tLean(8 + 3 * tr); tTrail(a, f1, tr >= 3 ? 3 : 2, 14 + 2 * tr); }
+    else if (ty === 'combo') { tAnim([[.05, f1], [.04, f0], [.05, f1], [.04, f0], [.12, f1]]); [0, .09, .18].forEach((d, i) => later(d, () => { tLean(6 + 3 * i, .08); tTrail(a, f1, 1, 16 + 6 * i); })); }
+    else if (ty === 'slash') { tAnim([[.18, f1]], t => ({ rot: sw * (-.2 + .32 * Math.min(1, t / .1)) })); tLean(8);
+      for (const r of [-.42, -.24]) fx.push({ k: 'ghost', x0: hero.x, y0: hero.y, x1: hero.x, y1: hero.y, fr: f1, flip: hero.f < 0, t: 0, T: .16 + (r < -.3 ? 0 : .04), mt: .01, rot: r * sw }); }
+    else if (ty === 'heavy') { tAnim([[.24, f1]], t => t < .12 ? { sy: .76 + 2 * t, sx: 1.2 - 1.6 * t, rot: .05 } : null); tLean(6, .1); shake = Math.max(shake, .12 + .04 * tr);
+      fx.push({ k: 'ring', x: hero.x, y: hero.y, t: 0, T: .35, r: FS(45) }); fx.push({ k: 'ghost', x0: hero.x, y0: hero.y, x1: hero.x, y1: hero.y, fr: f0, flip: hero.f < 0, t: 0, T: .14, mt: .01, hop: 18 }); }
+    else if (ty === 'spin') { tAnim(tSpinSteps(f1, 6, .05), t => ({ dy: 4 * Math.abs(Math.sin(t * 20)) })); for (const fl of [true, false]) fx.push({ k: 'ghost', x0: hero.x, y0: hero.y, x1: hero.x, y1: hero.y, fr: f1, flip: fl, t: 0, T: .22, mt: .01, rot: fl ? .3 : -.3 }); }
+    else if (ty === 'rise') { tAnim([[.22, f1]], t => ({ dy: 16 * 4 * (t / .22) * (1 - t / .22), rot: -.08 })); fx.push({ k: 'ghost', x0: hero.x, y0: hero.y, x1: hero.x, y1: hero.y, fr: f0, flip: hero.f < 0, t: 0, T: .16, mt: .01 }); }
+    else if (ty === 'flip') { tAnim([[.07, f1 + '~'], [.16, f1]]); later(.07, () => { tLean(12); tTrail(a, f1, 2, 18); }); }
+    else if (ty === 'cast') { tAnim([[.16, f1]], t => ({ dx: -6 * Math.sin(Math.PI * t / .16), sy: 1.03 })); }
+  }
   function heroXf() {
     let dx = 0, dy = 0, rot = 0, sx = 1, sy = 1;
+    { const o = windXf(); if (o) { dx += o.dx || 0; dy += o.dy || 0; rot += o.rot || 0; sx *= o.sx || 1; sy *= o.sy || 1; } }
     if (TA && DKT - TA.t0 < TA.T && TA.xf) { const o = TA.xf(DKT - TA.t0) || {}; dx += o.dx || 0; dy += o.dy || 0; rot += o.rot || 0; sx *= o.sx || 1; sy *= o.sy || 1; }
     if (TL && DKT - TL.t0 < TL.T) dx += TL.d * Math.sin(Math.PI * (DKT - TL.t0) / TL.T);
     return dx || dy || rot || sx !== 1 || sy !== 1 ? { dx, dy, rot, sx, sy } : null;
@@ -3104,7 +3137,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
         CM = skillMul(key); RM = k.dk ? DLV.sz[lvOf(key) - 1] * rsOf(key) : lvOf(key) >= 5 ? 1.1 : 1; const ch = S.wind.ch; S.chain = ch; S.lastCat = wepOf(key); S.lastI = i;
                 S.lhjOn = S.lhjReady; S.lhjReady = false; if (S.lhjOn) S.noHitT = 0;
         if (S.fj && S.fj[key] && !S.lijie) { const fc = fjCost(); if (S.zq >= fc) { S.zq -= fc; CM *= FJ_DMG; RM *= 1.12; S.fjN = (S.fjN || 0) + 1; fx.push({ k: 'fjg', x: hero.x, y: hero.y, t: 0, T: .45, sd: Math.random() * 6 }); if (S.fjN % 4 === 1) floaters.push({ x: hero.x + R(-10, 10), y: hero.y - 62, t: 0, txt: '发劲', color: '#8fd0ff' }); } }   // 11/16 用户定：发劲（照群侠）——点亮的武艺每次出手多耗真气，伤害 ×1.35
-        CK = key; const channel = k.cast(); if (k.dk && k.lv10 && lvOf(key) >= 10) { try { k.lv10(); } catch (e) { console.error(e); } } fx2Play(key); S.lhjOn = false;   // 11/16 LV10 突破
+        CK = key; const channel = k.cast(); try { autoAnim(key); } catch (e) { console.error(e); } if (k.dk && k.lv10 && lvOf(key) >= 10) { try { k.lv10(); } catch (e) { console.error(e); } } fx2Play(key); S.lhjOn = false;   // 11/16 LV10 突破
         const l0 = lvOf(key); S.mast[key] = (S.mast[key] || 0) + AFX.xp(); if (lvOf(key) > l0) note(`<i class="sk">${k.name}</i> 熟练度提升至 <b>${lvOf(key)}</b> 级`);
         if (!k.dk && lvOf(key) >= 10) later(.2, () => { CM *= .6; k.cast(); });   // LV10 质变：多出一击
         CM = 1; RM = 1; CK = '';
@@ -4584,8 +4617,8 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   let poseFlipNow = false;
   function pose() { const f = pose0(); poseFlipNow = !!f && f.endsWith('~'); return poseFlipNow ? f.slice(0, -1) : f; }
   function pose0() {
-    if (TA && DKT - TA.t0 < TA.T) { let t = DKT - TA.t0; for (const st of TA.steps) { if (t < st[0]) return st[1]; t -= st[0]; } }   // 11/17 腿法动作序列
     if (S.poseOverride) return S.poseOverride.f;
+    if (TA && DKT - TA.t0 < TA.T) { let t = DKT - TA.t0; for (const st of TA.steps) { if (t < st[0]) return st[1]; t -= st[0]; } }   // 11/17 招式动作序列（多段招自己设的 poseOverride 优先）
     if (S.recov) return S.recov.late && S.recov.t > S.recov.dur * .55 ? S.recov.late : S.recov.pose;
     if (S.wind && (hero.st !== 'walk' || S.wind.dur - S.wind.t < (S.wind.k.dk ? .32 : .16))) return S.wind.k.pose[0];   // 11/14：刀招举刀至少露 0.32 秒   // 边走边打时，出手前 0.16 秒也露一下起手帧
     return null;
@@ -5079,7 +5112,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
 #survEnd .kv{display:grid;grid-template-columns:auto 1fr auto 1fr;gap:calc(8px*var(--k)) calc(12px*var(--k));text-align:left;margin-top:calc(14px*var(--k));padding:calc(12px*var(--k));border:1px solid #6a5434;font-size:calc(16px*var(--kt))}#survEnd .kv span{color:#a8977a}
 @media (max-aspect-ratio:1/1){#survEnd .cells{grid-template-columns:repeat(3,1fr)}#survEnd .cl.pr{grid-column:span 3}#survEnd .two,#survEnd .ev{grid-template-columns:1fr}#survEnd .tags{margin-left:0;order:3;flex-basis:100%}#survEnd .hd{flex-wrap:wrap;justify-content:space-between}}
 @media (max-height:520px){#survEnd .fr{border-width:22px;max-height:98vh}}`;
-  window.SURV = { heroXf, rollK: () => RT.on ? OG().roll || 1 : 1, wepOpen: w => Object.keys(SK).some(k => !SK[k].off && wepOf(k) === w), endShow, endOn: () => !!document.getElementById('survEnd'), logEv, endPage: n => { endPage = n; endRender(); }, prepDbg: () => prepOpen(RT.node), repTest: R => report(R), slowMove, coinAt: (x, y, v) => { const n = Math.min(5, v), e = Math.ceil(v / n); for (let i = 0; i < n; i++) S.coins.push({ x: x + R(-14, 14), y: y + R(-6, 6), z: 8 + R(0, 10), vz: R(60, 110), vx: R(-40, 40), v: e, t: 0 }); }, wuParts, trial: TRIAL, BAO, BQN, BQC, SHANG, baoHit, blessOpts, bless: (k, cb) => blessDo(k, cb), baoPick: (qs, cb, t) => pickBao(qs, cb, t), maxHp: () => maxHp(), poseFlip: () => poseFlipNow, banner: (a, b) => waveBanner(a, b), curNode: () => RT.on && W.started ? RT.node : null, status, attrInfo, addXiu: n => addXiu(n), heldPre: () => heldPre(), dbg: () => ({ gf: S.gf.slice(), qg: S.qg, zq: S.zq, zqMax: zqMax(), exp: S.gfExp, GM }), giveGf: id => { if (GF[id]) { if (GF[id].qg) S.qg = id; else { const f = S.gf.indexOf(""); if (f >= 0) S.gf[f] = id; } } }, newHud: () => RT.on && !!RT.node, stunGate, noStun: () => RT.on, get slots() { return S.slots; }, SK, beginNode, frozen: () => RT.on && (ROUTE.shown() || buildOpen || talkHold || (banHold && !!document.getElementById('waveBan'))), routeHp: () => [hero.hp, maxHp()], camp(k) { if (k === 'heal') { heal(maxHp() * .3); S.shang = []; } else if (k && SK[k]) { const l = lvOf(k); if (l < 10) S.mast[k] = MAST_T[l]; } else RT.dmg *= 1.1; },   // 11/14 营地：休整回三成血；修炼 = 选一招直接升一级
+  window.SURV = { heroXf, skList: () => Object.keys(SK).filter(k => !SK[k].off && SK[k].dk).map(k => [k, SK[k].name, SK[k].tier, wepOf(k), (SK[k].pose || []).join('/')].join(' ')), rollK: () => RT.on ? OG().roll || 1 : 1, wepOpen: w => Object.keys(SK).some(k => !SK[k].off && wepOf(k) === w), endShow, endOn: () => !!document.getElementById('survEnd'), logEv, endPage: n => { endPage = n; endRender(); }, prepDbg: () => prepOpen(RT.node), repTest: R => report(R), slowMove, coinAt: (x, y, v) => { const n = Math.min(5, v), e = Math.ceil(v / n); for (let i = 0; i < n; i++) S.coins.push({ x: x + R(-14, 14), y: y + R(-6, 6), z: 8 + R(0, 10), vz: R(60, 110), vx: R(-40, 40), v: e, t: 0 }); }, wuParts, trial: TRIAL, BAO, BQN, BQC, SHANG, baoHit, blessOpts, bless: (k, cb) => blessDo(k, cb), baoPick: (qs, cb, t) => pickBao(qs, cb, t), maxHp: () => maxHp(), poseFlip: () => poseFlipNow, banner: (a, b) => waveBanner(a, b), curNode: () => RT.on && W.started ? RT.node : null, status, attrInfo, addXiu: n => addXiu(n), heldPre: () => heldPre(), dbg: () => ({ gf: S.gf.slice(), qg: S.qg, zq: S.zq, zqMax: zqMax(), exp: S.gfExp, GM }), giveGf: id => { if (GF[id]) { if (GF[id].qg) S.qg = id; else { const f = S.gf.indexOf(""); if (f >= 0) S.gf[f] = id; } } }, newHud: () => RT.on && !!RT.node, stunGate, noStun: () => RT.on, get slots() { return S.slots; }, SK, beginNode, frozen: () => RT.on && (ROUTE.shown() || buildOpen || talkHold || (banHold && !!document.getElementById('waveBan'))), routeHp: () => [hero.hp, maxHp()], camp(k) { if (k === 'heal') { heal(maxHp() * .3); S.shang = []; } else if (k && SK[k]) { const l = lvOf(k); if (l < 10) S.mast[k] = MAST_T[l]; } else RT.dmg *= 1.1; },   // 11/14 营地：休整回三成血；修炼 = 选一招直接升一级
     money: () => S.money, campSkills: () => [...S.slots, ...(S.owned || [])].filter((k, i, a) => k && SK[k] && a.indexOf(k) === i).map(k => ({ k, name: SK[k].name, lv: lvOf(k), img: IMGU[k] || '', icon: SK[k].icon, color: SK[k].color })), ORIGINS, setOrigin(k) { if (ORIGINS[k] && !ORIGINS[k].locked) { origin = k; startW = null; } }, origin: () => origin, setWep(w) { startW = w; }, wep: () => heldW(), startSk: () => startSk(), WEPN, takeMul: (from, kind) => { const fireK = kind === 'fire' || !!(from && (from.fire || (from.source && /fire|huo|jar/.test(String(from.source)))));
       if (RT.on && GM.block && Math.random() < GM.block) { floaters.push({ x: hero.x, y: hero.y - 50, t: 0, txt: '格挡', color: '#bfe0ff' }); return 0; }
       const mv = Math.abs(hero.ix) > .1 || Math.abs(hero.iy) > .1, low = hero.hp / maxHp() < .3 ? 1 - .10 * GM.low : 1;
