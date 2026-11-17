@@ -62,7 +62,7 @@ body.szz-pro #help{display:none}
 .x-back{min-height:34px!important}
 }
 #rot small{display:block;margin-top:10px;font-size:14px;font-weight:600;color:#c9b691;line-height:1.6}
-</style><link rel="preload" href="pack/fonts/result.woff2?v=a758924b59" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=a758924b59)format("woff2");font-display:swap}</style><style>@font-face{font-family:"WenKai";src:url(pack/fonts/kai.woff2?v=5855e56b30)format("woff2");font-display:swap}</style><link rel="preload" href="pack/fonts/pixel.woff2?v=b61630064f" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"Pixel12";src:url(pack/fonts/pixel.woff2?v=b61630064f)format("woff2");font-display:swap}@font-face{font-family:"Songti SC";src:url(pack/fonts/pixel.woff2?v=b61630064f)format("woff2");font-display:swap}@font-face{font-family:"STSong";src:url(pack/fonts/pixel.woff2?v=b61630064f)format("woff2");font-display:swap}@font-face{font-family:"Noto Serif SC";src:url(pack/fonts/pixel.woff2?v=b61630064f)format("woff2");font-display:swap}@font-face{font-family:"SimSun";src:url(pack/fonts/pixel.woff2?v=b61630064f)format("woff2");font-display:swap}@font-face{font-family:"PingFang SC";src:url(pack/fonts/pixel.woff2?v=b61630064f)format("woff2");font-display:swap}@font-face{font-family:"Microsoft YaHei";src:url(pack/fonts/pixel.woff2?v=b61630064f)format("woff2");font-display:swap}@font-face{font-family:"Noto Sans CJK SC";src:url(pack/fonts/pixel.woff2?v=b61630064f)format("woff2");font-display:swap}@font-face{font-family:"STKaiti";src:url(pack/fonts/pixel.woff2?v=b61630064f)format("woff2");font-display:swap}@font-face{font-family:"KaiTi";src:url(pack/fonts/pixel.woff2?v=b61630064f)format("woff2");font-display:swap}*{font-synthesis:none}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
+</style><link rel="preload" href="pack/fonts/result.woff2?v=2689b81dae" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=2689b81dae)format("woff2");font-display:swap}</style><style>@font-face{font-family:"WenKai";src:url(pack/fonts/kai.woff2?v=c123af79df)format("woff2");font-display:swap}</style><link rel="preload" href="pack/fonts/pixel.woff2?v=f76fad58dc" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"Pixel12";src:url(pack/fonts/pixel.woff2?v=f76fad58dc)format("woff2");font-display:swap}@font-face{font-family:"Songti SC";src:url(pack/fonts/pixel.woff2?v=f76fad58dc)format("woff2");font-display:swap}@font-face{font-family:"STSong";src:url(pack/fonts/pixel.woff2?v=f76fad58dc)format("woff2");font-display:swap}@font-face{font-family:"Noto Serif SC";src:url(pack/fonts/pixel.woff2?v=f76fad58dc)format("woff2");font-display:swap}@font-face{font-family:"SimSun";src:url(pack/fonts/pixel.woff2?v=f76fad58dc)format("woff2");font-display:swap}@font-face{font-family:"PingFang SC";src:url(pack/fonts/pixel.woff2?v=f76fad58dc)format("woff2");font-display:swap}@font-face{font-family:"Microsoft YaHei";src:url(pack/fonts/pixel.woff2?v=f76fad58dc)format("woff2");font-display:swap}@font-face{font-family:"Noto Sans CJK SC";src:url(pack/fonts/pixel.woff2?v=f76fad58dc)format("woff2");font-display:swap}@font-face{font-family:"STKaiti";src:url(pack/fonts/pixel.woff2?v=f76fad58dc)format("woff2");font-display:swap}@font-face{font-family:"KaiTi";src:url(pack/fonts/pixel.woff2?v=f76fad58dc)format("woff2");font-display:swap}*{font-synthesis:none}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
 <style>button{letter-spacing:.04em!important}</style></head><body>
 <style>
 #bootSplash{position:fixed;inset:0;z-index:99999;background:radial-gradient(ellipse at 50% 45%,#f3e4cf 0%,#ecd9c0 55%,#d9c09f 100%);transition:opacity .45s ease-out}
@@ -119,7 +119,7 @@ if(location.protocol==='https:'&&!/[?&]debug(?:=|&|$)/.test(location.search)&&'s
 })();
 // 自动更新：打开游戏、或从后台切回来时，查一下线上有没有新版本；有就在标题/整备页自动刷新（战斗中不打扰）
 (function(){
-var BUILD='f2869b91c0f6',busy=false;
+var BUILD='dde1806ff65b',busy=false;
 if(location.protocol!=='https:'||/[?&]debug(?:=|&|$)/.test(location.search))return;
 function check(){
   if(busy)return;
@@ -3143,7 +3143,7 @@ function drawHero() {
   if (drunk) ctx.restore();
 }
 function drawZ(z) {
-  if (z.dummy && window.SURV && SURV.drawDummy) { SURV.drawDummy(z); return; }
+  if (z.dummy && window.SURV && SURV.drawDummy && SURV.drawDummy(z) !== false) return;
   if (z.T.mirror && window.XINMO) { XINMO.draw(z); return; }
   ch2Telegraph(z);
   if (z.T.boss) { Boss.draw(z); drawHalberdBleedDots(z, z.y - 68); if (z.poisonT > 0) { ctx.fillStyle = '#8fd16a'; ctx.fillRect(z.x - 1, z.y - 64, 3, 3); }
@@ -10519,7 +10519,18 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   }
   function dummyStat0() { const n = performance.now(); DUM.log = DUM.log.filter(e => n - e[0] < 5000); const w = Math.min(5, Math.max(1, (n - DUM.t0) / 1000)); return { on: DUM.on, tot: DUM.tot, dps: DUM.log.reduce((a, e) => a + e[1], 0) / w, n: [...DUM.hitAt.values()].filter(t => n - t < 1200).length, all: zs.filter(z => z.dummy).length }; }
   function dummyStat() { return Object.assign(dummyStat0(), { brk: DUM.brk, broke: DUM.broke || 0, sol: !DUM.noSol }); }
+  // 11/18 用户：首领美术试样——放进演武场和主角、小兵、现有首领摆在一起看大小和画风（立着不动、能打）
+  const SHOWI = {}; for (const n of ['boss_blue', 'boss_green', 'boss_horse']) { const im = new Image(); im.src = 'art/ui/showcase/' + n + '.webp'; SHOWI[n] = im; }
+  function showcase(on) {
+    for (let i = zs.length - 1; i >= 0; i--) if (zs[i].show) zs.splice(i, 1);
+    if (!on) return;
+    const y0 = hero.y, L = [['real', 'grunt', 0], ['real', 'cheng_yuanzhi', 0], ['img', 'boss_blue', 56], ['img', 'boss_green', 56], ['img', 'boss_horse', 92]];
+    L.forEach(([k, n, h], i) => { const x = Math.max(arenaL + 14, Math.min(lockR - 14, hero.x + 40 + i * 44)), y = clampY(y0 + (i % 2 ? 22 : -4)); spawn(k === 'real' ? n : 'grunt', x, y); const z = zs[zs.length - 1];
+      z.dummy = 1; z.show = 1; z.ax = x; z.ay = y; z.hp = z.maxHp = 9999; z.survMul = 1; z.f = -1; if (k === 'img') { z.showImg = n; z.showH = h; } else z.realDraw = 1; });
+  }
   function drawDummy(z) {   // 代码画的木人桩（等正式美术）
+    if (z.realDraw) return false;
+    if (z.showImg) { const im = SHOWI[z.showImg]; if (im.complete && im.naturalWidth) { const h = z.showH, w = h * im.naturalWidth / im.naturalHeight, hit = DUM.hitAt.get(z), fl = hit && performance.now() - hit < 120; ctx.save(); ctx.fillStyle = 'rgba(0,0,0,.28)'; ctx.beginPath(); ctx.ellipse(z.x, z.y, w * .3, 5, 0, 0, 7); ctx.fill(); ctx.translate(z.x, z.y); if (z.showImg !== 'boss_horse') ctx.scale(-1, 1); if (fl) ctx.filter = 'brightness(1.8)'; ctx.imageSmoothingEnabled = false; ctx.drawImage(im, -w / 2, -h, w, h); ctx.restore(); } return true; }
     if (z.ax != null) { z.x = z.ax; z.y = z.ay; }
     const x = Math.round(z.x), y = Math.round(z.y), hit = DUM.hitAt.get(z), fl = hit && performance.now() - hit < 120;
     if (z.brokeT > 0) { ctx.save(); ctx.fillStyle = '#5e3a1e'; ctx.fillRect(x - 7, y - 3, 14, 3); ctx.fillStyle = '#8a5a32'; ctx.fillRect(x - 4, y - 10, 8, 8); ctx.restore(); return; }
@@ -10533,7 +10544,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     ctx.fillStyle = wd; ctx.beginPath(); ctx.arc(x, y - 40, 5, 0, 7); ctx.fill(); ctx.fillStyle = '#b8402a'; ctx.fillRect(x - 5, y - 41, 10, 2);
     ctx.restore();
   }
-  const TRIAL = { fxArr: () => fx, pvr: () => PVR, getPv: k => pvOpt(k), getPs: k => pvShape(k), pvReach: k => PVM[k] || 0, setPs: (k, o) => { PVS[k] = Object.assign(pvShape(k), o); try { localStorage.setItem('szz-pv-shape', JSON.stringify(PVS)); } catch (e) {} }, setPv: (k, o) => { PVO[k] = Object.assign(pvOpt(k), o); try { localStorage.setItem('szz-pv-opt', JSON.stringify(PVO)); } catch (e) {} }, dummy: m => dummyMode(m), dummyStat, dummyClear() { DUM.log = []; DUM.tot = 0; DUM.broke = 0; DUM.t0 = performance.now(); }, dummyBrk(v) { DUM.brk = v ? 1 : 0; for (const z of zs) if (z.dummy) { z.dhp = DUM.HP; z.brokeT = 0; z.hidden = false; } }, soldiers(v) { DUM.noSol = v ? 0 : 1; if (!v) for (let i = zs.length - 1; i >= 0; i--) if (!zs[i].dummy) zs.splice(i, 1); }, slot(i, k) { S.slots[i] = k; }, bao(k) { gainBao(k); }, lvSet(k, l) { (S.lvLock = S.lvLock || {})[k] = l; }, SK, GF, MOT, WEPN, TIERN, wepOf, IMGU, spdTxt, spawn: t => edgeSpawn(t), count: t => zs.filter(z => !z.dead && z.type === t).length, long() { W.tot = 9999; if (W.t > W.tot - 5) W.t = 0; },
+  const TRIAL = { showcase: on => showcase(on), fxArr: () => fx, pvr: () => PVR, getPv: k => pvOpt(k), getPs: k => pvShape(k), pvReach: k => PVM[k] || 0, setPs: (k, o) => { PVS[k] = Object.assign(pvShape(k), o); try { localStorage.setItem('szz-pv-shape', JSON.stringify(PVS)); } catch (e) {} }, setPv: (k, o) => { PVO[k] = Object.assign(pvOpt(k), o); try { localStorage.setItem('szz-pv-opt', JSON.stringify(PVO)); } catch (e) {} }, dummy: m => dummyMode(m), dummyStat, dummyClear() { DUM.log = []; DUM.tot = 0; DUM.broke = 0; DUM.t0 = performance.now(); }, dummyBrk(v) { DUM.brk = v ? 1 : 0; for (const z of zs) if (z.dummy) { z.dhp = DUM.HP; z.brokeT = 0; z.hidden = false; } }, soldiers(v) { DUM.noSol = v ? 0 : 1; if (!v) for (let i = zs.length - 1; i >= 0; i--) if (!zs[i].dummy) zs.splice(i, 1); }, slot(i, k) { S.slots[i] = k; }, bao(k) { gainBao(k); }, lvSet(k, l) { (S.lvLock = S.lvLock || {})[k] = l; }, SK, GF, MOT, WEPN, TIERN, wepOf, IMGU, spdTxt, spawn: t => edgeSpawn(t), count: t => zs.filter(z => !z.dead && z.type === t).length, long() { W.tot = 9999; if (W.t > W.tot - 5) W.t = 0; },
     setGf(ids) { S.gf = ['', '', '']; ids.slice(0, 3).forEach((id, i) => { S.gf[i] = id; }); GM = gfCalc(); }, setQg(id) { S.qg = id || ''; GM = gfCalc(); }, gf: () => S.gf.slice(), qg: () => S.qg, mul: k => skillMul(k), lv: k => lvOf(k), spd: k => spdTxt(SK[k]), rs: k => SK[k] && SK[k].dk ? rsOf(k) : null, setRs(k, v) { DRS[k] = v; try { localStorage.setItem('szz-dao-rs', JSON.stringify(DRS)); } catch (e) {} },
     sp: k => spOf(k), setSp(k, v) { DSP[k] = v; try { localStorage.setItem('szz-dao-sp', JSON.stringify(DSP)); } catch (e) {} }, spAll(v, w) { Object.keys(SK).forEach(k => { if (SK[k].dk && (w == null || wepOf(k) === w)) DSP[k] = v; }); try { localStorage.setItem('szz-dao-sp', JSON.stringify(DSP)); } catch (e) {} },
     FRN: ['idle', 'walk1', 'walk2', 'walk3', 'roll1', 'roll2', 'roll3', 'roll4', 'hurt', 'down', 'chop1', 'chop2', 'sweep1', 'sweep2', 'thrust1', 'thrust2', 'spin1', 'spin2', 'up1', 'up2'],
@@ -12266,7 +12277,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   const MOTN = { chop: '劈', sweep: '横扫', thrust: '刺', spin: '转', up: '挑' };
   const ORDER = [0, 2, 3, 4, 12, 7, 5, 8, 9, 1, 10, 11];   // 刀 锤 枪 关刀 长戟 石子 弓 黄符 羽扇 剑 拳 腿
   const TC = ['#c9b27a', '#c9b27a', '#6fb8ff', '#c58cff', '#ffb347'];
-  let box = null, tab = 0, sel = null, godT = 0, rng = true, rngT = 0, mini = false, dum = 'row', brk = 0, sol = 0, arena = false;   // 11/18 木人桩：'' 关 / one 单个 / row 一排 / ring 一圈
+  let box = null, tab = 0, sel = null, godT = 0, rng = true, rngT = 0, show = 0, mini = false, dum = 'row', brk = 0, sol = 0, arena = false;   // 11/18 木人桩：'' 关 / one 单个 / row 一排 / ring 一圈
   const DUMN = { '': '关', one: '单个', row: '一排', ring: '一圈' }, DUMO = ['', 'one', 'row', 'ring'];   // 11/16 用户：试炼里常驻弓手、投石手（看乾坤屏挡箭等）
   const T = () => window.SURV && SURV.trial;
   const css = `#szzTrial{position:fixed;z-index:10040;left:8px;top:56px;width:min(330px,46vw);max-height:calc(100vh - 70px);display:flex;flex-direction:column;background:rgba(14,10,7,.93);border:1px solid #8a6a3a;color:#efe2c4;font-size:13px;box-shadow:0 6px 20px rgba(0,0,0,.6)}
@@ -12301,12 +12312,13 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       ls = ids.map(id => { const g = t.GF[id]; return `<button data-g="${id}" class="${on.includes(id) ? 'on' : ''}"><span style="color:${TC[g.t + 1]}">${t.TIERN[g.t + 1]}</span> ${g.n}<small>${g.cn || (qg ? '轻功' : '内功')}</small></button>`; }).join('');
       const g = sel && t.GF[sel]; dt = g ? `<b>${g.n}</b>　${t.TIERN[g.t + 1]}阶<br>${g.d || ''}` : `<span style="opacity:.6">${qg ? '点一个轻功装上（只能装一个）' : '点心法装上（最多 3 个，再点取消）'}；武艺照常放。</span>`;
     }
-    box.innerHTML = `<div class="hd"><span>武学试炼</span><span>${mini ? '' : `<button class="dm">木人桩：${DUMN[dum]}</button> `}<button class="mn">${mini ? '展开' : '缩小'}</button></span></div>${mini ? '' : `<div class="dms"><span><button class="tbk">${brk ? '会碎的木人' : '不碎的木人'}</button> <button class="tsol">士兵：${sol ? '开' : '关'}</button>${sol ? ` <button class="rg">远程兵：${rng ? '开' : '关'}</button>` : ''}</span></div>${dum ? '<div class="dms"><span class="dmv">—</span><button class="dmc">清零</button></div>' : ''}<div class="tabs">${tabs}</div><div class="ls">${ls}</div><div class="dt">${dt}</div>`}`;
+    box.innerHTML = `<div class="hd"><span>武学试炼</span><span>${mini ? '' : `<button class="dm">木人桩：${DUMN[dum]}</button> `}<button class="mn">${mini ? '展开' : '缩小'}</button></span></div>${mini ? '' : `<div class="dms"><span><button class="tbk">${brk ? '会碎的木人' : '不碎的木人'}</button> <button class="tsol">士兵：${sol ? '开' : '关'}</button> <button class="tshow">${show ? '收起首领美术' : '首领美术对比'}</button>${sol ? ` <button class="rg">远程兵：${rng ? '开' : '关'}</button>` : ''}</span></div>${dum ? '<div class="dms"><span class="dmv">—</span><button class="dmc">清零</button></div>' : ''}<div class="tabs">${tabs}</div><div class="ls">${ls}</div><div class="dt">${dt}</div>`}`;
     box.querySelector('.mn').onclick = () => { mini = !mini; render(); };
     if (mini) return;
     const rg = box.querySelector('.rg'); if (rg) rg.onclick = () => { rng = !rng; render(); };
     box.querySelector('.dm').onclick = () => { dum = DUMO[(DUMO.indexOf(dum) + 1) % DUMO.length]; try { T().dummy(dum); } catch (e) {} render(); };
     box.querySelector('.tbk').onclick = () => { brk = brk ? 0 : 1; try { T().dummyBrk(brk); } catch (e) {} render(); };
+    box.querySelector('.tshow').onclick = () => { show = show ? 0 : 1; try { T().showcase(show); } catch (e) {} render(); };
     box.querySelector('.tsol').onclick = () => { sol = sol ? 0 : 1; try { T().soldiers(sol); } catch (e) {} render(); };
     const dc = box.querySelector('.dmc'); if (dc) dc.onclick = () => { try { T().dummyClear(); } catch (e) {} };
     box.querySelectorAll('.tabs button').forEach(b => b.onclick = () => { const v = b.dataset.t; tab = v === 'gf' || v === 'qg' ? v : +v; sel = null; render(); });
@@ -12362,7 +12374,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     try { await enterFight(); } finally { setTimeout(() => { const c = document.getElementById('szzTrialCover'); if (c) c.remove(); }, 250); }
     render(); clearTimeout(godT); keep();
   }
-  function close() { try { T().setLv(null); } catch (e) {} if (dum) { try { T().dummy(''); } catch (e) {} } dum = 'row'; brk = 0; sol = 0; mini = false; const wasArena = window.TRIAL_ARENA; try { T().soldiers(1); T().dummyBrk(0); } catch (e) {}
+  function close() { try { T().setLv(null); } catch (e) {} if (dum) { try { T().dummy(''); } catch (e) {} } dum = 'row'; brk = 0; sol = 0; show = 0; mini = false; const wasArena = window.TRIAL_ARENA; try { T().soldiers(1); T().dummyBrk(0); } catch (e) {}
     if (wasArena && window.TITLE && TITLE.mode && TITLE.mode() === 'game' && TITLE.show) { window.TRIAL_ON = false; TITLE.show(); } window.TRIAL_ARENA = false; window.TRIAL_ON = false; clearTimeout(godT); if (box) box.remove(); box = null; }   // 演武场关掉就回主界面
   window.TRIAL = { open, close };
 })();
