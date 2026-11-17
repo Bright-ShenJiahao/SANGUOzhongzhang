@@ -1925,7 +1925,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const tAnim0 = (...x) => tAnim(...x), tLean0 = (...x) => tLean(...x), tTrail0 = (...x) => tTrail(...x);
   function autoAnim(key) {   // 出手那一刻
     const k = SK[key], w = wepOf(key); if (!k || !k.dk || w === 11 || !k.pose || (TA && TA.t0 === DKT)) return;
-    const op = aOpt(key), xw = f => f && (t => { const o = f(t); return !o || op.mv ? o : Object.assign({}, o, { dx: 0, dy: 0 }); }), tAnim = (st, f) => tAnim0(st, xw(f)), tLean = (d, T) => { if (op.mv) tLean0(d, T); }, tTrail = (...x) => { if (op.gh) tTrail0(...x); }, gp = o => { if (op.gh) fx.push(o); };
+    const op = aOpt(key), xw = f => f && (t => { const o = f(t); return !o || op.mv ? o : Object.assign({}, o, { dx: 0, dy: 0, rot: 0 }); }), tAnim = (st, f) => tAnim0(st, xw(f)), tLean = (d, T) => { if (op.mv) tLean0(d, T); }, tTrail = (...x) => { if (op.gh) tTrail0(...x); }, gp = o => { if (op.gh) fx.push(o); };
     const f0 = k.pose[0], f1 = k.pose[1], ty = animOf(key), a = aim(), tr = k.tier || 1, sw = /sweep/.test(f1) ? -1 : 1;
     if (ty === 'stab') { tAnim([[.16, f1]], t => ({ rot: -.05 })); tLean(8 + 3 * tr); tTrail(a, f1, tr >= 3 ? 3 : 2, 14 + 2 * tr); }
     else if (ty === 'combo') { tAnim([[.05, f1], [.04, f0], [.05, f1], [.04, f0], [.12, f1]]); [0, .09, .18].forEach((d, i) => later(d, () => { tLean(6 + 3 * i, .08); tTrail(a, f1, 1, 16 + 6 * i); })); }
