@@ -165,6 +165,7 @@ const stoneSlowMove = (z, legacy = 1) => window.SURV && SURV.slowMove
   : z.survSlow > 0 ? legacy : 1;
 
 function zUpdate(z, dt) {
+  if (z.dummy && window.SURV && SURV.dummyTick) { SURV.dummyTick(z, dt); return; }   // 11/18 木人桩
   if (z.endFade != null) { z.endFade -= dt; z.vx = 0; z.moving = false; return; }   // 节点打完：敌人原地站定、淡出（11/11 用户定）
   if (window.GEAR && !z.dead) { dt = GEAR.enemyTime(z, dt); if (!dt) return; }
   if (z.drumT > 0 && !z.dead) { z.drumT -= dt; dt *= 1.3; }   /* 11/12 鼓手的战鼓：附近黄巾 4 秒内动作快 30% */

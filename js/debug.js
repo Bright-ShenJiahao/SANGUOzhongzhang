@@ -101,8 +101,6 @@
     const heroGroup = addGroup('hero', '主角');
     btn(heroGroup, '回到主界面', 'alt', () => { if (typeof returnFromPausedGame === 'function') returnFromPausedGame(true); else if (window.TITLE && TITLE.show) TITLE.show(); });
     btn(heroGroup, '回到整军备战', 'alt', () => { if (typeof returnFromPausedGame === 'function') returnFromPausedGame(false); else if (window.TITLE && TITLE.openPreparation) TITLE.openPreparation(1); });
-    btn(heroGroup, '武艺：刀（3招）', 'alt', () => { if (window.SURV) { SURV.slots.splice(0, 5, 'hengsao', 'tuodao', 'tiaozhan', '', ''); tipLine('武艺栏换成刀的黄阶 3 招'); } });   /* 11/17：旧按钮里的招名已过时，改成各兵器黄阶 3 招 */
-    btn(heroGroup, '武艺：剑（3招）', 'alt', () => { if (window.SURV) { SURV.slots.splice(0, 5, 'jlianci', 'zhantie', 'jianqi', '', ''); tipLine('武艺栏换成剑的黄阶 3 招：流星刺 断金斩 白虹剑'); } });
     btn(heroGroup, '回满血', '', () => { if (typeof hero !== 'undefined') hero.hp = maxHeroHp(); });
     btn(heroGroup, '修为 +100', '', () => { if (window.SURV && SURV.addXiu) SURV.addXiu(100); });
     // 面板底部临时提示（主界面、整备页时游戏内文字看不到）
@@ -110,58 +108,12 @@
     const godBtn = btn(heroGroup, god ? '无敌：开' : '无敌：关', 'off', () => {
       god = !god; godBtn.textContent = god ? '无敌：开' : '无敌：关'; godBtn.className = god ? 'alt' : 'off';
     });
-    btn(heroGroup, '伤害测试场', '', () => { if (window.DMGTEST) DMGTEST.open(); });
-    btn(heroGroup, '心魔记忆', '', () => { if (window.XINMO) XINMO.memory(); });
-    btn(heroGroup, '给 7 颗通脉丹', '', () => { if (window.MERIDIAN) { ['ch1','ch2','ch3','xc1','xc2','xc3','tg'].forEach(k => MERIDIAN.award(k)); tipLine('通脉丹 7/7：整军备战 → 经脉'); try { if (window.TITLE && TITLE.refreshPreparation) TITLE.refreshPreparation(); } catch (e) {} } });
     btn(heroGroup, '跳过这一波', '', () => { if (window.SURV) SURV.skipWave(); });
     btn(heroGroup, '图鉴全开', '', () => { if (window.CODEX) { CODEX.unlockAll(); CODEX.open(); } });
     btn(heroGroup, '武学试炼', 'alt', () => { if (window.TRIAL) TRIAL.open(); });
-    { const sk = btn(heroGroup, '皮肤：' + (window.HERO_SKIN ? HERO_SKIN.name() : '白衣'), 'alt', () => { if (!window.HERO_SKIN) return; HERO_SKIN.next(); sk.textContent = '皮肤：' + HERO_SKIN.name(); if (window.KAIJU && KAIJU.refresh) KAIJU.refresh(); });   // 11/13：8 套主角皮肤轮流看
+    { const sk = btn(heroGroup, '皮肤：' + (window.HERO_SKIN ? HERO_SKIN.name() : '白衣'), 'alt dbgWide', () => { if (!window.HERO_SKIN) return; HERO_SKIN.next(); sk.textContent = '皮肤：' + HERO_SKIN.name(); if (window.KAIJU && KAIJU.refresh) KAIJU.refresh(); });   // 11/13：8 套主角皮肤轮流看
       if (window.HERO_SKIN) HERO_SKIN.preload(HERO_SKIN.cur(), 'wd_'); }   // 11/13：一招一招看武艺、心法、轻功
     const allBtn = btn(heroGroup, '解锁关卡：关', 'off', () => { window.ROUTE_ALL = !window.ROUTE_ALL; allBtn.textContent = '解锁关卡：' + (window.ROUTE_ALL ? '开' : '关'); allBtn.className = window.ROUTE_ALL ? '' : 'off'; tipLine(window.ROUTE_ALL ? '路线长卷上任意节点都能直接点进去（首领、精英、奇遇、商店）' : '恢复正常路线'); });   /* 11/12 用户：随便进去看 */
-    btn(heroGroup, '给太平飞剑', '', () => { if (window.ARTIFACT) { ARTIFACT.grant('feijian'); ARTIFACT.equip('feijian'); ARTIFACT.startRun(); if (typeof say === 'function') say('已获得并装备太平飞剑', 2); try { if (window.TITLE && TITLE.refreshPreparation) TITLE.refreshPreparation(); } catch (e) {} } });
-    // 预览结算动画（数字滚动 + 铜钱雨）：直接判本局通关，结算显示 37 击倒、180 金币
-    btn(heroGroup, '看结算动画', '', () => {
-      if (window.TITLE && TITLE.blocks && TITLE.blocks()) { if (TITLE.skip) TITLE.skip(); if (window.ROOM && ROOM.skip) ROOM.skip(); }
-      setTimeout(() => {
-        if (typeof result !== 'undefined' && result) { result.born = gameT; result.rain = []; result.countSkip = false; for (const k in result) if (/^_[cd]/.test(k)) delete result[k]; result.coins = 180; return; }
-        kills = Math.max(kills, 37); won = true;
-        const w = setInterval(() => { if (typeof result !== 'undefined' && result) { clearInterval(w); result.coins = 180; result.rain = []; } }, 30);
-      }, 400);
-    });
-    const revive = btn(heroGroup, '复活次数 +1', '', () => { if (typeof reviveUsed !== 'undefined') reviveUsed = false; });
-    revive.classList.add('dbgWide');
-
-    const c1 = addGroup('chapter1', '第一章');
-    btn(c1, 'Boss 一阶段', 'alt', () => jumpBoss(false));
-    btn(c1, 'Boss 二阶段', 'alt', () => jumpBoss(true));
-    btn(c1, '清空本区域', '', () => { if (typeof zs !== 'undefined') zs.forEach(z => { z.dead = 1; z.hp = 0; }); });
-    btn(c1, '跳到下一关', '', () => {
-      if (typeof gateI === 'undefined') return;
-      gateI++; lockR = Infinity; zs.length = 0; clearAt = 0;
-      if (gateI < M.gates.length) warpTo(M.gates[gateI] + 10);
-    });
-
-    const c2 = addGroup('chapter2', '第二章');
-    btn(c2, '测试第二章', 'alt', () => { if (typeof startChapter2Debug === 'function') startChapter2Debug(); });
-    // 选战：直接进第二章任意一战（素材异步加载完再进）。4=张梁、5=张宝、6=张角祭台
-    const battles = document.createElement('div'); battles.className = 'dbgFloors';
-    const bl = document.createElement('span'); bl.textContent = '选战'; battles.appendChild(bl);
-    ['1', '2', '3', '张梁', '张宝', '张角'].forEach((t, i) => btn(battles, t, 'alt', () => {
-      if (typeof startChapter2Debug !== 'function') return;
-      startChapter2Debug(i + 1);
-      if (i + 1 === 4 || i + 1 === 5) setTimeout(() => { if (typeof chapter2Run !== 'undefined' && chapter2Run) chapter2Run.route = i + 1 === 4 ? 'zhang-liang' : 'zhang-bao'; }, 1500);
-    }));
-    c2.appendChild(battles);
-
-    const xc = addGroup('xiaochang', '校场');
-    const floors = document.createElement('div'); floors.className = 'dbgFloors';
-    const floorLabel = document.createElement('span'); floorLabel.textContent = '选层';
-    floors.appendChild(floorLabel);
-    for (let floor = 1; floor <= 6; floor++) btn(floors, floor === 6 ? '魔' : String(floor), 'alt', () => { if (window.XIAOCHANG) XIAOCHANG.start({ chapter: 1, floor }); });
-    xc.appendChild(floors);
-    btn(xc, '跳到第6波', 'dbgWide alt', () => { if (window.XIAOCHANG) XIAOCHANG.skipToSix(); });
-
     // 瞬移主角到新区域入口，并把镜头一起拉过去（否则镜头要滑半天）
     function warpTo(x) {
       hero.x = x; hero.y = (M.top + M.bot) / 2; hero.f = 1; hero.st = 'idle';
@@ -173,7 +125,7 @@
     setInterval(() => {
       if (!panel || typeof gateI === 'undefined') return;
       const z = typeof zs !== 'undefined' && zs.find(o => o.T && o.T.boss);
-      info.textContent = `区域 ${Math.min(gateI + 1, M.gates.length)}/${M.gates.length}\n` +
+      info.textContent =
         (z ? `管亥 ${Math.max(0, Math.round(z.hp))}/80 · ${z.st}\n` : '') +
         `帧率 ${Math.round(fps)} · 血 ${typeof hero !== 'undefined' ? hero.hp : '-'}\n` +
         // 排查「人物不见」用：主角坐标/状态、镜头、第二章状态、最近的报错

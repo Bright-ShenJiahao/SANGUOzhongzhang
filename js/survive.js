@@ -391,6 +391,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       return;
     }
     W.t += dt;
+    if (DUM.on) return;   // 11/18 木人桩：不刷兵
     if (RT.on) { W.lvF = W.lv0 + (W.lv1 - W.lv0) * Math.min(1, W.t / W.tot); W.n = Math.round(W.lvF); }   // 难度随时间平滑上升
     if (bossCount() && !W.bossDone && W.t >= 1) { W.bossDone = true; if (RT.on) spawnNamed(); else for (let i = 0; i < bossCount(); i++) edgeSpawn('elite', true); }
     // 补兵：开场慢慢涌进来（前 60% 时间里目标人数从少爬到满）
@@ -2793,11 +2794,11 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   // ---------- 出身（开局配置里选；起手只有 1 个武艺） ----------
   const ORIGINS = {
     // 11/16 用户定：出身 = 本门兵器 + 一个长处一个短处（照土豆兄弟），全部开放不用解锁；长戟、腿、弩 11/17 都做完，开局格子全部开放
-    nongfu: { name: '小兵', tag: '刀 · 锤 · 剑', wep: 0, weps: [0, 2, 1], skill: 'hengsao', desc: '黄巾乱里拉来的壮丁，命硬。受到伤害 -20%、气血 +20%；修为 -15%', take: .8, hp: 1.2, xiu: .85, oa: [5, 4, 2, 1, 1, 2, 1, 3], at: [6, 4, 2, 2, 3, 2, 2, 1, 3, 2] },
-    xiaozu: { name: '侍从', tag: '枪 · 关刀 · 长戟', wep: 3, weps: [3, 4, 12], skill: 'qiang', desc: '跟着将军上过阵，出手利落。武艺起手 -20%、长兵范围 +15%；移动速度 -10%', wu: .8, rng: { 2: 1.15 }, move: .9, oa: [4, 4, 5, 1, 1, 2, 1, 3], at: [4, 3, 4, 3, 2, 2, 2, 1, 3, 2] },
-    liehu: { name: '猎户', tag: '石子 · 弓', wep: 7, weps: [7, 5], skill: 'feishi', desc: '山里打猎的好眼力。射艺武艺伤害 +25%、捡铜钱范围加倍；气血 -20%', dmg: { 6: 1.25 }, coinR: 2, hp: .8, oa: [3, 4, 1, 5, 1, 4, 1, 3], at: [3, 2, 2, 5, 3, 2, 5, 2, 3, 2] },
-    shusheng: { name: '书生', tag: '黄符 · 羽扇', wep: 8, weps: [8, 9], skill: 'huofu', desc: '饱读诗书，通晓术法。修为 +30%、修炼多 1 次刷新；受到伤害 +15%', xiu: 1.3, xrr: 1, take: 1.15, oa: [2, 1, 1, 1, 1, 2, 6, 4], at: [2, 1, 1, 2, 3, 6, 2, 6, 5, 1] },
-    youxia: { name: '游侠', tag: '拳 · 腿', wep: 10, weps: [10, 11], skill: 'chongquan', desc: '仗义任侠，赤手空拳闯江湖。暴击 +10%、翻滚冷却 -30%；真气上限 -25%', crit: .1, roll: .7, zq: .75, oa: [5, 4, 2, 2, 1, 3, 1, 3], at: [3, 2, 2, 4, 4, 3, 2, 1, 3, 5] },
+    nongfu: { short: '被拉来的壮丁', name: '小兵', tag: '刀 · 锤 · 剑', wep: 0, weps: [0, 2, 1], skill: 'hengsao', desc: '黄巾乱里拉来的壮丁，命硬。受到伤害 -20%、气血 +20%；修为 -15%', take: .8, hp: 1.2, xiu: .85, oa: [5, 4, 2, 1, 1, 2, 1, 3], at: [6, 4, 2, 2, 3, 2, 2, 1, 3, 2] },
+    xiaozu: { short: '随将军上过阵', name: '侍从', tag: '枪 · 关刀 · 长戟', wep: 3, weps: [3, 4, 12], skill: 'qiang', desc: '跟着将军上过阵，出手利落。武艺起手 -20%、长兵范围 +15%；移动速度 -10%', wu: .8, rng: { 2: 1.15 }, move: .9, oa: [4, 4, 5, 1, 1, 2, 1, 3], at: [4, 3, 4, 3, 2, 2, 2, 1, 3, 2] },
+    liehu: { short: '山里的好眼力', name: '猎户', tag: '石子 · 弓', wep: 7, weps: [7, 5], skill: 'feishi', desc: '山里打猎的好眼力。射艺武艺伤害 +25%、捡铜钱范围加倍；气血 -20%', dmg: { 6: 1.25 }, coinR: 2, hp: .8, oa: [3, 4, 1, 5, 1, 4, 1, 3], at: [3, 2, 2, 5, 3, 2, 5, 2, 3, 2] },
+    shusheng: { short: '饱读诗书', name: '书生', tag: '黄符 · 羽扇', wep: 8, weps: [8, 9], skill: 'huofu', desc: '饱读诗书，通晓术法。修为 +30%、修炼多 1 次刷新；受到伤害 +15%', xiu: 1.3, xrr: 1, take: 1.15, oa: [2, 1, 1, 1, 1, 2, 6, 4], at: [2, 1, 1, 2, 3, 6, 2, 6, 5, 1] },
+    youxia: { short: '赤手闯江湖', name: '游侠', tag: '拳 · 腿', wep: 10, weps: [10, 11], skill: 'chongquan', desc: '仗义任侠，赤手空拳闯江湖。暴击 +10%、翻滚冷却 -30%；真气上限 -25%', crit: .1, roll: .7, zq: .75, oa: [5, 4, 2, 2, 1, 3, 1, 3], at: [3, 2, 2, 4, 4, 3, 2, 1, 3, 5] },
   };
   let origin = 'nongfu';
   const OG = () => ORIGINS[origin] || ORIGINS.nongfu;
@@ -4901,7 +4902,33 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   S10('qluanwu', '崩星裂地', '再错开半格裂出第二颗星（0.8 倍，收尾）', () => L10T(.35, () => { for (let i = 0; i < 8; i++) L10line(HX(), HY(), A10() + i * Math.PI / 4 + Math.PI / 8, FS(180), FS(14), Hqn, .8, { fin: 1, st: .3 }); }));
   S10('baji', '力拔山兮', '再砸一次（全屏，1.2 倍，收尾，必定爆劲）', () => L10T(.9, () => { shake = Math.max(shake, .5); fx.push({ k: 'ring', x: HX(), y: HY(), t: 0, T: .7, r: 420 }); for (const z of near(HX(), HY(), 420)) Hqn(z, 1.2, { fin: 1, st: .6, boom: 1 }); }));
   S10('fengjuan', '五禽归一', '五禽合一，最后再爆出五兽光影（半径 150，2.0 倍，收尾，必定爆劲）', () => L10T(5.6, () => { shake = Math.max(shake, .4); L10boom(HX(), HY(), FS(150), Hqn, 2.0, { fin: 1, boom: 1 }); }));
-  const TRIAL = { slot(i, k) { S.slots[i] = k; }, bao(k) { gainBao(k); }, lvSet(k, l) { (S.lvLock = S.lvLock || {})[k] = l; }, SK, GF, MOT, WEPN, TIERN, wepOf, IMGU, spdTxt, spawn: t => edgeSpawn(t), count: t => zs.filter(z => !z.dead && z.type === t).length, long() { W.tot = 9999; if (W.t > W.tot - 5) W.t = 0; },
+
+  // ---------- 11/18 木人桩（武学试炼里用）：不还手、打不死，统计伤害 ----------
+  const DUM = { on: '', log: [], tot: 0, t0: 0, hitAt: new Map() };
+  function dummyMode(mode) {
+    DUM.on = mode || ''; zs.length = 0; DUM.log = []; DUM.tot = 0; DUM.t0 = performance.now(); DUM.hitAt.clear();
+    if (!DUM.on) return;
+    const cx = hero.x + 60, cy = hero.y, pts = mode === 'one' ? [[cx, cy]] : mode === 'row' ? [0, 1, 2, 3, 4].map(i => [hero.x + 45 + i * 30, cy]) : [0, 1, 2, 3, 4, 5, 6, 7].map(i => [hero.x + Math.cos(i * Math.PI / 4) * 55, hero.y + Math.sin(i * Math.PI / 4) * 26]);
+    for (const [x0, y0] of pts) { const x = Math.max(arenaL + 14, Math.min(lockR - 14, x0)), y = clampY(y0); spawn('grunt', x, y); const z = zs[zs.length - 1]; z.dummy = 1; z.ax = x; z.ay = y; z.hp = z.maxHp = 9999; z.survMul = 1; z.f = x < hero.x ? 1 : -1; }
+  }
+  function dummyTick(z, dt) {
+    const lost = (z.maxHp || 9999) - z.hp; if (lost > 0) { DUM.tot += lost; DUM.log.push([performance.now(), lost]); DUM.hitAt.set(z, performance.now()); }
+    z.hp = z.maxHp = 9999; z.dead = 0; z.air = false; z.z = 0; z.vz = 0; z.vx = 0; z.stun = 0; z.daze = 0; z.moving = false; if (z.st !== 'idle') { z.st = 'idle'; z.t = 0; }
+    const k = Math.min(1, dt * 4); z.x += (z.ax - z.x) * k; z.y += (z.ay - z.y) * k; z.f = z.ax < hero.x ? 1 : -1;
+  }
+  function dummyStat() { const n = performance.now(); DUM.log = DUM.log.filter(e => n - e[0] < 5000); const w = Math.min(5, Math.max(1, (n - DUM.t0) / 1000)); return { on: DUM.on, tot: DUM.tot, dps: DUM.log.reduce((a, e) => a + e[1], 0) / w, n: [...DUM.hitAt.values()].filter(t => n - t < 1200).length, all: zs.filter(z => z.dummy).length }; }
+  function drawDummy(z) {   // 代码画的木人桩（等正式美术）
+    const x = Math.round(z.x), y = Math.round(z.y), hit = DUM.hitAt.get(z), fl = hit && performance.now() - hit < 120;
+    ctx.save(); ctx.fillStyle = 'rgba(0,0,0,.28)'; ctx.beginPath(); ctx.ellipse(x, y, 10, 3.5, 0, 0, 7); ctx.fill();
+    const wd = fl ? '#f6e2b8' : '#8a5a32', dk = fl ? '#e8c890' : '#5e3a1e';
+    ctx.fillStyle = dk; ctx.fillRect(x - 7, y - 3, 14, 3);
+    ctx.fillStyle = wd; ctx.fillRect(x - 4, y - 36, 8, 34); ctx.fillStyle = dk; ctx.fillRect(x - 4, y - 36, 2, 34);
+    ctx.fillStyle = wd; ctx.fillRect(x - 12, y - 27, 24, 3); ctx.fillRect(x - 10, y - 18, 20, 3);
+    ctx.fillStyle = dk; ctx.fillRect(x - 12, y - 25, 24, 1); ctx.fillRect(x - 10, y - 16, 20, 1);
+    ctx.fillStyle = wd; ctx.beginPath(); ctx.arc(x, y - 40, 5, 0, 7); ctx.fill(); ctx.fillStyle = '#b8402a'; ctx.fillRect(x - 5, y - 41, 10, 2);
+    ctx.restore();
+  }
+  const TRIAL = { dummy: m => dummyMode(m), dummyStat, dummyClear() { DUM.log = []; DUM.tot = 0; DUM.t0 = performance.now(); }, slot(i, k) { S.slots[i] = k; }, bao(k) { gainBao(k); }, lvSet(k, l) { (S.lvLock = S.lvLock || {})[k] = l; }, SK, GF, MOT, WEPN, TIERN, wepOf, IMGU, spdTxt, spawn: t => edgeSpawn(t), count: t => zs.filter(z => !z.dead && z.type === t).length, long() { W.tot = 9999; if (W.t > W.tot - 5) W.t = 0; },
     setGf(ids) { S.gf = ['', '', '']; ids.slice(0, 3).forEach((id, i) => { S.gf[i] = id; }); GM = gfCalc(); }, setQg(id) { S.qg = id || ''; GM = gfCalc(); }, gf: () => S.gf.slice(), qg: () => S.qg, mul: k => skillMul(k), lv: k => lvOf(k), spd: k => spdTxt(SK[k]), rs: k => SK[k] && SK[k].dk ? rsOf(k) : null, setRs(k, v) { DRS[k] = v; try { localStorage.setItem('szz-dao-rs', JSON.stringify(DRS)); } catch (e) {} },
     sp: k => spOf(k), setSp(k, v) { DSP[k] = v; try { localStorage.setItem('szz-dao-sp', JSON.stringify(DSP)); } catch (e) {} }, spAll(v, w) { Object.keys(SK).forEach(k => { if (SK[k].dk && (w == null || wepOf(k) === w)) DSP[k] = v; }); try { localStorage.setItem('szz-dao-sp', JSON.stringify(DSP)); } catch (e) {} },
     FRN: ['idle', 'walk1', 'walk2', 'walk3', 'roll1', 'roll2', 'roll3', 'roll4', 'hurt', 'down', 'chop1', 'chop2', 'sweep1', 'sweep2', 'thrust1', 'thrust2', 'spin1', 'spin2', 'up1', 'up2'],
@@ -5118,7 +5145,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
 #survEnd .kv{display:grid;grid-template-columns:auto 1fr auto 1fr;gap:calc(8px*var(--k)) calc(12px*var(--k));text-align:left;margin-top:calc(14px*var(--k));padding:calc(12px*var(--k));border:1px solid #6a5434;font-size:calc(16px*var(--kt))}#survEnd .kv span{color:#a8977a}
 @media (max-aspect-ratio:1/1){#survEnd .cells{grid-template-columns:repeat(3,1fr)}#survEnd .cl.pr{grid-column:span 3}#survEnd .two,#survEnd .ev{grid-template-columns:1fr}#survEnd .tags{margin-left:0;order:3;flex-basis:100%}#survEnd .hd{flex-wrap:wrap;justify-content:space-between}}
 @media (max-height:520px){#survEnd .fr{border-width:22px;max-height:98vh}}`;
-  window.SURV = { heroXf, skList: () => Object.keys(SK).filter(k => !SK[k].off && SK[k].dk).map(k => [k, SK[k].name, SK[k].tier, wepOf(k), (SK[k].pose || []).join('/')].join(' ')), rollK: () => RT.on ? OG().roll || 1 : 1, wepOpen: w => Object.keys(SK).some(k => !SK[k].off && wepOf(k) === w), endShow, endOn: () => !!document.getElementById('survEnd'), logEv, endPage: n => { endPage = n; endRender(); }, prepDbg: () => prepOpen(RT.node), repTest: R => report(R), slowMove, coinAt: (x, y, v) => { const n = Math.min(5, v), e = Math.ceil(v / n); for (let i = 0; i < n; i++) S.coins.push({ x: x + R(-14, 14), y: y + R(-6, 6), z: 8 + R(0, 10), vz: R(60, 110), vx: R(-40, 40), v: e, t: 0 }); }, wuParts, trial: TRIAL, BAO, BQN, BQC, SHANG, baoHit, blessOpts, bless: (k, cb) => blessDo(k, cb), baoPick: (qs, cb, t) => pickBao(qs, cb, t), maxHp: () => maxHp(), poseFlip: () => poseFlipNow, banner: (a, b) => waveBanner(a, b), curNode: () => RT.on && W.started ? RT.node : null, status, attrInfo, addXiu: n => addXiu(n), heldPre: () => heldPre(), dbg: () => ({ gf: S.gf.slice(), qg: S.qg, zq: S.zq, zqMax: zqMax(), exp: S.gfExp, GM }), giveGf: id => { if (GF[id]) { if (GF[id].qg) S.qg = id; else { const f = S.gf.indexOf(""); if (f >= 0) S.gf[f] = id; } } }, newHud: () => RT.on && !!RT.node, stunGate, noStun: () => RT.on, get slots() { return S.slots; }, SK, beginNode, frozen: () => RT.on && (ROUTE.shown() || buildOpen || talkHold || (banHold && !!document.getElementById('waveBan'))), routeHp: () => [hero.hp, maxHp()], camp(k) { if (k === 'heal') { heal(maxHp() * .3); S.shang = []; } else if (k && SK[k]) { const l = lvOf(k); if (l < 10) S.mast[k] = MAST_T[l]; } else RT.dmg *= 1.1; },   // 11/14 营地：休整回三成血；修炼 = 选一招直接升一级
+  window.SURV = { heroXf, dummyTick, drawDummy, skList: () => Object.keys(SK).filter(k => !SK[k].off && SK[k].dk).map(k => [k, SK[k].name, SK[k].tier, wepOf(k), (SK[k].pose || []).join('/')].join(' ')), rollK: () => RT.on ? OG().roll || 1 : 1, wepOpen: w => Object.keys(SK).some(k => !SK[k].off && wepOf(k) === w), endShow, endOn: () => !!document.getElementById('survEnd'), logEv, endPage: n => { endPage = n; endRender(); }, prepDbg: () => prepOpen(RT.node), repTest: R => report(R), slowMove, coinAt: (x, y, v) => { const n = Math.min(5, v), e = Math.ceil(v / n); for (let i = 0; i < n; i++) S.coins.push({ x: x + R(-14, 14), y: y + R(-6, 6), z: 8 + R(0, 10), vz: R(60, 110), vx: R(-40, 40), v: e, t: 0 }); }, wuParts, trial: TRIAL, BAO, BQN, BQC, SHANG, baoHit, blessOpts, bless: (k, cb) => blessDo(k, cb), baoPick: (qs, cb, t) => pickBao(qs, cb, t), maxHp: () => maxHp(), poseFlip: () => poseFlipNow, banner: (a, b) => waveBanner(a, b), curNode: () => RT.on && W.started ? RT.node : null, status, attrInfo, addXiu: n => addXiu(n), heldPre: () => heldPre(), dbg: () => ({ gf: S.gf.slice(), qg: S.qg, zq: S.zq, zqMax: zqMax(), exp: S.gfExp, GM }), giveGf: id => { if (GF[id]) { if (GF[id].qg) S.qg = id; else { const f = S.gf.indexOf(""); if (f >= 0) S.gf[f] = id; } } }, newHud: () => RT.on && !!RT.node, stunGate, noStun: () => RT.on, get slots() { return S.slots; }, SK, beginNode, frozen: () => RT.on && (ROUTE.shown() || buildOpen || talkHold || (banHold && !!document.getElementById('waveBan'))), routeHp: () => [hero.hp, maxHp()], camp(k) { if (k === 'heal') { heal(maxHp() * .3); S.shang = []; } else if (k && SK[k]) { const l = lvOf(k); if (l < 10) S.mast[k] = MAST_T[l]; } else RT.dmg *= 1.1; },   // 11/14 营地：休整回三成血；修炼 = 选一招直接升一级
     money: () => S.money, campSkills: () => [...S.slots, ...(S.owned || [])].filter((k, i, a) => k && SK[k] && a.indexOf(k) === i).map(k => ({ k, name: SK[k].name, lv: lvOf(k), img: IMGU[k] || '', icon: SK[k].icon, color: SK[k].color })), ORIGINS, setOrigin(k) { if (ORIGINS[k] && !ORIGINS[k].locked) { origin = k; startW = null; } }, origin: () => origin, setWep(w) { startW = w; }, wep: () => heldW(), startSk: () => startSk(), WEPN, takeMul: (from, kind) => { const fireK = kind === 'fire' || !!(from && (from.fire || (from.source && /fire|huo|jar/.test(String(from.source)))));
       if (RT.on && GM.block && Math.random() < GM.block) { floaters.push({ x: hero.x, y: hero.y - 50, t: 0, txt: '格挡', color: '#bfe0ff' }); return 0; }
       const mv = Math.abs(hero.ix) > .1 || Math.abs(hero.iy) > .1, low = hero.hp / maxHp() < .3 ? 1 - .10 * GM.low : 1;
