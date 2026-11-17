@@ -7,10 +7,10 @@
   const SKINS = { baiyi: '穿越者·乡勇', guanjun: '皇甫嵩·官军', huangjin: '张角·黄巾', baima: '公孙瓒·白马义从', caojun: '曹操·虎豹骑', baier: '刘备·白毦兵', wujun: '孙权·解烦卫', xiliang: '董卓·飞熊军', xianzhen: '吕布·陷阵营', xiandeng: '袁绍·先登营', danyang: '陶谦·丹阳兵', qingzhou: '曹操·青州兵', wudang: '诸葛亮·无当飞军', jinfan: '甘宁·锦帆军', tengjia: '孟获·藤甲兵' };
   const WEP = {   // manifest.json 的 weapons：图片宽高、脚底中心
     dao: { size: [251, 179], anchor: [127, 175] }, jian: { size: [262, 187], anchor: [131, 177] }, chui: { size: [211, 184], anchor: [115, 175] },
-    spear: { size: [365, 217], anchor: [185, 189] }, ji: { size: [365, 217], anchor: [185, 189] }, guandao: { size: [332, 211], anchor: [159, 191] }, bow: { size: [189, 177], anchor: [115, 175] },
+    spear: { size: [365, 217], anchor: [185, 189] }, ji: { size: [365, 217], anchor: [185, 189] }, nu: { size: [365, 217], anchor: [185, 189] }, guandao: { size: [332, 211], anchor: [159, 191] }, bow: { size: [189, 177], anchor: [115, 175] },
     stone: { size: [189, 177], anchor: [115, 175] }, fu: { size: [189, 183], anchor: [115, 175] }, fan: { size: [237, 192], anchor: [120, 175] },
     quan: { size: [189, 180], anchor: [115, 178] } };
-  const PRE = { wd_: 'dao', jian_: 'jian', chui_: 'chui', qiang_: 'spear', guandao_: 'guandao', bow_: 'bow', stone_: 'stone', huangfu_: 'fu', fan_: 'fan', quan_: 'quan', ji_: 'ji' };
+  const PRE = { wd_: 'dao', jian_: 'jian', chui_: 'chui', qiang_: 'spear', guandao_: 'guandao', bow_: 'bow', stone_: 'stone', huangfu_: 'fu', fan_: 'fan', quan_: 'quan', ji_: 'ji', nu_: 'nu' };
   const FR = new Set(['idle', 'walk1', 'walk2', 'walk3', 'hurt', 'roll1', 'roll2', 'roll3', 'roll4', 'down', 'chop1', 'chop2', 'sweep1', 'sweep2', 'thrust1', 'thrust2', 'spin1', 'spin2', 'up1', 'up2']);
   const SCALE = .5;
   let cur = 'baiyi';

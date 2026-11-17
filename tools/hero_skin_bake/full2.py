@@ -194,7 +194,9 @@ WEP={ # src, grip(src px), final length px, src length px
  'chui':(keyed(ws.crop((790,96,1028,188))),(62,45),80,238),
  'spear':(keyed(w2.crop((392,1075,1056,1139))),(250,32),220,664),
  'guandao':(keyed(w2.crop((388,1180,1060,1274))),(240,60),224,672),
- 'ji':(keyed(Image.open(_B+'/原始素材/长戟_用户.png')),(388,38),236,1030),   # 11/17 长戟：用户出的兵器图，握点按长枪比例
+ 'ji':(keyed(Image.open(_B+'/原始素材/长戟_用户.png')),(388,38),236,1030),
+ 'nu0':(keyed(Image.open(_B+'/原始素材/弩_上弦_用户.png')),(245,52),137,656),   # 11/18 弩（用户出图）：握在扳机附近，长约长枪的六成
+ 'nu1':(keyed(Image.open(_B+'/原始素材/弩_空弦_用户.png')),(245,52),137,656),   # 11/17 长戟：用户出的兵器图，握点按长枪比例
 }
 def fat(src,grip,L,L0,k=1.4,br=1.15):
     p,m=src;p=p.copy();p[m==0]=(34,24,28);h,w=m.shape;nh=int(h*k)
