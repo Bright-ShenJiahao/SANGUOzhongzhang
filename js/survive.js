@@ -2927,9 +2927,9 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   // [起手, 出手, 第二击]；刀没有专门的刺帧，借横斩
   // 11/12 新图集：每种兵器 20 帧，统一命名 前缀 + idle/walk1-3/roll1-4/hurt/down/chop1-2/sweep1-2/thrust1-2/spin1-2/up1-2
   const FRM0 = p => ({ chop: [p + 'chop1', p + 'chop2', p + 'chop2'], sweep: [p + 'sweep1', p + 'sweep2', p + 'sweep1'], thrust: [p + 'thrust1', p + 'thrust2', p + 'thrust1'], spin: [p + 'spin1', p + 'spin2', p + 'spin2'], up: [p + 'up1', p + 'up2', p + 'chop2'] });
-  const FRM = { wd_: FRM0('wd_'), qiang_: FRM0('qiang_'), bow_: FRM0('bow_'), stone_: FRM0('stone_'), fan_: FRM0('fan_'), huangfu_: FRM0('huangfu_'), quan_: FRM0('quan_'), guandao_: FRM0('guandao_'), jian_: FRM0('jian_'), chui_: FRM0('chui_'), ji_: FRM0('ji_') };
+  const FRM = { wd_: FRM0('wd_'), qiang_: FRM0('qiang_'), bow_: FRM0('bow_'), stone_: FRM0('stone_'), fan_: FRM0('fan_'), huangfu_: FRM0('huangfu_'), quan_: FRM0('quan_'), guandao_: FRM0('guandao_'), jian_: FRM0('jian_'), chui_: FRM0('chui_'), ji_: FRM0('ji_'), mao_: FRM0('mao_') };
   Object.assign(MOT, MOTX);
-  const HELDP = { 0: 'wd_', 1: 'jian_', 2: 'chui_', 3: 'qiang_', 4: 'guandao_', 5: 'bow_', 6: 'qiang_', 7: 'stone_', 8: 'huangfu_', 9: 'fan_', 10: 'quan_', 11: 'quan_', 12: 'ji_' };   // 书生开局拿黄符
+  const HELDP = { 0: 'wd_', 1: 'jian_', 2: 'chui_', 3: 'qiang_', 4: 'guandao_', 5: 'bow_', 6: 'mao_', 7: 'stone_', 8: 'huangfu_', 9: 'fan_', 10: 'quan_', 11: 'quan_', 12: 'ji_' };   // 书生开局拿黄符
   // 11/13 用户定：开局在出身的两种本门兵器里挑一种，主角手里一直拿它，起手武艺也跟着换
   let startW = null; const heldW = () => startW != null && (OG().weps || []).includes(startW) ? startW : OG().wep;
   const START_SK = { 0: 'hengsao', 2: 'zhendi', 3: 'qiang', 4: 'hengti', 7: 'feishi', 5: 'qishe', 8: 'huofu', 9: 'shanfeng', 1: 'jlianci', 10: 'chongquan', 11: 'chuanxin', 12: 'jici', 6: 'pofeng' };
@@ -3297,7 +3297,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     hupi: { image: 'art/ui/bao/hupi.webp', n: '虎皮护手', q: 1, w: 10, wd: 0, d: '拳挂的眩晕多 0.2 秒；收尾一击伤害 +30%' },
     shisuo: { image: 'art/ui/bao/shisuo.webp', n: '石锁', q: 1, w: 10, wd: 0, d: '劲只要 7 点就能爆劲（原来 10 点）' },
     elai: { image: 'art/ui/bao/elai.webp', n: '恶来铁腕', q: 2, w: 10, wd: .3, d: '拳武艺伤害 +30%；爆劲时向四周再震一圈（半径 80），圈里的人全部眩晕', c: '拳以外的武艺伤害 −30%' },
-    zhubingchan: { n: '竹柄鋋', q: 0, w: 6, wd: 0, d: '投矛武艺起手、收势 ×0.9' },   // 11/17 用户定：投矛 5 件宝物（图还没出）
+    zhubingchan: { n: '竹柄鋋', q: 0, w: 6, wd: 0, d: '投矛武艺起手、收势 ×0.9' },   // 11/17 用户定：投矛 5 件宝物
     tiebamao: { n: '铁把短矛', q: 0, w: 6, wd: .12, d: '投矛武艺伤害 +12%' },
     lingren: { n: '菱刃矛', q: 1, w: 6, wd: 0, d: '捡矛的范围 +50%' },
     sanleng: { n: '三棱鋋', q: 1, w: 6, wd: 0, d: '「拾矛」每层 +20%（原来 15%）' },
@@ -4539,7 +4539,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   const tex = (k, x, y, w, h) => { if (w <= 0) return false; const im = HIMG['h2_' + k]; if (!hok('h2_' + k)) return false; const sw = Math.min(im.naturalWidth, im.naturalWidth * w / (h * im.naturalWidth / im.naturalHeight)); ctx.drawImage(im, 0, 0, Math.max(1, sw), im.naturalHeight, x, y, w, h); return true; };   // 纹理条按高度缩放、从左往右截取，不拉花
   ['tuna','yangqi','tieyi','tayun','guanxing','taiping','hunyuan','gf00','gf01','gf02','gf03','gf30','gf31','gf32','gf33','qingshen','juqi','shixue','beishui','lhj','caoshang','xingyun','taxue','tiesha','yufeng'].forEach(id => himg('gf_' + id, 'art/ui/gf/' + id + '.webp'));
   const IMGU = { daolun: 'art/ui/kaiju/sk_daolun.webp' };
-  'hengsao tuodao tiaozhan daobo lianzhan huima cuofeng feilunren liedihuan xuehe tianbeng wanren hengti pidao xiongshou xuanfengd daoqi handi zhanjiang guowu yanyue tuodaoji shuiyan qinglong shanfeng liuying huifeng longjuan mihun shuangxue lianying bazhen huoyu chibi dongfeng qimen huofu feifu dingshen zhangxin wulei yaoshu huangtian tianlei fuhuo sadou jiutian sanmei jlianci zhantie jianqi liefeng feijian sixiang jinghong jianzhen xinjian jianlun yujian tianjian chongquan saotui shanggou xuanfengtui tieshan dahe huxiao lianhuan jingang qluanwu baji fengjuan qiang lansao lianci tiaoqiang lihua chong huimaq touqiang qianglin qijin bainiao longyin jici hengzhuo huaji goulian fengci paoji tiaozhen yuezhan huguan touyu yuanmenji fangtian chuanxin qiufeng dengtian jiandao dielang lingkong panlong juanyun feihong zhuishi lingyun wanying'.split(' ').forEach(k => { IMGU[k] = 'art/ui/skill/' + k + '.webp'; himg(k, IMGU[k]); });   // 11/14 用户的刀 12 招图标（每招一把不同的中国刀 + 招式特效）
+  'hengsao tuodao tiaozhan daobo lianzhan huima cuofeng feilunren liedihuan xuehe tianbeng wanren hengti pidao xiongshou xuanfengd daoqi handi zhanjiang guowu yanyue tuodaoji shuiyan qinglong shanfeng liuying huifeng longjuan mihun shuangxue lianying bazhen huoyu chibi dongfeng qimen huofu feifu dingshen zhangxin wulei yaoshu huangtian tianlei fuhuo sadou jiutian sanmei jlianci zhantie jianqi liefeng feijian sixiang jinghong jianzhen xinjian jianlun yujian tianjian chongquan saotui shanggou xuanfengtui tieshan dahe huxiao lianhuan jingang qluanwu baji fengjuan qiang lansao lianci tiaoqiang lihua chong huimaq touqiang qianglin qijin bainiao longyin jici hengzhuo huaji goulian fengci paoji tiaozhen yuezhan huguan touyu yuanmenji fangtian chuanxin qiufeng dengtian jiandao dielang lingkong panlong juanyun feihong zhuishi lingyun wanying pofeng yanwei huimab lianzhumao luoxing lujiao guanyun xingchen baichuan hanyue dinghai qianjun'.split(' ').forEach(k => { IMGU[k] = 'art/ui/skill/' + k + '.webp'; himg(k, IMGU[k]); });   // 11/14 用户的刀 12 招图标（每招一把不同的中国刀 + 招式特效）
   Object.assign(IMGU, {
     feishi: 'art/ui/skill/feishi.webp',
     sashi: 'art/ui/skill/sashi.webp',

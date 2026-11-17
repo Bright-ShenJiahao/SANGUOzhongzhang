@@ -195,13 +195,14 @@ WEP={ # src, grip(src px), final length px, src length px
  'spear':(keyed(w2.crop((392,1075,1056,1139))),(250,32),220,664),
  'guandao':(keyed(w2.crop((388,1180,1060,1274))),(240,60),224,672),
  'ji':(keyed(Image.open(_B+'/原始素材/长戟_用户.png')),(388,38),236,1030),   # 11/17 长戟：用户出的兵器图，握点按长枪比例
+ 'mao':(keyed(Image.open(_B+'/原始素材/投矛_用户.png')),(150,22),150,341),   # 11/17 投矛：短矛，长度约长枪的 2/3
 }
 def fat(src,grip,L,L0,k=1.4,br=1.15):
     p,m=src;p=p.copy();p[m==0]=(34,24,28);h,w=m.shape;nh=int(h*k)
     P=np.asarray(Image.fromarray(p.astype(np.uint8)).resize((w,nh),Image.BICUBIC)).astype(float)
     M=np.asarray(Image.fromarray((m*255).astype(np.uint8)).resize((w,nh),Image.BICUBIC)).astype(float)/255
     return ((np.clip(P*br+12,0,255),(M>0.5).astype(float)),(grip[0],grip[1]*k),L,L0)
-for _k in('spear','guandao','ji'):WEP[_k]=fat(*WEP[_k],k=1.9 if _k=='ji' else 1.4)
+for _k in('spear','guandao','ji','mao'):WEP[_k]=fat(*WEP[_k],k=1.9 if _k=='ji' else 1.4)
 def _clean():
     (p,m),g,L,L0=WEP['dao'];m=m.copy()
     red=(p[...,0]>120)&(p[...,1]<80)&(p[...,2]<100)
@@ -232,7 +233,7 @@ def compose(key,wname):
     out=base.copy()
     if info and wname:
         d=info['d'];th=math.degrees(math.atan2(d[1],d[0]))
-        two=wname in('spear','guandao','ji')
+        two=wname in('spear','guandao','ji','mao')
         if two:
             g=info['gaps'];tg=(g[0]+g[-1])/2 if len(g)>=2 else (info['tmin']+info['tmax'])/2
         else:
