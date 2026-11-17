@@ -3146,7 +3146,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
         const l0 = lvOf(key); S.mast[key] = (S.mast[key] || 0) + AFX.xp(); if (lvOf(key) > l0) note(`<i class="sk">${k.name}</i> 熟练度提升至 <b>${lvOf(key)}</b> 级`);
         if (!k.dk && lvOf(key) >= 10) later(.2, () => { CM *= .6; k.cast(); });   // LV10 质变：多出一击
         CM = 1; RM = 1; CK = '';
-        S.recov = { t: 0, dur: Math.max(k.stone || k.hammer || k.bow ? channel || 0 : 0, (k.dk ? Math.max(.08, k.rc - DLV.rc[lvOf(key) - 1]) * spOf(key) : k.rc) * CDM()), pose: k.pose[1], late: k.poseL }; S.wind = null; if (k.dk && !k.stone && !k.hammer && !k.bow) { const a = aim(), dx = Math.cos(a) * 7, dy = Math.sin(a) * 3; hero.x += dx; hero.y = clampY(hero.y + dy); daoSlash(key); }   // 11/14：刀招出手往前踏半步
+        S.recov = { t: 0, dur: Math.max(k.stone || k.hammer || k.bow ? channel || 0 : 0, (k.dk ? Math.max(.08, k.rc - DLV.rc[lvOf(key) - 1]) * spOf(key) : k.rc) * CDM()), pose: k.pose[1], late: k.poseL }; S.wind = null; if (k.dk && !k.stone && !k.hammer && !k.bow) { if (aOpt(key).mv) { const a = aim(), dx = Math.cos(a) * 7, dy = Math.sin(a) * 3; hero.x += dx; hero.y = clampY(hero.y + dy); } daoSlash(key); }   // 11/14：刀招出手往前踏半步；11/18 用户：这一步也归「位移」，默认不踏
         S.qi = (S.qi + 1) % 5; if (S.qi === 0) S.cycles++;
       }
       return;
