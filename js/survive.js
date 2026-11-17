@@ -4484,6 +4484,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   let banHold = false, talkHold = false, talkIn = null;   // 11/14：首领台词期间冻结战斗
   setInterval(() => { if (!talkIn || !RT.on || banHold || document.getElementById('waveBan') || (window.ROUTE && ROUTE.shown())) return; const t = talkIn; talkIn = null; if (window.STORY && STORY.boss(t, 0, () => { talkHold = false; })) talkHold = true; }, 150);
   function waveBanner(title, sub) {
+    if (RT.node && RT.node.trial) return;   // 演武场不弹关卡横幅
     const old = document.getElementById('waveBan'); if (old) old.remove();
     const d = document.createElement('div'); d.id = 'waveBan';
     d.innerHTML = '<div class="wb"><div class="jz"><div class="tx"><div class="t">' + title + '</div><div class="s">' + sub + '</div></div><b class="yin"></b></div></div><div class="hn">点击战斗</div>';
@@ -4570,7 +4571,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       ctx.textAlign = 'right'; const pc = Math.floor(r * 100) + '%'; ctx.strokeText(pc, bx + bw - 6, by + bh / 2 + .5); ctx.fillText(pc, bx + bw - 6, by + bh / 2 + .5);
       if (S.bank > 0) { ctx.textAlign = 'left'; ctx.fillStyle = '#ffd86e'; const t = '待修炼 ×' + S.bank; ctx.strokeText(t, bx + bw + (fine ? 10 : 10), by + bh / 2 + .5); ctx.fillText(t, bx + bw + 10, by + bh / 2 + .5); }
       // 倒计时（11/11 用户：这关没有倒计时）：沙漏 + 分:秒。电脑放修为条正下方，手机放修为条左边（下面是武艺格）
-      if (W.started && !W.pick) {
+      if (W.started && !W.pick && !(RT.node && RT.node.trial)) {   // 11/18 演武场不显示倒计时
         const left = Math.max(0, Math.ceil(WT() - W.t)), tt = String(left / 60 | 0).padStart(2, '0') + ':' + String(left % 60).padStart(2, '0'), urg = left <= 10;
         const fs = fine ? 18 : 13, tx = fine ? HW / 2 : bx - (fine ? 0 : 44), ty = fine ? by + bh + 15 : by + bh / 2 + .5, ih = fs + 6;
         ctx.font = '900 ' + fs + 'px "Arial Black",Impact,sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; const tw = ctx.measureText(tt).width, x0 = tx - (tw + ih + 4) / 2;
@@ -4621,7 +4622,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     ctx.font = 'bold 14px "PingFang SC",sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#ffe9a0';
     const left = Math.max(0, Math.ceil(WT() - W.t));
     ctx.textBaseline = 'alphabetic';
-    if (RT.on && !RT.node) { ctx.restore(); return; }   // 路线图还没选节点：不画波次文字
+    if (RT.on && (!RT.node || RT.node.trial)) { ctx.restore(); return; }   // 路线图还没选节点、演武场：不画波次文字
     ctx.fillText(W.retreat > 0 || W.between > 0 ? (RT.on ? '鸣金收兵' : `第 ${W.n}/${WAVES} 波 · 鸣金收兵`) : (RT.on ? ROUTE.name(RT.node) + (bossCount() ? ' · 敌将' : '') : `第 ${W.n}/${WAVES} 波 · 还剩 ${left} 秒${bossCount() ? ' · 敌将' : ''}`), HW / 2, labY);
     ctx.restore();
   }
