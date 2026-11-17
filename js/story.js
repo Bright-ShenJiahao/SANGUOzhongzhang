@@ -56,7 +56,7 @@
     const bgs = box.querySelectorAll('.bg'), pt = box.querySelector('.pt'), nm = box.querySelector('.nm'), tx = box.querySelector('.tx');
     st = { i: -1, lines, done, typing: 0, full: '', bgi: 0, bg: '' };
     for (const L of lines) { const u = L.who && POR[L.who]; if (u) { const im = new Image(); im.src = u; } if (L.bg) { const im = new Image(); im.src = L.bg; } }   // 一开始就把这段剧情要用的立绘、背景都预载
-    const finish = () => { if (!st) return; clearInterval(st.typing); holdEnd(); const d = st.done; st = null; removeEventListener('keydown', kd, true); removeEventListener('keyup', ku, true); removeEventListener('pointerdown', pd, true); box.style.transition = 'opacity .12s'; box.style.opacity = '0'; box.style.pointerEvents = 'none'; const b = box; setTimeout(() => { b.remove(); document.querySelectorAll('#szzStory').forEach(x => x.remove()); }, 130); /* 11/16 用户：最后一句到三赠有卡顿感，淡出缩到 0.12 秒 */ box = null; if (d) { try { d(); } catch (e) { console.error('story done', e); } } };   // 11/16 用户：最后一句不消失——收尾时把所有剧情层都清掉，回调出错也不卡
+    const finish = () => { if (!st) return; const eat = e => { e.stopPropagation(); e.preventDefault(); }; addEventListener('click', eat, true); setTimeout(() => removeEventListener('click', eat, true), 350);   /* 11/17：点完最后一句的那一下 click 不要落到后面弹出的桃园三赠上 */ clearInterval(st.typing); holdEnd(); const d = st.done; st = null; removeEventListener('keydown', kd, true); removeEventListener('keyup', ku, true); removeEventListener('pointerdown', pd, true); box.style.transition = 'opacity .12s'; box.style.opacity = '0'; box.style.pointerEvents = 'none'; const b = box; setTimeout(() => { b.remove(); document.querySelectorAll('#szzStory').forEach(x => x.remove()); }, 130); /* 11/16 用户：最后一句到三赠有卡顿感，淡出缩到 0.12 秒 */ box = null; if (d) { try { d(); } catch (e) { console.error('story done', e); } } };   // 11/16 用户：最后一句不消失——收尾时把所有剧情层都清掉，回调出错也不卡
     const show = () => {
       st.i++; if (st.i >= st.lines.length) return finish();
       const L = st.lines[st.i];
@@ -76,7 +76,7 @@
     const next = () => { if (!st) return; if (st.typing) { clearInterval(st.typing); st.typing = 0; tx.innerHTML = st.full; return; } show(); };
     // 11/15 用户：最后一句常点不下去——改成在 window 捕获阶段收 pointerdown（游戏自己的触摸/鼠标处理会吞掉 click），点到剧情框里任何地方都算
     let lastP = 0;
-    const pd = e => { if (!st || !box || !box.contains(e.target)) return; e.preventDefault(); e.stopPropagation(); const now = performance.now(); if (now - lastP < 120) return; lastP = now;
+    const pd = e => { if (!st || !box) return; if (!box.contains(e.target) && e.target.closest && e.target.closest('#dbg')) return;   /* 11/17 用户：最后一句一下下点又卡住——剧情是全屏的，点到哪里都算（之前只认剧情框里的元素，被别的层盖住就点不动） */ e.preventDefault(); e.stopPropagation(); const now = performance.now(); if (now - lastP < 120) return; lastP = now;
       if (e.target.closest('.s')) return finish();
       if (e.target.closest('.n')) { if (st.typing) { clearInterval(st.typing); st.typing = 0; } return show(); }
       next(); holdStart(); };

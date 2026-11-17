@@ -3162,7 +3162,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   function onRoll() {
     S.stoneRoll = (S.stoneRoll || 0) + 1;
     hero.rollCd *= GM.dcd;
-    if (HAS('jili') && RT.on && W.started) { (S.jili = S.jili || []).push({ x: hero.x, y: hero.y, t: 3, hs: new Set() }); fx.push({ k: 'mark', x: hero.x, y: hero.y, r: 13, t: 0, T: 3 }); }
+    if (HAS('jili') && RT.on && W.started) { (S.jili = S.jili || []).push({ x: hero.x, y: hero.y, t: 3, hs: new Set() }); fx.push({ k: 'jili', x: hero.x, y: hero.y, t: 0, T: 3, sd: Math.random() * 99 }); }   // 11/17 用户：原来借了箭雨的 mark 特效，空中飘着三条白线；改成地上撒的一小撮蒺藜
     if (S.qg === 'tiesha') for (const z of near(hero.x, hero.y, 64)) hit(z, .3 * RT.dmg, 110, Math.sign(z.x - hero.x) || hero.f, true, 0, .5, false, false, { secondary: true, survSkill: true });
     if (OG().roll) hero.rollCd *= OG().roll;   // 翻滚：前摇中 = 这一招作废、跳到下一招；后摇中 = 直接取消后摇
     if (S.wind) { S.skip[S.wind.i] = .35; S.wind = null; S.qi = (S.qi + 1) % 5; if (S.qi === 0) S.cycles++; S.qt = 0; S.brk = S.brk || [0, 0, 0, 0, 0]; S.brk[(S.qi + 4) % 5] = .45; }   // 11/14 用户：不再冒「打断」字，改成出招顺序那格灰一下、抖一下
@@ -4370,6 +4370,9 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
         ctx.restore(); continue;
       }
       if (e.k === 'burst') { ctx.save(); ctx.translate(e.x, e.y); ctx.scale(1, .5); const r = e.r * (.4 + .6 * Math.min(1, p * 2)); ctx.fillStyle = `rgba(${e.col},${.28 * (1 - p)})`; ctx.beginPath(); ctx.arc(0, 0, r, 0, 7); ctx.fill(); ctx.strokeStyle = `rgba(255,250,230,${.9 * (1 - p)})`; ctx.lineWidth = 4 * (1 - p) + 1; ctx.stroke(); ctx.restore(); }
+      else if (e.k === 'jili') { const al = Math.min(1, (e.T - e.t) / .4, e.t / .15); ctx.save(); ctx.globalAlpha = al; for (let i = 0; i < 6; i++) { const g = e.sd + i * 2.399, r = 4 + (i * 37 % 11), x = e.x + Math.cos(g) * r, y = e.y + Math.sin(g) * r * .5, b = g * 1.7;
+          ctx.strokeStyle = 'rgba(20,16,12,.9)'; ctx.lineWidth = 3; ctx.beginPath(); for (let j = 0; j < 3; j++) { const c = b + j * 2.094; ctx.moveTo(x, y); ctx.lineTo(x + Math.cos(c) * 4, y + Math.sin(c) * 2.4); } ctx.moveTo(x, y); ctx.lineTo(x, y - 4); ctx.stroke();
+          ctx.strokeStyle = 'rgba(200,205,210,.95)'; ctx.lineWidth = 1.2; ctx.stroke(); } ctx.restore(); }
       else if (e.k === 'mark') { ctx.save(); ctx.translate(e.x, e.y); ctx.scale(1, .5); ctx.strokeStyle = `rgba(255,90,60,${.3 + .4 * p})`; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.arc(0, 0, e.r, 0, 7); ctx.stroke(); ctx.restore(); ctx.strokeStyle = 'rgba(233,220,176,.9)'; ctx.lineWidth = 2; for (let i = 0; i < 4; i++) { const ox = (i - 1.5) * e.r * .4, yy = e.y * 1 - (1 - p) * 120; ctx.beginPath(); ctx.moveTo(e.x + ox, yy - 20); ctx.lineTo(e.x + ox, yy); ctx.stroke(); } }
       else if (e.k === 'bolt') { ctx.save(); ctx.strokeStyle = `rgba(235,240,255,${1 - p})`; ctx.lineWidth = 4 * (1 - p) + 1; ctx.beginPath(); let x = e.x, y = e.y - 170; ctx.moveTo(x, y); for (let i = 0; i < 6; i++) { x = e.x + R(-10, 10) * (i < 5); y += (e.y - (e.y - 170)) / 6; ctx.lineTo(x, y); } ctx.stroke(); ctx.restore(); }
       else if (e.k === 'img') { const im = DGI[e.n]; if (im.complete && im.naturalWidth) { const q = Math.min(1, p); ctx.save(); ctx.globalCompositeOperation = 'screen';
@@ -4385,7 +4388,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       else if (e.k === 'line') { ctx.save(); ctx.translate(e.x, e.y - 14); ctx.scale(1, .5); ctx.rotate(e.a); const k = Math.min(1, p * 4); ctx.lineCap = 'round'; ctx.strokeStyle = `rgba(${e.col},${.55 * (1 - p)})`; ctx.lineWidth = e.w * 1.6 * (1 - p) + 4; ctx.beginPath(); ctx.moveTo(10, 0); ctx.lineTo(10 + e.L * k, 0); ctx.stroke(); ctx.strokeStyle = `rgba(255,255,255,${.95 * (1 - p)})`; ctx.lineWidth = 3; ctx.stroke(); ctx.restore(); }
     }
     for (const e of fx) {
-      if (e.k === 'bowFall' || e.k === 'hammerArc' || e.k === 'hammerRing' || e.k === 'stonefield' || e.k === 'stonefall' || e.k === 'burst' || e.k === 'mark' || e.k === 'bolt' || e.k === 'line' || e.k === 'drop' || e.k === 'cut' || e.k === 'dg' || e.k === 'img' || e.k === 'fjg') continue;
+      if (e.k === 'bowFall' || e.k === 'hammerArc' || e.k === 'hammerRing' || e.k === 'stonefield' || e.k === 'stonefall' || e.k === 'burst' || e.k === 'mark' || e.k === 'jili' || e.k === 'bolt' || e.k === 'line' || e.k === 'drop' || e.k === 'cut' || e.k === 'dg' || e.k === 'img' || e.k === 'fjg') continue;
       if (e.k === 'gd') { gdDraw(e); continue; }
       if (e.k === 'ghost') {   // 残影：半透明主角，带一道拖尾
         const q = Math.min(1, e.t / e.mt), x = e.x0 + (e.x1 - e.x0) * q, y = e.y0 + (e.y1 - e.y0) * q, al = .6 * (1 - Math.max(0, (e.t - e.mt) / (e.T - e.mt)));
@@ -4895,7 +4898,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   S10('qluanwu', '崩星裂地', '再错开半格裂出第二颗星（0.8 倍，收尾）', () => L10T(.35, () => { for (let i = 0; i < 8; i++) L10line(HX(), HY(), A10() + i * Math.PI / 4 + Math.PI / 8, FS(180), FS(14), Hqn, .8, { fin: 1, st: .3 }); }));
   S10('baji', '力拔山兮', '再砸一次（全屏，1.2 倍，收尾，必定爆劲）', () => L10T(.9, () => { shake = Math.max(shake, .5); fx.push({ k: 'ring', x: HX(), y: HY(), t: 0, T: .7, r: 420 }); for (const z of near(HX(), HY(), 420)) Hqn(z, 1.2, { fin: 1, st: .6, boom: 1 }); }));
   S10('fengjuan', '五禽归一', '五禽合一，最后再爆出五兽光影（半径 150，2.0 倍，收尾，必定爆劲）', () => L10T(5.6, () => { shake = Math.max(shake, .4); L10boom(HX(), HY(), FS(150), Hqn, 2.0, { fin: 1, boom: 1 }); }));
-  const TRIAL = { slot(i, k) { S.slots[i] = k; }, lvSet(k, l) { (S.lvLock = S.lvLock || {})[k] = l; }, SK, GF, MOT, WEPN, TIERN, wepOf, IMGU, spdTxt, spawn: t => edgeSpawn(t), count: t => zs.filter(z => !z.dead && z.type === t).length, long() { W.tot = 9999; if (W.t > W.tot - 5) W.t = 0; },
+  const TRIAL = { slot(i, k) { S.slots[i] = k; }, bao(k) { gainBao(k); }, lvSet(k, l) { (S.lvLock = S.lvLock || {})[k] = l; }, SK, GF, MOT, WEPN, TIERN, wepOf, IMGU, spdTxt, spawn: t => edgeSpawn(t), count: t => zs.filter(z => !z.dead && z.type === t).length, long() { W.tot = 9999; if (W.t > W.tot - 5) W.t = 0; },
     setGf(ids) { S.gf = ['', '', '']; ids.slice(0, 3).forEach((id, i) => { S.gf[i] = id; }); GM = gfCalc(); }, setQg(id) { S.qg = id || ''; GM = gfCalc(); }, gf: () => S.gf.slice(), qg: () => S.qg, mul: k => skillMul(k), lv: k => lvOf(k), spd: k => spdTxt(SK[k]), rs: k => SK[k] && SK[k].dk ? rsOf(k) : null, setRs(k, v) { DRS[k] = v; try { localStorage.setItem('szz-dao-rs', JSON.stringify(DRS)); } catch (e) {} },
     sp: k => spOf(k), setSp(k, v) { DSP[k] = v; try { localStorage.setItem('szz-dao-sp', JSON.stringify(DSP)); } catch (e) {} }, spAll(v) { Object.keys(SK).forEach(k => { if (SK[k].dk) DSP[k] = v; }); try { localStorage.setItem('szz-dao-sp', JSON.stringify(DSP)); } catch (e) {} },
     FRN: ['idle', 'walk1', 'walk2', 'walk3', 'roll1', 'roll2', 'roll3', 'roll4', 'hurt', 'down', 'chop1', 'chop2', 'sweep1', 'sweep2', 'thrust1', 'thrust2', 'spin1', 'spin2', 'up1', 'up2'],
