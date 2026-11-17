@@ -5018,7 +5018,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
 #survEnd .bd0{position:relative;flex:none}
 #survEnd .bd0 .badge{width:calc(104px*var(--k))}
 #survEnd .bd0 .badge b{font-size:calc(28px*var(--kt))}
-#survEnd .bd0 .gd0{z-index:2;position:absolute;right:calc(-10px*var(--k));bottom:calc(-4px*var(--k));width:calc(42px*var(--k));height:calc(42px*var(--k));background:center/contain no-repeat;transform:rotate(-10deg);pointer-events:none}
+#survEnd .bd0 .gd0{z-index:2;position:absolute;right:calc(-14px*var(--k));bottom:calc(2px*var(--k));width:calc(46px*var(--k));height:calc(46px*var(--k));background:#1c120a center/74% no-repeat;border:2px solid #d4a55a;border-radius:50%;box-shadow:0 0 0 2px #000,0 3px 8px rgba(0,0,0,.7);filter:brightness(1.3);transform:rotate(-10deg);pointer-events:none}
 #survEnd .box0{border:calc(26px*var(--k)) solid transparent;border-image:url(art/ui/kaiju2/panel.webp) 100 fill stretch;padding:0 calc(8px*var(--k))}
 #survEnd .g2{display:grid;grid-template-columns:1fr 1fr;column-gap:calc(26px*var(--k))}
 #survEnd .kv0{display:flex;justify-content:space-between;align-items:baseline;padding:calc(7px*var(--k)) 0;border-bottom:1px dashed rgba(201,164,92,.32);font-size:calc(17px*var(--kt))}
