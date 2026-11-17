@@ -165,6 +165,7 @@
   window.ARENA = {
     available: () => ON_URL && typeof BG !== 'undefined' && !!(BG.arena || BG.field || BG.town || BG.altar),
     map: () => MSEL,
+    shows: k => MSEL === k && ready() && typeof IMG !== 'undefined' && IMG.arena === IMG['map_' + k],   // 11/18：这张图已经真的画上了（试炼进场等它，免得先闪一下别的地图）
     pick, pool: POOL, want,
     preload(seg) { const segs = Object.keys(POOL), i = segs.indexOf(seg); [seg, segs[i + 1]].forEach(s2 => (POOL[s2] || []).filter(hasMap).forEach(want)); },
     on: () => active && ready(),

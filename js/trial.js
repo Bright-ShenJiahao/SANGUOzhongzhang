@@ -73,6 +73,7 @@
   const wait = (f, ms = 6000) => new Promise(res => { const t0 = Date.now(); const k = () => { const v = f(); if (v) res(v); else if (Date.now() - t0 > ms) res(null); else setTimeout(k, 120); }; k(); });
   async function enterFight() {   // 11/18 用户：武学试炼专门一张演武场——先回主界面，再走「出征 → 开局」，开局后直接进演武场（不过路线图）
     window.TRIAL_ARENA = true;
+    try { if (window.ARENA && ARENA.want) ARENA.want('camp'); } catch (e) {}   // 先把演武场的图载上
     if (window.TITLE && TITLE.mode && TITLE.mode() === 'game') { if (TITLE.show) TITLE.show(); await new Promise(r => setTimeout(r, 300)); }
     const nm = document.getElementById('tName'); if (nm && !nm.value) nm.value = '试炼';
     if (window.RUNSAVE) RUNSAVE.has = () => false;
@@ -81,7 +82,9 @@
     const ask = await wait(() => document.getElementById('tNameAsk'), 2500);
     if (ask) { const ip = ask.querySelector('input'); if (ip && !ip.value) ip.value = '试炼'; const y = ask.querySelector('.yes'); if (y) y.click(); }
     const go = await wait(() => { const b = document.querySelector('#kaiju .bot .go'); return vis(b) && b; }); if (go) go.click();
-    return !!(await wait(() => SURV.curNode && SURV.curNode()));
+    const ok = !!(await wait(() => SURV.curNode && SURV.curNode()));
+    await wait(() => !window.ARENA || !ARENA.shows || ARENA.shows('camp'), 8000);   // 11/18 用户：进试炼还会先闪一下别的地图——等营地图真的画上再撤黑幕
+    return ok;
   }
   async function open() {
     window.TRIAL_ON = true;
