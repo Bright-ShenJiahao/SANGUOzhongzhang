@@ -4928,11 +4928,12 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     const lost = (z.maxHp || 9999) - z.hp; if (lost > 0) { DUM.tot += lost; DUM.log.push([performance.now(), lost]); DUM.hitAt.set(z, performance.now());
       if (DUM.brk && (z.dhp = (z.dhp == null ? DUM.HP : z.dhp) - lost) <= 0) { z.brokeT = 2; z.hidden = true; DUM.broke = (DUM.broke || 0) + 1; floaters.push({ x: z.x, y: z.y - 50, t: 0, txt: '碎！', color: '#ffcf70' }); sfx(CR, z.x); for (let i = 0; i < 7; i++) fx.push({ k: 'burst', x: z.x + R(-10, 10), y: z.y - R(0, 30), r: 8, t: 0, T: .35, col: '160,110,60' }); } }
     z.hp = z.maxHp = 9999; z.dead = 0; z.air = false; z.z = 0; z.vz = 0; z.vx = 0; z.stun = 0; z.daze = 0; z.moving = false; if (z.st !== 'idle') { z.st = 'idle'; z.t = 0; }
-    const k = Math.min(1, dt * 4); z.x += (z.ax - z.x) * k; z.y += (z.ay - z.y) * k; z.f = z.ax < hero.x ? 1 : -1;
+    z.x = z.ax; z.y = z.ay; z.vx = 0; z.kbV = 0;   // 11/18 用户：木人钉死在原地，击退、拉扯、打飞都不动 z.f = z.ax < hero.x ? 1 : -1;
   }
   function dummyStat0() { const n = performance.now(); DUM.log = DUM.log.filter(e => n - e[0] < 5000); const w = Math.min(5, Math.max(1, (n - DUM.t0) / 1000)); return { on: DUM.on, tot: DUM.tot, dps: DUM.log.reduce((a, e) => a + e[1], 0) / w, n: [...DUM.hitAt.values()].filter(t => n - t < 1200).length, all: zs.filter(z => z.dummy).length }; }
   function dummyStat() { return Object.assign(dummyStat0(), { brk: DUM.brk, broke: DUM.broke || 0, sol: !DUM.noSol }); }
   function drawDummy(z) {   // 代码画的木人桩（等正式美术）
+    if (z.ax != null) { z.x = z.ax; z.y = z.ay; }
     const x = Math.round(z.x), y = Math.round(z.y), hit = DUM.hitAt.get(z), fl = hit && performance.now() - hit < 120;
     if (z.brokeT > 0) { ctx.save(); ctx.fillStyle = '#5e3a1e'; ctx.fillRect(x - 7, y - 3, 14, 3); ctx.fillStyle = '#8a5a32'; ctx.fillRect(x - 4, y - 10, 8, 8); ctx.restore(); return; }
     if (DUM.brk) { const f = Math.max(0, (z.dhp == null ? DUM.HP : z.dhp) / DUM.HP); ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.fillRect(x - 12, y - 52, 24, 3); ctx.fillStyle = '#e8b25a'; ctx.fillRect(x - 12, y - 52, 24 * f, 3); }
