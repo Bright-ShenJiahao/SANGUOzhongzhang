@@ -3387,7 +3387,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     else if (k === 'e_heal5') { heal(maxHp() * .05); done(); }
     else done();
   }
-  function nodeClear() {   // 一个节点打完：敌人站定淡出 → 左下战报 → 整备屏（结算/拾取/修炼/行商/武艺）→ 回长卷
+  function nodeClear() { if (window.TITLE && TITLE.blocks && TITLE.blocks()) return;   // 11/18：已经回了主界面就不再弹整备屏   // 一个节点打完：敌人站定淡出 → 左下战报 → 整备屏（结算/拾取/修炼/行商/武艺）→ 回长卷
     const nd = RT.node; W.started = false; eshots.length = 0; TELE.length = 0;
     for (const z of zs) if (!z.dead) { z.endFade = .9; z.st = 'idle'; z.t = 0; z.enemySkill = null; z.air = false; z.stun = 0; z.daze = 0; }
     setTimeout(() => { zs.length = 0; }, 950);
@@ -4094,7 +4094,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   const TUT_PG = { prep: 'jie', loot: 'shi', xiu: 'xiu', shop: 'shang', wu: 'wu' };   // 11/16 用户：指引跟着当前页走，换了页，上一页没讲完的就不讲了
   const tutHi = () => { if (!tutSel) return; const p = document.getElementById('survPrep'); const t = p && p.querySelector(tutSel); if (t) t.classList.add('tuthi'); };
   function tut(k) {
-    if (!RT.on || tutSeen[k] || !TUT[k]) return; try { if (localStorage.getItem('szz-skip-tut') === '1') return; } catch (e) {}   // 11/14 用户：可设置跳过指引
+    if (!RT.on || window.TRIAL_ON || tutSeen[k] || !TUT[k]) return;   // 11/18 用户：武学试炼里不弹新手指引 try { if (localStorage.getItem('szz-skip-tut') === '1') return; } catch (e) {}   // 11/14 用户：可设置跳过指引
     tutSeen[k] = 1; try { localStorage.setItem(TUT_KEY, JSON.stringify(tutSeen)); } catch (e) {}   // 11/16 修：这句以前被写进了注释里，指引会反复弹
     const v = TUT[k], pg = TUT_PG[k] || ''; for (const st of Array.isArray(v[0]) ? v : [v]) tutQ.push(Object.assign(st.slice(), { pg }));
     if (!document.getElementById('survTut')) tutNext();   // 每句记着属于哪一页

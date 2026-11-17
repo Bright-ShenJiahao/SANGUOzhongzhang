@@ -1353,7 +1353,9 @@ function returnFromPausedGame(toHome = false) {
   const run = training && XIAOCHANG.state();
   const chapter = run ? run.chapter : chapter2Run ? 2 : 1;
   const view = training ? 'xiaochang' : 'campaign';
-  if (toHome) { if (window.TITLE && TITLE.show) TITLE.show(); else reset(); return; }
+  if (toHome) {   // 11/18 用户：回主界面时把试炼面板、整备屏、结算、指引对话框一起关掉
+    if (window.TRIAL && TRIAL.close) TRIAL.close(); ['survPrep', 'survEnd', 'survTut'].forEach(id => { const e = document.getElementById(id); if (e) e.remove(); });
+    if (window.TITLE && TITLE.show) TITLE.show(); else reset(); return; }
   reset();
   if (window.ROGUE) ROGUE.reset();
   if (window.TITLE && TITLE.openPreparation) TITLE.openPreparation({ chapter, view });

@@ -81,6 +81,7 @@
   }
   async function open() {
     window.TRIAL_ON = true;
+    { const t0 = document.getElementById('survTut'); if (t0) t0.remove(); }
     if (!document.getElementById('szzTrialCss')) { const s = document.createElement('style'); s.id = 'szzTrialCss'; s.textContent = css; document.head.appendChild(s); }
     if (!box) { box = document.createElement('div'); box.id = 'szzTrial'; document.body.appendChild(box); }
     box.innerHTML = '<div class="hd"><span>武学试炼 · 进场中…</span></div>';
