@@ -2832,7 +2832,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   let startW = null; const heldW = () => startW != null && (OG().weps || []).includes(startW) ? startW : OG().wep;
   const START_SK = { 0: 'hengsao', 2: 'zhendi', 3: 'qiang', 4: 'hengti', 7: 'feishi', 5: 'qishe', 8: 'huofu', 9: 'shanfeng', 1: 'jlianci', 10: 'chongquan', 11: 'chuanxin', 12: 'jici' };
   const startSk = () => START_SK[heldW()] || OG().skill;
-  const heldPre = () => HELDP[heldW()] || 'wd_';
+  const heldPre = () => { const k0 = (S.slots || []).find(k => k && SK[k] && SK[k].dk && HELDP[wepOf(k)]); return HELDP[k0 ? wepOf(k0) : heldW()] || 'wd_'; };   // 11/17 用户：书生拿着扇子出招、站着却拿符——站立/走路的兵器跟第一招武艺走，没有武艺才用出身默认兵器
   const preOf = k => { const p = HELDP[wepOf(k)]; return p && FRM[p] ? p : heldPre(); };   // 11/14 用户：出什么武艺，就用那种兵器的动作图
   const motFr = k => (FRM[preOf(k)] || FRM.wd_)[MOT[k] || 'chop'];
   // 11/14 用户的刀光图（白色发光体，art/ui/fx/）：游戏里按招式主色染色、用叠加发光画；黄/玄共用朴素刀光（玄阶加亮加残影），地/天各有专属图
@@ -5018,7 +5018,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
 #survEnd .bd0{position:relative;flex:none}
 #survEnd .bd0 .badge{width:calc(104px*var(--k))}
 #survEnd .bd0 .badge b{font-size:calc(28px*var(--kt))}
-#survEnd .bd0 .gd0{z-index:2;position:absolute;right:calc(-14px*var(--k));bottom:calc(2px*var(--k));width:calc(46px*var(--k));height:calc(46px*var(--k));background:#1c120a center/74% no-repeat;border:2px solid #d4a55a;border-radius:50%;box-shadow:0 0 0 2px #000,0 3px 8px rgba(0,0,0,.7);filter:brightness(1.3);transform:rotate(-10deg);pointer-events:none}
+#survEnd .bd0 .gd0{z-index:2;position:absolute;right:calc(-14px*var(--k));top:calc(-8px*var(--k));width:calc(46px*var(--k));height:calc(46px*var(--k));background:#1c120a center/74% no-repeat;border:2px solid #d4a55a;border-radius:50%;box-shadow:0 0 0 2px #000,0 3px 8px rgba(0,0,0,.7);filter:brightness(1.3);transform:rotate(-10deg);pointer-events:none}
 #survEnd .box0{border:calc(26px*var(--k)) solid transparent;border-image:url(art/ui/kaiju2/panel.webp) 100 fill stretch;padding:0 calc(8px*var(--k))}
 #survEnd .g2{display:grid;grid-template-columns:1fr 1fr;column-gap:calc(26px*var(--k))}
 #survEnd .kv0{display:flex;justify-content:space-between;align-items:baseline;padding:calc(7px*var(--k)) 0;border-bottom:1px dashed rgba(201,164,92,.32);font-size:calc(17px*var(--kt))}

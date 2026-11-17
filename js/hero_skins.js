@@ -38,11 +38,16 @@
     }
     return o.img.complete && o.img.naturalWidth ? o : null;
   }
+  function any(f) {   // 11/17 用户：开局有时是白衣服——要的帧还没下好时，先用同皮肤已下好的帧顶（同兵器的优先），不再退回旧的白衣图
+    const p = split(f); if (!p) return null; let best = null;
+    for (const k in cache) { const o = cache[k]; if (!k.startsWith(cur + '/') || !(o.img.complete && o.img.naturalWidth)) continue; if (k === cur + '/' + p[0] + '/idle') return o; if (!best || k.startsWith(cur + '/' + p[0] + '/')) best = o; }
+    return best;
+  }
   function preload(skin, prePrefix) {   // 换皮肤/换武器时先把这 20 张拉下来
     const w = PRE[prePrefix] || 'dao'; for (const n of FR) get(Object.keys(PRE).find(k => PRE[k] === w) + n, skin);
   }
   window.HERO_SKIN = {
-    SKINS, list: Object.keys(SKINS), get, preload,
+    SKINS, list: Object.keys(SKINS), get, any, preload, t0: performance.now(),
     cur: () => cur, name: () => SKINS[cur],
     set(s) { if (!SKINS[s]) return; cur = s; try { localStorage.setItem('szz-skin', s); } catch (e) {} preload(s, window.SURV && SURV.heldPre ? SURV.heldPre() : 'wd_'); },
     next() { const L = this.list; this.set(L[(L.indexOf(cur) + 1) % L.length]); return cur; },
