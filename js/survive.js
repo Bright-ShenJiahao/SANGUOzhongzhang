@@ -406,6 +406,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   // ---------- 武艺（代码画） ----------
   const fx = [];
   // 11/18 用户：所有武器的前摇都要有范围提醒、跟招式形状一致 —— 每招真正出手时记下它铺出来的范围（扇形、长条、圈、落点），下次前摇就照这个形状画；打在敌人身上的落点，前摇时吸附到那个位置附近的敌人
+  const PV_OFF = true;
   const PVR = {}, PVM = {}; let PVREC = null;   // PVM：这一招实际打到的最远距离（前摇手动形状的默认大小）
   fx.push = function (...a) { if (PVREC) for (const e of a) try { pvRec(e); } catch (er) { if (!window.__pvE) { window.__pvE = 1; console.error('pvRec', er); } } return Array.prototype.push.apply(this, a); };
   function pvStart(key) { pvEnd(); PVREC = { key, t0: DKT, hx: hero.x, hy: hero.y, a: aim(), sh: [] }; }
@@ -4359,8 +4360,9 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     }
     if (RT.on && S.coins && S.coins.length) coinDraw();
     // 前摇：脚下画出这一招将要覆盖的范围，越接近出手越亮
-    if (window.PV_ALWAYS && !S.wind && S.slots[0] && SK[S.slots[0]]) pvDraw(S.slots[0], 1, hexRgb(SK[S.slots[0]].color));   // 武学试炼「常显提醒」：改形状时一直画着
-    if (S.wind && pvDraw(S.wind.key, Math.min(1, S.wind.t / S.wind.dur), hexRgb(S.wind.k.color))) {}
+    if (PV_OFF) {}   // 11/18 用户：照群侠传，前摇不画范围提醒
+    else if (window.PV_ALWAYS && !S.wind && S.slots[0] && SK[S.slots[0]]) pvDraw(S.slots[0], 1, hexRgb(SK[S.slots[0]].color));   // 武学试炼「常显提醒」：改形状时一直画着
+    if (PV_OFF) {} else if (S.wind && pvDraw(S.wind.key, Math.min(1, S.wind.t / S.wind.dur), hexRgb(S.wind.k.color))) {}
     else if (S.wind && !S.wind.k.none && (S.wind.k.beam || S.wind.k.ring || (S.wind.k.range && S.wind.k.half))) {   // 没记到形状的：按招式填的范围画（刀照旧）
       const k = S.wind.k, po = pvOpt(S.wind.key), p = Math.min(1, S.wind.t / S.wind.dur), a = aim(), q = (k.dk ? rsOf(S.wind.key) * DLV.sz[lvOf(S.wind.key) - 1] : 1) * po.sc, col = pvCol(hexRgb(k.color)), al = Math.min(1, (.25 + .55 * p) * po.al), g = .4 + .6 * p;
       if (k.beam) vGround('v_band', hero.x, hero.y - 6, a, (k.len || 180) * q * p, 34, al * .8, col, 0, .5);
@@ -4499,6 +4501,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
           ctx.strokeStyle = 'rgba(200,205,210,.95)'; ctx.lineWidth = 1.2; ctx.stroke(); } ctx.restore(); }
       else if (e.k === 'mark') { ctx.save(); ctx.translate(e.x, e.y); ctx.scale(1, .5); ctx.strokeStyle = `rgba(255,90,60,${.3 + .4 * p})`; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.arc(0, 0, e.r, 0, 7); ctx.stroke(); ctx.restore(); ctx.strokeStyle = 'rgba(233,220,176,.9)'; ctx.lineWidth = 2; for (let i = 0; i < 4; i++) { const ox = (i - 1.5) * e.r * .4, yy = e.y * 1 - (1 - p) * 120; ctx.beginPath(); ctx.moveTo(e.x + ox, yy - 20); ctx.lineTo(e.x + ox, yy); ctx.stroke(); } }
       else if (e.k === 'bolt') { ctx.save(); ctx.strokeStyle = `rgba(235,240,255,${1 - p})`; ctx.lineWidth = 4 * (1 - p) + 1; ctx.beginPath(); let x = e.x, y = e.y - 170; ctx.moveTo(x, y); for (let i = 0; i < 6; i++) { x = e.x + R(-10, 10) * (i < 5); y += (e.y - (e.y - 170)) / 6; ctx.lineTo(x, y); } ctx.stroke(); ctx.restore(); }
+      else if (e.k === 'img' && e.n === 'fx_aim' && e.warn) {}   // 11/18 用户：预警只给敌人——主角武艺的落点不再画预警圈
       else if (e.k === 'img' && e.n === 'fx_aim' && vOK('v_edge')) { const q = Math.min(1, p), al = e.warn ? .35 + .55 * q : 1 - q, g = e.warn ? 1.15 - .15 * q : 1, w = e.w * .85 * g;   // 11/18 用户：落点预警的粉色准星不好看 → 换成金色地面光圈
         vGround('v_circle', e.x, e.y, 0, w, w, al * .3, '255,205,130'); vGround('v_edge', e.x, e.y, 0, w, w, al, '255,215,140'); }
       else if (e.k === 'img') { const im = DGI[e.n]; if (im.complete && im.naturalWidth) { const q = Math.min(1, p); ctx.save(); ctx.globalCompositeOperation = 'screen';
