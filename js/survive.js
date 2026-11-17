@@ -2031,6 +2031,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   //   黄：破风标 燕尾掷 回马标　玄：连珠矛 落星标 鹿角阵 贯云锥　地：星辰坠 百川归海 撼岳掷　天：定海神针 千钧一掷
   const MOCOL = { pofeng: '#e8dcc0', yanwei: '#f0d8a8', huimab: '#ffcf90', lianzhumao: '#e8d0a0', luoxing: '#ffd27a', lujiao: '#c8a070', guanyun: '#bfe0ff', xingchen: '#ffe8a0', baichuan: '#9fd8ff', hanyue: '#ffb060', dinghai: '#ffd040', qianjun: '#ffe060' };
   const MG = [];   // 地上的矛
+  const MAOI = { g: new Image(), b: new Image(), l: new Image() }; MAOI.g.src = 'art/ui/fx2/mao_g.webp'; MAOI.b.src = 'art/ui/fx2/mao_gb.webp'; MAOI.l.src = 'art/ui/fx2/mao_gl.webp';
   let mgJob = null;
   const maoPer = () => HAS('sanleng') ? .2 : .15;
   function mgTick() {
@@ -2051,7 +2052,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   // 一支投矛：直线飞，穿 o.pierce 个人（默认 1），停下的地方扎在地上（o.plant === false 不扎）
   function mShot(p, a, L, W, m, o = {}) {
     let i = 0; const cap = o.pierce == null ? 1 : o.pierce, done = pt => { if (o.plant !== false) plant(pt.x, pt.y, a); if (o.done) o.done(pt); };
-    stoneShot(p, a, FS(L), FS(W), openStone, z => { MH(z, typeof m === 'function' ? m(z, i) : m, Object.assign({}, o, { pin: i === 0 || !o.pin1 ? o.pin : 0 }), p); if (o.hit) o.hit(z, i); i++; if (i > cap) { done({ x: z.x, y: z.y }); return false; } return true; }, done, o.size || 1.5, 0, o.col || ['150,105,60', '235,225,200']);
+    stoneShot(p, a, FS(L), FS(W), openStone, z => { MH(z, typeof m === 'function' ? m(z, i) : m, Object.assign({}, o, { pin: i === 0 || !o.pin1 ? o.pin : 0 }), p); if (o.hit) o.hit(z, i); i++; if (i > cap) { done({ x: z.x, y: z.y }); return false; } return true; }, done, o.size || 1.5, 0, o.col || ['150,105,60', '235,225,200']); { const b = bolts[bolts.length - 1]; if (b) { b.jav = 1; b.jv = Math.min(2.4, (o.size || 1.5) / 1.5); } }
   }
   const mAim = r => { const z = nearest(FS(r)); return z ? Math.atan2((z.y - hero.y) * 2, z.x - hero.x) : aim(); };
   const mPt = (a, d) => ({ x: hero.x + Math.cos(a) * FS(d), y: clampY(hero.y + Math.sin(a) * FS(d) * .5) });
@@ -2173,7 +2174,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     return b;
   };
   // 用每帧扫过的线段判定，按命中先后处理，避免快石穿过近处敌人。
-  const ARIMG = new Image(); ARIMG.src = 'art/ui/arrow_shot.webp';   // 弓箭飞行图（切自兵器表的箭）
+  const ARIMG = new Image(); ARIMG.src = 'art/ui/arrow_shot.webp'; const JVIMG = new Image(); JVIMG.src = 'art/ui/javelin_shot.webp';   // 11/17 投矛飞行图   // 弓箭飞行图（切自兵器表的箭）
   function stoneShot(p, a, length, width, accept, contact, end, size = 1, pierce = HAS('yunxing') ? 1 : 0, arrowColor = null) {
     const b = stoneBolt(p, a, length, size);
     if (arrowColor) Object.assign(b, { stone: 0, shape: 'arrow', col: arrowColor });
@@ -2964,7 +2965,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     hengti: ['d', 170], pidao: ['d', 200], xiongshou: ['d', 170], xuanfengd: ['s', 200], daoqi: ['d', 220], handi: ['d', 170], zhanjiang: ['t', 110],
     qiang: ['d', 300], lianci: ['d', 140], lansao: ['d', 120], chong: ['d', 170], tiaoqiang: ['d', 190], lihua: ['s', 170], huimaq: ['d', 300] });
   Object.assign(FX2, { jici: ['d', 300], hengzhuo: ['d', 160], huaji: ['d', 220], goulian: ['d', 180], fengci: ['d', 220], paoji: ['t', 130], tiaozhen: ['d', 200], yuezhan: ['d', 240], huguan: ['s', 230], touyu: ['t', 220], yuanmenji: ['t', 240], fangtian: ['d', 340],
-    pofeng: ['d', 300], yanwei: ['d', 230], huimab: ['d', 260], lianzhumao: ['d', 260], luoxing: ['t', 150], lujiao: ['t', 200], guanyun: ['d', 380], xingchen: ['s', 320], baichuan: ['s', 340], hanyue: ['d', 420], dinghai: ['t', 260], qianjun: ['d', 360],   // 11/17 投矛（特效图先借弩的，等新图）
+    pofeng: ['d', 150], yanwei: ['d', 150], huimab: ['d', 160], lianzhumao: ['d', 150], luoxing: ['t', 150], lujiao: ['t', 200], guanyun: ['d', 190], xingchen: ['s', 320], baichuan: ['s', 340], hanyue: ['d', 220], dinghai: ['t', 260], qianjun: ['d', 240],   // 11/17 投矛：扔出去的招，出手特效只在手边一小段（矛自己飞）
     chuanxin: ['d', 240], qiufeng: ['s', 200], dengtian: ['d', 180], jiandao: ['s', 190], dielang: ['d', 220], lingkong: ['s', 160], panlong: ['s', 220], juanyun: ['s', 260], feihong: ['t', 150], zhuishi: ['t', 220], lingyun: ['t', 260], wanying: ['s', 330] });   // 11/17 长戟、腿
   for (const k in FX2) { const im = new Image(); im.src = 'art/ui/fx2/' + k + '.webp'; DGI['x_' + k] = im; }
   function fx2Play(key) {
@@ -4377,6 +4378,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       if (b.shape || b.col === STN || b.col === FUC || b.big) {
         ctx.save(); ctx.translate(b.x, b.y - 16); ctx.globalAlpha = Math.min(1, al + .3); ctx.strokeStyle = 'rgba(40,30,20,.95)'; ctx.lineWidth = 1.5;
         if (b.big) { ctx.fillStyle = '#f2c94c'; ctx.beginPath(); ctx.arc(0, 0, 8, 0, 7); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#fff4c8'; ctx.beginPath(); ctx.arc(-2, -3, 3, 0, 7); ctx.fill(); }
+        else if (b.jav && JVIMG.complete && JVIMG.naturalWidth) { ctx.rotate(Math.atan2(b.vy * 2, b.vx)); const w = 46 * (b.jv || 1), h = w * JVIMG.naturalHeight / JVIMG.naturalWidth; ctx.drawImage(JVIMG, -w * .7, -h / 2, w, h); }
         else if (b.shape === 'arrow' && ARIMG.complete && ARIMG.naturalWidth) { ctx.rotate(Math.atan2(b.vy * 2, b.vx)); const w = 34, h = w * ARIMG.naturalHeight / ARIMG.naturalWidth; if (b.col && b.col[0] !== ARW.col[0]) { ctx.shadowColor = `rgb(${b.col[0]})`; ctx.shadowBlur = 8; } ctx.drawImage(ARIMG, -w / 2, -h / 2, w, h); ctx.shadowBlur = 0; }   // 11/17 用户：弓箭用兵器图里的箭，不再用代码画的线
         else if (b.shape === 'arrow' || b.shape === 'sword') { ctx.rotate(Math.atan2(b.vy * 2, b.vx)); const L = b.shape === 'sword' ? 18 : 14; ctx.strokeStyle = `rgb(${b.col[0]})`; ctx.lineWidth = b.shape === 'sword' ? 3 : 2; ctx.beginPath(); ctx.moveTo(-L, 0); ctx.lineTo(L - 4, 0); ctx.stroke(); ctx.fillStyle = `rgb(${b.col[1]})`; ctx.beginPath(); ctx.moveTo(L + 2, 0); ctx.lineTo(L - 5, -3); ctx.lineTo(L - 5, 3); ctx.closePath(); ctx.fill(); if (b.shape === 'sword') { ctx.fillStyle = '#d8b050'; ctx.fillRect(-L, -4, 3, 8); } }
         else if (b.shape === 'feather') { ctx.rotate(Math.atan2(b.vy * 2, b.vx)); ctx.fillStyle = '#ff8a40'; ctx.beginPath(); ctx.ellipse(0, 0, 10, 3.5, 0, 0, 7); ctx.fill(); ctx.fillStyle = '#ffe0a0'; ctx.fillRect(-8, -1, 14, 2); }
@@ -4478,6 +4480,8 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
         ctx.restore(); continue;
       }
       if (e.k === 'burst') { ctx.save(); ctx.translate(e.x, e.y); ctx.scale(1, .5); const r = e.r * (.4 + .6 * Math.min(1, p * 2)); ctx.fillStyle = `rgba(${e.col},${.28 * (1 - p)})`; ctx.beginPath(); ctx.arc(0, 0, r, 0, 7); ctx.fill(); ctx.strokeStyle = `rgba(255,250,230,${.9 * (1 - p)})`; ctx.lineWidth = 4 * (1 - p) + 1; ctx.stroke(); ctx.restore(); }
+      else if (e.k === 'maoG' && MAOI.g.complete && MAOI.g.naturalWidth) { const al = Math.min(1, (e.T - e.t) / .3, e.t / .08), im = e.big ? MAOI.b : (!e.big && e.T - e.t < 1.5 && Math.floor(e.t * 6) % 2 && MAOI.l.naturalWidth ? MAOI.l : MAOI.g), H = e.big ? 92 : 36, Wd = H * im.naturalWidth / im.naturalHeight, fl = Math.cos(e.a || 0) > 0;   /* 11/17 地上的矛：用户出的图；快消失时闪金光 */
+          ctx.save(); ctx.globalAlpha = al; ctx.translate(e.x, e.y + 2); if (fl) ctx.scale(-1, 1); ctx.drawImage(im, -Wd / 2, -H, Wd, H); ctx.restore(); }
       else if (e.k === 'maoG') { const al = Math.min(1, (e.T - e.t) / .4, e.t / .08), S2 = e.big ? 2.6 : 1, b = e.a || 0, tx = Math.cos(b) * 0.35, L2 = 30 * S2; ctx.save(); ctx.globalAlpha = al; ctx.translate(e.x, e.y); ctx.lineCap = 'round';   /* 11/17 投矛：扎在地上的矛（斜插，尖朝下） */
           const dx = (Math.cos(b) >= 0 ? -1 : 1) * 10 * S2, top = { x: dx, y: -L2 }; ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(0, 0, 6 * S2, 2.5 * S2, 0, 0, 7); ctx.fill();
           ctx.strokeStyle = '#2a1a0e'; ctx.lineWidth = 4 * Math.sqrt(S2); ctx.beginPath(); ctx.moveTo(0, -3 * S2); ctx.lineTo(top.x, top.y); ctx.stroke(); ctx.strokeStyle = '#a07040'; ctx.lineWidth = 2 * Math.sqrt(S2); ctx.stroke();
