@@ -708,7 +708,7 @@ function update(dt) {
   if (chapter2Run && chapter2Run.battle === 6 && !(window.XIAOCHANG && XIAOCHANG.active())) tx = (M.W - vw) / 2;   // 祭台战：镜头固定在正中
   cam.x += (Math.max(0, Math.min(M.W - vw, tx)) - cam.x) * Math.min(1, dt * 6);
   if (window.ARENA) { ARENA.tick(); ARENA.cam(); }   // 竞技场：镜头固定，边界随窗口大小重算
-  shake = Math.max(0, shake - dt); msgT -= dt;
+  shake = Math.max(0, shake - dt); msgT -= dt; _shT = performance.now();
   if (msgT <= 0 && tutorialQueue.length) { const tip = tutorialQueue.shift(); say(tip.text, tip.time); }
   if (toastT > 0) toastT -= dt;
   // 失败时等主角落地、敌人庆祝一会儿后再显示结算。
@@ -857,13 +857,14 @@ function zFrame(z) {
   if (z.sprite === 'zhang_jiao') return z.st === 'rest' ? 'rest' : 'float';   // 张角飘着走，不走路
   return z.moving ? (Math.floor(z.t * 6) % 2 ? 'walk1' : 'walk2') : 'idle';
 }
+let _shT = 0;
 function draw() {
   if (window.PAUSE) PAUSE.syncButton();
   if (window.TITLE && TITLE.draw()) return;   // 标题界面自己接管整屏
   if (window.ROOM && ROOM.draw()) return;     // 开场农房
   if (window.ROUTE && ROUTE.shown()) { ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = '#eadcc0'; ctx.fillRect(0, 0, cv.width, cv.height); return; }   // 路线长卷（或正等着打开）时不画战斗场景，免得进游戏时先闪一下
   const W = cv.width, H = cv.height; SC = H / M.viewH;
-  const sk = shake > 0 && !(window.SZZSET && SZZSET.get('shake') === false) ? rnd(-2, 2) : 0;   // 设置里可关震屏
+  const sk = shake > 0 && performance.now() - _shT < 80 && !(window.SZZSET && SZZSET.get('shake') === false) ? rnd(-2, 2) : 0;   // 11/17 手机反馈：教程提示等暂停时游戏不更新，震屏不会衰减，画面一直抖——暂停中不震   // 设置里可关震屏
   OXs = Math.round(-cam.x * SC + sk);
   OYs = window.ARENA ? Math.round(-ARENA.camY() * SC) : 0;
   ctx.setTransform(SC, 0, 0, SC, OXs, OYs); ctx.imageSmoothingEnabled = true;
