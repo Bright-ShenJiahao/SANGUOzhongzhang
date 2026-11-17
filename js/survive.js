@@ -1916,20 +1916,25 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   }
   function windXf() {   // 起手阶段：重击在画面上跳起、落地正好出手；其余近战微微下蹲蓄力
     const W = S.wind; if (!W || !W.k.dk || wepOf(W.key) === 11) return null; const win = Math.min(W.dur, W.k.dk ? .32 : .16), p = (W.t - (W.dur - win)) / win; if (p < 0) return null;
-    const ty = animOf(W.key); if (ty !== 'heavy') return null;   // 11/17 手机反馈抖动：自动连放时每次起手都微蹲/后撤，像在抖；起手只留重击的跳起
+    const ty = animOf(W.key); if (ty !== 'heavy' || !aOpt(W.key).mv) return null;   // 11/17 手机反馈抖动：自动连放时每次起手都微蹲/后撤，像在抖；起手只留重击的跳起
     if (ty === 'heavy') { const H = W.k.tier >= 4 ? 40 : W.k.tier >= 3 ? 30 : 22; return p < .2 ? { sy: 1 - p * .6, sx: 1 + p * .4 } : { dy: H * Math.sin(Math.PI * (p - .2) / .8), rot: .12 * (p - .2) }; }
   }
+  // 11/18 用户：每招可选有没有位移（前探、跳起）、有没有残影；武学试炼里勾选，存在本机
+  let AOPT = {}; try { AOPT = JSON.parse(localStorage.getItem('szz-anim-opt') || '{}') || {}; } catch (e) {}
+  const aOpt = k => Object.assign({ mv: 1, gh: 1 }, AOPT[k] || {});
+  const tAnim0 = (...x) => tAnim(...x), tLean0 = (...x) => tLean(...x), tTrail0 = (...x) => tTrail(...x);
   function autoAnim(key) {   // 出手那一刻
     const k = SK[key], w = wepOf(key); if (!k || !k.dk || w === 11 || !k.pose || (TA && TA.t0 === DKT)) return;
+    const op = aOpt(key), xw = f => f && (t => { const o = f(t); return !o || op.mv ? o : Object.assign({}, o, { dx: 0, dy: 0 }); }), tAnim = (st, f) => tAnim0(st, xw(f)), tLean = (d, T) => { if (op.mv) tLean0(d, T); }, tTrail = (...x) => { if (op.gh) tTrail0(...x); }, gp = o => { if (op.gh) fx.push(o); };
     const f0 = k.pose[0], f1 = k.pose[1], ty = animOf(key), a = aim(), tr = k.tier || 1, sw = /sweep/.test(f1) ? -1 : 1;
     if (ty === 'stab') { tAnim([[.16, f1]], t => ({ rot: -.05 })); tLean(8 + 3 * tr); tTrail(a, f1, tr >= 3 ? 3 : 2, 14 + 2 * tr); }
     else if (ty === 'combo') { tAnim([[.05, f1], [.04, f0], [.05, f1], [.04, f0], [.12, f1]]); [0, .09, .18].forEach((d, i) => later(d, () => { tLean(6 + 3 * i, .08); tTrail(a, f1, 1, 16 + 6 * i); })); }
     else if (ty === 'slash') { tAnim([[.18, f1]], t => ({ rot: sw * (-.2 + .32 * Math.min(1, t / .1)) })); tLean(8);
-      for (const r of [-.42, -.24]) fx.push({ k: 'ghost', x0: hero.x, y0: hero.y, x1: hero.x, y1: hero.y, fr: f1, flip: hero.f < 0, t: 0, T: .16 + (r < -.3 ? 0 : .04), mt: .01, rot: r * sw }); }
+      for (const r of [-.42, -.24]) gp({ k: 'ghost', x0: hero.x, y0: hero.y, x1: hero.x, y1: hero.y, fr: f1, flip: hero.f < 0, t: 0, T: .16 + (r < -.3 ? 0 : .04), mt: .01, rot: r * sw }); }
     else if (ty === 'heavy') { tAnim([[.24, f1]], t => t < .12 ? { sy: .76 + 2 * t, sx: 1.2 - 1.6 * t, rot: .05 } : null); tLean(6, .1); shake = Math.max(shake, .12 + .04 * tr);
-      fx.push({ k: 'ring', x: hero.x, y: hero.y, t: 0, T: .35, r: FS(45) }); fx.push({ k: 'ghost', x0: hero.x, y0: hero.y, x1: hero.x, y1: hero.y, fr: f0, flip: hero.f < 0, t: 0, T: .14, mt: .01, hop: 18 }); }
-    else if (ty === 'spin') { tAnim(tSpinSteps(f1, 6, .05), t => ({ dy: 4 * Math.abs(Math.sin(t * 20)) })); for (const fl of [true, false]) fx.push({ k: 'ghost', x0: hero.x, y0: hero.y, x1: hero.x, y1: hero.y, fr: f1, flip: fl, t: 0, T: .22, mt: .01, rot: fl ? .3 : -.3 }); }
-    else if (ty === 'rise') { tAnim([[.22, f1]], t => ({ dy: 16 * 4 * (t / .22) * (1 - t / .22), rot: -.08 })); fx.push({ k: 'ghost', x0: hero.x, y0: hero.y, x1: hero.x, y1: hero.y, fr: f0, flip: hero.f < 0, t: 0, T: .16, mt: .01 }); }
+      fx.push({ k: 'ring', x: hero.x, y: hero.y, t: 0, T: .35, r: FS(45) }); gp({ k: 'ghost', x0: hero.x, y0: hero.y, x1: hero.x, y1: hero.y, fr: f0, flip: hero.f < 0, t: 0, T: .14, mt: .01, hop: 18 }); }
+    else if (ty === 'spin') { tAnim(tSpinSteps(f1, 6, .05), t => ({ dy: 4 * Math.abs(Math.sin(t * 20)) })); for (const fl of [true, false]) gp({ k: 'ghost', x0: hero.x, y0: hero.y, x1: hero.x, y1: hero.y, fr: f1, flip: fl, t: 0, T: .22, mt: .01, rot: fl ? .3 : -.3 }); }
+    else if (ty === 'rise') { tAnim([[.22, f1]], t => ({ dy: 16 * 4 * (t / .22) * (1 - t / .22), rot: -.08 })); gp({ k: 'ghost', x0: hero.x, y0: hero.y, x1: hero.x, y1: hero.y, fr: f0, flip: hero.f < 0, t: 0, T: .16, mt: .01 }); }
     else if (ty === 'flip') { tAnim([[.07, f1 + '~'], [.16, f1]]); later(.07, () => { tLean(12); tTrail(a, f1, 2, 18); }); }
     else if (ty === 'cast') { tAnim([[.16, f1]], t => ({ dx: -6 * Math.sin(Math.PI * t / .16), sy: 1.03 })); }
   }
@@ -4934,8 +4939,9 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     FRN: ['idle', 'walk1', 'walk2', 'walk3', 'roll1', 'roll2', 'roll3', 'roll4', 'hurt', 'down', 'chop1', 'chop2', 'sweep1', 'sweep2', 'thrust1', 'thrust2', 'spin1', 'spin2', 'up1', 'up2'],
     getPose: k => { const o = dpsOf(k); if (o) return Object.assign({ fa: 0, fb: 0 }, o); const m = motFr(k), hp = preOf(k); return { a: m[0].slice(hp.length), b: m[1].slice(hp.length), fa: 0, fb: 0 }; },
     preDir: k => ({ wd_: 'dao', jian_: 'jian', chui_: 'chui', qiang_: 'spear', guandao_: 'guandao', bow_: 'bow', stone_: 'stone', huangfu_: 'fu', fan_: 'fan', quan_: 'quan', ji_: 'ji' })[preOf(k)] || 'dao',
+    getAnim: k => aOpt(k), setAnim: (k, o) => { AOPT[k] = Object.assign(aOpt(k), o); try { localStorage.setItem('szz-anim-opt', JSON.stringify(AOPT)); } catch (e) {} },
     setPose: (k, o) => { DPS[k] = o; try { localStorage.setItem('szz-dao-pose', JSON.stringify(DPS)); } catch (e) {} },
-    poseAll: () => Object.keys(SK).filter(k => SK[k].dk && !SK[k].off).sort((a, b) => SK[a].tier - SK[b].tier).map(k => { const o = TRIAL.getPose(k); return `${SK[k].name}(${k}) 起手 ${o.a}${o.fa ? '（翻转）' : ''} → 出手 ${o.b}${o.fb ? '（翻转）' : ''}`; }).join('\n'),
+    poseAll: () => Object.keys(SK).filter(k => SK[k].dk && !SK[k].off).sort((a, b) => SK[a].tier - SK[b].tier).map(k => { const o = TRIAL.getPose(k); return `${SK[k].name}(${k}) 起手 ${o.a}${o.fa ? '（翻转）' : ''} → 出手 ${o.b}${o.fb ? '（翻转）' : ''}${aOpt(k).mv ? '' : ' · 无位移'}${aOpt(k).gh ? '' : ' · 无残影'}`; }).join('\n'),
     rsAll: () => Object.keys(SK).filter(k => SK[k].dk && !SK[k].off).sort((a, b) => SK[a].tier - SK[b].tier).map(k => `${TIERN[SK[k].tier]} ${SK[k].name}(${k}) 范围×${rsOf(k)} 速度×${spOf(k)}（${spdTxt(SK[k])}）`).join('\n'), setLv(k, l) { S.lvLock = {}; if (k && l) S.lvLock[k] = l; } };
   // ================= 局末结算（11/16 用户定，照群侠：结算总览 / 武林评定 / 逐关战报） =================
   function newStat() { return { log: [], dmg: {} }; }

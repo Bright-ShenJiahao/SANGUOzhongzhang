@@ -14,11 +14,11 @@
 #szzTrial .tabs{display:flex;flex-wrap:wrap;gap:3px;padding:6px}
 #szzTrial .tabs button{flex:1 0 17%;padding:4px 0;background:#2a1d12;border:1px solid #5a4226;color:#e9cf98;cursor:pointer}
 #szzTrial .tabs button.on{border-color:#ffd86e;color:#fff2c8;background:#4a3218}
-#szzTrial .ls{overflow:auto;padding:0 6px 6px;display:grid;grid-template-columns:1fr 1fr;gap:4px;align-content:start}
+#szzTrial .ls{flex:1 1 auto;min-height:90px;overflow:auto;padding:0 6px 6px;display:grid;grid-template-columns:1fr 1fr;gap:4px;align-content:start}
 #szzTrial .ls button{text-align:left;padding:5px 6px;background:#1c140d;border:1px solid #3a2a18;color:#efe2c4;cursor:pointer;line-height:1.25}
 #szzTrial .ls button.on{border-color:#ffd86e;background:#3a2814}
 #szzTrial .ls small{display:block;opacity:.65;font-size:11px}
-#szzTrial .dt{border-top:1px solid rgba(184,149,90,.35);padding:7px 9px;line-height:1.55;min-height:64px}
+#szzTrial .dt{border-top:1px solid rgba(184,149,90,.35);padding:7px 9px;line-height:1.55;min-height:64px;overflow:auto;flex:0 1 auto}
 #szzTrial .dt b{color:#ffe08a}
 #szzTrial .sl{display:flex;align-items:center;gap:6px;margin-top:5px}#szzTrial .sl input{flex:1;accent-color:#ffd86e}#szzTrial .sl b{min-width:44px;color:#ffe08a}
 #szzTrial .ps select{background:#1c140d;color:#efe2c4;border:1px solid #3a2a18;font-size:12px;padding:1px 4px}#szzTrial .ps label{font-size:12px;display:flex;align-items:center;gap:3px;cursor:pointer}
@@ -32,7 +32,7 @@
     if (typeof tab === 'number') {
       const w = ORDER[tab], ks = skills(w);
       ls = ks.map((k, i) => { const s = t.SK[k]; return `<button data-k="${k}" class="${sel === k ? 'on' : ''}"><span style="color:${TC[s.tier || 0]}">${t.TIERN[s.tier || 0]}</span> ${i + 1}. ${s.name}<small>${MOTN[t.MOT[k]] || '—'}</small></button>`; }).join('');
-      if (sel && t.SK[sel]) { const s = t.SK[sel], i = ks.indexOf(sel); dt = `<b>${t.WEPN[w]} · 第 ${i + 1} 招 · ${s.name}</b>　${t.TIERN[s.tier || 0]}阶 · 动作：${MOTN[t.MOT[sel]] || '—'}<br>${s.desc}<br><span style="opacity:.65">当前伤害倍率 ×${t.mul(sel).toFixed(2)}（出身、属性、熟练都算在内）</span><br><span style="opacity:.8">${t.spd(sel)}</span><div class="lvr">等级：${[1, 3, 5, 7, 10].map(n => `<button data-lv="${n}" class="${t.lv(sel) === n ? 'on' : ''}">LV${n}</button>`).join('')}</div>${t.rs(sel) != null ? `<div class="sl"><span>范围</span><input type="range" min="0.3" max="1.5" step="0.01" value="${t.rs(sel)}" data-sl="rs"><b>×${t.rs(sel).toFixed(2)}</b></div><div class="sl"><span>速度</span><input type="range" min="0.5" max="3" step="0.01" value="${t.sp(sel)}" data-sl="sp"><b>×${t.sp(sel).toFixed(2)}</b></div><div class="lvr sp2">${t.spd(sel)}</div>${(() => { const o = t.getPose(sel), opt = (v, w0) => (w0 ? ['无'] : []).concat(t.FRN).map(n => `<option value="${n}"${n === v ? ' selected' : ''}>${FRZ[n] || n}</option>`).join(''); return `<div class="sl ps"><span>起手</span><select data-ps="a">${opt(o.a)}</select><label><input type="checkbox" data-pf="fa"${o.fa ? ' checked' : ''}>翻转</label></div><div class="sl ps"><span>出手</span><select data-ps="b">${opt(o.b, 1)}</select><label><input type="checkbox" data-pf="fb"${o.fb ? ' checked' : ''}>翻转</label></div><div class="pv" style="display:flex;gap:6px;align-items:flex-end">${(o.b === '无' ? ['a'] : ['a', 'b']).map(x => `<img src="art/sprites/hero_skins/${window.HERO_SKIN ? HERO_SKIN.cur() : 'baiyi'}/${t.preDir ? t.preDir(sel) : 'dao'}/${o[x]}.png" style="height:72px;image-rendering:pixelated;${o['f' + x] ? 'transform:scaleX(-1)' : ''}">`).join('<span style="opacity:.6">→</span>')}</div>`; })()}<div class="lvr"><button data-spall="1">这个速度用到全部${t.WEPN[w]}招</button></div><div class="lvr"><button data-cp="1">复制新系统武艺设置</button></div>` : ''}`; }
+      if (sel && t.SK[sel]) { const s = t.SK[sel], i = ks.indexOf(sel); dt = `<b>${t.WEPN[w]} · 第 ${i + 1} 招 · ${s.name}</b>　${t.TIERN[s.tier || 0]}阶 · 动作：${MOTN[t.MOT[sel]] || '—'}<br>${s.desc}<br><span style="opacity:.65">当前伤害倍率 ×${t.mul(sel).toFixed(2)}（出身、属性、熟练都算在内）</span><br><span style="opacity:.8">${t.spd(sel)}</span><div class="lvr">等级：${[1, 3, 5, 7, 10].map(n => `<button data-lv="${n}" class="${t.lv(sel) === n ? 'on' : ''}">LV${n}</button>`).join('')}</div>${t.rs(sel) != null ? `<div class="sl"><span>范围</span><input type="range" min="0.3" max="1.5" step="0.01" value="${t.rs(sel)}" data-sl="rs"><b>×${t.rs(sel).toFixed(2)}</b></div><div class="sl"><span>速度</span><input type="range" min="0.5" max="3" step="0.01" value="${t.sp(sel)}" data-sl="sp"><b>×${t.sp(sel).toFixed(2)}</b></div><div class="lvr sp2">${t.spd(sel)}</div>${(() => { const o = t.getPose(sel), opt = (v, w0) => (w0 ? ['无'] : []).concat(t.FRN).map(n => `<option value="${n}"${n === v ? ' selected' : ''}>${FRZ[n] || n}</option>`).join(''); return `<div class="sl ps"><span>起手</span><select data-ps="a">${opt(o.a)}</select><label><input type="checkbox" data-pf="fa"${o.fa ? ' checked' : ''}>翻转</label></div><div class="sl ps"><span>出手</span><select data-ps="b">${opt(o.b, 1)}</select><label><input type="checkbox" data-pf="fb"${o.fb ? ' checked' : ''}>翻转</label></div><div class="sl ps">${(() => { const ao = t.getAnim ? t.getAnim(sel) : { mv: 1, gh: 1 }; return `<label><input type="checkbox" data-ao="mv"${ao.mv ? ' checked' : ''}>位移（前探、跳起）</label><label><input type="checkbox" data-ao="gh"${ao.gh ? ' checked' : ''}>残影</label>`; })()}</div><div class="pv" style="display:flex;gap:6px;align-items:flex-end">${(o.b === '无' ? ['a'] : ['a', 'b']).map(x => `<img src="art/sprites/hero_skins/${window.HERO_SKIN ? HERO_SKIN.cur() : 'baiyi'}/${t.preDir ? t.preDir(sel) : 'dao'}/${o[x]}.png" style="height:72px;image-rendering:pixelated;${o['f' + x] ? 'transform:scaleX(-1)' : ''}">`).join('<span style="opacity:.6">→</span>')}</div>`; })()}<div class="lvr"><button data-spall="1">这个速度用到全部${t.WEPN[w]}招</button></div><div class="lvr"><button data-cp="1">复制新系统武艺设置</button></div>` : ''}`; }
     } else {
       const qg = tab === 'qg', on = qg ? [t.qg()] : t.gf();
       const ids = Object.keys(t.GF).filter(id => !t.GF[id].off && !!t.GF[id].qg === qg).sort((a, b) => t.GF[a].t - t.GF[b].t);
@@ -50,6 +50,7 @@
     box.querySelectorAll('[data-sl]').forEach(r => r.oninput = () => { const v = Math.round(+r.value * 100) / 100; if (r.dataset.sl === 'rs') t.setRs(sel, v); else t.setSp(sel, v); r.nextElementSibling.textContent = '×' + v.toFixed(2); const q = box.querySelector('.sp2'); if (q) q.textContent = t.spd(sel); });   // 11/14：范围、速度拖动调（速度越大越慢），存本机
     const psSave = () => { const g = n => box.querySelector(n); const o = { a: g('[data-ps=a]').value, b: g('[data-ps=b]').value, fa: g('[data-pf=fa]').checked ? 1 : 0, fb: g('[data-pf=fb]').checked ? 1 : 0 }; t.setPose(sel, o); render(); };
     box.querySelectorAll('[data-ps],[data-pf]').forEach(e => e.onchange = psSave);
+    box.querySelectorAll('[data-ao]').forEach(e => e.onchange = () => { if (t.setAnim) t.setAnim(sel, { [e.dataset.ao]: e.checked ? 1 : 0 }); });
     box.querySelectorAll('[data-spall]').forEach(b => b.onclick = () => { t.spAll(t.sp(sel), t.wepOf(sel)); b.textContent = '已用到全部' + t.WEPN[t.wepOf(sel)] + '招 ×' + t.sp(sel).toFixed(2); });
     box.querySelectorAll('[data-cp]').forEach(b => b.onclick = () => { const txt = '武艺范围、速度（武学试炼调好；速度越大越慢）：\n' + t.rsAll() + '\n\n武艺动作（起手帧 → 出手帧）：\n' + t.poseAll();
       const ta = document.createElement('textarea'); ta.value = txt; ta.readOnly = true; ta.style.cssText = 'width:100%;height:150px;margin-top:6px;font-size:12px;background:#120c07;color:#efe2c4;border:1px solid #6a4a28';
@@ -69,6 +70,8 @@
   const wait = (f, ms = 6000) => new Promise(res => { const t0 = Date.now(); const k = () => { const v = f(); if (v) res(v); else if (Date.now() - t0 > ms) res(null); else setTimeout(k, 120); }; k(); });
   async function enterFight() {   // 不在战斗里：自动走 标题 → 开局 → 路线第一格
     if (window.TITLE && TITLE.mode && TITLE.mode() === 'game' && SURV.curNode && SURV.curNode() && !(ROUTE.shown && ROUTE.shown())) return true;
+    const pickFight = () => { try { const r = ROUTE.debug(); if (!r) return false; const L = r.cur && r.cur.next && r.cur.next.length ? r.cur.next : (r.nodes || []).flat().filter(x => x && x.layer === 1), n = L.find(x => x.type === 'battle') || L[0]; if (!n) return false; n.type = 'battle'; n.tag = n.tag || 'melee'; r.blessed = true; ROUTE.choose(n, 1); return true; } catch (e) { return false; } };   // 11/18 用户：进试炼别先停在路线图上
+    if (window.TITLE && TITLE.mode && TITLE.mode() === 'game' && ROUTE.shown && ROUTE.shown()) { for (let i = 0; i < 20 && ROUTE.shown(); i++) { pickFight(); await new Promise(r => setTimeout(r, 150)); } return !!(await wait(() => SURV.curNode && SURV.curNode())); }
     const nm = document.getElementById('tName'); if (nm && !nm.value) nm.value = '试炼';
     if (window.RUNSAVE) RUNSAVE.has = () => false;
     const vis = e => e && e.getClientRects().length > 0;
@@ -76,8 +79,8 @@
     const ask = await wait(() => document.getElementById('tNameAsk'), 2500);   // 11/14：「新的开始」之后要先报名号
     if (ask) { const ip = ask.querySelector('input'); if (ip && !ip.value) ip.value = '试炼'; const y = ask.querySelector('.yes'); if (y) y.click(); }
     const go = await wait(() => { const b = document.querySelector('#kaiju .bot .go'); return vis(b) && b; }); if (go) go.click();
-    await wait(() => window.TITLE && TITLE.mode && TITLE.mode() === 'game'); await new Promise(r => setTimeout(r, 1200));
-    try { const r = ROUTE.debug(), L = (r.nodes || []).flat().filter(x => x && x.layer === 1), n = L.find(x => x.type === 'battle') || L[0]; n.type = 'battle'; n.tag = n.tag || 'melee'; r.blessed = true; ROUTE.choose(n, 1); } catch (e) {}   // 11/14：第一列可能有奇遇；试炼直接进战斗、不弹三赠
+    await wait(() => window.TITLE && TITLE.mode && TITLE.mode() === 'game'); await wait(() => ROUTE.shown && ROUTE.shown(), 4000);
+    for (let i = 0; i < 20 && ROUTE.shown && ROUTE.shown(); i++) { pickFight(); await new Promise(r => setTimeout(r, 150)); }   // 11/14：第一列可能有奇遇；试炼直接进战斗、不弹三赠
     return !!(await wait(() => SURV.curNode && SURV.curNode()));
   }
   async function open() {
