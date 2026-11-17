@@ -562,7 +562,7 @@
     edge();
   }
 
-  if (ON) { const poll = () => { if (window.RUNSAVE && ((typeof over !== 'undefined' && over) || (typeof won !== 'undefined' && won))) RUNSAVE.clear(); if (pending && (!window.TITLE || TITLE.mode() === 'game')) { pending = false; open(); if (window.RUNSAVE) RUNSAVE.save(); } requestAnimationFrame(poll); }; requestAnimationFrame(poll); }   // 真正进游戏（不是在标题页）才打开长卷
+  if (ON) { const poll = () => { if (window.RUNSAVE && ((typeof over !== 'undefined' && over) || (typeof won !== 'undefined' && won))) RUNSAVE.clear(); if (pending && !window.TRIAL_ARENA && (!window.TITLE || TITLE.mode() === 'game')) { pending = false; open(); if (window.RUNSAVE) RUNSAVE.save(); } requestAnimationFrame(poll); }; requestAnimationFrame(poll); }   // 真正进游戏（不是在标题页）才打开长卷
   const MAP_OF = l => l <= SEGLEN ? 'field' : l <= SEGLEN * 2 ? 'town' : l <= SEGLEN * 3 ? 'forest' : l <= SEGLEN * 4 + 1 ? 'camp' : 'altar';   // 第 1~4 层打谷场，5~8 县城，9~12 林间空地，13~17 营寨腹地，18 张角祭坛
   window.ROUTE = {
     mapOf: n => { const seg = MAP_OF(n.layer); if (!window.ARENA || !ARENA.pick) return seg; let k = ARENA.pick(seg, n.id * 7 + n.layer); const prev = (n.prev || []).find(i => i && typeof i === 'object'); if (prev && ARENA.pick(MAP_OF(prev.layer), prev.id * 7 + prev.layer) === k) k = ARENA.pick(seg, n.id * 7 + n.layer + 1); return k; },   // 11/16 用户：每段 3 张图，按节点挑，跟上一场不重复
@@ -573,7 +573,7 @@
     secBoss: n => n && n.final ? [['张角', 'zhang_jiao'], [branch() === 'bao' ? '张梁' : '张宝', '']] : n && n.br ? [[n.br === 'bao' ? '张宝' : '张梁', ''], ['马元义', '']] : n && n.sec ? SECBOSS[n.sec - 1] : [],
     branch: () => branch(),   // 第 4 段走了哪边：'liang' / 'bao' / null
     tagOf: n => n.tag,
-    shown: () => shown || pending,
+    shown: () => shown || (pending && !window.TRIAL_ARENA),
     start() { run = { ...gen(), visited: new Set(), blessed: false }; run.cur = run.start; run.visited.add(run.start); pending = true; if (shown) close(); },
     snap() {   // 存档用：节点之间的连线存成编号
       if (!run) return null;

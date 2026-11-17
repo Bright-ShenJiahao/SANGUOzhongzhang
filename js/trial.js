@@ -4,7 +4,7 @@
   const MOTN = { chop: '劈', sweep: '横扫', thrust: '刺', spin: '转', up: '挑' };
   const ORDER = [0, 2, 3, 4, 12, 7, 5, 8, 9, 1, 10, 11];   // 刀 锤 枪 关刀 长戟 石子 弓 黄符 羽扇 剑 拳 腿
   const TC = ['#c9b27a', '#c9b27a', '#6fb8ff', '#c58cff', '#ffb347'];
-  let box = null, tab = 0, sel = null, godT = 0, rng = true, rngT = 0, dum = '';   // 11/18 木人桩：'' 关 / one 单个 / row 一排 / ring 一圈
+  let box = null, tab = 0, sel = null, godT = 0, rng = true, rngT = 0, dum = 'row', brk = 0, sol = 0, arena = false;   // 11/18 木人桩：'' 关 / one 单个 / row 一排 / ring 一圈
   const DUMN = { '': '关', one: '单个', row: '一排', ring: '一圈' }, DUMO = ['', 'one', 'row', 'ring'];   // 11/16 用户：试炼里常驻弓手、投石手（看乾坤屏挡箭等）
   const T = () => window.SURV && SURV.trial;
   const css = `#szzTrial{position:fixed;z-index:10040;left:8px;top:56px;width:min(330px,46vw);max-height:calc(100vh - 70px);display:flex;flex-direction:column;background:rgba(14,10,7,.93);border:1px solid #8a6a3a;color:#efe2c4;font-size:13px;box-shadow:0 6px 20px rgba(0,0,0,.6)}
@@ -39,10 +39,12 @@
       ls = ids.map(id => { const g = t.GF[id]; return `<button data-g="${id}" class="${on.includes(id) ? 'on' : ''}"><span style="color:${TC[g.t + 1]}">${t.TIERN[g.t + 1]}</span> ${g.n}<small>${g.cn || (qg ? '轻功' : '内功')}</small></button>`; }).join('');
       const g = sel && t.GF[sel]; dt = g ? `<b>${g.n}</b>　${t.TIERN[g.t + 1]}阶<br>${g.d || ''}` : `<span style="opacity:.6">${qg ? '点一个轻功装上（只能装一个）' : '点心法装上（最多 3 个，再点取消）'}；武艺照常放。</span>`;
     }
-    box.innerHTML = `<div class="hd"><span>武学试炼</span><span><button class="dm">木人桩：${DUMN[dum]}</button> ${dum ? '' : `<button class="rg">远程兵：${rng ? '开' : '关'}</button> `}<button class="x">关闭</button></span></div>${dum ? '<div class="dms"><span class="dmv">—</span><button class="dmc">清零</button></div>' : ''}<div class="tabs">${tabs}</div><div class="ls">${ls}</div><div class="dt">${dt}</div>`;
+    box.innerHTML = `<div class="hd"><span>武学试炼</span><span><button class="dm">木人桩：${DUMN[dum]}</button> <button class="x">关闭</button></span></div><div class="dms"><span><button class="tbk">${brk ? '会碎的木人' : '不碎的木人'}</button> <button class="tsol">士兵：${sol ? '开' : '关'}</button>${sol ? ` <button class="rg">远程兵：${rng ? '开' : '关'}</button>` : ''}</span></div>${dum ? '<div class="dms"><span class="dmv">—</span><button class="dmc">清零</button></div>' : ''}<div class="tabs">${tabs}</div><div class="ls">${ls}</div><div class="dt">${dt}</div>`;
     box.querySelector('.x').onclick = close;
     const rg = box.querySelector('.rg'); if (rg) rg.onclick = () => { rng = !rng; render(); };
     box.querySelector('.dm').onclick = () => { dum = DUMO[(DUMO.indexOf(dum) + 1) % DUMO.length]; try { T().dummy(dum); } catch (e) {} render(); };
+    box.querySelector('.tbk').onclick = () => { brk = brk ? 0 : 1; try { T().dummyBrk(brk); } catch (e) {} render(); };
+    box.querySelector('.tsol').onclick = () => { sol = sol ? 0 : 1; try { T().soldiers(sol); } catch (e) {} render(); };
     const dc = box.querySelector('.dmc'); if (dc) dc.onclick = () => { try { T().dummyClear(); } catch (e) {} };
     box.querySelectorAll('.tabs button').forEach(b => b.onclick = () => { const v = b.dataset.t; tab = v === 'gf' || v === 'qg' ? v : +v; sel = null; render(); });
     box.querySelectorAll('[data-k]').forEach(b => b.onclick = () => { sel = b.dataset.k; t.setLv(sel, 1); SURV.slots.splice(0, 5, sel, '', '', '', ''); render(); });
@@ -63,24 +65,21 @@
   function keep() {   // 无敌 + 关卡不结束
     if (!box) return;
     try { if (typeof hero !== 'undefined' && hero && typeof maxHeroHp === 'function') hero.hp = maxHeroHp(); if (T()) T().long();
-      if (dum && box) { const v = box.querySelector('.dmv'), st = T() && T().dummyStat && T().dummyStat(); if (v && st) v.textContent = `总伤害 ${st.tot.toFixed(1)}　每秒 ${st.dps.toFixed(1)}　打中 ${st.n}/${st.all} 个`; }
-      if (rng && !dum && T() && T().spawn && Date.now() - rngT > 3000) { rngT = Date.now(); for (const u of ['archer', 'slinger']) if (T().count(u) < 2) T().spawn(u); } } catch (e) {}
+      if (dum && box) { const v = box.querySelector('.dmv'), st = T() && T().dummyStat && T().dummyStat(); if (v && st) v.textContent = `总伤害 ${st.tot.toFixed(1)}　每秒 ${st.dps.toFixed(1)}　打中 ${st.n}/${st.all} 个${st.brk ? `　击碎 ${st.broke}` : ''}`; }
+      if (rng && sol && T() && T().spawn && Date.now() - rngT > 3000) { rngT = Date.now(); for (const u of ['archer', 'slinger']) if (T().count(u) < 2) T().spawn(u); } } catch (e) {}
     godT = setTimeout(keep, 400);
   }
   const wait = (f, ms = 6000) => new Promise(res => { const t0 = Date.now(); const k = () => { const v = f(); if (v) res(v); else if (Date.now() - t0 > ms) res(null); else setTimeout(k, 120); }; k(); });
-  async function enterFight() {   // 不在战斗里：自动走 标题 → 开局 → 路线第一格
-    if (window.TITLE && TITLE.mode && TITLE.mode() === 'game' && SURV.curNode && SURV.curNode() && !(ROUTE.shown && ROUTE.shown())) return true;
-    const pickFight = () => { try { const r = ROUTE.debug(); if (!r) return false; const L = r.cur && r.cur.next && r.cur.next.length ? r.cur.next : (r.nodes || []).flat().filter(x => x && x.layer === 1), n = L.find(x => x.type === 'battle') || L[0]; if (!n) return false; n.type = 'battle'; n.tag = n.tag || 'melee'; r.blessed = true; ROUTE.choose(n, 1); return true; } catch (e) { return false; } };   // 11/18 用户：进试炼别先停在路线图上
-    if (window.TITLE && TITLE.mode && TITLE.mode() === 'game' && ROUTE.shown && ROUTE.shown()) { for (let i = 0; i < 20 && ROUTE.shown(); i++) { pickFight(); await new Promise(r => setTimeout(r, 150)); } return !!(await wait(() => SURV.curNode && SURV.curNode())); }
+  async function enterFight() {   // 11/18 用户：武学试炼专门一张演武场——先回主界面，再走「出征 → 开局」，开局后直接进演武场（不过路线图）
+    window.TRIAL_ARENA = true;
+    if (window.TITLE && TITLE.mode && TITLE.mode() === 'game') { if (TITLE.show) TITLE.show(); await new Promise(r => setTimeout(r, 300)); }
     const nm = document.getElementById('tName'); if (nm && !nm.value) nm.value = '试炼';
     if (window.RUNSAVE) RUNSAVE.has = () => false;
     const vis = e => e && e.getClientRects().length > 0;
     const st = document.getElementById('tStart'); if (vis(st)) st.click();
-    const ask = await wait(() => document.getElementById('tNameAsk'), 2500);   // 11/14：「新的开始」之后要先报名号
+    const ask = await wait(() => document.getElementById('tNameAsk'), 2500);
     if (ask) { const ip = ask.querySelector('input'); if (ip && !ip.value) ip.value = '试炼'; const y = ask.querySelector('.yes'); if (y) y.click(); }
     const go = await wait(() => { const b = document.querySelector('#kaiju .bot .go'); return vis(b) && b; }); if (go) go.click();
-    await wait(() => window.TITLE && TITLE.mode && TITLE.mode() === 'game'); await wait(() => ROUTE.shown && ROUTE.shown(), 4000);
-    for (let i = 0; i < 20 && ROUTE.shown && ROUTE.shown(); i++) { pickFight(); await new Promise(r => setTimeout(r, 150)); }   // 11/14：第一列可能有奇遇；试炼直接进战斗、不弹三赠
     return !!(await wait(() => SURV.curNode && SURV.curNode()));
   }
   async function open() {
@@ -94,6 +93,7 @@
     try { await enterFight(); } finally { setTimeout(() => { const c = document.getElementById('szzTrialCover'); if (c) c.remove(); }, 250); }
     render(); clearTimeout(godT); keep();
   }
-  function close() { try { T().setLv(null); } catch (e) {} if (dum) { dum = ''; try { T().dummy(''); } catch (e) {} } window.TRIAL_ON = false; clearTimeout(godT); if (box) box.remove(); box = null; }
+  function close() { try { T().setLv(null); } catch (e) {} if (dum) { try { T().dummy(''); } catch (e) {} } dum = 'row'; brk = 0; sol = 0; const wasArena = window.TRIAL_ARENA; try { T().soldiers(1); T().dummyBrk(0); } catch (e) {}
+    if (wasArena && window.TITLE && TITLE.mode && TITLE.mode() === 'game' && TITLE.show) { window.TRIAL_ON = false; TITLE.show(); } window.TRIAL_ARENA = false; window.TRIAL_ON = false; clearTimeout(godT); if (box) box.remove(); box = null; }   // 演武场关掉就回主界面
   window.TRIAL = { open, close };
 })();

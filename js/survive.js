@@ -391,7 +391,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       return;
     }
     W.t += dt;
-    if (DUM.on) return;   // 11/18 木人桩：不刷兵
+    if (DUM.noSol) return;   // 11/18 演武场：士兵关着就不刷兵
     if (RT.on) { W.lvF = W.lv0 + (W.lv1 - W.lv0) * Math.min(1, W.t / W.tot); W.n = Math.round(W.lvF); }   // 难度随时间平滑上升
     if (bossCount() && !W.bossDone && W.t >= 1) { W.bossDone = true; if (RT.on) spawnNamed(); else for (let i = 0; i < bossCount(); i++) edgeSpawn('elite', true); }
     // 补兵：开场慢慢涌进来（前 60% 时间里目标人数从少爬到满）
@@ -3428,7 +3428,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     GM = gfCalc(); S.zq = zqMax(); S.lijie = false; S.fjN = 0; S.hp0 = hero.hp; S.noHitT = 0; S.xy = 0;
     S.k0 = typeof kills === 'number' ? kills : 0; S.coinGot = 0; S.taken = 0; S.hutiSum = 0; S.dps = {}; S.lastHp = hero.hp; S.coins = []; S.lvAt0 = S.lv; S.tutT = 0; S.stolen = 0; S.thiefCd = 8; S.catDone = false; TELE.length = 0; BOOM.length = 0;
     RT.node = nd; W.N = ROUTE.waves(nd); W.started = true; W.between = 0; W.pick = false; S.wind = null; S.recov = null; S.later = []; bolts.length = 0; zones.length = 0; DKO.length = 0; fx.length = 0;
-    zs.length = 0; eshots.length = 0; if (window.ARENA) { ARENA.start(ROUTE.mapOf(nd)); if (ARENA.preload && ROUTE.segOf) ARENA.preload(ROUTE.segOf(nd)); }
+    zs.length = 0; eshots.length = 0; if (window.ARENA) { ARENA.start(nd.map || ROUTE.mapOf(nd)); if (ARENA.preload && ROUTE.segOf) ARENA.preload(ROUTE.segOf(nd)); }
     startWave(1);
   }
 
@@ -4163,6 +4163,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     hero.x = arenaL + vw * .5; cam.x = arenaL;
     if (window.ARENA) ARENA.start();   // 竞技场试玩：重设边界、镜头和出生点
     RT.on = !!(window.ROUTE && ROUTE.on()); RT.dmg = 1; RT.cd = 1; RT.move = 1; RT.take = 1; RT.node = null;
+    if (RT.on && window.TRIAL_ARENA) { trialArena(); return; }   // 11/18 用户：武学试炼专门一张演武场，不过路线图
     if (RT.on) { W.started = false; ROUTE.start(); const r = window.__RESUME; if (r) { window.__RESUME = null; ROUTE.resume(r.route); restore(r.surv); } return; }
     startWave(1);
   }
@@ -4909,21 +4910,31 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   S10('fengjuan', '五禽归一', '五禽合一，最后再爆出五兽光影（半径 150，2.0 倍，收尾，必定爆劲）', () => L10T(5.6, () => { shake = Math.max(shake, .4); L10boom(HX(), HY(), FS(150), Hqn, 2.0, { fin: 1, boom: 1 }); }));
 
   // ---------- 11/18 木人桩（武学试炼里用）：不还手、打不死，统计伤害 ----------
-  const DUM = { on: '', log: [], tot: 0, t0: 0, hitAt: new Map() };
+  const DUM = { on: '', brk: 0, noSol: 0, log: [], tot: 0, t0: 0, hitAt: new Map() };
+  function trialArena() {   // 演武场：营地背景、不计时、默认一排木人、不刷兵
+    DUM.noSol = 1; beginNode({ id: 0, layer: 1, type: 'battle', tag: 'melee', map: 'camp', trial: 1, prev: [], next: [] }); W.tot = 9999;
+    later(.05, () => dummyMode('row'));
+  }
   function dummyMode(mode) {
-    DUM.on = mode || ''; zs.length = 0; DUM.log = []; DUM.tot = 0; DUM.t0 = performance.now(); DUM.hitAt.clear();
+    DUM.on = mode || ''; for (let i = zs.length - 1; i >= 0; i--) if (zs[i].dummy) zs.splice(i, 1); DUM.log = []; DUM.tot = 0; DUM.t0 = performance.now(); DUM.hitAt.clear();
     if (!DUM.on) return;
     const cx = hero.x + 60, cy = hero.y, pts = mode === 'one' ? [[cx, cy]] : mode === 'row' ? [0, 1, 2, 3, 4].map(i => [hero.x + 45 + i * 30, cy]) : [0, 1, 2, 3, 4, 5, 6, 7].map(i => [hero.x + Math.cos(i * Math.PI / 4) * 55, hero.y + Math.sin(i * Math.PI / 4) * 26]);
-    for (const [x0, y0] of pts) { const x = Math.max(arenaL + 14, Math.min(lockR - 14, x0)), y = clampY(y0); spawn('grunt', x, y); const z = zs[zs.length - 1]; z.dummy = 1; z.ax = x; z.ay = y; z.hp = z.maxHp = 9999; z.survMul = 1; z.f = x < hero.x ? 1 : -1; }
+    for (const [x0, y0] of pts) { const x = Math.max(arenaL + 14, Math.min(lockR - 14, x0)), y = clampY(y0); spawn('grunt', x, y); const z = zs[zs.length - 1]; z.dummy = 1; z.ax = x; z.ay = y; z.hp = z.maxHp = 9999; z.dhp = DUM.HP; z.survMul = 1; z.f = x < hero.x ? 1 : -1; }
   }
+  DUM.HP = 300;   // 会碎的木人：约 10 下普通招式
   function dummyTick(z, dt) {
-    const lost = (z.maxHp || 9999) - z.hp; if (lost > 0) { DUM.tot += lost; DUM.log.push([performance.now(), lost]); DUM.hitAt.set(z, performance.now()); }
+    if (z.brokeT > 0) { z.brokeT -= dt; z.hp = z.maxHp = 9999; z.dead = 0; if (z.brokeT <= 0) { z.hidden = false; z.dhp = DUM.HP; } return; }
+    const lost = (z.maxHp || 9999) - z.hp; if (lost > 0) { DUM.tot += lost; DUM.log.push([performance.now(), lost]); DUM.hitAt.set(z, performance.now());
+      if (DUM.brk && (z.dhp = (z.dhp == null ? DUM.HP : z.dhp) - lost) <= 0) { z.brokeT = 2; z.hidden = true; DUM.broke = (DUM.broke || 0) + 1; floaters.push({ x: z.x, y: z.y - 50, t: 0, txt: '碎！', color: '#ffcf70' }); sfx(CR, z.x); for (let i = 0; i < 7; i++) fx.push({ k: 'burst', x: z.x + R(-10, 10), y: z.y - R(0, 30), r: 8, t: 0, T: .35, col: '160,110,60' }); } }
     z.hp = z.maxHp = 9999; z.dead = 0; z.air = false; z.z = 0; z.vz = 0; z.vx = 0; z.stun = 0; z.daze = 0; z.moving = false; if (z.st !== 'idle') { z.st = 'idle'; z.t = 0; }
     const k = Math.min(1, dt * 4); z.x += (z.ax - z.x) * k; z.y += (z.ay - z.y) * k; z.f = z.ax < hero.x ? 1 : -1;
   }
-  function dummyStat() { const n = performance.now(); DUM.log = DUM.log.filter(e => n - e[0] < 5000); const w = Math.min(5, Math.max(1, (n - DUM.t0) / 1000)); return { on: DUM.on, tot: DUM.tot, dps: DUM.log.reduce((a, e) => a + e[1], 0) / w, n: [...DUM.hitAt.values()].filter(t => n - t < 1200).length, all: zs.filter(z => z.dummy).length }; }
+  function dummyStat0() { const n = performance.now(); DUM.log = DUM.log.filter(e => n - e[0] < 5000); const w = Math.min(5, Math.max(1, (n - DUM.t0) / 1000)); return { on: DUM.on, tot: DUM.tot, dps: DUM.log.reduce((a, e) => a + e[1], 0) / w, n: [...DUM.hitAt.values()].filter(t => n - t < 1200).length, all: zs.filter(z => z.dummy).length }; }
+  function dummyStat() { return Object.assign(dummyStat0(), { brk: DUM.brk, broke: DUM.broke || 0, sol: !DUM.noSol }); }
   function drawDummy(z) {   // 代码画的木人桩（等正式美术）
     const x = Math.round(z.x), y = Math.round(z.y), hit = DUM.hitAt.get(z), fl = hit && performance.now() - hit < 120;
+    if (z.brokeT > 0) { ctx.save(); ctx.fillStyle = '#5e3a1e'; ctx.fillRect(x - 7, y - 3, 14, 3); ctx.fillStyle = '#8a5a32'; ctx.fillRect(x - 4, y - 10, 8, 8); ctx.restore(); return; }
+    if (DUM.brk) { const f = Math.max(0, (z.dhp == null ? DUM.HP : z.dhp) / DUM.HP); ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.fillRect(x - 12, y - 52, 24, 3); ctx.fillStyle = '#e8b25a'; ctx.fillRect(x - 12, y - 52, 24 * f, 3); }
     ctx.save(); ctx.fillStyle = 'rgba(0,0,0,.28)'; ctx.beginPath(); ctx.ellipse(x, y, 10, 3.5, 0, 0, 7); ctx.fill();
     const wd = fl ? '#f6e2b8' : '#8a5a32', dk = fl ? '#e8c890' : '#5e3a1e';
     ctx.fillStyle = dk; ctx.fillRect(x - 7, y - 3, 14, 3);
@@ -4933,7 +4944,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     ctx.fillStyle = wd; ctx.beginPath(); ctx.arc(x, y - 40, 5, 0, 7); ctx.fill(); ctx.fillStyle = '#b8402a'; ctx.fillRect(x - 5, y - 41, 10, 2);
     ctx.restore();
   }
-  const TRIAL = { dummy: m => dummyMode(m), dummyStat, dummyClear() { DUM.log = []; DUM.tot = 0; DUM.t0 = performance.now(); }, slot(i, k) { S.slots[i] = k; }, bao(k) { gainBao(k); }, lvSet(k, l) { (S.lvLock = S.lvLock || {})[k] = l; }, SK, GF, MOT, WEPN, TIERN, wepOf, IMGU, spdTxt, spawn: t => edgeSpawn(t), count: t => zs.filter(z => !z.dead && z.type === t).length, long() { W.tot = 9999; if (W.t > W.tot - 5) W.t = 0; },
+  const TRIAL = { dummy: m => dummyMode(m), dummyStat, dummyClear() { DUM.log = []; DUM.tot = 0; DUM.broke = 0; DUM.t0 = performance.now(); }, dummyBrk(v) { DUM.brk = v ? 1 : 0; for (const z of zs) if (z.dummy) { z.dhp = DUM.HP; z.brokeT = 0; z.hidden = false; } }, soldiers(v) { DUM.noSol = v ? 0 : 1; if (!v) for (let i = zs.length - 1; i >= 0; i--) if (!zs[i].dummy) zs.splice(i, 1); }, slot(i, k) { S.slots[i] = k; }, bao(k) { gainBao(k); }, lvSet(k, l) { (S.lvLock = S.lvLock || {})[k] = l; }, SK, GF, MOT, WEPN, TIERN, wepOf, IMGU, spdTxt, spawn: t => edgeSpawn(t), count: t => zs.filter(z => !z.dead && z.type === t).length, long() { W.tot = 9999; if (W.t > W.tot - 5) W.t = 0; },
     setGf(ids) { S.gf = ['', '', '']; ids.slice(0, 3).forEach((id, i) => { S.gf[i] = id; }); GM = gfCalc(); }, setQg(id) { S.qg = id || ''; GM = gfCalc(); }, gf: () => S.gf.slice(), qg: () => S.qg, mul: k => skillMul(k), lv: k => lvOf(k), spd: k => spdTxt(SK[k]), rs: k => SK[k] && SK[k].dk ? rsOf(k) : null, setRs(k, v) { DRS[k] = v; try { localStorage.setItem('szz-dao-rs', JSON.stringify(DRS)); } catch (e) {} },
     sp: k => spOf(k), setSp(k, v) { DSP[k] = v; try { localStorage.setItem('szz-dao-sp', JSON.stringify(DSP)); } catch (e) {} }, spAll(v, w) { Object.keys(SK).forEach(k => { if (SK[k].dk && (w == null || wepOf(k) === w)) DSP[k] = v; }); try { localStorage.setItem('szz-dao-sp', JSON.stringify(DSP)); } catch (e) {} },
     FRN: ['idle', 'walk1', 'walk2', 'walk3', 'roll1', 'roll2', 'roll3', 'roll4', 'hurt', 'down', 'chop1', 'chop2', 'sweep1', 'sweep2', 'thrust1', 'thrust2', 'spin1', 'spin2', 'up1', 'up2'],
