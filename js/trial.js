@@ -25,13 +25,13 @@
 #szzTrial .lvr{margin-top:5px;display:flex;gap:4px;flex-wrap:wrap}#szzTrial .lvr button{padding:2px 7px;font-size:12px;background:#1c140d;border:1px solid #3a2a18;color:#efe2c4;cursor:pointer}#szzTrial .lvr button.on{border-color:#ffd86e;background:#3a2814}
 @media (max-aspect-ratio:1/1){#szzTrial{left:0;right:0;top:auto;bottom:0;width:auto;max-height:46vh}#szzTrial .ls{grid-template-columns:1fr 1fr 1fr}}`;
   // 11/18 用户：新画风（写实比例）的黄巾棍兵——演武场里打打看。图在 art/sprites/grunt_new/，帧尺寸按旧喽啰的精灵像素换算（站立高 85）
-  const GN = {"idle": [39.5, 85.0, 21.4, 84.4], "walk1": [52.9, 83.9, 26.1, 83.3], "walk2": [52.4, 84.1, 24.8, 83.6], "wind": [53.8, 92.7, 27.5, 92.2], "strike": [91.9, 67.5, 43.9, 67.0], "hurt": [80.1, 82.1, 49.7, 81.6], "down": [90.7, 29.8, 46.9, 29.2], "fly1": [86.7, 69.0, 62.1, 68.4], "fly2": [68.4, 79.3, 47.7, 78.7], "land": [92.2, 43.5, 43.8, 42.9]};
+  const GN = {"idle": [44.1, 95.0, 23.9, 94.3], "walk1": [59.1, 93.8, 29.2, 93.1], "walk2": [58.6, 94.0, 27.7, 93.4], "wind": [60.1, 103.6, 30.7, 103.0], "strike": [102.7, 75.4, 49.1, 74.9], "hurt": [89.5, 91.8, 55.5, 91.2], "down": [101.4, 33.3, 52.4, 32.6], "fly1": [96.9, 77.1, 69.4, 76.4], "fly2": [76.4, 88.6, 53.3, 88.0], "land": [103.0, 48.6, 49.0, 47.9]};
   function regNewGrunt() {
     if (typeof CH === 'undefined' || CH.grunt_new) return;
     CH.grunt_new = {};
     for (const [f, [w, h, ax, ay]] of Object.entries(GN)) { const img = new Image(), fr = { img, w, h, ax, ay, white: null, dark: null, skin: 0 };
       img.onload = () => { const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight; const g = c.getContext('2d'); g.drawImage(img, 0, 0); g.globalCompositeOperation = 'source-atop'; g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); fr.white = c; };
-      img.src = 'art/sprites/grunt_new/' + f + '.png'; CH.grunt_new[f] = fr; }
+      img.src = 'art/sprites/grunt_new/s_' + f + '.png'; CH.grunt_new[f] = fr; }
   }
   function skills(w) { const t = T(); return Object.keys(t.SK).filter(k => !t.SK[k].off && t.wepOf(k) === w).sort((a, b) => (t.SK[a].tier || 0) - (t.SK[b].tier || 0)); }
   function render() {
