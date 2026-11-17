@@ -1921,7 +1921,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   }
   // 11/18 用户：每招可选有没有位移（前探、跳起）、有没有残影；武学试炼里勾选，存在本机
   let AOPT = {}; try { AOPT = JSON.parse(localStorage.getItem('szz-anim-opt') || '{}') || {}; } catch (e) {}
-  const aOpt = k => Object.assign({ mv: 1, gh: 1 }, AOPT[k] || {});
+  const aOpt = k => Object.assign({ mv: 0, gh: 1 }, AOPT[k] || {});   // 11/18 用户：位移影响手感，默认关；残影默认开
   const tAnim0 = (...x) => tAnim(...x), tLean0 = (...x) => tLean(...x), tTrail0 = (...x) => tTrail(...x);
   function autoAnim(key) {   // 出手那一刻
     const k = SK[key], w = wepOf(key); if (!k || !k.dk || w === 11 || !k.pose || (TA && TA.t0 === DKT)) return;
