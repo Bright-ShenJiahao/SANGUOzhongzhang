@@ -434,8 +434,12 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     xinjian: [{ t: 'c', dx: 0, dy: 0, r: 55 }], yujian: [{ t: 'rect', dx: 0, dy: 0, L: 160, w: 8 }, { t: 'c', dx: 150, dy: 0, r: 40, tgt: 1 }], tianjian: [{ t: 'c', dx: 0, dy: 0, r: 99 }], jianlun: [{ t: 'c', dx: 0, dy: 0, r: 99 }],
     huofu: [{ t: 'c', dx: 100, dy: 0, r: 25, tgt: 1 }], feifu: [{ t: 'c', dx: 100, dy: 0, r: 18, tgt: 1 }], zhidao: [{ t: 'c', dx: 35, dy: 0, r: 25 }], lunchui: [{ t: 'fan', dx: 0, dy: 0, r: 55, half: 1.0 }],
     zhendi: [{ t: 'c', dx: 0, dy: 0, r: 41 }], xuanchui: [{ t: 'fan', dx: 0, dy: 0, r: 52, half: 1.3 }], fengjuan: [{ t: 'c', dx: 0, dy: 0, r: 50 }] };
+  // 11/18 用户：前摇提醒能调——每招的亮度、大小（武学试炼里拖，存在本机，复制设置时一起带上）
+  let PVO = {}; try { PVO = JSON.parse(localStorage.getItem('szz-pv-opt') || '{}') || {}; } catch (e) {}
+  const PVD = {}; for (const k of ['zhidao', 'lunchui', 'zhendi', 'kaishan', 'tiaotian', 'dizhen', 'xuanchui', 'zhichui', 'wanjun', 'leiting', 'pocheng', 'bengshan']) PVD[k] = { al: 1.8 };   // 锤的颜色和土地接近，默认调亮
+  const pvOpt = k => Object.assign({ al: 1, sc: 1 }, PVD[k] || {}, PVO[k] || {});
   function pvDraw(key, p, col) {   // 前摇提醒：照记下的形状画，越接近出手越亮
-    const L = PVR[key] || PVF[key]; if (!L) return false; const a = aim(), ca = Math.cos(a), sa = Math.sin(a), al = .25 + .55 * p, g = .55 + .45 * p;
+    const L = PVR[key] || PVF[key]; if (!L) return false; const po = pvOpt(key), a = aim(), ca = Math.cos(a), sa = Math.sin(a), al = Math.min(1, (.25 + .55 * p) * po.al), g = (.55 + .45 * p) * po.sc;
     for (const q of L) { let x = hero.x + (q.dx * ca - q.dy * sa), y = hero.y + (q.dx * sa + q.dy * ca) / 2;
       if (q.tgt) { let b = null, bd = 90; for (const z of zs) { if (z.dead) continue; const d = Math.hypot(z.x - x, (z.y - y) * 2); if (d < bd) { bd = d; b = z; } } if (b) { x = b.x; y = b.y; } }
       if (q.t === 'c') { vGround('v_circle', x, y, 0, q.r * 2 * g, q.r * 2 * g, al * .45, col); vGround('v_edge', x, y, 0, q.r * 2 * g, q.r * 2 * g, al, col); }
@@ -4324,7 +4328,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     // 前摇：脚下画出这一招将要覆盖的范围，越接近出手越亮
     if (S.wind && pvDraw(S.wind.key, Math.min(1, S.wind.t / S.wind.dur), hexRgb(S.wind.k.color))) {}
     else if (S.wind && !S.wind.k.none && (S.wind.k.beam || S.wind.k.ring || (S.wind.k.range && S.wind.k.half))) {   // 没记到形状的：按招式填的范围画（刀照旧）
-      const k = S.wind.k, p = Math.min(1, S.wind.t / S.wind.dur), a = aim(), q = k.dk ? rsOf(S.wind.key) * DLV.sz[lvOf(S.wind.key) - 1] : 1, col = hexRgb(k.color), al = .25 + .55 * p, g = .4 + .6 * p;
+      const k = S.wind.k, po = pvOpt(S.wind.key), p = Math.min(1, S.wind.t / S.wind.dur), a = aim(), q = (k.dk ? rsOf(S.wind.key) * DLV.sz[lvOf(S.wind.key) - 1] : 1) * po.sc, col = hexRgb(k.color), al = Math.min(1, (.25 + .55 * p) * po.al), g = .4 + .6 * p;
       if (k.beam) vGround('v_band', hero.x, hero.y - 6, a, (k.len || 180) * q * p, 34, al * .8, col, 0, .5);
       else if (k.ring) { const r = k.range * q * g; vGround('v_circle', hero.x, hero.y, 0, r * 2, r * 2, al * .45, col); vGround('v_edge', hero.x, hero.y, 0, r * 2, r * 2, al, col); }
       else { const r = k.range * q * g; vGround(k.half >= 1.15 ? 'v_fan180' : 'v_fan90', hero.x, hero.y - 6, a, r, k.half >= 1.15 ? r * 2 * Math.min(1, Math.sin(Math.min(k.half, Math.PI / 2)) + .05) : r * 2 * Math.sin(k.half) + 6, al * .75, col, 0, .5); }
@@ -5026,7 +5030,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     ctx.fillStyle = wd; ctx.beginPath(); ctx.arc(x, y - 40, 5, 0, 7); ctx.fill(); ctx.fillStyle = '#b8402a'; ctx.fillRect(x - 5, y - 41, 10, 2);
     ctx.restore();
   }
-  const TRIAL = { fxArr: () => fx, pvr: () => PVR, dummy: m => dummyMode(m), dummyStat, dummyClear() { DUM.log = []; DUM.tot = 0; DUM.broke = 0; DUM.t0 = performance.now(); }, dummyBrk(v) { DUM.brk = v ? 1 : 0; for (const z of zs) if (z.dummy) { z.dhp = DUM.HP; z.brokeT = 0; z.hidden = false; } }, soldiers(v) { DUM.noSol = v ? 0 : 1; if (!v) for (let i = zs.length - 1; i >= 0; i--) if (!zs[i].dummy) zs.splice(i, 1); }, slot(i, k) { S.slots[i] = k; }, bao(k) { gainBao(k); }, lvSet(k, l) { (S.lvLock = S.lvLock || {})[k] = l; }, SK, GF, MOT, WEPN, TIERN, wepOf, IMGU, spdTxt, spawn: t => edgeSpawn(t), count: t => zs.filter(z => !z.dead && z.type === t).length, long() { W.tot = 9999; if (W.t > W.tot - 5) W.t = 0; },
+  const TRIAL = { fxArr: () => fx, pvr: () => PVR, getPv: k => pvOpt(k), setPv: (k, o) => { PVO[k] = Object.assign(pvOpt(k), o); try { localStorage.setItem('szz-pv-opt', JSON.stringify(PVO)); } catch (e) {} }, dummy: m => dummyMode(m), dummyStat, dummyClear() { DUM.log = []; DUM.tot = 0; DUM.broke = 0; DUM.t0 = performance.now(); }, dummyBrk(v) { DUM.brk = v ? 1 : 0; for (const z of zs) if (z.dummy) { z.dhp = DUM.HP; z.brokeT = 0; z.hidden = false; } }, soldiers(v) { DUM.noSol = v ? 0 : 1; if (!v) for (let i = zs.length - 1; i >= 0; i--) if (!zs[i].dummy) zs.splice(i, 1); }, slot(i, k) { S.slots[i] = k; }, bao(k) { gainBao(k); }, lvSet(k, l) { (S.lvLock = S.lvLock || {})[k] = l; }, SK, GF, MOT, WEPN, TIERN, wepOf, IMGU, spdTxt, spawn: t => edgeSpawn(t), count: t => zs.filter(z => !z.dead && z.type === t).length, long() { W.tot = 9999; if (W.t > W.tot - 5) W.t = 0; },
     setGf(ids) { S.gf = ['', '', '']; ids.slice(0, 3).forEach((id, i) => { S.gf[i] = id; }); GM = gfCalc(); }, setQg(id) { S.qg = id || ''; GM = gfCalc(); }, gf: () => S.gf.slice(), qg: () => S.qg, mul: k => skillMul(k), lv: k => lvOf(k), spd: k => spdTxt(SK[k]), rs: k => SK[k] && SK[k].dk ? rsOf(k) : null, setRs(k, v) { DRS[k] = v; try { localStorage.setItem('szz-dao-rs', JSON.stringify(DRS)); } catch (e) {} },
     sp: k => spOf(k), setSp(k, v) { DSP[k] = v; try { localStorage.setItem('szz-dao-sp', JSON.stringify(DSP)); } catch (e) {} }, spAll(v, w) { Object.keys(SK).forEach(k => { if (SK[k].dk && (w == null || wepOf(k) === w)) DSP[k] = v; }); try { localStorage.setItem('szz-dao-sp', JSON.stringify(DSP)); } catch (e) {} },
     FRN: ['idle', 'walk1', 'walk2', 'walk3', 'roll1', 'roll2', 'roll3', 'roll4', 'hurt', 'down', 'chop1', 'chop2', 'sweep1', 'sweep2', 'thrust1', 'thrust2', 'spin1', 'spin2', 'up1', 'up2'],
@@ -5034,7 +5038,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     preDir: k => ({ wd_: 'dao', jian_: 'jian', chui_: 'chui', qiang_: 'spear', guandao_: 'guandao', bow_: 'bow', stone_: 'stone', huangfu_: 'fu', fan_: 'fan', quan_: 'quan', ji_: 'ji' })[preOf(k)] || 'dao',
     getAnim: k => aOpt(k), setAnim: (k, o) => { AOPT[k] = Object.assign(aOpt(k), o); try { localStorage.setItem('szz-anim-opt', JSON.stringify(AOPT)); } catch (e) {} },
     setPose: (k, o) => { DPS[k] = o; try { localStorage.setItem('szz-dao-pose', JSON.stringify(DPS)); } catch (e) {} },
-    poseAll: () => Object.keys(SK).filter(k => SK[k].dk && !SK[k].off).sort((a, b) => SK[a].tier - SK[b].tier).map(k => { const o = TRIAL.getPose(k); return `${SK[k].name}(${k}) 起手 ${o.a}${o.fa ? '（翻转）' : ''} → 出手 ${o.b}${o.fb ? '（翻转）' : ''}${aOpt(k).mv ? '' : ' · 无位移'}${aOpt(k).gh ? '' : ' · 无残影'}`; }).join('\n'),
+    poseAll: () => Object.keys(SK).filter(k => SK[k].dk && !SK[k].off).sort((a, b) => SK[a].tier - SK[b].tier).map(k => { const o = TRIAL.getPose(k); return `${SK[k].name}(${k}) 起手 ${o.a}${o.fa ? '（翻转）' : ''} → 出手 ${o.b}${o.fb ? '（翻转）' : ''}${aOpt(k).mv ? '' : ' · 无位移'}${aOpt(k).gh ? '' : ' · 无残影'}${pvOpt(k).al !== 1 ? ' · 提醒亮度×' + pvOpt(k).al : ''}${pvOpt(k).sc !== 1 ? ' · 提醒大小×' + pvOpt(k).sc : ''}`; }).join('\n'),
     rsAll: () => Object.keys(SK).filter(k => SK[k].dk && !SK[k].off).sort((a, b) => SK[a].tier - SK[b].tier).map(k => `${TIERN[SK[k].tier]} ${SK[k].name}(${k}) 范围×${rsOf(k)} 速度×${spOf(k)}（${spdTxt(SK[k])}）`).join('\n'), setLv(k, l) { S.lvLock = {}; if (k && l) S.lvLock[k] = l; } };
   // ================= 局末结算（11/16 用户定，照群侠：结算总览 / 武林评定 / 逐关战报） =================
   function newStat() { return { log: [], dmg: {} }; }
