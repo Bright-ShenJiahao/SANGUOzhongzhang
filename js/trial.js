@@ -89,7 +89,10 @@
     if (!document.getElementById('szzTrialCss')) { const s = document.createElement('style'); s.id = 'szzTrialCss'; s.textContent = css; document.head.appendChild(s); }
     if (!box) { box = document.createElement('div'); box.id = 'szzTrial'; document.body.appendChild(box); }
     box.innerHTML = '<div class="hd"><span>武学试炼 · 进场中…</span></div>';
-    await enterFight(); render(); clearTimeout(godT); keep();
+    // 11/18 用户：试炼借的是正常的一场仗（要先开一局、在路线图上点第一格），进场时用黑幕盖住，看不到标题、开局、路线图
+    let cv = document.getElementById('szzTrialCover'); if (!cv) { cv = document.createElement('div'); cv.id = 'szzTrialCover'; cv.style.cssText = 'position:fixed;inset:0;z-index:10038;background:#0c0806;display:flex;align-items:center;justify-content:center;color:#e6c98a;font:600 18px sans-serif;letter-spacing:4px'; cv.textContent = '武学试炼 · 进场中…'; document.body.appendChild(cv); }
+    try { await enterFight(); } finally { setTimeout(() => { const c = document.getElementById('szzTrialCover'); if (c) c.remove(); }, 250); }
+    render(); clearTimeout(godT); keep();
   }
   function close() { try { T().setLv(null); } catch (e) {} if (dum) { dum = ''; try { T().dummy(''); } catch (e) {} } window.TRIAL_ON = false; clearTimeout(godT); if (box) box.remove(); box = null; }
   window.TRIAL = { open, close };
