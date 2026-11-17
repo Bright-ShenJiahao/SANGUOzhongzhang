@@ -78,7 +78,7 @@ function updateDrops(dt) {
   }
   drops = drops.filter(d => !d.got);
   for (const f of floaters) f.t += dt;
-  floaters = floaters.filter(f => f.t < 1.1);
+  floaters = floaters.filter(f => f.t < (f.crit ? 1.25 : 1.1));
 }
 // 地面武器按可见内容的长边缩放；透明留白不参与尺寸计算。
 const DROP_WEAPON_SIZE = { stone: 10, hammer: 18, blade: 20, bow: 20, staff: 28, halberd: 32 };
@@ -169,12 +169,12 @@ function drawDrop(d) {
 }
 function drawFloaters() {
   for (const f of floaters) {
-    if (f.num) {   // 11/16 用户：照群侠——黄橙粗数字 + 深色描边，弹一下再往上飘；伤害越大字越大
-      const pop = 1 + .45 * Math.max(0, 1 - f.t / .12), sz = Math.min(22, 12 + Math.log10(Math.max(1, f.v)) * 3) * pop, yy = f.y - f.t * 22;
-      ctx.globalAlpha = Math.max(0, Math.min(1, (1.1 - f.t) / .35));
+    if (f.num) {   // 11/18 用户：普通白字、暴击红字；伤害越大字越大，暴击再大一号、弹得更狠
+      const c = !!f.crit, base = Math.min(c ? 26 : 19, (c ? 15 : 11) + Math.log10(Math.max(1, f.v)) * (c ? 3.4 : 2.6)), pop = 1 + (c ? .7 : .35) * Math.max(0, 1 - f.t / (c ? .16 : .1)), sz = base * pop, yy = f.y - f.t * (c ? 26 : 20);
+      ctx.globalAlpha = Math.max(0, Math.min(1, ((c ? 1.25 : 1) - f.t) / .3));
       ctx.font = '900 ' + sz.toFixed(1) + 'px "Arial Black",Impact,sans-serif'; ctx.textAlign = 'center'; ctx.lineJoin = 'round';
-      ctx.lineWidth = 4; ctx.strokeStyle = '#000'; ctx.strokeText(f.txt, f.x, yy);   // 11/16 用户：白字黑边粗体
-      ctx.fillStyle = '#fff'; ctx.fillText(f.txt, f.x, yy); continue;
+      ctx.lineWidth = c ? 5 : 3.5; ctx.strokeStyle = c ? '#2a0000' : '#000'; ctx.strokeText(f.txt, f.x, yy);
+      ctx.fillStyle = c ? '#ff3b2f' : '#fff'; ctx.fillText(f.txt, f.x, yy); continue;
     }
     const emph = f.big || f.dodge || f.gold;
     ctx.globalAlpha = Math.max(0, 1 - f.t / 1.1);

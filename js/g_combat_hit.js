@@ -18,8 +18,8 @@ function hit(z, dmg, kb, dir, knock, daze = 0, stun = .35, interrupt = false, ra
   const outcome=window.GEAR ? GEAR.hit(z,dmg,kb,dir,knock,daze,stun,interrupt,ranged,traits) : rawHit(z,dmg,kb,dir,knock,daze,stun,interrupt,ranged,traits);
   if (window.SURV && SURV.noStun && SURV.noStun() && z && !traits.dot && hp0 > z.hp) {   // 11/16 用户：照群侠跳整数伤害（×10，跟结算页一致）；同一只怪 0.12 秒内的几下合成一个数
     const v = (hp0 - Math.max(0, z.hp)) * 10, m = floaters.find(f => f.num && f.src === z && f.t < .12);
-    if (m) { m.v += v; m.txt = String(Math.round(m.v)); m.t = 0; }
-    else if (v >= .5) { let x = z.x + rnd(-8, 8), y = z.y - 46; for (let k = 0; k < 6 && floaters.some(f => f.num && f.t < .35 && Math.abs(f.x - x) < 24 && Math.abs((f.y - f.t * 22) - y) < 13); k++) { y -= 13; x += rnd(-6, 6); }   /* 一群怪挨着时数字往上错开，不叠成一坨 */ floaters.push({ x, y, t: 0, num: 1, src: z, v, txt: String(Math.max(1, Math.round(v))) }); }
+    if (m) { m.v += v; m.txt = String(Math.round(m.v)); m.t = 0; if (performance.now() < (window.__CRIT_UNTIL || 0)) m.crit = true; }
+    else if (v >= .5) { let x = z.x + rnd(-8, 8), y = z.y - 46; for (let k = 0; k < 6 && floaters.some(f => f.num && f.t < .35 && Math.abs(f.x - x) < 24 && Math.abs((f.y - f.t * 22) - y) < 13); k++) { y -= 13; x += rnd(-6, 6); }   /* 一群怪挨着时数字往上错开，不叠成一坨 */ floaters.push({ x, y, t: 0, num: 1, src: z, v, crit: performance.now() < (window.__CRIT_UNTIL || 0), txt: String(Math.max(1, Math.round(v))) }); }
   }
   if(armor&&!z.dead){z.st=old.st;z.t=old.t;z.air=false;z.z=0;z.vz=0;z.vx=0;z.stun=0;z.daze=0;}
   if (z && !traits.dot && !traits.secondary) window.__lastHit = `${z.type} 伤害${(+dmg).toFixed(2)} 血${(+hp0).toFixed(1)}→${(+z.hp).toFixed(1)} 击退${Math.round(kb)} ${outcome || ''}${z.air ? ' 空中' : ''}${z.hidden ? ' 隐身' : ''}${window.XIAOCHANG && XIAOCHANG.active() ? ' 校场' : ''}`;   // 排查「打了没伤害」
