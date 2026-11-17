@@ -4,7 +4,7 @@
   const MOTN = { chop: '劈', sweep: '横扫', thrust: '刺', spin: '转', up: '挑' };
   const ORDER = [0, 2, 3, 4, 12, 7, 5, 8, 9, 1, 10, 11];   // 刀 锤 枪 关刀 长戟 石子 弓 黄符 羽扇 剑 拳 腿
   const TC = ['#c9b27a', '#c9b27a', '#6fb8ff', '#c58cff', '#ffb347'];
-  let box = null, tab = 0, sel = null, godT = 0, rng = true, rngT = 0, show = 0, mini = false, dum = 'row', brk = 0, sol = 0, arena = false;   // 11/18 木人桩：'' 关 / one 单个 / row 一排 / ring 一圈
+  let box = null, tab = 0, sel = null, godT = 0, rng = true, rngT = 0, show = 0, ng = 0, mini = false, dum = 'row', brk = 0, sol = 0, arena = false;   // 11/18 木人桩：'' 关 / one 单个 / row 一排 / ring 一圈
   const DUMN = { '': '关', one: '单个', row: '一排', ring: '一圈' }, DUMO = ['', 'one', 'row', 'ring'];   // 11/16 用户：试炼里常驻弓手、投石手（看乾坤屏挡箭等）
   const T = () => window.SURV && SURV.trial;
   const css = `#szzTrial{position:fixed;z-index:10040;left:8px;top:56px;width:min(330px,46vw);max-height:calc(100vh - 70px);display:flex;flex-direction:column;background:rgba(14,10,7,.93);border:1px solid #8a6a3a;color:#efe2c4;font-size:13px;box-shadow:0 6px 20px rgba(0,0,0,.6)}
@@ -24,6 +24,15 @@
 #szzTrial .ps select{background:#1c140d;color:#efe2c4;border:1px solid #3a2a18;font-size:12px;padding:1px 4px}#szzTrial .ps label{font-size:12px;display:flex;align-items:center;gap:3px;cursor:pointer}
 #szzTrial .lvr{margin-top:5px;display:flex;gap:4px;flex-wrap:wrap}#szzTrial .lvr button{padding:2px 7px;font-size:12px;background:#1c140d;border:1px solid #3a2a18;color:#efe2c4;cursor:pointer}#szzTrial .lvr button.on{border-color:#ffd86e;background:#3a2814}
 @media (max-aspect-ratio:1/1){#szzTrial{left:0;right:0;top:auto;bottom:0;width:auto;max-height:46vh}#szzTrial .ls{grid-template-columns:1fr 1fr 1fr}}`;
+  // 11/18 用户：新画风（写实比例）的黄巾棍兵——演武场里打打看。图在 art/sprites/grunt_new/，帧尺寸按旧喽啰的精灵像素换算（站立高 85）
+  const GN = {"idle": [39.5, 85.0, 21.4, 84.4], "walk1": [52.9, 83.9, 26.1, 83.3], "walk2": [52.4, 84.1, 24.8, 83.6], "wind": [53.8, 92.7, 27.5, 92.2], "strike": [91.9, 67.5, 43.9, 67.0], "hurt": [80.1, 82.1, 49.7, 81.6], "down": [90.7, 29.8, 46.9, 29.2], "fly1": [86.7, 69.0, 62.1, 68.4], "fly2": [68.4, 79.3, 47.7, 78.7], "land": [92.2, 43.5, 43.8, 42.9]};
+  function regNewGrunt() {
+    if (typeof CH === 'undefined' || CH.grunt_new) return;
+    CH.grunt_new = {};
+    for (const [f, [w, h, ax, ay]] of Object.entries(GN)) { const img = new Image(), fr = { img, w, h, ax, ay, white: null, dark: null, skin: 0 };
+      img.onload = () => { const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight; const g = c.getContext('2d'); g.drawImage(img, 0, 0); g.globalCompositeOperation = 'source-atop'; g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); fr.white = c; };
+      img.src = 'art/sprites/grunt_new/' + f + '.png'; CH.grunt_new[f] = fr; }
+  }
   function skills(w) { const t = T(); return Object.keys(t.SK).filter(k => !t.SK[k].off && t.wepOf(k) === w).sort((a, b) => (t.SK[a].tier || 0) - (t.SK[b].tier || 0)); }
   function render() {
     const t = T(); if (!t || !box) return;
@@ -39,12 +48,13 @@
       ls = ids.map(id => { const g = t.GF[id]; return `<button data-g="${id}" class="${on.includes(id) ? 'on' : ''}"><span style="color:${TC[g.t + 1]}">${t.TIERN[g.t + 1]}</span> ${g.n}<small>${g.cn || (qg ? '轻功' : '内功')}</small></button>`; }).join('');
       const g = sel && t.GF[sel]; dt = g ? `<b>${g.n}</b>　${t.TIERN[g.t + 1]}阶<br>${g.d || ''}` : `<span style="opacity:.6">${qg ? '点一个轻功装上（只能装一个）' : '点心法装上（最多 3 个，再点取消）'}；武艺照常放。</span>`;
     }
-    box.innerHTML = `<div class="hd"><span>武学试炼</span><span>${mini ? '' : `<button class="dm">木人桩：${DUMN[dum]}</button> `}<button class="mn">${mini ? '展开' : '缩小'}</button></span></div>${mini ? '' : `<div class="dms"><span><button class="tbk">${brk ? '会碎的木人' : '不碎的木人'}</button> <button class="tsol">士兵：${sol ? '开' : '关'}</button> <button class="tshow">${show ? '收起首领美术' : '首领美术对比'}</button>${sol ? ` <button class="rg">远程兵：${rng ? '开' : '关'}</button>` : ''}</span></div>${dum ? '<div class="dms"><span class="dmv">—</span><button class="dmc">清零</button></div>' : ''}<div class="tabs">${tabs}</div><div class="ls">${ls}</div><div class="dt">${dt}</div>`}`;
+    box.innerHTML = `<div class="hd"><span>武学试炼</span><span>${mini ? '' : `<button class="dm">木人桩：${DUMN[dum]}</button> `}<button class="mn">${mini ? '展开' : '缩小'}</button></span></div>${mini ? '' : `<div class="dms"><span><button class="tbk">${brk ? '会碎的木人' : '不碎的木人'}</button> <button class="tsol">士兵：${sol ? '开' : '关'}</button> <button class="tng">${ng ? '新棍兵：开' : '新画风棍兵'}</button> <button class="tshow">${show ? '收起首领美术' : '首领美术对比'}</button>${sol ? ` <button class="rg">远程兵：${rng ? '开' : '关'}</button>` : ''}</span></div>${dum ? '<div class="dms"><span class="dmv">—</span><button class="dmc">清零</button></div>' : ''}<div class="tabs">${tabs}</div><div class="ls">${ls}</div><div class="dt">${dt}</div>`}`;
     box.querySelector('.mn').onclick = () => { mini = !mini; render(); };
     if (mini) return;
     const rg = box.querySelector('.rg'); if (rg) rg.onclick = () => { rng = !rng; render(); };
     box.querySelector('.dm').onclick = () => { dum = DUMO[(DUMO.indexOf(dum) + 1) % DUMO.length]; try { T().dummy(dum); } catch (e) {} render(); };
     box.querySelector('.tbk').onclick = () => { brk = brk ? 0 : 1; try { T().dummyBrk(brk); } catch (e) {} render(); };
+    box.querySelector('.tng').onclick = () => { ng = ng ? 0 : 1; window.NEW_GRUNT = !!ng; regNewGrunt(); try { if (ng) { sol = 1; T().soldiers(1); for (let i = 0; i < 4; i++) T().spawn('grunt'); } T().regrunt(ng); } catch (e) {} render(); };
     box.querySelector('.tshow').onclick = () => { show = show ? 0 : 1; try { T().showcase(show); } catch (e) {} render(); };
     box.querySelector('.tsol').onclick = () => { sol = sol ? 0 : 1; try { T().soldiers(sol); } catch (e) {} render(); };
     const dc = box.querySelector('.dmc'); if (dc) dc.onclick = () => { try { T().dummyClear(); } catch (e) {} };
@@ -102,7 +112,7 @@
     try { await enterFight(); } finally { setTimeout(() => { const c = document.getElementById('szzTrialCover'); if (c) c.remove(); }, 250); }
     render(); clearTimeout(godT); keep();
   }
-  function close() { try { T().setLv(null); } catch (e) {} if (dum) { try { T().dummy(''); } catch (e) {} } dum = 'row'; brk = 0; sol = 0; show = 0; mini = false; const wasArena = window.TRIAL_ARENA; try { T().soldiers(1); T().dummyBrk(0); } catch (e) {}
+  function close() { try { T().setLv(null); } catch (e) {} if (dum) { try { T().dummy(''); } catch (e) {} } dum = 'row'; brk = 0; sol = 0; show = 0; ng = 0; window.NEW_GRUNT = false; mini = false; const wasArena = window.TRIAL_ARENA; try { T().soldiers(1); T().dummyBrk(0); } catch (e) {}
     if (wasArena && window.TITLE && TITLE.mode && TITLE.mode() === 'game' && TITLE.show) { window.TRIAL_ON = false; TITLE.show(); } window.TRIAL_ARENA = false; window.TRIAL_ON = false; clearTimeout(godT); if (box) box.remove(); box = null; }   // 演武场关掉就回主界面
-  window.TRIAL = { open, close };
+  window.TRIAL = { open, close, regNew: regNewGrunt };
 })();

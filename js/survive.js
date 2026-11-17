@@ -346,7 +346,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     if (window.ARENA && ARENA.on()) { const p = ARENA.edge(); x = p.x; y = p.y; side = x < hero.x ? -1 : 1; }   // 俯视竞技场：四周都刷
     else { x = side < 0 ? cam.x + 6 : cam.x + vw - 6; x = Math.max(arenaL + 14, Math.min(lockR - 14, x)); y = R(M.top + 6, M.bot - 6); }
     spawn(type, x, y);
-    const z = zs[zs.length - 1]; z.f = -side; z.survMul = (1 + HP_SCALE * (W.n - 1)) * (HAS('yuxi') ? 1.15 : 1) * (S.enemyHpK || 1);
+    const z = zs[zs.length - 1]; z.f = -side; if (window.NEW_GRUNT && type === 'grunt' && typeof CH !== 'undefined' && CH.grunt_new) z.sprite = 'grunt_new'; z.survMul = (1 + HP_SCALE * (W.n - 1)) * (HAS('yuxi') ? 1.15 : 1) * (S.enemyHpK || 1);
     z.survTier = 0;
     if (!boss && (z.T.elite || ['yellow-heavy', 'yellow-shield', 'yellow-golem', 'cavalry'].includes(type))) { z.survTier = 1; z.hp = 7.5; z.maxHp = z.hp * z.survMul; }   // 四档：杂兵 ×1（3）、精英 ×2.5（7.5）
     z.hp *= z.survMul;
@@ -5057,10 +5057,10 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   const SHOWI = {}; for (const n of ['boss_blue', 'boss_green', 'boss_horse']) { const im = new Image(); im.src = 'art/ui/showcase/' + n + '.webp'; SHOWI[n] = im; }
   function showcase(on) {
     for (let i = zs.length - 1; i >= 0; i--) if (zs[i].show) zs.splice(i, 1);
-    if (!on) return;
-    const y0 = hero.y, L = [['real', 'grunt', 0], ['real', 'cheng_yuanzhi', 0], ['img', 'boss_blue', 56], ['img', 'boss_green', 56], ['img', 'boss_horse', 92]];
+    if (!on) return; if (window.TRIAL && TRIAL.regNew) TRIAL.regNew();
+    const y0 = hero.y, L = [['real', 'grunt', 0], ['new', 'grunt', 0], ['real', 'cheng_yuanzhi', 0], ['img', 'boss_blue', 56], ['img', 'boss_green', 56], ['img', 'boss_horse', 92]];
     L.forEach(([k, n, h], i) => { const x = Math.max(arenaL + 14, Math.min(lockR - 14, hero.x + 40 + i * 44)), y = clampY(y0 + (i % 2 ? 22 : -4)); spawn(k === 'real' ? n : 'grunt', x, y); const z = zs[zs.length - 1];
-      z.dummy = 1; z.show = 1; z.ax = x; z.ay = y; z.hp = z.maxHp = 9999; z.survMul = 1; z.f = -1; if (k === 'img') { z.showImg = n; z.showH = h; } else z.realDraw = 1; });
+      z.dummy = 1; z.show = 1; z.ax = x; z.ay = y; z.hp = z.maxHp = 9999; z.survMul = 1; z.f = -1; if (k === 'img') { z.showImg = n; z.showH = h; } else { z.realDraw = 1; if (k === 'new' && typeof CH !== 'undefined' && CH.grunt_new) z.sprite = 'grunt_new'; } });
   }
   function drawDummy(z) {   // 代码画的木人桩（等正式美术）
     if (z.realDraw) return false;
@@ -5078,7 +5078,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     ctx.fillStyle = wd; ctx.beginPath(); ctx.arc(x, y - 40, 5, 0, 7); ctx.fill(); ctx.fillStyle = '#b8402a'; ctx.fillRect(x - 5, y - 41, 10, 2);
     ctx.restore();
   }
-  const TRIAL = { showcase: on => showcase(on), fxArr: () => fx, pvr: () => PVR, getPv: k => pvOpt(k), getPs: k => pvShape(k), pvReach: k => PVM[k] || 0, setPs: (k, o) => { PVS[k] = Object.assign(pvShape(k), o); try { localStorage.setItem('szz-pv-shape', JSON.stringify(PVS)); } catch (e) {} }, setPv: (k, o) => { PVO[k] = Object.assign(pvOpt(k), o); try { localStorage.setItem('szz-pv-opt', JSON.stringify(PVO)); } catch (e) {} }, dummy: m => dummyMode(m), dummyStat, dummyClear() { DUM.log = []; DUM.tot = 0; DUM.broke = 0; DUM.t0 = performance.now(); }, dummyBrk(v) { DUM.brk = v ? 1 : 0; for (const z of zs) if (z.dummy) { z.dhp = DUM.HP; z.brokeT = 0; z.hidden = false; } }, soldiers(v) { DUM.noSol = v ? 0 : 1; if (!v) for (let i = zs.length - 1; i >= 0; i--) if (!zs[i].dummy) zs.splice(i, 1); }, slot(i, k) { S.slots[i] = k; }, bao(k) { gainBao(k); }, lvSet(k, l) { (S.lvLock = S.lvLock || {})[k] = l; }, SK, GF, MOT, WEPN, TIERN, wepOf, IMGU, spdTxt, spawn: t => edgeSpawn(t), count: t => zs.filter(z => !z.dead && z.type === t).length, long() { W.tot = 9999; if (W.t > W.tot - 5) W.t = 0; },
+  const TRIAL = { regrunt(on) { for (const z of zs) if (z.type === 'grunt' && !z.dummy) z.sprite = on && typeof CH !== 'undefined' && CH.grunt_new ? 'grunt_new' : 'grunt'; }, showcase: on => showcase(on), fxArr: () => fx, pvr: () => PVR, getPv: k => pvOpt(k), getPs: k => pvShape(k), pvReach: k => PVM[k] || 0, setPs: (k, o) => { PVS[k] = Object.assign(pvShape(k), o); try { localStorage.setItem('szz-pv-shape', JSON.stringify(PVS)); } catch (e) {} }, setPv: (k, o) => { PVO[k] = Object.assign(pvOpt(k), o); try { localStorage.setItem('szz-pv-opt', JSON.stringify(PVO)); } catch (e) {} }, dummy: m => dummyMode(m), dummyStat, dummyClear() { DUM.log = []; DUM.tot = 0; DUM.broke = 0; DUM.t0 = performance.now(); }, dummyBrk(v) { DUM.brk = v ? 1 : 0; for (const z of zs) if (z.dummy) { z.dhp = DUM.HP; z.brokeT = 0; z.hidden = false; } }, soldiers(v) { DUM.noSol = v ? 0 : 1; if (!v) for (let i = zs.length - 1; i >= 0; i--) if (!zs[i].dummy) zs.splice(i, 1); }, slot(i, k) { S.slots[i] = k; }, bao(k) { gainBao(k); }, lvSet(k, l) { (S.lvLock = S.lvLock || {})[k] = l; }, SK, GF, MOT, WEPN, TIERN, wepOf, IMGU, spdTxt, spawn: t => edgeSpawn(t), count: t => zs.filter(z => !z.dead && z.type === t).length, long() { W.tot = 9999; if (W.t > W.tot - 5) W.t = 0; },
     setGf(ids) { S.gf = ['', '', '']; ids.slice(0, 3).forEach((id, i) => { S.gf[i] = id; }); GM = gfCalc(); }, setQg(id) { S.qg = id || ''; GM = gfCalc(); }, gf: () => S.gf.slice(), qg: () => S.qg, mul: k => skillMul(k), lv: k => lvOf(k), spd: k => spdTxt(SK[k]), rs: k => SK[k] && SK[k].dk ? rsOf(k) : null, setRs(k, v) { DRS[k] = v; try { localStorage.setItem('szz-dao-rs', JSON.stringify(DRS)); } catch (e) {} },
     sp: k => spOf(k), setSp(k, v) { DSP[k] = v; try { localStorage.setItem('szz-dao-sp', JSON.stringify(DSP)); } catch (e) {} }, spAll(v, w) { Object.keys(SK).forEach(k => { if (SK[k].dk && (w == null || wepOf(k) === w)) DSP[k] = v; }); try { localStorage.setItem('szz-dao-sp', JSON.stringify(DSP)); } catch (e) {} },
     FRN: ['idle', 'walk1', 'walk2', 'walk3', 'roll1', 'roll2', 'roll3', 'roll4', 'hurt', 'down', 'chop1', 'chop2', 'sweep1', 'sweep2', 'thrust1', 'thrust2', 'spin1', 'spin2', 'up1', 'up2'],
