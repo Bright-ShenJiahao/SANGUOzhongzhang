@@ -1915,9 +1915,8 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   }
   function windXf() {   // 起手阶段：重击在画面上跳起、落地正好出手；其余近战微微下蹲蓄力
     const W = S.wind; if (!W || !W.k.dk || wepOf(W.key) === 11) return null; const win = Math.min(W.dur, W.k.dk ? .32 : .16), p = (W.t - (W.dur - win)) / win; if (p < 0) return null;
-    const ty = animOf(W.key); if (ty === 'cast') return { dx: -3 * p };
+    const ty = animOf(W.key); if (ty !== 'heavy') return null;   // 11/17 手机反馈抖动：自动连放时每次起手都微蹲/后撤，像在抖；起手只留重击的跳起
     if (ty === 'heavy') { const H = W.k.tier >= 4 ? 40 : W.k.tier >= 3 ? 30 : 22; return p < .2 ? { sy: 1 - p * .6, sx: 1 + p * .4 } : { dy: H * Math.sin(Math.PI * (p - .2) / .8), rot: .12 * (p - .2) }; }
-    return { sy: 1 - .06 * p, dx: -3 * p, rot: ty === 'slash' ? .12 * p : 0 };
   }
   function autoAnim(key) {   // 出手那一刻
     const k = SK[key], w = wepOf(key); if (!k || !k.dk || w === 11 || !k.pose || (TA && TA.t0 === DKT)) return;
