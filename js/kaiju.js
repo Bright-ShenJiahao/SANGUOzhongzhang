@@ -180,7 +180,7 @@
     document.body.appendChild(el); render();
     if (!figRaf) figRaf = requestAnimationFrame(figLoop);
   }
-  const HELDP = { 0: 'wd_', 1: 'jian_', 2: 'chui_', 3: 'qiang_', 4: 'guandao_', 5: 'bow_', 6: 'mao_', 7: 'stone_', 8: 'huangfu_', 9: 'fan_', 10: 'quan_', 11: 'quan_', 12: 'ji_' };
+  const HELDP = { 0: 'wd_', 1: 'jian_', 2: 'chui_', 3: 'qiang_', 4: 'guandao_', 5: 'bow_',  7: 'stone_', 8: 'huangfu_', 9: 'fan_', 10: 'quan_', 11: 'quan_', 12: 'ji_' };
   let figRaf = 0;
   function figLoop(t) {   // 人像：原地循环走路
     figRaf = 0; if (!el || !el.parentNode) return;

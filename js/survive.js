@@ -746,7 +746,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const DSP1 = { hengsao: 1.3, tuodao: 1.2, tiaozhan: 1.3, lianzhan: 1.2, daobo: 1.4, huima: 1.4, cuofeng: 1.4, liedihuan: 1.51, feilunren: 2.29, xuehe: 1.7, tianbeng: 2.2, wanren: 1.9 };
   const rsOf = k => (DRS[k] != null ? DRS[k] : DRS1[k] != null ? DRS1[k] : DRS0[(SK[k] && SK[k].tier) || 1] || 1) * (((OG().rng || {})[ATW[wepOf(k)]]) || 1);   /* 侍从：长兵范围 +15% */
   let DSP = {}; try { DSP = JSON.parse(localStorage.getItem('szz-dao-sp') || '{}') || {}; } catch (e) {}   // 起手/收势倍率（越大越慢），同样在武学试炼里拖动调
-  const spOf = k => (DSP[k] != null ? DSP[k] : DSP1[k] != null ? DSP1[k] : 1) * (typeof HAS === 'function' && SK[k] && SK[k].dk && ((HAS('huanshou') && WOFX[k] === 0) || (HAS('muqiang') && WOFX[k] === 3) || (HAS('qingshizi') && WOFX[k] === 7) || (HAS('qingtongchui') && WOFX[k] === 2) || (HAS('sangmugong') && WOFX[k] === 5) || (HAS('mugandao') && WOFX[k] === 4) || (HAS('pukui') && WOFX[k] === 9) || (HAS('zhusha') && WOFX[k] === 8) || (HAS('qingtongjian') && WOFX[k] === 1) || (HAS('chanshou') && WOFX[k] === 10) || (HAS('mugangji') && WOFX[k] === 12) || (HAS('zhubingchan') && WOFX[k] === 6) || (HAS('niupixue') && WOFX[k] === 11)) ? .9 : 1) * (typeof HAS === 'function' && HAS('qinglongdao') && WOFX[k] === 4 && S.gdSui != null && DKT - S.gdSui < 3 ? .85 : 1);   // 环首刀：刀的武艺快 10%
+  const spOf = k => (DSP[k] != null ? DSP[k] : DSP1[k] != null ? DSP1[k] : 1) * (typeof HAS === 'function' && SK[k] && SK[k].dk && ((HAS('huanshou') && WOFX[k] === 0) || (HAS('muqiang') && WOFX[k] === 3) || (HAS('qingshizi') && WOFX[k] === 7) || (HAS('qingtongchui') && WOFX[k] === 2) || (HAS('sangmugong') && WOFX[k] === 5) || (HAS('mugandao') && WOFX[k] === 4) || (HAS('pukui') && WOFX[k] === 9) || (HAS('zhusha') && WOFX[k] === 8) || (HAS('qingtongjian') && WOFX[k] === 1) || (HAS('chanshou') && WOFX[k] === 10) || (HAS('mugangji') && WOFX[k] === 12) || (HAS('niupixue') && WOFX[k] === 11)) ? .9 : 1) * (typeof HAS === 'function' && HAS('qinglongdao') && WOFX[k] === 4 && S.gdSui != null && DKT - S.gdSui < 3 ? .85 : 1);   // 环首刀：刀的武艺快 10%
   const SPDN = [[.62, '极快'], [.85, '快'], [1.05, '中'], [1.25, '慢'], [99, '极慢']];
   const spdTxt = o => { const m = o.dk ? spOf(o.key) : 1, wu = (o.dk ? o.wu : o.wu * 1.2) * m, rc = o.rc * m, t = wu * weaponWindMul(o.key) + rc; return `出手${SPDN.find(q => t <= q[0])[1]}　起手 ${(wu * weaponWindMul(o.key)).toFixed(2)} 秒 · 收势 ${rc.toFixed(2)} 秒`; };
   let DKT = 0; const DKO = [];   // 刀的持续判定（飞刃、血河、裂地环等）不靠 later：翻滚也不会断
@@ -2026,109 +2026,6 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
         if (!o.fin && o.t >= T + .1) { o.fin = 1; shake = Math.max(shake, .4); sfx(CR, hero.x); tRing(hero.x, hero.y, R / (DK * RM), L >= 7 ? 1.6 : 1.0, { up: 1, push: 40 }); } } })); } });
   Object.assign(DRS1, { chuanxin: .75, qiufeng: .75, dengtian: .75, jiandao: .75, dielang: .70, lingkong: .70, panlong: .75, juanyun: .78, feihong: .80, zhuishi: .80, lingyun: 1.0, wanying: 1.0 });
   Object.assign(DSP1, { chuanxin: 1.10, qiufeng: 1.10, dengtian: 1.15, jiandao: 1.30, dielang: 1.35, lingkong: 1.50, panlong: 1.30, juanyun: 1.90, feihong: 1.90, zhuishi: 2.00, lingyun: 2.30, wanying: 2.30 });
-  // ---------- 投矛（11/17 用户定，替掉弩）：扔出去、扎在地上、再捡回来；主打钉住（定身，精英减半、首领免疫）+ 击退 ----------
-  //   专属「拾矛」：扔出去的矛扎在地上留 5 秒，走到旁边就捡起来，每根 +15%（三棱鋋 +20%），最多 3 层，下一招投矛全部用掉
-  //   黄：破风标 燕尾掷 回马标　玄：连珠矛 落星标 鹿角阵 贯云锥　地：星辰坠 百川归海 撼岳掷　天：定海神针 千钧一掷
-  const MOCOL = { pofeng: '#e8dcc0', yanwei: '#f0d8a8', huimab: '#ffcf90', lianzhumao: '#e8d0a0', luoxing: '#ffd27a', lujiao: '#c8a070', guanyun: '#bfe0ff', xingchen: '#ffe8a0', baichuan: '#9fd8ff', hanyue: '#ffb060', dinghai: '#ffd040', qianjun: '#ffe060' };
-  const MG = [];   // 地上的矛
-  const MAOI = { g: new Image(), b: new Image(), l: new Image() }; MAOI.g.src = 'art/ui/fx2/mao_g.webp'; MAOI.b.src = 'art/ui/fx2/mao_gb.webp'; MAOI.l.src = 'art/ui/fx2/mao_gl.webp';
-  let mgJob = null;
-  const maoPer = () => HAS('sanleng') ? .2 : .15;
-  function mgTick() {
-    if (mgJob && DKO.includes(mgJob)) return;
-    mgJob = dmk({ T: 9999, tick(o, dt) {
-      const R = FS(40) * (HAS('lingren') ? 1.5 : 1);
-      for (let i = MG.length - 1; i >= 0; i--) { const g = MG[i]; g.t -= dt;
-        if (HAS('weiwu') && g.t < 4.6) { const dx = hero.x - g.x, dy = hero.y - g.y, d = Math.hypot(dx, dy) || 1, v = Math.min(d, FS(90) * dt); g.x += dx / d * v; g.y += dy / d * v; g.e.x = g.x; g.e.y = g.y; }   // 魏武短矛：矛慢慢飞回来
-        if (Math.hypot(hero.x - g.x, (hero.y - g.y) * 2) < R) { maoPick(g); MG.splice(i, 1); continue; }
-        if (g.t <= 0) { g.e.t = g.e.T; MG.splice(i, 1); } }
-      if (!MG.length) o.T = 0; } });
-    DKO.push(mgJob);
-  }
-  function maoPick(g) { if (g.e) g.e.t = g.e.T; const n0 = S.maoN || 0; S.maoN = Math.min(3, n0 + 1); if (S.maoN > n0) floaters.push({ x: hero.x, y: hero.y - 76, t: 0, txt: '拾矛×' + S.maoN, color: '#ffd27a' }); if (window.SFX) SFX.play('j_pick0'); }
-  function plant(x, y, a) { y = clampY(y); const e = { k: 'maoG', x, y, a, t: 0, T: 5 }; fx.push(e); MG.push({ x, y, t: 5, e }); mgTick(); }
-  const pin = (z, t) => { if (!z || z.dead || isBoss(z) || !t) return; stunz(z, tough(z) ? t / 2 : t); };
-  function MH(z, m, o = {}, p) { if (!z || z.dead) return false; const r = DH(z, m, o.kb == null ? 8 : o.kb, { x: p ? p.x : hero.x, up: o.up }); if (r && !z.dead) pin(z, o.pin); return r; }
-  // 一支投矛：直线飞，穿 o.pierce 个人（默认 1），停下的地方扎在地上（o.plant === false 不扎）
-  function mShot(p, a, L, W, m, o = {}) {
-    let i = 0; const cap = o.pierce == null ? 1 : o.pierce, done = pt => { if (o.plant !== false) plant(pt.x, pt.y, a); if (o.done) o.done(pt); };
-    stoneShot(p, a, FS(L), FS(W), openStone, z => { MH(z, typeof m === 'function' ? m(z, i) : m, Object.assign({}, o, { pin: i === 0 || !o.pin1 ? o.pin : 0 }), p); if (o.hit) o.hit(z, i); i++; if (i > cap) { done({ x: z.x, y: z.y }); return false; } return true; }, done, o.size || 1.5, 0, o.col || ['150,105,60', '235,225,200']); { const b = bolts[bolts.length - 1]; if (b) { b.jav = 1; b.jv = Math.min(2.4, (o.size || 1.5) / 1.5); } }
-  }
-  const mAim = r => { const z = nearest(FS(r)); return z ? Math.atan2((z.y - hero.y) * 2, z.x - hero.x) : aim(); };
-  const mPt = (a, d) => ({ x: hero.x + Math.cos(a) * FS(d), y: clampY(hero.y + Math.sin(a) * FS(d) * .5) });
-  const MGR = (k, tier, mot, o) => { const c0 = o.cast;
-    o.cast = function () { const n = S.maoN || 0; if (n) { CM *= 1 + maoPer() * n; S.maoN = 0; floaters.push({ x: hero.x, y: hero.y - 76, t: 0, txt: '拾矛 +' + Math.round(maoPer() * n * 100) + '%', color: '#ffb040' }); } sfx('bow', hero.x); return c0.call(this); };
-    add(k, Object.assign({ tier, dk: 1, key: k, color: MOCOL[k], bow: true }, o)); WOFX[k] = 6; MOTX[k] = mot; };
-  // ---- 黄 ----
-  MGR('pofeng', 1, 'chop', { name: '破风标', icon: '破', need: 400, wu: .30, rc: .24, beam: true, len: 280,
-    desc: '朝最近的敌人直线掷出一支矛（长 420），穿过 2 个人，停下的地方扎在地上，可以去捡。LV3 更重；LV5 第一个中矛的人被钉住 0.4 秒；LV7 能穿过 4 个人',
-    cast() { const L = dlv(); mShot(bowOrigin(), mAim(420), 420, 26, L >= 3 ? 1.3 : 1.15, { pierce: L >= 7 ? 4 : 2, pin: L >= 5 ? .4 : 0, pin1: 1 }); } });
-  MGR('yanwei', 1, 'chop', { name: '燕尾掷', icon: '燕', need: 380, wu: .32, rc: .24, beam: true, len: 260,
-    desc: '左右两手各斜掷一支矛，在身前 280 处交叉后继续飞（各长 400），每支穿过 2 个人，落地扎住。LV3 更重；LV5 交叉点炸开一小圈，钉住 0.3 秒；LV7 中间再掷一支',
-    cast() { const L = dlv(), a = mAim(380), T = mPt(a, 280), m = L >= 3 ? 1.05 : .9;
-      for (const s of [-1, 1]) { const p = { x: hero.x - Math.sin(a) * FS(60) * s, y: clampY(hero.y + Math.cos(a) * FS(30) * s) }; mShot(p, Math.atan2((T.y - p.y) * 2, T.x - p.x), 400, 22, m, { pierce: 2 }); }
-      if (L >= 7) mShot(bowOrigin(), a, 400, 22, m, { pierce: 2 });
-      if (L >= 5) later(.65, () => { fx.push({ k: 'burst', x: T.x, y: T.y, r: FS(55), t: 0, T: .3, col: gCol() }); for (const z of near(T.x, T.y, FS(55))) MH(z, .6, { pin: .3 }, T); }); } });
-  MGR('huimab', 1, 'chop', { name: '回马标', icon: '回', need: 300, wu: .30, rc: .24, beam: true, len: 220,
-    desc: '回身朝背后最近的敌人掷出一支矛（长 300），近距离把人打退 60，落地扎住。LV3 打退 90；LV5 钉住 0.4 秒；LV7 同时朝前方再掷一支',
-    cast() { const L = dlv(), f = aim(), bs = hittable().filter(z => (z.x - hero.x) * Math.cos(f) + (z.y - hero.y) * 2 * Math.sin(f) < 0 && dist(z, hero) < FS(300)).sort((p, q) => dist(p, hero) - dist(q, hero)), a = bs[0] ? Math.atan2((bs[0].y - hero.y) * 2, bs[0].x - hero.x) : f + Math.PI;
-      mShot(bowOrigin(), a, 300, 30, 1.3, { pierce: 1, kb: L >= 3 ? 90 : 60, pin: L >= 5 ? .4 : 0 }); if (L >= 7) mShot(bowOrigin(), f, 300, 26, .9, { pierce: 1 }); } });
-  // ---- 玄 ----
-  MGR('lianzhumao', 2, 'chop', { name: '连珠矛', icon: '珠', need: 400, wu: .38, rc: .28, beam: true, len: 260,
-    desc: '朝最近的敌人连掷 3 支矛（长 400），每支钉住 0.3 秒，落地扎住。LV3 连掷 4 支；LV5 每支钉住 0.5 秒；LV7 连掷 5 支',
-    cast() { const L = dlv(), n = L >= 7 ? 5 : L >= 3 ? 4 : 3; for (let j = 0; j < n; j++) later(j * .1, () => mShot(bowOrigin(), mAim(400) + (Math.random() - .5) * .1, 400, 22, .72, { pierce: 0, pin: L >= 5 ? .5 : .3 })); } });
-  MGR('luoxing', 2, 'up', { name: '落星标', icon: '星', need: 360, wu: .40, rc: .30, range: 360, half: Math.PI, ring: true,
-    desc: '把矛高高抛起，0.45 秒后落进远处最密的人堆（半径 80），钉住 0.4 秒；矛竖在地上 3 秒，周围的人每 0.5 秒被扎一下（0.25 倍），之后可以去捡。LV3 半径 100；LV5 抛两支，落到最密的两堆；LV7 扎得更疼（0.4 倍）',
-    cast() { const L = dlv(), R = FS(L >= 3 ? 100 : 80), ts = [jDense(FS(360))]; if (L >= 5) { const o = hittable().filter(z => dist(z, hero) < FS(360) && (!ts[0] || dist(z, ts[0]) > FS(140))); if (o.length) ts.push(o[0]); }
-      ts.forEach((t, j) => { const a = aim(), x = t ? t.x : mPt(a, 220).x, y = t ? t.y : mPt(a, 220).y; fx.push({ k: 'img', n: 'fx_aim', x, y, w: R * 2.3, t: 0, T: .45, col: '255,210,120', warn: 1 });
-        later(.45 + j * .1, () => { shake = Math.max(shake, .15); sfx(CR, x); fx.push({ k: 'burst', x, y, r: R, t: 0, T: .35, col: gCol() }); for (const z of near(x, y, R)) MH(z, 1.5, { pin: .4 }, { x, y }); plant(x, y, -Math.PI / 2);
-          DKO.push(dmk({ T: 3, nx: .5, tick(o) { if (o.t < o.nx) return; o.nx += .5; for (const z of near(x, y, FS(60))) MH(z, L >= 7 ? .4 : .25, { kb: 0 }, { x, y }); } })); }); }); } });
-  MGR('lujiao', 2, 'sweep', { name: '鹿角阵', icon: '鹿', need: 160, wu: .40, rc: .30, range: 160, half: 1.2,
-    desc: '在身前 90 处插下一排 5 支矛，变成鹿角拒马挡路 4 秒：碰到的人每 0.5 秒被扎一下（0.4 倍）并被推回去。插下的矛也能捡，捡走那支就没了。LV3 插 7 支；LV5 留 6 秒；LV7 扎得更疼（0.6 倍），第一次碰到的人钉住 0.3 秒',
-    cast() { const L = dlv(), a = aim(), n = L >= 3 ? 7 : 5, T = L >= 5 ? 6 : 4, c = mPt(a, 90), ps = [], seen = new Set();
-      for (let j = 0; j < n; j++) { const off = (j - (n - 1) / 2) * FS(34), x = c.x - Math.sin(a) * off, y = clampY(c.y + Math.cos(a) * off * .5); plant(x, y, a - Math.PI / 2); MG[MG.length - 1].t = T; MG[MG.length - 1].e.T = T; ps.push(MG[MG.length - 1]); }
-      DKO.push(dmk({ T, nx: 0, tick(o) { const tk = o.t >= o.nx; if (tk) o.nx += .5; for (const g of ps) { if (!MG.includes(g)) continue; for (const z of near(g.x, g.y, FS(26))) { if (tk || !seen.has(z)) { MH(z, L >= 7 ? .6 : .4, { kb: 0, pin: L >= 7 && !seen.has(z) ? .3 : 0 }, g); seen.add(z); } pushAway(z, g.x, g.y, FS(40), .15, { crash: false }); } } } })); } });
-  MGR('guanyun', 2, 'chop', { name: '贯云锥', icon: '锥', need: 380, wu: .42, rc: .30, beam: true, len: 280,
-    desc: '一支重矛穿透一条线（长 380），把一路上的人串起来一起拖到落点，落地扎住并炸开一小圈（半径 60，0.6 倍）。LV3 更重；LV5 落点的一圈钉住 0.5 秒；LV7 飞得更远（480）',
-    cast() { const L = dlv(), a = mAim(380), Ln = L >= 7 ? 480 : 380, end = mPt(a, Ln), hs = [];
-      mShot(bowOrigin(), a, Ln, 40, L >= 3 ? 1.6 : 1.4, { pierce: 99, size: 2, hit(z) { hs.push(z); }, done(pt) { for (const z of hs) if (!z.dead && !tough(z)) fPull(z, pt.x + (Math.random() - .5) * FS(20), pt.y, .12); later(.12, () => { fx.push({ k: 'burst', x: pt.x, y: pt.y, r: FS(60), t: 0, T: .3, col: gCol() }); for (const z of near(pt.x, pt.y, FS(60))) MH(z, .6, { pin: L >= 5 ? .5 : 0 }, pt); }); } }); } });
-  // ---- 地 ----
-  MGR('xingchen', 3, 'up', { name: '星辰坠', icon: '辰', need: 260, wu: .58, rc: .38, range: 260, half: Math.PI, ring: true,
-    desc: '0.5 秒内，身边一大圈（离身 60～260）从天上落下 10 支矛，每支落点一小圈（半径 45），钉住 0.2 秒，全部扎在地上可以捡。LV3 12 支；LV5 更重；LV7 每支落点半径 60',
-    cast() { const L = dlv(), n = L >= 3 ? 12 : 10, R = FS(L >= 7 ? 60 : 45), m = L >= 5 ? 1.0 : .8; shake = Math.max(shake, .15);
-      for (let j = 0; j < n; j++) { const g = Math.random() * Math.PI * 2, d = FS(60 + Math.random() * 200), x = hero.x + Math.cos(g) * d, y = clampY(hero.y + Math.sin(g) * d * .5);
-        later(j * .5 / n, () => { fx.push({ k: 'burst', x, y, r: R, t: 0, T: .28, col: gCol() }); for (const z of near(x, y, R)) MH(z, m, { pin: .2 }, { x, y }); plant(x, y, -Math.PI / 2 + (Math.random() - .5) * .5); if (j % 3 === 0) sfx(CR, x); }); } } });
-  MGR('baichuan', 3, 'spin', { name: '百川归海', icon: '川', need: 220, wu: .58, rc: .38, range: 220, half: Math.PI, ring: true,
-    desc: '先向身边一圈掷出 8 支矛扎在四周（长 200），0.6 秒后地上所有的矛一起飞回手里，沿路穿过敌人（0.7 倍），飞回来的矛算捡到（拾矛最多 3 层）。地上矛越多这招越强。LV3 掷 10 支；LV5 飞回更重（0.9 倍）；LV7 矛全部收回时身边炸开一圈（半径 90，0.8 倍）',
-    cast() { const L = dlv(), n = L >= 3 ? 10 : 8;
-      for (let j = 0; j < n; j++) mShot(bowOrigin(), j * Math.PI * 2 / n, 200, 20, .6, { pierce: 2 });
-      later(.6, () => { const gs = MG.splice(0); sfx(SW, hero.x);
-        for (const g of gs) { if (g.e) g.e.t = g.e.T; const a = Math.atan2((hero.y - g.y) * 2, hero.x - g.x), d = Math.max(20, dist(g, hero) / (DK * RM)); mShot({ x: g.x, y: g.y }, a, d, 22, L >= 5 ? .9 : .7, { pierce: 99, plant: false }); }
-        later(.45, () => { for (const g of gs) maoPick(g); if (L >= 7 && gs.length) { fx.push({ k: 'burst', x: hero.x, y: hero.y, r: FS(90), t: 0, T: .35, col: gCol() }); for (const z of near(hero.x, hero.y, FS(90))) MH(z, .8, {}); shake = Math.max(shake, .2); } }); }); } });
-  MGR('hanyue', 3, 'chop', { name: '撼岳掷', icon: '撼', need: 460, wu: .62, rc: .40, beam: true, len: 340,
-    desc: '一支巨矛直线横穿（长 560、宽 60），穿透不限，落地一圈震波（半径 120，1.0 倍）把人震退，矛扎在地上可以捡。LV3 巨矛宽 80；LV5 震波钉住 0.5 秒；LV7 震波半径 160',
-    cast() { const L = dlv(), a = mAim(460); shake = Math.max(shake, .2);
-      mShot(bowOrigin(), a, 560, L >= 3 ? 80 : 60, 2.0, { pierce: 99, size: 2.6, kb: 40, done(pt) { const R = FS(L >= 7 ? 160 : 120); shake = Math.max(shake, .35); sfx(CR, pt.x); fx.push({ k: 'ring', x: pt.x, y: pt.y, t: 0, T: .5, r: R }); fx.push({ k: 'burst', x: pt.x, y: pt.y, r: R, t: 0, T: .4, col: gCol() }); for (const z of near(pt.x, pt.y, R)) { MH(z, 1.0, { pin: L >= 5 ? .5 : 0 }, pt); pushAway(z, pt.x, pt.y, FS(60), .2, { crash: false }); } } }); } });
-  // ---- 天 ----
-  MGR('dinghai', 4, 'up', { name: '定海神针', icon: '针', need: 380, wu: .70, rc: .42, range: 380, half: Math.PI, ring: true,
-    desc: '一支巨矛从天上插进远处最密的人堆（半径 140，2.2 倍，钉住 0.6 秒），之后 6 秒不停向四周射出小矛（0.45 倍），周围的人变慢；结束时在旁边留下 3 支可以捡的矛。LV3 持续 8 秒；LV5 两个方向同时射；LV7 结束时炸开一大圈（半径 180，1.5 倍）',
-    cast() { const L = dlv(), t = jDense(FS(380)), a = aim(), x = t ? t.x : mPt(a, 240).x, y = t ? t.y : mPt(a, 240).y, R = FS(140), T = L >= 3 ? 8 : 6;
-      fx.push({ k: 'img', n: 'fx_aim', x, y, w: R * 2.3, t: 0, T: .5, col: '255,210,80', warn: 1 });
-      later(.5, () => { shake = Math.max(shake, .45); sfx(CR, x); fx.push({ k: 'burst', x, y, r: R, t: 0, T: .5, col: gCol() }); fx.push({ k: 'ring', x, y, t: 0, T: .6, r: R * 1.2 }); for (const z of near(x, y, R)) MH(z, 2.2, { pin: .6 }, { x, y });
-        const pole = { k: 'maoG', x, y, a: -Math.PI / 2, t: 0, T, big: 1 }; fx.push(pole);
-        DKO.push(dmk({ T: T + .02, nx: 0, g: 0, fin: 0, tick(o) { for (const z of near(x, y, FS(90))) addSL(z);
-          if (o.t >= o.nx && o.t < T) { o.nx += .3; o.g += .7; for (let s = 0; s < (L >= 5 ? 2 : 1); s++) mShot({ x, y }, o.g + s * Math.PI, 260, 18, .45, { pierce: 1, plant: false, size: 1.1 }); }
-          if (!o.fin && o.t >= T) { o.fin = 1; for (let j = 0; j < 3; j++) plant(x + Math.cos(j * 2.1) * FS(50), y + Math.sin(j * 2.1) * FS(25), -Math.PI / 2);
-            if (L >= 7) { fx.push({ k: 'burst', x, y, r: FS(180), t: 0, T: .45, col: gCol() }); shake = Math.max(shake, .35); for (const z of near(x, y, FS(180))) MH(z, 1.5, {}, { x, y }); } } } })); }); } });
-  MGR('qianjun', 4, 'chop', { name: '千钧一掷', icon: '钧', need: 640, wu: .72, rc: .42, beam: true, len: 400,
-    desc: '瞄准场上最强的敌人（有首领先打首领）蓄力 0.6 秒，一支巨矛穿透全屏（长 720、宽 50），一路上的人全部钉住 1.5 秒，打首领伤害翻倍，落地扎住。LV3 更重；LV5 射中目标时炸开一圈（半径 120，1.2 倍）；LV7 蓄力只要 0.4 秒',
-    cast() { const L = dlv(), t = nStrongM(640), cT = L >= 7 ? .4 : .6, a0 = t ? Math.atan2((t.y - hero.y) * 2, t.x - hero.x) : aim();
-      if (t) fx.push({ k: 'img', n: 'fx_aim', x: t.x, y: t.y, w: FS(70), t: 0, T: cT, col: '255,210,60', warn: 1 });
-      later(cT, () => { const a = t && !t.dead ? Math.atan2((t.y - hero.y) * 2, t.x - hero.x) : a0; shake = Math.max(shake, .4); sfx(CR, hero.x);
-        mShot(bowOrigin(), a, 720, 50, z => (L >= 3 ? 3.4 : 2.9) * (isBoss(z) ? 2 : 1), { pierce: 99, pin: 1.5, size: 2.6, col: ['200,150,60', '255,245,200'], hit(z) { if (L >= 5 && z === t) { fx.push({ k: 'burst', x: z.x, y: z.y, r: FS(120), t: 0, T: .4, col: gCol() }); for (const q of near(z.x, z.y, FS(120))) if (q !== z) MH(q, 1.2, {}, z); } } }); }); } });
-  const nStrongM = r => { const cs = hittable().filter(z => dist(z, hero) < FS(r)); return cs.length ? cs.reduce((b, z) => (isBoss(z) ? 1e9 : 0) + z.hp > (isBoss(b) ? 1e9 : 0) + b.hp ? z : b) : null; };
-  Object.assign(DRS1, { pofeng: .82, yanwei: .82, huimab: .80, lianzhumao: .82, luoxing: .85, lujiao: .85, guanyun: .82, xingchen: .85, baichuan: .85, hanyue: .88, dinghai: 1.0, qianjun: 1.0 });
-  Object.assign(DSP1, { pofeng: 1.3, yanwei: 1.3, huimab: 1.3, lianzhumao: 1.4, luoxing: 1.5, lujiao: 1.5, guanyun: 1.4, xingchen: 1.9, baichuan: 1.9, hanyue: 2.0, dinghai: 2.3, qianjun: 2.3 });
   // 石子：每次施放持有自己的命中计数及宝物触发次数。
   const SG = (key, tier, mot, need, wu, rc, rs, sp, name, desc, cast) => {
     const color = ['#c9b992', '#e0c49a', '#edab63', '#ffd477'][tier - 1];
@@ -2174,7 +2071,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     return b;
   };
   // 用每帧扫过的线段判定，按命中先后处理，避免快石穿过近处敌人。
-  const ARIMG = new Image(); ARIMG.src = 'art/ui/arrow_shot.webp'; const JVIMG = new Image(); JVIMG.src = 'art/ui/javelin_shot.webp';   // 11/17 投矛飞行图   // 弓箭飞行图（切自兵器表的箭）
+  const ARIMG = new Image(); ARIMG.src = 'art/ui/arrow_shot.webp';   // 弓箭飞行图（切自兵器表的箭）
   function stoneShot(p, a, length, width, accept, contact, end, size = 1, pierce = HAS('yunxing') ? 1 : 0, arrowColor = null) {
     const b = stoneBolt(p, a, length, size);
     if (arrowColor) Object.assign(b, { stone: 0, shape: 'arrow', col: arrowColor });
@@ -2898,7 +2795,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     // 11/16 用户定：出身 = 本门兵器 + 一个长处一个短处（照土豆兄弟），全部开放不用解锁；长戟、腿、弩 11/17 都做完，开局格子全部开放
     nongfu: { name: '小兵', tag: '刀 · 锤 · 剑', wep: 0, weps: [0, 2, 1], skill: 'hengsao', desc: '黄巾乱里拉来的壮丁，命硬。受到伤害 -20%、气血 +20%；修为 -15%', take: .8, hp: 1.2, xiu: .85, oa: [5, 4, 2, 1, 1, 2, 1, 3], at: [6, 4, 2, 2, 3, 2, 2, 1, 3, 2] },
     xiaozu: { name: '侍从', tag: '枪 · 关刀 · 长戟', wep: 3, weps: [3, 4, 12], skill: 'qiang', desc: '跟着将军上过阵，出手利落。武艺起手 -20%、长兵范围 +15%；移动速度 -10%', wu: .8, rng: { 2: 1.15 }, move: .9, oa: [4, 4, 5, 1, 1, 2, 1, 3], at: [4, 3, 4, 3, 2, 2, 2, 1, 3, 2] },
-    liehu: { name: '猎户', tag: '石子 · 弓 · 投矛', wep: 7, weps: [7, 5, 6], skill: 'feishi', desc: '山里打猎的好眼力。射艺武艺伤害 +25%、捡铜钱范围加倍；气血 -20%', dmg: { 6: 1.25 }, coinR: 2, hp: .8, oa: [3, 4, 1, 5, 1, 4, 1, 3], at: [3, 2, 2, 5, 3, 2, 5, 2, 3, 2] },
+    liehu: { name: '猎户', tag: '石子 · 弓', wep: 7, weps: [7, 5], skill: 'feishi', desc: '山里打猎的好眼力。射艺武艺伤害 +25%、捡铜钱范围加倍；气血 -20%', dmg: { 6: 1.25 }, coinR: 2, hp: .8, oa: [3, 4, 1, 5, 1, 4, 1, 3], at: [3, 2, 2, 5, 3, 2, 5, 2, 3, 2] },
     shusheng: { name: '书生', tag: '黄符 · 羽扇', wep: 8, weps: [8, 9], skill: 'huofu', desc: '饱读诗书，通晓术法。修为 +30%、修炼多 1 次刷新；受到伤害 +15%', xiu: 1.3, xrr: 1, take: 1.15, oa: [2, 1, 1, 1, 1, 2, 6, 4], at: [2, 1, 1, 2, 3, 6, 2, 6, 5, 1] },
     youxia: { name: '游侠', tag: '拳 · 腿', wep: 10, weps: [10, 11], skill: 'chongquan', desc: '仗义任侠，赤手空拳闯江湖。暴击 +10%、翻滚冷却 -30%；真气上限 -25%', crit: .1, roll: .7, zq: .75, oa: [5, 4, 2, 2, 1, 3, 1, 3], at: [3, 2, 2, 4, 4, 3, 2, 1, 3, 5] },
   };
@@ -2907,13 +2804,13 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   // ---------- 武艺类别 / 出身熟练 / 类别共鸣 / 连携 / 熟练度 ----------
   // 大类（出身熟练、心法专精）→ 具体兵器（连携、共鸣、施法时手里拿什么）
   const CATN = ['短兵器', '长兵器', '远程', '法师'], CATA = [1, 2, 3, 6];   // 大类 → 出身属性下标
-  const WEPN = ['刀', '剑', '锤', '枪', '关刀', '弓', '投矛', '石子', '黄符', '羽扇', '拳', '腿', '长戟'], WEPCAT = [0, 0, 0, 1, 1, 2, 2, 2, 3, 3, 0, 0, 1];
+  const WEPN = ['刀', '剑', '锤', '枪', '关刀', '弓', '', '石子', '黄符', '羽扇', '拳', '腿', '长戟'], WEPCAT = [0, 0, 0, 1, 1, 2, 2, 2, 3, 3, 0, 0, 1];
   // 11/12 用户定：刀一共 13 招（黄：横扫 连斩 刀波 / 玄：回马刀 刀轮 回旋斩 / 地：裂地环 地裂波 双环击飞 / 天：天崩地裂 飞轮刃 血河斩 万刃归宗），任何出身都能捡、能买，出刀时就是刀的帧，只是出身的短兵属性决定威力（农夫 ×1.18、书生 ×0.73）
   //   原本归剑/锤/关刀的连斩、地裂波、双环击飞、天崩地裂、回旋斩、血河斩、万刃归宗改归刀；四象剑气、震地不在名单里，留给以后的剑、锤
   const WOF = { hengsao: 0, daobo: 0, huima: 0, daolun: 0, lianzhan: 0, wanren: 0, dilie: 0, shuanghuan: 0, tianbeng: 0, xuanfeng: 0, xuehe: 0, liedihuan: 0, feilunren: 0, sixiang: 1, zhendi: 2, qiang: 3, chong: 3, lianci: 3, lansao: 3, tiaoqiang: 3, lihua: 3, touqiang: 3, huimaq: 3, qianglin: 3, bainiao: 3, qijin: 3, longyin: 3, jianyu: 5, huogong: 9, pili: 8, feishi: 7, sashi: 7, zashi: 7, tiaoshi: 7, xuanshi: 7, paoshi: 7, luoshi: 7, shici: 7, raoshen: 7, luanshi: 7, feihuang: 7, gunshi: 7, huofu: 8, feifu: 8, dingshen: 8, zhangxin: 8, wulei: 8, sadou: 8, tianlei: 8, fuhuo: 8, jiutian: 8, huangtian: 8, sanmei: 8 };
   Object.assign(WOF, WOFX);
   const wepOf = k => WOF[k] != null ? WOF[k] : 0;
-  const ONLY_DAO = true; const WEP_ON = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]; const wepOk = k => WEP_ON.includes(wepOf(k));   // 11/13：刀、枪、石子、黄符的招式做好了   // 11/12：刀、枪都有美术了   // 用户定 11/10：目前只有刀的美术，武艺奖励只出刀系；其他武器等美术补齐再开
+  const ONLY_DAO = true; const WEP_ON = [0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12]; const wepOk = k => WEP_ON.includes(wepOf(k));   // 11/13：刀、枪、石子、黄符的招式做好了   // 11/12：刀、枪都有美术了   // 用户定 11/10：目前只有刀的美术，武艺奖励只出刀系；其他武器等美术补齐再开
   const catOf = k => WEPCAT[wepOf(k)];
   // 武艺姿势：主角固定空手，放招时按这一招的兵器举起对应的施招帧（第 1 帧蓄力，第 2 帧出手，更多帧给第二刀和收势）
   // FRW 下标同 WEPN：[帧名前缀, 帧数]；法术暂按武艺配法器，之后改成按装备的法器
@@ -2928,12 +2825,12 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   // [起手, 出手, 第二击]；刀没有专门的刺帧，借横斩
   // 11/12 新图集：每种兵器 20 帧，统一命名 前缀 + idle/walk1-3/roll1-4/hurt/down/chop1-2/sweep1-2/thrust1-2/spin1-2/up1-2
   const FRM0 = p => ({ chop: [p + 'chop1', p + 'chop2', p + 'chop2'], sweep: [p + 'sweep1', p + 'sweep2', p + 'sweep1'], thrust: [p + 'thrust1', p + 'thrust2', p + 'thrust1'], spin: [p + 'spin1', p + 'spin2', p + 'spin2'], up: [p + 'up1', p + 'up2', p + 'chop2'] });
-  const FRM = { wd_: FRM0('wd_'), qiang_: FRM0('qiang_'), bow_: FRM0('bow_'), stone_: FRM0('stone_'), fan_: FRM0('fan_'), huangfu_: FRM0('huangfu_'), quan_: FRM0('quan_'), guandao_: FRM0('guandao_'), jian_: FRM0('jian_'), chui_: FRM0('chui_'), ji_: FRM0('ji_'), mao_: FRM0('mao_') };
+  const FRM = { wd_: FRM0('wd_'), qiang_: FRM0('qiang_'), bow_: FRM0('bow_'), stone_: FRM0('stone_'), fan_: FRM0('fan_'), huangfu_: FRM0('huangfu_'), quan_: FRM0('quan_'), guandao_: FRM0('guandao_'), jian_: FRM0('jian_'), chui_: FRM0('chui_'), ji_: FRM0('ji_') };
   Object.assign(MOT, MOTX);
-  const HELDP = { 0: 'wd_', 1: 'jian_', 2: 'chui_', 3: 'qiang_', 4: 'guandao_', 5: 'bow_', 6: 'mao_', 7: 'stone_', 8: 'huangfu_', 9: 'fan_', 10: 'quan_', 11: 'quan_', 12: 'ji_' };   // 书生开局拿黄符
+  const HELDP = { 0: 'wd_', 1: 'jian_', 2: 'chui_', 3: 'qiang_', 4: 'guandao_', 5: 'bow_',  7: 'stone_', 8: 'huangfu_', 9: 'fan_', 10: 'quan_', 11: 'quan_', 12: 'ji_' };   // 书生开局拿黄符
   // 11/13 用户定：开局在出身的两种本门兵器里挑一种，主角手里一直拿它，起手武艺也跟着换
   let startW = null; const heldW = () => startW != null && (OG().weps || []).includes(startW) ? startW : OG().wep;
-  const START_SK = { 0: 'hengsao', 2: 'zhendi', 3: 'qiang', 4: 'hengti', 7: 'feishi', 5: 'qishe', 8: 'huofu', 9: 'shanfeng', 1: 'jlianci', 10: 'chongquan', 11: 'chuanxin', 12: 'jici', 6: 'pofeng' };
+  const START_SK = { 0: 'hengsao', 2: 'zhendi', 3: 'qiang', 4: 'hengti', 7: 'feishi', 5: 'qishe', 8: 'huofu', 9: 'shanfeng', 1: 'jlianci', 10: 'chongquan', 11: 'chuanxin', 12: 'jici' };
   const startSk = () => START_SK[heldW()] || OG().skill;
   const heldPre = () => { const k0 = (S.slots || []).find(k => k && SK[k] && SK[k].dk && HELDP[wepOf(k)]); return HELDP[k0 ? wepOf(k0) : heldW()] || 'wd_'; };   // 11/17 用户：书生拿着扇子出招、站着却拿符——站立/走路的兵器跟第一招武艺走，没有武艺才用出身默认兵器
   const preOf = k => { const p = HELDP[wepOf(k)]; return p && FRM[p] ? p : heldPre(); };   // 11/14 用户：出什么武艺，就用那种兵器的动作图
@@ -2965,7 +2862,6 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     hengti: ['d', 170], pidao: ['d', 200], xiongshou: ['d', 170], xuanfengd: ['s', 200], daoqi: ['d', 220], handi: ['d', 170], zhanjiang: ['t', 110],
     qiang: ['d', 300], lianci: ['d', 140], lansao: ['d', 120], chong: ['d', 170], tiaoqiang: ['d', 190], lihua: ['s', 170], huimaq: ['d', 300] });
   Object.assign(FX2, { jici: ['d', 300], hengzhuo: ['d', 160], huaji: ['d', 220], goulian: ['d', 180], fengci: ['d', 220], paoji: ['t', 130], tiaozhen: ['d', 200], yuezhan: ['d', 240], huguan: ['s', 230], touyu: ['t', 220], yuanmenji: ['t', 240], fangtian: ['d', 340],
-    pofeng: ['d', 150], yanwei: ['d', 150], huimab: ['d', 160], lianzhumao: ['d', 150], luoxing: ['t', 150], lujiao: ['t', 200], guanyun: ['d', 190], xingchen: ['s', 320], baichuan: ['s', 340], hanyue: ['d', 220], dinghai: ['t', 260], qianjun: ['d', 240],   // 11/17 投矛：扔出去的招，出手特效只在手边一小段（矛自己飞）
     chuanxin: ['d', 240], qiufeng: ['s', 200], dengtian: ['d', 180], jiandao: ['s', 190], dielang: ['d', 220], lingkong: ['s', 160], panlong: ['s', 220], juanyun: ['s', 260], feihong: ['t', 150], zhuishi: ['t', 220], lingyun: ['t', 260], wanying: ['s', 330] });   // 11/17 长戟、腿
   for (const k in FX2) { const im = new Image(); im.src = 'art/ui/fx2/' + k + '.webp'; DGI['x_' + k] = im; }
   function fx2Play(key) {
@@ -3074,14 +2970,14 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   function powParts(k) {   // 威力 = 各项乘数，100 = 无加成
     const c = catOf(k), at = ATW[wepOf(k)] != null ? ATW[wepOf(k)] : 1, AN = ['体魄', '短兵', '长兵', '射艺', '术法', '身法', '射艺', '术法', '内力', '拳腿'];
     const w = wmul(k), am = attrMul(k), lm = mastMul(k), n = RES().cnt[wepOf(k)], rs = 1 + RESD[Math.min(5, n)] * (HAS('xinshu') ? 2 : 1);
-    const bw = 1 + (S.bao || []).reduce((t, b) => t + (BAO[b] && BAO[b].w === wepOf(k) ? BAO[b].wd : 0), 0), other = GM.all * GM.cat[c] * (1 + .06 * S.xy) * baoMul() * bw * rs * (HAS('baipi') && wepOf(k) !== 0 ? .7 : 1) * (HAS('longdan') && wepOf(k) !== 3 ? .7 : 1) * (HAS('yunxing') && wepOf(k) !== 7 ? .7 : 1) * (HAS('zhenyuechui') && wepOf(k) !== 2 ? .7 : 1) * (HAS('zhurigong') && wepOf(k) !== 5 ? .7 : 1) * (HAS('qinglongdao') && wepOf(k) !== 4 ? .7 : 1) * (HAS('qixingshan') && wepOf(k) !== 9 ? .7 : 1) * (HAS('taipingshu') && wepOf(k) !== 8 ? .7 : 1) * (HAS('yitian') && wepOf(k) !== 1 ? .7 : 1) * (HAS('elai') && wepOf(k) !== 10 ? .7 : 1) * (HAS('fangtianji') && wepOf(k) !== 12 ? .7 : 1) * (HAS('weiwu') && wepOf(k) !== 6 ? .7 : 1) * (HAS('zhuifengxue') && wepOf(k) !== 11 ? .7 : 1);
+    const bw = 1 + (S.bao || []).reduce((t, b) => t + (BAO[b] && BAO[b].w === wepOf(k) ? BAO[b].wd : 0), 0), other = GM.all * GM.cat[c] * (1 + .06 * S.xy) * baoMul() * bw * rs * (HAS('baipi') && wepOf(k) !== 0 ? .7 : 1) * (HAS('longdan') && wepOf(k) !== 3 ? .7 : 1) * (HAS('yunxing') && wepOf(k) !== 7 ? .7 : 1) * (HAS('zhenyuechui') && wepOf(k) !== 2 ? .7 : 1) * (HAS('zhurigong') && wepOf(k) !== 5 ? .7 : 1) * (HAS('qinglongdao') && wepOf(k) !== 4 ? .7 : 1) * (HAS('qixingshan') && wepOf(k) !== 9 ? .7 : 1) * (HAS('taipingshu') && wepOf(k) !== 8 ? .7 : 1) * (HAS('yitian') && wepOf(k) !== 1 ? .7 : 1) * (HAS('elai') && wepOf(k) !== 10 ? .7 : 1) * (HAS('fangtianji') && wepOf(k) !== 12 ? .7 : 1) * (HAS('zhuifengxue') && wepOf(k) !== 11 ? .7 : 1);
     const r = [['等级', lm], [(AN[at] || '属性') + ' ' + AT()[at], am], [w > 1.05 ? '本门' : w < .95 ? '外门' : '出身兵器', w], ['心法·宝物·同门', other]].filter(x => Math.abs(x[1] - 1) > .005);
     return { total: Math.round(100 * lm * am * w * other), rows: r };
   }
   function skillMul(k) {
     const c = catOf(k), n = RES().cnt[wepOf(k)], low = hero.hp / maxHp() < .3 ? 1 + .25 * GM.low : 1;
     const bw = (S.bao || []).reduce((t, b) => t + (BAO[b] && BAO[b].w === wepOf(k) ? BAO[b].wd : 0), 0);
-    return (1 + bw) * (HAS('baipi') && wepOf(k) !== 0 ? .7 : 1) * (HAS('longdan') && wepOf(k) !== 3 ? .7 : 1) * (HAS('yunxing') && wepOf(k) !== 7 ? .7 : 1) * (HAS('zhenyuechui') && wepOf(k) !== 2 ? .7 : 1) * (HAS('zhurigong') && wepOf(k) !== 5 ? .7 : 1) * (HAS('qinglongdao') && wepOf(k) !== 4 ? .7 : 1) * (HAS('qixingshan') && wepOf(k) !== 9 ? .7 : 1) * (HAS('taipingshu') && wepOf(k) !== 8 ? .7 : 1) * (HAS('yitian') && wepOf(k) !== 1 ? .7 : 1) * (HAS('elai') && wepOf(k) !== 10 ? .7 : 1) * (HAS('fangtianji') && wepOf(k) !== 12 ? .7 : 1) * (HAS('weiwu') && wepOf(k) !== 6 ? .7 : 1) * (HAS('zhuifengxue') && wepOf(k) !== 11 ? .7 : 1) * wmul(k) * attrMul(k) * (1 + RESD[Math.min(5, n)] * (HAS('xinshu') ? 2 : 1)) * mastMul(k) * GM.all * GM.cat[c] * low * (1 + .06 * S.xy) * baoMul();
+    return (1 + bw) * (HAS('baipi') && wepOf(k) !== 0 ? .7 : 1) * (HAS('longdan') && wepOf(k) !== 3 ? .7 : 1) * (HAS('yunxing') && wepOf(k) !== 7 ? .7 : 1) * (HAS('zhenyuechui') && wepOf(k) !== 2 ? .7 : 1) * (HAS('zhurigong') && wepOf(k) !== 5 ? .7 : 1) * (HAS('qinglongdao') && wepOf(k) !== 4 ? .7 : 1) * (HAS('qixingshan') && wepOf(k) !== 9 ? .7 : 1) * (HAS('taipingshu') && wepOf(k) !== 8 ? .7 : 1) * (HAS('yitian') && wepOf(k) !== 1 ? .7 : 1) * (HAS('elai') && wepOf(k) !== 10 ? .7 : 1) * (HAS('fangtianji') && wepOf(k) !== 12 ? .7 : 1) * (HAS('zhuifengxue') && wepOf(k) !== 11 ? .7 : 1) * wmul(k) * attrMul(k) * (1 + RESD[Math.min(5, n)] * (HAS('xinshu') ? 2 : 1)) * mastMul(k) * GM.all * GM.cat[c] * low * (1 + .06 * S.xy) * baoMul();
   }
   function critRoll() {   // 暴击：基础 5% + 心法；伤害 ×1.5 + 心诀
     if (!CK || !SK[CK]) return 1;
@@ -3298,11 +3194,6 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     hupi: { image: 'art/ui/bao/hupi.webp', n: '虎皮护手', q: 1, w: 10, wd: 0, d: '拳挂的眩晕多 0.2 秒；收尾一击伤害 +30%' },
     shisuo: { image: 'art/ui/bao/shisuo.webp', n: '石锁', q: 1, w: 10, wd: 0, d: '劲只要 7 点就能爆劲（原来 10 点）' },
     elai: { image: 'art/ui/bao/elai.webp', n: '恶来铁腕', q: 2, w: 10, wd: .3, d: '拳武艺伤害 +30%；爆劲时向四周再震一圈（半径 80），圈里的人全部眩晕', c: '拳以外的武艺伤害 −30%' },
-    zhubingchan: { n: '竹柄鋋', q: 0, w: 6, wd: 0, d: '投矛武艺起手、收势 ×0.9' },   // 11/17 用户定：投矛 5 件宝物
-    tiebamao: { n: '铁把短矛', q: 0, w: 6, wd: .12, d: '投矛武艺伤害 +12%' },
-    lingren: { n: '菱刃矛', q: 1, w: 6, wd: 0, d: '捡矛的范围 +50%' },
-    sanleng: { n: '三棱鋋', q: 1, w: 6, wd: 0, d: '「拾矛」每层 +20%（原来 15%）' },
-    weiwu: { n: '魏武短矛', q: 2, w: 6, wd: .3, d: '投矛武艺伤害 +30%；地上的矛会慢慢自己飞回你身边', c: '投矛以外的武艺伤害 −30%' },
     mugangji: { image: 'art/ui/bao/mugangji.webp', n: '木杆戟', q: 0, w: 12, wd: 0, d: '长戟武艺起手、收势 ×0.9' },   // 11/17 用户定：长戟 5 件宝物
     tieji: { image: 'art/ui/bao/tieji.webp', n: '铁戟', q: 0, w: 12, wd: .12, d: '长戟武艺伤害 +12%' },
     huaganji: { image: 'art/ui/bao/huaganji.webp', n: '画杆戟', q: 1, w: 12, wd: 0, d: '勾挂持续 3 秒（原来 2 秒），被勾挂的人受戟伤 +30%（原来 20%）' },
@@ -4378,7 +4269,6 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       if (b.shape || b.col === STN || b.col === FUC || b.big) {
         ctx.save(); ctx.translate(b.x, b.y - 16); ctx.globalAlpha = Math.min(1, al + .3); ctx.strokeStyle = 'rgba(40,30,20,.95)'; ctx.lineWidth = 1.5;
         if (b.big) { ctx.fillStyle = '#f2c94c'; ctx.beginPath(); ctx.arc(0, 0, 8, 0, 7); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#fff4c8'; ctx.beginPath(); ctx.arc(-2, -3, 3, 0, 7); ctx.fill(); }
-        else if (b.jav && JVIMG.complete && JVIMG.naturalWidth) { ctx.rotate(Math.atan2(b.vy * 2, b.vx)); const w = 46 * (b.jv || 1), h = w * JVIMG.naturalHeight / JVIMG.naturalWidth; ctx.drawImage(JVIMG, -w * .7, -h / 2, w, h); }
         else if (b.shape === 'arrow' && ARIMG.complete && ARIMG.naturalWidth) { ctx.rotate(Math.atan2(b.vy * 2, b.vx)); const w = 34, h = w * ARIMG.naturalHeight / ARIMG.naturalWidth; if (b.col && b.col[0] !== ARW.col[0]) { ctx.shadowColor = `rgb(${b.col[0]})`; ctx.shadowBlur = 8; } ctx.drawImage(ARIMG, -w / 2, -h / 2, w, h); ctx.shadowBlur = 0; }   // 11/17 用户：弓箭用兵器图里的箭，不再用代码画的线
         else if (b.shape === 'arrow' || b.shape === 'sword') { ctx.rotate(Math.atan2(b.vy * 2, b.vx)); const L = b.shape === 'sword' ? 18 : 14; ctx.strokeStyle = `rgb(${b.col[0]})`; ctx.lineWidth = b.shape === 'sword' ? 3 : 2; ctx.beginPath(); ctx.moveTo(-L, 0); ctx.lineTo(L - 4, 0); ctx.stroke(); ctx.fillStyle = `rgb(${b.col[1]})`; ctx.beginPath(); ctx.moveTo(L + 2, 0); ctx.lineTo(L - 5, -3); ctx.lineTo(L - 5, 3); ctx.closePath(); ctx.fill(); if (b.shape === 'sword') { ctx.fillStyle = '#d8b050'; ctx.fillRect(-L, -4, 3, 8); } }
         else if (b.shape === 'feather') { ctx.rotate(Math.atan2(b.vy * 2, b.vx)); ctx.fillStyle = '#ff8a40'; ctx.beginPath(); ctx.ellipse(0, 0, 10, 3.5, 0, 0, 7); ctx.fill(); ctx.fillStyle = '#ffe0a0'; ctx.fillRect(-8, -1, 14, 2); }
@@ -4480,12 +4370,6 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
         ctx.restore(); continue;
       }
       if (e.k === 'burst') { ctx.save(); ctx.translate(e.x, e.y); ctx.scale(1, .5); const r = e.r * (.4 + .6 * Math.min(1, p * 2)); ctx.fillStyle = `rgba(${e.col},${.28 * (1 - p)})`; ctx.beginPath(); ctx.arc(0, 0, r, 0, 7); ctx.fill(); ctx.strokeStyle = `rgba(255,250,230,${.9 * (1 - p)})`; ctx.lineWidth = 4 * (1 - p) + 1; ctx.stroke(); ctx.restore(); }
-      else if (e.k === 'maoG' && MAOI.g.complete && MAOI.g.naturalWidth) { const al = Math.min(1, (e.T - e.t) / .3, e.t / .08), im = e.big ? MAOI.b : (!e.big && e.T - e.t < 1.5 && Math.floor(e.t * 6) % 2 && MAOI.l.naturalWidth ? MAOI.l : MAOI.g), H = e.big ? 92 : 36, Wd = H * im.naturalWidth / im.naturalHeight, fl = Math.cos(e.a || 0) > 0;   /* 11/17 地上的矛：用户出的图；快消失时闪金光 */
-          ctx.save(); ctx.globalAlpha = al; ctx.translate(e.x, e.y + 2); if (fl) ctx.scale(-1, 1); ctx.drawImage(im, -Wd / 2, -H, Wd, H); ctx.restore(); }
-      else if (e.k === 'maoG') { const al = Math.min(1, (e.T - e.t) / .4, e.t / .08), S2 = e.big ? 2.6 : 1, b = e.a || 0, tx = Math.cos(b) * 0.35, L2 = 30 * S2; ctx.save(); ctx.globalAlpha = al; ctx.translate(e.x, e.y); ctx.lineCap = 'round';   /* 11/17 投矛：扎在地上的矛（斜插，尖朝下） */
-          const dx = (Math.cos(b) >= 0 ? -1 : 1) * 10 * S2, top = { x: dx, y: -L2 }; ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(0, 0, 6 * S2, 2.5 * S2, 0, 0, 7); ctx.fill();
-          ctx.strokeStyle = '#2a1a0e'; ctx.lineWidth = 4 * Math.sqrt(S2); ctx.beginPath(); ctx.moveTo(0, -3 * S2); ctx.lineTo(top.x, top.y); ctx.stroke(); ctx.strokeStyle = '#a07040'; ctx.lineWidth = 2 * Math.sqrt(S2); ctx.stroke();
-          ctx.fillStyle = '#b8402a'; ctx.beginPath(); ctx.arc(top.x * .82, top.y * .82, 2.2 * Math.sqrt(S2), 0, 7); ctx.fill();   /* 矛头扎进土里看不见，杆上一点红缨 */ if (!e.big && e.T - e.t < 1.2 && Math.floor(e.t * 8) % 2) { ctx.strokeStyle = 'rgba(255,220,120,.7)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.ellipse(0, 0, 9, 4, 0, 0, 7); ctx.stroke(); } ctx.restore(); }
       else if (e.k === 'nuTur') { const al = Math.min(1, (e.T - e.t) / .3, e.t / .1), S2 = e.big ? 1.9 : 1, fl = Math.cos(e.a) < 0 ? -1 : 1; ctx.save(); ctx.globalAlpha = al; ctx.translate(e.x, e.y); ctx.scale(S2 * fl, S2); ctx.lineCap = 'round';   /* 11/17 伏弩、床弩：地上架着的小弩（代码画） */
           ctx.strokeStyle = '#2a1a0e'; ctx.lineWidth = 4.5; ctx.beginPath(); ctx.moveTo(-9, 0); ctx.lineTo(-3, -12); ctx.lineTo(3, 0); ctx.moveTo(-14, -13); ctx.lineTo(12, -13); ctx.moveTo(10, -21); ctx.quadraticCurveTo(15, -13, 10, -5); ctx.stroke();
           ctx.strokeStyle = '#a8743a'; ctx.lineWidth = 2.2; ctx.stroke(); ctx.strokeStyle = 'rgba(240,225,190,.9)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(10, -21); ctx.lineTo(-6, -13); ctx.lineTo(10, -5); ctx.stroke(); ctx.restore(); }
@@ -4507,7 +4391,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       else if (e.k === 'line') { ctx.save(); ctx.translate(e.x, e.y - 14); ctx.scale(1, .5); ctx.rotate(e.a); const k = Math.min(1, p * 4); ctx.lineCap = 'round'; ctx.strokeStyle = `rgba(${e.col},${.55 * (1 - p)})`; ctx.lineWidth = e.w * 1.6 * (1 - p) + 4; ctx.beginPath(); ctx.moveTo(10, 0); ctx.lineTo(10 + e.L * k, 0); ctx.stroke(); ctx.strokeStyle = `rgba(255,255,255,${.95 * (1 - p)})`; ctx.lineWidth = 3; ctx.stroke(); ctx.restore(); }
     }
     for (const e of fx) {
-      if (e.k === 'bowFall' || e.k === 'hammerArc' || e.k === 'hammerRing' || e.k === 'stonefield' || e.k === 'stonefall' || e.k === 'burst' || e.k === 'mark' || e.k === 'jili' || e.k === 'nuTur' || e.k === 'maoG' || e.k === 'bolt' || e.k === 'line' || e.k === 'drop' || e.k === 'cut' || e.k === 'dg' || e.k === 'img' || e.k === 'fjg') continue;
+      if (e.k === 'bowFall' || e.k === 'hammerArc' || e.k === 'hammerRing' || e.k === 'stonefield' || e.k === 'stonefall' || e.k === 'burst' || e.k === 'mark' || e.k === 'jili' || e.k === 'nuTur' || e.k === 'bolt' || e.k === 'line' || e.k === 'drop' || e.k === 'cut' || e.k === 'dg' || e.k === 'img' || e.k === 'fjg') continue;
       if (e.k === 'gd') { gdDraw(e); continue; }
       if (e.k === 'ghost') {   // 残影：半透明主角，带一道拖尾
         const q = Math.min(1, e.t / e.mt), x = e.x0 + (e.x1 - e.x0) * q, y = e.y0 + (e.y1 - e.y0) * q, al = .6 * (1 - Math.max(0, (e.t - e.mt) / (e.T - e.mt)));
@@ -4543,7 +4427,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   const tex = (k, x, y, w, h) => { if (w <= 0) return false; const im = HIMG['h2_' + k]; if (!hok('h2_' + k)) return false; const sw = Math.min(im.naturalWidth, im.naturalWidth * w / (h * im.naturalWidth / im.naturalHeight)); ctx.drawImage(im, 0, 0, Math.max(1, sw), im.naturalHeight, x, y, w, h); return true; };   // 纹理条按高度缩放、从左往右截取，不拉花
   ['tuna','yangqi','tieyi','tayun','guanxing','taiping','hunyuan','gf00','gf01','gf02','gf03','gf30','gf31','gf32','gf33','qingshen','juqi','shixue','beishui','lhj','caoshang','xingyun','taxue','tiesha','yufeng'].forEach(id => himg('gf_' + id, 'art/ui/gf/' + id + '.webp'));
   const IMGU = { daolun: 'art/ui/kaiju/sk_daolun.webp' };
-  'hengsao tuodao tiaozhan daobo lianzhan huima cuofeng feilunren liedihuan xuehe tianbeng wanren hengti pidao xiongshou xuanfengd daoqi handi zhanjiang guowu yanyue tuodaoji shuiyan qinglong shanfeng liuying huifeng longjuan mihun shuangxue lianying bazhen huoyu chibi dongfeng qimen huofu feifu dingshen zhangxin wulei yaoshu huangtian tianlei fuhuo sadou jiutian sanmei jlianci zhantie jianqi liefeng feijian sixiang jinghong jianzhen xinjian jianlun yujian tianjian chongquan saotui shanggou xuanfengtui tieshan dahe huxiao lianhuan jingang qluanwu baji fengjuan qiang lansao lianci tiaoqiang lihua chong huimaq touqiang qianglin qijin bainiao longyin jici hengzhuo huaji goulian fengci paoji tiaozhen yuezhan huguan touyu yuanmenji fangtian chuanxin qiufeng dengtian jiandao dielang lingkong panlong juanyun feihong zhuishi lingyun wanying pofeng yanwei huimab lianzhumao luoxing lujiao guanyun xingchen baichuan hanyue dinghai qianjun'.split(' ').forEach(k => { IMGU[k] = 'art/ui/skill/' + k + '.webp'; himg(k, IMGU[k]); });   // 11/14 用户的刀 12 招图标（每招一把不同的中国刀 + 招式特效）
+  'hengsao tuodao tiaozhan daobo lianzhan huima cuofeng feilunren liedihuan xuehe tianbeng wanren hengti pidao xiongshou xuanfengd daoqi handi zhanjiang guowu yanyue tuodaoji shuiyan qinglong shanfeng liuying huifeng longjuan mihun shuangxue lianying bazhen huoyu chibi dongfeng qimen huofu feifu dingshen zhangxin wulei yaoshu huangtian tianlei fuhuo sadou jiutian sanmei jlianci zhantie jianqi liefeng feijian sixiang jinghong jianzhen xinjian jianlun yujian tianjian chongquan saotui shanggou xuanfengtui tieshan dahe huxiao lianhuan jingang qluanwu baji fengjuan qiang lansao lianci tiaoqiang lihua chong huimaq touqiang qianglin qijin bainiao longyin jici hengzhuo huaji goulian fengci paoji tiaozhen yuezhan huguan touyu yuanmenji fangtian chuanxin qiufeng dengtian jiandao dielang lingkong panlong juanyun feihong zhuishi lingyun wanying'.split(' ').forEach(k => { IMGU[k] = 'art/ui/skill/' + k + '.webp'; himg(k, IMGU[k]); });   // 11/14 用户的刀 12 招图标（每招一把不同的中国刀 + 招式特效）
   Object.assign(IMGU, {
     feishi: 'art/ui/skill/feishi.webp',
     sashi: 'art/ui/skill/sashi.webp',
@@ -4913,20 +4797,6 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   S10('zhuishi', '泰山压顶', '落点再砸下 3 块巨石（半径 70，1.0 倍，浮空）', () => L10T(.6, () => L10P(3, FS(300)).forEach((p, i) => L10T(i * .12, () => L10boom(p.x, p.y, FS(70), Htu, 1.0, { up: 1 })))));
   S10('lingyun', '踏破凌霄', '最后一脚之前，残影在全屏各处再踏 6 下（0.8 倍）', () => L10P(6, FS(400)).forEach((p, i) => L10T(.9 + i * .06, () => L10boom(p.x, p.y, FS(70), Htu, .8, {}))));
   S10('wanying', '追风逐电', '收势后腿影向外炸开 12 道腿风（长 300，0.6 倍，击退）', () => L10T(2.6, () => { for (let i = 0; i < 12; i++) L10line(HX(), HY(), i * Math.PI / 6, FS(300), FS(16), Htu, .6, { push: 60 }); }));
-  // ---------- 投矛 ----------
-  const Hm = (z, m, o) => MH(z, m, o || {});
-  S10('pofeng', '破风连标', '再并排掷出两支（0.6 倍，各穿 2 人）', () => L10T(.2, () => { for (const s of [-.12, .12]) mShot(bowOrigin(), A10() + s, 420, 22, .6, { pierce: 2 }); }));
-  S10('yanwei', '燕尾回翔', '交叉点再向两侧各掷一支（0.6 倍）', () => L10T(.6, () => { const a = A10(), c = mPt(a, 280); for (const s of [-1, 1]) mShot(c, a + s * 1.2, 260, 20, .6, { pierce: 1 }); }));
-  S10('huimab', '回马三标', '背后再扇形补两支（0.7 倍，打退）', () => L10T(.2, () => { const a = A10() + Math.PI; for (const s of [-.3, .3]) mShot(bowOrigin(), a + s, 300, 24, .7, { pierce: 1, kb: 60 }); }));
-  S10('lianzhumao', '连珠不绝', '连掷完再补 3 支（0.6 倍，钉住 0.3 秒）', () => { for (let j = 0; j < 3; j++) L10T(.5 + j * .1, () => mShot(bowOrigin(), A10(), 400, 20, .6, { pierce: 0, pin: .3 })); });
-  S10('luoxing', '流星落地', '落点周围再落下 4 支矛（半径 50，0.7 倍）', () => L10T(.7, () => L10P(4, FS(360)).forEach(p => { L10boom(p.x, p.y, FS(50), Hm, .7, {}); plant(p.x, p.y, -Math.PI / 2); })));
-  S10('lujiao', '鹿角连营', '拒马两头再各插一排斜矛（每排 3 支）', () => L10T(.2, () => { const a = A10(), c = mPt(a, 90); for (const s of [-1, 1]) for (let j = 0; j < 3; j++) { const off = s * FS(110 + j * 30); plant(c.x - Math.sin(a) * off - Math.cos(a) * FS(j * 18), clampY(c.y + Math.cos(a) * off * .5), a); } }));
-  S10('guanyun', '贯日穿云', '落点再朝原方向掷出一支（0.8 倍，穿透不限）', () => L10T(.95, () => { const a = A10(), p = mPt(a, 380); mShot(p, a, 300, 30, .8, { pierce: 99 }); }));
-  S10('xingchen', '星河倒挂', '再落下一轮 6 支（0.7 倍）', () => L10P(6, FS(260)).forEach((p, i) => L10T(.6 + i * .06, () => { L10boom(p.x, p.y, FS(45), Hm, .7, { pin: .2 }); plant(p.x, p.y, -Math.PI / 2); })));
-  S10('baichuan', '万流归宗', '收回后再向四周掷出一圈（8 支，0.6 倍）', () => L10T(1.15, () => { for (let j = 0; j < 8; j++) mShot(bowOrigin(), j * Math.PI / 4, 220, 18, .6, { pierce: 2 }); }));
-  S10('hanyue', '山崩地裂', '震波后 0.4 秒再余震一圈（半径 200，0.7 倍，钉住 0.3 秒）', () => L10T(1.6, () => { const p = mPt(A10(), 560); L10boom(p.x, p.y, FS(200), Hm, .7, { pin: .3 }); }));
-  S10('dinghai', '神针镇海', '巨矛插下时四周再插 4 支小矛（半径 60，1.0 倍）', () => L10T(.55, () => L10P(4, FS(380)).forEach(p => { L10boom(p.x, p.y, FS(60), Hm, 1.0, {}); plant(p.x, p.y, -Math.PI / 2); })));
-  S10('qianjun', '一掷千钧', '巨矛落地处炸开一大圈（半径 160，1.5 倍，钉住 1 秒）', () => L10T(1.1, () => { const t = L10P(1, FS(640))[0]; if (t) L10boom(t.x, t.y, FS(160), Hm, 1.5, { pin: 1 }); }));
   // ---------- 关刀 ----------
   S10('hengti', '横云出岫', '再绕身横扫一整圈（刀头带 40~150，0.8 倍）', () => L10T(.3, () => L10ring(HX(), HY(), FS(40), FS(150), Hg, .8, { pj: 1 })));
   S10('pidao', '开山断岳', '再劈出左右两道斜刀痕（0.9 倍）', () => L10T(.35, () => { for (const s of [-.4, .4]) L10line(HX(), HY(), A10() + s, FS(200), FS(20), Hg, .9, { pj: 1 }); }));
@@ -5031,12 +4901,12 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   S10('qluanwu', '崩星裂地', '再错开半格裂出第二颗星（0.8 倍，收尾）', () => L10T(.35, () => { for (let i = 0; i < 8; i++) L10line(HX(), HY(), A10() + i * Math.PI / 4 + Math.PI / 8, FS(180), FS(14), Hqn, .8, { fin: 1, st: .3 }); }));
   S10('baji', '力拔山兮', '再砸一次（全屏，1.2 倍，收尾，必定爆劲）', () => L10T(.9, () => { shake = Math.max(shake, .5); fx.push({ k: 'ring', x: HX(), y: HY(), t: 0, T: .7, r: 420 }); for (const z of near(HX(), HY(), 420)) Hqn(z, 1.2, { fin: 1, st: .6, boom: 1 }); }));
   S10('fengjuan', '五禽归一', '五禽合一，最后再爆出五兽光影（半径 150，2.0 倍，收尾，必定爆劲）', () => L10T(5.6, () => { shake = Math.max(shake, .4); L10boom(HX(), HY(), FS(150), Hqn, 2.0, { fin: 1, boom: 1 }); }));
-  const TRIAL = { slot(i, k) { S.slots[i] = k; }, bao(k) { gainBao(k); }, maoN() { return [S.maoN || 0, MG.length]; }, lvSet(k, l) { (S.lvLock = S.lvLock || {})[k] = l; }, SK, GF, MOT, WEPN, TIERN, wepOf, IMGU, spdTxt, spawn: t => edgeSpawn(t), count: t => zs.filter(z => !z.dead && z.type === t).length, long() { W.tot = 9999; if (W.t > W.tot - 5) W.t = 0; },
+  const TRIAL = { slot(i, k) { S.slots[i] = k; }, bao(k) { gainBao(k); }, lvSet(k, l) { (S.lvLock = S.lvLock || {})[k] = l; }, SK, GF, MOT, WEPN, TIERN, wepOf, IMGU, spdTxt, spawn: t => edgeSpawn(t), count: t => zs.filter(z => !z.dead && z.type === t).length, long() { W.tot = 9999; if (W.t > W.tot - 5) W.t = 0; },
     setGf(ids) { S.gf = ['', '', '']; ids.slice(0, 3).forEach((id, i) => { S.gf[i] = id; }); GM = gfCalc(); }, setQg(id) { S.qg = id || ''; GM = gfCalc(); }, gf: () => S.gf.slice(), qg: () => S.qg, mul: k => skillMul(k), lv: k => lvOf(k), spd: k => spdTxt(SK[k]), rs: k => SK[k] && SK[k].dk ? rsOf(k) : null, setRs(k, v) { DRS[k] = v; try { localStorage.setItem('szz-dao-rs', JSON.stringify(DRS)); } catch (e) {} },
     sp: k => spOf(k), setSp(k, v) { DSP[k] = v; try { localStorage.setItem('szz-dao-sp', JSON.stringify(DSP)); } catch (e) {} }, spAll(v, w) { Object.keys(SK).forEach(k => { if (SK[k].dk && (w == null || wepOf(k) === w)) DSP[k] = v; }); try { localStorage.setItem('szz-dao-sp', JSON.stringify(DSP)); } catch (e) {} },
     FRN: ['idle', 'walk1', 'walk2', 'walk3', 'roll1', 'roll2', 'roll3', 'roll4', 'hurt', 'down', 'chop1', 'chop2', 'sweep1', 'sweep2', 'thrust1', 'thrust2', 'spin1', 'spin2', 'up1', 'up2'],
     getPose: k => { const o = dpsOf(k); if (o) return Object.assign({ fa: 0, fb: 0 }, o); const m = motFr(k), hp = preOf(k); return { a: m[0].slice(hp.length), b: m[1].slice(hp.length), fa: 0, fb: 0 }; },
-    preDir: k => ({ wd_: 'dao', jian_: 'jian', chui_: 'chui', qiang_: 'spear', guandao_: 'guandao', bow_: 'bow', stone_: 'stone', huangfu_: 'fu', fan_: 'fan', quan_: 'quan', ji_: 'ji', mao_: 'mao' })[preOf(k)] || 'dao',
+    preDir: k => ({ wd_: 'dao', jian_: 'jian', chui_: 'chui', qiang_: 'spear', guandao_: 'guandao', bow_: 'bow', stone_: 'stone', huangfu_: 'fu', fan_: 'fan', quan_: 'quan', ji_: 'ji' })[preOf(k)] || 'dao',
     setPose: (k, o) => { DPS[k] = o; try { localStorage.setItem('szz-dao-pose', JSON.stringify(DPS)); } catch (e) {} },
     poseAll: () => Object.keys(SK).filter(k => SK[k].dk && !SK[k].off).sort((a, b) => SK[a].tier - SK[b].tier).map(k => { const o = TRIAL.getPose(k); return `${SK[k].name}(${k}) 起手 ${o.a}${o.fa ? '（翻转）' : ''} → 出手 ${o.b}${o.fb ? '（翻转）' : ''}`; }).join('\n'),
     rsAll: () => Object.keys(SK).filter(k => SK[k].dk && !SK[k].off).sort((a, b) => SK[a].tier - SK[b].tier).map(k => `${TIERN[SK[k].tier]} ${SK[k].name}(${k}) 范围×${rsOf(k)} 速度×${spOf(k)}（${spdTxt(SK[k])}）`).join('\n'), setLv(k, l) { S.lvLock = {}; if (k && l) S.lvLock[k] = l; } };
