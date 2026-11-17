@@ -2060,21 +2060,21 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     o.cast = function () { const n = S.maoN || 0; if (n) { CM *= 1 + maoPer() * n; S.maoN = 0; floaters.push({ x: hero.x, y: hero.y - 76, t: 0, txt: '拾矛 +' + Math.round(maoPer() * n * 100) + '%', color: '#ffb040' }); } sfx('bow', hero.x); return c0.call(this); };
     add(k, Object.assign({ tier, dk: 1, key: k, color: MOCOL[k], bow: true }, o)); WOFX[k] = 6; MOTX[k] = mot; };
   // ---- 黄 ----
-  MGR('pofeng', 1, 'thrust', { name: '破风标', icon: '破', need: 400, wu: .30, rc: .24, beam: true, len: 280,
+  MGR('pofeng', 1, 'chop', { name: '破风标', icon: '破', need: 400, wu: .30, rc: .24, beam: true, len: 280,
     desc: '朝最近的敌人直线掷出一支矛（长 420），穿过 2 个人，停下的地方扎在地上，可以去捡。LV3 更重；LV5 第一个中矛的人被钉住 0.4 秒；LV7 能穿过 4 个人',
     cast() { const L = dlv(); mShot(bowOrigin(), mAim(420), 420, 26, L >= 3 ? 1.3 : 1.15, { pierce: L >= 7 ? 4 : 2, pin: L >= 5 ? .4 : 0, pin1: 1 }); } });
-  MGR('yanwei', 1, 'thrust', { name: '燕尾掷', icon: '燕', need: 380, wu: .32, rc: .24, beam: true, len: 260,
+  MGR('yanwei', 1, 'chop', { name: '燕尾掷', icon: '燕', need: 380, wu: .32, rc: .24, beam: true, len: 260,
     desc: '左右两手各斜掷一支矛，在身前 280 处交叉后继续飞（各长 400），每支穿过 2 个人，落地扎住。LV3 更重；LV5 交叉点炸开一小圈，钉住 0.3 秒；LV7 中间再掷一支',
     cast() { const L = dlv(), a = mAim(380), T = mPt(a, 280), m = L >= 3 ? 1.05 : .9;
       for (const s of [-1, 1]) { const p = { x: hero.x - Math.sin(a) * FS(60) * s, y: clampY(hero.y + Math.cos(a) * FS(30) * s) }; mShot(p, Math.atan2((T.y - p.y) * 2, T.x - p.x), 400, 22, m, { pierce: 2 }); }
       if (L >= 7) mShot(bowOrigin(), a, 400, 22, m, { pierce: 2 });
       if (L >= 5) later(.65, () => { fx.push({ k: 'burst', x: T.x, y: T.y, r: FS(55), t: 0, T: .3, col: gCol() }); for (const z of near(T.x, T.y, FS(55))) MH(z, .6, { pin: .3 }, T); }); } });
-  MGR('huimab', 1, 'thrust', { name: '回马标', icon: '回', need: 300, wu: .30, rc: .24, beam: true, len: 220,
+  MGR('huimab', 1, 'chop', { name: '回马标', icon: '回', need: 300, wu: .30, rc: .24, beam: true, len: 220,
     desc: '回身朝背后最近的敌人掷出一支矛（长 300），近距离把人打退 60，落地扎住。LV3 打退 90；LV5 钉住 0.4 秒；LV7 同时朝前方再掷一支',
     cast() { const L = dlv(), f = aim(), bs = hittable().filter(z => (z.x - hero.x) * Math.cos(f) + (z.y - hero.y) * 2 * Math.sin(f) < 0 && dist(z, hero) < FS(300)).sort((p, q) => dist(p, hero) - dist(q, hero)), a = bs[0] ? Math.atan2((bs[0].y - hero.y) * 2, bs[0].x - hero.x) : f + Math.PI;
       mShot(bowOrigin(), a, 300, 30, 1.3, { pierce: 1, kb: L >= 3 ? 90 : 60, pin: L >= 5 ? .4 : 0 }); if (L >= 7) mShot(bowOrigin(), f, 300, 26, .9, { pierce: 1 }); } });
   // ---- 玄 ----
-  MGR('lianzhumao', 2, 'thrust', { name: '连珠矛', icon: '珠', need: 400, wu: .38, rc: .28, beam: true, len: 260,
+  MGR('lianzhumao', 2, 'chop', { name: '连珠矛', icon: '珠', need: 400, wu: .38, rc: .28, beam: true, len: 260,
     desc: '朝最近的敌人连掷 3 支矛（长 400），每支钉住 0.3 秒，落地扎住。LV3 连掷 4 支；LV5 每支钉住 0.5 秒；LV7 连掷 5 支',
     cast() { const L = dlv(), n = L >= 7 ? 5 : L >= 3 ? 4 : 3; for (let j = 0; j < n; j++) later(j * .1, () => mShot(bowOrigin(), mAim(400) + (Math.random() - .5) * .1, 400, 22, .72, { pierce: 0, pin: L >= 5 ? .5 : .3 })); } });
   MGR('luoxing', 2, 'up', { name: '落星标', icon: '星', need: 360, wu: .40, rc: .30, range: 360, half: Math.PI, ring: true,
@@ -2088,7 +2088,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     cast() { const L = dlv(), a = aim(), n = L >= 3 ? 7 : 5, T = L >= 5 ? 6 : 4, c = mPt(a, 90), ps = [], seen = new Set();
       for (let j = 0; j < n; j++) { const off = (j - (n - 1) / 2) * FS(34), x = c.x - Math.sin(a) * off, y = clampY(c.y + Math.cos(a) * off * .5); plant(x, y, a - Math.PI / 2); MG[MG.length - 1].t = T; MG[MG.length - 1].e.T = T; ps.push(MG[MG.length - 1]); }
       DKO.push(dmk({ T, nx: 0, tick(o) { const tk = o.t >= o.nx; if (tk) o.nx += .5; for (const g of ps) { if (!MG.includes(g)) continue; for (const z of near(g.x, g.y, FS(26))) { if (tk || !seen.has(z)) { MH(z, L >= 7 ? .6 : .4, { kb: 0, pin: L >= 7 && !seen.has(z) ? .3 : 0 }, g); seen.add(z); } pushAway(z, g.x, g.y, FS(40), .15, { crash: false }); } } } })); } });
-  MGR('guanyun', 2, 'thrust', { name: '贯云锥', icon: '锥', need: 380, wu: .42, rc: .30, beam: true, len: 280,
+  MGR('guanyun', 2, 'chop', { name: '贯云锥', icon: '锥', need: 380, wu: .42, rc: .30, beam: true, len: 280,
     desc: '一支重矛穿透一条线（长 380），把一路上的人串起来一起拖到落点，落地扎住并炸开一小圈（半径 60，0.6 倍）。LV3 更重；LV5 落点的一圈钉住 0.5 秒；LV7 飞得更远（480）',
     cast() { const L = dlv(), a = mAim(380), Ln = L >= 7 ? 480 : 380, end = mPt(a, Ln), hs = [];
       mShot(bowOrigin(), a, Ln, 40, L >= 3 ? 1.6 : 1.4, { pierce: 99, size: 2, hit(z) { hs.push(z); }, done(pt) { for (const z of hs) if (!z.dead && !tough(z)) fPull(z, pt.x + (Math.random() - .5) * FS(20), pt.y, .12); later(.12, () => { fx.push({ k: 'burst', x: pt.x, y: pt.y, r: FS(60), t: 0, T: .3, col: gCol() }); for (const z of near(pt.x, pt.y, FS(60))) MH(z, .6, { pin: L >= 5 ? .5 : 0 }, pt); }); } }); } });
@@ -2105,7 +2105,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       later(.6, () => { const gs = MG.splice(0); sfx(SW, hero.x);
         for (const g of gs) { if (g.e) g.e.t = g.e.T; const a = Math.atan2((hero.y - g.y) * 2, hero.x - g.x), d = Math.max(20, dist(g, hero) / (DK * RM)); mShot({ x: g.x, y: g.y }, a, d, 22, L >= 5 ? .9 : .7, { pierce: 99, plant: false }); }
         later(.45, () => { for (const g of gs) maoPick(g); if (L >= 7 && gs.length) { fx.push({ k: 'burst', x: hero.x, y: hero.y, r: FS(90), t: 0, T: .35, col: gCol() }); for (const z of near(hero.x, hero.y, FS(90))) MH(z, .8, {}); shake = Math.max(shake, .2); } }); }); } });
-  MGR('hanyue', 3, 'thrust', { name: '撼岳掷', icon: '撼', need: 460, wu: .62, rc: .40, beam: true, len: 340,
+  MGR('hanyue', 3, 'chop', { name: '撼岳掷', icon: '撼', need: 460, wu: .62, rc: .40, beam: true, len: 340,
     desc: '一支巨矛直线横穿（长 560、宽 60），穿透不限，落地一圈震波（半径 120，1.0 倍）把人震退，矛扎在地上可以捡。LV3 巨矛宽 80；LV5 震波钉住 0.5 秒；LV7 震波半径 160',
     cast() { const L = dlv(), a = mAim(460); shake = Math.max(shake, .2);
       mShot(bowOrigin(), a, 560, L >= 3 ? 80 : 60, 2.0, { pierce: 99, size: 2.6, kb: 40, done(pt) { const R = FS(L >= 7 ? 160 : 120); shake = Math.max(shake, .35); sfx(CR, pt.x); fx.push({ k: 'ring', x: pt.x, y: pt.y, t: 0, T: .5, r: R }); fx.push({ k: 'burst', x: pt.x, y: pt.y, r: R, t: 0, T: .4, col: gCol() }); for (const z of near(pt.x, pt.y, R)) { MH(z, 1.0, { pin: L >= 5 ? .5 : 0 }, pt); pushAway(z, pt.x, pt.y, FS(60), .2, { crash: false }); } } }); } });
@@ -2120,7 +2120,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
           if (o.t >= o.nx && o.t < T) { o.nx += .3; o.g += .7; for (let s = 0; s < (L >= 5 ? 2 : 1); s++) mShot({ x, y }, o.g + s * Math.PI, 260, 18, .45, { pierce: 1, plant: false, size: 1.1 }); }
           if (!o.fin && o.t >= T) { o.fin = 1; for (let j = 0; j < 3; j++) plant(x + Math.cos(j * 2.1) * FS(50), y + Math.sin(j * 2.1) * FS(25), -Math.PI / 2);
             if (L >= 7) { fx.push({ k: 'burst', x, y, r: FS(180), t: 0, T: .45, col: gCol() }); shake = Math.max(shake, .35); for (const z of near(x, y, FS(180))) MH(z, 1.5, {}, { x, y }); } } } })); }); } });
-  MGR('qianjun', 4, 'thrust', { name: '千钧一掷', icon: '钧', need: 640, wu: .72, rc: .42, beam: true, len: 400,
+  MGR('qianjun', 4, 'chop', { name: '千钧一掷', icon: '钧', need: 640, wu: .72, rc: .42, beam: true, len: 400,
     desc: '瞄准场上最强的敌人（有首领先打首领）蓄力 0.6 秒，一支巨矛穿透全屏（长 720、宽 50），一路上的人全部钉住 1.5 秒，打首领伤害翻倍，落地扎住。LV3 更重；LV5 射中目标时炸开一圈（半径 120，1.2 倍）；LV7 蓄力只要 0.4 秒',
     cast() { const L = dlv(), t = nStrongM(640), cT = L >= 7 ? .4 : .6, a0 = t ? Math.atan2((t.y - hero.y) * 2, t.x - hero.x) : aim();
       if (t) fx.push({ k: 'img', n: 'fx_aim', x: t.x, y: t.y, w: FS(70), t: 0, T: cT, col: '255,210,60', warn: 1 });

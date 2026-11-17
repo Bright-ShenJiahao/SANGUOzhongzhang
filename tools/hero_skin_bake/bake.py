@@ -28,7 +28,7 @@ def bake_frame(f,r,c):
     else:
         m&=base[...,3]==0;out[m]=W[m]
     return out
-ROW={'dao':1,'jian':1,'chui':1,'spear':2,'guandao':2,'ji':2,'mao':2,'bow':3,'stone':1,'fu':1,'fan':1,'quan':4}
+ROW={'dao':1,'jian':1,'chui':1,'spear':2,'guandao':2,'ji':2,'mao':1,'bow':3,'stone':1,'fu':1,'fan':1,'quan':4}
 def sheet(data,key,name):
     bg=np.array([70,110,70.]);sh=Image.new('RGB',(2400 if key in('spear','guandao') else 2000,1200),(70,110,70));d=ImageDraw.Draw(sh)
     for i,f in enumerate(data['sets'][key]):

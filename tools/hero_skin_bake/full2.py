@@ -233,7 +233,7 @@ def compose(key,wname):
     out=base.copy()
     if info and wname:
         d=info['d'];th=math.degrees(math.atan2(d[1],d[0]))
-        two=wname in('spear','guandao','ji','mao')
+        two=wname in('spear','guandao','ji')
         if two:
             g=info['gaps'];tg=(g[0]+g[-1])/2 if len(g)>=2 else (info['tmin']+info['tmax'])/2
         else:
