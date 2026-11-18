@@ -487,8 +487,8 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   fx.push = function (...a) { const k = CK && SK[CK] ? CK : null;
     for (const e of a) if (e && !e.sk && k) e.sk = k;
     const b = e => fxBase(e && e.boss ? null : e && e.sk);
-    a = a.filter(e => !(e && e.n === 'r_dust' && b(e) === 'g') && !(e && (e.k === 'dg' || e.k === 'cut') && e.n && GLOWN.has(e.n) && e.n !== 'r_hit' && b(e) === 'n'));
-    for (const e of a) if (e && e.n && GLOW[e.n] && b(e) === 'g') { e.n = GLOW[e.n]; if (!e.wh) e.wh = .25; if (!e.col) e.col = e.boss ? '255,140,60' : '255,236,190'; }
+    a = a.filter(e => !(e && e.n === 'r_dust' && b(e) === 'g') && !(e && !e.noMap && (e.k === 'dg' || e.k === 'cut') && e.n && GLOWN.has(e.n) && e.n !== 'r_hit' && b(e) === 'n'));
+    for (const e of a) if (e && e.n && !e.noMap && GLOW[e.n] && b(e) === 'g') { e.n = GLOW[e.n]; if (!e.wh) e.wh = .25; if (!e.col) e.col = e.boss ? '255,140,60' : '255,236,190'; }
     return _fxPush2.apply(this, a); };
   function _fxPush2(...a) { if (PVREC) for (const e of a) try { pvRec(e); } catch (er) { if (!window.__pvE) { window.__pvE = 1; console.error('pvRec', er); } } return Array.prototype.push.apply(this, a); };
   function pvStart(key) { pvEnd(); PVREC = { key, t0: DKT, hx: hero.x, hy: hero.y, a: aim(), sh: [] }; }
@@ -3325,11 +3325,15 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   }
   const bhFall = (x, y, L, col, k) => { if (fxBh(k || CK) && wepOf(k || CK) === 0 && bhImgOK('bh10')) { fx.push({ k: 'bhi', m: 'fall', n: 'bh10', x, y, w: L * 1.4, H: L * 1.6, ax: .5, ay: .92, col, t: 0, T: .6 }); return; } if (fxBh(k || CK) && wepOf(k || CK) === 0) fx.push({ k: 'bh', m: 'fall', x, y, L, H: L * 1.6, col, t: 0, T: .5 }); };
   // 11/18 用户：写实刀光图和真实判定对不上——武学试炼里每招可调 大小/前后/上下/角度（存本机，复制发 Claude 写死进 DGA0）
-  const DGA0 = {}; let DGA = {}; try { DGA = JSON.parse(localStorage.getItem('szz-dga') || '{}') || {}; } catch (e) {}
+  const FXT0 = {};   // 刀招特效对齐工具的导出（用户调好发来后写死在这里）
+  const DGA0 = {"hengsao":{"s":1,"dx":-6,"dy":15,"r":-6},"lianzhan":{"s":1,"dx":-4,"dy":21,"r":0}};   // 11/18 用户在武学试炼里对齐
+  let DGA = {}; try { DGA = JSON.parse(localStorage.getItem('szz-dga') || '{}') || {}; } catch (e) {}
   const dga = k => Object.assign({ s: 1, dx: 0, dy: 0, r: 0 }, DGA0[k] || {}, DGA[k] || {});
   function daoSlash(key, a1, x1, y1) {
     const m = DGM[key], o = SK[key]; if (!m || !o) return; daoSlash.t = DKT;
     const a = a1 != null ? a1 : aim(), f = Math.cos(a) >= 0 ? 1 : -1, hx = x1 != null ? x1 : hero.x, hy = y1 != null ? y1 : hero.y, R = Math.max(30, (o.range || (o.len ? o.len / 2 : 60)) * DK * rsOf(key)), t = o.tier || 1;
+    const FT = FXT0[key];   // 11/18 用户：刀招特效对齐工具导出的设置（两层：主特效 + 叠加），有就整个照它画
+    if (FT) { for (const o of [FT.l1, FT.l2]) { if (!o || o.img === 'none' || o.on === 0 || !DGI[o.img]) continue; fx.push({ k: 'dg', n: o.img, w: o.w, ax: o.ax, ay: o.ay, x: hx + f * o.x, y: hy + o.y, rot: o.r ? f * o.r * Math.PI / 180 : 0, sy: o.sy || 1, f, t: 0, T: t >= 4 ? .42 : t >= 3 ? .34 : .24, col: hexRgb(o.color || SK[key].color), al: o.al == null ? 1 : o.al, wh: o.img.startsWith('r_') ? 0 : .25, noMap: 1 }); } if (t >= 4) shake = Math.max(shake, .25); return; }
     const J = dga(key);
     if (!['xuehe', 'feilunren', 'liedihuan', 'tianbeng', 'wanren'].includes(key)) bhSwing(key, a, hx, hy, R);
     fx.push({ k: 'dg', n: m[0], w: R * m[1] * J.s, ax: m[2], ay: m[3], x: hx + f * (m[4] + J.dx), y: hy + m[5] + J.dy, rot: J.r ? f * J.r * Math.PI / 180 : 0, sy: m[6] || 1, f, t: 0, T: t >= 4 ? .42 : t >= 3 ? .34 : .24, col: hexRgb(o.color), al: 1, wh: m[0].startsWith('r_') ? 0 : [.15, .15, .25, .3, .4][t], ghost: t === 2 && !m[0].startsWith('r_') });
