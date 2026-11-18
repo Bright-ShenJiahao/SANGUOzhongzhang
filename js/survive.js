@@ -938,7 +938,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     freeze = Math.min(freeze, Math.max(f0, .04));
     if (SK[CK] && (SK[CK].stone || SK[CK].hammer || SK[CK].bow)) {
       freeze = Math.max(freeze, .035);
-      stoneBurst(z, 8 + SK[CK].tier * 2, .16);
+      { const hm = FXH0[wepOf(CK)] || 'c'; if (hm === 'q') fx.push({ k: 'dg', n: 'q_hit', qf: 1, x: z.x + R(-6, 6), y: z.y - 26 * (z.sc || 1) + R(-8, 6), w: 40 * (z.sc || 1), f: Math.random() < .5 ? 1 : -1, t: 0, T: .28, seed: Math.random() * 6, col: '' }); else if (hm === 'c') stoneBurst(z, 8 + SK[CK].tier * 2, .16, 'hit'); }   // 11/18 受击三选一（工具「受击」页）
     } else {   // 11/14 用户：打中时的手感——敌人身上闪一道刀痕；同一时刻多个目标只顿一次帧（约 0.05 秒）
       const sk = SK[CK], col = (sk && sk.color || '#ffe0a0').replace('#', ''), rgb = [0, 2, 4].map(i => parseInt(col.slice(i, i + 2), 16)).join(',');
       const hm = sk && FXH0[wepOf(CK)] || 'c'; if (hm === 'q') fx.push({ k: 'dg', n: 'q_hit', qf: 1, x: z.x + R(-6, 6), y: z.y - 26 * (z.sc || 1) + R(-8, 6), w: 40 * (z.sc || 1), f: Math.random() < .5 ? 1 : -1, t: 0, T: .28, seed: Math.random() * 6, col: '' }); else if (hm === 'c') fx.push({ k: 'cut', n: sk && WOFX[CK] === 0 ? 'r_hit' : (sk && sk.tier || 1) >= 3 ? 'dh2' : 'dg6', x: z.x, y: z.y - 20 * (z.sc || 1), a: Math.atan2(z.y - hero.y, z.x - x0) + (Math.random() - .5) * 1.2 - .6, L: 26 * (z.sc || 1), t: 0, T: .16, col: rgb });
@@ -2304,8 +2304,8 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     counts.set(z, n + 1);
     return true;
   };
-  const stoneBurst = (p, r, T = .25) =>
-    fx.push({ k: 'burst', x: p.x, y: p.y, r, t: 0, T, col: hexRgb(SK[CK].color), n: SK[CK] && (SK[CK].stone || SK[CK].hammer) ? 'e_chips' : '' });
+  const stoneBurst = (p, r, T = .25, hm) =>
+    fx.push({ k: 'burst', x: p.x, y: p.y, r, t: 0, T, col: hexRgb(SK[CK].color), n: SK[CK] && (SK[CK].stone || SK[CK].hammer) ? 'e_chips' : '', hm });
 
   function stoneHit(z, m, p, { slow, extra = 0, bonus = 0, kb = 8 } = {}) {
     const mult = (z.slT > 0 ? 1 + bonus : 1) *
@@ -2664,7 +2664,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     return q;
   };
   const hammerFx = (p, r, T = .28) => {
-    stoneBurst(p, stoneScale(r), T);
+    stoneBurst(p, stoneScale(r), T, 'pit');
     sfx(CR, p.x);
     shake = Math.max(shake, .04 * SK[CK].tier);
   };
@@ -2737,7 +2737,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       const d = reach * Math.min(1, o.t / T), w = stoneScale(width) / 2;
       if (o.t - lastVisual >= .045) {
         lastVisual = o.t;
-        stoneBurst(stonePoint(p, a, d), w, .17);
+        stoneBurst(stonePoint(p, a, d), w, .17, 'wave');
       }
       for (const z of hittable()) {
         if (hits.has(z)) continue;
@@ -3336,7 +3336,15 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   // 11/18 用户：写实刀光图和真实判定对不上——武学试炼里每招可调 大小/前后/上下/角度（存本机，复制发 Claude 写死进 DGA0）
   const FXF0 = {"daobo":{"img":"bh11","w":187,"dy":-16,"r":0,"sy":1,"spin":0,"grow":1,"al":1},"feilunren":{"img":"bh8","w":44,"dy":-16,"r":0,"sy":0.55,"spin":14,"grow":1,"al":1},"wanren":{"img":"dg6","w":55,"dy":-16,"r":0,"sy":1,"spin":0,"grow":1,"al":1}};   // 11/18 飞行物（偃月斩刀气 daobo / 飞轮刃刀轮 feilunren / 归海一刀飞刃 wanren）：工具导出 {img,w,dy,r,sy,spin,grow,al}
   const FXD0 = {};   // 11/18 从天上落下（天崩地裂 tianbeng / 归海一刀 wanren）：工具导出 {fall:{img,w,H,ax,ay,sy,al,on},land:{img,w,x,y,ax,ay,sy,al,on}}
-  const FXH0 = {};   // 11/18 受击刀光，按兵器：{0:'q'群侠白刀痕 | 'c'彩色小刀光 | 'n'不要}
+  const FXH0 = {};
+  const FXHM0 = {};   // 11/18 锤招特效（工具导出）：{pit:{l1,l2}, wave, arc, ring, lock}；大小按真实范围的倍数
+  const hmImg = n => (typeof VFX !== 'undefined' && VFX[n] && VFX[n].naturalWidth ? VFX[n] : DGI[n] && DGI[n].naturalWidth ? DGI[n] : null);
+  const hmTint = (n, rgb) => VFX[n] ? vTint(n, rgb) : dgTint(n, rgb);
+  function hmLayer(o, x, y, r, al, rgb, rot) {   // 一层锤特效：up=1 竖着贴在落点上方，up=0 平铺在地上（压扁成椭圆）
+    if (!o || o.on === 0 || !o.img || o.img === 'none') return; const im = hmImg(o.img); if (!im) return; const w = 2 * r * (o.k == null ? 1.2 : o.k), h = w * im.naturalHeight / im.naturalWidth * (!o.up && VFX[o.img] ? 2 : 1);   // v_/e_ 地面图本身已压扁过，平铺时还原
+    ctx.save(); ctx.translate(x, y + (o.y || 0) * r); ctx.globalAlpha = Math.max(0, Math.min(1, al * (o.al == null ? 1 : o.al)));
+    if (o.up) { ctx.scale(1, o.sy || 1); if (o.r) ctx.rotate(o.r * Math.PI / 180); } else { ctx.scale(1, .5 * (o.sy || 1)); ctx.rotate((rot || 0) + (o.r || 0) * Math.PI / 180); }
+    ctx.drawImage(hmTint(o.img, rgb), -(o.ax == null ? .5 : o.ax) * w, -(o.ay == null ? .5 : o.ay) * h, w, h); ctx.restore(); }   // 11/18 受击刀光，按兵器：{0:'q'群侠白刀痕 | 'c'彩色小刀光 | 'n'不要}
   const FXT0 = {"hengsao":{"l1":{"img":"dg4","w":61,"x":8,"y":1,"ax":0.5,"ay":0.8,"r":-6,"sy":1,"al":1},"l2":{"img":"bh2","w":40.5,"x":4.5,"y":-18,"ax":0.2,"ay":0.6,"r":0,"sy":1,"al":1,"on":0}},"tiaozhan":{"l1":{"img":"bh12","w":34,"x":14,"y":-24,"ax":0.3,"ay":0.6,"r":0,"sy":1,"al":1},"l2":{"img":"bh4","w":40.5,"x":4.5,"y":-18,"ax":0.2,"ay":0.6,"r":0,"sy":1,"al":1,"on":1}},"tuodao":{"l1":{"img":"bh6","w":40,"x":37,"y":-23,"ax":0.5,"ay":0.5,"r":0,"sy":1,"al":1},"l2":{"img":"dg3","w":26,"x":34,"y":-18,"ax":0.2,"ay":0.6,"r":0,"sy":1,"al":1,"on":1}},"lianzhan":{"l1":{"img":"dh2","w":78,"x":10,"y":7,"ax":0.5,"ay":0.8,"r":0,"sy":1,"al":1},"l2":{"img":"bh6","w":40.5,"x":4.5,"y":-18,"ax":0.2,"ay":0.6,"r":0,"sy":1,"al":1,"on":0}},"huima":{"l1":{"img":"dg5","w":72,"x":0,"y":-24,"ax":0.5,"ay":0.55,"r":0,"sy":1,"al":1},"l2":{"img":"dg5","w":63,"x":0,"y":-14,"ax":0.5,"ay":0.5,"r":0,"sy":1,"al":1,"on":1}},"cuofeng":{"l1":{"img":"bh5","w":66,"x":38,"y":-13,"ax":0.45,"ay":0.6,"r":0,"sy":1,"al":1},"l2":{"img":"bh5","w":40.5,"x":4.5,"y":-18,"ax":0.2,"ay":0.6,"r":0,"sy":1,"al":1,"on":0}},"feilunren":{"l1":{"img":"fx_lun","w":78,"x":-7,"y":-16,"ax":0.35,"ay":0.5,"r":0,"sy":1,"al":1},"l2":{"img":"bh7","w":40.5,"x":4.5,"y":-18,"ax":0.2,"ay":0.6,"r":0,"sy":1,"al":1,"on":0}},"liedihuan":{"l1":{"img":"dt_tianbeng","w":96,"x":24,"y":2,"ax":0.55,"ay":0.88,"r":0,"sy":1,"al":1},"l2":{"img":"fx_ring","w":21,"x":16.5,"y":-10,"ax":0.5,"ay":0.9,"r":0,"sy":1,"al":1,"on":1}},"xuehe":{"l1":{"img":"dd_xuehe","w":82.6,"x":51,"y":-16,"ax":0.5,"ay":0.75,"r":0,"sy":1,"al":1},"l2":{"img":"bh1","w":42.9,"x":4.8,"y":-18,"ax":0.2,"ay":0.6,"r":0,"sy":1,"al":1,"on":0}},"tianbeng":{"l1":{"img":"bh9","w":62.8,"x":74,"y":4,"ax":0.5,"ay":0.9,"r":0,"sy":1,"al":1},"l2":{"img":"dd_liedi","w":51.7,"x":22.2,"y":0,"ax":0.5,"ay":0.92,"r":0,"sy":1,"al":1,"on":1}},"wanren":{"l1":{"img":"dt_wanren","w":66,"x":0,"y":-16,"ax":0.5,"ay":0.5,"r":0,"sy":0.65,"al":1},"l2":{"img":"dh2","w":40.5,"x":28,"y":-60,"ax":0.2,"ay":0.6,"r":0,"sy":1,"al":1,"on":1}}};   // 11/18 用户用「刀招特效对齐工具」调好导出的设置（11 招；偃月斩没调，照旧）
   const DGA0 = {"hengsao":{"s":1,"dx":-6,"dy":15,"r":-6},"lianzhan":{"s":1,"dx":-4,"dy":21,"r":0}};   // 11/18 用户在武学试炼里对齐
   let DGA = {}; try { DGA = JSON.parse(localStorage.getItem('szz-dga') || '{}') || {}; } catch (e) {}
@@ -3367,6 +3375,8 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   Object.assign(DSP1, {"hengsao": 1.3, "qiang": 1.12, "lianci": 1.36, "lansao": 1.16, "huofu": 1.3, "feifu": 1.3, "dingshen": 1.3, "tuodao": 1.3, "tiaozhan": 1.3, "hengti": 1.45, "pidao": 1.45, "xiongshou": 1.45, "shanfeng": 1.3, "liuying": 1.3, "jlianci": 1.2, "zhantie": 1.2, "jianqi": 1.2, "chongquan": 1.1, "saotui": 1.1, "shanggou": 1.1, "huifeng": 1.3, "jici": 1.15, "hengzhuo": 1.15, "huaji": 1.25, "chuanxin": 1.1, "qiufeng": 1.1, "dengtian": 1.15, "feishi": 1.3, "sashi": 1.3, "tiaoshi": 1.3, "zhidao": 1.3, "lunchui": 1.3, "zhendi": 1.3, "qishe": 1.3, "lianzhu": 1.3, "luoyue": 1.3, "lianzhan": 1.2, "daobo": 1.4, "huima": 1.4, "chong": 1.36, "sixiang": 1.3, "tiaoqiang": 1.36, "lihua": 1.2, "huimaq": 1.4, "zhangxin": 1.4, "wulei": 1.4, "huangtian": 1.4, "xuanfengd": 1.4, "daoqi": 1.5, "handi": 1.6, "zhanjiang": 1.5, "yaoshu": 1.4, "longjuan": 1.35, "mihun": 1.35, "shuangxue": 1.35, "lianying": 1.35, "liefeng": 1.3, "feijian": 1.3, "jinghong": 1.3, "xuanfengtui": 1.2, "tieshan": 1.2, "dahe": 1.2, "huxiao": 1.2, "cuofeng": 1.4, "goulian": 1.4, "fengci": 1.4, "paoji": 1.6, "tiaozhen": 1.4, "jiandao": 1.3, "dielang": 1.35, "lingkong": 1.5, "panlong": 1.3, "zashi": 1.3, "xuanshi": 1.3, "shici": 1.2, "paoshi": 1.3, "kaishan": 1.35, "tiaotian": 1.35, "dizhen": 1.35, "xuanchui": 1.35, "zhuihun": 1.35, "liannu": 1.35, "xuanshe": 1.35, "jianyu": 1.35, "liedihuan": 1.51, "feilunren": 2.29, "xuehe": 1.7, "touqiang": 1.8, "qianglin": 2.08, "qijin": 2.3, "sadou": 1.9, "tianlei": 1.9, "fuhuo": 1.9, "yanyue": 2.2, "tuodaoji": 1.9, "guowu": 2.0, "bazhen": 1.8, "huoyu": 1.8, "chibi": 1.8, "jianzhen": 1.7, "xinjian": 1.7, "jianlun": 1.7, "lianhuan": 1.6, "jingang": 1.6, "qluanwu": 1.6, "yuezhan": 1.9, "huguan": 2.0, "touyu": 2.1, "juanyun": 1.9, "feihong": 1.9, "zhuishi": 2.0, "gunshi": 1.7, "luanshi": 2.0, "raoshen": 1.5, "zhichui": 1.8, "wanjun": 1.8, "leiting": 1.8, "dianguang": 1.8, "huoshi": 1.8, "luori": 1.8, "tianbeng": 1.83, "wanren": 1.9, "bainiao": 2.12, "longyin": 2.2, "jiutian": 2.2, "shuiyan": 2.3, "qinglong": 2.2, "dongfeng": 2.2, "qimen": 2.2, "yujian": 2.1, "tianjian": 2.1, "baji": 2.0, "fengjuan": 2.0, "sanmei": 2.2, "yuanmenji": 2.3, "fangtian": 2.3, "lingyun": 2.3, "wanying": 2.3, "feihuang": 1.9, "luoshi": 2.2, "pocheng": 2.1, "bengshan": 2.1, "guanri": 2.1, "wanjian": 2.1});
   Object.assign(DPS1, {"hengsao": {"a": "chop1", "b": "idle"}, "qiang": {"a": "thrust1", "b": "thrust2"}, "lianci": {"a": "thrust1", "b": "thrust2"}, "lansao": {"a": "sweep1", "b": "sweep2"}, "huofu": {"a": "chop1", "b": "thrust2"}, "feifu": {"a": "up1", "b": "up2"}, "dingshen": {"a": "up1", "b": "up2"}, "tuodao": {"a": "chop1", "b": "无"}, "tiaozhan": {"a": "up1", "b": "up2"}, "hengti": {"a": "sweep1", "b": "sweep2"}, "pidao": {"a": "chop1", "b": "chop2"}, "xiongshou": {"a": "up1", "b": "up2"}, "shanfeng": {"a": "sweep1", "b": "sweep2"}, "liuying": {"a": "thrust1", "b": "thrust2"}, "jlianci": {"a": "thrust1", "b": "thrust2"}, "zhantie": {"a": "sweep1", "b": "sweep2"}, "jianqi": {"a": "thrust1", "b": "thrust2"}, "chongquan": {"a": "thrust1", "b": "thrust2"}, "saotui": {"a": "sweep1", "b": "sweep2"}, "shanggou": {"a": "up1", "b": "up2"}, "huifeng": {"a": "up1", "b": "up2"}, "jici": {"a": "thrust1", "b": "thrust2"}, "hengzhuo": {"a": "chop1", "b": "chop2"}, "huaji": {"a": "sweep1", "b": "sweep2"}, "chuanxin": {"a": "spin1", "b": "spin2"}, "qiufeng": {"a": "sweep1", "b": "sweep2"}, "dengtian": {"a": "spin1", "b": "spin2"}, "feishi": {"a": "thrust1", "b": "thrust2"}, "sashi": {"a": "sweep1", "b": "sweep2"}, "tiaoshi": {"a": "thrust1", "b": "thrust2"}, "zhidao": {"a": "chop1", "b": "chop2"}, "lunchui": {"a": "sweep1", "b": "sweep2"}, "zhendi": {"a": "chop1", "b": "chop2"}, "qishe": {"a": "thrust1", "b": "thrust2"}, "lianzhu": {"a": "thrust1", "b": "thrust2"}, "luoyue": {"a": "up1", "b": "up2"}, "lianzhan": {"a": "chop1", "b": "sweep2"}, "daobo": {"a": "chop1", "b": "chop2"}, "huima": {"a": "spin1", "b": "up2"}, "chong": {"a": "thrust1", "b": "thrust2"}, "sixiang": {"a": "spin1", "b": "spin2"}, "tiaoqiang": {"a": "thrust2", "b": "up2"}, "lihua": {"a": "spin1", "b": "spin2"}, "huimaq": {"a": "thrust1", "b": "thrust2"}, "zhangxin": {"a": "thrust1", "b": "thrust2"}, "wulei": {"a": "chop1", "b": "thrust2"}, "huangtian": {"a": "up1", "b": "up2"}, "xuanfengd": {"a": "spin1", "b": "spin2"}, "daoqi": {"a": "sweep1", "b": "sweep2"}, "handi": {"a": "chop1", "b": "chop2"}, "zhanjiang": {"a": "up2", "b": "chop2"}, "yaoshu": {"a": "chop1", "b": "chop2"}, "longjuan": {"a": "spin1", "b": "spin2"}, "mihun": {"a": "sweep1", "b": "sweep2"}, "shuangxue": {"a": "sweep1", "b": "sweep2"}, "lianying": {"a": "thrust1", "b": "thrust2"}, "liefeng": {"a": "spin1", "b": "spin2"}, "feijian": {"a": "up1", "b": "thrust2"}, "jinghong": {"a": "up1", "b": "up2"}, "xuanfengtui": {"a": "spin1", "b": "spin2"}, "tieshan": {"a": "chop1", "b": "chop2"}, "dahe": {"a": "up1", "b": "up2"}, "huxiao": {"a": "thrust1", "b": "thrust2"}, "cuofeng": {"a": "chop1", "b": "chop2"}, "goulian": {"a": "sweep1", "b": "sweep2"}, "fengci": {"a": "thrust1", "b": "thrust2"}, "paoji": {"a": "up1", "b": "up2"}, "tiaozhen": {"a": "thrust1", "b": "thrust2"}, "jiandao": {"a": "sweep1", "b": "sweep2"}, "dielang": {"a": "spin1", "b": "spin2"}, "lingkong": {"a": "spin1", "b": "spin2"}, "panlong": {"a": "sweep1", "b": "sweep2"}, "zashi": {"a": "sweep1", "b": "sweep2"}, "xuanshi": {"a": "spin1", "b": "spin2"}, "shici": {"a": "thrust1", "b": "thrust2"}, "paoshi": {"a": "sweep1", "b": "sweep2"}, "kaishan": {"a": "chop1", "b": "chop2"}, "tiaotian": {"a": "chop1", "b": "chop2"}, "dizhen": {"a": "chop1", "b": "chop2"}, "xuanchui": {"a": "sweep1", "b": "sweep2"}, "zhuihun": {"a": "thrust1", "b": "thrust2"}, "liannu": {"a": "thrust1", "b": "thrust2"}, "xuanshe": {"a": "thrust1", "b": "thrust2"}, "jianyu": {"a": "up1", "b": "up2"}, "liedihuan": {"a": "sweep1", "b": "chop2"}, "feilunren": {"a": "sweep1", "b": "sweep2"}, "xuehe": {"a": "chop1", "b": "sweep2"}, "touqiang": {"a": "up1", "b": "thrust2"}, "qianglin": {"a": "up2", "b": "chop2"}, "qijin": {"a": "thrust1", "b": "thrust2"}, "sadou": {"a": "up1", "b": "up2"}, "tianlei": {"a": "up1", "b": "up2"}, "fuhuo": {"a": "sweep1", "b": "sweep2"}, "yanyue": {"a": "chop1", "b": "chop2"}, "tuodaoji": {"a": "spin1", "b": "spin2"}, "guowu": {"a": "thrust1", "b": "thrust2"}, "bazhen": {"a": "spin1", "b": "spin2"}, "huoyu": {"a": "up1", "b": "up2"}, "chibi": {"a": "up1", "b": "up2"}, "jianzhen": {"a": "up1", "b": "chop2"}, "xinjian": {"a": "spin1", "b": "spin2"}, "jianlun": {"a": "spin1", "b": "spin2"}, "lianhuan": {"a": "thrust1", "b": "thrust2"}, "jingang": {"a": "up1", "b": "chop2"}, "qluanwu": {"a": "up2", "b": "chop2"}, "yuezhan": {"a": "chop1", "b": "chop2"}, "huguan": {"a": "spin1", "b": "spin2"}, "touyu": {"a": "chop1", "b": "chop2"}, "juanyun": {"a": "spin1", "b": "spin2"}, "feihong": {"a": "spin1", "b": "spin2"}, "zhuishi": {"a": "spin1", "b": "spin2"}, "gunshi": {"a": "thrust1", "b": "thrust2"}, "luanshi": {"a": "sweep1", "b": "sweep2"}, "raoshen": {"a": "spin1", "b": "spin2"}, "zhichui": {"a": "up1", "b": "up2"}, "wanjun": {"a": "chop1", "b": "chop2"}, "leiting": {"a": "chop1", "b": "chop2"}, "dianguang": {"a": "thrust1", "b": "thrust2"}, "huoshi": {"a": "thrust1", "b": "thrust2"}, "luori": {"a": "up1", "b": "up2"}, "tianbeng": {"a": "spin2", "b": "chop2"}, "wanren": {"a": "spin1", "b": "spin2"}, "bainiao": {"a": "thrust1", "b": "thrust2"}, "longyin": {"a": "up2", "b": "chop2"}, "jiutian": {"a": "up1", "b": "up2"}, "shuiyan": {"a": "up2", "b": "chop2"}, "qinglong": {"a": "up1", "b": "up2"}, "dongfeng": {"a": "up1", "b": "up2"}, "qimen": {"a": "spin1", "b": "spin2"}, "yujian": {"a": "thrust1", "b": "thrust2"}, "tianjian": {"a": "spin1", "b": "up2"}, "baji": {"a": "up2", "b": "chop2"}, "fengjuan": {"a": "spin1", "b": "spin2"}, "sanmei": {"a": "up2", "b": "chop2"}, "yuanmenji": {"a": "chop1", "b": "chop2"}, "fangtian": {"a": "sweep1", "b": "sweep2"}, "lingyun": {"a": "spin1", "b": "spin2"}, "wanying": {"a": "spin1", "b": "spin2"}, "feihuang": {"a": "sweep1", "b": "sweep2"}, "luoshi": {"a": "up1", "b": "up2"}, "pocheng": {"a": "chop1", "b": "chop2"}, "bengshan": {"a": "chop1", "b": "chop2"}, "guanri": {"a": "thrust1", "b": "thrust2"}, "wanjian": {"a": "up1", "b": "up2"}});
   Object.assign(AOD, {"hengsao": {"gh": 0}, "tiaozhan": {"gh": 0}, "huima": {"gh": 0}, "cuofeng": {"gh": 0}});
+  const FXAN0 = {};   // 11/18 工具「动作」页导出：{key:{a,fa,b,fb,mv,gh}}，写成默认值
+  for (const k in FXAN0) { const o = FXAN0[k]; DPS1[k] = { a: o.a, b: o.b, fa: o.fa || 0, fb: o.fb || 0 }; AOD[k] = { mv: o.mv ? 1 : 0, gh: o.gh ? 1 : 0 }; }
   const dpsOf = k => SK[k] && SK[k].dk ? DPS[k] || DPS1[k] || null : null;
   const dpsFr = (k, i) => { const o = dpsOf(k); if (!o) return motFr(k)[i]; const hp = preOf(k), no = i !== 0 && o.b === '无', n = i === 0 || no ? o.a : o.b, f = i === 0 || no ? o.fa : o.fb; return hp + n + (f ? '~' : ''); };   // 11/18 用户：出手可选「无」＝整招停在起手那一帧
   for (const k of Object.keys(SK)) Object.defineProperties(SK[k], {
@@ -4723,11 +4733,12 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   function drawWorld() {
     if (S.wind?.hammerLock) {
       const { key, hammerLock: { q } } = S.wind;
-      const scale = DK * rsOf(key), r = ({ kaishan: 70, zhichui: 85, pocheng: 90 })[key];
+      const scale = DK * rsOf(key), r = ({ kaishan: 70, zhichui: 85, pocheng: 90 })[key], LK = FXHM0[key] && FXHM0[key].lock;
+      if (LK && LK.m === 1) {} else if (LK && LK.m === 2) hmLayer(LK, q.x, clampY(q.y), r * scale, 1, hexRgb(SK[key].color)); else {
       ctx.save(); ctx.translate(q.x, clampY(q.y)); ctx.scale(1, .5);
       ctx.strokeStyle = 'rgba(218,161,89,.65)'; ctx.lineWidth = 1.5;
       ctx.beginPath(); ctx.arc(0, 0, r * scale, 0, 7); ctx.stroke();
-      ctx.restore();
+      ctx.restore(); }
     }
     for (const z of zs) if (z.drumT > 0 && !z.dead) { ctx.save(); ctx.translate(z.x, z.y); ctx.scale(1, YS); ctx.fillStyle = `rgba(255,70,40,${.18 + .1 * Math.sin(gameT * 12)})`; ctx.beginPath(); ctx.arc(0, 0, 16, 0, 7); ctx.fill(); ctx.restore(); }   /* 被战鼓鼓舞 */
     for (const z of zs) if (z.bossLabel && !z.dead && !z.air) {   // 11/16：首领脚下暗红光环，一眼认出谁是首领
@@ -4859,6 +4870,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
         }
         ctx.restore(); continue;
       }
+      if (e.k === 'hammerArc' && FXHM0[e.sk] && FXHM0[e.sk].arc) { const R = e.r * (.85 + .25 * p); hmLayer(FXHM0[e.sk].arc, e.x, e.y, R, 1 - p * p, hexRgb(SK[e.sk].color), e.a + Math.PI / 2); continue; }
       if (e.k === 'hammerArc' && vOK('e_arc')) { const R = e.r * (.85 + .25 * p); vGround('e_arc', e.x, e.y, e.a + Math.PI / 2, R * 2.2, R * 2.2, 1 - p * p, null, .5, .62); continue; }
       if (e.k === 'hammerArc') {
         ctx.save(); ctx.translate(e.x, e.y); ctx.scale(1, .5);
@@ -4867,6 +4879,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
         ctx.beginPath(); ctx.arc(0, 0, e.r * (.76 + .24 * p), e.a - e.half, e.a + e.half); ctx.stroke(); ctx.restore();
         continue;
       }
+      if (e.k === 'hammerRing' && FXHM0[e.sk] && FXHM0[e.sk].ring) { const r = e.r0 + (e.r - e.r0) * p; hmLayer(FXHM0[e.sk].ring, e.x, e.y, r, 1 - p * .8, hexRgb(SK[e.sk].color)); continue; }
       if (e.k === 'hammerRing' && vOK('e_hring')) { const r = e.r0 + (e.r - e.r0) * p; vGround('e_hring', e.x, e.y, 0, r * 2.2, r * 2.2, 1 - p * .8); continue; }
       if (e.k === 'hammerRing') {
         const r = e.r0 + (e.r - e.r0) * p;
@@ -4895,7 +4908,8 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
         }
         ctx.restore(); continue;
       }
-      if (e.k === 'burst' && (() => { const r = e.r * (.5 + .5 * Math.min(1, p * 2)), al = 1 - p; if (e.n) return vUp(e.n, e.x, e.y - r * .2, r * 2.4, al, null); vGround('v_circle', e.x, e.y, 0, r * 2, r * 2, al * .35, e.col); return vUp('v_burst', e.x, e.y - r * .25, r * 1.8, al, e.col); })()) {}
+      if (e.k === 'burst' && e.hm && e.hm !== 'hit' && FXHM0[e.sk] && (FXHM0[e.sk][e.hm] || FXHM0[e.sk].pit)) { const C = e.hm === 'wave' ? FXHM0[e.sk].wave || FXHM0[e.sk].pit : FXHM0[e.sk].pit, r = e.r * (.5 + .5 * Math.min(1, p * 2)), al = 1 - p; if (C.l1 || C.l2) { hmLayer(C.l2, e.x, e.y, r, al, e.col); hmLayer(C.l1, e.x, e.y, r, al, e.col); } else hmLayer(C, e.x, e.y, r, al, e.col); }
+      else if (e.k === 'burst' && (() => { const r = e.r * (.5 + .5 * Math.min(1, p * 2)), al = 1 - p; if (e.n) return vUp(e.n, e.x, e.y - r * .2, r * 2.4, al, null); vGround('v_circle', e.x, e.y, 0, r * 2, r * 2, al * .35, e.col); return vUp('v_burst', e.x, e.y - r * .25, r * 1.8, al, e.col); })()) {}
       else if (e.k === 'burst') { ctx.save(); ctx.translate(e.x, e.y); ctx.scale(1, .5); const r = e.r * (.4 + .6 * Math.min(1, p * 2)); ctx.fillStyle = `rgba(${e.col},${.28 * (1 - p)})`; ctx.beginPath(); ctx.arc(0, 0, r, 0, 7); ctx.fill(); ctx.strokeStyle = `rgba(255,250,230,${.9 * (1 - p)})`; ctx.lineWidth = 4 * (1 - p) + 1; ctx.stroke(); ctx.restore(); }
       else if (e.k === 'nuTur') { const al = Math.min(1, (e.T - e.t) / .3, e.t / .1), S2 = e.big ? 1.9 : 1, fl = Math.cos(e.a) < 0 ? -1 : 1; ctx.save(); ctx.globalAlpha = al; ctx.translate(e.x, e.y); ctx.scale(S2 * fl, S2); ctx.lineCap = 'round';   /* 11/17 伏弩、床弩：地上架着的小弩（代码画） */
           ctx.strokeStyle = '#2a1a0e'; ctx.lineWidth = 4.5; ctx.beginPath(); ctx.moveTo(-9, 0); ctx.lineTo(-3, -12); ctx.lineTo(3, 0); ctx.moveTo(-14, -13); ctx.lineTo(12, -13); ctx.moveTo(10, -21); ctx.quadraticCurveTo(15, -13, 10, -5); ctx.stroke();
