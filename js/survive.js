@@ -8,7 +8,7 @@
   const R = (a, b) => a + Math.random() * (b - a);
   const dist = (a, b) => Math.hypot(a.x - b.x, (a.y - b.y) * 2);
   const alive = () => zs.filter(z => !z.dead && !z.hidden && z.hp > 0);
-  const hittable = () => alive().filter(z => !z.air);
+  const hittable = () => alive().filter(z => !z.air && !z.pilot);
 
   // ---------- 波次（数据照三国幸存者 data.js；同屏数按清版场地缩到约 1/4） ----------
   const WAVE_T = [22, 26, 34, 38, 42, 45, 48, 52, 55, 70, 60, 65, 70, 60, 60, 60, 90, 60, 75, 180];
@@ -191,6 +191,40 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   let BCFG = {}; try { BCFG = JSON.parse(localStorage.getItem('szz-boss-cfg') || '{}') || {}; } catch (e) {}
   const bcfg = (t, m) => Object.assign({ rs: 1, sp: 1 }, (BCFG0[t] || {})[m] || {}, (BCFG[t] || {})[m] || {});
   const BOSSTR = { on: false, move: '' };
+  // 11/18 用户：首领试炼要“我来操控程远志”——主角藏起来、无敌，程远志跟着摇杆走，J/K/L（或面板按钮）出招，打木人和士兵
+  const PIL = { z: null, busy: 0, lx: 0, ly: 0, ax: 1, ay: 0, wt: 0, slots: null };
+  function pilotOn(on) {
+    if (!on) { if (PIL.z) { const i = zs.indexOf(PIL.z); if (i >= 0) zs.splice(i, 1); } PIL.z = null; window.HIDE_HERO = false; if (PIL.slots) { S.slots.splice(0, PIL.slots.length, ...PIL.slots); PIL.slots = null; } return; }
+    if (!PIL.z || zs.indexOf(PIL.z) < 0) { for (let i = zs.length - 1; i >= 0; i--) if (zs[i].sprite === 'cheng_new') zs.splice(i, 1); TRIAL.newBoss(); PIL.z = zs.find(z => z.sprite === 'cheng_new') || null; }
+    if (!PIL.z) return; PIL.z.pilot = 1; PIL.z.hidden = false; window.HIDE_HERO = true;
+    if (!PIL.slots) { PIL.slots = S.slots.slice(); for (let i = 0; i < S.slots.length; i++) S.slots[i] = ''; }
+    PIL.lx = hero.x; PIL.ly = hero.y;
+  }
+  function pilotTick(z, dt) {
+    hero.inv = Math.max(hero.inv || 0, .2);
+    const dx = hero.x - PIL.lx, dy = hero.y - PIL.ly, mv = Math.hypot(dx, dy) > .3; PIL.lx = hero.x; PIL.ly = hero.y;
+    if (mv) { const L = Math.hypot(dx, dy); PIL.ax = dx / L; PIL.ay = dy / L; if (Math.abs(dx) > .2) z.f = dx < 0 ? -1 : 1; }
+    z.x = hero.x; z.y = hero.y; z.st = 'idle'; z.vx = 0; z.moving = mv; z.hp = z.maxHp || z.hp; z.dead = false;
+    if (PIL.busy > 0) { PIL.busy -= dt; return; }
+    PIL.wt = mv ? PIL.wt + dt : 0; z.cbFrame = mv ? 'walk' + (1 + Math.floor(PIL.wt * 5) % 4) : 'idle';
+  }
+  const pAng = () => Math.atan2(PIL.ay, PIL.ax);
+  const pHit = (f, m, kb) => { for (const e of hittable()) if (f(e)) GH(e, m, kb, { x: hero.x }); };
+  const pCirc = (x, y, r) => e => Math.hypot(e.x - x, (e.y - y) / YS) <= r + 8;
+  function pilotCast(mv) {
+    const z = PIL.z; if (!z || PIL.busy > 0) return; const C = bcfg('cheng_yuanzhi', mv), a = pAng(); z.f = Math.cos(a) < 0 ? -1 : 1;
+    if (mv === 'atk') { const w = .45 * C.sp; cyPlay(z, [[C.a, w], [C.b, .2]].concat(C.c ? [[C.c, .3]] : [])); PIL.busy = w + .2 + (C.c ? .3 : 0);
+      later(w, () => { pHit(e => inArc(hero.x, hero.y, e, a, Math.PI / 2.6, 125 * C.rs), 3, 60); shake = Math.max(shake, .12); if (window.SFX) SFX.play('crack', 0, .6); }); return; }
+    if (mv === 'sweep') { const r = 105 * C.rs, T = 1.0 * C.sp; teleAdd({ k: 'circle', x: hero.x, y: hero.y, r, T, src: z, then: () => pHit(pCirc(hero.x, hero.y, r), 4, 90) });
+      cyPlay(z, [[C.a, .85 * C.sp], [C.b, .22]].concat(C.c ? [[C.c, .35]] : [])); say(z, '横扫千军！'); PIL.busy = .85 * C.sp + .22 + (C.c ? .35 : 0); return; }
+    if (mv === 'boomerang') { const L = 280 * C.rs, ux = Math.cos(a), uy = Math.sin(a);
+      teleAdd({ k: 'line', x: hero.x, y: hero.y, a, len: L, w: 40, T: .5 * C.sp, src: z, snd: '', then: () => {
+        const x0 = hero.x, y0 = hero.y, fx = x0 + ux * L, fy = y0 + uy * L * YS, hit = new Map();
+        hzAdd({ kind: 'blade', src: z, x: x0, y: y0, r: 28, T: 1.15, upd: (o, dt) => { const q = o.t / 1.15, e = Math.sin(q * Math.PI), bx = q < .5 ? x0 : hero.x, by = q < .5 ? y0 : hero.y; o.x = bx + (fx - bx) * e; o.y = by + (fy - by) * e;
+          for (const t of hittable()) { if ((hit.get(t) || 0) > o.t) continue; if (Math.hypot(t.x - o.x, (t.y - o.y) / YS) < 36) { hit.set(t, o.t + .5); GH(t, 2.5, 40, { x: o.x }); } } } });
+      } }); cyPlay(z, [[C.a, .5 * C.sp], [C.b, .18], ['bare', .9]].concat(C.c ? [[C.c, .3]] : [])); say(z, '大刀回旋！'); PIL.busy = .5 * C.sp + .18 + .9 + (C.c ? .3 : 0); }
+  }
+  addEventListener('keydown', e => { if (!PIL.z || e.repeat) return; const m = { j: 'atk', k: 'boomerang', l: 'sweep', 1: 'atk', 2: 'boomerang', 3: 'sweep' }[e.key.toLowerCase()]; if (m) { e.preventDefault(); e.stopPropagation(); pilotCast(m); } }, true);
   const cyPlay = (z, seq) => { if (z.sprite !== 'cheng_new') return; let t = 0; z.cbFrame = seq[0][0]; for (let i = 0; i < seq.length; i++) { const [f, d] = seq[i], t0 = t; if (i) later(t0, () => { if (!z.dead) z.cbFrame = f; }); t += d; } later(t, () => { if (z.cbFrame === seq[seq.length - 1][0]) z.cbFrame = null; }); };
   const gap = (z, t, txt) => { z.stun = Math.max(z.stun || 0, t); floaters.push({ x: z.x, y: z.y - 70, t: 0, txt, color: '#9fe08a' }); };
   const BSK = {
@@ -274,6 +308,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       if (z.castT > 0) { z.castT -= dt; z.x = z.cx; z.y = z.cy; z.st = 'wind'; z.t = Math.min(z.t, .2); z.vx = 0; continue; }   // 蓄力：原地不动、举刀
       if (z.stun > 0) continue;
       if (z.skCd == null) z.skCd = 2.5;
+      if (z.pilot) continue;
       if (BOSSTR.on && z.sprite === 'cheng_new') { if (BOSSTR.move === 'atk' || !BOSSTR.move) continue; if (!z.seq || !z.seq.length) { if ((z.skCd -= dt) > 0) continue; z.seq = [BOSSTR.move]; z.skCd = 1.4; } const T = BSK[z.seq.shift()](z); if (T > 0) { z.castT = T; z.cx = z.x; z.cy = z.y; z.st = 'wind'; z.t = 0; } continue; }
       const big = z.survTier >= 3, list = z.clone ? ['crack'] : (BMOVES[z.type] || (big ? ['sweep', 'cleave'] : ['cleave']));
       if (!z.seq || !z.seq.length) {
@@ -5092,7 +5127,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     ctx.fillStyle = wd; ctx.beginPath(); ctx.arc(x, y - 40, 5, 0, 7); ctx.fill(); ctx.fillStyle = '#b8402a'; ctx.fillRect(x - 5, y - 41, 10, 2);
     ctx.restore();
   }
-  const TRIAL = { bossTr(on, mv) { BOSSTR.on = !!on; BOSSTR.move = mv || ''; const C = bcfg('cheng_yuanzhi', 'atk'); for (const z of zs) if (z.sprite === 'cheng_new') { z.seq = []; z.skCd = .6; z.T = Object.assign({}, TYPES.cheng_yuanzhi, z.T, { wind: (TYPES.cheng_yuanzhi.wind || .6) * C.sp }); } }, bossCfg: m => bcfg('cheng_yuanzhi', m), setBossCfg(m, o) { BCFG.cheng_yuanzhi = BCFG.cheng_yuanzhi || {}; BCFG.cheng_yuanzhi[m] = Object.assign(bcfg('cheng_yuanzhi', m), o); try { localStorage.setItem('szz-boss-cfg', JSON.stringify(BCFG)); } catch (e) {} }, bossCopy: () => JSON.stringify({ cheng_yuanzhi: { atk: bcfg('cheng_yuanzhi', 'atk'), boomerang: bcfg('cheng_yuanzhi', 'boomerang'), sweep: bcfg('cheng_yuanzhi', 'sweep') } }), newBoss() { const z = edgeSpawn('cheng_yuanzhi', { name: '程远志', hp: 70, sc: 1, tier: 3 }); if (z && typeof CH !== 'undefined' && CH.cheng_new) { z.sprite = 'cheng_new'; z.x = Math.min(lockR - 20, hero.x + 160); z.y = hero.y; } }, regrunt(on) { for (const z of zs) if (z.type === 'grunt' && !z.dummy) z.sprite = on && typeof CH !== 'undefined' && CH.grunt_new ? 'grunt_new' : 'grunt'; }, showcase: on => showcase(on), fxArr: () => fx, pvr: () => PVR, getPv: k => pvOpt(k), getPs: k => pvShape(k), pvReach: k => PVM[k] || 0, setPs: (k, o) => { PVS[k] = Object.assign(pvShape(k), o); try { localStorage.setItem('szz-pv-shape', JSON.stringify(PVS)); } catch (e) {} }, setPv: (k, o) => { PVO[k] = Object.assign(pvOpt(k), o); try { localStorage.setItem('szz-pv-opt', JSON.stringify(PVO)); } catch (e) {} }, dummy: m => dummyMode(m), dummyStat, dummyClear() { DUM.log = []; DUM.tot = 0; DUM.broke = 0; DUM.t0 = performance.now(); }, dummyBrk(v) { DUM.brk = v ? 1 : 0; for (const z of zs) if (z.dummy) { z.dhp = DUM.HP; z.brokeT = 0; z.hidden = false; } }, soldiers(v) { DUM.noSol = v ? 0 : 1; if (!v) for (let i = zs.length - 1; i >= 0; i--) if (!zs[i].dummy) zs.splice(i, 1); }, slot(i, k) { S.slots[i] = k; }, bao(k) { gainBao(k); }, lvSet(k, l) { (S.lvLock = S.lvLock || {})[k] = l; }, SK, GF, MOT, WEPN, TIERN, wepOf, IMGU, spdTxt, spawn: t => edgeSpawn(t), count: t => zs.filter(z => !z.dead && z.type === t).length, long() { W.tot = 9999; if (W.t > W.tot - 5) W.t = 0; },
+  const TRIAL = { pilot: on => pilotOn(on), pilotCast: m => pilotCast(m), pilotTick, bossTr(on, mv) { BOSSTR.on = !!on; BOSSTR.move = mv || ''; const C = bcfg('cheng_yuanzhi', 'atk'); for (const z of zs) if (z.sprite === 'cheng_new') { z.seq = []; z.skCd = .6; z.T = Object.assign({}, TYPES.cheng_yuanzhi, z.T, { wind: (TYPES.cheng_yuanzhi.wind || .6) * C.sp }); } }, bossCfg: m => bcfg('cheng_yuanzhi', m), setBossCfg(m, o) { BCFG.cheng_yuanzhi = BCFG.cheng_yuanzhi || {}; BCFG.cheng_yuanzhi[m] = Object.assign(bcfg('cheng_yuanzhi', m), o); try { localStorage.setItem('szz-boss-cfg', JSON.stringify(BCFG)); } catch (e) {} }, bossCopy: () => JSON.stringify({ cheng_yuanzhi: { atk: bcfg('cheng_yuanzhi', 'atk'), boomerang: bcfg('cheng_yuanzhi', 'boomerang'), sweep: bcfg('cheng_yuanzhi', 'sweep') } }), newBoss() { const z = edgeSpawn('cheng_yuanzhi', { name: '程远志', hp: 70, sc: 1, tier: 3 }); if (z && typeof CH !== 'undefined' && CH.cheng_new) { z.sprite = 'cheng_new'; z.x = Math.min(lockR - 20, hero.x + 160); z.y = hero.y; } }, regrunt(on) { for (const z of zs) if (z.type === 'grunt' && !z.dummy) z.sprite = on && typeof CH !== 'undefined' && CH.grunt_new ? 'grunt_new' : 'grunt'; }, showcase: on => showcase(on), fxArr: () => fx, pvr: () => PVR, getPv: k => pvOpt(k), getPs: k => pvShape(k), pvReach: k => PVM[k] || 0, setPs: (k, o) => { PVS[k] = Object.assign(pvShape(k), o); try { localStorage.setItem('szz-pv-shape', JSON.stringify(PVS)); } catch (e) {} }, setPv: (k, o) => { PVO[k] = Object.assign(pvOpt(k), o); try { localStorage.setItem('szz-pv-opt', JSON.stringify(PVO)); } catch (e) {} }, dummy: m => dummyMode(m), dummyStat, dummyClear() { DUM.log = []; DUM.tot = 0; DUM.broke = 0; DUM.t0 = performance.now(); }, dummyBrk(v) { DUM.brk = v ? 1 : 0; for (const z of zs) if (z.dummy) { z.dhp = DUM.HP; z.brokeT = 0; z.hidden = false; } }, soldiers(v) { DUM.noSol = v ? 0 : 1; if (!v) for (let i = zs.length - 1; i >= 0; i--) if (!zs[i].dummy) zs.splice(i, 1); }, slot(i, k) { S.slots[i] = k; }, bao(k) { gainBao(k); }, lvSet(k, l) { (S.lvLock = S.lvLock || {})[k] = l; }, SK, GF, MOT, WEPN, TIERN, wepOf, IMGU, spdTxt, spawn: t => edgeSpawn(t), count: t => zs.filter(z => !z.dead && z.type === t).length, long() { W.tot = 9999; if (W.t > W.tot - 5) W.t = 0; },
     setGf(ids) { S.gf = ['', '', '']; ids.slice(0, 3).forEach((id, i) => { S.gf[i] = id; }); GM = gfCalc(); }, setQg(id) { S.qg = id || ''; GM = gfCalc(); }, gf: () => S.gf.slice(), qg: () => S.qg, mul: k => skillMul(k), lv: k => lvOf(k), spd: k => spdTxt(SK[k]), rs: k => SK[k] && SK[k].dk ? rsOf(k) : null, setRs(k, v) { DRS[k] = v; try { localStorage.setItem('szz-dao-rs', JSON.stringify(DRS)); } catch (e) {} },
     sp: k => spOf(k), setSp(k, v) { DSP[k] = v; try { localStorage.setItem('szz-dao-sp', JSON.stringify(DSP)); } catch (e) {} }, spAll(v, w) { Object.keys(SK).forEach(k => { if (SK[k].dk && (w == null || wepOf(k) === w)) DSP[k] = v; }); try { localStorage.setItem('szz-dao-sp', JSON.stringify(DSP)); } catch (e) {} },
     FRN: ['idle', 'walk1', 'walk2', 'walk3', 'roll1', 'roll2', 'roll3', 'roll4', 'hurt', 'down', 'chop1', 'chop2', 'sweep1', 'sweep2', 'thrust1', 'thrust2', 'spin1', 'spin2', 'up1', 'up2'],

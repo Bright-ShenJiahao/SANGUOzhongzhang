@@ -273,6 +273,7 @@ function drawFireAura(h) {
 }
 
 function drawHero() {
+  if (window.HIDE_HERO) return;   // 11/18 首领试炼：玩家操控程远志时主角藏起来
   const h = hero; shadow(h.x, h.y, 10);
   if (!over && h.st !== 'down') drawFireAura(h);
   h.shieldFlash = Math.max(0, (h.shieldFlash || 0) - 1 / 60);

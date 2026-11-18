@@ -165,6 +165,7 @@ const stoneSlowMove = (z, legacy = 1) => window.SURV && SURV.slowMove
   : z.survSlow > 0 ? legacy : 1;
 
 function zUpdate(z, dt) {
+  if (z.pilot && window.SURV && SURV.trial) { SURV.trial.pilotTick(z, dt); return; }   // 11/18 首领试炼：玩家操控程远志
   if (z.dummy && window.SURV && SURV.dummyTick) { SURV.dummyTick(z, dt); return; }   // 11/18 木人桩
   if (z.endFade != null) { z.endFade -= dt; z.vx = 0; z.moving = false; return; }   // 节点打完：敌人原地站定、淡出（11/11 用户定）
   if (window.GEAR && !z.dead) { dt = GEAR.enemyTime(z, dt); if (!dt) return; }
