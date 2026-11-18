@@ -9,6 +9,7 @@
   const T = () => window.SURV && SURV.trial;
   const css = `#szzTrial{position:fixed;z-index:10040;left:8px;top:56px;width:min(330px,46vw);max-height:calc(100vh - 70px);display:flex;flex-direction:column;background:rgba(14,10,7,.93);border:1px solid #8a6a3a;color:#efe2c4;font-size:13px;box-shadow:0 6px 20px rgba(0,0,0,.6)}
 #szzTrial .hd{display:flex;align-items:center;justify-content:space-between;padding:6px 8px;border-bottom:1px solid rgba(184,149,90,.35);color:#ffd86e}
+#szzBoss{position:fixed;left:8px;top:100px;z-index:10037;width:300px;max-width:calc(100vw - 16px);background:rgba(24,16,10,.94);border:1px solid #8a6a3a;color:#ead9b6;font:13px/1.5 sans-serif;padding:6px 8px;border-radius:6px}#szzBoss .hd{display:flex;justify-content:space-between;align-items:center;color:#ffe08a;font-weight:700;margin-bottom:4px}#szzBoss button{background:#3a2a1a;border:1px solid #8a6a3a;color:#e6c98a;border-radius:4px;padding:2px 8px;cursor:pointer}#szzBoss .mv{display:flex;gap:4px;flex-wrap:wrap;margin:4px 0}#szzBoss .mv button.on{background:#7a5a2a;color:#fff}#szzBoss .ds{opacity:.75;font-size:12px;margin:3px 0}#szzBoss .row{display:flex;align-items:center;gap:6px;margin:3px 0}#szzBoss .row span{width:34px}#szzBoss .row input{flex:1}#szzBoss select{flex:1;background:#2a1d12;color:#ead9b6;border:1px solid #8a6a3a}#szzBoss .cp{margin-top:6px;width:100%}@media (max-width:560px){#szzBoss{top:auto;bottom:8px;right:8px;left:8px;width:auto}}
 #szzTrial .dms{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:4px 8px;background:#2a1d12;color:#ffe08a;font-size:12px;border-bottom:1px solid rgba(184,149,90,.35)}#szzTrial .dms button{background:none;border:1px solid #8a6a3a;color:#e6c98a;cursor:pointer;padding:0 6px}
 #szzTrial .hd button{background:none;border:1px solid #8a6a3a;color:#e6c98a;cursor:pointer;padding:1px 8px}
 #szzTrial .tabs{display:flex;flex-wrap:wrap;gap:3px;padding:6px}
@@ -35,6 +36,35 @@
       img.onload = () => { const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight; const g = c.getContext('2d'); g.drawImage(img, 0, 0); g.globalCompositeOperation = 'source-atop'; g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); fr.white = c; };
       img.src = 'art/sprites/grunt_new/s_' + f + '.png'; CH.grunt_new[f] = fr; }
   }
+
+  // 11/18 用户：首领试炼——照武学试炼的样子调首领的每一招（起手/出手帧、范围、速度），复制发 Claude
+  const BFR = { idle: '站立', walk1: '走路①', walk2: '走路②', walk3: '走路③', walk4: '走路④', wind: '举刀', strike: '劈下', throw1: '掷刀起手', throw2: '掷出', bare: '空手', catch: '接刀', sweep1: '横扫起手', sweep2: '转身横扫', sweep3: '横扫收势', hurt: '受击', down: '倒地', fly1: '被打飞①', fly2: '被打飞②', land: '落地' };
+  const BMV = [['atk', '普攻', '靠近了举刀劈下（速度＝举刀多久）'], ['boomerang', '大刀回旋', '掷出大刀飞出再飞回，刀没回来前空手（范围＝飞多远，速度＝预警多久）'], ['sweep', '横扫千军', '身周一圈横扫（范围＝圈多大，速度＝蓄力多久）']];
+  let bbox = null, bsel = 'atk';
+  function bossPanel(on) {
+    if (!on) { if (bbox) bbox.remove(); bbox = null; try { T().bossTr(false); } catch (e) {} return; }
+    regNewGrunt(); try { T().dummy(''); if (!zs.some(z => z.sprite === 'cheng_new')) T().newBoss(); } catch (e) {}
+    if (!bbox) { bbox = document.createElement('div'); bbox.id = 'szzBoss'; document.body.appendChild(bbox); }
+    brender();
+  }
+  function brender() {
+    const t = T(), C = t.bossCfg(bsel), op = v => Object.entries(BFR).map(([k, n]) => `<option value="${k}"${k === v ? ' selected' : ''}>${n}</option>`).join('');
+    bbox.innerHTML = `<div class="hd"><span>首领试炼 · 程远志</span><button class="bx">关闭</button></div>
+      <div class="mv">${BMV.map(([k, n]) => `<button data-m="${k}" class="${k === bsel ? 'on' : ''}">${n}</button>`).join('')}</div>
+      <div class="ds">${BMV.find(m => m[0] === bsel)[2]}。程远志会反复放这一招。</div>
+      <div class="row"><span>起手</span><select data-f="a">${op(C.a)}</select></div>
+      <div class="row"><span>出手</span><select data-f="b">${op(C.b)}</select></div>
+      ${bsel === 'atk' ? '' : `<div class="row"><span>范围</span><input type="range" min="0.4" max="2.5" step="0.05" value="${C.rs}" data-r="rs"><b>×${(+C.rs).toFixed(2)}</b></div>`}
+      <div class="row"><span>速度</span><input type="range" min="0.4" max="2.5" step="0.05" value="${C.sp}" data-r="sp"><b>×${(+C.sp).toFixed(2)}</b></div>
+      <div class="ds">速度越大越慢（预警、蓄力越久）。</div>
+      <button class="cp">复制首领设置</button>`;
+    bbox.querySelector('.bx').onclick = () => bossPanel(false);
+    bbox.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { bsel = b.dataset.m; t.bossTr(true, bsel); brender(); });
+    bbox.querySelectorAll('[data-f]').forEach(e => e.onchange = () => { t.setBossCfg(bsel, { [e.dataset.f]: e.value }); });
+    bbox.querySelectorAll('[data-r]').forEach(e => e.oninput = () => { const v = Math.round(+e.value * 100) / 100; t.setBossCfg(bsel, { [e.dataset.r]: v }); e.nextElementSibling.textContent = '×' + v.toFixed(2); if (bsel === 'atk') t.bossTr(true, bsel); });
+    bbox.querySelector('.cp').onclick = () => { const txt = '首领设置：' + t.bossCopy(); try { navigator.clipboard.writeText(txt); } catch (e) {} bbox.querySelector('.cp').textContent = '已复制'; };
+    t.bossTr(true, bsel);
+  }
   function skills(w) { const t = T(); return Object.keys(t.SK).filter(k => !t.SK[k].off && t.wepOf(k) === w).sort((a, b) => (t.SK[a].tier || 0) - (t.SK[b].tier || 0)); }
   function render() {
     const t = T(); if (!t || !box) return;
@@ -50,7 +80,7 @@
       ls = ids.map(id => { const g = t.GF[id]; return `<button data-g="${id}" class="${on.includes(id) ? 'on' : ''}"><span style="color:${TC[g.t + 1]}">${t.TIERN[g.t + 1]}</span> ${g.n}<small>${g.cn || (qg ? '轻功' : '内功')}</small></button>`; }).join('');
       const g = sel && t.GF[sel]; dt = g ? `<b>${g.n}</b>　${t.TIERN[g.t + 1]}阶<br>${g.d || ''}` : `<span style="opacity:.6">${qg ? '点一个轻功装上（只能装一个）' : '点心法装上（最多 3 个，再点取消）'}；武艺照常放。</span>`;
     }
-    box.innerHTML = `<div class="hd"><span>武学试炼</span><span>${mini ? '' : `<button class="dm">木人桩：${DUMN[dum]}</button> `}<button class="mn">${mini ? '展开' : '缩小'}</button></span></div>${mini ? '' : `<div class="dms"><span><button class="tbk">${brk ? '会碎的木人' : '不碎的木人'}</button> <button class="tsol">士兵：${sol ? '开' : '关'}</button> <button class="tng">${ng ? '新棍兵：开' : '新画风棍兵'}</button> <button class="tcy">打新程远志</button> <button class="tshow">${show ? '收起首领美术' : '首领美术对比'}</button>${sol ? ` <button class="rg">远程兵：${rng ? '开' : '关'}</button>` : ''}</span></div>${dum ? '<div class="dms"><span class="dmv">—</span><button class="dmc">清零</button></div>' : ''}<div class="tabs">${tabs}</div><div class="ls">${ls}</div><div class="dt">${dt}</div>`}`;
+    box.innerHTML = `<div class="hd"><span>武学试炼</span><span>${mini ? '' : `<button class="dm">木人桩：${DUMN[dum]}</button> `}<button class="mn">${mini ? '展开' : '缩小'}</button></span></div>${mini ? '' : `<div class="dms"><span><button class="tbk">${brk ? '会碎的木人' : '不碎的木人'}</button> <button class="tsol">士兵：${sol ? '开' : '关'}</button> <button class="tng">${ng ? '新棍兵：开' : '新画风棍兵'}</button> <button class="tcy">打新程远志</button> <button class="tbp">首领试炼</button> <button class="tshow">${show ? '收起首领美术' : '首领美术对比'}</button>${sol ? ` <button class="rg">远程兵：${rng ? '开' : '关'}</button>` : ''}</span></div>${dum ? '<div class="dms"><span class="dmv">—</span><button class="dmc">清零</button></div>' : ''}<div class="tabs">${tabs}</div><div class="ls">${ls}</div><div class="dt">${dt}</div>`}`;
     box.querySelector('.mn').onclick = () => { mini = !mini; render(); };
     if (mini) return;
     const rg = box.querySelector('.rg'); if (rg) rg.onclick = () => { rng = !rng; render(); };
@@ -58,6 +88,7 @@
     box.querySelector('.tbk').onclick = () => { brk = brk ? 0 : 1; try { T().dummyBrk(brk); } catch (e) {} render(); };
     box.querySelector('.tng').onclick = () => { ng = ng ? 0 : 1; window.NEW_GRUNT = !!ng; regNewGrunt(); try { if (ng) { sol = 1; T().soldiers(1); for (let i = 0; i < 4; i++) T().spawn('grunt'); } T().regrunt(ng); } catch (e) {} render(); };
     box.querySelector('.tcy').onclick = () => { regNewGrunt(); try { T().newBoss(); } catch (e) { console.error(e); } };
+    box.querySelector('.tbp').onclick = () => bossPanel(!bbox);
     box.querySelector('.tshow').onclick = () => { show = show ? 0 : 1; try { T().showcase(show); } catch (e) {} render(); };
     box.querySelector('.tsol').onclick = () => { sol = sol ? 0 : 1; try { T().soldiers(sol); } catch (e) {} render(); };
     const dc = box.querySelector('.dmc'); if (dc) dc.onclick = () => { try { T().dummyClear(); } catch (e) {} };
@@ -115,7 +146,7 @@
     try { await enterFight(); } finally { setTimeout(() => { const c = document.getElementById('szzTrialCover'); if (c) c.remove(); }, 250); }
     render(); clearTimeout(godT); keep();
   }
-  function close() { try { T().setLv(null); } catch (e) {} if (dum) { try { T().dummy(''); } catch (e) {} } dum = 'row'; brk = 0; sol = 0; show = 0; ng = 0; window.NEW_GRUNT = false; mini = false; const wasArena = window.TRIAL_ARENA; try { T().soldiers(1); T().dummyBrk(0); } catch (e) {}
+  function close() { try { T().setLv(null); } catch (e) {} bossPanel(false); if (dum) { try { T().dummy(''); } catch (e) {} } dum = 'row'; brk = 0; sol = 0; show = 0; ng = 0; window.NEW_GRUNT = false; mini = false; const wasArena = window.TRIAL_ARENA; try { T().soldiers(1); T().dummyBrk(0); } catch (e) {}
     if (wasArena && window.TITLE && TITLE.mode && TITLE.mode() === 'game' && TITLE.show) { window.TRIAL_ON = false; TITLE.show(); } window.TRIAL_ARENA = false; window.TRIAL_ON = false; clearTimeout(godT); if (box) box.remove(); box = null; }   // 演武场关掉就回主界面
   window.TRIAL = { open, close, regNew: regNewGrunt };
 })();
