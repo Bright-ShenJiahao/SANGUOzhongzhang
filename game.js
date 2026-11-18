@@ -833,7 +833,7 @@ function zFrame(z) {
   }
   if (z.air) return z.vz > 0 ? 'fly1' : 'fly2';
   if (z.cbFrame && !z.dead) return z.cbFrame;   // 第二章首领技能帧
-  if (z.sprite === 'cheng_new' && !z.dead && window.SURV && SURV.trial && SURV.trial.bossCfg && (z.st === 'wind' || z.st === 'strike' || z.st === 'rec')) { const C = SURV.trial.bossCfg('atk'); return z.st === 'wind' ? C.a : C.b; }   // 11/18 首领普攻帧可在首领试炼里挑
+  if (z.sprite === 'cheng_new' && !z.dead && window.SURV && SURV.trial && SURV.trial.bossCfg && (z.st === 'wind' || z.st === 'strike' || z.st === 'rec')) { const C = SURV.trial.bossCfg('atk'); return z.st === 'wind' ? C.a : z.st === 'rec' ? (C.c || C.b) : C.b; }   // 11/18 首领普攻帧可在首领试炼里挑
   if (z.zjDizzy > 0) return 'dizzy';
   if (z.sprite === 'zhang_jiao' && z.stun > 0) return 'hurt';
   if (z.sprite === 'zhang_jiao' && z.throwT > 0) return 'throw';

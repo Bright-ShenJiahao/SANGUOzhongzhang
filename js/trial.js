@@ -39,7 +39,7 @@
 
   // 11/18 用户：首领试炼——照武学试炼的样子调首领的每一招（起手/出手帧、范围、速度），复制发 Claude
   const BFR = { idle: '站立', walk1: '走路①', walk2: '走路②', walk3: '走路③', walk4: '走路④', wind: '举刀', strike: '劈下', throw1: '掷刀起手', throw2: '掷出', bare: '空手', catch: '接刀', sweep1: '横扫起手', sweep2: '转身横扫', sweep3: '横扫收势', hurt: '受击', down: '倒地', fly1: '被打飞①', fly2: '被打飞②', land: '落地' };
-  const BMV = [['atk', '普攻', '靠近了举刀劈下（速度＝举刀多久）'], ['boomerang', '大刀回旋', '掷出大刀飞出再飞回，刀没回来前空手（范围＝飞多远，速度＝预警多久）'], ['sweep', '横扫千军', '身周一圈横扫（范围＝圈多大，速度＝蓄力多久）']];
+  const BMV = [['atk', '普攻', '靠近了举刀劈下（速度＝举刀多久）'], ['boomerang', '大刀回旋', '掷出大刀飞出再飞回，刀没回来前空手，收手＝接刀那一下（范围＝飞多远，速度＝预警多久）'], ['sweep', '横扫千军', '身周一圈横扫（范围＝圈多大，速度＝蓄力多久）']];
   let bbox = null, bsel = 'atk';
   function bossPanel(on) {
     if (!on) { if (bbox) bbox.remove(); bbox = null; try { T().bossTr(false); } catch (e) {} return; }
@@ -54,6 +54,7 @@
       <div class="ds">${BMV.find(m => m[0] === bsel)[2]}。程远志会反复放这一招。</div>
       <div class="row"><span>起手</span><select data-f="a">${op(C.a)}</select></div>
       <div class="row"><span>出手</span><select data-f="b">${op(C.b)}</select></div>
+      <div class="row"><span>收手</span><select data-f="c"><option value=""${C.c ? '' : ' selected'}>无</option>${op(C.c)}</select></div>
       ${bsel === 'atk' ? '' : `<div class="row"><span>范围</span><input type="range" min="0.4" max="2.5" step="0.05" value="${C.rs}" data-r="rs"><b>×${(+C.rs).toFixed(2)}</b></div>`}
       <div class="row"><span>速度</span><input type="range" min="0.4" max="2.5" step="0.05" value="${C.sp}" data-r="sp"><b>×${(+C.sp).toFixed(2)}</b></div>
       <div class="ds">速度越大越慢（预警、蓄力越久）。</div>

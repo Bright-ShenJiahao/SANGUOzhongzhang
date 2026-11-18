@@ -187,14 +187,14 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const dirU = (z, tx, ty) => { const a = ang(z, tx, ty); return [Math.cos(a), Math.sin(a), a]; };
   const clampY = y => Math.max(M.top + 6, Math.min(M.bot - 6, y));
   // 11/18 用户：首领试炼——每招的起手/出手帧、范围、速度可调（存本机，复制发 Claude 写死进 BCFG0）
-  const BCFG0 = { cheng_yuanzhi: { atk: { a: 'wind', b: 'strike', rs: 1, sp: 1 }, boomerang: { a: 'throw1', b: 'throw2', rs: 1, sp: 1 }, sweep: { a: 'sweep1', b: 'sweep2', rs: 1, sp: 1 } } };
+  const BCFG0 = { cheng_yuanzhi: { atk: { a: 'wind', b: 'strike', c: 'strike', rs: 1, sp: 1 }, boomerang: { a: 'throw1', b: 'throw2', c: 'catch', rs: 1, sp: 1 }, sweep: { a: 'sweep1', b: 'sweep2', c: 'sweep3', rs: 1, sp: 1 } } };
   let BCFG = {}; try { BCFG = JSON.parse(localStorage.getItem('szz-boss-cfg') || '{}') || {}; } catch (e) {}
   const bcfg = (t, m) => Object.assign({ rs: 1, sp: 1 }, (BCFG0[t] || {})[m] || {}, (BCFG[t] || {})[m] || {});
   const BOSSTR = { on: false, move: '' };
   const cyPlay = (z, seq) => { if (z.sprite !== 'cheng_new') return; let t = 0; z.cbFrame = seq[0][0]; for (let i = 0; i < seq.length; i++) { const [f, d] = seq[i], t0 = t; if (i) later(t0, () => { if (!z.dead) z.cbFrame = f; }); t += d; } later(t, () => { if (z.cbFrame === seq[seq.length - 1][0]) z.cbFrame = null; }); };
   const gap = (z, t, txt) => { z.stun = Math.max(z.stun || 0, t); floaters.push({ x: z.x, y: z.y - 70, t: 0, txt, color: '#9fe08a' }); };
   const BSK = {
-    sweep: z => { const C = bcfg(z.type, 'sweep'); teleAdd({ k: 'circle', x: z.x, y: z.y, r: 105 * C.rs, T: 1.0 * C.sp, dmg: 2.5, src: z }); cyPlay(z, [[C.a, .85 * C.sp], [C.b, .22], ['sweep3', .35]]); say(z, '横扫千军！'); return 1.0 * C.sp; },
+    sweep: z => { const C = bcfg(z.type, 'sweep'); teleAdd({ k: 'circle', x: z.x, y: z.y, r: 105 * C.rs, T: 1.0 * C.sp, dmg: 2.5, src: z }); cyPlay(z, [[C.a, .85 * C.sp], [C.b, .22]].concat(C.c ? [[C.c, .35]] : [])); say(z, '横扫千军！'); return 1.0 * C.sp; },
     cleave: z => { teleAdd({ k: 'line', x: z.x, y: z.y, a: ang(z, hero.x, hero.y), len: 230, w: 46, T: .85, dmg: 2.8, src: z }); say(z, '开山劈！'); return .85; },
     charge: z => { const a = ang(z, hero.x, hero.y), L = 300, x0 = z.x, y0 = z.y;
       teleAdd({ k: 'line', x: x0, y: y0, a, len: L, w: 56, T: .8, dmg: 2.8, src: z, then: () => { z.dash = { x0, y0, x1: x0 + Math.cos(a) * L, y1: clampY(y0 + Math.sin(a) * L * YS), t: 0 }; } }); say(z, '冲啊！'); return .8; },
@@ -207,7 +207,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       teleAdd({ k: 'line', x: z.x, y: z.y, a, len: L, w: 40, T: .5 * C.sp, src: z, snd: '', then: () => {
         const x0 = z.x, y0 = z.y, fx = x0 + ux * L, fy = y0 + uy * L * YS;
         hzAdd({ kind: 'blade', src: z, x: x0, y: y0, r: 28, dmg: 2.6, T: 1.15, upd: o => { const q = o.t / 1.15, e = Math.sin(q * Math.PI), bx = q < .5 ? x0 : z.x, by = q < .5 ? y0 : z.y; o.x = bx + (fx - bx) * e; o.y = by + (fy - by) * e; if (q >= .5 && !o.back) { o.back = 1; o.hitT = 0; } } });
-      } }); cyPlay(z, [[C.a, .5 * C.sp], [C.b, .18], ['bare', .9], ['catch', .3]]); say(z, '大刀回旋！'); return 1.15 + .5 * C.sp; },
+      } }); cyPlay(z, [[C.a, .5 * C.sp], [C.b, .18], ['bare', .9]].concat(C.c ? [[C.c, .3]] : [])); say(z, '大刀回旋！'); return 1.15 + .5 * C.sp; },
     // 邓茂：九环刀劈地，三道裂地波扇形冲出；劈完刀卡在地里 1 秒
     quake3: z => { const a = ang(z, hero.x, hero.y);
       [-.42, 0, .42].forEach((d, i) => teleAdd({ k: 'line', x: z.x, y: z.y, a: a + d, len: 270, w: 38, T: .9, dmg: 2.6, src: z, c: 2, snd: i ? '' : 'land', then: i === 2 ? () => gap(z, 1, '刀卡住了！') : null }));
