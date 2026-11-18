@@ -148,7 +148,9 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     }
     for (const o of HZ) {
       ctx.save();
-      if (o.kind === 'blade') {   // 飞旋的大刀：转着的月牙
+      if (o.kind === 'blade' && o.src && o.src.sprite === 'cheng_new' && typeof CH !== 'undefined' && CH.cheng_new && CH.cheng_new.blade && CH.cheng_new.blade.img.complete) { const B = CH.cheng_new.blade, w = 66, h = w * B.img.naturalHeight / B.img.naturalWidth;   // 新画风：用画好的大刀转着飞
+        ctx.translate(o.x, o.y - 18); ctx.rotate(o.t * 18); ctx.drawImage(B.img, -w / 2, -h / 2, w, h);
+      } else if (o.kind === 'blade') {   // 飞旋的大刀：转着的月牙
         ctx.translate(o.x, o.y - 14); ctx.rotate(o.t * 20); ctx.lineCap = 'round';
         ctx.strokeStyle = '#2a1a10'; ctx.lineWidth = 9; ctx.beginPath(); ctx.arc(0, 0, 18, -1.2, 1.9); ctx.stroke();
         ctx.strokeStyle = '#e4e0d4'; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(0, 0, 18, -1.2, 1.9); ctx.stroke();
@@ -184,21 +186,23 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   // 每个首领的招：返回蓄力时长（这段时间首领原地不动）。11/12 用户：参考无名之辈，每个首领一招专属技能，招式之间不喘息；破绽来自招式本身（空手、刀卡地、头晕）
   const dirU = (z, tx, ty) => { const a = ang(z, tx, ty); return [Math.cos(a), Math.sin(a), a]; };
   const clampY = y => Math.max(M.top + 6, Math.min(M.bot - 6, y));
+  const cyPlay = (z, seq) => { if (z.sprite !== 'cheng_new') return; let t = 0; z.cbFrame = seq[0][0]; for (let i = 0; i < seq.length; i++) { const [f, d] = seq[i], t0 = t; if (i) later(t0, () => { if (!z.dead) z.cbFrame = f; }); t += d; } later(t, () => { if (z.cbFrame === seq[seq.length - 1][0]) z.cbFrame = null; }); };
   const gap = (z, t, txt) => { z.stun = Math.max(z.stun || 0, t); floaters.push({ x: z.x, y: z.y - 70, t: 0, txt, color: '#9fe08a' }); };
   const BSK = {
-    sweep: z => { teleAdd({ k: 'circle', x: z.x, y: z.y, r: 105, T: 1.0, dmg: 2.5, src: z }); say(z, '横扫千军！'); return 1.0; },
+    sweep: z => { teleAdd({ k: 'circle', x: z.x, y: z.y, r: 105, T: 1.0, dmg: 2.5, src: z }); cyPlay(z, [['sweep1', .85], ['sweep2', .22], ['sweep3', .35]]); say(z, '横扫千军！'); return 1.0; },
     cleave: z => { teleAdd({ k: 'line', x: z.x, y: z.y, a: ang(z, hero.x, hero.y), len: 230, w: 46, T: .85, dmg: 2.8, src: z }); say(z, '开山劈！'); return .85; },
     charge: z => { const a = ang(z, hero.x, hero.y), L = 300, x0 = z.x, y0 = z.y;
       teleAdd({ k: 'line', x: x0, y: y0, a, len: L, w: 56, T: .8, dmg: 2.8, src: z, then: () => { z.dash = { x0, y0, x1: x0 + Math.cos(a) * L, y1: clampY(y0 + Math.sin(a) * L * YS), t: 0 }; } }); say(z, '冲啊！'); return .8; },
     spin: z => { teleAdd({ k: 'circle', x: z.x, y: z.y, r: 120, T: 1.0, dmg: 2.5, src: z }); say(z, '旋戟！'); return 1.0; },
     firerain: z => { for (let i = 0; i < (z.rage ? 7 : 5); i++) teleAdd({ k: 'circle', x: hero.x + R(-110, 110), y: hero.y + R(-55, 55), r: 42, T: 1.0 + i * .14, dmg: 2, src: z, snd: 'land', c: 3 }); say(z, '火来！'); return .7; },
     thunder: z => { for (let i = 0; i < (z.rage ? 8 : 6); i++) teleAdd({ k: 'circle', x: hero.x + (i ? R(-120, 120) : 0), y: hero.y + (i ? R(-60, 60) : 0), r: 46, T: 1.15 + i * .12, dmg: 2.5, src: z, c: 1, snd: 'crack' }); say(z, '天雷！'); return .8; },
+    // 11/18 新画风程远志：技能按专门的动作帧走（z.cbFrame 依次换）
     // 程远志：长柄大刀脱手飞出，画一道直线飞到远处再飞回来，去回都伤人；刀没回来前空手站着（破绽）
     boomerang: z => { const [ux, uy, a] = dirU(z, hero.x, hero.y), L = 280;
       teleAdd({ k: 'line', x: z.x, y: z.y, a, len: L, w: 40, T: .5, src: z, snd: '', then: () => {
         const x0 = z.x, y0 = z.y, fx = x0 + ux * L, fy = y0 + uy * L * YS;
         hzAdd({ kind: 'blade', src: z, x: x0, y: y0, r: 28, dmg: 2.6, T: 1.15, upd: o => { const q = o.t / 1.15, e = Math.sin(q * Math.PI), bx = q < .5 ? x0 : z.x, by = q < .5 ? y0 : z.y; o.x = bx + (fx - bx) * e; o.y = by + (fy - by) * e; if (q >= .5 && !o.back) { o.back = 1; o.hitT = 0; } } });
-      } }); say(z, '大刀回旋！'); return 1.65; },
+      } }); cyPlay(z, [['throw1', .5], ['throw2', .18], ['bare', .9], ['catch', .3]]); say(z, '大刀回旋！'); return 1.65; },
     // 邓茂：九环刀劈地，三道裂地波扇形冲出；劈完刀卡在地里 1 秒
     quake3: z => { const a = ang(z, hero.x, hero.y);
       [-.42, 0, .42].forEach((d, i) => teleAdd({ k: 'line', x: z.x, y: z.y, a: a + d, len: 270, w: 38, T: .9, dmg: 2.6, src: z, c: 2, snd: i ? '' : 'land', then: i === 2 ? () => gap(z, 1, '刀卡住了！') : null }));

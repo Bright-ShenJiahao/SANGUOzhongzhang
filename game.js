@@ -856,6 +856,7 @@ function zFrame(z) {
   if (z.st === 'strike') return 'strike';
   if (z.st === 'rec') return z.T.ranged ? 'idle' : 'strike';
   if (z.sprite === 'zhang_jiao') return z.st === 'rest' ? 'rest' : 'float';   // 张角飘着走，不走路
+  if (z.sprite === 'cheng_new' && z.moving) return 'walk' + (1 + Math.floor(z.t * 7) % 4);   // 11/18 新画风程远志：四帧走路
   return z.moving ? (Math.floor(z.t * 6) % 2 ? 'walk1' : 'walk2') : 'idle';
 }
 let _shT = 0;
