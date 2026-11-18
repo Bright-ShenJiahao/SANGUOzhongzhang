@@ -176,6 +176,6 @@
   let bossMode = false;
   async function openBoss() { bossMode = true; await open(); if (box) box.style.display = 'none'; bossPanel(true); }
   // 11/18 用户：这些开关挪到开发者面板
-  function burnTry() { try { if (zs.filter(z => !z.dead && !z.dummy && !z.pilot).length < 4) { T().soldiers(1); for (let i = 0; i < 8; i++) { const z = T().spawn('grunt'); if (z) { z.x = hero.x + (i % 2 ? 1 : -1) * (70 + (i >> 1) * 40); z.y = hero.y + ((i * 37) % 60) - 30; } } setTimeout(() => SURV.burnTest(), 900); } else SURV.burnTest(); } catch (e) { console.error(e); } }
+  function burnTry() { try { if (zs.filter(z => !z.dead && !z.dummy && !z.pilot).length < 4) { T().soldiers(1); for (let i = 0; i < 8; i++) { const z = T().spawn('grunt'); if (z) { z.x = hero.x + (i % 2 ? 1 : -1) * (70 + (i >> 1) * 40); z.y = hero.y + ((i * 37) % 60) - 30; } } T().soldiers(0, 1); setTimeout(() => SURV.burnTest(), 900); } else SURV.burnTest(); } catch (e) { console.error(e); } }
   window.TRIAL = { open, openBoss, close, regNew: regNewGrunt, bpx: on => bpx(on), bpxOn: () => BPX, burnTry };
 })();
