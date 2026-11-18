@@ -955,14 +955,15 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   function dSweep(x, y, a0, half, r, m, kb, o = {}) {   // 扇形（r 用方案单位）
     r *= DK * RM; pvGeo('fan', x, y, a0, half, r);
     // 11/14 用户：有刀光图的招不再画代码扇形；出手那一下已由 daoSlash 播过，之后的追加刀（回锋、叠锋第二三刀等）按这一刀的方向再播一道刀光
-    if (typeof DGM !== 'undefined' && DGM[CK]) { if (DKT - (daoSlash.t || -9) > .06) daoSlash(CK, a0, x, y); }
+    if (FXQ0[CK] && FXQ0[CK].arc) fx.push({ k: 'qa', x, y, a: a0, half, r, t: 0, T: .26 });   // 11/18 工具「扇面」设置
+    else if (typeof DGM !== 'undefined' && DGM[CK]) { if (DKT - (daoSlash.t || -9) > .06) daoSlash(CK, a0, x, y); }
     else fx.push({ k: 'arc', x, y, a0, half, r, t: 0, T: .26, color: o.col || C.dao, rev: !!o.rev });
     return hittable().filter(z => inArc(x, y, z, a0, half, r) && DH(z, m, kb, Object.assign({ x }, o)));
   }
   function dCircle(x, y, r, m, kb, o = {}) {   // 圆（r 用方案单位）
     r *= DK * RM;
     if (o.fd && FXD0[CK]) {} else if (typeof DGM !== 'undefined' && DGM[CK]) { const tr = SK[CK].tier || 1; fx.push({ k: 'cut', n: tr >= 3 ? 'dh2' : 'dg6', x, y: y - 14, a: -.6, L: r * (tr >= 3 ? .5 : .7), t: 0, T: .32, col: hexRgb(SK[CK].color) }); }
-    else fx.push({ k: 'burst', x, y, r, t: 0, T: .4, col: o.col || '255,200,120' });
+    else fx.push({ k: 'burst', x, y, r, t: 0, T: .4, col: o.col || '255,200,120', hm: 'boom' });
     return near(x, y, r).filter(z => DH(z, m, kb, Object.assign({ x }, o)));
   }
   function dRect(x0, y0, a, L, w, f) {   // 从 (x0,y0) 朝 a 长 L、半宽 w 的矩形（已换算好的像素），对里面的人调 f(z)
@@ -1097,7 +1098,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const QD = () => HAS('longdan') ? 1.3 : 1, QDM = () => HAS('longdan') ? 1.5 : 1;   // 龙胆亮银枪：冲刺距离 +30%、冲刺路上伤害 ×1.5
   const QS = (n) => n * DK * RM;                           // 方案单位 → 像素
   const qCol = () => hexRgb(SK[CK] ? SK[CK].color : '#ffe0a0');
-  function qFx(x0, y0, a, L, T) { const ca = Math.cos(a), sa = Math.sin(a), Ls = L * Math.hypot(ca, sa * .5); fx.push({ k: 'cut', n: 'dg6', x: x0 + ca * L / 2, y: y0 + sa * L / 4 - 16, a: Math.atan2(sa * .5, ca), L: Ls / 2.2, t: 0, T: T || ((SK[CK] && SK[CK].tier) >= 3 ? .3 : .22), col: qCol() }); }
+  function qFx(x0, y0, a, L, T) { if (FXQ0[CK] && FXQ0[CK].thrust) { fx.push({ k: 'qt', x: x0, y: y0, a, L, t: 0, T: T || ((SK[CK] && SK[CK].tier) >= 3 ? .3 : .22), col: qCol() }); return; } const ca = Math.cos(a), sa = Math.sin(a), Ls = L * Math.hypot(ca, sa * .5); fx.push({ k: 'cut', n: 'dg6', x: x0 + ca * L / 2, y: y0 + sa * L / 4 - 16, a: Math.atan2(sa * .5, ca), L: Ls / 2.2, t: 0, T: T || ((SK[CK] && SK[CK].tier) >= 3 ? .3 : .22), col: qCol() }); }
   // 直线刺：(x0,y0) 朝 a，长 L、宽 W（方案单位，全宽）；m 可以是数，也可以是 z => 倍率；返回打中的人
   function qT(x0, y0, a, L, W, m, kb, o = {}, noFx) {
     const Lp = QS(L) * (o.noL ? 1 : QL()), w = QS(W) / 2; if (!noFx) qFx(x0, y0, a, Lp);
@@ -1112,6 +1113,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     const x1 = x0 + Math.cos(a) * Dp, y1 = clampY(y0 + Math.sin(a) * Dp * .5), hs = new Set(), w = QS(W) / 2;
     if (inv) hero.inv = Math.max(hero.inv || 0, inv); const gfr = SK[CK] ? SK[CK].pose[1] : null;
     if (Dp > 4) ghost(x0, y0, x1, y1, a, SK[CK] ? SK[CK].pose[1] : null, T + .1);
+    if (Dp > 4 && FXQ0[CK] && FXQ0[CK].thrust) fx.push({ k: 'qt', x: x0, y: y0, a, L: Dp, t: 0, T: T + .1, col: qCol() });   // 11/18 冲刺路上也画工具设置的枪芒
     // 11/17 用户：不要拖着主角走（影响走位）——主角留在原地，残影冲出去打，命中跟着残影算
     DKO.push(dmk({ T: T + .01, fin: 0, tick(q) { const p = Math.min(1, q.t / T), px = x0 + (x1 - x0) * p, py = clampY(y0 + (y1 - y0) * p); if (mv) { hero.x = px; hero.y = py; if (gfr && q.t >= (q.gn || 0)) { q.gn = q.t + .035; fx.push({ k: 'ghost', x0: px, y0: py, x1: px, y1: py, fr: gfr, flip: Math.cos(a) < 0, t: 0, T: .2, mt: .01, rot: -.1 }); } } if (Math.abs(Math.cos(a)) > .2) hero.f = Math.cos(a) >= 0 ? 1 : -1;
       for (const z of hittable()) if (!hs.has(z) && Math.hypot(z.x - px, (z.y - py) * 2) < w + 12) { hs.add(z); DH(z, (typeof m === 'function' ? m(z) : m) * QDM(), kb, Object.assign({ x: px - Math.cos(a) * 20 }, o)); }
@@ -1127,7 +1129,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   QG('lianci', 1, 'thrust', { name: '点星刺', icon: '星', need: 92, wu: .32, rc: .22, beam: true, len: 92,
     desc: '锁定最近的敌人，向他连点三枪，第三枪更大、把人打退。LV3 每枪挂 1 层流血（本招最多 2 层）；LV5 再加一记回抽枪；LV7 本招流血最多 3 层，同时点第二近的敌人两枪',
     cast() { const L = dlv(), blMax = L >= 7 ? 3 : 2, bl = L >= 3 ? 1 : 0;
-      const stab = (t, rad, m, kb) => { const a = Math.atan2((t.y - hero.y) * 2, t.x - hero.x); qFx(hero.x, hero.y, a, Math.max(10, dist(t, hero) - 6), .14); fx.push({ k: 'cut', n: 'dg6', x: t.x, y: t.y - 18, a: Math.atan2(Math.sin(a) * .5, Math.cos(a)), L: QS(rad) * .6, t: 0, T: .18, col: qCol() }); for (const z of near(t.x, t.y, QS(rad))) DH(z, m, kb, { bl, blMax, x: hero.x }); };
+      const stab = (t, rad, m, kb) => { const a = Math.atan2((t.y - hero.y) * 2, t.x - hero.x); qFx(hero.x, hero.y, a, Math.max(10, dist(t, hero) - 6), .14); fx.push({ k: 'cut', n: 'dg6', x: t.x, y: t.y - 18, a: Math.atan2(Math.sin(a) * .5, Math.cos(a)), L: QS(rad) * .6, t: 0, T: .18, col: qCol(), qs: 'spike' }); for (const z of near(t.x, t.y, QS(rad))) DH(z, m, kb, { bl, blMax, x: hero.x }); };
       const pick = () => { const a = aim(), t = nearest(QS(280)); return t || { x: hero.x + Math.cos(a) * QS(150), y: clampY(hero.y + Math.sin(a) * QS(75)) }; };
       const seq = [[48, .42, 10], [48, .42, 10], [62, .42, 45]].concat(L >= 5 ? [[70, 1.30, 60]] : []);
       DKO.push(dmk({ T: seq.length * .07 + .05, i: 0, tick(o) { while (o.i < seq.length && o.t >= o.i * .07) { const [r, m, kb] = seq[o.i], t = pick(); S.poseOverride = { f: o.i % 2 ? SK.lianci.pose[0] : SK.lianci.pose[1], t: .07 }; stab(t, r, m, kb);
@@ -1143,7 +1145,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   QG('tiaoqiang', 2, 'up', { name: '挑月枪', icon: '挑', need: 122, wu: .40, rc: .28, range: 122, half: .95,
     desc: '身前一横排枪尖从地里由近到远撩起（纵深 170、宽 240），把人挑飞（浮空）：落地再吃一下并晕 0.5 秒，之后 1.8 秒内受伤 +25%。LV3 落地时再挂 2 层流血；LV5 再撩第二浪、更远；LV7 浮空的人受伤 +45%，落地那一下 +50%',
     cast() { const L = dlv(), a = aim(), once = new Set(), fo = { up: 1, once, fkV: L >= 7 ? .45 : .25, fkBl: L >= 3 ? 2 : 0, fkLM: L >= 7 ? 1.5 : 1 };
-      const row = (d0, d1, m) => { const ca = Math.cos(a), sa = Math.sin(a), px = -sa, py = ca; for (let k = -3; k <= 3; k++) { const dd = QS((d0 + d1) / 2), off = QS(240) / 2 * k / 3; fx.push({ k: 'cut', n: 'dg6', x: hero.x + ca * dd + px * off, y: hero.y + (sa * dd + py * off) * .5 - 14, a: -Math.PI / 2 + .25, L: QS(d1 - d0) * .35, t: 0, T: .28, col: qCol() }); }
+      const row = (d0, d1, m) => { const ca = Math.cos(a), sa = Math.sin(a), px = -sa, py = ca; for (let k = -3; k <= 3; k++) { const dd = QS((d0 + d1) / 2), off = QS(240) / 2 * k / 3; fx.push({ k: 'cut', n: 'dg6', x: hero.x + ca * dd + px * off, y: hero.y + (sa * dd + py * off) * .5 - 14, a: -Math.PI / 2 + .25, L: QS(d1 - d0) * .35, t: 0, T: .28, col: qCol(), qs: 'spike' }); }
         const x0 = hero.x + ca * QS(d0), y0 = hero.y + sa * QS(d0) * .5; dRect(x0, y0, a, QS(d1 - d0), QS(240) / 2, z => DH(z, m, 0, Object.assign({ x: hero.x }, fo))); };
       DKO.push(dmk({ T: L >= 5 ? .5 : .32, i: 0, tick(o) { const segs = [[0, 60], [55, 115], [110, 170]]; while (o.i < 3 && o.t >= o.i * .1) { row(segs[o.i][0], segs[o.i][1], 1.35); o.i++; } if (L >= 5 && o.i === 3 && o.t >= .18 + .2) { o.i = 4; row(60, 230, .90); sfx(SW, hero.x); } } }));
       sfx(SW, hero.x); shake = Math.max(shake, .1); } });
@@ -1181,7 +1183,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       else for (let j = 0; j < 12; j++) { const d = QS(60 + 240 * (j + Math.random() * .6) / 12), off = QS(200) * (Math.random() - .5); P.push([cx + ca * d - sa * off, cy + (sa * d + ca * off) * .5]); }
       const gap = .5 / P.length, fenceT = L >= 7 ? 2 : 1.2; sfx(CR, hero.x); shake = Math.max(shake, .15);
       DKO.push(dmk({ T: .5 + fenceT, i: 0, nx: .5 + .4, tick(o) {
-        while (o.i < P.length && o.t >= o.i * gap) { const [x, y] = P[o.i]; fx.push({ k: 'cut', n: 'dg6', x, y: y - 12, a: -Math.PI / 2, L: QS(52) * .45, t: 0, T: .4 + (o.t < .5 ? fenceT : 0) * .3, col: qCol() }); for (const z of near(x, y, QS(26))) { const c = hitN.get(z) || 0; if (c >= 2) continue; hitN.set(z, c + 1); DH(z, m, 15, { bl, blMax: 3, x }); } o.i++; }
+        while (o.i < P.length && o.t >= o.i * gap) { const [x, y] = P[o.i]; fx.push({ k: 'cut', n: 'dg6', x, y: y - 12, a: -Math.PI / 2, L: QS(52) * .45, t: 0, T: .4 + (o.t < .5 ? fenceT : 0) * .3, col: qCol(), qs: 'spike' }); for (const z of near(x, y, QS(26))) { const c = hitN.get(z) || 0; if (c >= 2) continue; hitN.set(z, c + 1); DH(z, m, 15, { bl, blMax: 3, x }); } o.i++; }
         if (o.t >= o.nx) { o.nx += .4; for (const [x, y] of P) for (const z of near(x, y, QS(26))) DH(z, .30, 0, { bl: L >= 7 ? 1 : 0, blMax: 5, x }); } } })); } });
   QG('qijin', 3, 'thrust', { name: '游龙突', icon: '龙', need: 150, wu: .40, rc: .30, beam: true, len: 150,
     desc: '残影连突五段，每段冲一小步扎向最近的敌人，各挂 1 层流血（本招最多 4 层），第五段把人挑飞（浮空）；每段一瞬间无敌，身边人太多时那一段改成原地刺。LV3 每段流血 2 层；LV5 七段（七进七出）；LV7 连扎同一个人每段 +25%（最多 +100%），最后一段引爆 3 层流血',
@@ -1205,7 +1207,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     cast() { const L = dlv(), a0 = aim(), x0 = hero.x, y0 = hero.y; sfx(CR, hero.x); shake = Math.max(shake, .35);
       const dragon = (a, len, m, last) => { const Ln = QS(len), hw = QS(160) / 2, T = Ln / QS(780), b = { x: x0, y: y0, vx: Math.cos(a) * Ln / T, vy: Math.sin(a) * Ln / T / 2, a, t: 0, T, hitSet: [], nohit: 1, col: ['110,216,255', '230,250,255'], img: 'dg4', iw: hw * 3, tc: hexRgb(SK.longyin.color) }; bolts.push(b);
         const hs = new Set(); DKO.push(dmk({ T: T + 2, nx: 0, ny: T + .4, done: 0, tick(o) {
-          if (o.t < T) { if (o.t >= o.nx) { o.nx += .07; fx.push({ k: 'cut', n: 'dh2', x: b.x, y: b.y - 14, a: 0, L: hw * .5, t: 0, T: .35, col: hexRgb(SK.longyin.color) }); }
+          if (o.t < T) { if (o.t >= o.nx) { o.nx += .07; fx.push({ k: 'cut', n: 'dh2', x: b.x, y: b.y - 14, a: 0, L: hw * .5, t: 0, T: .35, col: hexRgb(SK.longyin.color), qs: 'trail' }); }
             for (const z of hittable()) if (!hs.has(z) && Math.hypot(z.x - b.x, (z.y - b.y) * 2) < hw + 10) { hs.add(z); DH(z, m, 30, { up: 1, bl: L >= 3 ? 4 : 3, x: b.x - b.vx }); } }
           else if (!o.done) { o.done = 1; if (last) { dCircle(b.x, b.y, 150, 1.05, 80, { x: b.x }); if (L >= 7) hs.forEach(z => qBoom(z, .35, 3)); sfx(CR, b.x); shake = Math.max(shake, .3); } }
           if (o.t >= o.ny && o.t < T + 2) { o.ny += .5; dRect(x0, y0, a, Ln, hw * .8, z => DH(z, .15, 0, { x: x0 })); } } })); };
@@ -3274,7 +3276,8 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     const o = SK[key], t4 = (o.tier || 3) >= 4, f = Math.cos(a) >= 0 ? 1 : -1; let ax = .5, ay = .62, rot = 0;
     if (ty === 't') ay = .85;
     else if (ty === 'd') { x = hero.x + Math.cos(a) * 8; y = hero.y - 14 + Math.sin(a) * 4; ax = .06; ay = .55; const sa = Math.atan2(Math.sin(a) * .5, Math.cos(a)); rot = f > 0 ? sa : sa - Math.PI; }
-    fx.push({ k: 'dg', n: 'x_' + key, w, ax, ay, x, y, sy: 1, f, rot, t: 0, T: t4 ? .75 : .55, col: hexRgb(o.color), al: .72, wh: t4 ? .3 : .22, ghost: false });
+    const B = FXB0[key]; let n = 'x_' + key, sy = 1, al = .72; if (B) { if (B.on === 0 || !B.img || B.img === 'none' || !DGI[B.img]) return; n = B.img; w *= B.k == null ? 1 : B.k; x += f * (B.x || 0); y += B.y || 0; rot += f * (B.r || 0) * Math.PI / 180; sy = B.sy || 1; al = B.al == null ? .72 : B.al; }   // 11/18 工具「大特效」设置
+    fx.push({ k: 'dg', n, w, ax, ay, x, y, sy, f, rot, t: 0, T: t4 ? .75 : .55, col: hexRgb(o.color), al, wh: t4 ? .3 : .22, ghost: false, noMap: B ? 1 : 0 });
     if (t4) shake = Math.max(shake, .2);
   }
   const o0rm = () => RM;
@@ -3318,6 +3321,18 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     if (D.fall) one(D.fall, e.x, e.y - (D.fall.H || 80) * (1 - q * q), 1, fade);
     if (q >= 1 && !e.hit) { e.hit = 1; fx.push({ k: 'burst', x: e.x, y: e.y, r: ((D.land && D.land.w) || 60) * .3, t: 0, T: .35, col }); }
   }
+  function qtDraw(e, p) {   // 枪芒：从 (x,y) 沿地面方向 a 刺出 L
+    const C = FXQ0[e.sk] && FXQ0[e.sk].thrust; if (!C) return; const ca = Math.cos(e.a), sa = Math.sin(e.a), Ls = e.L * Math.hypot(ca, sa * .5), ang = Math.atan2(sa * .5, ca), al = 1 - p * p;
+    for (const o of [C.l2, C.l1]) qLine(o, e.x, e.y - 16, Ls, ang, al, e.col); }
+  function qLine(o, x, y, len, ang, al, rgb) {   // 一层「沿一条线」的图：图宽 = 线长 × k，锚点默认在图左端
+    if (!o || o.on === 0 || !o.img || o.img === 'none') return; const im = hmImg(o.img); if (!im) return; const w = len * (o.k == null ? 1 : o.k), h = w * im.naturalHeight / im.naturalWidth * (o.sy || 1);
+    ctx.save(); ctx.translate(x, y + (o.y || 0)); ctx.rotate(ang + (o.r || 0) * Math.PI / 180); if (Math.cos(ang) < 0) ctx.scale(1, -1); ctx.globalAlpha = Math.max(0, Math.min(1, al * (o.al == null ? 1 : o.al)));
+    ctx.drawImage(o.img[0] === 'e' ? im : hmTint(o.img, rgb), -(o.ax == null ? 0 : o.ax) * w, -(o.ay == null ? .5 : o.ay) * h, w, h); ctx.restore(); }
+  function qsDraw(e, p) {   // 枪尖 / 拖尾：原来那道短刀光的位置和长度，换成工具里选的图
+    const C = FXQ0[e.sk] && FXQ0[e.sk][e.qs]; const o = C && (C.l1 || C); if (!o) return false; const len = e.L * 2.2, al = 1 - p * p;
+    for (const q of [C.l2, o]) if (q) { if (q.on === 0 || !q.img || q.img === 'none') continue; const im = hmImg(q.img); if (!im) continue; const w = len * (q.k == null ? 1 : q.k), h = w * im.naturalHeight / im.naturalWidth * (q.sy || 1);
+      ctx.save(); ctx.translate(e.x, e.y + (q.y || 0)); ctx.rotate((e.a || 0) + (q.r || 0) * Math.PI / 180); ctx.globalAlpha = Math.max(0, Math.min(1, al * (q.al == null ? 1 : q.al))); ctx.drawImage(q.img[0] === 'e' ? im : hmTint(q.img, e.col), -(q.ax == null ? .5 : q.ax) * w, -(q.ay == null ? .5 : q.ay) * h, w, h); ctx.restore(); }
+    return true; }
   function bhSwing(key, a, hx, hy, R) {   // 普通挥砍：一柄刀魂顺着这一招的方向挥过去
     const m = DGM[key]; if (!fxBh(key) || !m || wepOf(key) !== 0) return;
     { const n = BHI[key]; if (n && bhImgOK(n)) { const f = Math.cos(a) >= 0 ? 1 : -1, col = hexRgb(SK[key].color);
@@ -3337,6 +3352,8 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const FXF0 = {"daobo":{"img":"bh11","w":187,"dy":-16,"r":0,"sy":1,"spin":0,"grow":1,"al":1},"feilunren":{"img":"bh8","w":44,"dy":-16,"r":0,"sy":0.55,"spin":14,"grow":1,"al":1},"wanren":{"img":"dg6","w":55,"dy":-16,"r":0,"sy":1,"spin":0,"grow":1,"al":1}};   // 11/18 飞行物（偃月斩刀气 daobo / 飞轮刃刀轮 feilunren / 归海一刀飞刃 wanren）：工具导出 {img,w,dy,r,sy,spin,grow,al}
   const FXD0 = {"tianbeng":{"fall":{"img":"bh3","w":75,"H":86,"ax":0.5,"ay":0.92,"sy":1,"al":1,"on":1},"land":{"img":"v_ring","w":110,"x":0,"y":0,"ax":0.5,"ay":0.7,"sy":0.6,"al":1,"on":1}},"wanren":{"fall":{"img":"bh10","w":125,"H":142,"ax":0.5,"ay":0.92,"sy":1,"al":1,"on":1},"land":{"img":"dt_wanren","w":110,"x":0,"y":0,"ax":0.5,"ay":0.6,"sy":0.6,"al":1,"on":1}}};   // 11/18 从天上落下（天崩地裂 tianbeng / 归海一刀 wanren）：工具导出 {fall:{img,w,H,ax,ay,sy,al,on},land:{img,w,x,y,ax,ay,sy,al,on}}
   const FXH0 = {"0":"c"};
+  const FXQ0 = {};   // 11/18 枪招特效（工具导出）：thrust 枪芒{l1,l2}（沿刺出方向，长度跟招式走）、spike 枪尖、trail 龙身拖尾、arc 扇面、boom 落点爆开{l1,l2}
+  const FXB0 = {};   // 11/18 地/天招的大特效图（fx2）：{img,k,x,y,r,sy,al,on}
   const FXHM0 = {"zhidao":{"pit":{"l1":{"img":"v_edge","k":1.3,"y":-0.2,"up":1,"sy":1,"r":-3,"ax":0.5,"ay":0.5,"al":1,"on":1},"l2":{"img":"v_crack","k":1,"y":0,"up":0,"sy":1,"r":0,"ax":0.5,"ay":0.5,"al":0.8,"on":0}}},"lunchui":{"arc":{"img":"v_fan90","k":0.55,"y":0,"up":0,"sy":1,"r":-101,"ax":0.03,"ay":0.5,"al":1,"on":1}},"zhendi":{"pit":{"l1":{"img":"chuih10","k":1.2,"y":-0.2,"up":1,"sy":1,"r":0,"ax":0.5,"ay":0.5,"al":1,"on":1},"l2":{"img":"v_crack","k":1,"y":0,"up":0,"sy":1,"r":0,"ax":0.5,"ay":0.5,"al":0.8,"on":0}}},"kaishan":{"pit":{"l1":{"img":"chuih4","k":1.05,"y":-0.7,"up":1,"sy":1,"r":0,"ax":0.5,"ay":0.5,"al":1,"on":1},"l2":{"img":"v_crack","k":1,"y":0,"up":0,"sy":1,"r":0,"ax":0.5,"ay":0.5,"al":0.8,"on":0}},"lock":{"m":0,"img":"v_circle","k":1,"y":0,"up":0,"sy":1,"r":0,"ax":0.5,"ay":0.5,"al":0.6,"on":1}},"tiaotian":{"pit":{"l1":{"img":"chuih2","k":1.2,"y":-0.6,"up":1,"sy":1,"r":0,"ax":0.5,"ay":0.5,"al":1,"on":1},"l2":{"img":"v_crack","k":1,"y":0,"up":0,"sy":1,"r":0,"ax":0.5,"ay":0.5,"al":0.8,"on":0}}},"dizhen":{"wave":{"l1":{"img":"e_stones","k":1.2,"y":-0.2,"up":1,"sy":1,"r":0,"ax":0.5,"ay":0.5,"al":1,"on":1},"l2":{"img":"v_crack","k":1,"y":0,"up":0,"sy":1,"r":0,"ax":0.5,"ay":0.5,"al":0.8,"on":0}}},"xuanchui":{"arc":{"img":"dg6","k":0.55,"y":-0.25,"up":0,"sy":1,"r":-90,"ax":0.03,"ay":0.5,"al":1,"on":1}},"zhichui":{"pit":{"l1":{"img":"chuih8","k":1.2,"y":-0.2,"up":1,"sy":1,"r":0,"ax":0.5,"ay":0.5,"al":1,"on":1},"l2":{"img":"v_crack","k":1,"y":0,"up":0,"sy":1,"r":0,"ax":0.5,"ay":0.5,"al":0.8,"on":0}},"lock":{"m":0,"img":"v_circle","k":1,"y":0,"up":0,"sy":1,"r":0,"ax":0.5,"ay":0.5,"al":0.6,"on":1}},"wanjun":{"pit":{"l1":{"img":"chuih11","k":1.2,"y":-0.2,"up":1,"sy":1,"r":0,"ax":0.5,"ay":0.5,"al":1,"on":1},"l2":{"img":"v_crack","k":1,"y":0,"up":0,"sy":1,"r":0,"ax":0.5,"ay":0.5,"al":0.8,"on":0}},"ring":{"img":"v_edge","k":1.1,"y":0,"up":0,"sy":1,"r":0,"ax":0.5,"ay":0.5,"al":1,"on":1}},"leiting":{"pit":{"l1":{"img":"chuih10","k":1.2,"y":-0.2,"up":1,"sy":1,"r":0,"ax":0.5,"ay":0.5,"al":1,"on":1},"l2":{"img":"v_crack","k":1,"y":0,"up":0,"sy":1,"r":0,"ax":0.5,"ay":0.5,"al":0.8,"on":0}}},"pocheng":{"pit":{"l1":{"img":"chuih4","k":1.2,"y":-0.75,"up":1,"sy":1,"r":0,"ax":0.5,"ay":0.5,"al":1,"on":1},"l2":{"img":"e_hring","k":1,"y":0,"up":0,"sy":1,"r":0,"ax":0.5,"ay":0.5,"al":0.8,"on":1}},"lock":{"m":0,"img":"v_circle","k":1,"y":0,"up":0,"sy":1,"r":0,"ax":0.5,"ay":0.5,"al":0.6,"on":1}},"bengshan":{"pit":{"l1":{"img":"e_stones","k":0.85,"y":-0.2,"up":1,"sy":1,"r":0,"ax":0.5,"ay":0.5,"al":1,"on":1},"l2":{"img":"v_circle","k":1,"y":0,"up":0,"sy":1,"r":0,"ax":0.5,"ay":0.5,"al":0.8,"on":0}},"ring":{"img":"v_crack","k":1.1,"y":0,"up":0,"sy":1,"r":0,"ax":0.5,"ay":0.5,"al":1,"on":1}}};   // 11/18 锤招特效（工具导出）：{pit:{l1,l2}, wave, arc, ring, lock}；大小按真实范围的倍数
   const hmImg = n => (typeof VFX !== 'undefined' && VFX[n] && VFX[n].naturalWidth ? VFX[n] : DGI[n] && DGI[n].naturalWidth ? DGI[n] : null);
   const hmTint = (n, rgb) => VFX[n] ? vTint(n, rgb) : dgTint(n, rgb);
@@ -3346,7 +3363,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     if (o.up) { ctx.scale(1, o.sy || 1); if (o.r) ctx.rotate(o.r * Math.PI / 180); } else { ctx.scale(1, .5 * (o.sy || 1)); ctx.rotate((rot || 0) + (o.r || 0) * Math.PI / 180); }
     ctx.drawImage(hmTint(o.img, rgb), -(o.ax == null ? .5 : o.ax) * w, -(o.ay == null ? .5 : o.ay) * h, w, h); ctx.restore(); }   // 11/18 受击刀光，按兵器：{0:'q'群侠白刀痕 | 'c'彩色小刀光 | 'n'不要}
   const FXT0 = {"hengsao":{"l1":{"img":"dg4","w":61,"x":8,"y":1,"ax":0.5,"ay":0.8,"r":-6,"sy":1,"al":1},"l2":{"img":"bh2","w":40.5,"x":4.5,"y":-18,"ax":0.2,"ay":0.6,"r":0,"sy":1,"al":1,"on":0}},"tiaozhan":{"l1":{"img":"bh12","w":34,"x":14,"y":-24,"ax":0.3,"ay":0.6,"r":0,"sy":1,"al":1},"l2":{"img":"bh4","w":40.5,"x":4.5,"y":-18,"ax":0.2,"ay":0.6,"r":0,"sy":1,"al":1,"on":1}},"tuodao":{"l1":{"img":"bh6","w":40,"x":37,"y":-23,"ax":0.5,"ay":0.5,"r":0,"sy":1,"al":1},"l2":{"img":"dg3","w":26,"x":34,"y":-18,"ax":0.2,"ay":0.6,"r":0,"sy":1,"al":1,"on":1}},"lianzhan":{"l1":{"img":"dh2","w":78,"x":10,"y":7,"ax":0.5,"ay":0.8,"r":0,"sy":1,"al":1},"l2":{"img":"bh6","w":40.5,"x":4.5,"y":-18,"ax":0.2,"ay":0.6,"r":0,"sy":1,"al":1,"on":0}},"huima":{"l1":{"img":"dg5","w":72,"x":0,"y":-24,"ax":0.5,"ay":0.55,"r":0,"sy":1,"al":1},"l2":{"img":"dg5","w":63,"x":0,"y":-14,"ax":0.5,"ay":0.5,"r":0,"sy":1,"al":1,"on":1}},"cuofeng":{"l1":{"img":"bh5","w":66,"x":38,"y":-13,"ax":0.45,"ay":0.6,"r":0,"sy":1,"al":1},"l2":{"img":"bh5","w":40.5,"x":4.5,"y":-18,"ax":0.2,"ay":0.6,"r":0,"sy":1,"al":1,"on":0}},"feilunren":{"l1":{"img":"fx_lun","w":78,"x":-7,"y":-16,"ax":0.35,"ay":0.5,"r":0,"sy":1,"al":1},"l2":{"img":"bh7","w":40.5,"x":4.5,"y":-18,"ax":0.2,"ay":0.6,"r":0,"sy":1,"al":1,"on":0}},"liedihuan":{"l1":{"img":"dt_tianbeng","w":96,"x":24,"y":2,"ax":0.55,"ay":0.88,"r":0,"sy":1,"al":1},"l2":{"img":"fx_ring","w":21,"x":16.5,"y":-10,"ax":0.5,"ay":0.9,"r":0,"sy":1,"al":1,"on":1}},"xuehe":{"l1":{"img":"dd_xuehe","w":82.6,"x":51,"y":-16,"ax":0.5,"ay":0.75,"r":0,"sy":1,"al":1},"l2":{"img":"bh1","w":42.9,"x":4.8,"y":-18,"ax":0.2,"ay":0.6,"r":0,"sy":1,"al":1,"on":0}},"tianbeng":{"l1":{"img":"bh9","w":62.8,"x":74,"y":4,"ax":0.5,"ay":0.9,"r":0,"sy":1,"al":1},"l2":{"img":"dd_liedi","w":51.7,"x":22.2,"y":0,"ax":0.5,"ay":0.92,"r":0,"sy":1,"al":1,"on":1}},"wanren":{"l1":{"img":"dt_wanren","w":66,"x":0,"y":-16,"ax":0.5,"ay":0.5,"r":0,"sy":0.65,"al":1},"l2":{"img":"dh2","w":40.5,"x":28,"y":-60,"ax":0.2,"ay":0.6,"r":0,"sy":1,"al":1,"on":1}}};   // 11/18 用户用「招式特效对齐工具」调好导出的设置（11 招；偃月斩没调，照旧）
-  { const used = new Set((JSON.stringify([FXT0, FXF0, FXD0, FXHM0]).match(/"(?:chuih|gdh|jianh|jih|qiangh|gongh|nuh|shih|fuh|shanh|quanh|tuih)\d+"/g) || []).map(x => x.slice(1, -1)));   // 11/18 兵魂图（art/ui/fx/hun，144 张）只加载设置里用到的
+  { const used = new Set((JSON.stringify([FXT0, FXF0, FXD0, FXHM0, FXQ0, FXB0]).match(/"(?:chuih|gdh|jianh|jih|qiangh|gongh|nuh|shih|fuh|shanh|quanh|tuih)\d+"/g) || []).map(x => x.slice(1, -1)));   // 11/18 兵魂图（art/ui/fx/hun，144 张）只加载设置里用到的
     for (const n of used) if (!DGI[n]) { const im = new Image(); im.src = 'art/ui/fx/hun/' + n + '.webp'; DGI[n] = im; } }
   const DGA0 = {"hengsao":{"s":1,"dx":-6,"dy":15,"r":-6},"lianzhan":{"s":1,"dx":-4,"dy":21,"r":0}};   // 11/18 用户在武学试炼里对齐
   let DGA = {}; try { DGA = JSON.parse(localStorage.getItem('szz-dga') || '{}') || {}; } catch (e) {}
@@ -4910,7 +4927,8 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
         }
         ctx.restore(); continue;
       }
-      if (e.k === 'burst' && e.hm && e.hm !== 'hit' && FXHM0[e.sk] && (FXHM0[e.sk][e.hm] || FXHM0[e.sk].pit)) { const C = e.hm === 'wave' ? FXHM0[e.sk].wave || FXHM0[e.sk].pit : FXHM0[e.sk].pit, r = e.r * (.5 + .5 * Math.min(1, p * 2)), al = 1 - p; if (C.l1 || C.l2) { hmLayer(C.l2, e.x, e.y, r, al, e.col); hmLayer(C.l1, e.x, e.y, r, al, e.col); } else hmLayer(C, e.x, e.y, r, al, e.col); }
+      if (e.k === 'burst' && e.hm === 'boom' && FXQ0[e.sk] && FXQ0[e.sk].boom) { const C = FXQ0[e.sk].boom, r = e.r * (.5 + .5 * Math.min(1, p * 2)), al = 1 - p, rgb = hexRgb(SK[e.sk].color); hmLayer(C.l2, e.x, e.y, r, al, rgb); hmLayer(C.l1, e.x, e.y, r, al, rgb); }
+      else if (e.k === 'burst' && e.hm && e.hm !== 'hit' && FXHM0[e.sk] && (FXHM0[e.sk][e.hm] || FXHM0[e.sk].pit)) { const C = e.hm === 'wave' ? FXHM0[e.sk].wave || FXHM0[e.sk].pit : FXHM0[e.sk].pit, r = e.r * (.5 + .5 * Math.min(1, p * 2)), al = 1 - p; if (C.l1 || C.l2) { hmLayer(C.l2, e.x, e.y, r, al, e.col); hmLayer(C.l1, e.x, e.y, r, al, e.col); } else hmLayer(C, e.x, e.y, r, al, e.col); }
       else if (e.k === 'burst' && (() => { const r = e.r * (.5 + .5 * Math.min(1, p * 2)), al = 1 - p; if (e.n) return vUp(e.n, e.x, e.y - r * .2, r * 2.4, al, null); vGround('v_circle', e.x, e.y, 0, r * 2, r * 2, al * .35, e.col); return vUp('v_burst', e.x, e.y - r * .25, r * 1.8, al, e.col); })()) {}
       else if (e.k === 'burst') { ctx.save(); ctx.translate(e.x, e.y); ctx.scale(1, .5); const r = e.r * (.4 + .6 * Math.min(1, p * 2)); ctx.fillStyle = `rgba(${e.col},${.28 * (1 - p)})`; ctx.beginPath(); ctx.arc(0, 0, r, 0, 7); ctx.fill(); ctx.strokeStyle = `rgba(255,250,230,${.9 * (1 - p)})`; ctx.lineWidth = 4 * (1 - p) + 1; ctx.stroke(); ctx.restore(); }
       else if (e.k === 'nuTur') { const al = Math.min(1, (e.T - e.t) / .3, e.t / .1), S2 = e.big ? 1.9 : 1, fl = Math.cos(e.a) < 0 ? -1 : 1; ctx.save(); ctx.globalAlpha = al; ctx.translate(e.x, e.y); ctx.scale(S2 * fl, S2); ctx.lineCap = 'round';   /* 11/17 伏弩、床弩：地上架着的小弩（代码画） */
@@ -4932,18 +4950,21 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       else if (e.k === 'bhi') bhiDraw(e, p);
       else if (e.k === 'dg' && (FXQ || e.n === 'q_hit')) { if (QHIT || e.qf) qxDraw(e, p); }
       else if (e.k === 'fd') fdDraw(e, p);
+      else if (e.k === 'qt') qtDraw(e, p);
+      else if (e.k === 'qa') { const C = FXQ0[e.sk] && FXQ0[e.sk].arc; if (C) hmLayer(C, e.x, e.y, e.r * (.85 + .25 * p), 1 - p * p, hexRgb(SK[e.sk].color), e.a + Math.PI / 2); }
       else if (e.k === 'dg') { const im = DGI[e.n]; if (im.complete && im.naturalWidth) { const q = Math.min(1, p), al = q < .15 ? q / .15 : 1 - (q - .15) / .85, w = e.w, h = w * im.naturalHeight / im.naturalWidth, sc = 1 + .08 * q;
         const mix = FXM === 1 && /chop|sweep|up|moon|cross|^dg\d|dh|xuehe|lun/.test(e.n), rv = mix ? Math.min(1, q / .35) : 1;
         ctx.save(); ctx.translate(e.x, e.y); if (e.rot) ctx.rotate(e.rot); ctx.scale(e.f * sc * (mix ? .88 : 1), sc * e.sy * (mix ? .88 : 1)); ctx.translate(-e.ax * w, -e.ay * h); if (mix) { ctx.beginPath(); ctx.rect(-w * .05, -h * .1, w * 1.1 * (1 - (1 - rv) * (1 - rv)), h * 1.2); ctx.clip(); } ctx.globalCompositeOperation = 'screen';
         if (e.ghost) { ctx.globalAlpha = al * .3; ctx.globalCompositeOperation = 'source-over'; ctx.drawImage(dgTint(e.n, e.col), -w * .06, h * .03, w, h); }
         ctx.globalAlpha = al * e.al; ctx.globalCompositeOperation = 'source-over'; ctx.drawImage(dgTint(e.n, e.col), 0, 0, w, h); ctx.globalAlpha = Math.min(1, ctx.globalAlpha * .6); ctx.drawImage(dgTint(e.n, e.col), 0, 0, w, h); ctx.globalAlpha = al * e.al * e.wh; ctx.globalCompositeOperation = 'screen'; ctx.drawImage(im, 0, 0, w, h); if (mix && q < .5) { ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = .5 * (1 - q / .5); ctx.drawImage(im, 0, 0, w, h); } ctx.restore(); } }
+      else if (e.k === 'cut' && e.qs && FXQ0[e.sk] && FXQ0[e.sk][e.qs] && qsDraw(e, p)) {}
       else if (e.k === 'cut' && e.n && !FXQ && DGI[e.n].complete && DGI[e.n].naturalWidth) { const im = DGI[e.n], rr = e.n[0] === 'r', al = 1 - p * p, w = e.L * (e.n === 'dh2' ? 2.6 : rr ? 2.4 : 2.2), h = w * im.naturalHeight / im.naturalWidth; ctx.save(); ctx.translate(e.x, e.y); ctx.rotate(e.n === 'dh2' || rr ? 0 : e.a); ctx.globalCompositeOperation = 'screen'; ctx.globalAlpha = al; ctx.globalCompositeOperation = 'source-over'; ctx.drawImage(dgTint(e.n, e.col), -w / 2, -h / 2, w, h); ctx.globalAlpha = al * .6; ctx.drawImage(dgTint(e.n, e.col), -w / 2, -h / 2, w, h); ctx.globalAlpha = al * .3; ctx.globalCompositeOperation = 'screen'; ctx.drawImage(im, -w / 2, -h / 2, w, h); ctx.restore(); }
       else if (e.k === 'cut') { ctx.save(); ctx.translate(e.x, e.y); ctx.rotate(e.a); const g = Math.min(1, p * 5), L = e.L * g, al = 1 - p * p; ctx.lineCap = 'round'; ctx.strokeStyle = `rgba(${e.col},${.6 * al})`; ctx.lineWidth = 7 * (1 - p) + 2; ctx.beginPath(); ctx.moveTo(-L, 0); ctx.lineTo(L, 0); ctx.stroke(); ctx.strokeStyle = `rgba(255,255,255,${al})`; ctx.lineWidth = 2.5 * (1 - p) + .8; ctx.beginPath(); ctx.moveTo(-L, 0); ctx.lineTo(L, 0); ctx.stroke(); ctx.restore(); }
       else if (e.k === 'line' && vOK('v_beam')) { const k = Math.min(1, p * 4); ctx.save(); ctx.translate(e.x, e.y - 14); ctx.scale(1, .5); ctx.rotate(e.a); ctx.globalAlpha = 1 - p; ctx.drawImage(vTint('v_beam', e.col), 10, -e.w * 1.8, e.L * k, e.w * 3.6); ctx.restore(); }
       else if (e.k === 'line') { ctx.save(); ctx.translate(e.x, e.y - 14); ctx.scale(1, .5); ctx.rotate(e.a); const k = Math.min(1, p * 4); ctx.lineCap = 'round'; ctx.strokeStyle = `rgba(${e.col},${.55 * (1 - p)})`; ctx.lineWidth = e.w * 1.6 * (1 - p) + 4; ctx.beginPath(); ctx.moveTo(10, 0); ctx.lineTo(10 + e.L * k, 0); ctx.stroke(); ctx.strokeStyle = `rgba(255,255,255,${.95 * (1 - p)})`; ctx.lineWidth = 3; ctx.stroke(); ctx.restore(); }
     }
     for (const e of fx) { CURE = e;
-      if (e.k === 'bh' || e.k === 'bhi' || e.k === 'fd') continue;
+      if (e.k === 'bh' || e.k === 'bhi' || e.k === 'fd' || e.k === 'qt' || e.k === 'qa') continue;
       if (e.k === 'bowFall' || e.k === 'hammerArc' || e.k === 'hammerRing' || e.k === 'stonefield' || e.k === 'stonefall' || e.k === 'burst' || e.k === 'mark' || e.k === 'jili' || e.k === 'nuTur' || e.k === 'bolt' || e.k === 'line' || e.k === 'drop' || e.k === 'cut' || e.k === 'dg' || e.k === 'img' || e.k === 'fjg') continue;
       if (e.k === 'gd') { gdDraw(e); continue; }
       if (e.k === 'ghost') {   // 残影：半透明主角，带一道拖尾
