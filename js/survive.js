@@ -3299,7 +3299,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   }
   const BHK = { r_sweep: 'sw', dg1: 'sw', r_chop: 'ch', dg2: 'ch', r_moon: 'ch', dg4: 'ch', r_cross: 'x', r_up: 'up', dg3: 'up', dg5: 'sp' };
   function bhSwing(key, a, hx, hy, R) {   // 普通挥砍：一柄刀魂顺着这一招的方向挥过去
-    const m = DGM[key]; if (!fxBh(key) || !m) return; const t = BHK[m[0]] || BHK[({ hengsao: 'r_sweep', lianzhan: 'r_sweep', tuodao: 'r_chop', tiaozhan: 'r_up', daobo: 'r_moon', cuofeng: 'r_cross', huima: 'dg5' })[key]]; if (!t) return;
+    const m = DGM[key]; if (!fxBh(key) || !m || wepOf(key) !== 0) return;   // 刀魂只给刀招（枪的拦江扫也借刀光图，不能出刀魂） const t = BHK[m[0]] || BHK[({ hengsao: 'r_sweep', lianzhan: 'r_sweep', tuodao: 'r_chop', tiaozhan: 'r_up', daobo: 'r_moon', cuofeng: 'r_cross', huima: 'dg5' })[key]]; if (!t) return;
     const f = Math.cos(a) >= 0 ? 1 : -1, col = hexRgb(SK[key].color), L = Math.max(40, R * .85), T = .32, y = hy - 16;
     if (t === 'sw') fx.push({ k: 'bh', m: 'swing', x: hx, y: hy - 6, a0: a - f * 1.25, a1: a + f * 1.25, L, col, flat: 1, t: 0, T });
     else if (t === 'sp') fx.push({ k: 'bh', m: 'swing', x: hx, y: hy - 6, a0: a, a1: a + f * Math.PI * 2, L, col, flat: 1, t: 0, T: .4 });
@@ -3307,7 +3307,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     else { const s0 = f > 0 ? -1.6 : Math.PI + 1.6, s1 = f > 0 ? .5 : Math.PI - .5; fx.push({ k: 'bh', m: 'swing', x: hx, y, a0: s0, a1: s1, L, col, t: 0, T });
       if (t === 'x') fx.push({ k: 'bh', m: 'swing', x: hx, y, a0: f > 0 ? 1.3 : Math.PI - 1.3, a1: f > 0 ? -.6 : Math.PI + .6, L, col, t: 0, T: T + .06 }); }
   }
-  const bhFall = (x, y, L, col, k) => { if (fxBh(k || CK)) fx.push({ k: 'bh', m: 'fall', x, y, L, H: L * 1.6, col, t: 0, T: .5 }); };
+  const bhFall = (x, y, L, col, k) => { if (fxBh(k || CK) && wepOf(k || CK) === 0) fx.push({ k: 'bh', m: 'fall', x, y, L, H: L * 1.6, col, t: 0, T: .5 }); };
   // 11/18 用户：写实刀光图和真实判定对不上——武学试炼里每招可调 大小/前后/上下/角度（存本机，复制发 Claude 写死进 DGA0）
   const DGA0 = {}; let DGA = {}; try { DGA = JSON.parse(localStorage.getItem('szz-dga') || '{}') || {}; } catch (e) {}
   const dga = k => Object.assign({ s: 1, dx: 0, dy: 0, r: 0 }, DGA0[k] || {}, DGA[k] || {});
@@ -4732,7 +4732,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     for (const b of bolts) {   // 月牙刀波；石子、黄符、豆兵另画
       const p = b.t / b.T, al = 1 - p * p;
       if (b.img && GLOW[b.img] && fxBase(b.sk) === 'g') b.img = GLOW[b.img];
-      if (b.img && fxBh(b.sk) && !b.bh && b.tc && (b.img === 'dg6' || b.img === 'dg4' || b.img === 'r_moon' || b.img === 'fx_lun') && bhOK()) { b.bh = 1; b.img = 'bh_dao'; b.iw = (b.iw || 34) * (b.spin ? 1.6 : 1.5); }
+      if (b.img && fxBh(b.sk) && b.sk && wepOf(b.sk) === 0 && !b.bh && b.tc && (b.img === 'dg6' || b.img === 'dg4' || b.img === 'r_moon' || b.img === 'fx_lun') && bhOK()) { b.bh = 1; b.img = 'bh_dao'; b.iw = (b.iw || 34) * (b.spin ? 1.6 : 1.5); }
       if (b.img && DGI[b.img] && DGI[b.img].complete && DGI[b.img].naturalWidth) {   // 11/14：刀招的飞行物用刀光图（偃月斩刀气、万刃归宗飞刃、飞轮刃刀轮暂代）
         const im = DGI[b.img], w = b.iw, h = w * im.naturalHeight / im.naturalWidth; ctx.save(); ctx.translate(b.x, b.y - 16); ctx.rotate(b.spin ? b.t * 14 : Math.atan2(b.vy * 2, b.vx)); if (b.spin) ctx.scale(1, .55); ctx.globalCompositeOperation = 'screen';
         ctx.globalAlpha = Math.min(1, al + .4); ctx.globalCompositeOperation = 'source-over'; ctx.drawImage(dgTint(b.img, b.tc), -w / 2, -h / 2, w, h); ctx.drawImage(dgTint(b.img, b.tc), -w / 2, -h / 2, w, h); ctx.globalAlpha *= .3; ctx.globalCompositeOperation = 'screen'; ctx.drawImage(im, -w / 2, -h / 2, w, h); ctx.restore(); continue; }
