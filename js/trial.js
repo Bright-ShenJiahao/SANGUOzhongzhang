@@ -144,21 +144,20 @@
     godT = setTimeout(keep, 400);
   }
   const wait = (f, ms = 6000) => new Promise(res => { const t0 = Date.now(); const k = () => { const v = f(); if (v) res(v); else if (Date.now() - t0 > ms) res(null); else setTimeout(k, 120); }; k(); });
-  async function enterFight() {   // 11/18 用户：武学试炼专门一张演武场——先回主界面，再走「出征 → 开局」，开局后直接进演武场（不过路线图）
+  async function enterFight() {   // 11/18 用户：进试炼卡——不再走「主界面 → 开局 → 出征」，直接清掉这一局、在演武场开一场（游戏里点也是原地切过去）
     window.TRIAL_ARENA = true;
-    try { if (window.ARENA && ARENA.want) ARENA.want('camp'); } catch (e) {}   // 先把演武场的图载上
-    if (window.TITLE && TITLE.mode && TITLE.mode() === 'game') { if (TITLE.show) TITLE.show(); await new Promise(r => setTimeout(r, 300)); }
-    const nm = document.getElementById('tName'); if (nm && !nm.value) nm.value = '试炼';
+    try { if (window.ARENA && ARENA.want) ARENA.want('camp'); } catch (e) {}
     if (window.RUNSAVE) RUNSAVE.has = () => false;
-    const vis = e => e && e.getClientRects().length > 0;
-    const st = document.getElementById('tStart'); if (vis(st)) st.click();
-    const ask = await wait(() => document.getElementById('tNameAsk'), 2500);
-    if (ask) { const ip = ask.querySelector('input'); if (ip && !ip.value) ip.value = '试炼'; const y = ask.querySelector('.yes'); if (y) y.click(); }
-    const go = await wait(() => { const b = document.querySelector('#kaiju .bot .go'); return vis(b) && b; }); if (go) go.click();
-    const ok = !!(await wait(() => SURV.curNode && SURV.curNode()));
-    await wait(() => !window.ARENA || !ARENA.shows || ARENA.shows('camp'), 8000);   // 11/18 用户：进试炼还会先闪一下别的地图——等营地图真的画上再撤黑幕
+    for (const id of ['kaiju', 'tNameAsk']) { const e = document.getElementById(id); if (e) e.remove(); }
+    document.querySelectorAll('.rtEv').forEach(e => e.remove()); try { if (window.ROUTE && ROUTE.hide) ROUTE.hide(); } catch (e) {}
+    if (window.TITLE && TITLE.beginRun) TITLE.beginRun();
+    const ok = !!(await wait(() => SURV.curNode && SURV.curNode(), 4000));
+    await wait(() => !window.ARENA || !ARENA.shows || ARENA.shows('camp'), 8000);
     return ok;
   }
+  // 11/18 用户：开发者面板一开、或主界面闲着，就把演武场的图和常用动作帧先在后台下好，点进试炼基本不用等
+  function preload() { try { if (window.ARENA && ARENA.want) ARENA.want('camp'); if (window.HERO_SKIN && HERO_SKIN.preload) HERO_SKIN.preload(HERO_SKIN.cur(), 'wd_'); regNewGrunt(); } catch (e) {} }
+  if (/[?&]debug/.test(location.search)) (window.requestIdleCallback || (f => setTimeout(f, 2500)))(() => setTimeout(preload, 1500));
   async function open() {
     window.TRIAL_ON = true;
     { const t0 = document.getElementById('survTut'); if (t0) t0.remove(); }
@@ -166,7 +165,7 @@
     if (!box) { box = document.createElement('div'); box.id = 'szzTrial'; document.body.appendChild(box); }
     box.innerHTML = '<div class="hd"><span>武学试炼 · 进场中…</span></div>';
     // 11/18 用户：试炼借的是正常的一场仗（要先开一局、在路线图上点第一格），进场时用黑幕盖住，看不到标题、开局、路线图
-    let cv = document.getElementById('szzTrialCover'); if (!cv) { cv = document.createElement('div'); cv.id = 'szzTrialCover'; cv.style.cssText = 'position:fixed;inset:0;z-index:10038;background:#0c0806;display:flex;align-items:center;justify-content:center;color:#e6c98a;font:600 18px sans-serif;letter-spacing:4px'; cv.textContent = '武学试炼 · 进场中…'; document.body.appendChild(cv); }
+    let cv = document.getElementById('szzTrialCover'); if (!cv) { cv = document.createElement('div'); cv.id = 'szzTrialCover'; cv.style.cssText = 'position:fixed;inset:0;z-index:10038;background:#0c0806;display:flex;align-items:center;justify-content:center;color:#e6c98a;font:600 18px sans-serif;letter-spacing:4px'; cv.textContent = '演武场准备中…'; document.body.appendChild(cv); }
     try { await enterFight(); } finally { setTimeout(() => { const c = document.getElementById('szzTrialCover'); if (c) c.remove(); }, 250); }
     render(); clearTimeout(godT); keep();
   }

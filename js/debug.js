@@ -114,7 +114,7 @@
     btn(heroGroup, '首领试炼', 'alt', () => { if (window.TRIAL) TRIAL.openBoss(); });
     {   // 11/18 用户：特效风格 / 地面压灰 / 敌人消散 / 首领像素化——开发者面板里切，存本机
       const t = (on, a, b) => on ? a : b;
-      const fx = btn(heroGroup, '特效：' + t(window.FXQ, '群侠', '写实'), 'alt', () => { if (!window.SURV) return; SURV.setFxq(!window.FXQ); fx.textContent = '特效：' + t(window.FXQ, '群侠', '写实'); });
+      const FN = ['写实', '混合', '群侠'], fx = btn(heroGroup, '特效：' + FN[window.FXM || 0], 'alt', () => { if (!window.SURV) return; SURV.setFxm(((window.FXM || 0) + 1) % 3); fx.textContent = '特效：' + FN[window.FXM]; });
       const gr = btn(heroGroup, '地面：' + t(window.ARENA && ARENA.gray && ARENA.gray(), '微灰', '原色'), 'alt', () => { if (!window.ARENA || !ARENA.setGray) return; ARENA.setGray(!ARENA.gray()); gr.textContent = '地面：' + t(ARENA.gray(), '微灰', '原色'); });
       const bon = () => { try { return localStorage.getItem('szz-burn') !== '0'; } catch (e) { return true; } };
       const bu = btn(heroGroup, '消散：' + t(bon(), '燃尽', '淡出'), 'alt', () => { if (!window.SURV) return; SURV.setBurn(!bon()); bu.textContent = '消散：' + t(bon(), '燃尽', '淡出'); });

@@ -793,7 +793,7 @@ function drawChar(name, f, x, y, flip, alpha = 1, white = false, sc = 1, dark = 
   if (dark && !fr.dark) {
     try { if ('filter' in ctx) ctx.filter = 'brightness(.78) saturate(.82)'; } catch (e) {}
   }
-  if (im === fr.white && window.SURV && SURV.noStun && SURV.noStun() && !window.FXQ) {   // 11/14 用户：受击闪白太亮——三国终章只叠半透明白，不整个变白
+  if (im === fr.white && window.SURV && SURV.noStun && SURV.noStun() && !window.QH) {   // 11/14 用户：受击闪白太亮——三国终章只叠半透明白，不整个变白
     ctx.drawImage(fr.img, -fr.ax * sp, -fr.ay * sp, fr.w * sp, fr.h * sp); ctx.globalAlpha = alpha * .5;
   }
   ctx.drawImage(im, -fr.ax * sp, -fr.ay * sp, fr.w * sp, fr.h * sp);
