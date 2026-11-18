@@ -3115,7 +3115,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     if (!B) {
       const name = z.sprite || z.type, fr = typeof CH !== 'undefined' && CH[name] && CH[name][zFrame(z)]; if (!fr || !fr.img || !(fr.img.width || fr.img.naturalWidth)) return false;
       const sp = Math.max(.5, SC * PX) * (z.sc || 1), W = Math.max(2, Math.ceil(fr.w * sp)), H = Math.max(2, Math.ceil(fr.h * sp));
-      const c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d'); x.drawImage(fr.img, 0, 0, W, H);
+      const c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d', { willReadFrequently: true }); x.drawImage(fr.img, 0, 0, W, H);
       let src; try { src = x.getImageData(0, 0, W, H); } catch (e) { return false; }
       const nv = new Float32Array(W * H), ox = Math.random() * NZ.n, oy = Math.random() * NZ.n, k = NZ.n / Math.max(W, H) * 1.3;
       for (let py = 0; py < H; py++) for (let px = 0; px < W; px++) { const u = ((px * k + ox) | 0) % NZ.n, v = ((py * k + oy) | 0) % NZ.n; nv[py * W + px] = NZ.c[v * NZ.n + u] * .85 + (1 - py / H) * .15; }
@@ -3133,7 +3133,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       else { o[j] = s[j]; o[j + 1] = s[j + 1]; o[j + 2] = s[j + 2]; o[j + 3] = a; } }
     B.x.putImageData(B.out, 0, 0); B.gx.putImageData(B.gd, 0, 0);
     const sx = Math.round(B.wx * SC + OXs), sy = Math.round(B.wy * SC + OYs);
-    ctx.save(); ctx.setTransform(1, 0, 0, 1, sx, sy); if (B.flip) ctx.scale(-1, 1); ctx.drawImage(B.c, -B.ax, -B.ay); if (p > .02 && p < .97) { ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = .9; try { ctx.filter = 'blur(3px)'; } catch (e) {} ctx.drawImage(B.gc, -B.ax, -B.ay); ctx.filter = 'none'; ctx.drawImage(B.gc, -B.ax, -B.ay); } ctx.restore();
+    ctx.save(); ctx.setTransform(1, 0, 0, 1, sx, sy); if (B.flip) ctx.scale(-1, 1); ctx.drawImage(B.c, -B.ax, -B.ay); if (p > .02 && p < .97) { ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = .45; for (const [dx, dy] of [[-1.5, 0], [1.5, 0], [0, -1.5], [0, 1.5]]) ctx.drawImage(B.gc, -B.ax + dx * SC * .5, -B.ay + dy * SC * .5); ctx.globalAlpha = 1; ctx.drawImage(B.gc, -B.ax, -B.ay); } ctx.restore();
     const now = performance.now(), dt = Math.min(.05, (now - B.last) / 1000) / (window.BURN_SLOW || 1); B.last = now; const hgt = B.H / SC;
     if (p < .9) for (let i = 0; i < 2; i++) if (Math.random() < .4) B.P.push({ x: B.wx + R(-.35, .35) * B.W / SC, y: B.wy - R(.1, .85) * hgt, vy: -R(14, 34), vx: R(-6, 6), r: R(3, 7), t: 0, T: R(.5, 1), e: Math.random() < .6 });
     ctx.save();
