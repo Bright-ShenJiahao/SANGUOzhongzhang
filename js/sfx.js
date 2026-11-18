@@ -295,9 +295,10 @@
   // 用户定：语音不再一打开就全下；进到哪一章才按顺序（一条一条）预取那一章的语音
   const vqueue = []; let vbusy = false;
   function pumpVoice() { if (vbusy || !vqueue.length || !init()) return; vbusy = true; decode(vqueue.shift()).catch(() => {}).finally(() => { vbusy = false; setTimeout(pumpVoice, 150); }); }
-  function preloadVoices(prefixes) { if (!(typeof ASSETS !== "undefined" && ASSETS) || !ASSETS.voice) return; for (const n in ASSETS.voice) if (!vcache[n] && !vqueue.includes(n) && (!prefixes || prefixes.some(p => n.startsWith(p)))) vqueue.push(n); pumpVoice(); }
+  const VOICE_OFF = true;   // 11/19 用户：现有配音不能商用，先关掉（文件留着，以后换可商用的再打开）
+  function preloadVoices(prefixes) { if (VOICE_OFF) return; if (!(typeof ASSETS !== "undefined" && ASSETS) || !ASSETS.voice) return; for (const n in ASSETS.voice) if (!vcache[n] && !vqueue.includes(n) && (!prefixes || prefixes.some(p => n.startsWith(p)))) vqueue.push(n); pumpVoice(); }
   async function voice(name, pan = 0) {
-    if (muted || !(typeof ASSETS !== "undefined" && ASSETS) || !ASSETS.voice || !ASSETS.voice[name] || !init()) return;
+    if (VOICE_OFF || muted || !(typeof ASSETS !== "undefined" && ASSETS) || !ASSETS.voice || !ASSETS.voice[name] || !init()) return;
     try {
       if (ac.state !== 'running') await ac.resume();
       const buffer = await decode(name);
