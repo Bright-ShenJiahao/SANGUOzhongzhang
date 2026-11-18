@@ -476,9 +476,20 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   // 11/18 用户：枪的特效（上色的发光刀光，贴着真实判定）最舒服——「光效」档把刀的写实图、锤的土石图换回发光图
   const GLOW = { r_sweep: 'dg1', r_chop: 'dg2', r_up: 'dg3', r_moon: 'dg4', r_cross: 'dg4', r_xuehe: 'dd_xuehe', r_lun: 'dd_feilun', r_liedi: 'dd_liedi', r_tianbeng: 'dt_tianbeng', r_wanren: 'dt_wanren', r_hit: 'dg6' };
   const EGLOW = { e_hring: 'v_ring', e_arc: 'v_fan180', e_impact: 'v_burst', e_stones: 'v_rocks', e_fall: 'v_beam', e_chips: 'v_dust' };
-  const glowOn = () => window.FXM === 3;
+  const glowOn = () => window.FXM === 3; let CURE = null;
+  // 11/18 用户：每一招自己选特效——写实 / 代码（发光上色、贴着判定）/ 无，另可叠刀魂；存本机，复制发 Claude 写死进 FXSK0
+  const FXSK0 = {}; let FXSK = {}; try { FXSK = JSON.parse(localStorage.getItem('szz-fxsk') || '{}') || {}; } catch (e) {}
+  const fxSk = k => Object.assign({}, FXSK0[k] || {}, FXSK[k] || {});
+  const fxBase = k => { const o = k ? fxSk(k) : {}; return o.b || (glowOn() ? 'g' : 'r'); };
+  const fxBh = k => { const o = k ? fxSk(k) : {}; return o.h != null ? !!o.h : BH; };
+  const GLOWN = new Set(Object.keys(GLOW).concat(Object.values(GLOW), ['r_dust']));
   const _fxPush = Array.prototype.push;
-  fx.push = function (...a) { if (glowOn()) { a = a.filter(e => !(e && e.n === 'r_dust')); for (const e of a) if (e && e.n && GLOW[e.n]) { e.n = GLOW[e.n]; if (!e.wh) e.wh = .25; if (!e.col) e.col = e.boss ? '255,140,60' : '255,236,190'; } } return _fxPush2.apply(this, a); };
+  fx.push = function (...a) { const k = CK && SK[CK] ? CK : null;
+    for (const e of a) if (e && !e.sk && k) e.sk = k;
+    const b = e => fxBase(e && e.boss ? null : e && e.sk);
+    a = a.filter(e => !(e && e.n === 'r_dust' && b(e) === 'g') && !(e && (e.k === 'dg' || e.k === 'cut') && e.n && GLOWN.has(e.n) && e.n !== 'r_hit' && b(e) === 'n'));
+    for (const e of a) if (e && e.n && GLOW[e.n] && b(e) === 'g') { e.n = GLOW[e.n]; if (!e.wh) e.wh = .25; if (!e.col) e.col = e.boss ? '255,140,60' : '255,236,190'; }
+    return _fxPush2.apply(this, a); };
   function _fxPush2(...a) { if (PVREC) for (const e of a) try { pvRec(e); } catch (er) { if (!window.__pvE) { window.__pvE = 1; console.error('pvRec', er); } } return Array.prototype.push.apply(this, a); };
   function pvStart(key) { pvEnd(); PVREC = { key, t0: DKT, hx: hero.x, hy: hero.y, a: aim(), sh: [] }; }
   const RNGO = [];   // 11/18 对齐用：真实判定的轮廓（武学试炼开着「显示判定线」时，每次出招画 1.2 秒）
@@ -583,6 +594,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       sfx('swing_knife', hero.x); shake = Math.max(shake, .08);
     } };
   const bolts = [], zones = [];
+  const _bPush = Array.prototype.push; bolts.push = function (...a) { for (const b of a) if (b && !b.sk && CK) b.sk = CK; return _bPush.apply(this, a); };
   for (const a of [bolts, zones]) { const pu = a.push; a.push = function (...o) { o.forEach(x => { x.cm = CM; x.ck = CK; }); return pu.apply(this, o); }; }   // 弹道/地面效果记下出手那一刻的倍率
 
   // ---------- 三国幸存者武艺（黄玄地天；tier 0 基础 / 黄 / 玄 / 地 / 天） ----------
@@ -1065,7 +1077,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       const N = L >= 5 ? 9 : 6, pr = L >= 7 ? 95 : 75, P = [];
       for (let i = 0; i < N; i++) { if (i < 2 && t) P.push([t.x + R(-10, 10), t.y + R(-6, 6)]); else { const g = Math.random() * 7, rr = R(100, 240) * DK * RM; P.push([hero.x + Math.cos(g) * rr, clampY(hero.y + Math.sin(g) * rr * .5)]); } }
       P.forEach(([x, y], i) => fx.push({ k: 'img', n: 'fx_aim', x, y, w: pr * DK * 2.4, t: 0, T: .2 + i * .15, col: '255,120,70', warn: 1 }));
-      DKO.push(dmk({ T: .2 + N * .15, i: 0, tick(o) { while (o.i < N && o.t >= .2 + o.i * .15) { const [x, y] = P[o.i]; dCircle(x, y, pr, 1.00, 50, { up: 1, x }); bhFall(x, y, pr * DK * 1.3, hexRgb(SK.tianbeng.color)); sfx(CR, x); shake = Math.max(shake, .15); o.i++; } } })); } });
+      DKO.push(dmk({ T: .2 + N * .15, i: 0, tick(o) { while (o.i < N && o.t >= .2 + o.i * .15) { const [x, y] = P[o.i]; dCircle(x, y, pr, 1.00, 50, { up: 1, x }); bhFall(x, y, pr * DK * 1.3, hexRgb(SK.tianbeng.color), 'tianbeng'); sfx(CR, x); shake = Math.max(shake, .15); o.i++; } } })); } });
   DAO('wanren', 4, 'spin', { name: '归海一刀', icon: '海', color: '#b8f0ff', need: 200, wu: .80, rc: .50, none: true,
     desc: '14 柄飞刃从四周射向最近的敌人，一路穿透（同一人最多吃 6 柄），汇聚后一记巨斩（对浮空目标 ×1.4），并引爆目标身上全部流血（每层 0.25×）。LV3 引爆每层 0.35×；LV5 20 柄；LV7 巨斩更大',
     cast() { const L = dlv(), t = nearest(260), a = aim(), px = t ? t.x : hero.x + Math.cos(a) * 80, py = t ? t.y : clampY(hero.y + Math.sin(a) * 40), N = L >= 5 ? 20 : 14, Rr = 420 * DK * RM, ft = .35;
@@ -1074,7 +1086,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       DKO.push(dmk({ T: ft + .02, done: 0, tick(o) {
         for (const b of bs) for (const z of hittable()) { if (b.hitSet.includes(z) || Math.hypot(z.x - b.x, (z.y - b.y) * 2) > 16) continue; b.hitSet.push(z); const c = cnt.get(z) || 0; if (c >= 6) continue; cnt.set(z, c + 1); DH(z, .50, 8, { x: b.x });   /* 11/15 用户：每柄 0.35→0.50，和天崩地裂对齐 */ }
         if (!o.done && o.t >= ft) { o.done = 1; const rr = (L >= 7 ? 120 : 90); shake = Math.max(shake, .45); sfx(CR, px);
-          dCircle(px, py, rr, 2.20, 40, { fk: 1.4, x: px, col: '190,240,255' }); bhFall(px, py, rr * DK * 1.8, '170,235,255');
+          dCircle(px, py, rr, 2.20, 40, { fk: 1.4, x: px, col: '190,240,255' }); bhFall(px, py, rr * DK * 1.8, '170,235,255', 'wanren');
           for (const z of near(px, py, rr * DK * o.rm)) if (z.blT > 0 && z.bl > 0 && !z.dead) { const d = z.bl * (L >= 3 ? .35 : .25) * DU * RT.dmg * CM; rec(d); hit(z, d, 0, 1, false, 0, 0, false, false, { dot: true, secondary: true, survSkill: true }); floaters.push({ x: z.x, y: z.y - 70, t: 0, txt: '引爆', color: '#ff6a5a' }); z.bl = 0; z.blT = 0; } } } })); } });
   for (const k of ['daolun', 'xuanfeng', 'dilie', 'shuanghuan', 'hongji', 'shuangyue', 'luanwu']) if (SK[k]) SK[k].off = true;
   // ---------- 枪（11/15 用户定，照第二份策划方案重做）：直线、点杀、短扇、地波四种判定；主打流血 + 浮空；位移 1 进 1 退 + 游龙突，自带保护 ----------
@@ -3213,8 +3225,8 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const VTC = {}; const vTint = (n, rgb) => { if (!rgb || n[0] === 'e') return VFX[n]; const key = n + rgb; if (VTC[key]) return VTC[key]; const im = VFX[n], c = document.createElement('canvas'); c.width = im.naturalWidth; c.height = im.naturalHeight; const g = c.getContext('2d');
     g.drawImage(im, 0, 0); g.globalCompositeOperation = 'multiply'; g.fillStyle = 'rgb(' + rgb + ')'; g.fillRect(0, 0, c.width, c.height); g.globalCompositeOperation = 'destination-in'; g.drawImage(im, 0, 0); return VTC[key] = c; };
   // 地面上的图（图本身已经画成斜 45° 压扁的样子）：在地面平面里转到方向 a。w = 地面上的长度，h = 地面上的宽度（不压扁的），ax/ay = 锚点（图上的比例）
-  function vGround(n, x, y, a, w, h, al, rgb, ax = .5, ay = .5) { if (glowOn() && EGLOW[n]) n = EGLOW[n]; if (!vOK(n)) return false; ctx.save(); ctx.translate(x, y); ctx.scale(1, .5); ctx.rotate(a || 0); ctx.globalAlpha = Math.max(0, Math.min(1, al)); ctx.drawImage(vTint(n, rgb), -ax * w, -ay * h, w, h); ctx.restore(); return true; }
-  function vUp(n, x, y, w, al, rgb, rot = 0) { if (glowOn() && EGLOW[n]) n = EGLOW[n]; if (!vOK(n)) return false; const im = VFX[n], h = w * im.naturalHeight / im.naturalWidth; ctx.save(); ctx.translate(x, y); if (rot) ctx.rotate(rot); ctx.globalAlpha = Math.max(0, Math.min(1, al)); ctx.drawImage(vTint(n, rgb), -w / 2, -h / 2, w, h); ctx.restore(); return true; }
+  function vGround(n, x, y, a, w, h, al, rgb, ax = .5, ay = .5) { if (EGLOW[n] && fxBase(CURE && CURE.sk) === 'g') n = EGLOW[n]; if (!vOK(n)) return false; ctx.save(); ctx.translate(x, y); ctx.scale(1, .5); ctx.rotate(a || 0); ctx.globalAlpha = Math.max(0, Math.min(1, al)); ctx.drawImage(vTint(n, rgb), -ax * w, -ay * h, w, h); ctx.restore(); return true; }
+  function vUp(n, x, y, w, al, rgb, rot = 0) { if (EGLOW[n] && fxBase(CURE && CURE.sk) === 'g') n = EGLOW[n]; if (!vOK(n)) return false; const im = VFX[n], h = w * im.naturalHeight / im.naturalWidth; ctx.save(); ctx.translate(x, y); if (rot) ctx.rotate(rot); ctx.globalAlpha = Math.max(0, Math.min(1, al)); ctx.drawImage(vTint(n, rgb), -w / 2, -h / 2, w, h); ctx.restore(); return true; }
   // [图, 宽度=范围的几倍, 锚点x, 锚点y（图上哪一点放在落点）, 落点前移, 落点高度]
   const DGM = { lansao: ['dg1', 2.6, .5, .8, 14, -14], hengsao: ['r_sweep', 2.6, .5, .8, 14, -14], lianzhan: ['r_sweep', 2.6, .5, .8, 14, -14], tuodao: ['r_chop', 2.4, .5, .5, 10, -14], tiaozhan: ['r_up', 1.6, .3, .6, 14, -24], daobo: ['r_moon', 2.2, .45, .6, 10, -26], cuofeng: ['r_cross', 2.2, .45, .6, 10, -26], huima: ['dg5', 2.4, .5, .55, 0, -24],
     xuehe: ['r_xuehe', 2.6, .5, .75, 20, -16], feilunren: ['r_lun', 2.6, .35, .5, 30, -16], liedihuan: ['r_liedi', 3.2, .55, .88, 24, 2], tianbeng: ['r_tianbeng', 1.7, .5, .9, 30, 4], wanren: ['r_wanren', 2.2, .5, .5, 0, -16, .65] };
@@ -3287,7 +3299,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   }
   const BHK = { r_sweep: 'sw', dg1: 'sw', r_chop: 'ch', dg2: 'ch', r_moon: 'ch', dg4: 'ch', r_cross: 'x', r_up: 'up', dg3: 'up', dg5: 'sp' };
   function bhSwing(key, a, hx, hy, R) {   // 普通挥砍：一柄刀魂顺着这一招的方向挥过去
-    const m = DGM[key]; if (!BH || !m) return; const t = BHK[m[0]] || BHK[({ hengsao: 'r_sweep', lianzhan: 'r_sweep', tuodao: 'r_chop', tiaozhan: 'r_up', daobo: 'r_moon', cuofeng: 'r_cross', huima: 'dg5' })[key]]; if (!t) return;
+    const m = DGM[key]; if (!fxBh(key) || !m) return; const t = BHK[m[0]] || BHK[({ hengsao: 'r_sweep', lianzhan: 'r_sweep', tuodao: 'r_chop', tiaozhan: 'r_up', daobo: 'r_moon', cuofeng: 'r_cross', huima: 'dg5' })[key]]; if (!t) return;
     const f = Math.cos(a) >= 0 ? 1 : -1, col = hexRgb(SK[key].color), L = Math.max(40, R * .85), T = .32, y = hy - 16;
     if (t === 'sw') fx.push({ k: 'bh', m: 'swing', x: hx, y: hy - 6, a0: a - f * 1.25, a1: a + f * 1.25, L, col, flat: 1, t: 0, T });
     else if (t === 'sp') fx.push({ k: 'bh', m: 'swing', x: hx, y: hy - 6, a0: a, a1: a + f * Math.PI * 2, L, col, flat: 1, t: 0, T: .4 });
@@ -3295,7 +3307,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     else { const s0 = f > 0 ? -1.6 : Math.PI + 1.6, s1 = f > 0 ? .5 : Math.PI - .5; fx.push({ k: 'bh', m: 'swing', x: hx, y, a0: s0, a1: s1, L, col, t: 0, T });
       if (t === 'x') fx.push({ k: 'bh', m: 'swing', x: hx, y, a0: f > 0 ? 1.3 : Math.PI - 1.3, a1: f > 0 ? -.6 : Math.PI + .6, L, col, t: 0, T: T + .06 }); }
   }
-  const bhFall = (x, y, L, col) => { if (BH) fx.push({ k: 'bh', m: 'fall', x, y, L, H: L * 1.6, col, t: 0, T: .5 }); };
+  const bhFall = (x, y, L, col, k) => { if (fxBh(k || CK)) fx.push({ k: 'bh', m: 'fall', x, y, L, H: L * 1.6, col, t: 0, T: .5 }); };
   // 11/18 用户：写实刀光图和真实判定对不上——武学试炼里每招可调 大小/前后/上下/角度（存本机，复制发 Claude 写死进 DGA0）
   const DGA0 = {}; let DGA = {}; try { DGA = JSON.parse(localStorage.getItem('szz-dga') || '{}') || {}; } catch (e) {}
   const dga = k => Object.assign({ s: 1, dx: 0, dy: 0, r: 0 }, DGA0[k] || {}, DGA[k] || {});
@@ -4719,8 +4731,8 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     }
     for (const b of bolts) {   // 月牙刀波；石子、黄符、豆兵另画
       const p = b.t / b.T, al = 1 - p * p;
-      if (b.img && glowOn() && GLOW[b.img]) b.img = GLOW[b.img];
-      if (b.img && BH && !b.bh && b.tc && (b.img === 'dg6' || b.img === 'dg4' || b.img === 'r_moon' || b.img === 'fx_lun') && bhOK()) { b.bh = 1; b.img = 'bh_dao'; b.iw = (b.iw || 34) * (b.spin ? 1.6 : 1.5); }
+      if (b.img && GLOW[b.img] && fxBase(b.sk) === 'g') b.img = GLOW[b.img];
+      if (b.img && fxBh(b.sk) && !b.bh && b.tc && (b.img === 'dg6' || b.img === 'dg4' || b.img === 'r_moon' || b.img === 'fx_lun') && bhOK()) { b.bh = 1; b.img = 'bh_dao'; b.iw = (b.iw || 34) * (b.spin ? 1.6 : 1.5); }
       if (b.img && DGI[b.img] && DGI[b.img].complete && DGI[b.img].naturalWidth) {   // 11/14：刀招的飞行物用刀光图（偃月斩刀气、万刃归宗飞刃、飞轮刃刀轮暂代）
         const im = DGI[b.img], w = b.iw, h = w * im.naturalHeight / im.naturalWidth; ctx.save(); ctx.translate(b.x, b.y - 16); ctx.rotate(b.spin ? b.t * 14 : Math.atan2(b.vy * 2, b.vx)); if (b.spin) ctx.scale(1, .55); ctx.globalCompositeOperation = 'screen';
         ctx.globalAlpha = Math.min(1, al + .4); ctx.globalCompositeOperation = 'source-over'; ctx.drawImage(dgTint(b.img, b.tc), -w / 2, -h / 2, w, h); ctx.drawImage(dgTint(b.img, b.tc), -w / 2, -h / 2, w, h); ctx.globalAlpha *= .3; ctx.globalCompositeOperation = 'screen'; ctx.drawImage(im, -w / 2, -h / 2, w, h); ctx.restore(); continue; }
@@ -4783,7 +4795,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
         ctx.restore(); }
       ctx.restore(); }
     dStatusDraw();
-    for (const e of fx) {
+    for (const e of fx) { CURE = e;
       const p = e.t / e.T;
       if (e.k === 'fjg') {   // 11/16 发劲：脚下一圈蓝光 + 身上一层往上飘的蓝色气焰（照群侠）
         const x = hero.x, y = hero.y, al = 1 - p; ctx.save(); ctx.globalCompositeOperation = 'lighter';
@@ -4877,7 +4889,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       else if (e.k === 'line' && vOK('v_beam')) { const k = Math.min(1, p * 4); ctx.save(); ctx.translate(e.x, e.y - 14); ctx.scale(1, .5); ctx.rotate(e.a); ctx.globalAlpha = 1 - p; ctx.drawImage(vTint('v_beam', e.col), 10, -e.w * 1.8, e.L * k, e.w * 3.6); ctx.restore(); }
       else if (e.k === 'line') { ctx.save(); ctx.translate(e.x, e.y - 14); ctx.scale(1, .5); ctx.rotate(e.a); const k = Math.min(1, p * 4); ctx.lineCap = 'round'; ctx.strokeStyle = `rgba(${e.col},${.55 * (1 - p)})`; ctx.lineWidth = e.w * 1.6 * (1 - p) + 4; ctx.beginPath(); ctx.moveTo(10, 0); ctx.lineTo(10 + e.L * k, 0); ctx.stroke(); ctx.strokeStyle = `rgba(255,255,255,${.95 * (1 - p)})`; ctx.lineWidth = 3; ctx.stroke(); ctx.restore(); }
     }
-    for (const e of fx) {
+    for (const e of fx) { CURE = e;
       if (e.k === 'bh') continue;
       if (e.k === 'bowFall' || e.k === 'hammerArc' || e.k === 'hammerRing' || e.k === 'stonefield' || e.k === 'stonefall' || e.k === 'burst' || e.k === 'mark' || e.k === 'jili' || e.k === 'nuTur' || e.k === 'bolt' || e.k === 'line' || e.k === 'drop' || e.k === 'cut' || e.k === 'dg' || e.k === 'img' || e.k === 'fjg') continue;
       if (e.k === 'gd') { gdDraw(e); continue; }
@@ -5453,7 +5465,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     ctx.fillStyle = wd; ctx.beginPath(); ctx.arc(x, y - 40, 5, 0, 7); ctx.fill(); ctx.fillStyle = '#b8402a'; ctx.fillRect(x - 5, y - 41, 10, 2);
     ctx.restore();
   }
-  const TRIAL = { hasDg: k => !!DGM[k], dgAdj: k => dga(k), setDgAdj(k, o) { DGA[k] = Object.assign(dga(k), o); try { localStorage.setItem('szz-dga', JSON.stringify(DGA)); } catch (e) {} }, dgCopy: () => JSON.stringify(Object.fromEntries(Object.keys(DGM).map(k => [k, dga(k)]).filter(([, o]) => o.s !== 1 || o.dx || o.dy || o.r))), pilot: on => pilotOn(on), pilotCast: m => pilotCast(m), pilotTick, bossTr(on, mv) { BOSSTR.on = !!on; BOSSTR.move = mv || ''; const C = bcfg('cheng_yuanzhi', 'atk'); for (const z of zs) if (z.sprite === 'cheng_new') { z.seq = []; z.skCd = .6; z.T = Object.assign({}, TYPES.cheng_yuanzhi, z.T, { wind: (TYPES.cheng_yuanzhi.wind || .6) * C.sp }); } }, bossCfg: m => bcfg('cheng_yuanzhi', m), setBossCfg(m, o) { BCFG.cheng_yuanzhi = BCFG.cheng_yuanzhi || {}; BCFG.cheng_yuanzhi[m] = Object.assign(bcfg('cheng_yuanzhi', m), o); try { localStorage.setItem('szz-boss-cfg', JSON.stringify(BCFG)); } catch (e) {} }, bossCopy: () => JSON.stringify({ cheng_yuanzhi: { atk: bcfg('cheng_yuanzhi', 'atk'), boomerang: bcfg('cheng_yuanzhi', 'boomerang'), sweep: bcfg('cheng_yuanzhi', 'sweep'), chase: bcfg('cheng_yuanzhi', 'chase') } }), newBoss() { const z = edgeSpawn('cheng_yuanzhi', { name: '程远志', hp: 70, sc: 1, tier: 3 }); if (z && typeof CH !== 'undefined' && CH.cheng_new) { z.sprite = 'cheng_new'; z.x = Math.min(lockR - 20, hero.x + 160); z.y = hero.y; } }, regrunt(on) { for (const z of zs) if (z.type === 'grunt' && !z.dummy) z.sprite = on && typeof CH !== 'undefined' && CH.grunt_new ? 'grunt_new' : 'grunt'; }, showcase: on => showcase(on), fxArr: () => fx, pvr: () => PVR, getPv: k => pvOpt(k), getPs: k => pvShape(k), pvReach: k => PVM[k] || 0, setPs: (k, o) => { PVS[k] = Object.assign(pvShape(k), o); try { localStorage.setItem('szz-pv-shape', JSON.stringify(PVS)); } catch (e) {} }, setPv: (k, o) => { PVO[k] = Object.assign(pvOpt(k), o); try { localStorage.setItem('szz-pv-opt', JSON.stringify(PVO)); } catch (e) {} }, dummy: m => dummyMode(m), dummyStat, dummyClear() { DUM.log = []; DUM.tot = 0; DUM.broke = 0; DUM.t0 = performance.now(); }, dummyBrk(v) { DUM.brk = v ? 1 : 0; for (const z of zs) if (z.dummy) { z.dhp = DUM.HP; z.brokeT = 0; z.hidden = false; } }, soldiers(v, keep) { DUM.noSol = v ? 0 : 1; if (!v && !keep) for (let i = zs.length - 1; i >= 0; i--) if (!zs[i].dummy) zs.splice(i, 1); }, slot(i, k) { S.slots[i] = k; }, bao(k) { gainBao(k); }, lvSet(k, l) { (S.lvLock = S.lvLock || {})[k] = l; }, SK, GF, MOT, WEPN, TIERN, wepOf, IMGU, spdTxt, spawn: t => edgeSpawn(t), count: t => zs.filter(z => !z.dead && z.type === t).length, long() { W.tot = 9999; if (W.t > W.tot - 5) W.t = 0; },
+  const TRIAL = { fxSk: k => fxSk(k), fxBaseOf: k => fxBase(k), fxBhOf: k => fxBh(k), setFxSk(k, o) { FXSK[k] = Object.assign(fxSk(k), o); try { localStorage.setItem('szz-fxsk', JSON.stringify(FXSK)); } catch (e) {} }, fxSkCopy: () => JSON.stringify(FXSK), hasDg: k => !!DGM[k], dgAdj: k => dga(k), setDgAdj(k, o) { DGA[k] = Object.assign(dga(k), o); try { localStorage.setItem('szz-dga', JSON.stringify(DGA)); } catch (e) {} }, dgCopy: () => JSON.stringify(Object.fromEntries(Object.keys(DGM).map(k => [k, dga(k)]).filter(([, o]) => o.s !== 1 || o.dx || o.dy || o.r))), pilot: on => pilotOn(on), pilotCast: m => pilotCast(m), pilotTick, bossTr(on, mv) { BOSSTR.on = !!on; BOSSTR.move = mv || ''; const C = bcfg('cheng_yuanzhi', 'atk'); for (const z of zs) if (z.sprite === 'cheng_new') { z.seq = []; z.skCd = .6; z.T = Object.assign({}, TYPES.cheng_yuanzhi, z.T, { wind: (TYPES.cheng_yuanzhi.wind || .6) * C.sp }); } }, bossCfg: m => bcfg('cheng_yuanzhi', m), setBossCfg(m, o) { BCFG.cheng_yuanzhi = BCFG.cheng_yuanzhi || {}; BCFG.cheng_yuanzhi[m] = Object.assign(bcfg('cheng_yuanzhi', m), o); try { localStorage.setItem('szz-boss-cfg', JSON.stringify(BCFG)); } catch (e) {} }, bossCopy: () => JSON.stringify({ cheng_yuanzhi: { atk: bcfg('cheng_yuanzhi', 'atk'), boomerang: bcfg('cheng_yuanzhi', 'boomerang'), sweep: bcfg('cheng_yuanzhi', 'sweep'), chase: bcfg('cheng_yuanzhi', 'chase') } }), newBoss() { const z = edgeSpawn('cheng_yuanzhi', { name: '程远志', hp: 70, sc: 1, tier: 3 }); if (z && typeof CH !== 'undefined' && CH.cheng_new) { z.sprite = 'cheng_new'; z.x = Math.min(lockR - 20, hero.x + 160); z.y = hero.y; } }, regrunt(on) { for (const z of zs) if (z.type === 'grunt' && !z.dummy) z.sprite = on && typeof CH !== 'undefined' && CH.grunt_new ? 'grunt_new' : 'grunt'; }, showcase: on => showcase(on), fxArr: () => fx, pvr: () => PVR, getPv: k => pvOpt(k), getPs: k => pvShape(k), pvReach: k => PVM[k] || 0, setPs: (k, o) => { PVS[k] = Object.assign(pvShape(k), o); try { localStorage.setItem('szz-pv-shape', JSON.stringify(PVS)); } catch (e) {} }, setPv: (k, o) => { PVO[k] = Object.assign(pvOpt(k), o); try { localStorage.setItem('szz-pv-opt', JSON.stringify(PVO)); } catch (e) {} }, dummy: m => dummyMode(m), dummyStat, dummyClear() { DUM.log = []; DUM.tot = 0; DUM.broke = 0; DUM.t0 = performance.now(); }, dummyBrk(v) { DUM.brk = v ? 1 : 0; for (const z of zs) if (z.dummy) { z.dhp = DUM.HP; z.brokeT = 0; z.hidden = false; } }, soldiers(v, keep) { DUM.noSol = v ? 0 : 1; if (!v && !keep) for (let i = zs.length - 1; i >= 0; i--) if (!zs[i].dummy) zs.splice(i, 1); }, slot(i, k) { S.slots[i] = k; }, bao(k) { gainBao(k); }, lvSet(k, l) { (S.lvLock = S.lvLock || {})[k] = l; }, SK, GF, MOT, WEPN, TIERN, wepOf, IMGU, spdTxt, spawn: t => edgeSpawn(t), count: t => zs.filter(z => !z.dead && z.type === t).length, long() { W.tot = 9999; if (W.t > W.tot - 5) W.t = 0; },
     setGf(ids) { S.gf = ['', '', '']; ids.slice(0, 3).forEach((id, i) => { S.gf[i] = id; }); GM = gfCalc(); }, setQg(id) { S.qg = id || ''; GM = gfCalc(); }, gf: () => S.gf.slice(), qg: () => S.qg, mul: k => skillMul(k), lv: k => lvOf(k), spd: k => spdTxt(SK[k]), rs: k => SK[k] && SK[k].dk ? rsOf(k) : null, setRs(k, v) { DRS[k] = v; try { localStorage.setItem('szz-dao-rs', JSON.stringify(DRS)); } catch (e) {} },
     sp: k => spOf(k), setSp(k, v) { DSP[k] = v; try { localStorage.setItem('szz-dao-sp', JSON.stringify(DSP)); } catch (e) {} }, spAll(v, w) { Object.keys(SK).forEach(k => { if (SK[k].dk && (w == null || wepOf(k) === w)) DSP[k] = v; }); try { localStorage.setItem('szz-dao-sp', JSON.stringify(DSP)); } catch (e) {} },
     FRN: ['idle', 'walk1', 'walk2', 'walk3', 'roll1', 'roll2', 'roll3', 'roll4', 'hurt', 'down', 'chop1', 'chop2', 'sweep1', 'sweep2', 'thrust1', 'thrust2', 'spin1', 'spin2', 'up1', 'up2'],
