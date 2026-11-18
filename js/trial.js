@@ -9,7 +9,7 @@
   const T = () => window.SURV && SURV.trial;
   const css = `#szzTrial{position:fixed;z-index:10040;left:8px;top:56px;width:min(330px,46vw);max-height:calc(100vh - 70px);display:flex;flex-direction:column;background:rgba(14,10,7,.93);border:1px solid #8a6a3a;color:#efe2c4;font-size:13px;box-shadow:0 6px 20px rgba(0,0,0,.6)}
 #szzTrial .hd{display:flex;align-items:center;justify-content:space-between;padding:6px 8px;border-bottom:1px solid rgba(184,149,90,.35);color:#ffd86e}
-#szzBoss{position:fixed;left:8px;top:100px;z-index:10041;max-height:calc(100vh - 110px);overflow:auto;width:300px;max-width:calc(100vw - 16px);background:rgba(24,16,10,.94);border:1px solid #8a6a3a;color:#ead9b6;font:13px/1.5 sans-serif;padding:6px 8px;border-radius:6px}#szzBoss .hd{display:flex;justify-content:space-between;align-items:center;color:#ffe08a;font-weight:700;margin-bottom:4px}#szzBoss button{background:#3a2a1a;border:1px solid #8a6a3a;color:#e6c98a;border-radius:4px;padding:2px 8px;cursor:pointer}#szzBoss .mv{display:flex;gap:4px;flex-wrap:wrap;margin:4px 0}#szzBoss .mv button.on{background:#7a5a2a;color:#fff}#szzBoss .ds{opacity:.75;font-size:12px;margin:3px 0}#szzBoss .row{display:flex;align-items:center;gap:6px;margin:3px 0}#szzBoss .row span{width:34px}#szzBoss .row input{flex:1}#szzBoss select{flex:1;background:#2a1d12;color:#ead9b6;border:1px solid #8a6a3a}#szzBoss .cp{margin-top:6px;width:100%}#szzBossKeys{position:fixed;right:14px;bottom:110px;z-index:10041;display:flex;gap:8px}#szzBossKeys button{width:74px;height:74px;border-radius:50%;background:rgba(60,36,18,.88);border:2px solid #c9a35a;color:#ffe9b0;font:700 14px/1.2 sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;touch-action:none}#szzBossKeys small{opacity:.6;font-size:11px}@media (max-height:500px){#szzBoss{top:56px;font-size:12px;line-height:1.35;width:270px}#szzBossKeys{bottom:90px}#szzBossKeys button{width:60px;height:60px;font-size:12px}}@media (max-width:560px){#szzBoss{top:auto;bottom:8px;right:8px;left:8px;width:auto}}
+#szzBoss{position:fixed;left:8px;top:100px;z-index:10041;max-height:calc(100vh - 110px);overflow:auto;width:300px;max-width:calc(100vw - 16px);background:rgba(24,16,10,.94);border:1px solid #8a6a3a;color:#ead9b6;font:13px/1.5 sans-serif;padding:6px 8px;border-radius:6px}#szzBoss .hd{display:flex;justify-content:space-between;align-items:center;color:#ffe08a;font-weight:700;margin-bottom:4px}#szzBoss button{background:#3a2a1a;border:1px solid #8a6a3a;color:#e6c98a;border-radius:4px;padding:2px 8px;cursor:pointer}#szzBoss .mv{display:flex;gap:4px;flex-wrap:wrap;margin:4px 0}#szzBoss .mv button.on{background:#7a5a2a;color:#fff}#szzBoss .ds{opacity:.75;font-size:12px;margin:3px 0}#szzBoss .row{display:flex;align-items:center;gap:6px;margin:3px 0}#szzBoss .row span{width:34px}#szzBoss .row input{flex:1}#szzBoss select{flex:1;background:#2a1d12;color:#ead9b6;border:1px solid #8a6a3a}#szzBoss .cp{margin-top:6px;width:100%}#szzBoss .fxr{margin-top:6px;display:flex;flex-wrap:wrap;gap:4px}#szzBossKeys{position:fixed;right:14px;bottom:110px;z-index:10041;display:flex;gap:8px}#szzBossKeys button{width:74px;height:74px;border-radius:50%;background:rgba(60,36,18,.88);border:2px solid #c9a35a;color:#ffe9b0;font:700 14px/1.2 sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;touch-action:none}#szzBossKeys small{opacity:.6;font-size:11px}@media (max-height:500px){#szzBoss{top:56px;font-size:12px;line-height:1.35;width:270px}#szzBossKeys{bottom:90px}#szzBossKeys button{width:60px;height:60px;font-size:12px}}@media (max-width:560px){#szzBoss{top:auto;bottom:8px;right:8px;left:8px;width:auto}}
 #szzTrial .dms{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:4px 8px;background:#2a1d12;color:#ffe08a;font-size:12px;border-bottom:1px solid rgba(184,149,90,.35)}#szzTrial .dms button{background:none;border:1px solid #8a6a3a;color:#e6c98a;cursor:pointer;padding:0 6px}
 #szzTrial .hd button{background:none;border:1px solid #8a6a3a;color:#e6c98a;cursor:pointer;padding:1px 8px}
 #szzTrial .tabs{display:flex;flex-wrap:wrap;gap:3px;padding:6px}
@@ -37,13 +37,39 @@
       img.src = 'art/sprites/grunt_new/s_' + f + '.png'; CH.grunt_new[f] = fr; }
   }
 
+
+  // 11/18 用户：特效风格（写实/群侠）、地面压灰、纸片燃尽、首领像素化——两个试炼里都能切
+  const fxBtns = () => `<button class="tfx">特效：${window.FXQ ? '群侠' : '写实'}</button> <button class="tgr">地面：${window.ARENA && ARENA.gray && ARENA.gray() ? '压灰' : '原色'}</button> <button class="tburn">纸片燃尽</button>`;
+  function fxWire(root, re) {
+    const q = c => root.querySelector(c);
+    if (q('.tfx')) q('.tfx').onclick = () => { try { SURV.setFxq(!window.FXQ); } catch (e) {} re(); };
+    if (q('.tgr')) q('.tgr').onclick = () => { try { ARENA.setGray(!ARENA.gray()); } catch (e) {} re(); };
+    if (q('.tburn')) q('.tburn').onclick = () => { try { if (zs.filter(z => !z.dead && !z.dummy && !z.pilot).length < 4) { T().soldiers(1); for (let i = 0; i < 8; i++) { const z = T().spawn('grunt'); if (z) { z.x = hero.x + (i % 2 ? 1 : -1) * (70 + (i >> 1) * 40); z.y = hero.y + ((i * 37) % 60) - 30; } } setTimeout(() => SURV.burnTest(), 900); } else SURV.burnTest(); } catch (e) { console.error(e); } };
+    if (q('.tpx')) q('.tpx').onclick = () => { bpx(!BPX); re(); };
+  }
+  let BPX = false; try { BPX = localStorage.getItem('szz-bpx') === '1'; } catch (e) {}
+  function bpx(on) {   // 首领像素化：降到和小兵一样的密度（1 像素 = 1 世界单位），放大不平滑，外描一圈深色
+    BPX = !!on; try { localStorage.setItem('szz-bpx', on ? '1' : '0'); } catch (e) {}
+    if (typeof CH === 'undefined' || !CH.cheng_new) return;
+    for (const fr of Object.values(CH.cheng_new)) {
+      if (!fr.img0) fr.img0 = fr.img;
+      if (!on) { fr.img = fr.img0; fr.skin = 0; continue; }
+      if (fr.px) { fr.img = fr.px; fr.skin = 1; continue; }
+      const im = fr.img0; if (!(im.complete && im.naturalWidth)) continue;
+      const W = Math.max(2, Math.round(fr.w)), H = Math.max(2, Math.round(fr.h)), c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d');
+      x.imageSmoothingQuality = 'high'; x.drawImage(im, 0, 0, W, H); const d = x.getImageData(0, 0, W, H), a = d.data, solid = new Uint8Array(W * H);
+      for (let i = 0; i < W * H; i++) { const al = a[i * 4 + 3]; solid[i] = al >= 110 ? 1 : 0; if (solid[i]) { a[i * 4 + 3] = 255; for (let k = 0; k < 3; k++) a[i * 4 + k] = Math.round(a[i * 4 + k] / 12) * 12; } else if (al < 40) a[i * 4 + 3] = 0; }
+      for (let y = 0; y < H; y++) for (let X = 0; X < W; X++) { const i = y * W + X; if (solid[i] || a[i * 4 + 3] > 0) continue; if ((X > 0 && solid[i - 1]) || (X < W - 1 && solid[i + 1]) || (y > 0 && solid[i - W]) || (y < H - 1 && solid[i + W])) { a[i * 4] = 32; a[i * 4 + 1] = 20; a[i * 4 + 2] = 14; a[i * 4 + 3] = 255; } }
+      x.putImageData(d, 0, 0); c.complete = true; c.naturalWidth = W; c.naturalHeight = H; c.src = 'px'; fr.px = c; fr.img = c; fr.skin = 1;
+    }
+  }
   // 11/18 用户：首领试炼——照武学试炼的样子调首领的每一招（起手/出手帧、范围、速度），复制发 Claude
   const BFR = { idle: '站立', walk1: '走路①', walk2: '走路②', walk3: '走路③', walk4: '走路④', wind: '举刀', strike: '劈下', throw1: '掷刀起手', throw2: '掷出', bare: '空手', catch: '接刀', sweep1: '横扫起手', sweep2: '转身横扫', sweep3: '横扫收势', hurt: '受击', down: '倒地', fly1: '被打飞①', fly2: '被打飞②', land: '落地' };
   const BMV = [['atk', '普攻', '身前 110° 扇形一刀（范围＝刀够多远，速度＝举刀多久）'], ['boomerang', '大刀回旋', '掷出大刀飞出再飞回，刀没回来前空手，收手＝接刀那一下（范围＝飞多远，速度＝预警多久）'], ['sweep', '横扫千军', '身周一圈横扫（范围＝圈多大，速度＝蓄力多久）'], ['chase', '掷刀追身', '大刀掷出插在远处地上，人冲到刀边拔刀砸地（范围＝掷多远，速度＝起手多久）；出手帧也用在冲刺途中']];
   let bbox = null, bsel = 'atk', bmini = false;
   function bossPanel(on) {
     if (!on) { if (bbox) bbox.remove(); bbox = null; const k = document.getElementById('szzBossKeys'); if (k) k.remove(); try { T().bossTr(false); T().pilot(false); } catch (e) {} if (box) render(); return; }
-    regNewGrunt(); try { T().pilot(true); } catch (e) { console.error(e); }
+    regNewGrunt(); if (BPX) setTimeout(() => bpx(true), 600); try { T().pilot(true); } catch (e) { console.error(e); }
     mini = true; if (box) render();
     if (!bbox) { bbox = document.createElement('div'); bbox.id = 'szzBoss'; document.body.appendChild(bbox);
       const k = document.createElement('div'); k.id = 'szzBossKeys'; k.innerHTML = BMV.map(([m, n], i) => `<button data-c="${m}">${n}<small>${'JKLI'[i]}</small></button>`).join(''); document.body.appendChild(k);
@@ -61,8 +87,9 @@
       ${`<div class="row"><span>范围</span><input type="range" min="0.4" max="2.5" step="0.05" value="${C.rs}" data-r="rs"><b>×${(+C.rs).toFixed(2)}</b></div>`}
       <div class="row"><span>速度</span><input type="range" min="0.4" max="2.5" step="0.05" value="${C.sp}" data-r="sp"><b>×${(+C.sp).toFixed(2)}</b></div>
       <div class="ds">速度越大越慢（预警、蓄力越久）。</div>
-      <button class="cp">复制首领设置</button>`}`;
+      <button class="cp">复制首领设置</button><div class="fxr">${fxBtns()} <button class="tpx">像素化：${BPX ? '开' : '关'}</button></div>`}`;
     bbox.querySelector('.bm').onclick = () => { bmini = !bmini; brender(); };
+    fxWire(bbox, brender);
     if (bmini) { bbox.querySelector('.bx').onclick = () => bossMode ? close() : bossPanel(false); return; }
     bbox.querySelector('.bx').onclick = () => bossMode ? close() : bossPanel(false);
     bbox.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { bsel = b.dataset.m; brender(); });
@@ -85,7 +112,7 @@
       ls = ids.map(id => { const g = t.GF[id]; return `<button data-g="${id}" class="${on.includes(id) ? 'on' : ''}"><span style="color:${TC[g.t + 1]}">${t.TIERN[g.t + 1]}</span> ${g.n}<small>${g.cn || (qg ? '轻功' : '内功')}</small></button>`; }).join('');
       const g = sel && t.GF[sel]; dt = g ? `<b>${g.n}</b>　${t.TIERN[g.t + 1]}阶<br>${g.d || ''}` : `<span style="opacity:.6">${qg ? '点一个轻功装上（只能装一个）' : '点心法装上（最多 3 个，再点取消）'}；武艺照常放。</span>`;
     }
-    box.innerHTML = `<div class="hd"><span>武学试炼</span><span>${mini ? '' : `<button class="dm">木人桩：${DUMN[dum]}</button> `}<button class="mn">${mini ? '展开' : '缩小'}</button></span></div>${mini ? '' : `<div class="dms"><span><button class="tbk">${brk ? '会碎的木人' : '不碎的木人'}</button> <button class="tsol">士兵：${sol ? '开' : '关'}</button> <button class="tng">${ng ? '新棍兵：开' : '新画风棍兵'}</button> <button class="tcy">打新程远志</button> <button class="tbp">首领试炼</button> <button class="tshow">${show ? '收起首领美术' : '首领美术对比'}</button>${sol ? ` <button class="rg">远程兵：${rng ? '开' : '关'}</button>` : ''}</span></div>${dum ? '<div class="dms"><span class="dmv">—</span><button class="dmc">清零</button></div>' : ''}<div class="tabs">${tabs}</div><div class="ls">${ls}</div><div class="dt">${dt}</div>`}`;
+    box.innerHTML = `<div class="hd"><span>武学试炼</span><span>${mini ? '' : `<button class="dm">木人桩：${DUMN[dum]}</button> `}<button class="mn">${mini ? '展开' : '缩小'}</button></span></div>${mini ? '' : `<div class="dms"><span><button class="tbk">${brk ? '会碎的木人' : '不碎的木人'}</button> <button class="tsol">士兵：${sol ? '开' : '关'}</button> <button class="tng">${ng ? '新棍兵：开' : '新画风棍兵'}</button> <button class="tcy">打新程远志</button> <button class="tbp">首领试炼</button> <button class="tshow">${show ? '收起首领美术' : '首领美术对比'}</button> ${fxBtns()}${sol ? ` <button class="rg">远程兵：${rng ? '开' : '关'}</button>` : ''}</span></div>${dum ? '<div class="dms"><span class="dmv">—</span><button class="dmc">清零</button></div>' : ''}<div class="tabs">${tabs}</div><div class="ls">${ls}</div><div class="dt">${dt}</div>`}`;
     box.querySelector('.mn').onclick = () => { mini = !mini; render(); };
     if (mini) return;
     const rg = box.querySelector('.rg'); if (rg) rg.onclick = () => { rng = !rng; render(); };
@@ -94,6 +121,7 @@
     box.querySelector('.tng').onclick = () => { ng = ng ? 0 : 1; window.NEW_GRUNT = !!ng; regNewGrunt(); try { if (ng) { sol = 1; T().soldiers(1); for (let i = 0; i < 4; i++) T().spawn('grunt'); } T().regrunt(ng); } catch (e) {} render(); };
     box.querySelector('.tcy').onclick = () => { regNewGrunt(); try { T().newBoss(); } catch (e) { console.error(e); } };
     box.querySelector('.tbp').onclick = () => bossPanel(!bbox);
+    fxWire(box, render);
     box.querySelector('.tshow').onclick = () => { show = show ? 0 : 1; try { T().showcase(show); } catch (e) {} render(); };
     box.querySelector('.tsol').onclick = () => { sol = sol ? 0 : 1; try { T().soldiers(sol); } catch (e) {} render(); };
     const dc = box.querySelector('.dmc'); if (dc) dc.onclick = () => { try { T().dummyClear(); } catch (e) {} };

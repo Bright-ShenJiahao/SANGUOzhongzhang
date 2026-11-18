@@ -793,7 +793,7 @@ function drawChar(name, f, x, y, flip, alpha = 1, white = false, sc = 1, dark = 
   if (dark && !fr.dark) {
     try { if ('filter' in ctx) ctx.filter = 'brightness(.78) saturate(.82)'; } catch (e) {}
   }
-  if (im === fr.white && window.SURV && SURV.noStun && SURV.noStun()) {   // 11/14 用户：受击闪白太亮——三国终章只叠半透明白，不整个变白
+  if (im === fr.white && window.SURV && SURV.noStun && SURV.noStun() && !window.FXQ) {   // 11/14 用户：受击闪白太亮——三国终章只叠半透明白，不整个变白
     ctx.drawImage(fr.img, -fr.ax * sp, -fr.ay * sp, fr.w * sp, fr.h * sp); ctx.globalAlpha = alpha * .5;
   }
   ctx.drawImage(im, -fr.ax * sp, -fr.ay * sp, fr.w * sp, fr.h * sp);
@@ -1071,7 +1071,7 @@ function draw() {
   if (catapults.length || allyShots.length || allyFires.length) list.push({ y: M.bot - 1, d: () => drawCatapults() });
   for (const d of drops) list.push({ y: d.y, d: () => drawDrop(d) });
   for (const v of villagers) list.push({ y: v.y, d: () => drawVillager(v) });
-  for (const z of zs) list.push({ y: z.y, d: () => { if (z.endFade != null) { if (z.endFade <= 0) return; ctx.save(); ctx.globalAlpha *= Math.min(1, z.endFade / .7); drawZ(z); ctx.restore(); return; } if (window.XIAOCHANG) XIAOCHANG.drawAffix(z); drawZ(z); } });
+  for (const z of zs) list.push({ y: z.y, d: () => { if (z.endFade != null) { if (window.SURV && SURV.burnDraw && SURV.burnDraw(z)) return; if (z.endFade <= 0) return; ctx.save(); ctx.globalAlpha *= Math.min(1, z.endFade / .7); drawZ(z); ctx.restore(); return; } if (window.XIAOCHANG) XIAOCHANG.drawAffix(z); drawZ(z); } });
   list.push({ y: hero.y, d: drawHero });
   for (const s of shots) list.push({ y: s.y + .1, d: () => drawShot(s) });
   for (const g of gearSpins) list.push({ y: g.y + 12.2, d: () => {   // 回旋：绕一圈的淡青光箭/石子 + 拖尾

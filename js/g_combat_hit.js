@@ -85,7 +85,7 @@ function rawHit(z, dmg, kb, dir, knock, daze = 0, stun = .35, interrupt = false,
   if (window.ROGUE && ROGUE.onHit) { dmg = ROGUE.onHit(z, dmg, traits, ranged); dbg.rogue = dmg; }   // 震慑破绽加伤、避实眩晕回血
   dbg.hp0 = z.hp; z.hp -= dmg * (z.daze > 0 ? 1.5 : 1);   // 被打晕的目标吃 1.5 倍伤害
   if (!traits.secondary) window.__hitTrace = Object.assign(dbg, { out: dmg, hp1: z.hp, st: z.st, type: z.type, xcActive: !!(window.XIAOCHANG && XIAOCHANG.active()), xcRun: !!(window.XIAOCHANG && XIAOCHANG.state()) });
-  z.flash = .1; z.stun = z.T.siege ? 0 : (window.SURV && SURV.noStun && SURV.noStun() ? Math.max(z.stun || 0, stun) : (z.T.heavy && z.st === 'wind' && !interrupt ? 0 : stun));   /* 三国终章：普通命中不清掉已有的眩晕 */ z.vx = z.T.siege ? 0 : kb * dir * (z.T.heavy ? .6 : 1);
+  z.flash = .1; if (window.SURV && SURV.qHit) SURV.qHit(z); z.stun = z.T.siege ? 0 : (window.SURV && SURV.noStun && SURV.noStun() ? Math.max(z.stun || 0, stun) : (z.T.heavy && z.st === 'wind' && !interrupt ? 0 : stun));   /* 三国终章：普通命中不清掉已有的眩晕 */ z.vx = z.T.siege ? 0 : kb * dir * (z.T.heavy ? .6 : 1);
   if (z.T.chapterBoss) {   // 用户定：第二章首领沿用管亥的「韧性」——挨打累积，满了才踉跄；出招中不被打断；平时只被推一点
     const POISE = { zhang_liang: 8, zhang_bao: 6, zhang_jiao: 10 }[z.type] || 8;
     z.poise = (z.poise || 0) + dmg; (z.hitLog ||= []).push(gameT); z.hitLog = z.hitLog.filter(t => gameT - t < 2);
