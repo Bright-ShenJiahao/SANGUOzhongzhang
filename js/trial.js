@@ -30,6 +30,7 @@
   const CYN = {"idle": [91.5, 150.0, 49.2, 147.0], "walk1": [122.5, 127.5, 67.0, 124.5], "walk2": [117.5, 126.0, 63.8, 123.0], "walk3": [117.5, 126.5, 65.8, 123.5], "walk4": [117.5, 126.0, 63.8, 123.0], "wind": [138.0, 146.0, 81.2, 143.0], "strike": [185.5, 112.5, 55.0, 109.5], "throw1": [169.5, 118.5, 116.0, 115.5], "throw2": [158.0, 110.5, 52.8, 107.5], "bare": [116.0, 108.5, 47.0, 105.5], "catch": [126.0, 178.5, 64.0, 175.5], "sweep1": [170.0, 122.0, 95.2, 119.0], "sweep2": [212.5, 147.5, 68.5, 131.0], "sweep3": [171.5, 120.5, 57.8, 117.5], "hurt": [154.5, 132.0, 92.5, 129.0], "blade": [150.0, 85.5, 75.0, 42.8], "down": [177.5, 73.5, 88.8, 70.5], "fly1": [175.5, 114.5, 87.8, 111.5], "fly2": [133.5, 138.0, 66.8, 135.0], "land": [140.0, 162.0, 68.0, 159.0]};   // 11/18 新画风程远志（写实比例，站立 150）
   function regNewGrunt() {
     if (typeof CH === 'undefined') return; if (!CH.cheng_new) { CH.cheng_new = {}; for (const [f, [w, h, ax, ay]] of Object.entries(CYN)) { const img = new Image(), fr = { img, w, h, ax, ay, white: null, dark: null }; img.onload = () => { const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight; const g = c.getContext('2d'); g.drawImage(img, 0, 0); g.globalCompositeOperation = 'source-atop'; g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); fr.white = c; }; img.src = 'art/sprites/cheng_new/' + f + '.png'; CH.cheng_new[f] = fr; } }
+    if (BPX) setTimeout(() => bpx(true), 800);
     if (CH.grunt_new) return;
     CH.grunt_new = {};
     for (const [f, [w, h, ax, ay]] of Object.entries(GN)) { const img = new Image(), fr = { img, w, h, ax, ay, white: null, dark: null, skin: 0 };
@@ -39,14 +40,6 @@
 
 
   // 11/18 用户：特效风格（写实/群侠）、地面压灰、纸片燃尽、首领像素化——两个试炼里都能切
-  const fxBtns = () => `<button class="tfx">特效：${window.FXQ ? '群侠' : '写实'}</button> <button class="tgr">地面：${window.ARENA && ARENA.gray && ARENA.gray() ? '压灰' : '原色'}</button> <button class="tburn">纸片燃尽</button>`;
-  function fxWire(root, re) {
-    const q = c => root.querySelector(c);
-    if (q('.tfx')) q('.tfx').onclick = () => { try { SURV.setFxq(!window.FXQ); } catch (e) {} re(); };
-    if (q('.tgr')) q('.tgr').onclick = () => { try { ARENA.setGray(!ARENA.gray()); } catch (e) {} re(); };
-    if (q('.tburn')) q('.tburn').onclick = () => { try { if (zs.filter(z => !z.dead && !z.dummy && !z.pilot).length < 4) { T().soldiers(1); for (let i = 0; i < 8; i++) { const z = T().spawn('grunt'); if (z) { z.x = hero.x + (i % 2 ? 1 : -1) * (70 + (i >> 1) * 40); z.y = hero.y + ((i * 37) % 60) - 30; } } setTimeout(() => SURV.burnTest(), 900); } else SURV.burnTest(); } catch (e) { console.error(e); } };
-    if (q('.tpx')) q('.tpx').onclick = () => { bpx(!BPX); re(); };
-  }
   let BPX = false; try { BPX = localStorage.getItem('szz-bpx') === '1'; } catch (e) {}
   function bpx(on) {   // 首领像素化：降到和小兵一样的密度（1 像素 = 1 世界单位），放大不平滑，外描一圈深色
     BPX = !!on; try { localStorage.setItem('szz-bpx', on ? '1' : '0'); } catch (e) {}
@@ -87,9 +80,8 @@
       ${`<div class="row"><span>范围</span><input type="range" min="0.4" max="2.5" step="0.05" value="${C.rs}" data-r="rs"><b>×${(+C.rs).toFixed(2)}</b></div>`}
       <div class="row"><span>速度</span><input type="range" min="0.4" max="2.5" step="0.05" value="${C.sp}" data-r="sp"><b>×${(+C.sp).toFixed(2)}</b></div>
       <div class="ds">速度越大越慢（预警、蓄力越久）。</div>
-      <button class="cp">复制首领设置</button><div class="fxr">${fxBtns()} <button class="tpx">像素化：${BPX ? '开' : '关'}</button></div>`}`;
+      <button class="cp">复制首领设置</button>`}`;
     bbox.querySelector('.bm').onclick = () => { bmini = !bmini; brender(); };
-    fxWire(bbox, brender);
     if (bmini) { bbox.querySelector('.bx').onclick = () => bossMode ? close() : bossPanel(false); return; }
     bbox.querySelector('.bx').onclick = () => bossMode ? close() : bossPanel(false);
     bbox.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { bsel = b.dataset.m; brender(); });
@@ -112,7 +104,7 @@
       ls = ids.map(id => { const g = t.GF[id]; return `<button data-g="${id}" class="${on.includes(id) ? 'on' : ''}"><span style="color:${TC[g.t + 1]}">${t.TIERN[g.t + 1]}</span> ${g.n}<small>${g.cn || (qg ? '轻功' : '内功')}</small></button>`; }).join('');
       const g = sel && t.GF[sel]; dt = g ? `<b>${g.n}</b>　${t.TIERN[g.t + 1]}阶<br>${g.d || ''}` : `<span style="opacity:.6">${qg ? '点一个轻功装上（只能装一个）' : '点心法装上（最多 3 个，再点取消）'}；武艺照常放。</span>`;
     }
-    box.innerHTML = `<div class="hd"><span>武学试炼</span><span>${mini ? '' : `<button class="dm">木人桩：${DUMN[dum]}</button> `}<button class="mn">${mini ? '展开' : '缩小'}</button></span></div>${mini ? '' : `<div class="dms"><span><button class="tbk">${brk ? '会碎的木人' : '不碎的木人'}</button> <button class="tsol">士兵：${sol ? '开' : '关'}</button> <button class="tng">${ng ? '新棍兵：开' : '新画风棍兵'}</button> <button class="tcy">打新程远志</button> <button class="tbp">首领试炼</button> <button class="tshow">${show ? '收起首领美术' : '首领美术对比'}</button> ${fxBtns()}${sol ? ` <button class="rg">远程兵：${rng ? '开' : '关'}</button>` : ''}</span></div>${dum ? '<div class="dms"><span class="dmv">—</span><button class="dmc">清零</button></div>' : ''}<div class="tabs">${tabs}</div><div class="ls">${ls}</div><div class="dt">${dt}</div>`}`;
+    box.innerHTML = `<div class="hd"><span>武学试炼</span><span>${mini ? '' : `<button class="dm">木人桩：${DUMN[dum]}</button> `}<button class="mn">${mini ? '展开' : '缩小'}</button></span></div>${mini ? '' : `<div class="dms"><span><button class="tbk">${brk ? '会碎的木人' : '不碎的木人'}</button> <button class="tsol">士兵：${sol ? '开' : '关'}</button> <button class="tng">${ng ? '新棍兵：开' : '新画风棍兵'}</button> <button class="tcy">打新程远志</button> <button class="tbp">首领试炼</button> <button class="tshow">${show ? '收起首领美术' : '首领美术对比'}</button>${sol ? ` <button class="rg">远程兵：${rng ? '开' : '关'}</button>` : ''}</span></div>${dum ? '<div class="dms"><span class="dmv">—</span><button class="dmc">清零</button></div>' : ''}<div class="tabs">${tabs}</div><div class="ls">${ls}</div><div class="dt">${dt}</div>`}`;
     box.querySelector('.mn').onclick = () => { mini = !mini; render(); };
     if (mini) return;
     const rg = box.querySelector('.rg'); if (rg) rg.onclick = () => { rng = !rng; render(); };
@@ -121,7 +113,6 @@
     box.querySelector('.tng').onclick = () => { ng = ng ? 0 : 1; window.NEW_GRUNT = !!ng; regNewGrunt(); try { if (ng) { sol = 1; T().soldiers(1); for (let i = 0; i < 4; i++) T().spawn('grunt'); } T().regrunt(ng); } catch (e) {} render(); };
     box.querySelector('.tcy').onclick = () => { regNewGrunt(); try { T().newBoss(); } catch (e) { console.error(e); } };
     box.querySelector('.tbp').onclick = () => bossPanel(!bbox);
-    fxWire(box, render);
     box.querySelector('.tshow').onclick = () => { show = show ? 0 : 1; try { T().showcase(show); } catch (e) {} render(); };
     box.querySelector('.tsol').onclick = () => { sol = sol ? 0 : 1; try { T().soldiers(sol); } catch (e) {} render(); };
     const dc = box.querySelector('.dmc'); if (dc) dc.onclick = () => { try { T().dummyClear(); } catch (e) {} };
@@ -184,5 +175,7 @@
   // 11/18 用户：单独一个「首领试炼」——进去直接操控首领打木头人
   let bossMode = false;
   async function openBoss() { bossMode = true; await open(); if (box) box.style.display = 'none'; bossPanel(true); }
-  window.TRIAL = { open, openBoss, close, regNew: regNewGrunt };
+  // 11/18 用户：这些开关挪到开发者面板
+  function burnTry() { try { if (zs.filter(z => !z.dead && !z.dummy && !z.pilot).length < 4) { T().soldiers(1); for (let i = 0; i < 8; i++) { const z = T().spawn('grunt'); if (z) { z.x = hero.x + (i % 2 ? 1 : -1) * (70 + (i >> 1) * 40); z.y = hero.y + ((i * 37) % 60) - 30; } } setTimeout(() => SURV.burnTest(), 900); } else SURV.burnTest(); } catch (e) { console.error(e); } }
+  window.TRIAL = { open, openBoss, close, regNew: regNewGrunt, bpx: on => bpx(on), bpxOn: () => BPX, burnTry };
 })();

@@ -62,7 +62,7 @@ body.szz-pro #help{display:none}
 .x-back{min-height:34px!important}
 }
 #rot small{display:block;margin-top:10px;font-size:14px;font-weight:600;color:#c9b691;line-height:1.6}
-</style><link rel="preload" href="pack/fonts/result.woff2?v=75b929261d" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=75b929261d)format("woff2");font-display:swap}</style><style>@font-face{font-family:"WenKai";src:url(pack/fonts/kai.woff2?v=d9e20de337)format("woff2");font-display:swap}</style><link rel="preload" href="pack/fonts/pixel.woff2?v=933451e6d8" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"Pixel12";src:url(pack/fonts/pixel.woff2?v=933451e6d8)format("woff2");font-display:swap}@font-face{font-family:"Songti SC";src:url(pack/fonts/pixel.woff2?v=933451e6d8)format("woff2");font-display:swap}@font-face{font-family:"STSong";src:url(pack/fonts/pixel.woff2?v=933451e6d8)format("woff2");font-display:swap}@font-face{font-family:"Noto Serif SC";src:url(pack/fonts/pixel.woff2?v=933451e6d8)format("woff2");font-display:swap}@font-face{font-family:"SimSun";src:url(pack/fonts/pixel.woff2?v=933451e6d8)format("woff2");font-display:swap}@font-face{font-family:"PingFang SC";src:url(pack/fonts/pixel.woff2?v=933451e6d8)format("woff2");font-display:swap}@font-face{font-family:"Microsoft YaHei";src:url(pack/fonts/pixel.woff2?v=933451e6d8)format("woff2");font-display:swap}@font-face{font-family:"Noto Sans CJK SC";src:url(pack/fonts/pixel.woff2?v=933451e6d8)format("woff2");font-display:swap}@font-face{font-family:"STKaiti";src:url(pack/fonts/pixel.woff2?v=933451e6d8)format("woff2");font-display:swap}@font-face{font-family:"KaiTi";src:url(pack/fonts/pixel.woff2?v=933451e6d8)format("woff2");font-display:swap}*{font-synthesis:none}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
+</style><link rel="preload" href="pack/fonts/result.woff2?v=f459d66a5e" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=f459d66a5e)format("woff2");font-display:swap}</style><style>@font-face{font-family:"WenKai";src:url(pack/fonts/kai.woff2?v=e47a9169de)format("woff2");font-display:swap}</style><link rel="preload" href="pack/fonts/pixel.woff2?v=6101f35315" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"Pixel12";src:url(pack/fonts/pixel.woff2?v=6101f35315)format("woff2");font-display:swap}@font-face{font-family:"Songti SC";src:url(pack/fonts/pixel.woff2?v=6101f35315)format("woff2");font-display:swap}@font-face{font-family:"STSong";src:url(pack/fonts/pixel.woff2?v=6101f35315)format("woff2");font-display:swap}@font-face{font-family:"Noto Serif SC";src:url(pack/fonts/pixel.woff2?v=6101f35315)format("woff2");font-display:swap}@font-face{font-family:"SimSun";src:url(pack/fonts/pixel.woff2?v=6101f35315)format("woff2");font-display:swap}@font-face{font-family:"PingFang SC";src:url(pack/fonts/pixel.woff2?v=6101f35315)format("woff2");font-display:swap}@font-face{font-family:"Microsoft YaHei";src:url(pack/fonts/pixel.woff2?v=6101f35315)format("woff2");font-display:swap}@font-face{font-family:"Noto Sans CJK SC";src:url(pack/fonts/pixel.woff2?v=6101f35315)format("woff2");font-display:swap}@font-face{font-family:"STKaiti";src:url(pack/fonts/pixel.woff2?v=6101f35315)format("woff2");font-display:swap}@font-face{font-family:"KaiTi";src:url(pack/fonts/pixel.woff2?v=6101f35315)format("woff2");font-display:swap}*{font-synthesis:none}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
 <style>button{letter-spacing:.04em!important}</style></head><body>
 <style>
 #bootSplash{position:fixed;inset:0;z-index:99999;background:radial-gradient(ellipse at 50% 45%,#f3e4cf 0%,#ecd9c0 55%,#d9c09f 100%);transition:opacity .45s ease-out}
@@ -119,7 +119,7 @@ if(location.protocol==='https:'&&!/[?&]debug(?:=|&|$)/.test(location.search)&&'s
 })();
 // 自动更新：打开游戏、或从后台切回来时，查一下线上有没有新版本；有就在标题/整备页自动刷新（战斗中不打扰）
 (function(){
-var BUILD='11d553923064',busy=false;
+var BUILD='ad468b7664e4',busy=false;
 if(location.protocol!=='https:'||/[?&]debug(?:=|&|$)/.test(location.search))return;
 function check(){
   if(busy)return;
@@ -1413,6 +1413,16 @@ const XIAOCHANG = { drawBackground() {}, state: () => null, start() {}, on: () =
     btn(heroGroup, '图鉴全开', '', () => { if (window.CODEX) { CODEX.unlockAll(); CODEX.open(); } });
     btn(heroGroup, '武学试炼', 'alt', () => { if (window.TRIAL) TRIAL.open(); });
     btn(heroGroup, '首领试炼', 'alt', () => { if (window.TRIAL) TRIAL.openBoss(); });
+    {   // 11/18 用户：特效风格 / 地面压灰 / 敌人消散 / 首领像素化——开发者面板里切，存本机
+      const t = (on, a, b) => on ? a : b;
+      const fx = btn(heroGroup, '特效：' + t(window.FXQ, '群侠', '写实'), 'alt', () => { if (!window.SURV) return; SURV.setFxq(!window.FXQ); fx.textContent = '特效：' + t(window.FXQ, '群侠', '写实'); });
+      const gr = btn(heroGroup, '地面：' + t(window.ARENA && ARENA.gray && ARENA.gray(), '压灰', '原色'), 'alt', () => { if (!window.ARENA || !ARENA.setGray) return; ARENA.setGray(!ARENA.gray()); gr.textContent = '地面：' + t(ARENA.gray(), '压灰', '原色'); });
+      const bon = () => { try { return localStorage.getItem('szz-burn') !== '0'; } catch (e) { return true; } };
+      const bu = btn(heroGroup, '消散：' + t(bon(), '燃尽', '淡出'), 'alt', () => { if (!window.SURV) return; SURV.setBurn(!bon()); bu.textContent = '消散：' + t(bon(), '燃尽', '淡出'); });
+      const pon = () => { try { return localStorage.getItem('szz-bpx') === '1'; } catch (e) { return false; } };
+      const px = btn(heroGroup, '首领像素：' + t(pon(), '开', '关'), 'alt', () => { if (!window.TRIAL || !TRIAL.bpx) return; TRIAL.bpx(!pon()); px.textContent = '首领像素：' + t(pon(), '开', '关'); });
+      btn(heroGroup, '纸片燃尽（刷兵烧掉）', 'alt dbgWide', () => { if (window.TRIAL && TRIAL.burnTry) TRIAL.burnTry(); });
+    }
     { const sk = btn(heroGroup, '皮肤：' + (window.HERO_SKIN ? HERO_SKIN.name() : '白衣'), 'alt dbgWide', () => { if (!window.HERO_SKIN) return; HERO_SKIN.next(); sk.textContent = '皮肤：' + HERO_SKIN.name(); if (window.KAIJU && KAIJU.refresh) KAIJU.refresh(); });   // 11/13：8 套主角皮肤轮流看
       if (window.HERO_SKIN) HERO_SKIN.preload(HERO_SKIN.cur(), 'wd_'); }   // 11/13：一招一招看武艺、心法、轻功
     const allBtn = btn(heroGroup, '解锁关卡：关', 'off', () => { window.ROUTE_ALL = !window.ROUTE_ALL; allBtn.textContent = '解锁关卡：' + (window.ROUTE_ALL ? '开' : '关'); allBtn.className = window.ROUTE_ALL ? '' : 'off'; tipLine(window.ROUTE_ALL ? '路线长卷上任意节点都能直接点进去（首领、精英、奇遇、商店）' : '恢复正常路线'); });   /* 11/12 用户：随便进去看 */
@@ -1479,7 +1489,7 @@ const XIAOCHANG = { drawBackground() {}, state: () => null, start() {}, on: () =
 
   // 三国终章：老游戏的按钮先藏起来（锦囊、经脉、神器、校场、第二章、Boss 等已拿掉），只留测试要用的几个
   function trimPanel() {
-    const keep = ['回到主界面', '武艺：刀', '武艺：剑', '回满血', '无敌', '跳过这一波', '恢复存档', '跳到第', '修为', '图鉴全开', '解锁关卡', '武学试炼', '首领试炼', '皮肤：'];   /* 11/12：图鉴、解锁关卡也留着 */
+    const keep = ['回到主界面', '武艺：刀', '武艺：剑', '回满血', '无敌', '跳过这一波', '恢复存档', '跳到第', '修为', '图鉴全开', '解锁关卡', '武学试炼', '首领试炼', '特效：', '地面：', '消散：', '首领像素', '纸片燃尽', '皮肤：'];   /* 11/12：图鉴、解锁关卡也留着 */
     panel.querySelectorAll('button').forEach(b => { if (!keep.some(k => b.textContent.startsWith(k))) b.style.display = 'none'; });
     panel.querySelectorAll('.dbgTrial,.dbgFloors').forEach(e => { e.style.display = 'none'; });
     panel.querySelectorAll('.dbgGroup').forEach(g => { if (![...g.querySelectorAll('button')].some(b => b.style.display !== 'none')) g.style.display = 'none'; });
@@ -9528,6 +9538,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
 #survTut.sty .tskip{position:fixed}
 @media (max-height:520px){#survTut.sty .bx2{height:30vh;font-size:14px;line-height:1.5;padding:calc(2vh + 14px) 4vw 1vh}#survTut.sty .lh2{bottom:calc(3vh + 30vh);height:56vh}#survTut.sty.top .bx2{top:16vh}#survTut.sty .nm2{font-size:15px}}
 #survTut.bt{right:1.2vw!important;bottom:calc(16vh + 20px)!important;width:min(30vw,520px)!important}#survTut.bt .bx{min-height:0;border:calc(10px*var(--k)) solid transparent!important;border-image:url(pack/ui/prep/dialog.webp?v=85a6668724) 40 fill stretch!important;background:none!important;padding:calc(4px*var(--k)) calc(14px*var(--k))}#survTut.bt p{font:500 clamp(13px,2vh,18px)/1.5 "PingFang SC",Pixel12,sans-serif!important;margin:0}#survTut.bt>em{width:calc(9vh + 12px)!important;border:2px solid #8a6a32!important;box-shadow:0 0 0 2px #000}#survTut.bt .nm{font-size:clamp(12px,1.8vh,16px)!important}@media (max-height:520px){#survTut.bt{width:44vw!important;bottom:24vh!important}#survTut.bt p{font-size:12px!important}}
+#survTut.bt .bx{padding-top:calc(22px*var(--k))!important}#survTut.bt .nm{top:calc(-38px*var(--k))}
 body:has(#szzStory) #survTut,body:has(#szzStory) #survNote,body:has(#waveBan) #survTut{display:none!important}   /* 11/16 用户：首领对话/横幅时左下刘备小框不要叠上来 */
 #survTut{position:fixed;right:1vw;bottom:calc(16vh + 60px);z-index:10040;display:flex;align-items:stretch;width:min(820px,60vw);cursor:pointer;animation:tutIn .3s ease-out}
 @keyframes tutIn{from{transform:translateY(16px);opacity:0}}
@@ -11036,7 +11047,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
 #survEnd .kv{display:grid;grid-template-columns:auto 1fr auto 1fr;gap:calc(8px*var(--k)) calc(12px*var(--k));text-align:left;margin-top:calc(14px*var(--k));padding:calc(12px*var(--k));border:1px solid #6a5434;font-size:calc(16px*var(--kt))}#survEnd .kv span{color:#a8977a}
 @media (max-aspect-ratio:1/1){#survEnd .cells{grid-template-columns:repeat(3,1fr)}#survEnd .cl.pr{grid-column:span 3}#survEnd .two,#survEnd .ev{grid-template-columns:1fr}#survEnd .tags{margin-left:0;order:3;flex-basis:100%}#survEnd .hd{flex-wrap:wrap;justify-content:space-between}}
 @media (max-height:520px){#survEnd .fr{border-width:22px;max-height:98vh}}`;
-  window.SURV = { qHit, burnDraw, setBurn(v) { BURN_ON = !!v; try { localStorage.setItem('szz-burn', v ? '1' : '0'); } catch (e) {} }, burnTest() { const L = zs.filter(z => !z.dead && !z.dummy && !z.pilot && z.endFade == null); for (const z of L) { z.endFade = .9; z.st = 'idle'; z.t = 0; z.air = false; z.stun = 0; } later(1.9, () => { for (let i = zs.length - 1; i >= 0; i--) if (L.includes(zs[i])) zs.splice(i, 1); }); return L.length; }, setFxq(v) { FXQ = window.FXQ = !!v; try { localStorage.setItem('szz-fxq', v ? '1' : '0'); } catch (e) {} }, heroXf, dummyTick, drawDummy, skList: () => Object.keys(SK).filter(k => !SK[k].off && SK[k].dk).map(k => [k, SK[k].name, SK[k].tier, wepOf(k), (SK[k].pose || []).join('/')].join(' ')), rollK: () => RT.on ? OG().roll || 1 : 1, wepOpen: w => Object.keys(SK).some(k => !SK[k].off && wepOf(k) === w), endShow, endOn: () => !!document.getElementById('survEnd'), logEv, endPage: n => { endPage = n; endRender(); }, prepDbg: () => prepOpen(RT.node), repTest: R => report(R), slowMove, coinAt: (x, y, v) => { const n = Math.min(5, v), e = Math.ceil(v / n); for (let i = 0; i < n; i++) S.coins.push({ x: x + R(-14, 14), y: y + R(-6, 6), z: 8 + R(0, 10), vz: R(60, 110), vx: R(-40, 40), v: e, t: 0 }); }, wuParts, trial: TRIAL, BAO, BQN, BQC, SHANG, baoHit, blessOpts, bless: (k, cb) => blessDo(k, cb), baoPick: (qs, cb, t) => pickBao(qs, cb, t), maxHp: () => maxHp(), poseFlip: () => poseFlipNow, banner: (a, b) => waveBanner(a, b), curNode: () => RT.on && W.started ? RT.node : null, status, attrInfo, addXiu: n => addXiu(n), heldPre: () => heldPre(), dbg: () => ({ gf: S.gf.slice(), qg: S.qg, zq: S.zq, zqMax: zqMax(), exp: S.gfExp, GM }), giveGf: id => { if (GF[id]) { if (GF[id].qg) S.qg = id; else { const f = S.gf.indexOf(""); if (f >= 0) S.gf[f] = id; } } }, newHud: () => RT.on && !!RT.node, stunGate, noStun: () => RT.on, get slots() { return S.slots; }, SK, beginNode, frozen: () => RT.on && (ROUTE.shown() || buildOpen || talkHold || (banHold && !!document.getElementById('waveBan'))), routeHp: () => [hero.hp, maxHp()], camp(k) { if (k === 'heal') { heal(maxHp() * .3); S.shang = []; } else if (k && SK[k]) { const l = lvOf(k); if (l < 10) S.mast[k] = MAST_T[l]; } else RT.dmg *= 1.1; },   // 11/14 营地：休整回三成血；修炼 = 选一招直接升一级
+  window.SURV = { tut: k => tut(k), qHit, burnDraw, setBurn(v) { BURN_ON = !!v; try { localStorage.setItem('szz-burn', v ? '1' : '0'); } catch (e) {} }, burnTest() { const L = zs.filter(z => !z.dead && !z.dummy && !z.pilot && z.endFade == null); for (const z of L) { z.endFade = .9; z.st = 'idle'; z.t = 0; z.air = false; z.stun = 0; } later(1.9, () => { for (let i = zs.length - 1; i >= 0; i--) if (L.includes(zs[i])) zs.splice(i, 1); }); return L.length; }, setFxq(v) { FXQ = window.FXQ = !!v; try { localStorage.setItem('szz-fxq', v ? '1' : '0'); } catch (e) {} }, heroXf, dummyTick, drawDummy, skList: () => Object.keys(SK).filter(k => !SK[k].off && SK[k].dk).map(k => [k, SK[k].name, SK[k].tier, wepOf(k), (SK[k].pose || []).join('/')].join(' ')), rollK: () => RT.on ? OG().roll || 1 : 1, wepOpen: w => Object.keys(SK).some(k => !SK[k].off && wepOf(k) === w), endShow, endOn: () => !!document.getElementById('survEnd'), logEv, endPage: n => { endPage = n; endRender(); }, prepDbg: () => prepOpen(RT.node), repTest: R => report(R), slowMove, coinAt: (x, y, v) => { const n = Math.min(5, v), e = Math.ceil(v / n); for (let i = 0; i < n; i++) S.coins.push({ x: x + R(-14, 14), y: y + R(-6, 6), z: 8 + R(0, 10), vz: R(60, 110), vx: R(-40, 40), v: e, t: 0 }); }, wuParts, trial: TRIAL, BAO, BQN, BQC, SHANG, baoHit, blessOpts, bless: (k, cb) => blessDo(k, cb), baoPick: (qs, cb, t) => pickBao(qs, cb, t), maxHp: () => maxHp(), poseFlip: () => poseFlipNow, banner: (a, b) => waveBanner(a, b), curNode: () => RT.on && W.started ? RT.node : null, status, attrInfo, addXiu: n => addXiu(n), heldPre: () => heldPre(), dbg: () => ({ gf: S.gf.slice(), qg: S.qg, zq: S.zq, zqMax: zqMax(), exp: S.gfExp, GM }), giveGf: id => { if (GF[id]) { if (GF[id].qg) S.qg = id; else { const f = S.gf.indexOf(""); if (f >= 0) S.gf[f] = id; } } }, newHud: () => RT.on && !!RT.node, stunGate, noStun: () => RT.on, get slots() { return S.slots; }, SK, beginNode, frozen: () => RT.on && (ROUTE.shown() || buildOpen || talkHold || (banHold && !!document.getElementById('waveBan'))), routeHp: () => [hero.hp, maxHp()], camp(k) { if (k === 'heal') { heal(maxHp() * .3); S.shang = []; } else if (k && SK[k]) { const l = lvOf(k); if (l < 10) S.mast[k] = MAST_T[l]; } else RT.dmg *= 1.1; },   // 11/14 营地：休整回三成血；修炼 = 选一招直接升一级
     money: () => S.money, campSkills: () => [...S.slots, ...(S.owned || [])].filter((k, i, a) => k && SK[k] && a.indexOf(k) === i).map(k => ({ k, name: SK[k].name, lv: lvOf(k), img: IMGU[k] || '', icon: SK[k].icon, color: SK[k].color })), ORIGINS, setOrigin(k) { if (ORIGINS[k] && !ORIGINS[k].locked) { origin = k; startW = null; } }, origin: () => origin, setWep(w) { startW = w; }, wep: () => heldW(), startSk: () => startSk(), WEPN, takeMul: (from, kind) => { const fireK = kind === 'fire' || !!(from && (from.fire || (from.source && /fire|huo|jar/.test(String(from.source)))));
       if (RT.on && GM.block && Math.random() < GM.block) { floaters.push({ x: hero.x, y: hero.y - 50, t: 0, txt: '格挡', color: '#bfe0ff' }); return 0; }
       const mv = Math.abs(hero.ix) > .1 || Math.abs(hero.iy) > .1, low = hero.hp / maxHp() < .3 ? 1 - .10 * GM.low : 1;
@@ -12577,6 +12588,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   const CYN = {"idle": [91.5, 150.0, 49.2, 147.0], "walk1": [122.5, 127.5, 67.0, 124.5], "walk2": [117.5, 126.0, 63.8, 123.0], "walk3": [117.5, 126.5, 65.8, 123.5], "walk4": [117.5, 126.0, 63.8, 123.0], "wind": [138.0, 146.0, 81.2, 143.0], "strike": [185.5, 112.5, 55.0, 109.5], "throw1": [169.5, 118.5, 116.0, 115.5], "throw2": [158.0, 110.5, 52.8, 107.5], "bare": [116.0, 108.5, 47.0, 105.5], "catch": [126.0, 178.5, 64.0, 175.5], "sweep1": [170.0, 122.0, 95.2, 119.0], "sweep2": [212.5, 147.5, 68.5, 131.0], "sweep3": [171.5, 120.5, 57.8, 117.5], "hurt": [154.5, 132.0, 92.5, 129.0], "blade": [150.0, 85.5, 75.0, 42.8], "down": [177.5, 73.5, 88.8, 70.5], "fly1": [175.5, 114.5, 87.8, 111.5], "fly2": [133.5, 138.0, 66.8, 135.0], "land": [140.0, 162.0, 68.0, 159.0]};   // 11/18 新画风程远志（写实比例，站立 150）
   function regNewGrunt() {
     if (typeof CH === 'undefined') return; if (!CH.cheng_new) { CH.cheng_new = {}; for (const [f, [w, h, ax, ay]] of Object.entries(CYN)) { const img = new Image(), fr = { img, w, h, ax, ay, white: null, dark: null }; img.onload = () => { const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight; const g = c.getContext('2d'); g.drawImage(img, 0, 0); g.globalCompositeOperation = 'source-atop'; g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); fr.white = c; }; img.src = 'art/sprites/cheng_new/' + f + '.png'; CH.cheng_new[f] = fr; } }
+    if (BPX) setTimeout(() => bpx(true), 800);
     if (CH.grunt_new) return;
     CH.grunt_new = {};
     for (const [f, [w, h, ax, ay]] of Object.entries(GN)) { const img = new Image(), fr = { img, w, h, ax, ay, white: null, dark: null, skin: 0 };
@@ -12586,14 +12598,6 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
 
 
   // 11/18 用户：特效风格（写实/群侠）、地面压灰、纸片燃尽、首领像素化——两个试炼里都能切
-  const fxBtns = () => `<button class="tfx">特效：${window.FXQ ? '群侠' : '写实'}</button> <button class="tgr">地面：${window.ARENA && ARENA.gray && ARENA.gray() ? '压灰' : '原色'}</button> <button class="tburn">纸片燃尽</button>`;
-  function fxWire(root, re) {
-    const q = c => root.querySelector(c);
-    if (q('.tfx')) q('.tfx').onclick = () => { try { SURV.setFxq(!window.FXQ); } catch (e) {} re(); };
-    if (q('.tgr')) q('.tgr').onclick = () => { try { ARENA.setGray(!ARENA.gray()); } catch (e) {} re(); };
-    if (q('.tburn')) q('.tburn').onclick = () => { try { if (zs.filter(z => !z.dead && !z.dummy && !z.pilot).length < 4) { T().soldiers(1); for (let i = 0; i < 8; i++) { const z = T().spawn('grunt'); if (z) { z.x = hero.x + (i % 2 ? 1 : -1) * (70 + (i >> 1) * 40); z.y = hero.y + ((i * 37) % 60) - 30; } } setTimeout(() => SURV.burnTest(), 900); } else SURV.burnTest(); } catch (e) { console.error(e); } };
-    if (q('.tpx')) q('.tpx').onclick = () => { bpx(!BPX); re(); };
-  }
   let BPX = false; try { BPX = localStorage.getItem('szz-bpx') === '1'; } catch (e) {}
   function bpx(on) {   // 首领像素化：降到和小兵一样的密度（1 像素 = 1 世界单位），放大不平滑，外描一圈深色
     BPX = !!on; try { localStorage.setItem('szz-bpx', on ? '1' : '0'); } catch (e) {}
@@ -12634,9 +12638,8 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       ${`<div class="row"><span>范围</span><input type="range" min="0.4" max="2.5" step="0.05" value="${C.rs}" data-r="rs"><b>×${(+C.rs).toFixed(2)}</b></div>`}
       <div class="row"><span>速度</span><input type="range" min="0.4" max="2.5" step="0.05" value="${C.sp}" data-r="sp"><b>×${(+C.sp).toFixed(2)}</b></div>
       <div class="ds">速度越大越慢（预警、蓄力越久）。</div>
-      <button class="cp">复制首领设置</button><div class="fxr">${fxBtns()} <button class="tpx">像素化：${BPX ? '开' : '关'}</button></div>`}`;
+      <button class="cp">复制首领设置</button>`}`;
     bbox.querySelector('.bm').onclick = () => { bmini = !bmini; brender(); };
-    fxWire(bbox, brender);
     if (bmini) { bbox.querySelector('.bx').onclick = () => bossMode ? close() : bossPanel(false); return; }
     bbox.querySelector('.bx').onclick = () => bossMode ? close() : bossPanel(false);
     bbox.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { bsel = b.dataset.m; brender(); });
@@ -12659,7 +12662,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       ls = ids.map(id => { const g = t.GF[id]; return `<button data-g="${id}" class="${on.includes(id) ? 'on' : ''}"><span style="color:${TC[g.t + 1]}">${t.TIERN[g.t + 1]}</span> ${g.n}<small>${g.cn || (qg ? '轻功' : '内功')}</small></button>`; }).join('');
       const g = sel && t.GF[sel]; dt = g ? `<b>${g.n}</b>　${t.TIERN[g.t + 1]}阶<br>${g.d || ''}` : `<span style="opacity:.6">${qg ? '点一个轻功装上（只能装一个）' : '点心法装上（最多 3 个，再点取消）'}；武艺照常放。</span>`;
     }
-    box.innerHTML = `<div class="hd"><span>武学试炼</span><span>${mini ? '' : `<button class="dm">木人桩：${DUMN[dum]}</button> `}<button class="mn">${mini ? '展开' : '缩小'}</button></span></div>${mini ? '' : `<div class="dms"><span><button class="tbk">${brk ? '会碎的木人' : '不碎的木人'}</button> <button class="tsol">士兵：${sol ? '开' : '关'}</button> <button class="tng">${ng ? '新棍兵：开' : '新画风棍兵'}</button> <button class="tcy">打新程远志</button> <button class="tbp">首领试炼</button> <button class="tshow">${show ? '收起首领美术' : '首领美术对比'}</button> ${fxBtns()}${sol ? ` <button class="rg">远程兵：${rng ? '开' : '关'}</button>` : ''}</span></div>${dum ? '<div class="dms"><span class="dmv">—</span><button class="dmc">清零</button></div>' : ''}<div class="tabs">${tabs}</div><div class="ls">${ls}</div><div class="dt">${dt}</div>`}`;
+    box.innerHTML = `<div class="hd"><span>武学试炼</span><span>${mini ? '' : `<button class="dm">木人桩：${DUMN[dum]}</button> `}<button class="mn">${mini ? '展开' : '缩小'}</button></span></div>${mini ? '' : `<div class="dms"><span><button class="tbk">${brk ? '会碎的木人' : '不碎的木人'}</button> <button class="tsol">士兵：${sol ? '开' : '关'}</button> <button class="tng">${ng ? '新棍兵：开' : '新画风棍兵'}</button> <button class="tcy">打新程远志</button> <button class="tbp">首领试炼</button> <button class="tshow">${show ? '收起首领美术' : '首领美术对比'}</button>${sol ? ` <button class="rg">远程兵：${rng ? '开' : '关'}</button>` : ''}</span></div>${dum ? '<div class="dms"><span class="dmv">—</span><button class="dmc">清零</button></div>' : ''}<div class="tabs">${tabs}</div><div class="ls">${ls}</div><div class="dt">${dt}</div>`}`;
     box.querySelector('.mn').onclick = () => { mini = !mini; render(); };
     if (mini) return;
     const rg = box.querySelector('.rg'); if (rg) rg.onclick = () => { rng = !rng; render(); };
@@ -12668,7 +12671,6 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     box.querySelector('.tng').onclick = () => { ng = ng ? 0 : 1; window.NEW_GRUNT = !!ng; regNewGrunt(); try { if (ng) { sol = 1; T().soldiers(1); for (let i = 0; i < 4; i++) T().spawn('grunt'); } T().regrunt(ng); } catch (e) {} render(); };
     box.querySelector('.tcy').onclick = () => { regNewGrunt(); try { T().newBoss(); } catch (e) { console.error(e); } };
     box.querySelector('.tbp').onclick = () => bossPanel(!bbox);
-    fxWire(box, render);
     box.querySelector('.tshow').onclick = () => { show = show ? 0 : 1; try { T().showcase(show); } catch (e) {} render(); };
     box.querySelector('.tsol').onclick = () => { sol = sol ? 0 : 1; try { T().soldiers(sol); } catch (e) {} render(); };
     const dc = box.querySelector('.dmc'); if (dc) dc.onclick = () => { try { T().dummyClear(); } catch (e) {} };
@@ -12731,7 +12733,9 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   // 11/18 用户：单独一个「首领试炼」——进去直接操控首领打木头人
   let bossMode = false;
   async function openBoss() { bossMode = true; await open(); if (box) box.style.display = 'none'; bossPanel(true); }
-  window.TRIAL = { open, openBoss, close, regNew: regNewGrunt };
+  // 11/18 用户：这些开关挪到开发者面板
+  function burnTry() { try { if (zs.filter(z => !z.dead && !z.dummy && !z.pilot).length < 4) { T().soldiers(1); for (let i = 0; i < 8; i++) { const z = T().spawn('grunt'); if (z) { z.x = hero.x + (i % 2 ? 1 : -1) * (70 + (i >> 1) * 40); z.y = hero.y + ((i * 37) % 60) - 30; } } setTimeout(() => SURV.burnTest(), 900); } else SURV.burnTest(); } catch (e) { console.error(e); } }
+  window.TRIAL = { open, openBoss, close, regNew: regNewGrunt, bpx: on => bpx(on), bpxOn: () => BPX, burnTry };
 })();
 
 // 11/13 像素界面套件（用户出的图：金/墨/朱三种按钮、墨色面板+标题牌、宣纸面板、输入框、勾选框）

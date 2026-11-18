@@ -112,6 +112,16 @@
     btn(heroGroup, '图鉴全开', '', () => { if (window.CODEX) { CODEX.unlockAll(); CODEX.open(); } });
     btn(heroGroup, '武学试炼', 'alt', () => { if (window.TRIAL) TRIAL.open(); });
     btn(heroGroup, '首领试炼', 'alt', () => { if (window.TRIAL) TRIAL.openBoss(); });
+    {   // 11/18 用户：特效风格 / 地面压灰 / 敌人消散 / 首领像素化——开发者面板里切，存本机
+      const t = (on, a, b) => on ? a : b;
+      const fx = btn(heroGroup, '特效：' + t(window.FXQ, '群侠', '写实'), 'alt', () => { if (!window.SURV) return; SURV.setFxq(!window.FXQ); fx.textContent = '特效：' + t(window.FXQ, '群侠', '写实'); });
+      const gr = btn(heroGroup, '地面：' + t(window.ARENA && ARENA.gray && ARENA.gray(), '压灰', '原色'), 'alt', () => { if (!window.ARENA || !ARENA.setGray) return; ARENA.setGray(!ARENA.gray()); gr.textContent = '地面：' + t(ARENA.gray(), '压灰', '原色'); });
+      const bon = () => { try { return localStorage.getItem('szz-burn') !== '0'; } catch (e) { return true; } };
+      const bu = btn(heroGroup, '消散：' + t(bon(), '燃尽', '淡出'), 'alt', () => { if (!window.SURV) return; SURV.setBurn(!bon()); bu.textContent = '消散：' + t(bon(), '燃尽', '淡出'); });
+      const pon = () => { try { return localStorage.getItem('szz-bpx') === '1'; } catch (e) { return false; } };
+      const px = btn(heroGroup, '首领像素：' + t(pon(), '开', '关'), 'alt', () => { if (!window.TRIAL || !TRIAL.bpx) return; TRIAL.bpx(!pon()); px.textContent = '首领像素：' + t(pon(), '开', '关'); });
+      btn(heroGroup, '纸片燃尽（刷兵烧掉）', 'alt dbgWide', () => { if (window.TRIAL && TRIAL.burnTry) TRIAL.burnTry(); });
+    }
     { const sk = btn(heroGroup, '皮肤：' + (window.HERO_SKIN ? HERO_SKIN.name() : '白衣'), 'alt dbgWide', () => { if (!window.HERO_SKIN) return; HERO_SKIN.next(); sk.textContent = '皮肤：' + HERO_SKIN.name(); if (window.KAIJU && KAIJU.refresh) KAIJU.refresh(); });   // 11/13：8 套主角皮肤轮流看
       if (window.HERO_SKIN) HERO_SKIN.preload(HERO_SKIN.cur(), 'wd_'); }   // 11/13：一招一招看武艺、心法、轻功
     const allBtn = btn(heroGroup, '解锁关卡：关', 'off', () => { window.ROUTE_ALL = !window.ROUTE_ALL; allBtn.textContent = '解锁关卡：' + (window.ROUTE_ALL ? '开' : '关'); allBtn.className = window.ROUTE_ALL ? '' : 'off'; tipLine(window.ROUTE_ALL ? '路线长卷上任意节点都能直接点进去（首领、精英、奇遇、商店）' : '恢复正常路线'); });   /* 11/12 用户：随便进去看 */
@@ -178,7 +188,7 @@
 
   // 三国终章：老游戏的按钮先藏起来（锦囊、经脉、神器、校场、第二章、Boss 等已拿掉），只留测试要用的几个
   function trimPanel() {
-    const keep = ['回到主界面', '武艺：刀', '武艺：剑', '回满血', '无敌', '跳过这一波', '恢复存档', '跳到第', '修为', '图鉴全开', '解锁关卡', '武学试炼', '首领试炼', '皮肤：'];   /* 11/12：图鉴、解锁关卡也留着 */
+    const keep = ['回到主界面', '武艺：刀', '武艺：剑', '回满血', '无敌', '跳过这一波', '恢复存档', '跳到第', '修为', '图鉴全开', '解锁关卡', '武学试炼', '首领试炼', '特效：', '地面：', '消散：', '首领像素', '纸片燃尽', '皮肤：'];   /* 11/12：图鉴、解锁关卡也留着 */
     panel.querySelectorAll('button').forEach(b => { if (!keep.some(k => b.textContent.startsWith(k))) b.style.display = 'none'; });
     panel.querySelectorAll('.dbgTrial,.dbgFloors').forEach(e => { e.style.display = 'none'; });
     panel.querySelectorAll('.dbgGroup').forEach(g => { if (![...g.querySelectorAll('button')].some(b => b.style.display !== 'none')) g.style.display = 'none'; });
