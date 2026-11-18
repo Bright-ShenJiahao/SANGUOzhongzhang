@@ -116,8 +116,9 @@
       const t = (on, a, b) => on ? a : b;
       const FN = ['写实', '混合', '群侠'], fx = btn(heroGroup, '特效：' + FN[window.FXM || 0], 'alt', () => { if (!window.SURV) return; SURV.setFxm(((window.FXM || 0) + 1) % 3); fx.textContent = '特效：' + FN[window.FXM]; });
       const gr = btn(heroGroup, '地面：' + t(window.ARENA && ARENA.gray && ARENA.gray(), '微灰', '原色'), 'alt', () => { if (!window.ARENA || !ARENA.setGray) return; ARENA.setGray(!ARENA.gray()); gr.textContent = '地面：' + t(ARENA.gray(), '微灰', '原色'); });
-      const bon = () => { try { return localStorage.getItem('szz-burn') !== '0'; } catch (e) { return true; } };
-      const bu = btn(heroGroup, '消散：' + t(bon(), '燃尽', '淡出'), 'alt', () => { if (!window.SURV) return; SURV.setBurn(!bon()); bu.textContent = '消散：' + t(bon(), '燃尽', '淡出'); });
+      try { window.SHKM = +(localStorage.getItem('szz-shk') || 0); } catch (e) {}
+      const SN = ['全部', '只大招', '关'], sh = btn(heroGroup, '震屏：' + SN[window.SHKM || 0], 'alt', () => { window.SHKM = ((window.SHKM || 0) + 1) % 3; try { localStorage.setItem('szz-shk', String(window.SHKM)); } catch (e) {} sh.textContent = '震屏：' + SN[window.SHKM]; });
+      const bu = btn(heroGroup, '消散：' + (window.SURV && SURV.exitName ? SURV.exitName() : ''), 'alt', () => { if (!window.SURV || !SURV.setExit) return; SURV.setExit(SURV.exitN() + 1); bu.textContent = '消散：' + SURV.exitName(); });
       const pon = () => { try { return localStorage.getItem('szz-bpx') === '1'; } catch (e) { return false; } };
       const px = btn(heroGroup, '首领像素：' + t(pon(), '开', '关'), 'alt', () => { if (!window.TRIAL || !TRIAL.bpx) return; TRIAL.bpx(!pon()); px.textContent = '首领像素：' + t(pon(), '开', '关'); });
       btn(heroGroup, '纸片燃尽（刷兵烧掉）', 'alt dbgWide', () => { if (window.TRIAL && TRIAL.burnTry) TRIAL.burnTry(); });
@@ -188,7 +189,7 @@
 
   // 三国终章：老游戏的按钮先藏起来（锦囊、经脉、神器、校场、第二章、Boss 等已拿掉），只留测试要用的几个
   function trimPanel() {
-    const keep = ['回到主界面', '武艺：刀', '武艺：剑', '回满血', '无敌', '跳过这一波', '恢复存档', '跳到第', '修为', '图鉴全开', '解锁关卡', '武学试炼', '首领试炼', '特效：', '地面：', '消散：', '首领像素', '纸片燃尽', '皮肤：'];   /* 11/12：图鉴、解锁关卡也留着 */
+    const keep = ['回到主界面', '武艺：刀', '武艺：剑', '回满血', '无敌', '跳过这一波', '恢复存档', '跳到第', '修为', '图鉴全开', '解锁关卡', '武学试炼', '首领试炼', '特效：', '地面：', '消散：', '震屏：', '首领像素', '纸片燃尽', '皮肤：'];   /* 11/12：图鉴、解锁关卡也留着 */
     panel.querySelectorAll('button').forEach(b => { if (!keep.some(k => b.textContent.startsWith(k))) b.style.display = 'none'; });
     panel.querySelectorAll('.dbgTrial,.dbgFloors').forEach(e => { e.style.display = 'none'; });
     panel.querySelectorAll('.dbgGroup').forEach(g => { if (![...g.querySelectorAll('button')].some(b => b.style.display !== 'none')) g.style.display = 'none'; });

@@ -867,7 +867,7 @@ function draw() {
   if (window.ROOM && ROOM.draw()) return;     // 开场农房
   if (window.ROUTE && ROUTE.shown()) { ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = '#eadcc0'; ctx.fillRect(0, 0, cv.width, cv.height); return; }   // 路线长卷（或正等着打开）时不画战斗场景，免得进游戏时先闪一下
   const W = cv.width, H = cv.height; SC = H / M.viewH;
-  const sk = shake > 0 && performance.now() - _shT < 80 && !(window.SZZSET && SZZSET.get('shake') === false) ? rnd(-2, 2) : 0;   // 11/17 手机反馈：教程提示等暂停时游戏不更新，震屏不会衰减，画面一直抖——暂停中不震   // 设置里可关震屏
+  const shm = window.SHKM || 0, sk = shake > (shm === 1 ? .18 : 0) && shm !== 2 && performance.now() - _shT < 80 && !(window.SZZSET && SZZSET.get('shake') === false) ? rnd(-2, 2) : 0;   /* 11/18 用户：震屏 全部/只大招/关（开发者面板调） */   // 11/17 手机反馈：教程提示等暂停时游戏不更新，震屏不会衰减，画面一直抖——暂停中不震   // 设置里可关震屏
   OXs = Math.round(-cam.x * SC + sk);
   OYs = window.ARENA ? Math.round(-ARENA.camY() * SC) : 0;
   ctx.setTransform(SC, 0, 0, SC, OXs, OYs); ctx.imageSmoothingEnabled = true;
@@ -1071,7 +1071,7 @@ function draw() {
   if (catapults.length || allyShots.length || allyFires.length) list.push({ y: M.bot - 1, d: () => drawCatapults() });
   for (const d of drops) list.push({ y: d.y, d: () => drawDrop(d) });
   for (const v of villagers) list.push({ y: v.y, d: () => drawVillager(v) });
-  for (const z of zs) list.push({ y: z.y, d: () => { if (z.endFade != null) { if (window.SURV && SURV.burnDraw && SURV.burnDraw(z)) return; if (z.endFade <= 0) return; ctx.save(); ctx.globalAlpha *= Math.min(1, z.endFade / .7); drawZ(z); ctx.restore(); return; } if (window.XIAOCHANG) XIAOCHANG.drawAffix(z); drawZ(z); } });
+  for (const z of zs) list.push({ y: z.y, d: () => { if (z.endFade != null) { if (window.SURV && SURV.exitDraw && SURV.exitDraw(z)) return; if (z.endFade <= 0) return; ctx.save(); ctx.globalAlpha *= Math.min(1, z.endFade / .7); drawZ(z); ctx.restore(); return; } if (window.XIAOCHANG) XIAOCHANG.drawAffix(z); drawZ(z); } });
   list.push({ y: hero.y, d: drawHero });
   for (const s of shots) list.push({ y: s.y + .1, d: () => drawShot(s) });
   for (const g of gearSpins) list.push({ y: g.y + 12.2, d: () => {   // 回旋：绕一圈的淡青光箭/石子 + 拖尾
