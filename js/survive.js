@@ -478,7 +478,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const EGLOW = { e_hring: 'v_ring', e_arc: 'v_fan180', e_impact: 'v_burst', e_stones: 'v_rocks', e_fall: 'v_beam', e_chips: 'v_dust' };
   const glowOn = () => window.FXM === 3; let CURE = null;
   // 11/18 用户：每一招自己选特效——写实 / 代码（发光上色、贴着判定）/ 无，另可叠刀魂；存本机，复制发 Claude 写死进 FXSK0
-  const FXSK0 = {}; let FXSK = {}; try { FXSK = JSON.parse(localStorage.getItem('szz-fxsk') || '{}') || {}; } catch (e) {}
+  const FXSK0 = {"hengsao":{"b":"g","h":0},"tuodao":{"h":0},"tiaozhan":{"h":0},"lianzhan":{"h":0},"daobo":{"h":0},"huima":{"h":0},"cuofeng":{"h":0},"liedihuan":{"h":0,"b":"n"},"feilunren":{"h":0},"xuehe":{"h":0}};   // 11/18 用户在武学试炼里选定 let FXSK = {}; try { FXSK = JSON.parse(localStorage.getItem('szz-fxsk') || '{}') || {}; } catch (e) {}
   const fxSk = k => Object.assign({}, FXSK0[k] || {}, FXSK[k] || {});
   const fxBase = k => { const o = k ? fxSk(k) : {}; return o.b || (glowOn() ? 'g' : 'r'); };
   const fxBh = k => { const o = k ? fxSk(k) : {}; return o.h != null ? !!o.h : BH; };
