@@ -2,7 +2,7 @@
 (() => {
   const FRZ = { idle: '待机', walk1: '走路 1', walk2: '走路 2', walk3: '走路 3', roll1: '翻滚 1', roll2: '翻滚 2', roll3: '翻滚 3', roll4: '翻滚 4', hurt: '受击', down: '倒地', chop1: '劈·起手', chop2: '劈·出手', sweep1: '横扫·起手', sweep2: '横扫·出手', thrust1: '刺·起手', thrust2: '刺·出手', spin1: '转·起手', spin2: '转·出手', up1: '挑·起手', up2: '挑·出手' };   // 11/18 用户：动作帧显示中文
   const MOTN = { chop: '劈', sweep: '横扫', thrust: '刺', spin: '转', up: '挑' };
-  const ORDER = [0, 2, 3, 4, 12, 7, 5, 8, 9, 1, 10, 11];   // 刀 锤 枪 关刀 长戟 石子 弓 黄符 羽扇 剑 拳 腿
+  const ORDER = [0, 2, 3, 4, 12, 7, 5, 6, 8, 9, 1, 10, 11];   // 刀 锤 枪 关刀 长戟 石子 弓 弩 黄符 羽扇 剑 拳 腿
   const TC = ['#c9b27a', '#c9b27a', '#6fb8ff', '#c58cff', '#ffb347'];
   let box = null, tab = 0, sel = null, godT = 0, rng = true, rngT = 0, show = 0, ng = 0, mini = false, dum = 'row', brk = 0, sol = 0, arena = false;   // 11/18 木人桩：'' 关 / one 单个 / row 一排 / ring 一圈
   const DUMN = { '': '关', one: '单个', row: '一排', ring: '一圈' }, DUMO = ['', 'one', 'row', 'ring'];   // 11/16 用户：试炼里常驻弓手、投石手（看乾坤屏挡箭等）
