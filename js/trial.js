@@ -39,14 +39,14 @@
 
   // 11/18 用户：首领试炼——照武学试炼的样子调首领的每一招（起手/出手帧、范围、速度），复制发 Claude
   const BFR = { idle: '站立', walk1: '走路①', walk2: '走路②', walk3: '走路③', walk4: '走路④', wind: '举刀', strike: '劈下', throw1: '掷刀起手', throw2: '掷出', bare: '空手', catch: '接刀', sweep1: '横扫起手', sweep2: '转身横扫', sweep3: '横扫收势', hurt: '受击', down: '倒地', fly1: '被打飞①', fly2: '被打飞②', land: '落地' };
-  const BMV = [['atk', '普攻', '靠近了举刀劈下（速度＝举刀多久）'], ['boomerang', '大刀回旋', '掷出大刀飞出再飞回，刀没回来前空手，收手＝接刀那一下（范围＝飞多远，速度＝预警多久）'], ['sweep', '横扫千军', '身周一圈横扫（范围＝圈多大，速度＝蓄力多久）']];
+  const BMV = [['atk', '普攻', '身前 110° 扇形一刀（范围＝刀够多远，速度＝举刀多久）'], ['boomerang', '大刀回旋', '掷出大刀飞出再飞回，刀没回来前空手，收手＝接刀那一下（范围＝飞多远，速度＝预警多久）'], ['sweep', '横扫千军', '身周一圈横扫（范围＝圈多大，速度＝蓄力多久）'], ['chase', '掷刀追身', '大刀掷出插在远处地上，人冲到刀边拔刀砸地（范围＝掷多远，速度＝起手多久）；出手帧也用在冲刺途中']];
   let bbox = null, bsel = 'atk', bmini = false;
   function bossPanel(on) {
     if (!on) { if (bbox) bbox.remove(); bbox = null; const k = document.getElementById('szzBossKeys'); if (k) k.remove(); try { T().bossTr(false); T().pilot(false); } catch (e) {} if (box) render(); return; }
     regNewGrunt(); try { T().pilot(true); } catch (e) { console.error(e); }
     mini = true; if (box) render();
     if (!bbox) { bbox = document.createElement('div'); bbox.id = 'szzBoss'; document.body.appendChild(bbox);
-      const k = document.createElement('div'); k.id = 'szzBossKeys'; k.innerHTML = BMV.map(([m, n], i) => `<button data-c="${m}">${n}<small>${'JKL'[i]}</small></button>`).join(''); document.body.appendChild(k);
+      const k = document.createElement('div'); k.id = 'szzBossKeys'; k.innerHTML = BMV.map(([m, n], i) => `<button data-c="${m}">${n}<small>${'JKLI'[i]}</small></button>`).join(''); document.body.appendChild(k);
       k.querySelectorAll('[data-c]').forEach(b => b.onpointerdown = e => { e.preventDefault(); e.stopPropagation(); T().pilotCast(b.dataset.c); }); }
     brender();
   }
@@ -54,11 +54,11 @@
     const t = T(), C = t.bossCfg(bsel), op = v => Object.entries(BFR).map(([k, n]) => `<option value="${k}"${k === v ? ' selected' : ''}>${n}</option>`).join('');
     bbox.innerHTML = `<div class="hd"><span>首领试炼 · 程远志</span><span><button class="bm">${bmini ? '展开' : '缩小'}</button> <button class="bx">${bossMode ? '退出' : '关闭'}</button></span></div>${bmini ? '' : `
       <div class="mv">${BMV.map(([k, n]) => `<button data-m="${k}" class="${k === bsel ? 'on' : ''}">${n}</button>`).join('')}</div>
-      <div class="ds">你就是程远志：移动照常，J/K/L 或右下角按钮出招。正在调：${BMV.find(m => m[0] === bsel)[1]}——${BMV.find(m => m[0] === bsel)[2]}</div>
+      <div class="ds">你就是程远志：移动照常，J/K/L/I 或右下角按钮出招。正在调：${BMV.find(m => m[0] === bsel)[1]}——${BMV.find(m => m[0] === bsel)[2]}</div>
       <div class="row"><span>起手</span><select data-f="a">${op(C.a)}</select></div>
       <div class="row"><span>出手</span><select data-f="b">${op(C.b)}</select></div>
       <div class="row"><span>收手</span><select data-f="c"><option value=""${C.c ? '' : ' selected'}>无</option>${op(C.c)}</select></div>
-      ${bsel === 'atk' ? '' : `<div class="row"><span>范围</span><input type="range" min="0.4" max="2.5" step="0.05" value="${C.rs}" data-r="rs"><b>×${(+C.rs).toFixed(2)}</b></div>`}
+      ${`<div class="row"><span>范围</span><input type="range" min="0.4" max="2.5" step="0.05" value="${C.rs}" data-r="rs"><b>×${(+C.rs).toFixed(2)}</b></div>`}
       <div class="row"><span>速度</span><input type="range" min="0.4" max="2.5" step="0.05" value="${C.sp}" data-r="sp"><b>×${(+C.sp).toFixed(2)}</b></div>
       <div class="ds">速度越大越慢（预警、蓄力越久）。</div>
       <button class="cp">复制首领设置</button>`}`;
