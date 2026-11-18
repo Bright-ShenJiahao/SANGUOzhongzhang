@@ -4229,7 +4229,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   function learn(it) {   // 格子满了也能学：先放进「掌握武学」，在武学页换上
     S.owned = S.owned || [];
     if (it.kind === 'skill' && (S.slots.includes(it.k) || S.owned.includes(it.k))) { const l = lvOf(it.k); if (l < 10) S.mast[it.k] = MAST_T[l]; note(`<i class="sk">${SK[it.k].name}</i> 已经学会，熟练度直接升到 <b>${lvOf(it.k)}</b> 级`); return true; }   // 11/16 用户（照土豆兄弟）：重复的秘籍不浪费，直接升一级
-    if (it.kind === 'skill') { const f = S.slots.indexOf(''); if (f >= 0) S.slots[f] = it.k; else S.owned.push(it.k); tut('learn'); window.CODEX && CODEX.see('sk:' + it.k); }
+    if (it.kind === 'skill') { const f = S.slots.indexOf(''); if (f >= 0) S.slots[f] = it.k; else S.owned.push(it.k); if (document.getElementById('survPrep')) tut('learn'); else S.tutLearn = 1; window.CODEX && CODEX.see('sk:' + it.k); }
     else if (it.kind === 'gf') { if (GF[it.id].qg) { if (!S.qg) S.qg = it.id; else S.owned.push(it.id); } else { const f = S.gf.indexOf(''); if (f >= 0) S.gf[f] = it.id; else S.owned.push(it.id); } GM = gfCalc(); }
     else if (it.kind === 'item') { if (ITEMS[it.id].use) heal(maxHp() * .4); else (S.items = S.items || []).push(it.id); GM = gfCalc(); }
     return true;
@@ -4253,7 +4253,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   const MVT = k => SK[k] && /^【位移】/.test(SK[k].desc || '') ? ['<b style="color:#ff9a6a">位移</b>'] : [];   // 11/17 用户：会带着主角走的招明确标「位移」
   const tagsOf = it => it.kind === 'skill' ? ['武艺', '主动', WEPN[wepOf(it.k)]].concat(MVT(it.k)) : it.kind === 'gf' ? (GF[it.id].qg ? ['轻功', '被动'] : ['心法', '被动']) : ITEMS[it.id].use ? ['道具', '消耗'] : ['道具', '永久'];
   function prepOpen(nd) { { const t = document.getElementById('survTut'); if (t) t.remove(); tutQ = []; }   // 战斗里没看完的提醒不带进整备屏
-    prepNd = nd; prepTab = 'jie'; prepLastTab = ''; selLoot = 0; selWu = null; selShop = 0; if (window.SFX) SFX.play('j_shop'); prepRender(); tut('prep'); }
+    prepNd = nd; prepTab = 'jie'; prepLastTab = ''; selLoot = 0; selWu = null; selShop = 0; if (window.SFX) SFX.play('j_shop'); prepRender(); tut('prep'); if (S.tutLearn) { S.tutLearn = 0; tut('learn'); } }
   function prepClose() {
     for (const it of S.loot || []) S.money += it.sell;   // 没处理的战利品：按卖价自动换钱
     S.loot = []; const el = document.getElementById('survPrep'); if (el) el.remove(); document.body.classList.remove('prep-open'); { const t = document.getElementById('survTut'); if (t) t.remove(); tutQ = []; } W.pick = false; const nd = prepNd; prepNd = null; ROUTE.done(nd);
