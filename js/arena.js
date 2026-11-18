@@ -66,8 +66,16 @@
     if (typeof IMG !== 'undefined' && IMG['map_' + key]) IMG.arena = IMG['map_' + key];
   }
   let active = false;
-  const img = () => (typeof IMG !== 'undefined' ? IMG.arena : null);
-  const ready = () => { const i = img(); return !!(i && i.complete && i.width); };
+  const rawImg = () => (typeof IMG !== 'undefined' ? IMG.arena : null);
+  // 11/18 用户：地面「微灰」——压一点点饱和度（默认开，开发者面板可关）
+  let GRAY = true; try { GRAY = localStorage.getItem('szz-gray2') !== '0'; } catch (e) {}
+  const GRC = new WeakMap();
+  const grayOf = i => { let c = GRC.get(i); if (c) return c; if (!(i && i.complete && i.width)) return i; c = document.createElement('canvas'); c.width = i.width; c.height = i.height; const x = c.getContext('2d');
+    if ('filter' in x) { x.filter = 'saturate(.72) brightness(.98)'; x.drawImage(i, 0, 0); } else { x.drawImage(i, 0, 0); x.globalCompositeOperation = 'saturation'; x.fillStyle = 'rgba(128,128,128,.28)'; x.fillRect(0, 0, c.width, c.height); }
+    GRC.set(i, c); return c; };
+  const img = () => { const i = rawImg(); return GRAY && i ? grayOf(i) : i; };
+
+  const ready = () => { const i = rawImg(); return !!(i && i.complete && i.width); };
   function geo() {
     const vw = viewW(), i = img();
     const s = Math.max(vw / i.width, M.viewH / i.height) * Z, w = i.width * s, h = i.height * s;
@@ -110,11 +118,11 @@
       const [, x0, y0, x1, y1, md, am] = e;
       let src = bim, sx = x0 * bim.width, sy = y0 * bim.height; const sw = (x1 - x0) * bim.width, sh = (y1 - y0) * bim.height;
       if (md !== 'b') {   // 11/16 用户：杆子不能跟着动——只把布（黄/白）抠出来扭动，旗杆、横木、墙都留在原图不动
-        if (!e._c || e._c.k !== MSEL) { const c = document.createElement('canvas'); c.width = Math.ceil(sw); c.height = Math.ceil(sh); const x = c.getContext('2d'); x.drawImage(bim, sx, sy, sw, sh, 0, 0, c.width, c.height);
+        if (!e._c || e._c.k !== MSEL + GRAY) { const c = document.createElement('canvas'); c.width = Math.ceil(sw); c.height = Math.ceil(sh); const x = c.getContext('2d'); x.drawImage(bim, sx, sy, sw, sh, 0, 0, c.width, c.height);
           const d = x.getImageData(0, 0, c.width, c.height), a = d.data, wh = MSEL === 'shi';
           for (let i = 0; i < a.length; i += 4) { const r = a[i], gg = a[i + 1], b = a[i + 2], mx = Math.max(r, gg, b), mn = Math.min(r, gg, b);
             const cloth = wh ? (mx > 120 && mx - mn < 70) : (r > 120 && gg > 80 && r - b > 70 && gg - b > 35); if (!cloth) a[i + 3] = 0; }
-          x.putImageData(d, 0, 0); c.k = MSEL; e._c = c; }
+          x.putImageData(d, 0, 0); c.k = MSEL + GRAY; e._c = c; }
         src = e._c; sx = 0; sy = 0; }
       const dx0 = X(x0), dy0 = Y(y0), dw = (x1 - x0) * g.w, dh = (y1 - y0) * g.h, A = (am || 1) * g.h * .004;
       ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
@@ -165,6 +173,8 @@
   window.ARENA = {
     available: () => ON_URL && typeof BG !== 'undefined' && !!(BG.arena || BG.field || BG.town || BG.altar),
     map: () => MSEL,
+    setGray(v) { GRAY = !!v; try { localStorage.setItem('szz-gray2', v ? '1' : '0'); } catch (e) {} for (const k in OCCS) for (const o of OCCS[k]) o.cv = null; },
+    gray: () => GRAY,
     shows: k => MSEL === k && ready() && typeof IMG !== 'undefined' && IMG.arena === IMG['map_' + k],   // 11/18：这张图已经真的画上了（试炼进场等它，免得先闪一下别的地图）
     pick, pool: POOL, want,
     preload(seg) { const segs = Object.keys(POOL), i = segs.indexOf(seg); [seg, segs[i + 1]].forEach(s2 => (POOL[s2] || []).filter(hasMap).forEach(want)); },

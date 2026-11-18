@@ -294,7 +294,7 @@
     + '.rtEv .tt{border:none!important;background:url(art/ui/hud/bian.webp) center/100% 100% no-repeat!important;height:clamp(48px,8.5vh,64px)!important;padding:0 clamp(48px,6vw,80px)!important;top:clamp(-38px,-6vh,-26px)!important;font:400 clamp(22px,3.8vh,30px) WenKai,MaShanZheng,serif!important;letter-spacing:.3em;color:#f0d89a!important;text-shadow:0 2px 0 #1a0e05}'
     + '.rtEv button{font-family:WenKai,MaShanZheng,"STKaiti",serif!important;font-weight:400!important}.rtEv button small{font-size:clamp(13px,2.3vh,16px)!important;color:#e2d4b6!important}'
     + '.rtEv .pn.thinp{border:clamp(36px,7.5vh,66px) solid transparent!important;border-image:url(art/ui/prep/panel_big.webp) 110 fill stretch!important;background:none!important;box-shadow:0 14px 40px rgba(0,0,0,.65)!important;padding:clamp(8px,1.6vh,16px) clamp(10px,1.6vw,20px) clamp(6px,1.2vh,12px)!important}.rtEv .pn.thinp::before,.rtEv .pn.thinp::after{display:none!important}@media (max-height:520px){.rtEv .pn.thinp{border-width:24px!important;padding-top:24px!important}}'   // 11/14 用户：大框要有美术——用整备屏的金边云纹面板
-    + '.rtEv .op{align-items:stretch}.rtEv button{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:4px}.rtEv button small{min-height:2.9em;display:flex;align-items:flex-start;justify-content:center;text-align:center;line-height:1.45}'   // 人物、名字、说明三行对齐
+    + '.rtEv .op{align-items:stretch}.rtEv.sgc .pn{width:min(880px,96vw)}.rtEv.sgc .op{max-height:44vh;overflow:auto;padding-right:2px}.rtEv.sgc .op{display:grid;grid-template-columns:1fr 1fr;gap:6px}.rtEv.sgc .op button{width:auto!important;max-width:none!important;min-height:0!important;padding:6px 10px!important;font-size:15px!important}.rtEv.sgc .op button small{font-size:11px!important;margin-top:2px}@media (max-height:520px){.rtEv.sgc .op{max-height:38vh}.rtEv.sgc .pn{padding:6px 12px 6px;border-width:16px}.rtEv.sgc .op button{font-size:13px!important;padding:3px 8px!important}.rtEv.sgc .pf{display:none}.rtEv.sgc .ds,.rtEv.sgc .sy{font-size:12px!important;line-height:1.4}.rtEv.sgc .hp{font-size:11px!important;margin:1px 0!important}}.rtEv button{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:4px}.rtEv button small{min-height:2.9em;display:flex;align-items:flex-start;justify-content:center;text-align:center;line-height:1.45}'   // 人物、名字、说明三行对齐
     + '.rtEv button img{border:1px solid rgba(184,149,90,.6);object-fit:cover}.rtEv.bl .op{flex-wrap:nowrap}.rtEv.bl button{min-width:0;flex:1}.rtEv.bl button img{width:clamp(72px,12vh,96px)!important;height:clamp(72px,12vh,96px)!important;margin-bottom:8px!important}'
     + '@media (max-aspect-ratio:9/10){.rtEv.bl .op{flex-direction:column;gap:8px}.rtEv.bl button{display:grid!important;grid-template-columns:auto 1fr;column-gap:12px;align-items:center;text-align:left;flex:none;padding:8px 12px!important}.rtEv.bl button img{grid-row:1/3;width:64px!important;height:64px!important;margin:0!important}.rtEv.bl button small{min-height:0;justify-content:flex-start;text-align:left}}';   // 11/17：手机竖屏桃园三赠三张卡改成上下排，头像在左
   { const st = document.createElement('style'); st.textContent = EV_CSS + EV_THIN + EV_KAI; document.head.appendChild(st); }
@@ -327,6 +327,7 @@
     if (r < .15) return fightFrom(n, 'battle', '林子里一声梆子响，黄巾伏兵四起！', '伏 击');
     if (r < .25) return chest(n);
     if (r < .30) return popup('一路无事', '', '这段路风平浪静，你停下来歇了口气。', [['继续赶路', '回复 5% 气血', 'ok']], () => SURV.event('e_heal5', () => done(n, true)));
+    if (!run.sgSeen && n.layer >= 3 && window.SURV && SURV.sgOpts && SURV.sgOpts().length >= 3 && Math.random() < .2) { run.sgSeen = 1; return sangong(n); }   // 11/18 白马寺·散功，一局最多一次
     run.evSeen = run.evSeen || [];
     let pool = EVENTS.map((e, i) => i).filter(i => !run.evSeen.includes(i)); if (!pool.length) { run.evSeen = []; pool = EVENTS.map((e, i) => i); }
     const idx = pool[(Math.random() * pool.length) | 0], ev = EVENTS[idx]; run.evSeen.push(idx);
@@ -337,6 +338,13 @@
       if (fight) return fightFrom(n, fight, msg, ev.t);
       if (typeof msg === 'string' && msg) popup(ev.t, '', msg, [['继续', '', 'ok']], () => done(n, true), null, evi); else done(n, true);
     }), ev.npc, evi);
+  }
+  function sangong(n) {   // 11/18 用户定：白马寺·散功——散掉一门武学，按品阶换修为；外门武艺回报 ×1.3
+    const T = '白马寺 · 散功';
+    popup(T, '', '洛阳城外白马寺，老方丈看你一眼：「施主所学太杂，诸般招式互相掣肘。愿舍一门，老衲以佛门心法替你化开。所舍品阶越高，所得越多。」散去哪一门，都回一半气血和真气。',
+      SURV.sgOpts(), k => SURV.event(k, (msg, fight) => { if (fight === 'train') return popup(T, '', msg, [['去修炼', '品阶高，再修炼一次', 'ok']], () => train(n, T)); if (typeof msg === 'string' && msg) popup(T, '', msg, [['继续', '', 'ok']], () => done(n, true)); else done(n, true); }),
+      ['刘备', 'art/ui/npc/liubei_face.webp', '舍得舍得，有舍才有得。留下最趁手的，其余的放下也罢。']);
+    if (campBox) campBox.classList.add('sgc');
   }
   function chest(n) { if (window.SFX) SFX.play('j_event'); const q = () => Math.random() < .3 ? 1 : 0; SURV.baoPick([q(), q(), q()], () => done(n, true), '宝 箱 · 选一件宝物'); }
   function bless() {   // 11/14 用户定：出征前·桃园三赠（刘备、关羽免费，张飞有代价），三选一
@@ -565,6 +573,7 @@
   if (ON) { const poll = () => { if (window.RUNSAVE && ((typeof over !== 'undefined' && over) || (typeof won !== 'undefined' && won))) RUNSAVE.clear(); if (pending && !window.TRIAL_ARENA && (!window.TITLE || TITLE.mode() === 'game')) { pending = false; open(); if (window.RUNSAVE) RUNSAVE.save(); } requestAnimationFrame(poll); }; requestAnimationFrame(poll); }   // 真正进游戏（不是在标题页）才打开长卷
   const MAP_OF = l => l <= SEGLEN ? 'field' : l <= SEGLEN * 2 ? 'town' : l <= SEGLEN * 3 ? 'forest' : l <= SEGLEN * 4 + 1 ? 'camp' : 'altar';   // 第 1~4 层打谷场，5~8 县城，9~12 林间空地，13~17 营寨腹地，18 张角祭坛
   window.ROUTE = {
+    sgTest: () => sangong(run && run.cur ? run.cur : { layer: 3 }),
     mapOf: n => { const seg = MAP_OF(n.layer); if (!window.ARENA || !ARENA.pick) return seg; let k = ARENA.pick(seg, n.id * 7 + n.layer); const prev = (n.prev || []).find(i => i && typeof i === 'object'); if (prev && ARENA.pick(MAP_OF(prev.layer), prev.id * 7 + prev.layer) === k) k = ARENA.pick(seg, n.id * 7 + n.layer + 1); return k; },   // 11/16 用户：每段 3 张图，按节点挑，跟上一场不重复
     segOf: n => MAP_OF(n.layer), segLen: SEGLEN,
     on: () => ON, TIME_K, layers: () => LAYERS,
