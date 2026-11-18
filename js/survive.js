@@ -941,7 +941,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       stoneBurst(z, 8 + SK[CK].tier * 2, .16);
     } else {   // 11/14 用户：打中时的手感——敌人身上闪一道刀痕；同一时刻多个目标只顿一次帧（约 0.05 秒）
       const sk = SK[CK], col = (sk && sk.color || '#ffe0a0').replace('#', ''), rgb = [0, 2, 4].map(i => parseInt(col.slice(i, i + 2), 16)).join(',');
-      fx.push({ k: 'cut', n: sk && WOFX[CK] === 0 ? 'r_hit' : (sk && sk.tier || 1) >= 3 ? 'dh2' : 'dg6', x: z.x, y: z.y - 20 * (z.sc || 1), a: Math.atan2(z.y - hero.y, z.x - x0) + (Math.random() - .5) * 1.2 - .6, L: 26 * (z.sc || 1), t: 0, T: .16, col: rgb });
+      const hm = sk && FXH0[wepOf(CK)] || 'c'; if (hm === 'q') fx.push({ k: 'dg', n: 'q_hit', qf: 1, x: z.x + R(-6, 6), y: z.y - 26 * (z.sc || 1) + R(-8, 6), w: 40 * (z.sc || 1), f: Math.random() < .5 ? 1 : -1, t: 0, T: .28, seed: Math.random() * 6, col: '' }); else if (hm === 'c') fx.push({ k: 'cut', n: sk && WOFX[CK] === 0 ? 'r_hit' : (sk && sk.tier || 1) >= 3 ? 'dh2' : 'dg6', x: z.x, y: z.y - 20 * (z.sc || 1), a: Math.atan2(z.y - hero.y, z.x - x0) + (Math.random() - .5) * 1.2 - .6, L: 26 * (z.sc || 1), t: 0, T: .16, col: rgb });
       const now = performance.now(); if (now - (DH.hs || 0) > 110) { DH.hs = now; freeze = Math.max(freeze, .05); }
     }
     if (z.dead) return true;
@@ -961,7 +961,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   }
   function dCircle(x, y, r, m, kb, o = {}) {   // 圆（r 用方案单位）
     r *= DK * RM;
-    if (typeof DGM !== 'undefined' && DGM[CK]) { const tr = SK[CK].tier || 1; fx.push({ k: 'cut', n: tr >= 3 ? 'dh2' : 'dg6', x, y: y - 14, a: -.6, L: r * (tr >= 3 ? .5 : .7), t: 0, T: .32, col: hexRgb(SK[CK].color) }); }
+    if (o.fd && FXD0[CK]) {} else if (typeof DGM !== 'undefined' && DGM[CK]) { const tr = SK[CK].tier || 1; fx.push({ k: 'cut', n: tr >= 3 ? 'dh2' : 'dg6', x, y: y - 14, a: -.6, L: r * (tr >= 3 ? .5 : .7), t: 0, T: .32, col: hexRgb(SK[CK].color) }); }
     else fx.push({ k: 'burst', x, y, r, t: 0, T: .4, col: o.col || '255,200,120' });
     return near(x, y, r).filter(z => DH(z, m, kb, Object.assign({ x }, o)));
   }
@@ -1077,7 +1077,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       const N = L >= 5 ? 9 : 6, pr = L >= 7 ? 95 : 75, P = [];
       for (let i = 0; i < N; i++) { if (i < 2 && t) P.push([t.x + R(-10, 10), t.y + R(-6, 6)]); else { const g = Math.random() * 7, rr = R(100, 240) * DK * RM; P.push([hero.x + Math.cos(g) * rr, clampY(hero.y + Math.sin(g) * rr * .5)]); } }
       P.forEach(([x, y], i) => fx.push({ k: 'img', n: 'fx_aim', x, y, w: pr * DK * 2.4, t: 0, T: .2 + i * .15, col: '255,120,70', warn: 1 }));
-      DKO.push(dmk({ T: .2 + N * .15, i: 0, tick(o) { while (o.i < N && o.t >= .2 + o.i * .15) { const [x, y] = P[o.i]; dCircle(x, y, pr, 1.00, 50, { up: 1, x }); bhFall(x, y, pr * DK * 1.3, hexRgb(SK.tianbeng.color), 'tianbeng'); sfx(CR, x); shake = Math.max(shake, .15); o.i++; } } })); } });
+      DKO.push(dmk({ T: .2 + N * .15, i: 0, tick(o) { while (o.i < N && o.t >= .2 + o.i * .15) { const [x, y] = P[o.i]; dCircle(x, y, pr, 1.00, 50, { up: 1, x, fd: 1 }); bhFall(x, y, pr * DK * 1.3, hexRgb(SK.tianbeng.color), 'tianbeng'); sfx(CR, x); shake = Math.max(shake, .15); o.i++; } } })); } });
   DAO('wanren', 4, 'spin', { name: '归海一刀', icon: '海', color: '#b8f0ff', need: 200, wu: .80, rc: .50, none: true,
     desc: '14 柄飞刃从四周射向最近的敌人，一路穿透（同一人最多吃 6 柄），汇聚后一记巨斩（对浮空目标 ×1.4），并引爆目标身上全部流血（每层 0.25×）。LV3 引爆每层 0.35×；LV5 20 柄；LV7 巨斩更大',
     cast() { const L = dlv(), t = nearest(260), a = aim(), px = t ? t.x : hero.x + Math.cos(a) * 80, py = t ? t.y : clampY(hero.y + Math.sin(a) * 40), N = L >= 5 ? 20 : 14, Rr = 420 * DK * RM, ft = .35;
@@ -1086,7 +1086,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       DKO.push(dmk({ T: ft + .02, done: 0, tick(o) {
         for (const b of bs) for (const z of hittable()) { if (b.hitSet.includes(z) || Math.hypot(z.x - b.x, (z.y - b.y) * 2) > 16) continue; b.hitSet.push(z); const c = cnt.get(z) || 0; if (c >= 6) continue; cnt.set(z, c + 1); DH(z, .50, 8, { x: b.x });   /* 11/15 用户：每柄 0.35→0.50，和天崩地裂对齐 */ }
         if (!o.done && o.t >= ft) { o.done = 1; const rr = (L >= 7 ? 120 : 90); shake = Math.max(shake, .45); sfx(CR, px);
-          dCircle(px, py, rr, 2.20, 40, { fk: 1.4, x: px, col: '190,240,255' }); bhFall(px, py, rr * DK * 1.8, '170,235,255', 'wanren');
+          dCircle(px, py, rr, 2.20, 40, { fk: 1.4, x: px, col: '190,240,255', fd: 1 }); bhFall(px, py, rr * DK * 1.8, '170,235,255', 'wanren');
           for (const z of near(px, py, rr * DK * o.rm)) if (z.blT > 0 && z.bl > 0 && !z.dead) { const d = z.bl * (L >= 3 ? .35 : .25) * DU * RT.dmg * CM; rec(d); hit(z, d, 0, 1, false, 0, 0, false, false, { dot: true, secondary: true, survSkill: true }); floaters.push({ x: z.x, y: z.y - 70, t: 0, txt: '引爆', color: '#ff6a5a' }); z.bl = 0; z.blT = 0; } } } })); } });
   for (const k of ['daolun', 'xuanfeng', 'dilie', 'shuanghuan', 'hongji', 'shuangyue', 'luanwu']) if (SK[k]) SK[k].off = true;
   // ---------- 枪（11/15 用户定，照第二份策划方案重做）：直线、点杀、短扇、地波四种判定；主打流血 + 浮空；位移 1 进 1 退 + 游龙突，自带保护 ----------
@@ -3309,6 +3309,15 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     ctx.save(); ctx.translate(e.x, e.y + dy); if (e.rot) ctx.rotate(e.rot); ctx.scale((e.f || 1) * sc, sc); ctx.translate(-e.ax * w, -e.ay * h); ctx.globalCompositeOperation = 'lighter';
     ctx.globalAlpha = Math.max(0, al) * .9; ctx.drawImage(dgTint(e.n, col), 0, 0, w, h); ctx.globalAlpha = Math.max(0, al) * .55; ctx.drawImage(im, 0, 0, w, h); ctx.restore();
   }
+  function fdDraw(e, p) {   // 11/18 落下：前 25% 从天上掉下来（插地），落地那一下弹出落地图，后段淡掉
+    const D = e.D, col = e.col, q = Math.min(1, p / .25), fade = p < .6 ? 1 : 1 - (p - .6) / .4;
+    const one = (o, x, y, sc, al) => { if (!o || o.on === 0 || !o.img || o.img === 'none' || !bhImgOK(o.img)) return; const im = DGI[o.img], w = o.w, h = w * im.naturalHeight / im.naturalWidth;
+      ctx.save(); ctx.translate(x, y); ctx.scale(sc, sc * (o.sy || 1)); ctx.translate(-(o.ax == null ? .5 : o.ax) * w, -(o.ay == null ? .9 : o.ay) * h); ctx.globalAlpha = Math.max(0, al) * (o.al == null ? 1 : o.al);
+      ctx.drawImage(dgTint(o.img, col), 0, 0, w, h); ctx.globalAlpha *= .55; if (o.img[0] !== 'r') { ctx.globalCompositeOperation = 'lighter'; ctx.drawImage(im, 0, 0, w, h); } ctx.restore(); };
+    if (q >= 1 && D.land) { const pl = (p - .25) / .75; one(D.land, e.x + (D.land.x || 0), e.y + (D.land.y || 0), .8 + .2 * Math.min(1, pl / .15), pl < .1 ? pl / .1 : 1 - pl); }
+    if (D.fall) one(D.fall, e.x, e.y - (D.fall.H || 80) * (1 - q * q), 1, fade);
+    if (q >= 1 && !e.hit) { e.hit = 1; fx.push({ k: 'burst', x: e.x, y: e.y, r: ((D.land && D.land.w) || 60) * .3, t: 0, T: .35, col }); }
+  }
   function bhSwing(key, a, hx, hy, R) {   // 普通挥砍：一柄刀魂顺着这一招的方向挥过去
     const m = DGM[key]; if (!fxBh(key) || !m || wepOf(key) !== 0) return;
     { const n = BHI[key]; if (n && bhImgOK(n)) { const f = Math.cos(a) >= 0 ? 1 : -1, col = hexRgb(SK[key].color);
@@ -3323,8 +3332,11 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     else { const s0 = f > 0 ? -1.6 : Math.PI + 1.6, s1 = f > 0 ? .5 : Math.PI - .5; fx.push({ k: 'bh', m: 'swing', x: hx, y, a0: s0, a1: s1, L, col, t: 0, T });
       if (t === 'x') fx.push({ k: 'bh', m: 'swing', x: hx, y, a0: f > 0 ? 1.3 : Math.PI - 1.3, a1: f > 0 ? -.6 : Math.PI + .6, L, col, t: 0, T: T + .06 }); }
   }
-  const bhFall = (x, y, L, col, k) => { if (fxBh(k || CK) && wepOf(k || CK) === 0 && bhImgOK('bh10')) { fx.push({ k: 'bhi', m: 'fall', n: 'bh10', x, y, w: L * 1.4, H: L * 1.6, ax: .5, ay: .92, col, t: 0, T: .6 }); return; } if (fxBh(k || CK) && wepOf(k || CK) === 0) fx.push({ k: 'bh', m: 'fall', x, y, L, H: L * 1.6, col, t: 0, T: .5 }); };
+  const bhFall = (x, y, L, col, k) => { { const D = FXD0[k || CK]; if (D) { fx.push({ k: 'fd', D, x, y, col, t: 0, T: .7 }); return; } } if (fxBh(k || CK) && wepOf(k || CK) === 0 && bhImgOK('bh10')) { fx.push({ k: 'bhi', m: 'fall', n: 'bh10', x, y, w: L * 1.4, H: L * 1.6, ax: .5, ay: .92, col, t: 0, T: .6 }); return; } if (fxBh(k || CK) && wepOf(k || CK) === 0) fx.push({ k: 'bh', m: 'fall', x, y, L, H: L * 1.6, col, t: 0, T: .5 }); };
   // 11/18 用户：写实刀光图和真实判定对不上——武学试炼里每招可调 大小/前后/上下/角度（存本机，复制发 Claude 写死进 DGA0）
+  const FXF0 = {};   // 11/18 飞行物（偃月斩刀气 daobo / 飞轮刃刀轮 feilunren / 归海一刀飞刃 wanren）：工具导出 {img,w,dy,r,sy,spin,grow,al}
+  const FXD0 = {};   // 11/18 从天上落下（天崩地裂 tianbeng / 归海一刀 wanren）：工具导出 {fall:{img,w,H,ax,ay,sy,al,on},land:{img,w,x,y,ax,ay,sy,al,on}}
+  const FXH0 = {};   // 11/18 受击刀光，按兵器：{0:'q'群侠白刀痕 | 'c'彩色小刀光 | 'n'不要}
   const FXT0 = {"hengsao":{"l1":{"img":"dg4","w":61,"x":8,"y":1,"ax":0.5,"ay":0.8,"r":-6,"sy":1,"al":1},"l2":{"img":"bh2","w":40.5,"x":4.5,"y":-18,"ax":0.2,"ay":0.6,"r":0,"sy":1,"al":1,"on":0}},"tiaozhan":{"l1":{"img":"dg3","w":34,"x":14,"y":-24,"ax":0.3,"ay":0.6,"r":0,"sy":1,"al":1},"l2":{"img":"bh4","w":40.5,"x":4.5,"y":-18,"ax":0.2,"ay":0.6,"r":0,"sy":1,"al":1,"on":1}},"tuodao":{"l1":{"img":"bh6","w":55,"x":37,"y":-23,"ax":0.5,"ay":0.5,"r":0,"sy":1,"al":1},"l2":{"img":"bh2","w":46.1,"x":5.1,"y":-18,"ax":0.2,"ay":0.6,"r":0,"sy":1,"al":1,"on":0}},"lianzhan":{"l1":{"img":"dh2","w":78,"x":10,"y":7,"ax":0.5,"ay":0.8,"r":0,"sy":1,"al":1},"l2":{"img":"bh6","w":40.5,"x":4.5,"y":-18,"ax":0.2,"ay":0.6,"r":0,"sy":1,"al":1,"on":0}},"huima":{"l1":{"img":"dg5","w":72,"x":0,"y":-24,"ax":0.5,"ay":0.55,"r":0,"sy":1,"al":1},"l2":{"img":"dg5","w":63,"x":0,"y":-14,"ax":0.5,"ay":0.5,"r":0,"sy":1,"al":1,"on":1}},"cuofeng":{"l1":{"img":"bh5","w":66,"x":38,"y":-13,"ax":0.45,"ay":0.6,"r":0,"sy":1,"al":1},"l2":{"img":"bh5","w":40.5,"x":4.5,"y":-18,"ax":0.2,"ay":0.6,"r":0,"sy":1,"al":1,"on":0}},"feilunren":{"l1":{"img":"fx_lun","w":78,"x":-7,"y":-16,"ax":0.35,"ay":0.5,"r":0,"sy":1,"al":1},"l2":{"img":"bh7","w":40.5,"x":4.5,"y":-18,"ax":0.2,"ay":0.6,"r":0,"sy":1,"al":1,"on":0}},"liedihuan":{"l1":{"img":"dt_tianbeng","w":96,"x":24,"y":2,"ax":0.55,"ay":0.88,"r":0,"sy":1,"al":1},"l2":{"img":"fx_ring","w":21,"x":16.5,"y":-10,"ax":0.5,"ay":0.9,"r":0,"sy":1,"al":1,"on":1}},"xuehe":{"l1":{"img":"dd_xuehe","w":82.6,"x":51,"y":-16,"ax":0.5,"ay":0.75,"r":0,"sy":1,"al":1},"l2":{"img":"bh1","w":42.9,"x":4.8,"y":-18,"ax":0.2,"ay":0.6,"r":0,"sy":1,"al":1,"on":0}},"tianbeng":{"l1":{"img":"bh9","w":62.8,"x":74,"y":4,"ax":0.5,"ay":0.9,"r":0,"sy":1,"al":1},"l2":{"img":"dd_liedi","w":51.7,"x":22.2,"y":0,"ax":0.5,"ay":0.92,"r":0,"sy":1,"al":1,"on":1}},"wanren":{"l1":{"img":"dt_wanren","w":66,"x":0,"y":-16,"ax":0.5,"ay":0.5,"r":0,"sy":0.65,"al":1},"l2":{"img":"dh2","w":40.5,"x":28,"y":-60,"ax":0.2,"ay":0.6,"r":0,"sy":1,"al":1,"on":1}}};   // 11/18 用户用「刀招特效对齐工具」调好导出的设置（11 招；偃月斩没调，照旧）
   const DGA0 = {"hengsao":{"s":1,"dx":-6,"dy":15,"r":-6},"lianzhan":{"s":1,"dx":-4,"dy":21,"r":0}};   // 11/18 用户在武学试炼里对齐
   let DGA = {}; try { DGA = JSON.parse(localStorage.getItem('szz-dga') || '{}') || {}; } catch (e) {}
@@ -4751,6 +4763,9 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     }
     for (const b of bolts) {   // 月牙刀波；石子、黄符、豆兵另画
       const p = b.t / b.T, al = 1 - p * p;
+      { const F = b.sk && b.tc && FXF0[b.sk]; if (F) { if (F.img !== 'none' && DGI[F.img] && DGI[F.img].complete && DGI[F.img].naturalWidth) { const im = DGI[F.img], w = F.w, h = w * im.naturalHeight / im.naturalWidth, sc = 1 + ((F.grow || 1) - 1) * p, rr = F.r ? F.r * Math.PI / 180 : 0;   // 11/18 用户用工具调的飞行物
+          ctx.save(); ctx.translate(b.x, b.y + (F.dy == null ? -16 : F.dy)); ctx.rotate((F.spin ? b.t * F.spin : Math.atan2(b.vy * 2, b.vx)) + rr); ctx.scale(sc, sc * (F.sy || 1)); ctx.globalAlpha = Math.min(1, al + .4) * (F.al == null ? 1 : F.al);
+          ctx.drawImage(dgTint(F.img, b.tc), -w / 2, -h / 2, w, h); ctx.globalAlpha *= .6; ctx.drawImage(dgTint(F.img, b.tc), -w / 2, -h / 2, w, h); if (F.img[0] !== 'r') { ctx.globalAlpha *= .5; ctx.globalCompositeOperation = 'screen'; ctx.drawImage(im, -w / 2, -h / 2, w, h); } ctx.restore(); } continue; } }
       if (b.img && GLOW[b.img] && fxBase(b.sk) === 'g') b.img = GLOW[b.img];
       if (b.img && fxBh(b.sk) && b.sk && wepOf(b.sk) === 0 && !b.bh && b.tc && (b.img === 'dg6' || b.img === 'dg4' || b.img === 'r_moon' || b.img === 'fx_lun')) { const n = b.spin ? 'bh7' : b.sk === 'daobo' ? 'bh12' : 'bh11'; if (bhImgOK(n)) { b.bh = 1; b.img = n; b.iw = (b.iw || 34) * (b.spin ? 2.2 : n === 'bh12' ? 1.4 : 2.4); } else if (bhOK()) { b.bh = 1; b.img = 'bh_dao'; b.iw = (b.iw || 34) * (b.spin ? 1.6 : 1.5); } }
       if (b.img && DGI[b.img] && DGI[b.img].complete && DGI[b.img].naturalWidth) {   // 11/14：刀招的飞行物用刀光图（偃月斩刀气、万刃归宗飞刃、飞轮刃刀轮暂代）
@@ -4899,7 +4914,8 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
         ctx.restore(); } }
       else if (e.k === 'bh') bhDraw(e, p);
       else if (e.k === 'bhi') bhiDraw(e, p);
-      else if (e.k === 'dg' && (FXQ || e.n === 'q_hit')) { if (QHIT) qxDraw(e, p); }
+      else if (e.k === 'dg' && (FXQ || e.n === 'q_hit')) { if (QHIT || e.qf) qxDraw(e, p); }
+      else if (e.k === 'fd') fdDraw(e, p);
       else if (e.k === 'dg') { const im = DGI[e.n]; if (im.complete && im.naturalWidth) { const q = Math.min(1, p), al = q < .15 ? q / .15 : 1 - (q - .15) / .85, w = e.w, h = w * im.naturalHeight / im.naturalWidth, sc = 1 + .08 * q;
         const mix = FXM === 1 && /chop|sweep|up|moon|cross|^dg\d|dh|xuehe|lun/.test(e.n), rv = mix ? Math.min(1, q / .35) : 1;
         ctx.save(); ctx.translate(e.x, e.y); if (e.rot) ctx.rotate(e.rot); ctx.scale(e.f * sc * (mix ? .88 : 1), sc * e.sy * (mix ? .88 : 1)); ctx.translate(-e.ax * w, -e.ay * h); if (mix) { ctx.beginPath(); ctx.rect(-w * .05, -h * .1, w * 1.1 * (1 - (1 - rv) * (1 - rv)), h * 1.2); ctx.clip(); } ctx.globalCompositeOperation = 'screen';
@@ -4911,7 +4927,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       else if (e.k === 'line') { ctx.save(); ctx.translate(e.x, e.y - 14); ctx.scale(1, .5); ctx.rotate(e.a); const k = Math.min(1, p * 4); ctx.lineCap = 'round'; ctx.strokeStyle = `rgba(${e.col},${.55 * (1 - p)})`; ctx.lineWidth = e.w * 1.6 * (1 - p) + 4; ctx.beginPath(); ctx.moveTo(10, 0); ctx.lineTo(10 + e.L * k, 0); ctx.stroke(); ctx.strokeStyle = `rgba(255,255,255,${.95 * (1 - p)})`; ctx.lineWidth = 3; ctx.stroke(); ctx.restore(); }
     }
     for (const e of fx) { CURE = e;
-      if (e.k === 'bh' || e.k === 'bhi') continue;
+      if (e.k === 'bh' || e.k === 'bhi' || e.k === 'fd') continue;
       if (e.k === 'bowFall' || e.k === 'hammerArc' || e.k === 'hammerRing' || e.k === 'stonefield' || e.k === 'stonefall' || e.k === 'burst' || e.k === 'mark' || e.k === 'jili' || e.k === 'nuTur' || e.k === 'bolt' || e.k === 'line' || e.k === 'drop' || e.k === 'cut' || e.k === 'dg' || e.k === 'img' || e.k === 'fjg') continue;
       if (e.k === 'gd') { gdDraw(e); continue; }
       if (e.k === 'ghost') {   // 残影：半透明主角，带一道拖尾
