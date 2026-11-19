@@ -121,7 +121,6 @@
       const bh = btn(heroGroup, '兵魂：' + (window.SURV && SURV.bhOn && SURV.bhOn() ? '开' : '关'), 'alt', () => { if (!window.SURV || !SURV.setBh) return; SURV.setBh(!SURV.bhOn()); bh.textContent = '兵魂：' + (SURV.bhOn() ? '开' : '关'); });
       const bu = btn(heroGroup, '消散：' + (window.SURV && SURV.exitName ? SURV.exitName() : ''), 'alt', () => { if (!window.SURV || !SURV.setExit) return; SURV.setExit(SURV.exitN() + 1); bu.textContent = '消散：' + SURV.exitName(); });
       const pon = () => { try { return localStorage.getItem('szz-bpx') === '1'; } catch (e) { return false; } };
-      const cu = btn(heroGroup, 'Q像素版：' + t(window.SURV && SURV.trial && SURV.trial.cuteOn(), '开', '关'), 'alt', () => { const T = window.SURV && SURV.trial; if (!T) return; T.cute(!T.cuteOn()); cu.textContent = 'Q像素版：' + t(T.cuteOn(), '开', '关'); });   // 11/19 实验：小兵、张角换成 Q 像素画风
       const px = btn(heroGroup, '首领像素：' + t(pon(), '开', '关'), 'alt', () => { if (!window.TRIAL || !TRIAL.bpx) return; TRIAL.bpx(!pon()); px.textContent = '首领像素：' + t(pon(), '开', '关'); });
       btn(heroGroup, '纸片燃尽（刷兵烧掉）', 'alt dbgWide', () => { if (window.TRIAL && TRIAL.burnTry) TRIAL.burnTry(); });
     }
