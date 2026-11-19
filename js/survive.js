@@ -86,7 +86,8 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   }
   // 会动的危险物（飞出去的大刀、流星锤、追人的符、旋风）：碰到主角就伤，同一个东西 0.7 秒内只伤一次
   const HZ = [];
-  function hzAdd(o) { o.t = 0; o.hitT = 0; if (!o.mv) o.mv = (BCX && BCX.mv) || (o.src && o.src.lastMv) || 'shot'; if (BCX) { if (o.r) o.r *= BCX.rs || 1; o.bc = BCX; } HZ.push(o); return o; }
+  function hzAdd(o) { o.t = 0; o.hitT = 0; if (!o.mv) o.mv = (BCX && BCX.mv) || (o.src && o.src.lastMv) || 'shot';
+    if (o.kind === 'stuck' && o.src) try { bossFx({ k: 'circle', x: o.x, y: o.y, r: 30, src: o.src, fxOn: 1, fxKind: 'stuck', mv: o.mv + '_stuck' }); } catch (e) {} if (BCX) { if (o.r) o.r *= BCX.rs || 1; o.bc = BCX; } HZ.push(o); return o; }
   function hzTick(dt) {
     for (let i = HZ.length - 1; i >= 0; i--) {
       const o = HZ[i]; o.t += dt; o.hitT -= dt;
@@ -103,7 +104,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   function fieldTick(dt) {
     for (let i = WALLS.length - 1; i >= 0; i--) {
       const w = WALLS[i], p = w.p; w.t += dt;
-      if (w.t > 5 || (w.src && w.src.dead)) { p.solid = false; p.fadeAt = gameT; WALLS.splice(i, 1); continue; }
+      if (w.t > 5 || (w.src && w.src.dead)) { if (w.src) try { bossFx({ k: 'circle', x: p.x, y: p.y, r: 26, src: w.src, fxOn: 1, fxKind: 'wallEnd', mv: 'zb_wall_end' }); } catch (e) {} p.solid = false; p.fadeAt = gameT; WALLS.splice(i, 1); continue; }
       const hw = p.w / 2 + 6, x0 = p.x - hw, x1 = p.x + hw, y0 = p.y - 12, y1 = p.y + 4;
       if (hero.x > x0 && hero.x < x1 && hero.y > y0 && hero.y < y1) {   // 推到最近的一边
         const opts = [[hero.x - x0, 'x', x0], [x1 - hero.x, 'x', x1], [hero.y - y0, 'y', y0], [y1 - hero.y, 'y', y1]].sort((a, b) => a[0] - b[0])[0];
@@ -244,7 +245,11 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const bCol = z => { const k = fxKey(z); if (!k) return null; const B = bfxGet(k); return B.off ? null : B.col || BFXC[k] || '255,225,160'; };
   const gfx = (n, x, y, w, col, o = {}) => fx.push(Object.assign({ k: 'dg', n, w, ax: .5, ay: .5, x, y, sy: 1, f: 1, t: 0, T: .42, col, al: 1, wh: .35, boss: 1, noMap: 1 }, o));
   // 默认特效（和「首领特效对齐工具」里同一套算法）：返回 [主层, 第二层]，位置是判定的落点/终点
-  function bfxAuto(o, z) { const L = [], dir = a => { const sa = Math.atan2(Math.sin(a) * YS, Math.cos(a)), d = Math.cos(a) < 0 ? -1 : 1; return { rot: d > 0 ? sa : sa - Math.PI, df: d }; };
+  function bfxAuto(o, z) { const r0 = o.r || 26;   // 11/20 土墙升起/倒塌、兵器插地：不伤人，单独一套默认
+    if (o.fxKind === 'wall') return [{ n: 'dd_liedi', x: o.x, y: o.y - 4, w: r0 * 3, ay: .82, T: .5 }, { n: 'v_rocks', x: o.x, y: o.y, w: r0 * 3, T: .45 }];
+    if (o.fxKind === 'wallEnd') return [{ n: 'v_dust', x: o.x, y: o.y - 8, w: r0 * 3.4, T: .5 }, { n: 'v_rocks', x: o.x, y: o.y, w: r0 * 3, T: .45 }];
+    if (o.fxKind === 'stuck') return [{ n: 'v_crack', x: o.x, y: o.y, w: r0 * 2.6, T: .5 }, { n: 'fx_ring', x: o.x, y: o.y, w: r0 * 2.4, T: .35 }];
+    const L = [], dir = a => { const sa = Math.atan2(Math.sin(a) * YS, Math.cos(a)), d = Math.cos(a) < 0 ? -1 : 1; return { rot: d > 0 ? sa : sa - Math.PI, df: d }; };
     if (o.k === 'line') { const Ln = o.len, ex = o.x + Math.cos(o.a) * Ln, ey = o.y + Math.sin(o.a) * Ln * YS;
       if (o.c === 2) { L.push({ n: 'dd_liedi', x: ex, y: ey - 6, w: Math.max(70, o.w * 2.6), ay: .82, T: .5 }, { n: 'fx_ring', x: ex, y: ey, w: Math.max(60, o.w * 2), sy: .9, T: .4 }); }
       else L.push(Object.assign({ n: 'dg4', x: o.x + Math.cos(o.a) * Ln * .62, y: o.y + Math.sin(o.a) * Ln * .62 * YS - 18, w: Math.max(90, o.w * 2.4), T: .32 }, dir(o.a)), { n: 'fx_ring', x: ex, y: ey, w: Math.max(50, o.w * 1.6), T: .35, off: 1 }); }
@@ -269,8 +274,8 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     for (const s of eshots) { const z = s.source || s.src; if (!z || z.survBoss) continue; now.add(s); let x = s.x, y = s.y; if (s.x0 != null) { const q = Math.min(1, s.t / (s.T || 1)); x = s.x0 + (s.tx - s.x0) * q; y = s.y0 + (s.ty - s.y0) * q - Math.sin(q * Math.PI) * 50; } else y = y - (s.z || 0); if (!s.mv) { s.mv = 'shot'; s.fxSrc = z; s.kind = s.k; } hzFxTick(s, dt, x, y); ESEEN.set(s, s); }
     for (const s of ESEEN.keys()) if (!now.has(s)) { ESEEN.delete(s); if (s.__fk && s.__lx != null) hzFx(s, true, s.__lx, s.__ly); } }
   window.SURV_BFX = (z, o) => { try { bossFx(Object.assign({ src: z, dmg: 1, mv: 'atk' }, o)); } catch (e) {} };
-  function bossFx(o) { const z = o.src || o.fxSrc, tk = fxKey(z); if (!tk || !(o.dmg || (z.pilot && z.sprite === 'cheng_new' && o.then))) return;
-    if (window.__TREC) window.__TREC.push({ tk, mv: o.mv || 'any', k: o.k, dx: o.x - z.x, dy: o.y - z.y, a: o.a, len: o.len, w: o.w, r: o.r || o.r1, c: o.c || 0, f: z.f || 1, t: gameT, T: o.T || 0, fr: typeof zFrame === 'function' ? zFrame(z) : '', sp: z.sprite, sc: z.sc || 1 });
+  function bossFx(o) { const z = o.src || o.fxSrc, tk = fxKey(z); if (!tk || !(o.dmg || o.fxOn || (z.pilot && z.sprite === 'cheng_new' && o.then))) return;
+    if (window.__TREC) window.__TREC.push({ tk, mv: o.mv || 'any', k: o.k, dx: o.x - z.x, dy: o.y - z.y, a: o.a, len: o.len, w: o.w, r: o.r || o.r1, c: o.c || 0, f: z.f || 1, t: gameT, T: o.T || 0, fk: o.fxKind || '', fr: typeof zFrame === 'function' ? zFrame(z) : '', sp: z.sprite, sc: z.sc || 1 });
     const B = bfxGet(tk), M = bfxGet(tk + ':' + (o.mv || 'any')); if (B.off || M.off) return;
     const sol = tk[0] === 's' && tk[1] === ':', col = B.col || BFXC[tk] || '255,225,160', K = (B.k || (sol ? .6 : 1)), AL = (B.al != null ? B.al : sol ? .7 : 1), TM = M.T || 1, f = z.f || 1;
     const A = bfxAuto(o, z);
@@ -370,7 +375,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     // 张宝：土墙（照无名之辈）：在主角身后升起一排土墙堵退路，留一个缺口，5 秒后崩塌
     wall: z => { const [ux, uy] = dirU(z, AX(z), AY(z)), bx = AX(z) + ux * 58, by = AY(z) + uy * 58 * YS, px = -uy, py = ux, skip = (Math.random() * 5) | 0;
       for (let k = 0; k < 5; k++) { if (k === skip) continue; const x = bx + px * (k - 2) * 46, y = clampY(by + py * (k - 2) * 46 * YS);
-        teleAdd({ k: 'circle', x, y, r: 24, T: .6, src: z, c: 2, snd: k ? '' : 'land', then: () => { const p = { g: 'zb_wall', x, y, solid: true, broken: false, hp: 0, hitT: 0, sc: 1, w: 56, h: 18.7 }; props.push(p); WALLS.push({ p, t: 0, src: z }); } }); }
+        teleAdd({ k: 'circle', x, y, r: 24, T: .6, src: z, c: 2, snd: k ? '' : 'land', fxOn: 1, fxKind: 'wall', then: () => { const p = { g: 'zb_wall', x, y, solid: true, broken: false, hp: 0, hitT: 0, sc: 1, w: 56, h: 18.7 }; props.push(p); WALLS.push({ p, t: 0, src: z }); } }); }
       say(z, '土墙，起！'); return .6; },
     // 张角：雷符：三张符追着主角飘，1.3 秒后在主角脚下落雷
     leifu: z => { for (let k = 0; k < 3; k++) { const o = hzAdd({ kind: 'fu', src: z, x: z.x + (k - 1) * 16, y: z.y - 4, r: 14, dmg: 1.5, T: 1.3, upd: (o, dt) => { const d = Math.hypot(AX(z) - o.x, AY(z) - o.y) || 1; o.x += (AX(z) - o.x) / d * 85 * dt; o.y += (AY(z) - o.y) / d * 85 * dt * YS; } });

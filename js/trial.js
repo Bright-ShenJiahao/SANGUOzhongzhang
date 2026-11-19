@@ -172,8 +172,9 @@
   function fxRender() {
     const t = T(); if (!fxBox || !t) return;
     const boss = fxT.slice(0, 2) !== 's:', nm = boss ? ((FXB.find(x => x[0] === fxT) || [0, fxT])[1]) : SOLN[fxT.slice(2)] || fxT;
-    const mvs = boss ? (fxT === 'cheng_yuanzhi' ? ['atk', 'boomerang', 'sweep', 'chase'] : ['atk'].concat(t.nmoves()[fxT] || [], fxT === 'zhang_jiao' ? ['zj_ht'] : [])) : ['atk', 'any', 'shot', 'boom'];
-    const MN2 = { atk: '普攻', any: '技能', shot: '飞行物', boom: '自爆', boomerang: '大刀回旋', sweep: '横扫千军', chase: '拖刀追身' };
+    let mvs = boss ? (fxT === 'cheng_yuanzhi' ? ['atk', 'boomerang', 'sweep', 'chase'] : ['atk'].concat(t.nmoves()[fxT] || [], fxT === 'zhang_jiao' ? ['zj_ht'] : [])) : ['atk', 'any', 'shot', 'boom'];
+    { const EX = { zhang_bao: ['zb_wall_end'], guanhai_b: ['gb_throw_stuck'], cheng_yuanzhi: ['boomerang_stuck', 'chase_stuck'] }; if (boss && EX[fxT]) mvs.push(...EX[fxT]); }
+    const MN2 = { atk: '普攻', any: '技能', shot: '飞行物', boom: '自爆', boomerang: '大刀回旋', sweep: '横扫千军', chase: '拖刀追身', zb_wall: '土墙·升起', zb_wall_end: '土墙·倒塌', gb_throw_stuck: '掷戟·插地', boomerang_stuck: '大刀回旋·插地', chase_stuck: '拖刀·插地' };
     const L = mvs.map(m => [m, MN2[m] || NMN[m] || m]); if (!L.find(x => x[0] === fxM)) fxM = L[0][0];
     const B = t.bfxGet(fxT), M0 = t.bfxGet(fxT + ':' + fxM), M = Object.assign({ beam: M0.beam }, M0.l1 || {}), col = B.col || t.bfxCol(fxT), sol = !boss;
     const sl = (lab, key, o, min, max, step, def, fmt) => { const v = o[key] != null ? o[key] : def; return `<div class="row"><span>${lab}</span><input type="range" min="${min}" max="${max}" step="${step}" value="${v}" data-${o === B ? 'b' : 'm'}="${key}"><b>${fmt(v)}</b></div>`; };
