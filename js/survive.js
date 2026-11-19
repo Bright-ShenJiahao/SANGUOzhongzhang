@@ -71,7 +71,8 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   // 首领战机制（11/11）：每 13 秒喊人，从四周涌来一圈喽啰；血量过半「暴怒」：移速 +30%、抬手更快，脚下气焰变红
   // ===== 首领招式（11/11 用户定 1）：地上先亮红色预警（圈 / 直线），过一会儿才砸下来；翻滚无敌能躲 =====
   const TELE = [], BOOM = [], YS = .55;   // 俯视战场地面压扁系数：圆画成椭圆，判定也按压扁后的距离
-  function teleAdd(o) { o.t = 0; TELE.push(o); return o; }
+  let BCX = null;   // 11/19 首领试炼调出来的「范围/速度/起手出手帧」，放招期间生效（预警、飞行物、later 都带着）
+  function teleAdd(o) { o.t = 0; if (BCX) { const r = BCX.rs || 1; for (const k of ['len', 'r', 'r0', 'r1']) if (o[k]) o[k] *= r; o.T *= BCX.sp || 1; o.bc = BCX; } TELE.push(o); return o; }
   /* 11/12 首领专属技能：预警颜色按属性分 0 暗红（兵器）1 白（雷）2 土黄（土）3 橙（符火）；ring = 圆环带缺口 */
   const TC = [['140,20,14', '235,60,40', '#a8180e', '#ff8a50'],   /* 11/16 用户：首领预警改暗红细描边，和黄巾小兵的黄色分开 */ ['230,230,255', '240,240,255', '#e8e8ff', '#f4f4ff'], ['170,120,50', '225,175,95', '#c89850', '#e8c888'], ['230,110,20', '255,160,60', '#ff8a2a', '#ffc070']];
   const angDiff = (a, b) => Math.abs((((a - b + Math.PI) % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI) - Math.PI);
@@ -85,15 +86,15 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   }
   // 会动的危险物（飞出去的大刀、流星锤、追人的符、旋风）：碰到主角就伤，同一个东西 0.7 秒内只伤一次
   const HZ = [];
-  function hzAdd(o) { o.t = 0; o.hitT = 0; HZ.push(o); return o; }
+  function hzAdd(o) { o.t = 0; o.hitT = 0; if (BCX) { if (o.r) o.r *= BCX.rs || 1; o.bc = BCX; } HZ.push(o); return o; }
   function hzTick(dt) {
     for (let i = HZ.length - 1; i >= 0; i--) {
       const o = HZ[i]; o.t += dt; o.hitT -= dt;
       if (o.src && (o.src.dead || o.src.hp <= 0 || o.src.endFade != null)) { HZ.splice(i, 1); continue; }
-      if (o.upd) o.upd(o, dt);
+      const bk = BCX; BCX = o.bc || null; if (o.upd) o.upd(o, dt); BCX = bk;
       if (o.r && o.dmg && o.src && o.src.pilot) { o.hm = o.hm || new Map(); for (const e of hittable()) if (e !== o.src && (o.hm.get(e) || -1) < o.t && Math.hypot(e.x - o.x, (e.y - o.y) / YS) < o.r + 6) { o.hm.set(e, o.t + .5); GH(e, o.dmg * 1.3, 50, { x: o.x }); } }
       else if (o.r && o.dmg && o.hitT <= 0 && Math.hypot(hero.x - o.x, (hero.y - o.y) / YS) < o.r && typeof dmgHero === 'function') { dmgHero(o.dmg, o.src || null, 'skill'); o.hitT = .7; }
-      if (o.t >= o.T) { HZ.splice(i, 1); if (o.end) o.end(o); }
+      if (o.t >= o.T) { HZ.splice(i, 1); if (o.end) { const b2 = BCX; BCX = o.bc || null; o.end(o); BCX = b2; } }
     }
   }
   // 张宝的土墙（会挡主角的路）、波才的令旗（插着就不停冒兵，主角站在旗边 0.8 秒就拔掉）
@@ -126,7 +127,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       else if (o.dmg && teleHit(o) && typeof dmgHero === 'function') dmgHero(o.dmg, o.src || null, 'skill');
       shake = Math.max(shake, o.k !== 'line' && (o.r || o.r1) > 80 ? .3 : .18); if (window.SFX && o.snd !== '') SFX.play(o.snd || 'crack', 0, .8);
       BOOM.push({ k: o.k, x: o.x, y: o.y, r: o.r, r0: o.r0, r1: o.r1, ga: o.ga, gw: o.gw, a: o.a, len: o.len, w: o.w, t: 0, c: o.c || 0 });
-      if (o.then) o.then();
+      if (o.then) { const bk = BCX; BCX = o.bc || null; o.then(); BCX = bk; }
     }
     for (let i = BOOM.length - 1; i >= 0; i--) if ((BOOM[i].t += dt) > .4) BOOM.splice(i, 1);
     hzTick(dt); fieldTick(dt);
@@ -233,8 +234,8 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   function pilotCast(mv) {
     const z = PIL.z; if (!z || PIL.busy > 0) return;
     if (z.sprite !== 'cheng_new') { const a = pAng(); z.f = Math.cos(a) < 0 ? -1 : 1;   // 11/19 新画风首领：普攻 = 起手→出手打前方扇面；其余按 BSK 招式，打的是士兵和木人
-      if (mv === 'atk') { cyPlay(z, [['wind', .4], ['strike', .3]]); PIL.busy = .7; later(.4, () => { pHit(e => inArc(hero.x, hero.y, e, a, Math.PI * 55 / 180, 115), 3, 60); shake = Math.max(shake, .12); if (window.SFX) SFX.play('crack', 0, .6); }); return; }
-      if (!BSK[mv]) return; const T = BSK[mv](z); if (T > 0 && !(z.castT > 0)) { z.castT = T; z.cx = z.x; z.cy = z.y; } PIL.busy = Math.max(T, .3) + .7; return; }
+      if (mv === 'atk') { const C = bcfg(z.type, 'atk'), w = .4 * C.sp; cyPlay(z, [[C.a || 'wind', w], [C.b || 'strike', .3]].concat(C.c ? [[C.c, .3]] : [])); PIL.busy = w + .3 + (C.c ? .3 : 0); later(w, () => { pHit(e => inArc(hero.x, hero.y, e, a, Math.PI * 55 / 180, 115 * C.rs), 3, 60); shake = Math.max(shake, .12); if (window.SFX) SFX.play('crack', 0, .6); }); return; }
+      if (!BSK[mv]) return; const T = runMv(z, mv); if (T > 0 && !(z.castT > 0)) { z.castT = T; z.cx = z.x; z.cy = z.y; } PIL.busy = Math.max(T, .3) + .7; return; }
     const C = bcfg('cheng_yuanzhi', mv), a = pAng(); z.f = Math.cos(a) < 0 ? -1 : 1;
     if (mv === 'atk') { const w = .45 * C.sp; cyPlay(z, [[C.a, w], [C.b, .2]].concat(C.c ? [[C.c, .3]] : [])); PIL.busy = w + .2 + (C.c ? .3 : 0);
       later(w, () => { pHit(e => inArc(hero.x, hero.y, e, a, Math.PI * 55 / 180, 125 * C.rs), 3, 60); bfx('r_chop', hero.x + Math.cos(a) * 55 * C.rs, hero.y - 30 + Math.sin(a) * 25, Math.cos(a) < 0 ? -1 : 1, 150 * C.rs, .5, .5, .3); shake = Math.max(shake, .12); if (window.SFX) SFX.play('crack', 0, .6); }); return; }
@@ -264,7 +265,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   }
   const pMoves = () => !PIL.z || PIL.z.sprite === 'cheng_new' ? ['atk', 'boomerang', 'sweep', 'chase'] : ['atk'].concat(NMOVES[PIL.z.type] || [], PIL.z.type === 'zhang_jiao' ? ['zj_ht'] : []);
   addEventListener('keydown', e => { if (!PIL.z || e.repeat) return; const q = { j: 0, k: 1, l: 2, i: 3, u: 4, 1: 0, 2: 1, 3: 2, 4: 3, 5: 4 }[e.key.toLowerCase()], m = q == null ? null : pMoves()[q]; if (m) { e.preventDefault(); e.stopPropagation(); pilotCast(m); } }, true);
-  const cyPlay = (z, seq) => { if (!/_new$/.test(z.sprite || '')) return; let t = 0; z.cbFrame = seq[0][0]; for (let i = 0; i < seq.length; i++) { const [f, d] = seq[i], t0 = t; if (i) later(t0, () => { if (!z.dead) z.cbFrame = f; }); t += d; } later(t, () => { if (z.cbFrame === seq[seq.length - 1][0]) z.cbFrame = null; }); };
+  const cyPlay = (z, seq) => { if (!/_new$/.test(z.sprite || '')) return; if (BCX && BCX.first) { BCX.first = 0; seq = seq.map(x => x.slice()); if (BCX.a) seq[0][0] = BCX.a; if (BCX.b && seq[1]) seq[1][0] = BCX.b; if (BCX.c) { if (seq.length > 2) seq[seq.length - 1][0] = BCX.c; else seq.push([BCX.c, .3]); } } let t = 0; z.cbFrame = seq[0][0]; for (let i = 0; i < seq.length; i++) { const [f, d] = seq[i], t0 = t; if (i) later(t0, () => { if (!z.dead) z.cbFrame = f; }); t += d; } later(t, () => { if (z.cbFrame === seq[seq.length - 1][0]) z.cbFrame = null; }); };
   const gap = (z, t, txt) => { z.stun = Math.max(z.stun || 0, t); floaters.push({ x: z.x, y: z.y - 70, t: 0, txt, color: '#9fe08a' }); };
   // 11/19 操控首领时，招式瞄准前方（摇杆方向 170 远），打士兵和木人；平时瞄准主角
   const AX = z => z.pilot ? z.x + PIL.ax * 170 : hero.x, AY = z => z.pilot ? clampY(z.y + PIL.ay * 85) : hero.y;
@@ -335,7 +336,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const newSp = t => { const n = NSP[t] || t + '_new'; return typeof CH !== 'undefined' && CH[n] && CH[n].idle && CH[n].idle.img.complete && CH[n].idle.img.naturalWidth ? n : ''; };
   const shout = (z, t) => { if (z.survTier >= 3) say(z, t); };   // 小头目出招不喊话（用户定）
   const proj = (z, o) => { const ux = Math.cos(o.a), uy = Math.sin(o.a);   // 直线飞行物
-    return hzAdd(Object.assign({ kind: 'spr', spr: z.sprite, src: z, x: z.x + ux * 20, y: z.y + uy * 20 * YS, upd: (q, dt) => { q.x += ux * o.spd * dt; q.y = clampY(q.y + uy * o.spd * dt * YS); } }, o)); };
+    return hzAdd(Object.assign({ kind: 'spr', spr: z.sprite, src: z, x: z.x + ux * 20, y: z.y + uy * 20 * YS, upd: (q, dt) => { const v = o.spd * ((q.bc && q.bc.rs) || 1); q.x += ux * v * dt; q.y = clampY(q.y + uy * v * dt * YS); } }, o)); };
   const loopFr = (z, frs, d, T) => { const seq = []; for (let t = 0, i = 0; t < T - 1e-6; t += d, i++) seq.push([frs[i % frs.length], Math.min(d, T - t)]); cyPlay(z, seq); };
   const dashTo = (z, x1, y1, then) => { z.f = x1 < z.x ? -1 : 1; z.dash = { x0: z.x, y0: z.y, x1, y1: clampY(y1), t: 0 }; z.dashThen = then || null; };
   Object.assign(BSK, {
@@ -416,6 +417,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       for (let i = 0; i < 10; i++) teleAdd({ k: 'circle', x: AX(z) + (i ? R(-200, 200) : 0), y: clampY(AY(z) + (i ? R(-90, 90) : 0)), r: R(40, 56), T: 1.0 + i * .2, dmg: 2.4, src: z, c: 1, snd: i % 2 ? '' : 'crack' });
       return 3.0; },
   });
+  const runMv = (z, m) => { if (!/_new$/.test(z.sprite || '') || z.sprite === 'cheng_new') return BSK[m](z); const C = bcfg(z.type, m), k = BCX; BCX = Object.assign({}, C, { first: 1 }); try { return BSK[m](z) * (C.sp || 1); } finally { BCX = k; } };
   const NMOVES = { deng_mao: ['dm_dash', 'dm_rings', 'dm_quake'], bo_cai: ['bc_spin', 'bc_arrows', 'bc_fire'], he_yi: ['hy_dash3', 'hy_ji', 'hy_spin'], zhang_mancheng: ['zm_glide', 'zm_fu', 'zm_ring'],
     guanhai_m: ['gm_charge', 'gm_ji', 'gm_rear'], guanhai_b: ['gb_leap', 'gb_throw', 'gb_spin'], zhang_liang: ['zl_whirl', 'zl_cross', 'zl_charge'], zhang_bao: ['zb_burrow', 'zb_rain', 'zb_wall'], ma_yuanyi: ['my_claw', 'my_flail', 'my_spin'], zhang_jiao: ['zj_blink', 'zj_fu', 'zj_storm'] };
   const RAGEL = { bo_cai: '颍川儿郎，随我死战！', guanhai_b: '老子宰了你！', zhang_liang: '都给我上！杀！', zhang_bao: '黄沙迷阵——众弟子，助我！', zhang_jiao: '吾……未死！' };
@@ -447,7 +449,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
         z.skI = (z.skI || 0); z.seq = big ? [list[z.skI % list.length], list[(z.skI + 1) % list.length]] : [list[z.skI % list.length]]; z.skI += big ? 2 : 1;
         z.skCd = big ? (z.rage ? 3.5 : 5) : 8;   // 首领两招连放，然后隔 5 秒（暴怒 3.5 秒）；小头目一招，隔 8 秒
       }
-      const T = BSK[z.seq.shift()](z);
+      const T = runMv(z, z.seq.shift());
       if (T > 0 && !(z.castT > 0)) { z.castT = T; z.cx = z.x; z.cy = z.y; }
       if (T > 0) { z.st = 'wind'; z.t = 0; }
     }
@@ -728,7 +730,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     return out;
   }
   const shot = (a, o) => bolts.push(Object.assign({ x: hero.x + Math.cos(a) * 14, y: hero.y + Math.sin(a) * 7, vx: Math.cos(a) * 270, vy: Math.sin(a) * 135, a, t: 0, T: .85, hitSet: [], dmg: 1.8, col: ['160,225,255', '240,252,255'] }, o));
-  const later = (t, f) => { const c = CM, r = RM, k = CK; S.later.push({ t, f() { const o = CM, q = RM, w = CK; CM = c; RM = r; CK = k; f(); CM = o; RM = q; CK = w; } }); };
+  const later = (t, f) => { const c = CM, r = RM, k = CK, b = BCX; if (b) t *= b.sp || 1; S.later.push({ t, f() { const o = CM, q = RM, w = CK, bb = BCX; CM = c; RM = r; CK = k; BCX = b; f(); CM = o; RM = q; CK = w; BCX = bb; } }); };
   const add = (k, o) => { SK[k] = Object.assign({ wu: .6, rc: .35, pose: [], range: 0, half: 0, tier: 0 }, o); };
   SK.hengsao.tier = 1; SK.lianzhan.tier = 1;
   // 刀 13 招两招新的（11/12）
@@ -5661,7 +5663,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     ctx.fillStyle = wd; ctx.beginPath(); ctx.arc(x, y - 40, 5, 0, 7); ctx.fill(); ctx.fillStyle = '#b8402a'; ctx.fillRect(x - 5, y - 41, 10, 2);
     ctx.restore();
   }
-  const TRIAL = { fxSk: k => fxSk(k), fxBaseOf: k => fxBase(k), fxBhOf: k => fxBh(k), setFxSk(k, o) { FXSK[k] = Object.assign(fxSk(k), o); try { localStorage.setItem('szz-fxsk', JSON.stringify(FXSK)); } catch (e) {} }, fxSkCopy: () => JSON.stringify(FXSK), hasDg: k => !!DGM[k], dgAdj: k => dga(k), setDgAdj(k, o) { DGA[k] = Object.assign(dga(k), o); try { localStorage.setItem('szz-dga', JSON.stringify(DGA)); } catch (e) {} }, dgCopy: () => JSON.stringify(Object.fromEntries(Object.keys(DGM).map(k => [k, dga(k)]).filter(([, o]) => o.s !== 1 || o.dx || o.dy || o.r))), pilot: on => pilotOn(on), pilotCast: m => pilotCast(m), pilotTick, bossTr(on, mv) { BOSSTR.on = !!on; BOSSTR.move = mv || ''; const C = bcfg('cheng_yuanzhi', 'atk'); for (const z of zs) if (z.sprite === 'cheng_new') { z.seq = []; z.skCd = .6; z.T = Object.assign({}, TYPES.cheng_yuanzhi, z.T, { wind: (TYPES.cheng_yuanzhi.wind || .6) * C.sp }); } }, bossCfg: m => bcfg('cheng_yuanzhi', m), setBossCfg(m, o) { BCFG.cheng_yuanzhi = BCFG.cheng_yuanzhi || {}; BCFG.cheng_yuanzhi[m] = Object.assign(bcfg('cheng_yuanzhi', m), o); try { localStorage.setItem('szz-boss-cfg', JSON.stringify(BCFG)); } catch (e) {} }, bossCopy: () => JSON.stringify({ cheng_yuanzhi: { atk: bcfg('cheng_yuanzhi', 'atk'), boomerang: bcfg('cheng_yuanzhi', 'boomerang'), sweep: bcfg('cheng_yuanzhi', 'sweep'), chase: bcfg('cheng_yuanzhi', 'chase') } }), pilotAs(t) { PIL.t = t; if (PIL.z) { const i = zs.indexOf(PIL.z); if (i >= 0) zs.splice(i, 1); PIL.z = null; } const go = () => pilotOn(true); if (t !== 'cheng_yuanzhi' && typeof ensureAssets === 'function') ensureAssets('bossnew', { silent: true }).then(go); else go(); }, pilotMoves: () => pMoves(), pilotType: () => PIL.t || 'cheng_yuanzhi', nmoves: () => NMOVES, newBossOk: t => !!newSp(t), spawnNew(t) {   // 11/19 首领试炼：叫出一个新画风首领来打（AI 自己出招）
+  const TRIAL = { fxSk: k => fxSk(k), fxBaseOf: k => fxBase(k), fxBhOf: k => fxBh(k), setFxSk(k, o) { FXSK[k] = Object.assign(fxSk(k), o); try { localStorage.setItem('szz-fxsk', JSON.stringify(FXSK)); } catch (e) {} }, fxSkCopy: () => JSON.stringify(FXSK), hasDg: k => !!DGM[k], dgAdj: k => dga(k), setDgAdj(k, o) { DGA[k] = Object.assign(dga(k), o); try { localStorage.setItem('szz-dga', JSON.stringify(DGA)); } catch (e) {} }, dgCopy: () => JSON.stringify(Object.fromEntries(Object.keys(DGM).map(k => [k, dga(k)]).filter(([, o]) => o.s !== 1 || o.dx || o.dy || o.r))), pilot: on => pilotOn(on), pilotCast: m => pilotCast(m), pilotTick, bossTr(on, mv) { BOSSTR.on = !!on; BOSSTR.move = mv || ''; const C = bcfg('cheng_yuanzhi', 'atk'); for (const z of zs) if (z.sprite === 'cheng_new') { z.seq = []; z.skCd = .6; z.T = Object.assign({}, TYPES.cheng_yuanzhi, z.T, { wind: (TYPES.cheng_yuanzhi.wind || .6) * C.sp }); } }, bossCfg: (m, t = 'cheng_yuanzhi') => bcfg(t, m), frameNames: t => { const n = newSp(t), C = n && CH[n]; return C ? Object.keys(C).filter(k => !['portrait', 'weapon', 'ringitem', 'flagitem', 'getup', 'chant'].includes(k) && C[k] === C[k] && !(k.startsWith('walk') && t === 'guanhai_m')) : []; }, setBossCfg(m, o, t = 'cheng_yuanzhi') { BCFG[t] = BCFG[t] || {}; BCFG[t][m] = Object.assign(bcfg(t, m), o); try { localStorage.setItem('szz-boss-cfg', JSON.stringify(BCFG)); } catch (e) {} }, bossCopy: () => JSON.stringify(Object.assign({ cheng_yuanzhi: { atk: bcfg('cheng_yuanzhi', 'atk'), boomerang: bcfg('cheng_yuanzhi', 'boomerang'), sweep: bcfg('cheng_yuanzhi', 'sweep'), chase: bcfg('cheng_yuanzhi', 'chase') } }, Object.fromEntries(Object.keys(BCFG).filter(t => t !== 'cheng_yuanzhi').map(t => [t, Object.fromEntries(Object.keys(BCFG[t]).map(m => [m, bcfg(t, m)]))])))), pilotAs(t) { PIL.t = t; if (PIL.z) { const i = zs.indexOf(PIL.z); if (i >= 0) zs.splice(i, 1); PIL.z = null; } const go = () => pilotOn(true); if (t !== 'cheng_yuanzhi' && typeof ensureAssets === 'function') ensureAssets('bossnew', { silent: true }).then(go); else go(); }, pilotMoves: () => pMoves(), pilotType: () => PIL.t || 'cheng_yuanzhi', nmoves: () => NMOVES, newBossOk: t => !!newSp(t), spawnNew(t) {   // 11/19 首领试炼：叫出一个新画风首领来打（AI 自己出招）
       const go = () => { pilotOn(false); for (let i = zs.length - 1; i >= 0; i--) if (zs[i].survBoss && !zs[i].dummy) zs.splice(i, 1);
         const big = ['bo_cai', 'guanhai_m', 'guanhai_b', 'zhang_liang', 'zhang_bao', 'zhang_jiao'].includes(t), z = edgeSpawn(t, { name: (TYPES[t].name || '').split('·').pop(), hp: big ? 130 : 40, sc: 1, tier: big ? 3 : 2 });
         if (!z) return; bossBuff(z, big ? 1.6 : 1.3); const n = newSp(t); if (n) z.sprite = n; z.x = Math.min(lockR - 20, hero.x + 170); z.y = hero.y; z.skCd = 1.2; };

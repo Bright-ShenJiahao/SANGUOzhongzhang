@@ -91,25 +91,35 @@
     k.querySelectorAll('[data-c]').forEach(b => b.onpointerdown = e => { e.preventDefault(); e.stopPropagation(); T().pilotCast(b.dataset.c); });
   }
   const isCh = () => T().pilotType() === 'cheng_yuanzhi', pName = () => isCh() ? '程远志' : ((NBS.find(x => x[0] === T().pilotType()) || [0, ''])[1]);
+  // 11/19 新画风首领的帧中文名（调起手/出手/收手用）
+  const FRN = { idle: '站立', walk1: '走路①', walk2: '走路②', walk3: '走路③', walk4: '走路④', run1: '奔跑①', run2: '奔跑②', run3: '奔跑③', run4: '奔跑④', wind: '普攻起手', strike: '普攻出手', hurt: '受击', down: '倒地', fly1: '被打飞①', fly2: '被打飞②', land: '起身', fall: '落马', horse: '空马', roar: '怒吼',
+    dash1: '冲·起步', dash2: '冲·疾冲', dash3: '冲·急停', upcut: '上撩', ring1: '掷环·起手', ring2: '掷环·出手', quake1: '举刀', quake2: '劈地', quake3: '拔刀', spin0: '旋·起手', spin1: '旋①', spin2: '旋②', spin3: '旋③', dizzy: '头晕', flag1: '拔旗', flag2: '挥旗', flag3: '收旗', torch: '点火',
+    throw1: '掷·起手', throw2: '掷·出手', catch: '接戟', cross: '交叉重斩', talis: '拍符', glide: '滑行', stop: '急停', plant1: '举剑', plant2: '插剑', chant: '念咒', rest: '喘息', charge1: '冲·蓄势', charge2: '冲·狂奔', charge3: '冲·收势', rear: '人立', stomp: '马踏',
+    leap1: '跃·蓄力', leap2: '跃·腾空', leap3: '跃·落劈', run: '空手冲', pull: '拔戟/收锤', cross1: '十字·起手', cross2: '十字·出手', sink1: '下沉', sink2: '半身', rise: '破土', call1: '指天', call2: '挥下', seal: '结印', swing: '剑挥', sleeve: '拂袖',
+    flail1: '抡锤', flail2: '直击', claw1: '飞爪·甩', claw2: '被拉飞', claw3: '落地', vanish: '化符', appear: '现身', talis1: '雷符·起手', talis2: '雷符·出手', raise: '举杖', stab: '杖戳地', read: '念经', float: '浮空' };
   function brender() {
-    const t = T(), C = t.bossCfg(bsel), op = v => Object.entries(BFR).map(([k, n]) => `<option value="${k}"${k === v ? ' selected' : ''}>${n}</option>`).join('');
-    bbox.innerHTML = `<div class="hd"><span>首领试炼 · ${pName()}</span><span><button class="bm">${bmini ? '展开' : '缩小'}</button> <button class="bx">${bossMode ? '退出' : '关闭'}</button></span></div>${bmini ? '' : !isCh() ? `<div class="ds">你就是${pName()}：移动照常，右下角按钮或 J K L I U 出招，招式打士兵和木人。</div>${nbHtml()}` : `
-      <div class="mv">${BMV.map(([k, n]) => `<button data-m="${k}" class="${k === bsel ? 'on' : ''}">${n}</button>`).join('')}</div>
-      <div class="ds">你就是程远志：移动照常，J/K/L/I 或右下角按钮出招。正在调：${BMV.find(m => m[0] === bsel)[1]}——${BMV.find(m => m[0] === bsel)[2]}</div>
-      <div class="row"><span>起手</span><select data-f="a">${op(C.a)}</select></div>
-      <div class="row"><span>出手</span><select data-f="b">${op(C.b)}</select></div>
-      <div class="row"><span>收手</span><select data-f="c"><option value=""${C.c ? '' : ' selected'}>无</option>${op(C.c)}</select></div>
-      ${`<div class="row"><span>范围</span><input type="range" min="0.4" max="2.5" step="0.05" value="${C.rs}" data-r="rs"><b>×${(+C.rs).toFixed(2)}</b></div>`}
+    const t = T(), ty = t.pilotType(), ch = isCh();
+    const mvs = ch ? BMV : t.pilotMoves().map(m => [m, m === 'atk' ? '普攻' : NMN[m] || m, m === 'atk' ? '身前扇形一下（范围＝打多远，速度＝起手多久）' : '范围＝预警圈/线多大、飞多远；速度＝预警和动作多久（越大越慢）']);
+    if (!mvs.find(m => m[0] === bsel)) bsel = mvs[0][0];
+    const C = t.bossCfg(bsel, ty), FR = ch ? BFR : Object.fromEntries(t.frameNames(ty).map(k => [k, FRN[k] || k])), cur = mvs.find(m => m[0] === bsel);
+    const op = v => Object.entries(FR).map(([k, n]) => `<option value="${k}"${k === v ? ' selected' : ''}>${n}</option>`).join('');
+    const opd = v => `<option value=""${v ? '' : ' selected'}>${ch ? '无' : '默认'}</option>` + op(v);
+    bbox.innerHTML = `<div class="hd"><span>首领试炼 · ${pName()}</span><span><button class="bm">${bmini ? '展开' : '缩小'}</button> <button class="bx">${bossMode ? '退出' : '关闭'}</button></span></div>${bmini ? '' : `
+      <div class="mv">${mvs.map(([k, n]) => `<button data-m="${k}" class="${k === bsel ? 'on' : ''}">${n}</button>`).join('')}</div>
+      <div class="ds">你就是${pName()}：移动照常，右下角按钮或 J K L I U 出招，招式打士兵和木人。正在调：${cur[1]}——${cur[2]}</div>
+      <div class="row"><span>起手</span><select data-f="a">${ch ? op(C.a) : opd(C.a)}</select></div>
+      <div class="row"><span>出手</span><select data-f="b">${ch ? op(C.b) : opd(C.b)}</select></div>
+      <div class="row"><span>收手</span><select data-f="c">${opd(C.c)}</select></div>
+      <div class="row"><span>范围</span><input type="range" min="0.4" max="2.5" step="0.05" value="${C.rs}" data-r="rs"><b>×${(+C.rs).toFixed(2)}</b></div>
       <div class="row"><span>速度</span><input type="range" min="0.4" max="2.5" step="0.05" value="${C.sp}" data-r="sp"><b>×${(+C.sp).toFixed(2)}</b></div>
-      <div class="ds">速度越大越慢（预警、蓄力越久）。</div>
-      <button class="cp">复制首领设置</button>${nbHtml()}`}`;
+      <div class="ds">速度越大越慢（预警、蓄力越久）。${ch ? '' : '起手/出手选「默认」＝用这招原本的动作帧。'}</div>
+      <button class="cp">复制首领设置（全部首领）</button>${nbHtml()}`}`;
     bbox.querySelector('.bm').onclick = () => { bmini = !bmini; brender(); };
-    if (bmini) { bbox.querySelector('.bx').onclick = () => bossMode ? close() : bossPanel(false); return; }
     bbox.querySelector('.bx').onclick = () => bossMode ? close() : bossPanel(false);
-    if (!isCh()) { nbBind(); return; }
+    if (bmini) return;
     bbox.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { bsel = b.dataset.m; brender(); });
-    bbox.querySelectorAll('[data-f]').forEach(e => e.onchange = () => { t.setBossCfg(bsel, { [e.dataset.f]: e.value }); });
-    bbox.querySelectorAll('[data-r]').forEach(e => e.oninput = () => { const v = Math.round(+e.value * 100) / 100; t.setBossCfg(bsel, { [e.dataset.r]: v }); e.nextElementSibling.textContent = '×' + v.toFixed(2); });
+    bbox.querySelectorAll('[data-f]').forEach(e => e.onchange = () => { t.setBossCfg(bsel, { [e.dataset.f]: e.value }, ty); });
+    bbox.querySelectorAll('[data-r]').forEach(e => e.oninput = () => { const v = Math.round(+e.value * 100) / 100; t.setBossCfg(bsel, { [e.dataset.r]: v }, ty); e.nextElementSibling.textContent = '×' + v.toFixed(2); });
     nbBind();
     bbox.querySelector('.cp').onclick = () => { const txt = '首领设置：' + t.bossCopy(); try { navigator.clipboard.writeText(txt); } catch (e) {} bbox.querySelector('.cp').textContent = '已复制'; };
   }
