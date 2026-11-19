@@ -336,12 +336,12 @@ function zUpdate(z, dt) {
       }
     }
     if (z.t > T.wind) {
-      set(z, 'strike'); sfx(T.ranged === 'stone' ? 'sling' : T.ranged === 'fire' ? 'bow' : 'enemySwing', z.x);
+      set(z, 'strike'); sfx(T.ranged === 'stone' ? 'sling' : T.ranged === 'fire' ? 'bow' : 'enemySwing', z.x); if (!T.ranged && window.SURV_BFX) SURV_BFX(z, { k: 'fan', x: z.x, y: z.y, a: z.f > 0 ? 0 : Math.PI, r: (T.reach || 24) + 16 });
       if (T.ranged === 'stone') eshots.push({ source:z, k: 'stone', x: z.x + z.f * 16, y: z.y, z: 24, vx: z.f * 190, life: .95 });   // 射程约 180，和玩家一致
       else if (T.ranged === 'fire') {
         const dx=hero.x-z.x,dy=hero.y-z.y;
         for(const angle of ch2Troops()&&z.type==='archer'?[-Math.PI/15,0,Math.PI/15]:[0]){
-          eshots.push({k:'fire',enemyVolley:ch2Troops(),x0:z.x+z.f*16,y0:z.y,tx:z.x+dx*Math.cos(angle)-dy*Math.sin(angle),ty:z.y+dx*Math.sin(angle)+dy*Math.cos(angle),t:0,T:.9});
+          eshots.push({source:z,k:'fire',enemyVolley:ch2Troops(),x0:z.x+z.f*16,y0:z.y,tx:z.x+dx*Math.cos(angle)-dy*Math.sin(angle),ty:z.y+dx*Math.sin(angle)+dy*Math.cos(angle),t:0,T:.9});
         }
       }
       else if (window.SURV && SURV.curNode && SURV.curNode() && !T.elite ? Math.hypot(hero.x - z.x, (hero.y - z.y) / .6) < T.reach + 8 : Math.abs(dx) < T.reach && Math.abs(hero.y - z.y) < 14 && Math.sign(dx) === z.f) dmgHero(T.dmg, z);   // 上下判定 9→14，和主角攻击范围对齐

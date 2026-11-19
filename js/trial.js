@@ -172,8 +172,9 @@
   function fxRender() {
     const t = T(); if (!fxBox || !t) return;
     const boss = fxT.slice(0, 2) !== 's:', nm = boss ? ((FXB.find(x => x[0] === fxT) || [0, fxT])[1]) : SOLN[fxT.slice(2)] || fxT;
-    const mvs = boss ? (fxT === 'cheng_yuanzhi' ? [] : (t.nmoves()[fxT] || []).concat(fxT === 'zhang_jiao' ? ['zj_ht'] : [])) : [];
-    const L = [['any', boss ? (mvs.length ? '其他' : '全部招式') : '出招']].concat(mvs.map(m => [m, NMN[m] || m])); if (!L.find(x => x[0] === fxM)) fxM = L[0][0];
+    const mvs = boss ? (fxT === 'cheng_yuanzhi' ? ['atk', 'boomerang', 'sweep', 'chase'] : ['atk'].concat(t.nmoves()[fxT] || [], fxT === 'zhang_jiao' ? ['zj_ht'] : [])) : ['atk', 'any', 'shot', 'boom'];
+    const MN2 = { atk: '普攻', any: '技能', shot: '飞行物', boom: '自爆', boomerang: '大刀回旋', sweep: '横扫千军', chase: '拖刀追身' };
+    const L = mvs.map(m => [m, MN2[m] || NMN[m] || m]); if (!L.find(x => x[0] === fxM)) fxM = L[0][0];
     const B = t.bfxGet(fxT), M0 = t.bfxGet(fxT + ':' + fxM), M = Object.assign({ beam: M0.beam }, M0.l1 || {}), col = B.col || t.bfxCol(fxT), sol = !boss;
     const sl = (lab, key, o, min, max, step, def, fmt) => { const v = o[key] != null ? o[key] : def; return `<div class="row"><span>${lab}</span><input type="range" min="${min}" max="${max}" step="${step}" value="${v}" data-${o === B ? 'b' : 'm'}="${key}"><b>${fmt(v)}</b></div>`; };
     fxBox.innerHTML = `<div class="hd"><span>特效调试 · ${nm}</span><button class="fxx">关闭</button></div>
@@ -190,7 +191,7 @@
       <div class="ds">${boss ? '「放这招」会叫这个首领出来对你放（主角无敌）。程远志的招不分开，统一调「全部招式」。' : '小兵刷出来会自己出招；只有地上有预警的招（劈、突刺、冲锋、砸地、火箭落点等）会有特效。'}改完马上生效，存在这台设备上；满意了点「复制特效设置」发给我。</div>`;
     const set = (k, o) => { t.bfxSet(k, o); };
     fxBox.querySelector('.fxx').onclick = () => { fxBox.remove(); fxBox = null; };
-    fxBox.querySelectorAll('[data-ft]').forEach(b => b.onclick = () => { fxT = b.dataset.ft; fxM = 'any'; fxRender(); });
+    fxBox.querySelectorAll('[data-ft]').forEach(b => b.onclick = () => { fxT = b.dataset.ft; fxM = ''; fxRender(); });
     fxBox.querySelectorAll('[data-fm]').forEach(b => b.onclick = () => { fxM = b.dataset.fm; fxRender(); });
     fxBox.querySelector('.fxo').onclick = () => { set(fxT, { off: B.off ? '' : 1 }); fxRender(); };
     fxBox.querySelector('.fxc').oninput = e => set(fxT, { col: rgbOf(e.target.value) });
