@@ -156,7 +156,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       if (o.kind === 'spr' && SP && SP[o.fr] && SP[o.fr].img.complete) { const B = SP[o.fr], w = o.w || 30, h = w * B.img.naturalHeight / B.img.naturalWidth;
         ctx.translate(o.x, o.y - (o.lift || 22)); ctx.rotate((o.rot || 0) + (o.spin || 0) * o.t); ctx.drawImage(B.img, -w / 2, -h / 2, w, h);
       } else if (o.kind === 'stuck' && SP && SP.weapon && SP.weapon.img.complete) { const B = SP.weapon, w = 62, h = w * B.img.naturalHeight / B.img.naturalWidth;   // 插在地上的长戟
-        ctx.translate(o.x, o.y + 2); ctx.rotate(-1.25); ctx.drawImage(B.img, -w * .15, -h / 2, w, h);
+        ctx.translate(o.x, o.y + 2); ctx.scale(o.f || 1, 1); ctx.rotate(1.2); ctx.drawImage(B.img, -w * .86, -h / 2, w, h);   // 11/20 戟头朝下插进土里，杆子斜向投出的方向后仰
       } else if (o.kind === 'xwave') {   // 张梁十字刀气：两道交叉的弧光
         ctx.translate(o.x, o.y - 26); ctx.rotate(o.a || 0); ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round';
         for (const s of [-1, 1]) for (let k = 0; k < 2; k++) { ctx.strokeStyle = k ? 'rgba(255,240,200,.9)' : 'rgba(255,170,80,.45)'; ctx.lineWidth = k ? 2.5 : 7; ctx.beginPath(); ctx.moveTo(-14, -18 * s); ctx.quadraticCurveTo(10, 0, -14, 18 * s); ctx.stroke(); }
@@ -384,7 +384,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       later(.5, () => { if (z.dead) return; hzAdd({ kind: 'drv', src: z, T: .45, upd: o => { const q = Math.min(1, o.t / .45); z.x = z.cx = x0 + (tx - x0) * q; z.y = z.cy = y0 + (ty - y0) * q; z.z = Math.sin(q * Math.PI) * 50; }, end: () => { z.z = 0; } }); }); return 1.4; },
     gb_throw: z => { const [ux, uy, a] = dirU(z, AX(z), AY(z)), L = 300; cyPlay(z, [['throw1', .7], ['throw2', 1.2], ['run', .3], ['pull', .4]]); shout(z, '看戟！');
       teleAdd({ k: 'line', x: z.x, y: z.y, a, len: L, w: 34, T: .7, dmg: 3, src: z, then: () => { const px = z.x + ux * L, py = clampY(z.y + uy * L * YS); gap(z, 1.2, '空手！');
-        hzAdd({ kind: 'stuck', spr: z.sprite, src: z, x: px, y: py, T: 1.3, end: () => dashTo(z, px, py) }); } }); return .7; },
+        hzAdd({ kind: 'stuck', spr: z.sprite, src: z, x: px, y: py, f: ux < 0 ? -1 : 1, T: 1.3, end: () => dashTo(z, px, py) }); } }); return .7; },
     gb_spin: z => { loopFr(z, ['spin1', 'spin2'], .13, 1.3); shout(z, '都给我滚开！'); [0, 1].forEach(i => teleAdd({ k: 'circle', x: z.x, y: z.y, r: 96, T: .6 + i * .55, dmg: 2.6, src: z, snd: 'enemySwing' })); return 1.25; },
     // 张梁：双刀旋风（转完头晕）/ 十字刀气 / 人公冲锋
     zl_whirl: z => { cyPlay(z, [['spin1', .3]]); shout(z, '人公旋风！');
