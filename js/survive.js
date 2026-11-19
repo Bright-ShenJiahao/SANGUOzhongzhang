@@ -125,6 +125,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       TELE.splice(i, 1);
       if (o.dmg && o.src && o.src.pilot) { for (const e of hittable()) if (e !== o.src && teleHitAt(o, e.x, e.y)) GH(e, o.dmg * 1.3, 70, { x: o.x }); }   // 11/19 操控首领：招式打士兵和木人
       else if (o.dmg && teleHit(o) && typeof dmgHero === 'function') dmgHero(o.dmg, o.src || null, 'skill');
+      try { bossFx(o); } catch (e) {}
       shake = Math.max(shake, o.k !== 'line' && (o.r || o.r1) > 80 ? .3 : .18); if (window.SFX && o.snd !== '') SFX.play(o.snd || 'crack', 0, .8);
       BOOM.push({ k: o.k, x: o.x, y: o.y, r: o.r, r0: o.r0, r1: o.r1, ga: o.ga, gw: o.gw, a: o.a, len: o.len, w: o.w, t: 0, c: o.c || 0 });
       if (o.then) { const bk = BCX; BCX = o.bc || null; o.then(); BCX = bk; }
@@ -179,6 +180,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
         ctx.translate(o.x, o.y - 18); ctx.rotate(Math.sin(o.t * 9) * .4); ctx.fillStyle = '#f2d24a'; ctx.strokeStyle = '#b02a18'; ctx.lineWidth = 1.5; ctx.fillRect(-5, -8, 10, 16); ctx.strokeRect(-5, -8, 10, 16);
         ctx.beginPath(); ctx.moveTo(-2, -5); ctx.lineTo(2, -1); ctx.lineTo(-2, 3); ctx.lineTo(2, 6); ctx.stroke();
       } else if (o.kind === 'whirl') {   // 张梁双刀旋风
+        { const col = bCol(o.src); if (col && typeof dgTint === 'function' && DGI.dt_wanren && DGI.dt_wanren.complete) { ctx.save(); ctx.translate(o.x, o.y - 8); ctx.scale(1, YS); ctx.rotate(o.t * 9); ctx.globalAlpha = .75; const w = o.r * 2.4; ctx.drawImage(dgTint('dt_wanren', col), -w / 2, -w / 2, w, w); ctx.globalAlpha = .3; ctx.globalCompositeOperation = 'screen'; ctx.drawImage(DGI.dt_wanren, -w / 2, -w / 2, w, w); ctx.restore(); } }
         ctx.translate(o.x, o.y); ctx.scale(1, YS); ctx.globalCompositeOperation = 'lighter';
         for (let k = 0; k < 3; k++) { ctx.strokeStyle = `rgba(255,200,120,${.45 - k * .12})`; ctx.lineWidth = 6 - k * 1.5; ctx.beginPath(); ctx.arc(0, 0, o.r - k * 10, o.t * 14 + k, o.t * 14 + k + 2.4); ctx.stroke(); }
       } else if (o.kind === 'fire') {   // 火油罐烧出的一片火
@@ -230,6 +232,20 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const pHit = (f, m, kb) => { const L = []; for (const e of hittable()) if (f(e)) { GH(e, m, kb, { x: hero.x }); L.push(e); bfx('r_hit', e.x, e.y - 30, Math.random() < .5 ? 1 : -1, 70, .5, .5, .3); } return L; };
   // 11/18 用户：首领的招也要写实特效——先借刀的写实特效图（同一套画风）
   const bfx = (n, x, y, f, w, ax = .5, ay = .5, T = .4, sy = 1) => fx.push({ k: 'dg', n, w, ax, ay, x, y, sy, f, t: 0, T: FXQ ? Math.min(T, .3) : T, col: '', al: 1, wh: 0, boss: 1 });
+  // 11/20 用户：首领出手也要像主角那样的光效——复用主角的白色光效图，按首领主色上色，在预警「落下」那一刻贴着判定画
+  const BFXC = { deng_mao: '215,45,30', zhang_liang: '80,210,130', zhang_jiao: '150,205,255' };
+  const bCol = z => z && z.type && BFXC[z.type] && /_(new|px)$/.test(z.sprite || '') ? BFXC[z.type] : null;
+  const gfx = (n, x, y, w, col, o = {}) => fx.push(Object.assign({ k: 'dg', n, w, ax: .5, ay: .5, x, y, sy: 1, f: 1, t: 0, T: .42, col, al: 1, wh: .35, boss: 1, noMap: 1 }, o));
+  function bossFx(o) { const z = o.src, col = bCol(z); if (!col || !o.dmg) return;
+    if (o.k === 'line') { const L = o.len, sa = Math.atan2(Math.sin(o.a) * YS, Math.cos(o.a)), ex = o.x + Math.cos(o.a) * L, ey = o.y + Math.sin(o.a) * L * YS;
+      fx.push({ k: 'line', x: o.x, y: o.y, a: o.a, L, w: o.w * .5, col, t: 0, T: .38, boss: 1 });
+      if (o.c === 2) { gfx('dd_liedi', ex, ey - 6, Math.max(70, o.w * 2.6), col, { ay: .82, T: .5 }); gfx('fx_ring', ex, ey, Math.max(60, o.w * 2), col, { sy: .9, T: .4 }); }
+      else gfx('dg4', o.x + Math.cos(o.a) * L * .62, o.y + Math.sin(o.a) * L * .62 * YS - 18, Math.max(90, o.w * 2.4), col, { rot: sa, T: .32 });
+      return; }
+    if (o.k === 'circle' || o.k === 'ring') { const r = o.r || o.r1, self = Math.hypot(o.x - z.x, o.y - z.y) < 24;
+      if (self) { gfx('dt_wanren', o.x, o.y - 6, r * 2.3, col, { sy: YS, T: .45 }); gfx('fx_ring', o.x, o.y, r * 2.2, col, { T: .4 }); return; }
+      if (o.c === 1) fx.push({ k: 'bolt', x: o.x, y: o.y, t: 0, T: .3 });
+      gfx('dt_tianbeng', o.x, o.y + 4, r * 2.4, col, { ay: .88, T: .45 }); gfx('fx_ring', o.x, o.y, r * 2.1, col, { T: .4 }); } }
   const pCirc = (x, y, r) => e => Math.hypot(e.x - x, (e.y - y) / YS) <= r + 8;
   function pilotCast(mv) {
     const z = PIL.z; if (!z || PIL.busy > 0) return;
