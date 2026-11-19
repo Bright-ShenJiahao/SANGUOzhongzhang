@@ -787,6 +787,8 @@ function safeArea() {   // 读 CSS 的 env(safe-area-inset-*)，每秒更新一�
 { const _di = CanvasRenderingContext2D.prototype.drawImage; CanvasRenderingContext2D.prototype.drawImage = function (img, ...a) { if (img instanceof HTMLImageElement && (!img.complete || !img.naturalWidth)) { if (img.src && img.complete && typeof retryImg === 'function') retryImg(img); return; } return _di.call(this, img, ...a); }; }
 function retryImg(img) { const now = performance.now(); if ((img._tries || 0) >= 8 || now - (img._at || 0) < 1500) return; img._at = now; img._tries = (img._tries || 0) + 1; const base = img.src.replace(/([?&])retry=\d+/, ''); img.src = base + (base.includes('?') ? '&' : '?') + 'retry=' + img._tries; }
 function drawChar(name, f, x, y, flip, alpha = 1, white = false, sc = 1, dark = false) {
+  if (name === 'grunt' && !window.CUTE_ON && CH.grunt_pxq && CH.grunt_pxq.idle && CH.grunt_pxq.idle.img.naturalWidth) name = 'grunt_pxq';   // 11/19 用户定：棍兵用「着甲Q」画风
+  if (name === 'grunt_orig') name = 'grunt';
   if (window.CUTE_ON && (name === 'grunt' || name === 'grunt_new') && CH.grunt_cute && CH.grunt_cute.idle && CH.grunt_cute.idle.img.naturalWidth) name = 'grunt_cute';   // 11/19 实验：Q像素小兵（所有黄巾棍兵都换，不管从哪刷出来）
   let fr = name === 'hero' && window.HERO_SKIN ? (HERO_SKIN.get(f) || HERO_SKIN.any(f)) : null;
   if (!fr && name === 'hero' && window.HERO_SKIN && performance.now() - HERO_SKIN.t0 < 6000) return;   // 11/17：皮肤图还一张都没下好时先不画（最多 6 秒），免得闪一下旧的白衣主角   // 11/13 主角皮肤（hero_skins，0.5 倍、按 anchor 对脚底）；没下好就用旧图
