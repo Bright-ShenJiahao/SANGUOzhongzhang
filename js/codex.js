@@ -30,7 +30,7 @@
     ['drummer', '鼓手', 'drummer', '第 3 段起', '胸前挂着战鼓，鼓声一响，黄巾就红了眼。', ['擂鼓：附近黄巾 4 秒内动作快 30%（脚下发红光）。', '自己不打人，最好先杀。']],
     ['priest', '黄巾方士', 'priest', '第 4 段起', '太平道的小道士，摇铃念咒，能救人也能放火。', ['回春：附近有受伤的黄巾就给他们回血。', '符火：没人受伤时朝你丢一团符火，落地烧 2 秒。']],
     ['crossbow', '黄巾弩手', 'crossbow', '第 3 段起', '端着大弩的老兵，一箭能射穿两个人。', ['穿透弩：半蹲瞄准时地上出现一条细红线，0.8 秒后射出，线上的全中。']],
-    ['cavalry', '黄巾骑兵', 'cavalry', '第 3 段起', '骑着抢来的土马，挺矛冲阵。', ['冲锋：绕着你兜圈，停下后出一条预警线，直线冲过去。', '血比步卒厚。']],
+    ['cavalry', '黄巾骑兵', 'cavalry', '第 3 段起', '骑着抢来的土马，挺矛冲阵。', ['冲锋：绕着你兜圈，停下后出一条预警线，直线冲过去；冲过头会掉头再冲一次（预警更短）。', '血比步卒厚。']],
     ['elite', '老卒', 'elite', '第 1 段起', '打过几场硬仗的老兵，刀口都卷了。', ['刀气：蓄力后劈出一道扇形刀气，出手不会被打断。', '精英：打倒掉 5 枚铜钱。']],
     ['yellow-golem', '黄巾力士', 'yellow_golem', '第 3 段起', '喝了符水、力大无穷的巨汉。', ['重拳：一拳能把人打飞，血非常厚。', '精英：打倒掉 5 枚铜钱。']],
     ['yellow-catapult', '投石车', 'yellow_catapult', '投石车节点', '黄巾从官府抢来的守城器械。', ['砸石：远程抛大石，落点有预警圈。', '拆掉掉 5 枚铜钱。']],
@@ -47,6 +47,10 @@
     ['zhang_liang', '张梁', 'zhang_liang_q', '第 4 段首领', '人公将军，张角三弟，以勇猛著称。', ['双刀旋风：边转边追 2.2 秒，转完头晕。', '冲锋。', '半血狂怒：更快，出招几乎不停。']],
     ['zhang_jiao', '张角', 'zhang_jiao_q', '最终首领', '天公将军，太平道大贤良师，以《太平要术》号令天下黄巾。', ['雷符：三张符追着你飘，随后在你脚下落雷。', '天雷滚滚：全场随机落雷，其中一道必定劈在你脚下。']],
   ];
+  // 11/20 用户定：小兵用着甲新画风站立图；首领格子用新头像，点开看立绘
+  const PXA = { grunt: 'grunt_pxa', blade: 'blade_pxa', slinger: 'slinger_pxa', archer: 'archer_pxa', elite: 'elite_pxa', priest: 'priest_pxa', yellow_heavy: 'heavy_pxa', yellow_shield: 'shield_pxa', yellow_spear: 'spear_pxa', yellow_golem: 'golem_pxa', fire_jar: 'firejar_pxa', drummer: 'drum_pxa', cavalry: 'cav_pxa', fanatic: 'fanatic_pxa', crossbow: 'xbow_pxa', thief: 'thief_pxa' };
+  for (const e of UNITS) if (PXA[e[2]]) { e[2] = PXA[e[2]]; delete PIC[e[0]]; }
+  const LH = { deng_mao: 'art/ui/npc/deng_mao_lihui.webp', cheng_yuanzhi: 'art/ui/npc/cheng_yuanzhi_lihui.webp', he_yi: 'art/ui/npc/he_yi_lihui.webp', bo_cai: 'art/ui/npc/bo_cai_lihui.webp', zhang_mancheng: 'art/ui/npc/zhang_mancheng_lihui.webp', guanhai: 'art/ui/npc/guanhai_lihui.webp', ma_yuanyi: 'art/ui/npc/ma_yuanyi_lihui.webp', zhang_bao: 'art/ui/npc/zhang_bao_lihui.webp', zhang_liang: 'art/ui/npc/zhang_liang_lihui.webp', zhang_jiao: 'art/ui/npc/zhangjiao_lihui.webp' };
   const ALL = UNITS.concat(BOSSES);
   // 11/13 用户定：按强弱排序编号；小兵格子按游戏里的真实大小统一比例显示（不再各自撑满格子）
   const no = e => { const L = UNITS.includes(e) ? UNITS : BOSSES; return 'No.' + String(L.indexOf(e) + 1).padStart(2, '0'); };
@@ -83,14 +87,14 @@
 #szzCodex .lk span{color:#7a6c58}
 #szzCodex .dt{width:min(360px,40%);border-left:1px solid rgba(184,149,90,.3);padding:16px 18px;overflow:auto}
 #szzCodex .dt .pic{height:190px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;background:radial-gradient(ellipse at 50% 60%,rgba(184,149,90,.18),rgba(0,0,0,0) 70%)}
-#szzCodex .dt .pic img{max-width:100%;max-height:100%;object-fit:contain;image-rendering:pixelated}
+#szzCodex .dt .pic img{max-width:100%;max-height:100%;object-fit:contain;image-rendering:pixelated}#szzCodex .dt .pic.lh{height:300px;align-items:flex-end}#szzCodex .dt .pic.lh img{image-rendering:auto}
 #szzCodex .dt h3{margin:0 0 4px;font:700 22px "Songti SC","Noto Serif SC",serif;letter-spacing:.2em;color:#ffe2a0}
 #szzCodex .dt .tg{display:inline-block;margin-bottom:10px;padding:1px 8px;border:1px solid rgba(184,149,90,.5);font-size:12px;color:#c9b48a}
 #szzCodex .dt p{margin:0 0 12px;line-height:1.6;color:#e8dcc0;font-size:14px}
 #szzCodex .dt h4{margin:0 0 6px;font-size:13px;color:#c9a560;letter-spacing:.2em}
 #szzCodex .dt ul{margin:0;padding-left:18px;font-size:13px;line-height:1.7;color:#ddd0b4}
 #szzCodex .dt .no{color:#8a7a62;font-size:14px;line-height:1.7}
-@media (max-aspect-ratio:1/1){#szzCodex .bd{flex-direction:column}#szzCodex .dt{width:auto;max-height:45%;border-left:0;border-top:1px solid rgba(184,149,90,.3)}#szzCodex .dt .pic{height:120px}}
+@media (max-aspect-ratio:1/1){#szzCodex .bd{flex-direction:column}#szzCodex .dt{width:auto;max-height:45%;border-left:0;border-top:1px solid rgba(184,149,90,.3)}#szzCodex .dt .pic{height:120px}#szzCodex .dt .pic.lh{height:200px}}
 @media (max-height:500px){#szzCodex .cx{height:96vh}#szzCodex .cd{height:96px}#szzCodex .cd img{max-height:62px}#szzCodex .dt .pic{height:120px}#szzCodex .hd{padding:6px 12px}#szzCodex .gr{grid-template-columns:repeat(auto-fill,minmax(80px,1fr))}}`;
   const box = document.createElement('div'); box.id = 'szzCodex'; box.hidden = true;
   box.innerHTML = '<div class="cx"><div class="hd"><h2>图鉴</h2><button type="button" class="tb" data-t="u">小兵</button><button type="button" class="tb" data-t="b">首领</button><button type="button" class="tb" data-t="w">武学</button><button type="button" class="tb" data-t="q">宝物</button><button type="button" class="tb" data-t="t">术语</button><span class="ct"></span><button type="button" class="x" aria-label="关闭">✕</button></div><div class="bd"><div class="gw"><div class="wf"></div><div class="gr"></div></div><div class="dt"></div></div></div>';
@@ -144,7 +148,7 @@
   function detail(e) {
     const dt = box.querySelector('.dt'); if (!e) { dt.innerHTML = '<p class="no">点左边的头像看详情。</p>'; return; }
     if (!has(e[0])) { dt.innerHTML = `<div class="pic lk"><img src="${img(e)}" alt="" style="filter:brightness(0) opacity(.55)"></div><h3>？？？</h3><span class="tg">${e[3]}</span><p class="no">尚未遇到。在战斗中第一次遇到后解锁。</p>`; return; }
-    dt.innerHTML = `<div class="pic"><img src="${img(e)}" alt=""></div><h3>${no(e)}　${e[1]}</h3><span class="tg">${e[3]}</span><p>${e[4]}</p><h4>技 能</h4><ul>${e[5].map(t => `<li>${t}</li>`).join('')}</ul>`;
+    dt.innerHTML = `<div class="pic${LH[e[0]] ? ' lh' : ''}"><img src="${LH[e[0]] || img(e)}" alt=""></div><h3>${no(e)}　${e[1]}</h3><span class="tg">${e[3]}</span><p>${e[4]}</p><h4>技 能</h4><ul>${e[5].map(t => `<li>${t}</li>`).join('')}</ul>`;
   }
   // 11/15 用户：图鉴加「宝物」页——兵器宝物按兵器分，其余算通用；拿到过才解锁
   const BQ = () => { const S2 = window.SURV; if (!S2 || !S2.BAO) return []; return Object.keys(S2.BAO).map(k => ({ k, id: 'bao:' + k, o: S2.BAO[k], w: S2.BAO[k].w != null ? S2.BAO[k].w : -2 })).sort((a, b) => (a.w === -2) - (b.w === -2) || a.w - b.w || a.o.q - b.o.q); };

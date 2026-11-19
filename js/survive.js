@@ -4167,7 +4167,10 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       return;
     }
     if (T.unit === 'cav') {   // 骑兵：绕着主角兜圈，冷却好了就停下、出一条冲锋预警线，然后直线冲过去
-      if (z.cdash) { const c = z.cdash; c.t += dt; const q = Math.min(1, c.t / .42); z.x = c.x0 + (c.x1 - c.x0) * q; z.y = Math.max(M.top + 6, Math.min(M.bot - 6, c.y0 + (c.y1 - c.y0) * q)); z.st = 'strike'; z.moving = true; if (q >= 1) { z.cdash = null; set(z, 'move'); } return; }
+      if (z.cdash) { const c = z.cdash; c.t += dt; const q = Math.min(1, c.t / .42); z.x = c.x0 + (c.x1 - c.x0) * q; z.y = Math.max(M.top + 6, Math.min(M.bot - 6, c.y0 + (c.y1 - c.y0) * q)); z.st = 'strike'; z.moving = true; if (q >= 1) { z.cdash = null;
+          if (!c.back && !z.air) { const a2 = ang(z, hero.x, hero.y), L2 = 280; z.f = Math.cos(a2) < 0 ? -1 : 1; set(z, 'wind');   // 11/20 用户：冲过头后掉头再冲一次（预警更短）
+            teleAdd({ k: 'line', x: z.x, y: z.y, a: a2, len: L2, w: 40, T: .5, dmg: 2, src: z, snd: '', then: () => { if (z.dead || z.air) return; z.cdash = { x0: z.x, y0: z.y, x1: z.x + Math.cos(a2) * L2, y1: z.y + Math.sin(a2) * L2 * YS, t: 0, back: 1 }; if (window.SFX) SFX.play('enemySwing', 0, .8); } });
+          } else set(z, 'move'); } return; }
       if (z.st === 'wind') { z.moving = false; return; }
       if (z.ucd <= 0 && d < 280) { z.ucd = R(3.5, 4.5); const a = ang(z, hero.x, hero.y), L = 330, x0 = z.x, y0 = z.y; z.f = Math.cos(a) < 0 ? -1 : 1; set(z, 'wind');
         teleAdd({ k: 'line', x: x0, y: y0, a, len: L, w: 40, T: .7, dmg: 2, src: z, snd: '', then: () => { if (z.dead || z.air) return; z.cdash = { x0: z.x, y0: z.y, x1: z.x + Math.cos(a) * L, y1: z.y + Math.sin(a) * L * YS, t: 0 }; if (window.SFX) SFX.play('enemySwing', 0, .8); } }); return; }
