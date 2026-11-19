@@ -133,7 +133,7 @@
     const C = t.bossCfg(bsel, ty), FR = ch ? BFR : Object.fromEntries(t.frameNames(ty).map(k => [k, FRN[k] || k])), cur = mvs.find(m => m[0] === bsel);
     const op = v => Object.entries(FR).map(([k, n]) => `<option value="${k}"${k === v ? ' selected' : ''}>${n}</option>`).join('');
     const opd = v => `<option value=""${v ? '' : ' selected'}>${ch ? '无' : '默认'}</option>` + op(v);
-    bbox.innerHTML = `<div class="hd"><span>首领试炼 · ${pName()}</span><span><button class="bm">${bmini ? '展开' : '缩小'}</button> <button class="bx">${bossMode ? '退出' : '关闭'}</button></span></div>${bmini ? '' : `
+    bbox.innerHTML = `<div class="hd"><span>首领试炼 · ${pName()}</span><span><button class="bfx" style="border-color:#7ad0ff;color:#bfe6ff">特效调试</button> <button class="bm">${bmini ? '展开' : '缩小'}</button> <button class="bx">${bossMode ? '退出' : '关闭'}</button></span></div>${bmini ? '' : `
       <div class="mv">${mvs.map(([k, n]) => `<button data-m="${k}" class="${k === bsel ? 'on' : ''}">${n}</button>`).join('')}</div>
       <div class="ds">你就是${pName()}：移动照常，右下角按钮或 J K L I U 出招，招式打士兵和木人。正在调：${cur[1]}——${cur[2]}</div>
       <div class="row"><span>起手</span><select data-f="a">${ch ? op(C.a) : opd(C.a)}</select></div>
@@ -144,6 +144,7 @@
       <div class="ds">速度越大越慢（预警、蓄力越久）。${ch ? '' : '起手/出手选「默认」＝用这招原本的动作帧。'}</div>
       <button class="cp">复制首领设置（全部首领）</button>${nbHtml()}`}`;
     bbox.querySelector('.bm').onclick = () => { bmini = !bmini; brender(); };
+    bbox.querySelector('.bfx').onclick = () => { if (innerHeight > innerWidth && !bmini) { bmini = true; brender(); } fxPanel(nbSel || (t.pilotType() !== 'cheng_yuanzhi' ? t.pilotType() : 'deng_mao')); };
     bbox.querySelector('.bx').onclick = () => bossMode ? close() : bossPanel(false);
     bindCute(); if (bmini) return;
     bbox.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { bsel = b.dataset.m; brender(); });
@@ -151,6 +152,60 @@
     bbox.querySelectorAll('[data-r]').forEach(e => e.oninput = () => { const v = Math.round(+e.value * 100) / 100; t.setBossCfg(bsel, { [e.dataset.r]: v }, ty); e.nextElementSibling.textContent = '×' + v.toFixed(2); });
     nbBind();
     bbox.querySelector('.cp').onclick = () => { const txt = '首领设置：' + t.bossCopy(); try { navigator.clipboard.writeText(txt); } catch (e) {} bbox.querySelector('.cp').textContent = '已复制'; };
+  }
+  // 11/20 用户：首领、小兵的出手特效也要能调（像主角那样）——选人、选招，调图/颜色/大小/位置/角度/时长，点「放这招」马上看；复制发 Claude 写死
+  const FXIMG = [['auto', '默认'], ['none', '不要特效'], ['dg1', '月牙①'], ['dg2', '月牙·扁'], ['dg3', '月牙·竖'], ['dg4', '大月牙'], ['dg5', 'S形刀光'], ['dg6', '细刀光'], ['dh2', '刀光·横'], ['dd_xuehe', '血河刀光'], ['dd_feilun', '飞轮'], ['dd_liedi', '裂地'], ['dt_tianbeng', '天崩'], ['dt_wanren', '旋涡'], ['fx_lun', '旋风'], ['fx_ring', '光环'], ['fx_he', '光带']];
+  const SOLN = { grunt: '棍兵', blade: '刀手', slinger: '投石手', archer: '弓手', elite: '老卒', priest: '方士', 'yellow-heavy': '大刀兵', 'yellow-shield': '盾兵', 'yellow-spear': '枪兵', 'yellow-golem': '力士', 'fire-jar': '火罐手', cavalry: '骑兵', fanatic: '狂信徒', crossbow: '弩手' };
+  const FXB = [['cheng_yuanzhi', '程远志'], ['zhang_fei', '张飞']].concat(NBS);
+  let fxT = '', fxM = 'any', fxBox = null;
+  const hex = rgb => '#' + rgb.split(',').map(v => (+v).toString(16).padStart(2, '0')).join('');
+  const rgbOf = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)).join(',');
+  function fxPanel(tk) {
+    if (tk) fxT = tk; if (!fxT) fxT = 'deng_mao';
+    if (!fxBox) { fxBox = document.createElement('div'); fxBox.id = 'szzFx'; document.body.appendChild(fxBox); sbar('szzFx', 1);
+      const st = document.createElement('style'); st.textContent = `#szzFx{position:fixed;right:8px;top:60px;z-index:10046;width:300px;max-width:calc(100vw - 16px);max-height:calc(100vh - 70px);overflow:auto;background:rgba(14,22,30,.95);border:1px solid #4a7a9a;color:#dbe8f2;font:13px/1.5 sans-serif;padding:6px 8px;border-radius:6px;scrollbar-color:#7ab0d0 #12202a}
+#szzFx .hd{display:flex;justify-content:space-between;align-items:center;color:#bfe6ff;font-weight:700;margin-bottom:4px}#szzFx button{background:#12202a;border:1px solid #3a5a70;color:#dbe8f2;padding:2px 7px;margin:1px;cursor:pointer;font-size:12px;border-radius:3px}#szzFx button.on{border-color:#7ad0ff;background:#1f3a50;color:#fff}
+#szzFx .row{display:flex;align-items:center;gap:6px;margin:3px 0}#szzFx .row span{width:52px;flex:none;color:#9cc4dc}#szzFx .row input[type=range]{flex:1;accent-color:#7ad0ff}#szzFx .row b{min-width:40px;text-align:right;color:#bfe6ff;font-weight:600}#szzFx select{background:#12202a;color:#dbe8f2;border:1px solid #3a5a70;font-size:12px;flex:1}#szzFx .sec{margin-top:6px;border-top:1px solid #2a4a60;padding-top:4px;color:#9cc4dc}#szzFx .ds{font-size:11px;opacity:.75}
+@media (max-aspect-ratio:1/1){#szzFx{left:0;right:0;top:auto;bottom:0;width:auto;max-height:50vh}}`; document.head.appendChild(st); }
+    fxRender();
+  }
+  function fxRender() {
+    const t = T(); if (!fxBox || !t) return;
+    const boss = fxT.slice(0, 2) !== 's:', nm = boss ? ((FXB.find(x => x[0] === fxT) || [0, fxT])[1]) : SOLN[fxT.slice(2)] || fxT;
+    const mvs = boss ? (fxT === 'cheng_yuanzhi' ? [] : (t.nmoves()[fxT] || []).concat(fxT === 'zhang_jiao' ? ['zj_ht'] : [])) : [];
+    const L = [['any', boss ? (mvs.length ? '其他' : '全部招式') : '出招']].concat(mvs.map(m => [m, NMN[m] || m])); if (!L.find(x => x[0] === fxM)) fxM = L[0][0];
+    const B = t.bfxGet(fxT), M = t.bfxGet(fxT + ':' + fxM), col = B.col || t.bfxCol(fxT), sol = !boss;
+    const sl = (lab, key, o, min, max, step, def, fmt) => { const v = o[key] != null ? o[key] : def; return `<div class="row"><span>${lab}</span><input type="range" min="${min}" max="${max}" step="${step}" value="${v}" data-${o === B ? 'b' : 'm'}="${key}"><b>${fmt(v)}</b></div>`; };
+    fxBox.innerHTML = `<div class="hd"><span>特效调试 · ${nm}</span><button class="fxx">关闭</button></div>
+      <div class="sec">首领：</div><div>${FXB.map(([k, n]) => `<button data-ft="${k}" class="${k === fxT ? 'on' : ''}">${n}</button>`).join('')}</div>
+      <div class="sec">小兵：</div><div>${Object.entries(SOLN).map(([k, n]) => `<button data-ft="s:${k}" class="${'s:' + k === fxT ? 'on' : ''}">${n}</button>`).join('')}</div>
+      <div class="sec">整体（这个人所有招一起改）</div>
+      <div class="row"><span>开关</span><button class="fxo ${B.off ? '' : 'on'}">${B.off ? '已关' : '开'}</button><span style="width:auto">颜色</span><input type="color" class="fxc" value="${hex(col)}"></div>
+      ${sl('大小', 'k', B, .2, 2.5, .05, sol ? .6 : 1, v => '×' + (+v).toFixed(2))}${sl('亮度', 'al', B, .1, 1, .05, sol ? .7 : 1, v => (+v).toFixed(2))}
+      <div class="sec">单招</div><div>${L.map(([k, n]) => `<button data-fm="${k}" class="${k === fxM ? 'on' : ''}">${n}</button>`).join('')}</div>
+      <div class="row"><span>特效图</span><select class="fxi">${FXIMG.map(([k, n]) => `<option value="${k}"${(M.img || 'auto') === k ? ' selected' : ''}>${n}</option>`).join('')}</select></div>
+      ${sl('大小', 'k', M, .2, 3, .05, 1, v => '×' + (+v).toFixed(2))}${sl('前后', 'dx', M, -120, 120, 2, 0, v => v)}${sl('上下', 'dy', M, -120, 120, 2, 0, v => v)}${sl('角度', 'r', M, -180, 180, 5, 0, v => v + '°')}${sl('时长', 'T', M, .3, 3, .05, 1, v => '×' + (+v).toFixed(2))}${sl('亮度', 'al', M, .1, 1, .05, 1, v => (+v).toFixed(2))}
+      <div class="row"><span>光束</span><button class="fxbm ${M.beam === 0 ? '' : 'on'}">${M.beam === 0 ? '关' : '开'}</button><span class="ds" style="width:auto">直线招沿预警线的一道光</span></div>
+      <div style="margin-top:6px"><button class="fxp" style="border-color:#ffd86e;color:#ffe08a">${boss ? (fxT === 'cheng_yuanzhi' ? '叫程远志出来' : '放这招') : '刷 2 个出来'}</button> <button class="fxr">重置这个人</button> <button class="fxcp">复制特效设置</button></div>
+      <div class="ds">${boss ? '「放这招」会叫这个首领出来对你放（主角无敌）。程远志的招不分开，统一调「全部招式」。' : '小兵刷出来会自己出招；只有地上有预警的招（劈、突刺、冲锋、砸地、火箭落点等）会有特效。'}改完马上生效，存在这台设备上；满意了点「复制特效设置」发给我。</div>`;
+    const set = (k, o) => { t.bfxSet(k, o); };
+    fxBox.querySelector('.fxx').onclick = () => { fxBox.remove(); fxBox = null; };
+    fxBox.querySelectorAll('[data-ft]').forEach(b => b.onclick = () => { fxT = b.dataset.ft; fxM = 'any'; fxRender(); });
+    fxBox.querySelectorAll('[data-fm]').forEach(b => b.onclick = () => { fxM = b.dataset.fm; fxRender(); });
+    fxBox.querySelector('.fxo').onclick = () => { set(fxT, { off: B.off ? '' : 1 }); fxRender(); };
+    fxBox.querySelector('.fxc').oninput = e => set(fxT, { col: rgbOf(e.target.value) });
+    fxBox.querySelectorAll('[data-b]').forEach(e => e.oninput = () => { const v = +e.value; set(fxT, { [e.dataset.b]: v }); e.nextElementSibling.textContent = e.dataset.b === 'k' ? '×' + v.toFixed(2) : v.toFixed(2); });
+    fxBox.querySelectorAll('[data-m]').forEach(e => e.oninput = () => { const v = +e.value, k = e.dataset.m; set(fxT + ':' + fxM, { [k]: v }); e.nextElementSibling.textContent = k === 'k' || k === 'T' ? '×' + v.toFixed(2) : k === 'al' ? v.toFixed(2) : k === 'r' ? v + '°' : v; });
+    fxBox.querySelector('.fxi').onchange = e => set(fxT + ':' + fxM, { img: e.target.value === 'auto' ? '' : e.target.value });
+    fxBox.querySelector('.fxbm').onclick = () => { set(fxT + ':' + fxM, { beam: M.beam === 0 ? '' : 0 }); fxRender(); };
+    fxBox.querySelector('.fxr').onclick = () => { t.bfxReset(fxT); fxRender(); };
+    fxBox.querySelector('.fxcp').onclick = () => { const txt = '特效设置：' + t.bfxCopy(); try { navigator.clipboard.writeText(txt); } catch (e) {} fxBox.querySelector('.fxcp').textContent = '已复制'; };
+    fxBox.querySelector('.fxp').onclick = () => { try {
+      if (!boss) { t.unitStyle(fxT.slice(2), 2); return; }
+      const has = () => zs.find(z => z.survBoss && !z.dead && (fxT === 'zhang_fei' ? z.zf : z.type === fxT) && /_(new|px)$/.test(z.sprite || ''));
+      const go = () => { if (fxM !== 'any') t.forceMove(fxM); };
+      if (has()) go(); else { if (fxT === 'zhang_fei') t.zhangFei(); else if (fxT === 'cheng_yuanzhi') t.pilotAs('cheng_yuanzhi'); else t.spawnNew(fxT); setTimeout(go, 1500); }
+    } catch (e) { console.error(e); } };
   }
   function skills(w) { const t = T(); return Object.keys(t.SK).filter(k => !t.SK[k].off && t.wepOf(k) === w).sort((a, b) => (t.SK[a].tier || 0) - (t.SK[b].tier || 0)); }
   function render() {
@@ -167,12 +222,13 @@
       ls = ids.map(id => { const g = t.GF[id]; return `<button data-g="${id}" class="${on.includes(id) ? 'on' : ''}"><span style="color:${TC[g.t + 1]}">${t.TIERN[g.t + 1]}</span> ${g.n}<small>${g.cn || (qg ? '轻功' : '内功')}</small></button>`; }).join('');
       const g = sel && t.GF[sel]; dt = g ? `<b>${g.n}</b>　${t.TIERN[g.t + 1]}阶<br>${g.d || ''}` : `<span style="opacity:.6">${qg ? '点一个轻功装上（只能装一个）' : '点心法装上（最多 3 个，再点取消）'}；武艺照常放。</span>`;
     }
-    box.innerHTML = `<div class="hd"><span>武学试炼</span><span>${mini ? '' : `<button class="dm">木人桩：${DUMN[dum]}</button> `}<button class="mn">${mini ? '展开' : '缩小'}</button></span></div>${mini ? '' : `<div class="dms"><span><button class="tbk">${brk ? '会碎的木人' : '不碎的木人'}</button> <button class="tsol">士兵：${sol ? '开' : '关'}</button>  <button class="trg">范围：${window.FXALIGN ? '开' : '关'}</button>${sol ? ` <button class="rg">远程兵：${rng ? '开' : '关'}</button>` : ''}</span></div><div class="dms" style="flex-wrap:wrap"><span>新画风：<button class="tzf" style="border-color:#ffd86e;color:#ffe08a">刷张飞＋新兵</button> 刷兵：<button data-ut="grunt">棍兵</button> <button data-ut="blade">刀手</button> <button data-ut="slinger">投石手</button> <button data-ut="archer">弓手</button> <button data-ut="elite">老卒</button> <button data-ut="priest">方士</button> <button data-ut="yellow-heavy">大刀兵</button> <button data-ut="yellow-shield">盾兵</button> <button data-ut="yellow-spear">枪兵</button> <button data-ut="yellow-golem">力士</button> <button data-ut="fire-jar">火罐</button> <button data-ut="drummer">鼓手</button> <button data-ut="cavalry">骑兵</button> <button data-ut="fanatic">狂信徒</button> <button data-ut="crossbow">弩手</button> <button data-ut="thief">窃贼</button></span></div>${dum ? '<div class="dms"><span class="dmv">—</span><button class="dmc">清零</button></div>' : ''}<div class="tabs">${tabs}</div><div class="ls">${ls}</div><div class="dt">${dt}</div>`}`;
+    box.innerHTML = `<div class="hd"><span>武学试炼</span><span>${mini ? '' : `<button class="dm">木人桩：${DUMN[dum]}</button> `}<button class="mn">${mini ? '展开' : '缩小'}</button></span></div>${mini ? '' : `<div class="dms"><span><button class="tbk">${brk ? '会碎的木人' : '不碎的木人'}</button> <button class="tsol">士兵：${sol ? '开' : '关'}</button>  <button class="trg">范围：${window.FXALIGN ? '开' : '关'}</button>${sol ? ` <button class="rg">远程兵：${rng ? '开' : '关'}</button>` : ''}</span></div><div class="dms" style="flex-wrap:wrap"><span>新画风：<button class="tzf" style="border-color:#ffd86e;color:#ffe08a">刷张飞＋新兵</button> <button class="tfx" style="border-color:#7ad0ff;color:#bfe6ff">小兵特效调试</button> 刷兵：<button data-ut="grunt">棍兵</button> <button data-ut="blade">刀手</button> <button data-ut="slinger">投石手</button> <button data-ut="archer">弓手</button> <button data-ut="elite">老卒</button> <button data-ut="priest">方士</button> <button data-ut="yellow-heavy">大刀兵</button> <button data-ut="yellow-shield">盾兵</button> <button data-ut="yellow-spear">枪兵</button> <button data-ut="yellow-golem">力士</button> <button data-ut="fire-jar">火罐</button> <button data-ut="drummer">鼓手</button> <button data-ut="cavalry">骑兵</button> <button data-ut="fanatic">狂信徒</button> <button data-ut="crossbow">弩手</button> <button data-ut="thief">窃贼</button></span></div>${dum ? '<div class="dms"><span class="dmv">—</span><button class="dmc">清零</button></div>' : ''}<div class="tabs">${tabs}</div><div class="ls">${ls}</div><div class="dt">${dt}</div>`}`;
     box.querySelector('.mn').onclick = () => { mini = !mini; render(); };
     if (mini) return;
     const rg = box.querySelector('.rg'); if (rg) rg.onclick = () => { rng = !rng; render(); };
     box.querySelector('.dm').onclick = () => { dum = DUMO[(DUMO.indexOf(dum) + 1) % DUMO.length]; try { T().dummy(dum); } catch (e) {} render(); };
     box.querySelector('.tbk').onclick = () => { brk = brk ? 0 : 1; try { T().dummyBrk(brk); } catch (e) {} render(); };
+    { const b = box.querySelector('.tfx'); if (b) b.onclick = () => fxPanel('s:blade'); }
     box.querySelector('.tzf').onclick = () => { try { T().zhangFei(); } catch (e) { console.error(e); } };
     box.querySelectorAll('[data-ut]').forEach(b => b.onclick = () => { try { T().unitStyle(b.dataset.ut); } catch (e) { console.error(e); } });
     box.querySelectorAll('[data-gs]').forEach(b => b.onclick = () => { try { T().gruntStyle(b.dataset.gs); } catch (e) { console.error(e); } });
@@ -246,5 +302,5 @@
   async function openBoss() { bossMode = true; await open(); if (box) box.style.display = 'none'; bossPanel(true); }
   // 11/18 用户：这些开关挪到开发者面板
   function burnTry() { try { if (zs.filter(z => !z.dead && !z.dummy && !z.pilot).length < 4) { T().soldiers(1); for (let i = 0; i < 8; i++) { const z = T().spawn('grunt'); if (z) { z.x = hero.x + (i % 2 ? 1 : -1) * (70 + (i >> 1) * 40); z.y = hero.y + ((i * 37) % 60) - 30; } } T().soldiers(0, 1); setTimeout(() => SURV.burnTest(), 900); } else SURV.burnTest(); } catch (e) { console.error(e); } }
-  window.TRIAL = { open, openBoss, close, regNew: regNewGrunt, bpx: on => bpx(on), bpxOn: () => BPX, burnTry };
+  window.TRIAL = { fxPanel, open, openBoss, close, regNew: regNewGrunt, bpx: on => bpx(on), bpxOn: () => BPX, burnTry };
 })();
