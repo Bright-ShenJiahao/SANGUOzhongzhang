@@ -5192,8 +5192,9 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
   }
   function hud(HW) {
     hudT = performance.now(); buildUi();
+    if (PIL.z && window.HIDE_HERO) { for (const id of ['bR', 'top', 'wp', 'survBuildBtn']) { const e = document.getElementById(id); if (e) e.style.visibility = 'hidden'; } return; }   // 11/19 用户：首领试炼和武学试炼分开——操控首领时不画主角的招式栏、血条真气、修为、翻滚键
     if (RT.on && RT.node && S.money != null) moneyHud();
-    for (const id of ['bR', 'top']) { const e = document.getElementById(id); if (e && e.style.visibility) e.style.visibility = ''; }
+    for (const id of ['bR', 'top', 'wp', 'survBuildBtn']) { const e = document.getElementById(id); if (e && e.style.visibility) e.style.visibility = ''; }
     const HH = ctx.canvas.height / DPR, fine = !(window.matchMedia && matchMedia('(pointer:coarse)').matches), n = 5, sz = fine ? 44 : 38, sz0 = sz, gap = 6, w = n * sz + (n - 1) * gap;
     const lab = fine ? sz * .8 : 0, x0 = fine ? 16 + lab + 6 : (HW - w) / 2, y0 = fine ? HH - 16 - sz * 2 - 8 : (RT.on ? 60 : 44), labY = (fine ? 54 : y0 + sz + 4 + 26 + 18) + (RT.on ? 16 : 0);
     ctx.save();
