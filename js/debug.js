@@ -121,6 +121,7 @@
       const bh = btn(heroGroup, '兵魂：' + (window.SURV && SURV.bhOn && SURV.bhOn() ? '开' : '关'), 'alt', () => { if (!window.SURV || !SURV.setBh) return; SURV.setBh(!SURV.bhOn()); bh.textContent = '兵魂：' + (SURV.bhOn() ? '开' : '关'); });
       const bu = btn(heroGroup, '消散：' + (window.SURV && SURV.exitName ? SURV.exitName() : ''), 'alt', () => { if (!window.SURV || !SURV.setExit) return; SURV.setExit(SURV.exitN() + 1); bu.textContent = '消散：' + SURV.exitName(); });
       const pon = () => { try { return localStorage.getItem('szz-bpx') === '1'; } catch (e) { return false; } };
+      const cu = btn(heroGroup, 'Q像素版：' + t(window.SURV && SURV.trial && SURV.trial.cuteOn(), '开', '关'), 'alt', () => { const T = window.SURV && SURV.trial; if (!T) return; T.cute(!T.cuteOn()); cu.textContent = 'Q像素版：' + t(T.cuteOn(), '开', '关'); });   // 11/19 实验：小兵、张角换成 Q 像素画风
       const px = btn(heroGroup, '首领像素：' + t(pon(), '开', '关'), 'alt', () => { if (!window.TRIAL || !TRIAL.bpx) return; TRIAL.bpx(!pon()); px.textContent = '首领像素：' + t(pon(), '开', '关'); });
       btn(heroGroup, '纸片燃尽（刷兵烧掉）', 'alt dbgWide', () => { if (window.TRIAL && TRIAL.burnTry) TRIAL.burnTry(); });
     }
@@ -190,7 +191,7 @@
 
   // 三国终章：老游戏的按钮先藏起来（锦囊、经脉、神器、校场、第二章、Boss 等已拿掉），只留测试要用的几个
   function trimPanel() {
-    const keep = ['回到主界面', '武艺：刀', '武艺：剑', '回满血', '无敌', '跳过这一波', '恢复存档', '跳到第', '修为', '图鉴全开', '解锁关卡', '武学试炼', '首领试炼', '特效：', '地面：', '消散：', '震屏：', '兵魂：', '首领像素', '纸片燃尽', '皮肤：'];   /* 11/12：图鉴、解锁关卡也留着 */
+    const keep = ['回到主界面', '武艺：刀', '武艺：剑', '回满血', '无敌', '跳过这一波', '恢复存档', '跳到第', '修为', '图鉴全开', '解锁关卡', '武学试炼', '首领试炼', '特效：', '地面：', '消散：', '震屏：', '兵魂：', '首领像素', 'Q像素版', '纸片燃尽', '皮肤：'];   /* 11/12：图鉴、解锁关卡也留着 */
     panel.querySelectorAll('button').forEach(b => { if (!keep.some(k => b.textContent.startsWith(k))) b.style.display = 'none'; });
     panel.querySelectorAll('.dbgTrial,.dbgFloors').forEach(e => { e.style.display = 'none'; });
     panel.querySelectorAll('.dbgGroup').forEach(g => { if (![...g.querySelectorAll('button')].some(b => b.style.display !== 'none')) g.style.display = 'none'; });

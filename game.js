@@ -13,6 +13,7 @@ const LAZY = { chapter2: [], xiaochang: [], core: [], bossnew: [] }, LAZY_DONE =
 const LAZY_CHARS = { yellow_heavy: 'chapter2', yellow_shield: 'chapter2', yellow_spear: 'chapter2', yellow_catapult: 'chapter2', zhang_liang: 'chapter2', zhang_bao: 'chapter2', yellow_golem: 'chapter2', zhang_jiao: 'chapter2' };
 // 11/19 首领重做：新画风十个首领（原分辨率大图）开局后台再下，没下好前首领用旧图
 for (const b of ['deng_mao', 'bo_cai', 'he_yi', 'zhang_mancheng', 'guanhai', 'guanhai_horse', 'zhang_liang', 'zhang_bao', 'ma_yuanyi', 'zhang_jiao']) LAZY_CHARS[b + '_new'] = 'bossnew';
+LAZY_CHARS.zhang_jiao_cute = 'bossnew';
 function lazyLoad(group, k, src) { const i = new Image(); IMG[k] = i; LAZY[group].push([i, src]); return i; }
 function ensureAssets(group, { silent = false, label = '' } = {}) {
   const list = LAZY[group] || [];
@@ -76,7 +77,8 @@ for (const [name, frames] of Object.entries(ASSETS.chars)) {
   }
 }
 // 11/19 首领新图缺的通用帧用相近的帧顶上（骑马管亥没有走路/倒地帧等），免得某个状态下人物隐形
-for (const [n, C] of Object.entries(CH)) if (/_new$/.test(n)) {
+for (const [n, C] of Object.entries(CH)) if (/_(new|cute)$/.test(n)) {
+  if (!C.walk3 && C.walk1 && C.walk2 && !C.run1) { C.walk3 = C.walk1; C.walk4 = C.walk2; }   // 只有两帧走路的（Q像素小兵）
   const A = { walk1: 'run1', walk2: 'run2', walk3: 'run3', walk4: 'run4', down: 'fall', fly1: 'fall', fly2: 'fall', land: 'hurt', getup: 'land', dizzy: 'hurt', chant: 'idle', rest: 'hurt' };
   for (const [k, v] of Object.entries(A)) if (!C[k] && C[v]) C[k] = C[v];
   for (const k of ['walk1', 'walk2', 'walk3', 'walk4', 'hurt', 'down', 'fly1', 'fly2', 'land', 'getup', 'wind', 'strike']) if (!C[k] && C.idle) C[k] = C.idle;
@@ -842,7 +844,7 @@ function zFrame(z) {
   }
   if (z.air) return z.vz > 0 ? 'fly1' : 'fly2';
   if (z.cbFrame && !z.dead) return z.cbFrame;   // 第二章首领技能帧
-  if (z.sprite && /_new$/.test(z.sprite) && !z.dead && window.SURV && SURV.trial && SURV.trial.bossCfg && (z.st === 'wind' || z.st === 'strike' || z.st === 'rec')) { const C = SURV.trial.bossCfg('atk', z.sprite === 'cheng_new' ? 'cheng_yuanzhi' : z.type), a = C.a || 'wind', b = C.b || 'strike'; return z.st === 'wind' ? a : z.st === 'rec' ? (C.c || b) : b; }   // 11/19 每个首领的普攻帧都能在首领试炼里调   // 11/18 首领普攻帧可在首领试炼里挑
+  if (z.sprite && /_(new|cute)$/.test(z.sprite) && !z.dead && window.SURV && SURV.trial && SURV.trial.bossCfg && (z.st === 'wind' || z.st === 'strike' || z.st === 'rec')) { const C = SURV.trial.bossCfg('atk', z.sprite === 'cheng_new' ? 'cheng_yuanzhi' : z.type), a = C.a || 'wind', b = C.b || 'strike'; return z.st === 'wind' ? a : z.st === 'rec' ? (C.c || b) : b; }   // 11/19 每个首领的普攻帧都能在首领试炼里调   // 11/18 首领普攻帧可在首领试炼里挑
   if (z.zjDizzy > 0) return 'dizzy';
   if (z.sprite === 'zhang_jiao' && z.stun > 0) return 'hurt';
   if (z.sprite === 'zhang_jiao' && z.throwT > 0) return 'throw';
@@ -866,7 +868,7 @@ function zFrame(z) {
   if (z.st === 'strike') return 'strike';
   if (z.st === 'rec') return z.T.ranged ? 'idle' : 'strike';
   if (z.sprite === 'zhang_jiao') return z.st === 'rest' ? 'rest' : 'float';   // 张角飘着走，不走路
-  if (z.sprite && /_new$/.test(z.sprite) && z.moving) return 'walk' + (1 + Math.floor(z.t * 5) % 4);   // 11/19 首领新图都是四帧走路   // 11/18 新程远志（用户：慢一点）：迈步→经过→迈步→经过（照主角的走法）
+  if (z.sprite && /_(new|cute)$/.test(z.sprite) && z.moving) return 'walk' + (1 + Math.floor(z.t * 5) % 4);   // 11/19 首领新图都是四帧走路   // 11/18 新程远志（用户：慢一点）：迈步→经过→迈步→经过（照主角的走法）
   return z.moving ? (Math.floor(z.t * 6) % 2 ? 'walk1' : 'walk2') : 'idle';
 }
 let _shT = 0;

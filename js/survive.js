@@ -265,7 +265,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   }
   const pMoves = () => !PIL.z || PIL.z.sprite === 'cheng_new' ? ['atk', 'boomerang', 'sweep', 'chase'] : ['atk'].concat(NMOVES[PIL.z.type] || [], PIL.z.type === 'zhang_jiao' ? ['zj_ht'] : []);
   addEventListener('keydown', e => { if (!PIL.z || e.repeat) return; const q = { j: 0, k: 1, l: 2, i: 3, u: 4, 1: 0, 2: 1, 3: 2, 4: 3, 5: 4 }[e.key.toLowerCase()], m = q == null ? null : pMoves()[q]; if (m) { e.preventDefault(); e.stopPropagation(); pilotCast(m); } }, true);
-  const cyPlay = (z, seq) => { if (!/_new$/.test(z.sprite || '')) return; if (BCX && BCX.first) { BCX.first = 0; seq = seq.map(x => x.slice()); if (BCX.a) seq[0][0] = BCX.a; if (BCX.b && seq[1]) seq[1][0] = BCX.b; if (BCX.c) { if (seq.length > 2) seq[seq.length - 1][0] = BCX.c; else seq.push([BCX.c, .3]); } } let t = 0; z.cbFrame = seq[0][0]; for (let i = 0; i < seq.length; i++) { const [f, d] = seq[i], t0 = t; if (i) later(t0, () => { if (!z.dead) z.cbFrame = f; }); t += d; } later(t, () => { if (z.cbFrame === seq[seq.length - 1][0]) z.cbFrame = null; }); };
+  const cyPlay = (z, seq) => { if (!/_(new|cute)$/.test(z.sprite || '')) return; if (BCX && BCX.first) { BCX.first = 0; seq = seq.map(x => x.slice()); if (BCX.a) seq[0][0] = BCX.a; if (BCX.b && seq[1]) seq[1][0] = BCX.b; if (BCX.c) { if (seq.length > 2) seq[seq.length - 1][0] = BCX.c; else seq.push([BCX.c, .3]); } } let t = 0; z.cbFrame = seq[0][0]; for (let i = 0; i < seq.length; i++) { const [f, d] = seq[i], t0 = t; if (i) later(t0, () => { if (!z.dead) z.cbFrame = f; }); t += d; } later(t, () => { if (z.cbFrame === seq[seq.length - 1][0]) z.cbFrame = null; }); };
   const gap = (z, t, txt) => { z.stun = Math.max(z.stun || 0, t); floaters.push({ x: z.x, y: z.y - 70, t: 0, txt, color: '#9fe08a' }); };
   // 11/19 操控首领时，招式瞄准前方（摇杆方向 170 远），打士兵和木人；平时瞄准主角
   const AX = z => z.pilot ? z.x + PIL.ax * 170 : hero.x, AY = z => z.pilot ? clampY(z.y + PIL.ay * 85) : hero.y;
@@ -333,7 +333,8 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   // ===== 11/19 首领重做：新画风十个首领的招式（设计表：普攻 + 位移 + 远程 + 特色，大招地上先出预警），出招帧用新图 =====
   let NEWOFF = false; try { NEWOFF = localStorage.getItem('szz-oldboss') === '1'; } catch (e) {}   // 开发者面板可切回旧首领对比
   const NSP = { guanhai_m: 'guanhai_horse_new', guanhai_b: 'guanhai_new' };
-  const newSp = t => { const n = NSP[t] || t + '_new'; return typeof CH !== 'undefined' && CH[n] && CH[n].idle && CH[n].idle.img.complete && CH[n].idle.img.naturalWidth ? n : ''; };
+  const CUTE = () => { try { return localStorage.getItem('szz-cute') === '1'; } catch (e) { return false; } };   // 11/19 实验：Q像素画风（小兵、张角）
+  const newSp = t => { const n = (CUTE() && typeof CH !== 'undefined' && CH[t + '_cute'] && CH[t + '_cute'].idle.img.complete && CH[t + '_cute'].idle.img.naturalWidth && t + '_cute') || NSP[t] || t + '_new'; return typeof CH !== 'undefined' && CH[n] && CH[n].idle && CH[n].idle.img.complete && CH[n].idle.img.naturalWidth ? n : ''; };
   const shout = (z, t) => { if (z.survTier >= 3) say(z, t); };   // 小头目出招不喊话（用户定）
   const proj = (z, o) => { const ux = Math.cos(o.a), uy = Math.sin(o.a);   // 直线飞行物
     return hzAdd(Object.assign({ kind: 'spr', spr: z.sprite, src: z, x: z.x + ux * 20, y: z.y + uy * 20 * YS, upd: (q, dt) => { const v = o.spd * ((q.bc && q.bc.rs) || 1); q.x += ux * v * dt; q.y = clampY(q.y + uy * v * dt * YS); } }, o)); };
@@ -417,7 +418,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       for (let i = 0; i < 10; i++) teleAdd({ k: 'circle', x: AX(z) + (i ? R(-200, 200) : 0), y: clampY(AY(z) + (i ? R(-90, 90) : 0)), r: R(40, 56), T: 1.0 + i * .2, dmg: 2.4, src: z, c: 1, snd: i % 2 ? '' : 'crack' });
       return 3.0; },
   });
-  const runMv = (z, m) => { if (!/_new$/.test(z.sprite || '') || z.sprite === 'cheng_new') return BSK[m](z); const C = bcfg(z.type, m), k = BCX; BCX = Object.assign({}, C, { first: 1 }); try { return BSK[m](z) * (C.sp || 1); } finally { BCX = k; } };
+  const runMv = (z, m) => { if (!/_(new|cute)$/.test(z.sprite || '') || z.sprite === 'cheng_new') return BSK[m](z); const C = bcfg(z.type, m), k = BCX; BCX = Object.assign({}, C, { first: 1 }); try { return BSK[m](z) * (C.sp || 1); } finally { BCX = k; } };
   const NMOVES = { deng_mao: ['dm_dash', 'dm_rings', 'dm_quake'], bo_cai: ['bc_spin', 'bc_arrows', 'bc_fire'], he_yi: ['hy_dash3', 'hy_ji', 'hy_spin'], zhang_mancheng: ['zm_glide', 'zm_fu', 'zm_ring'],
     guanhai_m: ['gm_charge', 'gm_ji', 'gm_rear'], guanhai_b: ['gb_leap', 'gb_throw', 'gb_spin'], zhang_liang: ['zl_whirl', 'zl_cross', 'zl_charge'], zhang_bao: ['zb_burrow', 'zb_rain', 'zb_wall'], ma_yuanyi: ['my_claw', 'my_flail', 'my_spin'], zhang_jiao: ['zj_blink', 'zj_fu', 'zj_storm'] };
   const RAGEL = { bo_cai: '颍川儿郎，随我死战！', guanhai_b: '老子宰了你！', zhang_liang: '都给我上！杀！', zhang_bao: '黄沙迷阵——众弟子，助我！', zhang_jiao: '吾……未死！' };
@@ -443,7 +444,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       if (z.skCd == null) z.skCd = 2.5;
       if (z.pilot) continue;
       if (BOSSTR.on && z.sprite === 'cheng_new') { if (BOSSTR.move === 'atk' || !BOSSTR.move) continue; if (!z.seq || !z.seq.length) { if ((z.skCd -= dt) > 0) continue; z.seq = [BOSSTR.move]; z.skCd = 1.4; } const T = BSK[z.seq.shift()](z); if (T > 0) { z.castT = T; z.cx = z.x; z.cy = z.y; z.st = 'wind'; z.t = 0; } continue; }
-      const big = z.survTier >= 3, list = z.clone ? ['crack'] : ((/_new$/.test(z.sprite || '') && NMOVES[z.type]) || BMOVES[z.type] || (big ? ['sweep', 'cleave'] : ['cleave']));
+      const big = z.survTier >= 3, list = z.clone ? ['crack'] : ((/_(new|cute)$/.test(z.sprite || '') && NMOVES[z.type]) || BMOVES[z.type] || (big ? ['sweep', 'cleave'] : ['cleave']));
       if (!z.seq || !z.seq.length) {
         if ((z.skCd -= dt) > 0) continue;
         z.skI = (z.skI || 0); z.seq = big ? [list[z.skI % list.length], list[(z.skI + 1) % list.length]] : [list[z.skI % list.length]]; z.skI += big ? 2 : 1;
@@ -460,7 +461,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     for (const z of zs) {
       if (!z.survBoss || z.dead || z.hp <= 0 || z.endFade != null || !(z.survTier >= 3)) continue;
       if (z.type === 'guanhai_m' && !z.dismount && z.hp < (z.maxHp || z.hp) * .5) {   // 管亥二阶段：被打下马，换步战长戟，摔倒僵直 1.2 秒
-        z.dismount = 1; z.type = 'guanhai_b'; z.sprite = (/_new$/.test(z.sprite || '') && newSp('guanhai_b')) || 'guanhai_b'; z.cbFrame = null; z.dash = null; z.T = Object.assign({}, TYPES.guanhai_b, { dmg: TYPES.guanhai_b.dmg * 1.6, heavy: true }); z.stun = 1.2; z.st = 'hurt'; z.t = 0;
+        z.dismount = 1; z.type = 'guanhai_b'; z.sprite = (/_(new|cute)$/.test(z.sprite || '') && newSp('guanhai_b')) || 'guanhai_b'; z.cbFrame = null; z.dash = null; z.T = Object.assign({}, TYPES.guanhai_b, { dmg: TYPES.guanhai_b.dmg * 1.6, heavy: true }); z.stun = 1.2; z.st = 'hurt'; z.t = 0;
         floaters.push({ x: z.x, y: z.y - 70, t: 0, txt: '管亥 落马！', color: '#ffcf6a', big: 1 }); shake = Math.max(shake, .35); if (window.SFX) SFX.play('crack');
         z.rage = 0;
       }
@@ -469,10 +470,10 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
         floaters.push({ x: z.x, y: z.y - 84, t: 0, txt: '张梁 狂怒！', color: '#ff4a2a', big: 1 }); shake = Math.max(shake, .4); if (window.SFX) SFX.play('crack');
       }
       if (!z.rage && z.hp < (z.maxHp || z.hp) * .5 && z.type === 'zhang_bao') {   /* 11/12 张宝二阶段：召出两个分身（血少、伤害低，打掉就散） */
-        for (const s of [-1, 1]) { const c = edgeSpawn('zhang_bao', { name: '张宝·分身', hp: 18, sc: 1, tier: 2 }); if (c) { c.x = z.x + s * 70; c.y = Math.max(M.top + 6, Math.min(M.bot - 6, z.y + s * 30)); c.T = Object.assign({}, c.T, { dmg: (c.T.dmg || 1) * .6 }); c.clone = 1; if (/_new$/.test(z.sprite || '')) c.sprite = z.sprite; } } cyPlay(z, [['sleeve', .7]]);
+        for (const s of [-1, 1]) { const c = edgeSpawn('zhang_bao', { name: '张宝·分身', hp: 18, sc: 1, tier: 2 }); if (c) { c.x = z.x + s * 70; c.y = Math.max(M.top + 6, Math.min(M.bot - 6, z.y + s * 30)); c.T = Object.assign({}, c.T, { dmg: (c.T.dmg || 1) * .6 }); c.clone = 1; if (/_(new|cute)$/.test(z.sprite || '')) c.sprite = z.sprite; } } cyPlay(z, [['sleeve', .7]]);
         floaters.push({ x: z.x, y: z.y - 84, t: 0, txt: '张宝：分身之术！', color: '#c9a0ff', big: 1 }); if (window.SFX) SFX.play('j_banner');
       }
-      if (!z.rage && z.hp < (z.maxHp || z.hp) * .5 && /_new$/.test(z.sprite || '')) { cyPlay(z, [['roar', .8]]); if (RAGEL[z.type]) say(z, RAGEL[z.type]); if (z.type === 'zhang_jiao') { z.seq = ['zj_ht']; z.skCd = 0; } }
+      if (!z.rage && z.hp < (z.maxHp || z.hp) * .5 && /_(new|cute)$/.test(z.sprite || '')) { cyPlay(z, [['roar', .8]]); if (RAGEL[z.type]) say(z, RAGEL[z.type]); if (z.type === 'zhang_jiao') { z.seq = ['zj_ht']; z.skCd = 0; } }
       if (!z.rage && z.hp < (z.maxHp || z.hp) * .5) { z.rage = 1; z.T = Object.assign({}, z.T, { spd: (z.T.spd || 30) * 1.3, wind: (z.T.wind || .8) * .75 }); floaters.push({ x: z.x, y: z.y - (z.dismount ? 96 : 64), t: 0, txt: (z.bossLabel || '敌将') + ' 暴怒！', color: '#ff4a2a' }); shake = Math.max(shake, .3); if (window.SFX) SFX.play('j_banner'); }
       if ((z.bossT -= dt) <= 0) {
         z.bossT = z.rage ? 10 : 13; const n = 5 + (z.rage ? 2 : 0);
@@ -525,7 +526,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     if (window.ARENA && ARENA.on()) { const p = ARENA.edge(); x = p.x; y = p.y; side = x < hero.x ? -1 : 1; }   // 俯视竞技场：四周都刷
     else { x = side < 0 ? cam.x + 6 : cam.x + vw - 6; x = Math.max(arenaL + 14, Math.min(lockR - 14, x)); y = R(M.top + 6, M.bot - 6); }
     spawn(type, x, y);
-    const z = zs[zs.length - 1]; z.f = -side; if (window.NEW_GRUNT && type === 'grunt' && typeof CH !== 'undefined' && CH.grunt_new) z.sprite = 'grunt_new'; z.survMul = (1 + HP_SCALE * (W.n - 1)) * (HAS('yuxi') ? 1.15 : 1) * (S.enemyHpK || 1);
+    const z = zs[zs.length - 1]; z.f = -side; if (window.NEW_GRUNT && type === 'grunt' && typeof CH !== 'undefined' && CH.grunt_new) z.sprite = 'grunt_new'; if (type === 'grunt' && CUTE() && typeof CH !== 'undefined' && CH.grunt_cute) z.sprite = 'grunt_cute'; z.survMul = (1 + HP_SCALE * (W.n - 1)) * (HAS('yuxi') ? 1.15 : 1) * (S.enemyHpK || 1);
     z.survTier = 0;
     if (!boss && (z.T.elite || ['yellow-heavy', 'yellow-shield', 'yellow-golem', 'cavalry'].includes(type))) { z.survTier = 1; z.hp = 7.5; z.maxHp = z.hp * z.survMul; }   // 四档：杂兵 ×1（3）、精英 ×2.5（7.5）
     z.hp *= z.survMul;
@@ -5668,8 +5669,8 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
         const big = ['bo_cai', 'guanhai_m', 'guanhai_b', 'zhang_liang', 'zhang_bao', 'zhang_jiao'].includes(t), z = edgeSpawn(t, { name: (TYPES[t].name || '').split('·').pop(), hp: big ? 130 : 40, sc: 1, tier: big ? 3 : 2 });
         if (!z) return; bossBuff(z, big ? 1.6 : 1.3); const n = newSp(t); if (n) z.sprite = n; z.x = Math.min(lockR - 20, hero.x + 170); z.y = hero.y; z.skCd = 1.2; };
       if (typeof ensureAssets === 'function') ensureAssets('bossnew', { silent: true }).then(go); else go(); },
-    forceMove(m) { for (const z of zs) if (z.survBoss && !z.dead && /_new$/.test(z.sprite || '')) { z.seq = [m]; z.skCd = 0; } },
-    oldBoss(v) { NEWOFF = !!v; try { localStorage.setItem('szz-oldboss', v ? '1' : '0'); } catch (e) {} },
+    forceMove(m) { for (const z of zs) if (z.survBoss && !z.dead && /_(new|cute)$/.test(z.sprite || '')) { z.seq = [m]; z.skCd = 0; } },
+    cute(v) { try { localStorage.setItem('szz-cute', v ? '1' : '0'); } catch (e) {} for (const z of zs) if (z.type === 'grunt' && !z.dummy) z.sprite = v ? 'grunt_cute' : 'grunt'; if (typeof ensureAssets === 'function') ensureAssets('bossnew', { silent: true }); }, cuteOn: () => CUTE(), oldBoss(v) { NEWOFF = !!v; try { localStorage.setItem('szz-oldboss', v ? '1' : '0'); } catch (e) {} },
     newBoss() { const z = edgeSpawn('cheng_yuanzhi', { name: '程远志', hp: 70, sc: 1, tier: 3 }); if (z && typeof CH !== 'undefined' && CH.cheng_new) { z.sprite = 'cheng_new'; z.x = Math.min(lockR - 20, hero.x + 160); z.y = hero.y; } }, regrunt(on) { for (const z of zs) if (z.type === 'grunt' && !z.dummy) z.sprite = on && typeof CH !== 'undefined' && CH.grunt_new ? 'grunt_new' : 'grunt'; }, showcase: on => showcase(on), fxArr: () => fx, boltArr: () => bolts, pvr: () => PVR, getPv: k => pvOpt(k), getPs: k => pvShape(k), pvReach: k => PVM[k] || 0, setPs: (k, o) => { PVS[k] = Object.assign(pvShape(k), o); try { localStorage.setItem('szz-pv-shape', JSON.stringify(PVS)); } catch (e) {} }, setPv: (k, o) => { PVO[k] = Object.assign(pvOpt(k), o); try { localStorage.setItem('szz-pv-opt', JSON.stringify(PVO)); } catch (e) {} }, dummy: m => dummyMode(m), dummyStat, dummyClear() { DUM.log = []; DUM.tot = 0; DUM.broke = 0; DUM.t0 = performance.now(); }, dummyBrk(v) { DUM.brk = v ? 1 : 0; for (const z of zs) if (z.dummy) { z.dhp = DUM.HP; z.brokeT = 0; z.hidden = false; } }, soldiers(v, keep) { DUM.noSol = v ? 0 : 1; if (!v && !keep) for (let i = zs.length - 1; i >= 0; i--) if (!zs[i].dummy) zs.splice(i, 1); }, slot(i, k) { S.slots[i] = k; }, bao(k) { gainBao(k); }, lvSet(k, l) { (S.lvLock = S.lvLock || {})[k] = l; }, SK, GF, MOT, WEPN, TIERN, wepOf, IMGU, spdTxt, spawn: t => edgeSpawn(t), count: t => zs.filter(z => !z.dead && z.type === t).length, long() { W.tot = 9999; if (W.t > W.tot - 5) W.t = 0; },
     setGf(ids) { S.gf = ['', '', '']; ids.slice(0, 3).forEach((id, i) => { S.gf[i] = id; }); GM = gfCalc(); }, setQg(id) { S.qg = id || ''; GM = gfCalc(); }, gf: () => S.gf.slice(), qg: () => S.qg, mul: k => skillMul(k), lv: k => lvOf(k), spd: k => spdTxt(SK[k]), rs: k => SK[k] && SK[k].dk ? rsOf(k) : null, setRs(k, v) { DRS[k] = v; try { localStorage.setItem('szz-dao-rs', JSON.stringify(DRS)); } catch (e) {} },
     sp: k => spOf(k), setSp(k, v) { DSP[k] = v; try { localStorage.setItem('szz-dao-sp', JSON.stringify(DSP)); } catch (e) {} }, spAll(v, w) { Object.keys(SK).forEach(k => { if (SK[k].dk && (w == null || wepOf(k) === w)) DSP[k] = v; }); try { localStorage.setItem('szz-dao-sp', JSON.stringify(DSP)); } catch (e) {} },
