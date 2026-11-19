@@ -174,7 +174,7 @@
     const boss = fxT.slice(0, 2) !== 's:', nm = boss ? ((FXB.find(x => x[0] === fxT) || [0, fxT])[1]) : SOLN[fxT.slice(2)] || fxT;
     const mvs = boss ? (fxT === 'cheng_yuanzhi' ? [] : (t.nmoves()[fxT] || []).concat(fxT === 'zhang_jiao' ? ['zj_ht'] : [])) : [];
     const L = [['any', boss ? (mvs.length ? '其他' : '全部招式') : '出招']].concat(mvs.map(m => [m, NMN[m] || m])); if (!L.find(x => x[0] === fxM)) fxM = L[0][0];
-    const B = t.bfxGet(fxT), M = t.bfxGet(fxT + ':' + fxM), col = B.col || t.bfxCol(fxT), sol = !boss;
+    const B = t.bfxGet(fxT), M0 = t.bfxGet(fxT + ':' + fxM), M = Object.assign({ beam: M0.beam }, M0.l1 || {}), col = B.col || t.bfxCol(fxT), sol = !boss;
     const sl = (lab, key, o, min, max, step, def, fmt) => { const v = o[key] != null ? o[key] : def; return `<div class="row"><span>${lab}</span><input type="range" min="${min}" max="${max}" step="${step}" value="${v}" data-${o === B ? 'b' : 'm'}="${key}"><b>${fmt(v)}</b></div>`; };
     fxBox.innerHTML = `<div class="hd"><span>特效调试 · ${nm}</span><button class="fxx">关闭</button></div>
       <div class="sec">首领：</div><div>${FXB.map(([k, n]) => `<button data-ft="${k}" class="${k === fxT ? 'on' : ''}">${n}</button>`).join('')}</div>
@@ -183,10 +183,10 @@
       <div class="row"><span>开关</span><button class="fxo ${B.off ? '' : 'on'}">${B.off ? '已关' : '开'}</button><span style="width:auto">颜色</span><input type="color" class="fxc" value="${hex(col)}"></div>
       ${sl('大小', 'k', B, .2, 2.5, .05, sol ? .6 : 1, v => '×' + (+v).toFixed(2))}${sl('亮度', 'al', B, .1, 1, .05, sol ? .7 : 1, v => (+v).toFixed(2))}
       <div class="sec">单招</div><div>${L.map(([k, n]) => `<button data-fm="${k}" class="${k === fxM ? 'on' : ''}">${n}</button>`).join('')}</div>
-      <div class="row"><span>特效图</span><select class="fxi">${FXIMG.map(([k, n]) => `<option value="${k}"${(M.img || 'auto') === k ? ' selected' : ''}>${n}</option>`).join('')}</select></div>
-      ${sl('大小', 'k', M, .2, 3, .05, 1, v => '×' + (+v).toFixed(2))}${sl('前后', 'dx', M, -120, 120, 2, 0, v => v)}${sl('上下', 'dy', M, -120, 120, 2, 0, v => v)}${sl('角度', 'r', M, -180, 180, 5, 0, v => v + '°')}${sl('时长', 'T', M, .3, 3, .05, 1, v => '×' + (+v).toFixed(2))}${sl('亮度', 'al', M, .1, 1, .05, 1, v => (+v).toFixed(2))}
+      <div class="row"><span>特效图</span><select class="fxi">${FXIMG.map(([k, n]) => `<option value="${k}"${(M.on === 0 ? 'none' : M.img || 'auto') === k ? ' selected' : ''}>${n}</option>`).join('')}</select></div>
+      ${sl('大小', 'k', M, .2, 3, .05, 1, v => '×' + (+v).toFixed(2))}${sl('前后', 'x', M, -120, 120, 2, 0, v => v)}${sl('上下', 'y', M, -120, 120, 2, 0, v => v)}${sl('角度', 'r', M, -180, 180, 5, 0, v => v + '°')}${sl('时长', 'T', M, .3, 3, .05, 1, v => '×' + (+v).toFixed(2))}${sl('亮度', 'al', M, .1, 1, .05, 1, v => (+v).toFixed(2))}
       <div class="row"><span>光束</span><button class="fxbm ${M.beam === 0 ? '' : 'on'}">${M.beam === 0 ? '关' : '开'}</button><span class="ds" style="width:auto">直线招沿预警线的一道光</span></div>
-      <div style="margin-top:6px"><button class="fxp" style="border-color:#ffd86e;color:#ffe08a">${boss ? (fxT === 'cheng_yuanzhi' ? '叫程远志出来' : '放这招') : '刷 2 个出来'}</button> <button class="fxr">重置这个人</button> <button class="fxcp">复制特效设置</button></div>
+      <div style="margin-top:6px"><button class="fxp" style="border-color:#ffd86e;color:#ffe08a">${boss ? (fxT === 'cheng_yuanzhi' ? '叫程远志出来' : '放这招') : '刷 2 个出来'}</button> <button class="fxr">重置这个人</button> <button class="fxcp">复制特效设置</button> <button class="fxin">粘贴工具设置</button></div>
       <div class="ds">${boss ? '「放这招」会叫这个首领出来对你放（主角无敌）。程远志的招不分开，统一调「全部招式」。' : '小兵刷出来会自己出招；只有地上有预警的招（劈、突刺、冲锋、砸地、火箭落点等）会有特效。'}改完马上生效，存在这台设备上；满意了点「复制特效设置」发给我。</div>`;
     const set = (k, o) => { t.bfxSet(k, o); };
     fxBox.querySelector('.fxx').onclick = () => { fxBox.remove(); fxBox = null; };
@@ -195,9 +195,10 @@
     fxBox.querySelector('.fxo').onclick = () => { set(fxT, { off: B.off ? '' : 1 }); fxRender(); };
     fxBox.querySelector('.fxc').oninput = e => set(fxT, { col: rgbOf(e.target.value) });
     fxBox.querySelectorAll('[data-b]').forEach(e => e.oninput = () => { const v = +e.value; set(fxT, { [e.dataset.b]: v }); e.nextElementSibling.textContent = e.dataset.b === 'k' ? '×' + v.toFixed(2) : v.toFixed(2); });
-    fxBox.querySelectorAll('[data-m]').forEach(e => e.oninput = () => { const v = +e.value, k = e.dataset.m; set(fxT + ':' + fxM, { [k]: v }); e.nextElementSibling.textContent = k === 'k' || k === 'T' ? '×' + v.toFixed(2) : k === 'al' ? v.toFixed(2) : k === 'r' ? v + '°' : v; });
-    fxBox.querySelector('.fxi').onchange = e => set(fxT + ':' + fxM, { img: e.target.value === 'auto' ? '' : e.target.value });
-    fxBox.querySelector('.fxbm').onclick = () => { set(fxT + ':' + fxM, { beam: M.beam === 0 ? '' : 0 }); fxRender(); };
+    fxBox.querySelectorAll('[data-m]').forEach(e => e.oninput = () => { const v = +e.value, k = e.dataset.m; set(fxT + ':' + fxM, k === 'T' ? { T: v } : { l1: Object.assign({}, M0.l1 || {}, { [k]: v }) }); e.nextElementSibling.textContent = k === 'k' || k === 'T' ? '×' + v.toFixed(2) : k === 'al' ? v.toFixed(2) : k === 'r' ? v + '°' : v; });
+    fxBox.querySelector('.fxi').onchange = e => { const v = e.target.value, l1 = Object.assign({}, M0.l1 || {}); if (v === 'auto') delete l1.img; else if (v === 'none') { l1.on = 0; } else { l1.img = v; l1.on = 1; } set(fxT + ':' + fxM, { l1 }); };
+    fxBox.querySelector('.fxbm').onclick = () => { set(fxT + ':' + fxM, { beam: M0.beam === 0 ? '' : 0 }); fxRender(); };
+    fxBox.querySelector('.fxin').onclick = () => { const v = prompt('把「首领特效对齐工具」复制出来的设置粘贴到这里：'); if (!v) return; try { t.bfxImport(v.replace(/^[^{]*/, '')); fxRender(); } catch (e) { alert('格式不对：' + e.message); } };
     fxBox.querySelector('.fxr').onclick = () => { t.bfxReset(fxT); fxRender(); };
     fxBox.querySelector('.fxcp').onclick = () => { const txt = '特效设置：' + t.bfxCopy(); try { navigator.clipboard.writeText(txt); } catch (e) {} fxBox.querySelector('.fxcp').textContent = '已复制'; };
     fxBox.querySelector('.fxp').onclick = () => { try {
