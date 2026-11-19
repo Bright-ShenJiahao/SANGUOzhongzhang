@@ -161,7 +161,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
         ctx.translate(o.x, o.y - 26); ctx.rotate(o.a || 0); ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round';
         for (const s of [-1, 1]) for (let k = 0; k < 2; k++) { ctx.strokeStyle = k ? 'rgba(255,240,200,.9)' : 'rgba(255,170,80,.45)'; ctx.lineWidth = k ? 2.5 : 7; ctx.beginPath(); ctx.moveTo(-14, -18 * s); ctx.quadraticCurveTo(10, 0, -14, 18 * s); ctx.stroke(); }
       } else if (o.kind === 'stuck' && typeof CH !== 'undefined' && CH.cheng_new && CH.cheng_new.blade && CH.cheng_new.blade.img.complete) { const B = CH.cheng_new.blade, w = 66, h = w * B.img.naturalHeight / B.img.naturalWidth;   // 11/18 掷出去插在地上的大刀
-        ctx.translate(o.x, o.y + 4); ctx.scale(o.f || 1, 1); ctx.rotate(1.74); ctx.drawImage(B.img, -w * .9, -h * .22, w, h);
+        ctx.translate(o.x, o.y + 4); ctx.scale(o.f || 1, 1); ctx.rotate(1.4);   /* 11/20 新图大刀是水平的：刀头朝下插地、刀柄向后仰 */ ctx.drawImage(B.img, -w * .9, -h * .22, w, h);
       } else if (o.kind === 'ghost') { ctx.restore(); if (typeof drawChar === 'function') drawChar(o.spr || 'cheng_new', o.fr, o.x, o.y, o.f < 0, .45 * (1 - o.t / o.T)); continue;
       } else if (o.kind === 'blade' && o.src && o.src.sprite === 'cheng_new' && typeof CH !== 'undefined' && CH.cheng_new && CH.cheng_new.blade && CH.cheng_new.blade.img.complete) { const B = CH.cheng_new.blade, w = 66, h = w * B.img.naturalHeight / B.img.naturalWidth;   // 新画风：用画好的大刀转着飞
         ctx.translate(o.x, o.y - 18); ctx.rotate(o.t * 18); ctx.drawImage(B.img, -w / 2, -h / 2, w, h);
