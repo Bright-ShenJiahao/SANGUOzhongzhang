@@ -256,7 +256,7 @@ function zUpdate(z, dt) {
   }
   if (z.st === 'wake') { if (z.t > (z.T.elite ? 1.0 : .55)) set(z, 'move'); else return; }
   if (T.thief && window.SURV && SURV.thief) { SURV.thief(z, dt); return; }
-  if ((z.type === 'blade' || z.type === 'slinger') && window.SURV && SURV.soldierSkill && SURV.soldierSkill(z, dt)) return;   // 11/19 刀手垫步斩 / 投石手连投
+  if (['blade', 'slinger', 'archer', 'elite', 'yellow-heavy', 'yellow-spear', 'crossbow', 'yellow-shield'].includes(z.type) && window.SURV && SURV.soldierSkill && SURV.soldierSkill(z, dt)) return;   // 11/19 刀手垫步斩 / 投石手连投
   if (T.unit && window.SURV && SURV.unitAI) { SURV.unitAI(z, dt); return; }   /* 11/12 新兵种：火罐手/鼓手/骑兵/狂信徒/弩手 */   // 窃贼：AI 在 survive.js（要用到地上的铜钱）
   if (T.priest) {                        // 方士：远离玩家 → 念咒 → 回血/火球，念咒可被打断
     if (z.daze > 0) { z.daze -= dt; z.stun = Math.max(0, z.stun - dt); moveEnt(z, z.vx * dt, 0); z.vx *= .85; return; }

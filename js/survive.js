@@ -4107,7 +4107,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   // ================= 11/12 新兵种 AI =================
   // 11/19 小兵技能（用户定的设计）：刀手「垫步斩」——地上短线预警，往前跨一步横斩；投石手「连投」——连甩三颗扇形石子，太近时后退
   function soldierSkill(z, dt) {
-    const sp = z.type === 'blade' ? 'blade_pxa' : 'slinger_pxa'; if (typeof CH === 'undefined' || !CH[sp] || !CH[sp].idle.img.naturalWidth) return false;
+    const sp = { blade: 'blade_pxa', slinger: 'slinger_pxa', archer: 'archer_pxa', elite: 'elite_pxa', 'yellow-heavy': 'heavy_pxa', 'yellow-spear': 'spear_pxa', crossbow: 'xbow_pxa', 'yellow-shield': 'shield_pxa' }[z.type]; if (typeof CH === 'undefined' || !CH[sp] || !CH[sp].idle.img.naturalWidth) return false;
     if (z.sk && (z.dead || z.stun > 0 || z.air || z.st !== 'move')) { z.sk = null; z.cbFrame = null; }
     z.skCd = (z.skCd == null ? R(.8, 2) : z.skCd) - dt;
     const dx = hero.x - z.x, dy = (hero.y - z.y) / YS, d = Math.hypot(dx, dy) || 1;
@@ -4115,9 +4115,22 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       if (z.st !== 'move' || z.stun > 0 || z.air || z.skCd > 0 || (S && S.over)) return false;
       if (z.type === 'blade' && d > 32 && d < 115) { const a = Math.atan2(dy * YS, dx); z.sk = { k: 'step', t: 0, a, x0: z.x, y0: z.y }; z.f = dx < 0 ? -1 : 1; teleAdd({ k: 'line', x: z.x, y: z.y, a, len: 85, w: 26, T: .5, dmg: 1.5, src: z, snd: 'enemySwing' }); }
       else if (z.type === 'slinger' && d > 55 && d < 150) { z.sk = { k: 'rapid', t: 0, n: 0 }; z.f = dx < 0 ? -1 : 1; }
+      else if (z.type === 'archer' && d > 90 && d < 260) { z.sk = { k: 'lob', t: 0 }; z.f = dx < 0 ? -1 : 1; for (let i = 0; i < 3; i++) teleAdd({ k: 'circle', x: hero.x + (i ? R(-40, 40) : 0), y: clampY(hero.y + (i ? R(-22, 22) : 0)), r: 22, T: 1.1 + i * .12, dmg: 1.2, src: z, snd: i ? '' : 'land' }); }   // 仰射：脚下三个圈，1 秒后箭落
+      else if (z.type === 'elite' && d < 70) { z.sk = { k: 'spin', t: 0 }; teleAdd({ k: 'circle', x: z.x, y: z.y, r: 62, T: .6, dmg: 2.5, src: z, snd: 'enemySwing' }); }   // 回旋斧
+      else if (z.type === 'yellow-heavy' && d > 60 && d < 170) { const a = Math.atan2(dy * YS, dx); z.sk = { k: 'drag', t: 0, a, x0: z.x, y0: z.y }; z.f = dx < 0 ? -1 : 1; teleAdd({ k: 'line', x: z.x, y: z.y, a, len: 140, w: 34, T: .7, dmg: 2, src: z }); }   // 拖刀冲
+      else if (z.type === 'yellow-spear' && d > 30 && d < 95) { const a = Math.atan2(dy * YS, dx); z.sk = { k: 'thrust', t: 0 }; z.f = dx < 0 ? -1 : 1; for (let i = 0; i < 3; i++) teleAdd({ k: 'line', x: z.x, y: z.y, a: a + (i - 1) * .12, len: 95, w: 16, T: .55 + i * .28, dmg: 1.2, src: z, snd: 'enemySwing' }); }   // 连刺
+      else if (z.type === 'crossbow' && d > 110 && d < 300) { z.sk = { k: 'bolt3', t: 0, n: 0 }; z.f = dx < 0 ? -1 : 1; }   // 三连弩
+      else if (z.type === 'yellow-shield' && d > 50 && d < 200) { z.sk = { k: 'wall', t: 0 }; z.wallT = 2; }   // 盾墙：2 秒正面远程全挡
       else return false;
     }
     const k = z.sk; k.t += dt; z.moving = false; z.vx = 0;
+    const fin = cd => { z.sk = null; z.cbFrame = null; z.skCd = R(cd, cd * 1.5); return true; };
+    if (k.k === 'lob') { z.cbFrame = 'lob'; return k.t > 1.2 ? fin(6) : true; }
+    if (k.k === 'spin') { z.cbFrame = k.t < .6 ? (k.t % .2 < .1 ? 'spin1' : 'spin2') : 'rest'; return k.t > 1.6 ? fin(6) : true; }
+    if (k.k === 'drag') { if (k.t < .7) z.cbFrame = 'wind'; else if (k.t < .95) { z.cbFrame = 'drag'; const q = (k.t - .7) / .25; z.x = z.cx = k.x0 + Math.cos(k.a) * 140 * q; z.y = z.cy = clampY(k.y0 + Math.sin(k.a) * 140 * q); } else z.cbFrame = 'rest'; return k.t > 1.9 ? fin(7) : true; }
+    if (k.k === 'thrust') { z.cbFrame = k.t < .5 ? 'wind' : ['strike', 'thrust2', 'thrust3'][Math.min(2, Math.floor((k.t - .5) / .28))]; return k.t > 1.5 ? fin(6) : true; }
+    if (k.k === 'bolt3') { z.cbFrame = k.t < .5 ? 'wind' : 'rapid'; if (k.n < 3 && k.t > .5 + k.n * .25) { const a = Math.atan2(dy * YS, dx); eshots.push({ source: z, k: 'arrow', x: z.x + Math.cos(a) * 16, y: z.y, z: 22, vx: Math.cos(a) * 300, vy: Math.sin(a) * 300, life: 1.1, dmg: 1.2 }); k.n++; if (window.SFX) SFX.play('bow', 0, .5); } return k.t > 1.4 ? fin(7) : true; }
+    if (k.k === 'wall') { z.cbFrame = 'wall'; z.f = dx < 0 ? -1 : 1; z.wallT = 2 - k.t; if (k.t > 2) { z.wallT = 0; return fin(7); } return true; }
     if (k.k === 'step') {
       if (k.t < .5) z.cbFrame = 'step';
       else if (k.t < .62) { z.cbFrame = 'slash'; const q = (k.t - .5) / .12; z.x = z.cx = k.x0 + Math.cos(k.a) * 70 * q; z.y = z.cy = clampY(k.y0 + Math.sin(k.a) * 70 * q); }
