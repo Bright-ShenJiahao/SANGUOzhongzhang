@@ -69,6 +69,19 @@
       k.querySelectorAll('[data-c]').forEach(b => b.onpointerdown = e => { e.preventDefault(); e.stopPropagation(); T().pilotCast(b.dataset.c); }); }
     brender();
   }
+  // 11/19 首领重做：试炼里叫出新画风首领，点招式名让它马上放那一招
+  const NBS = [['deng_mao', '邓茂'], ['bo_cai', '波才'], ['he_yi', '何仪'], ['zhang_mancheng', '张曼成'], ['guanhai_m', '管亥·骑马'], ['zhang_liang', '张梁'], ['zhang_bao', '张宝'], ['ma_yuanyi', '马元义'], ['zhang_jiao', '张角']];
+  const NMN = { dm_dash: '九环冲斩', dm_rings: '掷环', dm_quake: '震地三刀', bc_spin: '旋斧突进', bc_arrows: '令旗箭雨', bc_fire: '火烧草营', hy_dash3: '三连闪突', hy_ji: '飞戟', hy_spin: '旋身双戟', zm_glide: '神行符', zm_fu: '火符', zm_ring: '符阵火环',
+    gm_charge: '纵马冲阵', gm_ji: '马上掷戟', gm_rear: '人立马踏', gb_leap: '跃斩', gb_throw: '掷戟', gb_spin: '旋戟', zl_whirl: '双刀旋风', zl_cross: '十字刀气', zl_charge: '人公冲锋', zb_burrow: '地遁', zb_rain: '火雨', zb_wall: '土墙', my_claw: '飞爪', my_flail: '流星直击', my_spin: '旋锤', zj_blink: '符遁', zj_fu: '雷符', zj_storm: '天雷', zj_ht: '黄天当立' };
+  let nbSel = '';
+  function nbHtml() {
+    const t = T(), mv = nbSel ? ((t.nmoves()[nbSel] || []).concat(nbSel === 'guanhai_m' ? t.nmoves().guanhai_b : []).concat(nbSel === 'zhang_jiao' ? ['zj_ht'] : [])) : [];
+    return `<div class="ds" style="margin-top:6px;border-top:1px solid #5a4226;padding-top:4px">新画风首领（叫出来打你，主角无敌）：</div><div class="mv">${NBS.map(([k, n]) => `<button data-nb="${k}" class="${k === nbSel ? 'on' : ''}">${n}</button>`).join('')}</div>${mv.length ? `<div class="mv">${mv.map(m => `<button data-nm="${m}">${NMN[m] || m}</button>`).join('')}</div><div class="ds">点招式名＝马上放这一招；不点就按顺序自己放。管亥打到半血落马换步战。</div>` : ''}`;
+  }
+  function nbBind() {
+    bbox.querySelectorAll('[data-nb]').forEach(b => b.onclick = () => { nbSel = b.dataset.nb; T().spawnNew(nbSel); brender(); });
+    bbox.querySelectorAll('[data-nm]').forEach(b => b.onclick = () => T().forceMove(b.dataset.nm));
+  }
   function brender() {
     const t = T(), C = t.bossCfg(bsel), op = v => Object.entries(BFR).map(([k, n]) => `<option value="${k}"${k === v ? ' selected' : ''}>${n}</option>`).join('');
     bbox.innerHTML = `<div class="hd"><span>首领试炼 · 程远志</span><span><button class="bm">${bmini ? '展开' : '缩小'}</button> <button class="bx">${bossMode ? '退出' : '关闭'}</button></span></div>${bmini ? '' : `
@@ -80,13 +93,14 @@
       ${`<div class="row"><span>范围</span><input type="range" min="0.4" max="2.5" step="0.05" value="${C.rs}" data-r="rs"><b>×${(+C.rs).toFixed(2)}</b></div>`}
       <div class="row"><span>速度</span><input type="range" min="0.4" max="2.5" step="0.05" value="${C.sp}" data-r="sp"><b>×${(+C.sp).toFixed(2)}</b></div>
       <div class="ds">速度越大越慢（预警、蓄力越久）。</div>
-      <button class="cp">复制首领设置</button>`}`;
+      <button class="cp">复制首领设置</button>${nbHtml()}`}`;
     bbox.querySelector('.bm').onclick = () => { bmini = !bmini; brender(); };
     if (bmini) { bbox.querySelector('.bx').onclick = () => bossMode ? close() : bossPanel(false); return; }
     bbox.querySelector('.bx').onclick = () => bossMode ? close() : bossPanel(false);
     bbox.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { bsel = b.dataset.m; brender(); });
     bbox.querySelectorAll('[data-f]').forEach(e => e.onchange = () => { t.setBossCfg(bsel, { [e.dataset.f]: e.value }); });
     bbox.querySelectorAll('[data-r]').forEach(e => e.oninput = () => { const v = Math.round(+e.value * 100) / 100; t.setBossCfg(bsel, { [e.dataset.r]: v }); e.nextElementSibling.textContent = '×' + v.toFixed(2); });
+    nbBind();
     bbox.querySelector('.cp').onclick = () => { const txt = '首领设置：' + t.bossCopy(); try { navigator.clipboard.writeText(txt); } catch (e) {} bbox.querySelector('.cp').textContent = '已复制'; };
   }
   function skills(w) { const t = T(); return Object.keys(t.SK).filter(k => !t.SK[k].off && t.wepOf(k) === w).sort((a, b) => (t.SK[a].tier || 0) - (t.SK[b].tier || 0)); }

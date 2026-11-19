@@ -9,8 +9,10 @@ function flushLoads() { while (LOADQ.length) { const [i, src] = LOADQ.shift(); i
 function load(k, src) { const i = new Image(); IMG[k] = i; if (!src || String(src).startsWith('data:')) { i.src = src; return i; } const pri = k.startsWith('hero_') ? 2 : k.startsWith('grunt_') || k.startsWith('blade_') || k.startsWith('slinger_') || k.startsWith('archer_') || k.startsWith('elite_') || k.startsWith('priest_') ? 1 : 0; i._pri = pri; i._must = pri === 2;   // 排队优先级：主角 > 第一章敌人 > 其他
   i.src = src; LAZY.core.push([i, src]); return i; }   // 用户定 2026-10-31：取消分批下载，打开就全部开始下（失败会自动重试）
 // 按需加载：第二章、校场的图片先不下载，进入（或整备页预取）时才开始，首次打开少下载约2MB。
-const LAZY = { chapter2: [], xiaochang: [], core: [] }, LAZY_DONE = {};   // core：打开就要的图（第一章等），进战斗前必须全部下完
+const LAZY = { chapter2: [], xiaochang: [], core: [], bossnew: [] }, LAZY_DONE = {};   // core：打开就要的图（第一章等），进战斗前必须全部下完
 const LAZY_CHARS = { yellow_heavy: 'chapter2', yellow_shield: 'chapter2', yellow_spear: 'chapter2', yellow_catapult: 'chapter2', zhang_liang: 'chapter2', zhang_bao: 'chapter2', yellow_golem: 'chapter2', zhang_jiao: 'chapter2' };
+// 11/19 首领重做：新画风十个首领（原分辨率大图）开局后台再下，没下好前首领用旧图
+for (const b of ['deng_mao', 'bo_cai', 'he_yi', 'zhang_mancheng', 'guanhai', 'guanhai_horse', 'zhang_liang', 'zhang_bao', 'ma_yuanyi', 'zhang_jiao']) LAZY_CHARS[b + '_new'] = 'bossnew';
 function lazyLoad(group, k, src) { const i = new Image(); IMG[k] = i; LAZY[group].push([i, src]); return i; }
 function ensureAssets(group, { silent = false, label = '' } = {}) {
   const list = LAZY[group] || [];
@@ -64,13 +66,20 @@ for (const [name, frames] of Object.entries(ASSETS.chars)) {
     const fr = { img: LAZY_CHARS[name] ? lazyLoad(LAZY_CHARS[name], name + '_' + f, src) : load(name + '_' + f, src), w, h, ax, ay, white: null };
     fr.dark = null;   // 深色剪影（精英兵用）
     fr.img.onload = () => {   // 预先做一张白色剪影，用于受击闪白
-      const c = document.createElement('canvas'); c.width = w; c.height = h; const g = c.getContext('2d');
-      g.drawImage(fr.img, 0, 0); g.globalCompositeOperation = 'source-atop'; g.fillStyle = '#fff'; g.fillRect(0, 0, w, h); fr.white = c;
-      const d = document.createElement('canvas'); d.width = w; d.height = h; const dg = d.getContext('2d');
-      dg.drawImage(fr.img, 0, 0); dg.globalCompositeOperation = 'source-atop'; dg.fillStyle = 'rgba(18,10,6,.55)'; dg.fillRect(0, 0, w, h); fr.dark = d;
+      const W = fr.img.naturalWidth || w, H = fr.img.naturalHeight || h;   // 11/19 首领新图是原分辨率大图（比 w×h 大），剪影按图片原尺寸做
+      const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d');
+      g.drawImage(fr.img, 0, 0); g.globalCompositeOperation = 'source-atop'; g.fillStyle = '#fff'; g.fillRect(0, 0, W, H); fr.white = c;
+      const d = document.createElement('canvas'); d.width = W; d.height = H; const dg = d.getContext('2d');
+      dg.drawImage(fr.img, 0, 0); dg.globalCompositeOperation = 'source-atop'; dg.fillStyle = 'rgba(18,10,6,.55)'; dg.fillRect(0, 0, W, H); fr.dark = d;
     };
     CH[name][f] = fr;
   }
+}
+// 11/19 首领新图缺的通用帧用相近的帧顶上（骑马管亥没有走路/倒地帧等），免得某个状态下人物隐形
+for (const [n, C] of Object.entries(CH)) if (/_new$/.test(n)) {
+  const A = { walk1: 'run1', walk2: 'run2', walk3: 'run3', walk4: 'run4', down: 'fall', fly1: 'fall', fly2: 'fall', land: 'hurt', getup: 'land', dizzy: 'hurt', chant: 'idle', rest: 'hurt' };
+  for (const [k, v] of Object.entries(A)) if (!C[k] && C[v]) C[k] = C[v];
+  for (const k of ['walk1', 'walk2', 'walk3', 'walk4', 'hurt', 'down', 'fly1', 'fly2', 'land', 'getup', 'wind', 'strike']) if (!C[k] && C.idle) C[k] = C.idle;
 }
 const PX = 0.4;
 const HERO_SC = 0.86;   // 11/13：主角按喽啰的缩放画，像素颗粒一样大   // 1 个精灵像素 = 0.4 世界单位
@@ -857,7 +866,7 @@ function zFrame(z) {
   if (z.st === 'strike') return 'strike';
   if (z.st === 'rec') return z.T.ranged ? 'idle' : 'strike';
   if (z.sprite === 'zhang_jiao') return z.st === 'rest' ? 'rest' : 'float';   // 张角飘着走，不走路
-  if (z.sprite === 'cheng_new' && z.moving) return 'walk' + (1 + Math.floor(z.t * 5) % 4);   // 11/18 新程远志（用户：慢一点）：迈步→经过→迈步→经过（照主角的走法）
+  if (z.sprite && /_new$/.test(z.sprite) && z.moving) return 'walk' + (1 + Math.floor(z.t * 5) % 4);   // 11/19 首领新图都是四帧走路   // 11/18 新程远志（用户：慢一点）：迈步→经过→迈步→经过（照主角的走法）
   return z.moving ? (Math.floor(z.t * 6) % 2 ? 'walk1' : 'walk2') : 'idle';
 }
 let _shT = 0;

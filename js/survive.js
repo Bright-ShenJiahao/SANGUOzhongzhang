@@ -148,9 +148,17 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     }
     for (const o of HZ) {
       ctx.save();
-      if (o.kind === 'stuck' && typeof CH !== 'undefined' && CH.cheng_new && CH.cheng_new.blade && CH.cheng_new.blade.img.complete) { const B = CH.cheng_new.blade, w = 66, h = w * B.img.naturalHeight / B.img.naturalWidth;   // 11/18 掷出去插在地上的大刀
+      const SP = o.spr && typeof CH !== 'undefined' && CH[o.spr];   // 11/19 首领新图：飞出去的铁环/短戟/长戟用画好的兵器图
+      if (o.kind === 'spr' && SP && SP[o.fr] && SP[o.fr].img.complete) { const B = SP[o.fr], w = o.w || 30, h = w * B.img.naturalHeight / B.img.naturalWidth;
+        ctx.translate(o.x, o.y - (o.lift || 22)); ctx.rotate((o.rot || 0) + (o.spin || 0) * o.t); ctx.drawImage(B.img, -w / 2, -h / 2, w, h);
+      } else if (o.kind === 'stuck' && SP && SP.weapon && SP.weapon.img.complete) { const B = SP.weapon, w = 62, h = w * B.img.naturalHeight / B.img.naturalWidth;   // 插在地上的长戟
+        ctx.translate(o.x, o.y + 2); ctx.rotate(-1.25); ctx.drawImage(B.img, -w * .15, -h / 2, w, h);
+      } else if (o.kind === 'xwave') {   // 张梁十字刀气：两道交叉的弧光
+        ctx.translate(o.x, o.y - 26); ctx.rotate(o.a || 0); ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round';
+        for (const s of [-1, 1]) for (let k = 0; k < 2; k++) { ctx.strokeStyle = k ? 'rgba(255,240,200,.9)' : 'rgba(255,170,80,.45)'; ctx.lineWidth = k ? 2.5 : 7; ctx.beginPath(); ctx.moveTo(-14, -18 * s); ctx.quadraticCurveTo(10, 0, -14, 18 * s); ctx.stroke(); }
+      } else if (o.kind === 'stuck' && typeof CH !== 'undefined' && CH.cheng_new && CH.cheng_new.blade && CH.cheng_new.blade.img.complete) { const B = CH.cheng_new.blade, w = 66, h = w * B.img.naturalHeight / B.img.naturalWidth;   // 11/18 掷出去插在地上的大刀
         ctx.translate(o.x, o.y + 4); ctx.scale(o.f || 1, 1); ctx.rotate(1.74); ctx.drawImage(B.img, -w * .9, -h * .22, w, h);
-      } else if (o.kind === 'ghost') { ctx.restore(); if (typeof drawChar === 'function') drawChar('cheng_new', o.fr, o.x, o.y, o.f < 0, .45 * (1 - o.t / o.T)); continue;
+      } else if (o.kind === 'ghost') { ctx.restore(); if (typeof drawChar === 'function') drawChar(o.spr || 'cheng_new', o.fr, o.x, o.y, o.f < 0, .45 * (1 - o.t / o.T)); continue;
       } else if (o.kind === 'blade' && o.src && o.src.sprite === 'cheng_new' && typeof CH !== 'undefined' && CH.cheng_new && CH.cheng_new.blade && CH.cheng_new.blade.img.complete) { const B = CH.cheng_new.blade, w = 66, h = w * B.img.naturalHeight / B.img.naturalWidth;   // 新画风：用画好的大刀转着飞
         ctx.translate(o.x, o.y - 18); ctx.rotate(o.t * 18); ctx.drawImage(B.img, -w / 2, -h / 2, w, h);
       } else if (o.kind === 'blade') {   // 飞旋的大刀：转着的月牙
@@ -245,7 +253,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
         end: () => { if (PIL.stuck) { PIL.stuck.t = PIL.stuck.T; PIL.stuck = null; } const r = 80 * C.rs; pHit(pCirc(hero.x, hero.y, r), 3.5, 100); bfx('r_tianbeng', hero.x + f * 20, hero.y, f, r * 2.2, .5, .85, .5); shake = Math.max(shake, .3); if (window.SFX) SFX.play('land', 0, .8); } }); });
   }
   addEventListener('keydown', e => { if (!PIL.z || e.repeat) return; const m = { j: 'atk', k: 'boomerang', l: 'sweep', i: 'chase', 1: 'atk', 2: 'boomerang', 3: 'sweep', 4: 'chase' }[e.key.toLowerCase()]; if (m) { e.preventDefault(); e.stopPropagation(); pilotCast(m); } }, true);
-  const cyPlay = (z, seq) => { if (z.sprite !== 'cheng_new') return; let t = 0; z.cbFrame = seq[0][0]; for (let i = 0; i < seq.length; i++) { const [f, d] = seq[i], t0 = t; if (i) later(t0, () => { if (!z.dead) z.cbFrame = f; }); t += d; } later(t, () => { if (z.cbFrame === seq[seq.length - 1][0]) z.cbFrame = null; }); };
+  const cyPlay = (z, seq) => { if (!/_new$/.test(z.sprite || '')) return; let t = 0; z.cbFrame = seq[0][0]; for (let i = 0; i < seq.length; i++) { const [f, d] = seq[i], t0 = t; if (i) later(t0, () => { if (!z.dead) z.cbFrame = f; }); t += d; } later(t, () => { if (z.cbFrame === seq[seq.length - 1][0]) z.cbFrame = null; }); };
   const gap = (z, t, txt) => { z.stun = Math.max(z.stun || 0, t); floaters.push({ x: z.x, y: z.y - 70, t: 0, txt, color: '#9fe08a' }); };
   const BSK = {
     sweep: z => { const C = bcfg(z.type, 'sweep'); teleAdd({ k: 'circle', x: z.x, y: z.y, r: 105 * C.rs, T: 1.0 * C.sp, dmg: 2.5, src: z }); cyPlay(z, [[C.a, .85 * C.sp], [C.b, .22]].concat(C.c ? [[C.c, .35]] : [])); say(z, '横扫千军！'); return 1.0 * C.sp; },
@@ -308,6 +316,96 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
         teleAdd({ k: 'circle', x: mid ? hero.x : hero.x + R(-330, 330), y: mid ? hero.y : clampY(hero.y + R(-160, 160)), r: R(42, 64), T: 1.0 + i * .11, dmg: 2.6, src: z, c: 1, snd: i % 2 ? '' : 'crack' }); }
       say(z, '天雷滚滚！'); return 1.0; },
   };
+  // ===== 11/19 首领重做：新画风十个首领的招式（设计表：普攻 + 位移 + 远程 + 特色，大招地上先出预警），出招帧用新图 =====
+  let NEWOFF = false; try { NEWOFF = localStorage.getItem('szz-oldboss') === '1'; } catch (e) {}   // 开发者面板可切回旧首领对比
+  const NSP = { guanhai_m: 'guanhai_horse_new', guanhai_b: 'guanhai_new' };
+  const newSp = t => { const n = NSP[t] || t + '_new'; return typeof CH !== 'undefined' && CH[n] && CH[n].idle && CH[n].idle.img.complete && CH[n].idle.img.naturalWidth ? n : ''; };
+  const shout = (z, t) => { if (z.survTier >= 3) say(z, t); };   // 小头目出招不喊话（用户定）
+  const proj = (z, o) => { const ux = Math.cos(o.a), uy = Math.sin(o.a);   // 直线飞行物
+    return hzAdd(Object.assign({ kind: 'spr', spr: z.sprite, src: z, x: z.x + ux * 20, y: z.y + uy * 20 * YS, upd: (q, dt) => { q.x += ux * o.spd * dt; q.y = clampY(q.y + uy * o.spd * dt * YS); } }, o)); };
+  const loopFr = (z, frs, d, T) => { const seq = []; for (let t = 0, i = 0; t < T - 1e-6; t += d, i++) seq.push([frs[i % frs.length], Math.min(d, T - t)]); cyPlay(z, seq); };
+  const dashTo = (z, x1, y1, then) => { z.f = x1 < z.x ? -1 : 1; z.dash = { x0: z.x, y0: z.y, x1, y1: clampY(y1), t: 0 }; z.dashThen = then || null; };
+  Object.assign(BSK, {
+    // 邓茂：九环冲斩（拖刀猛冲，冲到头上撩）/ 掷环（三枚铁环扇形飞出）/ 震地三刀（三道地缝一道比一道远）
+    dm_dash: z => { const [ux, uy, a] = dirU(z, hero.x, hero.y), L = 230, x1 = z.x + ux * L, y1 = z.y + uy * L * YS; cyPlay(z, [['dash1', .6]]);
+      teleAdd({ k: 'line', x: z.x, y: z.y, a, len: L, w: 44, T: .6, dmg: 2.4, src: z, then: () => { cyPlay(z, [['dash2', .3], ['upcut', .45]]); dashTo(z, x1, y1, () => teleAdd({ k: 'circle', x: z.x + ux * 24, y: z.y, r: 56, T: .12, dmg: 2.2, src: z, snd: 'crack' })); } }); return .6; },
+    dm_rings: z => { const a = ang(z, hero.x, hero.y); cyPlay(z, [['ring1', .5], ['ring2', .4]]);
+      [-.32, 0, .32].forEach(d => teleAdd({ k: 'line', x: z.x, y: z.y, a: a + d, len: 230, w: 22, T: .5, src: z, snd: '' }));
+      later(.5, () => { if (z.dead) return; [-.32, 0, .32].forEach(d => proj(z, { a: a + d, spd: 300, T: .8, r: 16, dmg: 2, fr: 'ringitem', w: 16, spin: 9 })); if (window.SFX) SFX.play('enemySwing', 0, .7); }); return .9; },
+    dm_quake: z => { const a = ang(z, hero.x, hero.y); cyPlay(z, [['quake1', .45], ['quake2', .25], ['quake3', .2], ['quake2', .25], ['quake3', .2], ['quake2', .25], ['quake3', .4]]);
+      [150, 210, 270].forEach((L, i) => teleAdd({ k: 'line', x: z.x, y: z.y, a, len: L, w: 36, T: .7 + i * .45, dmg: 2.4, src: z, c: 2, snd: 'land' })); return 2.0; },
+    // 波才：旋斧突进（转完晃两下）/ 令旗箭雨 / 火烧草营（身周一圈火）
+    bc_spin: z => { cyPlay(z, [['spin0', .5]]); shout(z, '开山！');
+      later(.5, () => { if (z.dead) return; z.chase = { t: 0, T: 1.6, spd: z.rage ? 82 : 70 }; loopFr(z, ['spin1', 'spin2'], .14, 1.6);
+        hzAdd({ kind: 'whirl', src: z, x: z.x, y: z.y, r: 58, dmg: 2.4, T: 1.6, upd: o => { o.x = z.x; o.y = z.y; }, end: () => { gap(z, 1.0, '晃了！'); cyPlay(z, [['dizzy', 1.0]]); } }); }); return .5; },
+    bc_arrows: z => { const cx = hero.x, cy = hero.y, n = z.rage ? 12 : 9; cyPlay(z, [['flag1', .35], ['flag2', .5], ['flag3', .35]]); shout(z, '放箭！');
+      for (let i = 0; i < n; i++) teleAdd({ k: 'circle', x: cx + (i ? R(-100, 100) : 0), y: clampY(cy + (i ? R(-50, 50) : 0)), r: 30, T: 1.0 + i * .07, dmg: 2, src: z, snd: i % 3 ? '' : 'land' }); return .85; },
+    bc_fire: z => { const x = z.x, y = z.y; cyPlay(z, [['torch', 1.1]]); shout(z, '烧！给我烧！');
+      teleAdd({ k: 'ring', x, y, r0: 34, r1: 110, ga: 0, gw: 0, T: 1.0, dmg: 2.5, src: z, c: 3, snd: 'land', then: () => { for (let k = 0; k < 9; k++) { const t = k / 9 * 6.283; hzAdd({ kind: 'fire', src: z, x: x + Math.cos(t) * 78, y: clampY(y + Math.sin(t) * 78 * YS), r: 24, dmg: 1.2, T: 3.5 }); } } }); return 1.1; },
+    // 何仪：三连闪突 / 飞戟（飞出去再飞回来）/ 旋身双戟
+    hy_dash3: z => { const step = k => { const a = ang(z, hero.x, hero.y), L = 170, x0 = z.x, y0 = z.y; z.castT = .4; z.cx = x0; z.cy = y0; cyPlay(z, [['dash1', .4], ['dash2', .3], ['dash3', .25]]);
+        teleAdd({ k: 'line', x: x0, y: y0, a, len: L, w: 42, T: .4, dmg: 2.2, src: z, snd: 'enemySwing', then: () => dashTo(z, x0 + Math.cos(a) * L, y0 + Math.sin(a) * L * YS, k < 2 ? () => later(.12, () => { if (!z.dead) step(k + 1); }) : () => gap(z, .8, '喘气！')) }); };
+      step(0); return .4; },
+    hy_ji: z => { const [ux, uy, a] = dirU(z, hero.x, hero.y), L = 250; cyPlay(z, [['throw1', .45], ['throw2', 1.0], ['catch', .3]]);
+      teleAdd({ k: 'line', x: z.x, y: z.y, a, len: L, w: 26, T: .45, src: z, snd: '' });
+      later(.45, () => { if (z.dead) return; const x0 = z.x, y0 = z.y, fx = x0 + ux * L, fy = y0 + uy * L * YS;
+        hzAdd({ kind: 'spr', spr: z.sprite, fr: 'weapon', w: 40, spin: 14, src: z, x: x0, y: y0, r: 20, dmg: 2.2, T: 1.0, upd: o => { const q = o.t, e = Math.sin(q * Math.PI), bx = q < .5 ? x0 : z.x, by = q < .5 ? y0 : z.y; o.x = bx + (fx - bx) * e; o.y = by + (fy - by) * e; if (q >= .5 && !o.back) { o.back = 1; o.hitT = 0; } } }); }); return 1.45; },
+    hy_spin: z => { loopFr(z, ['spin1', 'spin2'], .12, 1.2); [0, 1].forEach(i => teleAdd({ k: 'circle', x: z.x, y: z.y, r: 82, T: .55 + i * .5, dmg: 2.2, src: z, snd: 'enemySwing' })); return 1.1; },
+    // 张曼成：神行符（化黄烟高速滑行，留残影）/ 火符（三张，落地起火）/ 符阵火环
+    zm_glide: z => { const [ux, uy, a] = dirU(z, hero.x, hero.y), L = Math.min(260, Math.hypot(hero.x - z.x, (hero.y - z.y) / YS) + 60), x0 = z.x, y0 = z.y; cyPlay(z, [['talis', .45]]);
+      teleAdd({ k: 'line', x: x0, y: y0, a, len: L, w: 36, T: .45, dmg: 2, src: z, snd: '', then: () => { cyPlay(z, [['glide', .3], ['stop', .35]]); dashTo(z, x0 + ux * L, y0 + uy * L * YS); for (let k = 1; k <= 4; k++) later(k * .06, () => hzAdd({ kind: 'ghost', spr: z.sprite, x: z.x, y: z.y, f: z.f, fr: 'glide', T: .35 })); } }); return .45; },
+    zm_fu: z => { const a = ang(z, hero.x, hero.y); cyPlay(z, [['throw1', .45], ['throw2', .35]]);
+      later(.45, () => { if (z.dead) return; [-.28, 0, .28].forEach(d => { const o = proj(z, { kind: 'fu', a: a + d, spd: 230, T: .9, r: 14, dmg: 1.6 }); o.end = q => hzAdd({ kind: 'fire', src: z, x: q.x, y: q.y, r: 26, dmg: 1, T: 2.5 }); }); }); return .8; },
+    zm_ring: z => { cyPlay(z, [['plant1', .3], ['plant2', 1.0], ['rest', .8]]); teleAdd({ k: 'ring', x: z.x, y: z.y, r0: 40, r1: 115, ga: R(0, 6.28), gw: .45, T: 1.3, dmg: 2.8, src: z, c: 3, snd: 'land', then: () => gap(z, .8, '喘气！') }); return 1.3; },
+    // 管亥·骑马：纵马冲阵 / 马上掷戟 / 人立马踏
+    gm_charge: z => { const [ux, uy, a] = dirU(z, hero.x, hero.y), L = 320, x0 = z.x, y0 = z.y; cyPlay(z, [['charge1', .75]]); shout(z, '北海铁骑，冲！');
+      teleAdd({ k: 'line', x: x0, y: y0, a, len: L, w: 58, T: .75, dmg: 2.8, src: z, then: () => { cyPlay(z, [['charge2', .3], ['charge3', .45]]); dashTo(z, x0 + ux * L, y0 + uy * L * YS); } }); return .75; },
+    gm_ji: z => { const a = ang(z, hero.x, hero.y); cyPlay(z, [['throw1', .45], ['throw2', .35]]); shout(z, '着！'); teleAdd({ k: 'line', x: z.x, y: z.y, a, len: 300, w: 22, T: .45, src: z, snd: '' });
+      later(.45, () => { if (!z.dead) proj(z, { a, spd: 360, T: .85, r: 16, dmg: 2.4, fr: 'weapon', w: 36, rot: a, lift: 30 }); }); return .8; },
+    gm_rear: z => { cyPlay(z, [['rear', .85], ['stomp', .45]]); shout(z, '踏平他！'); teleAdd({ k: 'circle', x: z.x, y: z.y, r: 92, T: .85, dmg: 3, src: z, snd: 'land' }); return 1.2; },
+    // 管亥·步战：跃斩 / 掷戟（空手冲过去捡）/ 旋戟
+    gb_leap: z => { const tx = hero.x, ty = hero.y, x0 = z.x, y0 = z.y; cyPlay(z, [['leap1', .5], ['leap2', .45], ['leap3', .45]]); shout(z, '哪里走！'); z.f = tx < x0 ? -1 : 1;
+      teleAdd({ k: 'circle', x: tx, y: ty, r: 70, T: .95, dmg: 3, src: z, snd: 'land' });
+      later(.5, () => { if (z.dead) return; hzAdd({ kind: 'drv', src: z, T: .45, upd: o => { const q = Math.min(1, o.t / .45); z.x = z.cx = x0 + (tx - x0) * q; z.y = z.cy = y0 + (ty - y0) * q; z.z = Math.sin(q * Math.PI) * 50; }, end: () => { z.z = 0; } }); }); return 1.4; },
+    gb_throw: z => { const [ux, uy, a] = dirU(z, hero.x, hero.y), L = 300; cyPlay(z, [['throw1', .7], ['throw2', 1.2], ['run', .3], ['pull', .4]]); shout(z, '看戟！');
+      teleAdd({ k: 'line', x: z.x, y: z.y, a, len: L, w: 34, T: .7, dmg: 3, src: z, then: () => { const px = z.x + ux * L, py = clampY(z.y + uy * L * YS); gap(z, 1.2, '空手！');
+        hzAdd({ kind: 'stuck', spr: z.sprite, src: z, x: px, y: py, T: 1.3, end: () => dashTo(z, px, py) }); } }); return .7; },
+    gb_spin: z => { loopFr(z, ['spin1', 'spin2'], .13, 1.3); shout(z, '都给我滚开！'); [0, 1].forEach(i => teleAdd({ k: 'circle', x: z.x, y: z.y, r: 96, T: .6 + i * .55, dmg: 2.6, src: z, snd: 'enemySwing' })); return 1.25; },
+    // 张梁：双刀旋风（转完头晕）/ 十字刀气 / 人公冲锋
+    zl_whirl: z => { cyPlay(z, [['spin1', .3]]); shout(z, '人公旋风！');
+      later(.3, () => { if (z.dead) return; z.chase = { t: 0, T: 2.2, spd: z.rage ? 72 : 60 }; loopFr(z, ['spin1', 'spin2', 'spin3', 'spin2'], .1, 2.2);
+        hzAdd({ kind: 'whirl', src: z, x: z.x, y: z.y, r: 60, dmg: 2.2, T: 2.2, upd: o => { o.x = z.x; o.y = z.y; }, end: () => { gap(z, 1.2, '头晕！'); cyPlay(z, [['dizzy', 1.2]]); } }); }); return .3; },
+    zl_cross: z => { const a = ang(z, hero.x, hero.y); cyPlay(z, [['cross1', .55], ['cross2', .4]]); shout(z, '十字斩！'); teleAdd({ k: 'line', x: z.x, y: z.y, a, len: 320, w: 40, T: .55, src: z, snd: '' });
+      later(.55, () => { if (!z.dead) proj(z, { kind: 'xwave', a, spd: 380, T: .85, r: 24, dmg: 2.6 }); }); return .95; },
+    zl_charge: z => { const [ux, uy, a] = dirU(z, hero.x, hero.y), L = 300, x0 = z.x, y0 = z.y; cyPlay(z, [['charge1', .8]]); shout(z, '给我让开！');
+      teleAdd({ k: 'line', x: x0, y: y0, a, len: L, w: 56, T: .8, dmg: 2.8, src: z, then: () => { cyPlay(z, [['charge2', .3], ['charge3', .35]]); dashTo(z, x0 + ux * L, y0 + uy * L * YS); } }); return .8; },
+    // 张宝：地遁（钻进地里，在主角附近破土）/ 火雨 / 土墙（半血分身照旧）
+    zb_burrow: z => { cyPlay(z, [['sink1', .3], ['sink2', .3]]); shout(z, '遁！');
+      later(.6, () => { if (z.dead) return; z.under = 2; z.hidden = true; const tx = hero.x + R(-40, 40), ty = clampY(hero.y + R(-20, 20));
+        teleAdd({ k: 'circle', x: tx, y: ty, r: 62, T: 1.0, dmg: 2.6, src: z, c: 2, snd: 'land', then: () => { z.under = 0; z.hidden = false; z.x = z.cx = tx; z.y = z.cy = ty; z.f = hero.x < z.x ? -1 : 1; cyPlay(z, [['rise', .45]]); } }); }); return 1.65; },
+    zb_rain: z => { const n = z.rage ? 8 : 6; cyPlay(z, [['call1', .5], ['call2', .4]]); shout(z, '天火，降！');
+      for (let i = 0; i < n; i++) teleAdd({ k: 'circle', x: hero.x + (i ? R(-110, 110) : 0), y: clampY(hero.y + (i ? R(-55, 55) : 0)), r: 40, T: 1.0 + i * .14, dmg: 2, src: z, c: 3, snd: 'land' }); return .9; },
+    zb_wall: z => { cyPlay(z, [['seal', .6]]); return BSK.wall(z); },
+    // 马元义：飞爪（锤钩住远处被拉过去，落地横扫）/ 流星直击 / 旋锤三圈
+    my_claw: z => { const [ux, uy, a] = dirU(z, hero.x, hero.y), L = Math.min(240, Math.hypot(hero.x - z.x, (hero.y - z.y) / YS) + 40), x0 = z.x, y0 = z.y, x1 = x0 + ux * L, y1 = clampY(y0 + uy * L * YS);
+      cyPlay(z, [['claw1', .5]]); teleAdd({ k: 'line', x: x0, y: y0, a, len: L, w: 26, T: .5, src: z, snd: '' });
+      later(.5, () => { if (z.dead) return; hzAdd({ kind: 'ball', src: z, x: x1, y: y1, T: .35 }); cyPlay(z, [['claw2', .3], ['claw3', .45]]); dashTo(z, x1, y1, () => teleAdd({ k: 'circle', x: z.x, y: z.y, r: 70, T: .15, dmg: 2.4, src: z, snd: 'crack' })); }); return .5; },
+    my_flail: z => { cyPlay(z, [['flail1', .5], ['flail2', .95], ['pull', .35]]); return BSK.flail(z); },
+    my_spin: z => { loopFr(z, ['spin1', 'spin2', 'spin3'], .12, 1.5); [0, 1, 2].forEach(i => teleAdd({ k: 'circle', x: z.x, y: z.y, r: 88, T: .5 + i * .4, dmg: 2, src: z, snd: 'enemySwing' })); return 1.4; },
+    // 张角：符遁（化符消失，在别处出现）/ 雷符 / 举杖召雷；半血「黄天当立」
+    zj_blink: z => { cyPlay(z, [['vanish', .4]]); shout(z, '符遁！');
+      later(.4, () => { if (z.dead) return; z.under = 1; z.hidden = true; const a = R(0, 6.28), tx = Math.max(arenaL + 30, Math.min(lockR - 30, hero.x + Math.cos(a) * 170)), ty = clampY(hero.y + Math.sin(a) * 80);
+        later(.55, () => { z.under = 0; z.hidden = false; z.x = z.cx = tx; z.y = z.cy = ty; z.f = hero.x < z.x ? -1 : 1; cyPlay(z, [['appear', .4]]); }); }); return 1.35; },
+    zj_fu: z => { cyPlay(z, [['talis1', .4], ['talis2', .35]]); return BSK.leifu(z); },
+    zj_storm: z => { cyPlay(z, [['raise', 1.0]]); return BSK.storm(z); },
+    zj_ht: z => { cyPlay(z, [['float', 3.0]]); say(z, '苍天已死，黄天当立！');
+      for (let k = 0; k < 8; k++) { const e = edgeSpawn(pickType()); if (e) { const t = k / 8 * 6.283; e.x = hero.x + Math.cos(t) * 160; e.y = clampY(hero.y + Math.sin(t) * 80); } }
+      for (let i = 0; i < 10; i++) teleAdd({ k: 'circle', x: hero.x + (i ? R(-200, 200) : 0), y: clampY(hero.y + (i ? R(-90, 90) : 0)), r: R(40, 56), T: 1.0 + i * .2, dmg: 2.4, src: z, c: 1, snd: i % 2 ? '' : 'crack' });
+      return 3.0; },
+  });
+  const NMOVES = { deng_mao: ['dm_dash', 'dm_rings', 'dm_quake'], bo_cai: ['bc_spin', 'bc_arrows', 'bc_fire'], he_yi: ['hy_dash3', 'hy_ji', 'hy_spin'], zhang_mancheng: ['zm_glide', 'zm_fu', 'zm_ring'],
+    guanhai_m: ['gm_charge', 'gm_ji', 'gm_rear'], guanhai_b: ['gb_leap', 'gb_throw', 'gb_spin'], zhang_liang: ['zl_whirl', 'zl_cross', 'zl_charge'], zhang_bao: ['zb_burrow', 'zb_rain', 'zb_wall'], ma_yuanyi: ['my_claw', 'my_flail', 'my_spin'], zhang_jiao: ['zj_blink', 'zj_fu', 'zj_storm'] };
+  const RAGEL = { bo_cai: '颍川儿郎，随我死战！', guanhai_b: '老子宰了你！', zhang_liang: '都给我上！杀！', zhang_bao: '黄沙迷阵——众弟子，助我！', zhang_jiao: '吾……未死！' };
   const BMOVES = { cheng_yuanzhi: ['boomerang', 'sweep'], deng_mao: ['quake3', 'cleave'], bo_cai: ['flag', 'spin'], he_yi: ['dash3', 'cleave'], zhang_mancheng: ['firering', 'firerain'], ma_yuanyi: ['flail', 'spin'],
     guanhai_m: ['charge', 'stomp'], guanhai_b: ['throwj', 'spin'], zhang_liang: ['whirl', 'charge'], zhang_bao: ['crack', 'wall', 'firerain'], zhang_jiao: ['leifu', 'storm'] };
   function say(z, t) { floaters.push({ x: z.x, y: z.y - 64, t: 0, txt: t, color: '#ffcf6a' }); }
@@ -330,7 +428,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       if (z.skCd == null) z.skCd = 2.5;
       if (z.pilot) continue;
       if (BOSSTR.on && z.sprite === 'cheng_new') { if (BOSSTR.move === 'atk' || !BOSSTR.move) continue; if (!z.seq || !z.seq.length) { if ((z.skCd -= dt) > 0) continue; z.seq = [BOSSTR.move]; z.skCd = 1.4; } const T = BSK[z.seq.shift()](z); if (T > 0) { z.castT = T; z.cx = z.x; z.cy = z.y; z.st = 'wind'; z.t = 0; } continue; }
-      const big = z.survTier >= 3, list = z.clone ? ['crack'] : (BMOVES[z.type] || (big ? ['sweep', 'cleave'] : ['cleave']));
+      const big = z.survTier >= 3, list = z.clone ? ['crack'] : ((/_new$/.test(z.sprite || '') && NMOVES[z.type]) || BMOVES[z.type] || (big ? ['sweep', 'cleave'] : ['cleave']));
       if (!z.seq || !z.seq.length) {
         if ((z.skCd -= dt) > 0) continue;
         z.skI = (z.skI || 0); z.seq = big ? [list[z.skI % list.length], list[(z.skI + 1) % list.length]] : [list[z.skI % list.length]]; z.skI += big ? 2 : 1;
@@ -347,7 +445,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     for (const z of zs) {
       if (!z.survBoss || z.dead || z.hp <= 0 || z.endFade != null || !(z.survTier >= 3)) continue;
       if (z.type === 'guanhai_m' && !z.dismount && z.hp < (z.maxHp || z.hp) * .5) {   // 管亥二阶段：被打下马，换步战长戟，摔倒僵直 1.2 秒
-        z.dismount = 1; z.type = 'guanhai_b'; z.sprite = 'guanhai_b'; z.T = Object.assign({}, TYPES.guanhai_b, { dmg: TYPES.guanhai_b.dmg * 1.6, heavy: true }); z.stun = 1.2; z.st = 'hurt'; z.t = 0;
+        z.dismount = 1; z.type = 'guanhai_b'; z.sprite = (/_new$/.test(z.sprite || '') && newSp('guanhai_b')) || 'guanhai_b'; z.cbFrame = null; z.dash = null; z.T = Object.assign({}, TYPES.guanhai_b, { dmg: TYPES.guanhai_b.dmg * 1.6, heavy: true }); z.stun = 1.2; z.st = 'hurt'; z.t = 0;
         floaters.push({ x: z.x, y: z.y - 70, t: 0, txt: '管亥 落马！', color: '#ffcf6a', big: 1 }); shake = Math.max(shake, .35); if (window.SFX) SFX.play('crack');
         z.rage = 0;
       }
@@ -356,9 +454,10 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
         floaters.push({ x: z.x, y: z.y - 84, t: 0, txt: '张梁 狂怒！', color: '#ff4a2a', big: 1 }); shake = Math.max(shake, .4); if (window.SFX) SFX.play('crack');
       }
       if (!z.rage && z.hp < (z.maxHp || z.hp) * .5 && z.type === 'zhang_bao') {   /* 11/12 张宝二阶段：召出两个分身（血少、伤害低，打掉就散） */
-        for (const s of [-1, 1]) { const c = edgeSpawn('zhang_bao', { name: '张宝·分身', hp: 18, sc: 1, tier: 2 }); if (c) { c.x = z.x + s * 70; c.y = Math.max(M.top + 6, Math.min(M.bot - 6, z.y + s * 30)); c.T = Object.assign({}, c.T, { dmg: (c.T.dmg || 1) * .6 }); c.clone = 1; } }
+        for (const s of [-1, 1]) { const c = edgeSpawn('zhang_bao', { name: '张宝·分身', hp: 18, sc: 1, tier: 2 }); if (c) { c.x = z.x + s * 70; c.y = Math.max(M.top + 6, Math.min(M.bot - 6, z.y + s * 30)); c.T = Object.assign({}, c.T, { dmg: (c.T.dmg || 1) * .6 }); c.clone = 1; if (/_new$/.test(z.sprite || '')) c.sprite = z.sprite; } } cyPlay(z, [['sleeve', .7]]);
         floaters.push({ x: z.x, y: z.y - 84, t: 0, txt: '张宝：分身之术！', color: '#c9a0ff', big: 1 }); if (window.SFX) SFX.play('j_banner');
       }
+      if (!z.rage && z.hp < (z.maxHp || z.hp) * .5 && /_new$/.test(z.sprite || '')) { cyPlay(z, [['roar', .8]]); if (RAGEL[z.type]) say(z, RAGEL[z.type]); if (z.type === 'zhang_jiao') { z.seq = ['zj_ht']; z.skCd = 0; } }
       if (!z.rage && z.hp < (z.maxHp || z.hp) * .5) { z.rage = 1; z.T = Object.assign({}, z.T, { spd: (z.T.spd || 30) * 1.3, wind: (z.T.wind || .8) * .75 }); floaters.push({ x: z.x, y: z.y - (z.dismount ? 96 : 64), t: 0, txt: (z.bossLabel || '敌将') + ' 暴怒！', color: '#ff4a2a' }); shake = Math.max(shake, .3); if (window.SFX) SFX.play('j_banner'); }
       if ((z.bossT -= dt) <= 0) {
         z.bossT = z.rage ? 10 : 13; const n = 5 + (z.rage ? 2 : 0);
@@ -404,7 +503,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     const list = nd.br ? [BR[nd.br], BOSSES[4][1]] : nd.final ? [BOSSES[4][0], BR[took === 'bao' ? 'liang' : 'bao']] : BOSSES[secOf(nd)];
     bossIntro(nd.final ? 0 : secOf(nd), list[0].name, !!nd.final);
     W.bossT = list[0].t; talkIn = list[0].t;   // 11/14：首领登场台词（等开战横幅点掉再说）
-    list.forEach((b, i) => { const z = edgeSpawn(c2ok || !b.fb ? b.t : b.fb, Object.assign({}, b, { tier: i === 0 ? 3 : 2, hp: i === 0 ? 130 : 40 })); bossBuff(z, i === 0 ? 1.6 : 1.3); });   // 11/11 用户：BOSS 太简单 → 首领血 54→130、小头目 21→40，伤害 ×1.6 / ×1.3   // 四档：小头目 ×7（21）、首领 ×18（54）
+    list.forEach((b, i) => { const z = edgeSpawn(c2ok || !b.fb ? b.t : b.fb, Object.assign({}, b, { tier: i === 0 ? 3 : 2, hp: i === 0 ? 130 : 40 })); bossBuff(z, i === 0 ? 1.6 : 1.3); if (z && !NEWOFF) { const n = newSp(z.type); if (n) { z.sprite = n; z.cbFrame = null; } } });   // 11/19 首领重做：新图下好了就用新图和新招   // 11/11 用户：BOSS 太简单 → 首领血 54→130、小头目 21→40，伤害 ×1.6 / ×1.3   // 四档：小头目 ×7（21）、首领 ×18（54）
   }
   function edgeSpawn(type, boss) {   // boss：true = 老卒式 ×4 血；对象 = 命名首领 {name, hp 或 m, sc}
     const vw = viewW(); let side = Math.random() < .5 ? -1 : 1, x, y;
@@ -422,7 +521,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   function startWave(n) {
     if (RT.on) {   // 路线模式：一个节点 = 一整场连续的仗（不分波、不鸣金）。难度从「本节点第 1 波」平滑爬到「最后一波」的级别
       const nd = RT.node, L = ROUTE.layers(), N0 = ROUTE.waves(nd);
-      if (n === 1) { W.outTalk = 0; W.bossT = null; talkHold = false; }
+      if (n === 1) { W.outTalk = 0; W.bossT = null; talkHold = false; if (typeof ensureAssets === 'function') ensureAssets('bossnew', { silent: true }); }   // 11/19 新首领图在开打后后台下载
       if (n === 1) { const cn = v => v <= 10 ? '零一二三四五六七八九十'[v] : v < 20 ? '十' + (v % 10 ? '零一二三四五六七八九'[v % 10] : '') : '零一二三四五六七八九'[(v / 10) | 0] + '十' + (v % 10 ? '零一二三四五六七八九'[v % 10] : ''); waveBanner(ROUTE.name(nd), nd.type === 'boss' ? '首领战 · 迎战' : nd.type === 'elite' ? '第' + cn(nd.layer) + '层 · 精锐 · 迎战' : '第' + cn(nd.layer) + '层 · 迎战'); }
       const lvOf = k => Math.max(1, Math.min(WAVES, 1 + Math.floor(((nd.layer - 1 + (k - 1) / N0) / L) * WAVES) + (nd.type === 'elite' ? 2 : 0) + (nd.type === 'boss' ? 2 : 0)));
       W.lv0 = lvOf(1); W.lv1 = lvOf(N0); W.tot = 0; for (let k = 1; k <= N0; k++) W.tot += (WAVE_T[lvOf(k) - 1] || 60) * ROUTE.TIME_K;
@@ -5548,7 +5647,14 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     ctx.fillStyle = wd; ctx.beginPath(); ctx.arc(x, y - 40, 5, 0, 7); ctx.fill(); ctx.fillStyle = '#b8402a'; ctx.fillRect(x - 5, y - 41, 10, 2);
     ctx.restore();
   }
-  const TRIAL = { fxSk: k => fxSk(k), fxBaseOf: k => fxBase(k), fxBhOf: k => fxBh(k), setFxSk(k, o) { FXSK[k] = Object.assign(fxSk(k), o); try { localStorage.setItem('szz-fxsk', JSON.stringify(FXSK)); } catch (e) {} }, fxSkCopy: () => JSON.stringify(FXSK), hasDg: k => !!DGM[k], dgAdj: k => dga(k), setDgAdj(k, o) { DGA[k] = Object.assign(dga(k), o); try { localStorage.setItem('szz-dga', JSON.stringify(DGA)); } catch (e) {} }, dgCopy: () => JSON.stringify(Object.fromEntries(Object.keys(DGM).map(k => [k, dga(k)]).filter(([, o]) => o.s !== 1 || o.dx || o.dy || o.r))), pilot: on => pilotOn(on), pilotCast: m => pilotCast(m), pilotTick, bossTr(on, mv) { BOSSTR.on = !!on; BOSSTR.move = mv || ''; const C = bcfg('cheng_yuanzhi', 'atk'); for (const z of zs) if (z.sprite === 'cheng_new') { z.seq = []; z.skCd = .6; z.T = Object.assign({}, TYPES.cheng_yuanzhi, z.T, { wind: (TYPES.cheng_yuanzhi.wind || .6) * C.sp }); } }, bossCfg: m => bcfg('cheng_yuanzhi', m), setBossCfg(m, o) { BCFG.cheng_yuanzhi = BCFG.cheng_yuanzhi || {}; BCFG.cheng_yuanzhi[m] = Object.assign(bcfg('cheng_yuanzhi', m), o); try { localStorage.setItem('szz-boss-cfg', JSON.stringify(BCFG)); } catch (e) {} }, bossCopy: () => JSON.stringify({ cheng_yuanzhi: { atk: bcfg('cheng_yuanzhi', 'atk'), boomerang: bcfg('cheng_yuanzhi', 'boomerang'), sweep: bcfg('cheng_yuanzhi', 'sweep'), chase: bcfg('cheng_yuanzhi', 'chase') } }), newBoss() { const z = edgeSpawn('cheng_yuanzhi', { name: '程远志', hp: 70, sc: 1, tier: 3 }); if (z && typeof CH !== 'undefined' && CH.cheng_new) { z.sprite = 'cheng_new'; z.x = Math.min(lockR - 20, hero.x + 160); z.y = hero.y; } }, regrunt(on) { for (const z of zs) if (z.type === 'grunt' && !z.dummy) z.sprite = on && typeof CH !== 'undefined' && CH.grunt_new ? 'grunt_new' : 'grunt'; }, showcase: on => showcase(on), fxArr: () => fx, boltArr: () => bolts, pvr: () => PVR, getPv: k => pvOpt(k), getPs: k => pvShape(k), pvReach: k => PVM[k] || 0, setPs: (k, o) => { PVS[k] = Object.assign(pvShape(k), o); try { localStorage.setItem('szz-pv-shape', JSON.stringify(PVS)); } catch (e) {} }, setPv: (k, o) => { PVO[k] = Object.assign(pvOpt(k), o); try { localStorage.setItem('szz-pv-opt', JSON.stringify(PVO)); } catch (e) {} }, dummy: m => dummyMode(m), dummyStat, dummyClear() { DUM.log = []; DUM.tot = 0; DUM.broke = 0; DUM.t0 = performance.now(); }, dummyBrk(v) { DUM.brk = v ? 1 : 0; for (const z of zs) if (z.dummy) { z.dhp = DUM.HP; z.brokeT = 0; z.hidden = false; } }, soldiers(v, keep) { DUM.noSol = v ? 0 : 1; if (!v && !keep) for (let i = zs.length - 1; i >= 0; i--) if (!zs[i].dummy) zs.splice(i, 1); }, slot(i, k) { S.slots[i] = k; }, bao(k) { gainBao(k); }, lvSet(k, l) { (S.lvLock = S.lvLock || {})[k] = l; }, SK, GF, MOT, WEPN, TIERN, wepOf, IMGU, spdTxt, spawn: t => edgeSpawn(t), count: t => zs.filter(z => !z.dead && z.type === t).length, long() { W.tot = 9999; if (W.t > W.tot - 5) W.t = 0; },
+  const TRIAL = { fxSk: k => fxSk(k), fxBaseOf: k => fxBase(k), fxBhOf: k => fxBh(k), setFxSk(k, o) { FXSK[k] = Object.assign(fxSk(k), o); try { localStorage.setItem('szz-fxsk', JSON.stringify(FXSK)); } catch (e) {} }, fxSkCopy: () => JSON.stringify(FXSK), hasDg: k => !!DGM[k], dgAdj: k => dga(k), setDgAdj(k, o) { DGA[k] = Object.assign(dga(k), o); try { localStorage.setItem('szz-dga', JSON.stringify(DGA)); } catch (e) {} }, dgCopy: () => JSON.stringify(Object.fromEntries(Object.keys(DGM).map(k => [k, dga(k)]).filter(([, o]) => o.s !== 1 || o.dx || o.dy || o.r))), pilot: on => pilotOn(on), pilotCast: m => pilotCast(m), pilotTick, bossTr(on, mv) { BOSSTR.on = !!on; BOSSTR.move = mv || ''; const C = bcfg('cheng_yuanzhi', 'atk'); for (const z of zs) if (z.sprite === 'cheng_new') { z.seq = []; z.skCd = .6; z.T = Object.assign({}, TYPES.cheng_yuanzhi, z.T, { wind: (TYPES.cheng_yuanzhi.wind || .6) * C.sp }); } }, bossCfg: m => bcfg('cheng_yuanzhi', m), setBossCfg(m, o) { BCFG.cheng_yuanzhi = BCFG.cheng_yuanzhi || {}; BCFG.cheng_yuanzhi[m] = Object.assign(bcfg('cheng_yuanzhi', m), o); try { localStorage.setItem('szz-boss-cfg', JSON.stringify(BCFG)); } catch (e) {} }, bossCopy: () => JSON.stringify({ cheng_yuanzhi: { atk: bcfg('cheng_yuanzhi', 'atk'), boomerang: bcfg('cheng_yuanzhi', 'boomerang'), sweep: bcfg('cheng_yuanzhi', 'sweep'), chase: bcfg('cheng_yuanzhi', 'chase') } }), nmoves: () => NMOVES, newBossOk: t => !!newSp(t), spawnNew(t) {   // 11/19 首领试炼：叫出一个新画风首领来打（AI 自己出招）
+      const go = () => { pilotOn(false); for (let i = zs.length - 1; i >= 0; i--) if (zs[i].survBoss && !zs[i].dummy) zs.splice(i, 1);
+        const big = ['bo_cai', 'guanhai_m', 'zhang_liang', 'zhang_bao', 'zhang_jiao'].includes(t), z = edgeSpawn(t, { name: (TYPES[t].name || '').split('·').pop(), hp: big ? 130 : 40, sc: 1, tier: big ? 3 : 2 });
+        if (!z) return; bossBuff(z, big ? 1.6 : 1.3); const n = newSp(t); if (n) z.sprite = n; z.x = Math.min(lockR - 20, hero.x + 170); z.y = hero.y; z.skCd = 1.2; };
+      if (typeof ensureAssets === 'function') ensureAssets('bossnew', { silent: true }).then(go); else go(); },
+    forceMove(m) { for (const z of zs) if (z.survBoss && !z.dead && /_new$/.test(z.sprite || '')) { z.seq = [m]; z.skCd = 0; } },
+    oldBoss(v) { NEWOFF = !!v; try { localStorage.setItem('szz-oldboss', v ? '1' : '0'); } catch (e) {} },
+    newBoss() { const z = edgeSpawn('cheng_yuanzhi', { name: '程远志', hp: 70, sc: 1, tier: 3 }); if (z && typeof CH !== 'undefined' && CH.cheng_new) { z.sprite = 'cheng_new'; z.x = Math.min(lockR - 20, hero.x + 160); z.y = hero.y; } }, regrunt(on) { for (const z of zs) if (z.type === 'grunt' && !z.dummy) z.sprite = on && typeof CH !== 'undefined' && CH.grunt_new ? 'grunt_new' : 'grunt'; }, showcase: on => showcase(on), fxArr: () => fx, boltArr: () => bolts, pvr: () => PVR, getPv: k => pvOpt(k), getPs: k => pvShape(k), pvReach: k => PVM[k] || 0, setPs: (k, o) => { PVS[k] = Object.assign(pvShape(k), o); try { localStorage.setItem('szz-pv-shape', JSON.stringify(PVS)); } catch (e) {} }, setPv: (k, o) => { PVO[k] = Object.assign(pvOpt(k), o); try { localStorage.setItem('szz-pv-opt', JSON.stringify(PVO)); } catch (e) {} }, dummy: m => dummyMode(m), dummyStat, dummyClear() { DUM.log = []; DUM.tot = 0; DUM.broke = 0; DUM.t0 = performance.now(); }, dummyBrk(v) { DUM.brk = v ? 1 : 0; for (const z of zs) if (z.dummy) { z.dhp = DUM.HP; z.brokeT = 0; z.hidden = false; } }, soldiers(v, keep) { DUM.noSol = v ? 0 : 1; if (!v && !keep) for (let i = zs.length - 1; i >= 0; i--) if (!zs[i].dummy) zs.splice(i, 1); }, slot(i, k) { S.slots[i] = k; }, bao(k) { gainBao(k); }, lvSet(k, l) { (S.lvLock = S.lvLock || {})[k] = l; }, SK, GF, MOT, WEPN, TIERN, wepOf, IMGU, spdTxt, spawn: t => edgeSpawn(t), count: t => zs.filter(z => !z.dead && z.type === t).length, long() { W.tot = 9999; if (W.t > W.tot - 5) W.t = 0; },
     setGf(ids) { S.gf = ['', '', '']; ids.slice(0, 3).forEach((id, i) => { S.gf[i] = id; }); GM = gfCalc(); }, setQg(id) { S.qg = id || ''; GM = gfCalc(); }, gf: () => S.gf.slice(), qg: () => S.qg, mul: k => skillMul(k), lv: k => lvOf(k), spd: k => spdTxt(SK[k]), rs: k => SK[k] && SK[k].dk ? rsOf(k) : null, setRs(k, v) { DRS[k] = v; try { localStorage.setItem('szz-dao-rs', JSON.stringify(DRS)); } catch (e) {} },
     sp: k => spOf(k), setSp(k, v) { DSP[k] = v; try { localStorage.setItem('szz-dao-sp', JSON.stringify(DSP)); } catch (e) {} }, spAll(v, w) { Object.keys(SK).forEach(k => { if (SK[k].dk && (w == null || wepOf(k) === w)) DSP[k] = v; }); try { localStorage.setItem('szz-dao-sp', JSON.stringify(DSP)); } catch (e) {} },
     FRN: ['idle', 'walk1', 'walk2', 'walk3', 'roll1', 'roll2', 'roll3', 'roll4', 'hurt', 'down', 'chop1', 'chop2', 'sweep1', 'sweep2', 'thrust1', 'thrust2', 'spin1', 'spin2', 'up1', 'up2'],

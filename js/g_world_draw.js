@@ -314,6 +314,7 @@ function drawZ(z) {
     ctx.strokeText(z.T.name, z.x, y - 3); ctx.fillText(z.T.name, z.x, y - 3); ctx.textAlign = 'left';
     return;
   }
+  if (z.under) { if (z.under > 1) shadow(z.x, z.y, 8); return; }   // 11/19 首领遁地/化符中：不画人
   shadow(z.x, z.y, 10);
   const a = z.st === 'gone' ? Math.max(0, 1 - z.t * 1.2) * (Math.floor(z.t * 12) % 2 ? .4 : 1) : 1 * (z.clone ? .5 : 1);   /* 张宝分身半透明 */
   const hop = z.celebrating ? Math.abs(Math.sin(z.celebrateT * 7)) * 2.5 : 0;
