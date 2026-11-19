@@ -9,6 +9,7 @@
   const T = () => window.SURV && SURV.trial;
   const css = `#szzTrial{position:fixed;z-index:10040;left:8px;top:56px;width:min(330px,46vw);max-height:calc(100vh - 70px);display:flex;flex-direction:column;background:rgba(14,10,7,.93);border:1px solid #8a6a3a;color:#efe2c4;font-size:13px;box-shadow:0 6px 20px rgba(0,0,0,.6)}
 #szzTrial .hd{display:flex;align-items:center;justify-content:space-between;padding:6px 8px;border-bottom:1px solid rgba(184,149,90,.35);color:#ffd86e}
+@media (max-height:520px){#szzBoss{top:44px!important;max-height:calc(100vh - 52px)!important;width:250px!important;font-size:11px!important;-webkit-overflow-scrolling:touch}#szzBoss button{padding:1px 5px!important}}
 #szzBoss{position:fixed;left:8px;top:100px;z-index:10041;max-height:calc(100vh - 110px);overflow:auto;width:300px;max-width:calc(100vw - 16px);background:rgba(24,16,10,.94);border:1px solid #8a6a3a;color:#ead9b6;font:13px/1.5 sans-serif;padding:6px 8px;border-radius:6px}#szzBoss .hd{display:flex;justify-content:space-between;align-items:center;color:#ffe08a;font-weight:700;margin-bottom:4px}#szzBoss button{background:#3a2a1a;border:1px solid #8a6a3a;color:#e6c98a;border-radius:4px;padding:2px 8px;cursor:pointer}#szzBoss .mv{display:flex;gap:4px;flex-wrap:wrap;margin:4px 0}#szzBoss .mv button.on{background:#7a5a2a;color:#fff}#szzBoss .ds{opacity:.75;font-size:12px;margin:3px 0}#szzBoss .row{display:flex;align-items:center;gap:6px;margin:3px 0}#szzBoss .row span{width:34px}#szzBoss .row input{flex:1}#szzBoss select{flex:1;background:#2a1d12;color:#ead9b6;border:1px solid #8a6a3a}#szzBoss .cp{margin-top:6px;width:100%}#szzBoss .fxr{margin-top:6px;display:flex;flex-wrap:wrap;gap:4px}#szzBossKeys{position:fixed;right:14px;bottom:110px;z-index:10041;display:flex;gap:8px}#szzBossKeys button{width:74px;height:74px;border-radius:50%;background:rgba(60,36,18,.88);border:2px solid #c9a35a;color:#ffe9b0;font:700 14px/1.2 sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;touch-action:none}#szzBossKeys small{opacity:.6;font-size:11px}@media (max-height:500px){#szzBoss{top:56px;font-size:12px;line-height:1.35;width:270px}#szzBossKeys{bottom:90px}#szzBossKeys button{width:60px;height:60px;font-size:12px}}@media (max-width:560px){#szzBoss{top:auto;bottom:8px;right:8px;left:8px;width:auto}}
 #szzTrial .dms{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:4px 8px;background:#2a1d12;color:#ffe08a;font-size:12px;border-bottom:1px solid rgba(184,149,90,.35)}#szzTrial .dms button{background:none;border:1px solid #8a6a3a;color:#e6c98a;cursor:pointer;padding:0 6px}
 #szzTrial .hd button{background:none;border:1px solid #8a6a3a;color:#e6c98a;cursor:pointer;padding:1px 8px}
@@ -24,7 +25,30 @@
 #szzTrial .sl{display:flex;align-items:center;gap:6px;margin-top:5px}#szzTrial .sl input{flex:1;accent-color:#ffd86e}#szzTrial .sl b{min-width:44px;color:#ffe08a}
 #szzTrial .ps select{background:#1c140d;color:#efe2c4;border:1px solid #3a2a18;font-size:12px;padding:1px 4px}#szzTrial .ps label{font-size:12px;display:flex;align-items:center;gap:3px;cursor:pointer}
 #szzTrial .lvr{margin-top:5px;display:flex;gap:4px;flex-wrap:wrap}#szzTrial .lvr button{padding:2px 7px;font-size:12px;background:#1c140d;border:1px solid #3a2a18;color:#efe2c4;cursor:pointer}#szzTrial .lvr button.on{border-color:#ffd86e;background:#3a2814}
+@media (max-height:560px){#szzTrial{top:40px;max-height:calc(100vh - 48px);overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;font-size:12px}#szzTrial .ls{flex:none;overflow:visible;min-height:0}#szzTrial .dt{overflow:visible}}
+#szzTrial::-webkit-scrollbar,#szzBoss::-webkit-scrollbar,#szzTrial .ls::-webkit-scrollbar{width:12px}#szzTrial::-webkit-scrollbar-thumb,#szzBoss::-webkit-scrollbar-thumb,#szzTrial .ls::-webkit-scrollbar-thumb{background:#b8955a;border-radius:6px;border:2px solid #1c140d}#szzTrial::-webkit-scrollbar-track,#szzBoss::-webkit-scrollbar-track,#szzTrial .ls::-webkit-scrollbar-track{background:#2a1d12}
+#szzTrial,#szzBoss{scrollbar-color:#b8955a #2a1d12}
 @media (max-aspect-ratio:1/1){#szzTrial{left:0;right:0;top:auto;bottom:0;width:auto;max-height:46vh}#szzTrial .ls{grid-template-columns:1fr 1fr 1fr}}`;
+  // 11/19 用户：手机上面板太长看不全——两个面板旁边各加一条看得见、能拖的滑条
+  function sbar(id, onLeft) {
+    const b = document.createElement('div'); b.id = id + 'Bar'; b.style.cssText = 'position:fixed;z-index:10045;width:16px;background:#2a1d12;border:1px solid #8a6a3a;border-radius:8px;display:none;touch-action:none';
+    const th = document.createElement('div'); th.style.cssText = 'position:absolute;left:1px;right:1px;background:#d8b46a;border-radius:7px;min-height:24px'; b.appendChild(th); document.body.appendChild(b);
+    let drag = null;
+    const tgt = () => document.getElementById(id);
+    b.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); b.setPointerCapture(e.pointerId); drag = 1; mv(e); });
+    b.addEventListener('pointermove', e => { if (drag) mv(e); });
+    b.addEventListener('pointerup', () => drag = null); b.addEventListener('pointercancel', () => drag = null);
+    function mv(e) { const el = tgt(); if (!el) return; const r = b.getBoundingClientRect(), q = Math.max(0, Math.min(1, (e.clientY - r.top) / r.height)); el.scrollTop = q * (el.scrollHeight - el.clientHeight); }
+    (function loop() {
+      const el = tgt();
+      if (!el || !el.isConnected || getComputedStyle(el).display === 'none' || el.scrollHeight <= el.clientHeight + 2) b.style.display = 'none';
+      else { const r = el.getBoundingClientRect(); b.style.display = 'block'; b.style.left = (onLeft ? Math.max(0, r.left - 19) : Math.min(innerWidth - 18, r.right + 2)) + 'px'; b.style.top = r.top + 'px'; b.style.height = r.height + 'px';
+        const h = r.height, t = Math.max(24, h * el.clientHeight / el.scrollHeight); th.style.height = t + 'px'; th.style.top = ((h - t) * el.scrollTop / (el.scrollHeight - el.clientHeight)) + 'px'; }
+      requestAnimationFrame(loop);
+    })();
+  }
+  setTimeout(() => { sbar('szzTrial'); sbar('szzBoss'); sbar('dbg', 1); }, 0);
+
   // 11/18 用户：新画风（写实比例）的黄巾棍兵——演武场里打打看。图在 art/sprites/grunt_new/，帧尺寸按旧喽啰的精灵像素换算（站立高 85）
   const GN = {"idle": [44.1, 95.0, 23.9, 94.3], "walk1": [59.1, 93.8, 29.2, 93.1], "walk2": [58.6, 94.0, 27.7, 93.4], "wind": [60.1, 103.6, 30.7, 103.0], "strike": [102.7, 75.4, 49.1, 74.9], "hurt": [89.5, 91.8, 55.5, 91.2], "down": [101.4, 33.3, 52.4, 32.6], "fly1": [96.9, 77.1, 69.4, 76.4], "fly2": [76.4, 88.6, 53.3, 88.0], "land": [103.0, 48.6, 49.0, 47.9]};
   const CYN = {"idle": [91.5, 150.0, 49.2, 147.0], "walk1": [122.5, 127.5, 67.0, 124.5], "walk2": [117.5, 126.0, 63.8, 123.0], "walk3": [117.5, 126.5, 65.8, 123.5], "walk4": [117.5, 126.0, 63.8, 123.0], "wind": [138.0, 146.0, 81.2, 143.0], "strike": [185.5, 112.5, 55.0, 109.5], "throw1": [169.5, 118.5, 116.0, 115.5], "throw2": [158.0, 110.5, 52.8, 107.5], "bare": [116.0, 108.5, 47.0, 105.5], "catch": [126.0, 178.5, 64.0, 175.5], "sweep1": [170.0, 122.0, 95.2, 119.0], "sweep2": [212.5, 147.5, 68.5, 131.0], "sweep3": [171.5, 120.5, 57.8, 117.5], "hurt": [154.5, 132.0, 92.5, 129.0], "blade": [150.0, 85.5, 75.0, 42.8], "down": [177.5, 73.5, 88.8, 70.5], "fly1": [175.5, 114.5, 87.8, 111.5], "fly2": [133.5, 138.0, 66.8, 135.0], "land": [140.0, 162.0, 68.0, 159.0]};   // 11/18 新画风程远志（写实比例，站立 150）
@@ -76,13 +100,12 @@
   let nbSel = '';
   function nbHtml() {
     const t = T(), mv = nbSel ? ((t.nmoves()[nbSel] || []).concat(nbSel === 'guanhai_m' ? t.nmoves().guanhai_b : []).concat(nbSel === 'zhang_jiao' ? ['zj_ht'] : [])) : [];
-    return `<div class="ds" style="margin-top:6px"><button class="tcute" style="background:#5a3a14">Q版张角 + Q版小兵 一起看</button></div><div class="ds" style="margin-top:6px"><button class="tshow">${show ? '收起首领美术' : '首领美术对比'}</button></div><div class="ds" style="margin-top:6px;border-top:1px solid #5a4226;padding-top:4px">换成操控别的首领（右下角按钮 / J K L I U 出招）：</div><div class="mv"><button data-pl="cheng_yuanzhi" class="${T().pilotType() === 'cheng_yuanzhi' ? 'on' : ''}">程远志</button>${NBS.map(([k, n]) => `<button data-pl="${k}" class="${k === T().pilotType() ? 'on' : ''}">${n}</button>`).join('')}</div>
+    return `<div class="ds" style="margin-top:6px"><button class="tshow">${show ? '收起首领美术' : '首领美术对比'}</button></div><div class="ds" style="margin-top:6px;border-top:1px solid #5a4226;padding-top:4px">换成操控别的首领（右下角按钮 / J K L I U 出招）：</div><div class="mv"><button data-pl="cheng_yuanzhi" class="${T().pilotType() === 'cheng_yuanzhi' ? 'on' : ''}">程远志</button>${NBS.map(([k, n]) => `<button data-pl="${k}" class="${k === T().pilotType() ? 'on' : ''}">${n}</button>`).join('')}</div>
       <div class="ds" style="margin-top:6px;border-top:1px solid #5a4226;padding-top:4px">或者叫一个首领出来打你（主角无敌，AI 自己出招）：</div><div class="mv">${NBS.map(([k, n]) => `<button data-nb="${k}" class="${k === nbSel ? 'on' : ''}">${n}</button>`).join('')}</div>${mv.length ? `<div class="mv">${mv.map(m => `<button data-nm="${m}">${NMN[m] || m}</button>`).join('')}</div><div class="ds">点招式名＝马上放这一招；不点就按顺序自己放。管亥打到半血落马换步战。</div>` : ''}`;
   }
   function nbBind() {
     bbox.querySelectorAll('[data-nb]').forEach(b => b.onclick = () => { nbSel = b.dataset.nb; T().spawnNew(nbSel); const k = document.getElementById('szzBossKeys'); if (k) k.innerHTML = ''; brender(); });
-    const tc = bbox.querySelector('.tcute'); if (tc) tc.onclick = () => { const t = T(); t.cute(1); const b = [...document.querySelectorAll('#dbg button')].find(b => b.textContent.includes('Q像素')); if (b) b.textContent = 'Q像素版：开';
-      t.pilotAs('cheng_yuanzhi'); setTimeout(() => { try { t.pilot(false); } catch (e) {} nbSel = 'zhang_jiao'; t.spawnNew('zhang_jiao'); t.soldiers(1, 1); for (let i = 0; i < 6; i++) { const z = t.spawn('grunt'); if (z) { z.x = hero.x + 60 + (i % 3) * 45; z.y = hero.y - 40 + (i >> 1) * 28; } } t.soldiers(0, 1); const k = document.getElementById('szzBossKeys'); if (k) k.innerHTML = ''; brender(); }, 500); };   // 11/19 用户：Q版张角和Q版小兵放一起看
+    bindCute();
     const ts = bbox.querySelector('.tshow'); if (ts) ts.onclick = () => { show = show ? 0 : 1; try { T().showcase(show); } catch (e) {} brender(); };
     bbox.querySelectorAll('[data-pl]').forEach(b => b.onclick = () => { nbSel = ''; T().pilotAs(b.dataset.pl); setTimeout(() => { bkeys(); brender(); }, 400); });
     bbox.querySelectorAll('[data-nm]').forEach(b => b.onclick = () => T().forceMove(b.dataset.nm));
@@ -99,6 +122,10 @@
     throw1: '掷·起手', throw2: '掷·出手', catch: '接戟', cross: '交叉重斩', talis: '拍符', glide: '滑行', stop: '急停', plant1: '举剑', plant2: '插剑', chant: '念咒', rest: '喘息', charge1: '冲·蓄势', charge2: '冲·狂奔', charge3: '冲·收势', rear: '人立', stomp: '马踏',
     leap1: '跃·蓄力', leap2: '跃·腾空', leap3: '跃·落劈', run: '空手冲', pull: '拔戟/收锤', cross1: '十字·起手', cross2: '十字·出手', sink1: '下沉', sink2: '半身', rise: '破土', call1: '指天', call2: '挥下', seal: '结印', swing: '剑挥', sleeve: '拂袖',
     flail1: '抡锤', flail2: '直击', claw1: '飞爪·甩', claw2: '被拉飞', claw3: '落地', vanish: '化符', appear: '现身', talis1: '雷符·起手', talis2: '雷符·出手', raise: '举杖', stab: '杖戳地', read: '念经', float: '浮空' };
+  function bindCute() {
+    const tc = bbox.querySelector('.tcute'); if (tc) tc.onclick = () => { const t = T(); t.cute(1); const b = [...document.querySelectorAll('#dbg button')].find(b => b.textContent.includes('Q像素')); if (b) b.textContent = 'Q像素版：开';
+      t.pilotAs('cheng_yuanzhi'); setTimeout(() => { try { t.pilot(false); } catch (e) {} nbSel = 'zhang_jiao'; t.spawnNew('zhang_jiao'); t.soldiers(1, 1); for (let i = 0; i < 6; i++) { const z = t.spawn('grunt'); if (z) { z.x = hero.x + 60 + (i % 3) * 45; z.y = hero.y - 40 + (i >> 1) * 28; } } t.soldiers(0, 1); const k = document.getElementById('szzBossKeys'); if (k) k.innerHTML = ''; brender(); }, 500); };   // 11/19 用户：Q版张角和Q版小兵放一起看
+  }
   function brender() {
     const t = T(), ty = t.pilotType(), ch = isCh();
     const mvs = ch ? BMV : t.pilotMoves().map(m => [m, m === 'atk' ? '普攻' : NMN[m] || m, m === 'atk' ? '身前扇形一下（范围＝打多远，速度＝起手多久）' : '范围＝预警圈/线多大、飞多远；速度＝预警和动作多久（越大越慢）']);
@@ -106,7 +133,7 @@
     const C = t.bossCfg(bsel, ty), FR = ch ? BFR : Object.fromEntries(t.frameNames(ty).map(k => [k, FRN[k] || k])), cur = mvs.find(m => m[0] === bsel);
     const op = v => Object.entries(FR).map(([k, n]) => `<option value="${k}"${k === v ? ' selected' : ''}>${n}</option>`).join('');
     const opd = v => `<option value=""${v ? '' : ' selected'}>${ch ? '无' : '默认'}</option>` + op(v);
-    bbox.innerHTML = `<div class="hd"><span>首领试炼 · ${pName()}</span><span><button class="bm">${bmini ? '展开' : '缩小'}</button> <button class="bx">${bossMode ? '退出' : '关闭'}</button></span></div>${bmini ? '' : `
+    bbox.innerHTML = `<div class="hd"><span>首领试炼 · ${pName()}</span><span><button class="tcute" style="background:#6a4210">Q版对比</button> <button class="bm">${bmini ? '展开' : '缩小'}</button> <button class="bx">${bossMode ? '退出' : '关闭'}</button></span></div>${bmini ? '' : `
       <div class="mv">${mvs.map(([k, n]) => `<button data-m="${k}" class="${k === bsel ? 'on' : ''}">${n}</button>`).join('')}</div>
       <div class="ds">你就是${pName()}：移动照常，右下角按钮或 J K L I U 出招，招式打士兵和木人。正在调：${cur[1]}——${cur[2]}</div>
       <div class="row"><span>起手</span><select data-f="a">${ch ? op(C.a) : opd(C.a)}</select></div>
@@ -118,7 +145,7 @@
       <button class="cp">复制首领设置（全部首领）</button>${nbHtml()}`}`;
     bbox.querySelector('.bm').onclick = () => { bmini = !bmini; brender(); };
     bbox.querySelector('.bx').onclick = () => bossMode ? close() : bossPanel(false);
-    if (bmini) return;
+    bindCute(); if (bmini) return;
     bbox.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { bsel = b.dataset.m; brender(); });
     bbox.querySelectorAll('[data-f]').forEach(e => e.onchange = () => { t.setBossCfg(bsel, { [e.dataset.f]: e.value }, ty); });
     bbox.querySelectorAll('[data-r]').forEach(e => e.oninput = () => { const v = Math.round(+e.value * 100) / 100; t.setBossCfg(bsel, { [e.dataset.r]: v }, ty); e.nextElementSibling.textContent = '×' + v.toFixed(2); });
@@ -140,12 +167,14 @@
       ls = ids.map(id => { const g = t.GF[id]; return `<button data-g="${id}" class="${on.includes(id) ? 'on' : ''}"><span style="color:${TC[g.t + 1]}">${t.TIERN[g.t + 1]}</span> ${g.n}<small>${g.cn || (qg ? '轻功' : '内功')}</small></button>`; }).join('');
       const g = sel && t.GF[sel]; dt = g ? `<b>${g.n}</b>　${t.TIERN[g.t + 1]}阶<br>${g.d || ''}` : `<span style="opacity:.6">${qg ? '点一个轻功装上（只能装一个）' : '点心法装上（最多 3 个，再点取消）'}；武艺照常放。</span>`;
     }
-    box.innerHTML = `<div class="hd"><span>武学试炼</span><span>${mini ? '' : `<button class="dm">木人桩：${DUMN[dum]}</button> `}<button class="mn">${mini ? '展开' : '缩小'}</button></span></div>${mini ? '' : `<div class="dms"><span><button class="tbk">${brk ? '会碎的木人' : '不碎的木人'}</button> <button class="tsol">士兵：${sol ? '开' : '关'}</button> <button class="tng">${ng ? '新棍兵：开' : '新画风棍兵'}</button> <button class="trg">范围：${window.FXALIGN ? '开' : '关'}</button>${sol ? ` <button class="rg">远程兵：${rng ? '开' : '关'}</button>` : ''}</span></div>${dum ? '<div class="dms"><span class="dmv">—</span><button class="dmc">清零</button></div>' : ''}<div class="tabs">${tabs}</div><div class="ls">${ls}</div><div class="dt">${dt}</div>`}`;
+    box.innerHTML = `<div class="hd"><span>武学试炼</span><span>${mini ? '' : `<button class="dm">木人桩：${DUMN[dum]}</button> `}<button class="mn">${mini ? '展开' : '缩小'}</button></span></div>${mini ? '' : `<div class="dms"><span><button class="tbk">${brk ? '会碎的木人' : '不碎的木人'}</button> <button class="tsol">士兵：${sol ? '开' : '关'}</button> <button class="tng">${ng ? '新棍兵：开' : '新画风棍兵'}</button> <button class="trg">范围：${window.FXALIGN ? '开' : '关'}</button>${sol ? ` <button class="rg">远程兵：${rng ? '开' : '关'}</button>` : ''}</span></div><div class="dms" style="flex-wrap:wrap"><span>新画风：<button class="tzf" style="border-color:#ffd86e;color:#ffe08a">刷张飞＋新兵</button> 刷棍兵：<button data-gs="grunt">现在</button> <button data-gs="grunt_cute">Q像素</button> <button data-gs="grunt_px">张飞风</button> <button data-gs="grunt_new">写实</button></span></div>${dum ? '<div class="dms"><span class="dmv">—</span><button class="dmc">清零</button></div>' : ''}<div class="tabs">${tabs}</div><div class="ls">${ls}</div><div class="dt">${dt}</div>`}`;
     box.querySelector('.mn').onclick = () => { mini = !mini; render(); };
     if (mini) return;
     const rg = box.querySelector('.rg'); if (rg) rg.onclick = () => { rng = !rng; render(); };
     box.querySelector('.dm').onclick = () => { dum = DUMO[(DUMO.indexOf(dum) + 1) % DUMO.length]; try { T().dummy(dum); } catch (e) {} render(); };
     box.querySelector('.tbk').onclick = () => { brk = brk ? 0 : 1; try { T().dummyBrk(brk); } catch (e) {} render(); };
+    box.querySelector('.tzf').onclick = () => { try { T().zhangFei(); } catch (e) { console.error(e); } };
+    box.querySelectorAll('[data-gs]').forEach(b => b.onclick = () => { try { T().gruntStyle(b.dataset.gs); } catch (e) { console.error(e); } });
     box.querySelector('.tng').onclick = () => { ng = ng ? 0 : 1; window.NEW_GRUNT = !!ng; regNewGrunt(); try { if (ng) { sol = 1; T().soldiers(1); for (let i = 0; i < 4; i++) T().spawn('grunt'); } T().regrunt(ng); } catch (e) {} render(); };
     box.querySelector('.trg').onclick = () => { window.FXALIGN = !window.FXALIGN; render(); };   // 11/18 用户：一键显示预警（出手前，招式颜色）和真实伤害范围（打中那一刻，青色）
 
