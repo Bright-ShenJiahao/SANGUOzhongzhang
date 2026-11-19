@@ -4820,7 +4820,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
       const LH = { liu: 'liubei', guan: 'guanyu', zhang: 'zhangfei' }[who];
       const tg = sel && PREP.querySelector(sel), r = tg && tg.getBoundingClientRect(), top = !!r && r.top + r.height / 2 > innerHeight * .55;
       d.className = 'sty' + (top ? ' top' : '');
-      d.innerHTML = `${top ? '' : `<img class="lh2 ${LH === 'zhangfei' ? 'wd' : ''}" src="art/ui/npc/${LH}_lihui.webp">`}<div class="bx2"><b class="nm2">${nm}</b><p>${txt}</p><small class="hn2">按 <b>空格键</b> 或点一下 继续</small>${top ? `<em class="fc2" style="background-image:url('${face}')"></em>` : ''}</div>`;
+      d.innerHTML = `${top ? '' : `<img class="lh2 " src="art/ui/npc/${LH}_lihui.webp">`}<div class="bx2"><b class="nm2">${nm}</b><p>${txt}</p><small class="hn2">按 <b>空格键</b> 或点一下 继续</small>${top ? `<em class="fc2" style="background-image:url('${face}')"></em>` : ''}</div>`;
     } else d.className = 'bt';
     if (!PREP) d.innerHTML = (big ? `<div class="lh" style="background-image:url('art/ui/npc/liubei_lihui.webp')"></div>` : '') + `<div class="bx"><b class="nm">${nm}</b><p>${txt}</p><small>${document.getElementById('survPrep') ? '按 <b>空格键</b> 或点一下 继续' : '点一下关闭'}</small></div>${big ? '' : `<em style="background-image:url('${face}')"></em>`}`;
     const go = () => { removeEventListener('keydown', key, true); if (!d.parentNode) return; d.remove(); tutNext(); };

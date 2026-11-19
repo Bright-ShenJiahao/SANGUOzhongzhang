@@ -63,7 +63,7 @@
       if (L.bg && L.bg !== st.bg) { st.bg = L.bg; const nb = bgs[st.bgi ^= 1], ob = bgs[st.bgi ^ 1]; nb.style.backgroundImage = 'url(' + L.bg + ')'; nb.classList.add('on'); ob.classList.remove('on'); }
       const src = L.who && POR[L.who];
       if (src) {   // 11/16 用户：人物和字对不上——新立绘没下载完时旧立绘会先亮出来；改成新图加载好才显示
-        pt.classList.toggle('hd', !!HEAD[L.who]); pt.classList.toggle('wd', L.who === 'zhangfei');   // 11/17 张飞立绘带长蛇矛，是横长图，放宽
+        pt.classList.toggle('hd', !!HEAD[L.who]); pt.classList.toggle('wd', false);   // 11/17 张飞立绘带长蛇矛，是横长图，放宽
         if (pt.getAttribute('src') !== src) { pt.classList.remove('on'); pt.onload = () => { if (pt.getAttribute('src') === src) requestAnimationFrame(() => pt.classList.add('on')); }; pt.src = src; if (pt.complete && pt.naturalWidth) pt.onload(); }
         else requestAnimationFrame(() => pt.classList.add('on'));
       } else { pt.classList.remove('on'); pt.removeAttribute('src'); }
