@@ -205,7 +205,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const dirU = (z, tx, ty) => { const a = ang(z, tx, ty); return [Math.cos(a), Math.sin(a), a]; };
   const clampY = y => Math.max(M.top + 6, Math.min(M.bot - 6, y));
   // 11/18 用户：首领试炼——每招的起手/出手帧、范围、速度可调（存本机，复制发 Claude 写死进 BCFG0）
-  const BCFG0 = { cheng_yuanzhi: { atk: { a: 'wind', b: 'strike', c: 'strike', rs: 1, sp: 1 }, boomerang: { a: 'throw1', b: 'throw2', c: 'catch', rs: 1, sp: 1 }, sweep: { a: 'sweep1', b: 'sweep2', c: 'sweep3', rs: 1, sp: 1 }, chase: { a: 'throw1', b: 'throw2', c: 'strike', rs: 1, sp: 1 } } };
+  const BCFG0 = { deng_mao: { dm_quake: { b: 'roar', c: 'roar' } }, cheng_yuanzhi: { atk: { a: 'wind', b: 'strike', c: 'strike', rs: 1, sp: 1 }, boomerang: { a: 'throw1', b: 'throw2', c: 'catch', rs: 1, sp: 1 }, sweep: { a: 'sweep1', b: 'sweep2', c: 'sweep3', rs: 1, sp: 1 }, chase: { a: 'throw1', b: 'throw2', c: 'strike', rs: 1, sp: 1 } } };
   let BCFG = {}; try { BCFG = JSON.parse(localStorage.getItem('szz-boss-cfg') || '{}') || {}; } catch (e) {}
   const bcfg = (t, m) => Object.assign({ rs: 1, sp: 1 }, (BCFG0[t] || {})[m] || {}, (BCFG[t] || {})[m] || {});
   const BOSSTR = { on: false, move: '' };
@@ -237,7 +237,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   // 11/20 用户：首领、小兵都要能调（像主角的特效工具）：BFXS0 = 写死的设置；本机调的存 szz-bfxs，复制发 Claude 写进 BFXS0
   // 键：首领类型 / 's:'+小兵类型（整体：col 颜色 k 大小 al 透明 off 关）；'类型:招式'（img 换图/none、k、dx、dy、r 角度、T 时长、beam 光束 0/1）
   const BFXC = { cheng_yuanzhi: '240,70,50', deng_mao: '215,45,30', he_yi: '245,120,40', bo_cai: '255,205,50', zhang_mancheng: '175,195,210', guanhai_m: '150,200,60', guanhai_b: '150,200,60', ma_yuanyi: '175,95,235', zhang_bao: '225,230,245', zhang_liang: '70,210,160', zhang_jiao: '150,205,255', zhang_fei: '235,45,40' };
-  const BFXS0 = {};
+  const BFXS0 = {"deng_mao": {"k": 0.85, "col": "164,60,50"}, "deng_mao:atk": {"l1": {"img": "dg3", "on": 1, "k": 0.6}}, "deng_mao:dm_rings": {"p1": {"img": "v_beam", "on": 1}}, "deng_mao:dm_quake": {"l1": {"img": "dt_tianbeng", "on": 1}}};   // 11/20 用户在「首领·小兵特效对齐工具」里调好的
   let BFXS = {}; try { BFXS = JSON.parse(localStorage.getItem('szz-bfxs') || '{}') || {}; } catch (e) {}
   const bfxGet = k => Object.assign({}, BFXS0[k] || {}, BFXS[k] || {});
   const SOLFX = ['blade', 'slinger', 'archer', 'elite', 'yellow-heavy', 'yellow-spear', 'crossbow', 'yellow-shield', 'yellow-golem', 'fire-jar', 'cavalry', 'priest', 'fanatic', 'grunt'];
