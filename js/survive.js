@@ -791,7 +791,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const TLAYER = [0, 1, 1, 10, 16], TW = [1, 3, 2, 1, .6];   // 每阶最早出现的层、抽到的权重（黄多玄少，地天更少）
   const curLayer = () => (RT.on && RT.node && RT.node.layer) || (RT.on ? 1 : 99);
   const tierLayerOk = t => curLayer() >= TLAYER[Math.max(1, Math.min(4, t || 1))];
-  const tierOk = k => RT.on ? tierLayerOk(SK[k].tier || 1) : W.n >= TMIN[SK[k].tier || 0];
+  const tierOk = k => (!S.tierCap || (SK[k].tier || 1) <= S.tierCap) && (RT.on ? tierLayerOk(SK[k].tier || 1) : W.n >= TMIN[SK[k].tier || 0]);
   const wShuffle = (L, w) => L.map(k => [k, Math.pow(Math.random(), 1 / Math.max(.05, w(k)))]).sort((a, b) => b[1] - a[1]).map(x => x[0]);   // 按权重随机排序
   const HT = (z, dmg, kb, dir, fr) => { const v = VUL(z); rec(dmg * DM() * v); const f0 = freeze; hit(z, dmg * DM() * v, kb, dir || hero.f, false, 0, .3, false, false, { secondary: true, survSkill: true }); freeze = Math.min(freeze, Math.max(f0, fr || .04)); };
   const near = (x, y, r) => (pvGeo('c', x, y, 0, 0, r + 6), hittable()).filter(z => Math.hypot(z.x - x, (z.y - y) * 2) < r + 6);
@@ -3732,7 +3732,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     if (S.lhjOn || Math.random() < .05 + (OG().crit || 0) + AFX.crit() + IT('crit') + GM.crit + GM.critC[c] + (HAS('qixing') ? .08 : 0) + (HAS('dukang') ? .15 : 0)) { window.__CRIT_UNTIL = performance.now() + 260; return 1.5 + GM.critD[c] + (HAS('qixing') ? .3 : 0); }
     return 1;
   }
-  const CDM = () => RT.cd * RES().cd * (HAS('hufu2') ? .9 : 1) * (GFR('jfzy') ? .8 : 1) * (S.csjzT > 0 ? .8 : 1);
+  const CDM = () => RT.cd * RES().cd * (HAS('hufu2') ? .9 : 1) * (GFR('jfzy') ? 1 - Math.min(.35, GFV('jfzy', .2)) : 1) * (S.csjzT > 0 ? 1 - Math.min(.35, GFV('csjz', .2)) : 1);
   // ---------- 心法（三国幸存者 38 个：20 心法 + 8 通用 + 5 杂项 + 5 轻功） ----------
   const GGEN = [.02, .03, .045, .065], GSPEC = [.08, .13, .19, .28], GLVM = [1, 1.3, 1.7], GFTH = [120, 300], GTN = ['黄', '玄', '地', '天'], GTC = ['#c9b27a', '#6fb8ff', '#c58cff', '#ffb347'];
   const GF = {};
@@ -3756,15 +3756,16 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   gadd('beishui', '背水一战', 2, { x: {}, low: 1, d: '生命低于 30% 时，武艺伤害 +25%，受到伤害 -10%' });
   gadd('lhj', '连环劲', 2, { x: {}, lhj: 1, d: '连续 3 秒不受伤，下一招必定暴击' });
   // 11/20 用户：改玩法的心法（不是单纯加数值）
-  gadd('ygzq', '一鼓作气', 1, { x: {}, d: '每仗开打后前 10 秒，武艺伤害 +50%' });
-  gadd('hfzr', '后发制人', 1, { x: {}, d: '翻滚后的下一招：范围 +50%，必定暴击' });
-  gadd('sbf', '三板斧', 0, { x: {}, d: '每放到第 3 招，这一招伤害翻倍' });
-  gadd('yydl', '以逸待劳', 0, { x: {}, d: '站定 1 秒后，下一招伤害 +60%' });
-  gadd('zjdq', '斩将夺旗', 2, { x: {}, d: '对精锐和首领伤害 +30%；打倒精锐回复 20% 气血' });
-  gadd('srpz', '势如破竹', 2, { x: {}, d: '击倒敌人时 10% 几率：下一招不用起手、立刻出手（2 秒内最多一次）' });
-  gadd('jfzy', '疾风骤雨', 1, { x: {}, d: '出手快 20%（起手、收势都缩短），每招伤害 −10%' });
-  gadd('csjz', '乘胜追击', 3, { x: {}, d: '连续击倒 30 人后，6 秒内武艺伤害 +30%、出手快 20%' });
+  gadd('ygzq', '一鼓作气', 1, { x: {}, d: '每仗开打后前 10 秒，武艺伤害 +50%（心法升级后 ×1.3 / ×1.7）' });
+  gadd('hfzr', '后发制人', 1, { x: {}, d: '翻滚后的下一招：范围 +50%，必定暴击（范围加成随心法升级 ×1.3 / ×1.7）' });
+  gadd('sbf', '三板斧', 0, { x: {}, d: '每放到第 3 招，这一招伤害 +100%（心法升级后 ×1.3 / ×1.7）' });
+  gadd('yydl', '以逸待劳', 0, { x: {}, d: '站定 1 秒后，下一招伤害 +60%（心法升级后 ×1.3 / ×1.7）' });
+  gadd('zjdq', '斩将夺旗', 2, { x: {}, d: '对精锐和首领伤害 +30%；打倒精锐回复 20% 气血（心法升级后 ×1.3 / ×1.7）' });
+  gadd('srpz', '势如破竹', 2, { x: {}, d: '击倒敌人时 10% 几率：下一招不用起手、立刻出手（2 秒内最多一次；几率随心法升级 ×1.3 / ×1.7）' });
+  gadd('jfzy', '疾风骤雨', 1, { x: {}, d: '出手快 20%（起手、收势都缩短），每招伤害 −10%（加快随心法升级 ×1.3 / ×1.7）' });
+  gadd('csjz', '乘胜追击', 3, { x: {}, d: '连续击倒 30 人后，6 秒内武艺伤害 +30%、出手快 20%（心法升级后 ×1.3 / ×1.7）' });
   const GFR = id => { try { return S.gf.includes(id); } catch (e) { return false; } };
+  const GFV = (id, v) => v * GLVM[gfLv(id) - 1];   // 改玩法的心法也跟着心法等级涨：LV2 ×1.3、LV3 ×1.7
   gadd('caoshang', '草上飞', 0, { qg: true, d: '轻功：跑动时脚下留风痕，敌人踩上减速 30%' });
   gadd('xingyun', '行云诀', 1, { qg: true, d: '轻功：跑动每 1 秒积 1 层势（最多 5），每层伤害 +6%；停下后每 1.5 秒散 1 层' });
   gadd('taxue', '踏雪无痕', 2, { qg: true, d: '轻功：跑动时受到伤害 -15%' });
@@ -3855,9 +3856,9 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       if (kills > S.lk) {
         const d = kills - S.lk; const c0 = S.combo; S.combo += d; S.comboT = 3; if (RT.on) comboFx(c0, d);
         if (RT.on && GFR('csjz') && Math.floor(S.combo / 30) > Math.floor(c0 / 30)) { S.csjzT = 6; floaters.push({ x: hero.x, y: hero.y - 90, t: 0, txt: '乘胜追击', color: '#ffb347' }); }
-        if (RT.on && GFR('srpz') && !(S.srpzCd > 0) && Math.random() < 1 - Math.pow(.9, d)) { S.srpzReady = true; S.srpzCd = 2; }
+        if (RT.on && GFR('srpz') && !(S.srpzCd > 0) && Math.random() < 1 - Math.pow(1 - GFV('srpz', .1), d)) { S.srpzReady = true; S.srpzCd = 2; }
         if (RT.on) {
-          S.gf.forEach(id => { if (id) { const l0 = gfLv(id); S.gfExp[id] = (S.gfExp[id] || 0) + d * AFX.xp() * (GF[id].c >= 0 ? XPM[Math.max(1, gfSame(GF[id].c))] : 1); if (gfLv(id) > l0) note(`<i class="sk">${GF[id].n}</i> 熟练度提升至 <b>${gfLv(id)}</b> 级`); } });
+          S.gf.forEach(id => { if (id) { const l0 = gfLv(id); S.gfExp[id] = (S.gfExp[id] || 0) + d * AFX.xp() * (GF[id].c >= 0 ? XPM[Math.max(1, gfSame(GF[id].c))] : 1); if (gfLv(id) > l0) { note(`<i class="sk">${GF[id].n}</i> 熟练度提升至 <b>${gfLv(id)}</b> 级`); if (hero) floaters.push({ x: hero.x, y: hero.y - 100, t: 0, txt: `${GF[id].n} LV${gfLv(id)}：效果 ×${GLVM[gfLv(id) - 1]}`, color: '#8fd0ff' }); } } });
           if (GM.kh) heal(maxHp() * GM.kh * d);
           S.zq = Math.min(zqMax(), S.zq + zqMax() * .003 * d);
           addXiu(d);
@@ -3894,7 +3895,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
         const k = S.wind.k, i = S.wind.i, key = S.wind.key; S.flash[i] = .3;
         const t = nearest(k.stone || k.hammer || k.bow ? k.need * DK * rsOf(key) : 200); if (t) hero.f = Math.sign(t.x - hero.x) || hero.f;
         CM = skillMul(key); RM = k.dk ? DLV.sz[lvOf(key) - 1] * rsOf(key) : lvOf(key) >= 5 ? 1.1 : 1; const ch = S.wind.ch; S.chain = ch; S.lastCat = wepOf(key); S.lastI = i;
-        { S.castN = (S.castN || 0) + 1; if (GFR('ygzq') && W.t < 10) CM *= 1.5; if (GFR('sbf') && S.castN % 3 === 0) CM *= 2; if (GFR('yydl') && S.stillT >= 1) CM *= 1.6; if (GFR('jfzy')) CM *= .9; if (S.csjzT > 0) CM *= 1.3; if (S.hfReady) { S.hfReady = false; RM *= 1.5; S.lhjReady = true; } }   // 11/20 改玩法的心法
+        { S.castN = (S.castN || 0) + 1; if (GFR('ygzq') && W.t < 10) CM *= 1 + GFV('ygzq', .5); if (GFR('sbf') && S.castN % 3 === 0) CM *= 1 + GFV('sbf', 1); if (GFR('yydl') && S.stillT >= 1) CM *= 1 + GFV('yydl', .6); if (GFR('jfzy')) CM *= .9; if (S.csjzT > 0) CM *= 1 + GFV('csjz', .3); if (S.hfReady) { S.hfReady = false; RM *= 1 + GFV('hfzr', .5); S.lhjReady = true; } }   // 11/20 改玩法的心法
                 S.lhjOn = S.lhjReady; S.lhjReady = false; if (S.lhjOn) S.noHitT = 0;
         if (S.fj && S.fj[key] && !S.lijie) { const fc = fjCost(); if (S.zq >= fc) { S.zq -= fc; CM *= FJ_DMG; RM *= 1.12; S.fjN = (S.fjN || 0) + 1; fx.push({ k: 'fjg', x: hero.x, y: hero.y, t: 0, T: .45, sd: Math.random() * 6 }); if (S.fjN % 4 === 1) floaters.push({ x: hero.x + R(-10, 10), y: hero.y - 62, t: 0, txt: '发劲', color: '#8fd0ff' }); } }   // 11/16 用户定：发劲（照群侠）——点亮的武艺每次出手多耗真气，伤害 ×1.35
         pvStart(key); CK = key; const channel = k.cast(); try { autoAnim(key); } catch (e) { console.error(e); } if (k.dk && k.lv10 && lvOf(key) >= 10) { try { k.lv10(); } catch (e) { console.error(e); } } fx2Play(key); S.lhjOn = false;   // 11/16 LV10 突破
@@ -4050,7 +4051,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     if (!traits || traits.dot || !traits.survSkill) return d;
     if (HAS('pojia') && z && !z.dead) addPJ(z, 1, 4);
     const tg = z && (tough(z) || z.survTier >= 1);
-    return d * (HAS('lingqi') && tough(z) ? 1.15 : 1) * (tg ? (GFR('zjdq') ? 1.3 : 1) * (FAC().tough || 1) : 1);
+    return d * (HAS('lingqi') && tough(z) ? 1.15 : 1) * (tg ? (GFR('zjdq') ? 1 + GFV('zjdq', .3) : 1) * (FAC().tough || 1) : 1);
   }
   function baoTick(dt) {
     if (!RT.on || !W.started || W.pick || !hero) return;
@@ -4064,7 +4065,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const BLESS = {
     lb: [['money', '盘缠', '得 100 铜钱'], ['hp', '宽厚', '气血上限 +10%'], ['caoxie', '织席草鞋', '得宝物「织席草鞋」']],
     gy: [['lv3', '指点刀法', '起手的武艺直接升到 LV3'], ['gf', '赠书', '学一门心法（三选一）'], ['xiu', '夜读春秋', '修为 +60']],
-    zf: [['drink', '痛饮', '失去 30% 气血，得一件良品宝物'], ['dice', '欠酒钱', '之后 3 关得到的铜钱减半，得一件传说宝物（三选一）'], ['fight', '拼命', '气血上限 −15%，多学一招武艺（三选一）']],
+    zf: [['drink', '痛饮', '失去 20% 气血，得一件凡品宝物（三选一）'], ['dice', '欠酒钱', '之后 3 关得到的铜钱减半，得一件良品宝物（三选一）'], ['fight', '拼命', '气血上限 −10%，多学一招黄阶武艺（三选一）']],   // 11/20 用户：张飞开头别给太多（原：良品 / 传说 / 任意武艺）
   };
   function blessOpts() { const r = L => L[(Math.random() * L.length) | 0]; return [['刘备'].concat(r(BLESS.lb)), ['关羽'].concat(r(BLESS.gy)), ['张飞'].concat(r(BLESS.zf))]; }
   function blessDo(k, cb) {
@@ -4075,9 +4076,9 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     else if (k === 'lv3') { const s0 = S.slots[0]; if (s0) S.mast[s0] = Math.max(S.mast[s0] || 0, MAST_T[2]); done(); }
     else if (k === 'gf') offerReward(1, cb, 1, ['perk']);
     else if (k === 'xiu') { addXiu(60); done(); }
-    else if (k === 'drink') { hero.hp = Math.max(1, hero.hp - maxHp() * .3); pickBao([1, 1, 1], cb, '张飞 · 痛饮 · 良品宝物'); }
-    else if (k === 'dice') { S.debt = 3; pickBao([2, 2, 2], cb, '张飞 · 欠酒钱 · 传说宝物'); }
-    else if (k === 'fight') { S.hpMul = (S.hpMul || 1) * .85; hero.hp = Math.min(hero.hp, maxHp()); offerReward(1, cb, 1, ['skill']); }
+    else if (k === 'drink') { hero.hp = Math.max(1, hero.hp - maxHp() * .2); pickBao([0, 0, 0], cb, '张飞 · 痛饮 · 凡品宝物'); }
+    else if (k === 'dice') { S.debt = 3; pickBao([1, 1, 1], cb, '张飞 · 欠酒钱 · 良品宝物'); }
+    else if (k === 'fight') { S.hpMul = (S.hpMul || 1) * .9; hero.hp = Math.min(hero.hp, maxHp()); S.tierCap = 1; offerReward(1, () => { S.tierCap = 0; if (cb) cb(); }, 1, ['skill']); }
     else done();
   }
 
@@ -4249,7 +4250,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   const PORTRAIT = new Image(); PORTRAIT.src = 'art/ui/npc/liubei_face.webp';
   function addCoin(v) { S.cf = (S.cf || 0) + v * (FAC().coin || 1); const n = Math.floor(S.cf); S.cf -= n; S.money += n; S.coinGot += n; }
   function dropCoins(z) {
-    if (GFR('zjdq') && z.survTier === 1) heal(maxHp() * .2);   // 斩将夺旗：打倒精锐回 20%   // 敌人倒下掉铜钱：普通 1，精锐 3，敌将 15
+    if (GFR('zjdq') && z.survTier === 1) heal(maxHp() * GFV('zjdq', .2));   // 斩将夺旗：打倒精锐回 20%   // 敌人倒下掉铜钱：普通 1，精锐 3，敌将 15
     if (z.T.unit === 'fan' && !z.fanBoom) { z.fanBoom = 1; teleAdd({ k: 'circle', x: z.x, y: z.y, r: 42, T: .45, dmg: 1.2, c: 3, snd: 'land', fxSrc: z, mv: 'boom' }); }   /* 11/12 狂信徒：倒下 0.45 秒后炸一小圈（不挂 src，人死了也照炸） */
     if (z.T.siege) { for (let i = 0; i < 5; i++) S.coins.push({ x: z.x + R(-16, 16), y: z.y + R(-6, 6), z: 8 + R(0, 10), vz: R(60, 110), vx: R(-40, 40), v: 1, t: 0 }); return; }   // 拆了投石车：地上掉 5 文
     if (z.T.thief) { const v = (z.loot || 0) + 4; z.loot = 0; for (let i = 0; i < Math.min(6, v); i++) S.coins.push({ x: z.x + R(-14, 14), y: z.y + R(-6, 6), z: 8 + R(0, 10), vz: R(60, 110), vx: R(-40, 40), v: Math.ceil(v / Math.min(6, v)), t: 0 }); floaters.push({ x: z.x, y: z.y - 44, t: 0, txt: '钱袋破了！', color: '#ffd86e' }); return; }   // 窃贼：偷的钱 + 4 全撒出来
