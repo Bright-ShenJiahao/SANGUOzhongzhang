@@ -33,6 +33,7 @@
   const inEll = (e, x, y) => ((x - e[0]) / e[2]) ** 2 + ((y - e[1]) / e[3]) ** 2 < 1;
   const walk = (x, y) => (inPoly(FC.ground, x, y) && !FC.block.some(b => inPoly(b, x, y)) && !FC.ell.some(e => inEll(e, x, y))) || FC.top.some(b => inPoly(b, x, y)) || FC.ramp.some(b => inPoly(b, x, y));
   let camTop = 0;
+  let SOFT = null;
   const HAZE = !/[?&]look=plain(?:&|$)/.test(location.search);   // 11/16 用户：照群侠，氛围层（薄雾/暗角/飘尘/软阴影）默认打开，?look=plain 关掉   // 群侠传式氛围：薄雾 + 降饱和 + 暗角 + 飘尘 + 软阴影
   const DUST = Array.from({ length: 46 }, () => ({ x: Math.random(), y: Math.random(), r: .6 + Math.random() * 1.8, vx: .004 + Math.random() * .012, vy: (Math.random() - .5) * .004, a: .08 + Math.random() * .16 }));
   let dustT = 0;
@@ -268,10 +269,9 @@
       }
       return [dx, dy];
     },
-    soft: HAZE ? (x, y, r) => {   // 更大更软的脚下阴影
-      ctx.save(); ctx.translate(x, y); ctx.scale(1, .34);
-      const gr = ctx.createRadialGradient(0, 0, 0, 0, 0, r * 1.7); gr.addColorStop(0, 'rgba(25,20,22,.42)'); gr.addColorStop(.55, 'rgba(25,20,22,.2)'); gr.addColorStop(1, 'rgba(25,20,22,0)');
-      ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(0, 0, r * 1.7, 0, 7); ctx.fill(); ctx.restore();
+    soft: HAZE ? (x, y, r) => {   // 更大更软的脚下阴影（11/20 人多会卡：渐变只画一次存成小图，之后每个人直接贴图，不再每帧每人新建渐变）
+      if (!SOFT) { SOFT = document.createElement('canvas'); SOFT.width = SOFT.height = 64; const g = SOFT.getContext('2d'), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32); gr.addColorStop(0, 'rgba(25,20,22,.42)'); gr.addColorStop(.55, 'rgba(25,20,22,.2)'); gr.addColorStop(1, 'rgba(25,20,22,0)'); g.fillStyle = gr; g.fillRect(0, 0, 64, 64); }
+      const R = r * 1.7; ctx.drawImage(SOFT, x - R, y - R * .34, R * 2, R * .68);
     } : null,
     post(W, H) {   // 在人物之后、界面之前，整屏叠一层氛围（屏幕坐标）
       if (!HAZE || !this.on()) return;
