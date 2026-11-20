@@ -29,7 +29,7 @@ const bossCount = () => RT.on ? (RT.node ? (RT.node.type === 'boss' ? 2 : RT.nod
 const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: false, between: 0, started: false };
   const WT = () => RT.on ? W.tot : (WAVE_T[Math.min(W.n, WAVES) - 1] || 60);   // 路线模式：一个节点是一整场连续的仗，时长 = 原来几波加起来
   const CNT_BASE = 28, CNT_STEP = 6.2, CNT_MAX = 180;   // 路线模式：场上同屏人数 = 28 + 6.2×(难度级-1)，1 级约 28 只，10 级约 84，20 级约 146；难度级随时间连续上升，所以人数是一路慢慢涨
-  const targetN = () => RT.on ? Math.min(CNT_MAX, Math.round((CNT_BASE + CNT_STEP * ((W.lvF || 1) - 1)) * (RT.node ? [1, .8, .9, 1][RT.node.layer] || 1 : 1))) : Math.max(8, Math.round((WAVE_N[W.n - 1] || 100) * N_SCALE));
+  const targetN = () => RT.on ? Math.min(CNT_MAX, Math.round((CNT_BASE + CNT_STEP * ((W.lvF || 1) - 1)) * (RT.node ? [1, .55, .75, .9][RT.node.layer] || 1 : 1))) : Math.max(8, Math.round((WAVE_N[W.n - 1] || 100) * N_SCALE));
   // ---------- 路线模式：按「段」和「节点标签」出兵 ----------
   // 单位简写：g 喽啰 b 刀手 s 投石 a 弓箭 p 方士 e 老卒 | 第二章兵（贴图没加载完时用刀手/老卒顶替）：h 大刀 d 盾 q 枪 l 力士
   const U = { g: ['grunt'], b: ['blade'], s: ['slinger'], a: ['archer'], p: ['priest'], e: ['elite'], h: ['yellow-heavy', 'blade'], d: ['yellow-shield', 'blade'], q: ['yellow-spear', 'blade'], l: ['yellow-golem', 'elite'], f: ['fire-jar'], m: ['drummer'], c: ['cavalry'], k: ['fanatic'], x: ['crossbow'] };   /* 11/12 新兵种：f 火罐手 m 鼓手 c 骑兵 k 狂信徒 */
@@ -394,7 +394,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   };
   // ===== 11/19 首领重做：新画风十个首领的招式（设计表：普攻 + 位移 + 远程 + 特色，大招地上先出预警），出招帧用新图 =====
   let NEWOFF = false; try { NEWOFF = localStorage.getItem('szz-oldboss') === '1'; } catch (e) {}   // 开发者面板可切回旧首领对比
-  const NSP = { guanhai_m: 'guanhai_horse_new', guanhai_b: 'guanhai_new' };
+  const NSP = { guanhai_m: 'guanhai_horse_new', guanhai_b: 'guanhai_new', cheng_yuanzhi: 'cheng_new' };   // 11/20 用户：程远志新图也要进正式关卡
   const CUTE = () => { let v = false; try { v = localStorage.getItem('szz-cute') === '1'; } catch (e) {} window.CUTE_ON = v; return v; }; CUTE();   // 11/19 实验：Q像素画风（小兵、张角）
   const newSp = t => { const n = (CUTE() && typeof CH !== 'undefined' && CH[t + '_cute'] && CH[t + '_cute'].idle.img.complete && CH[t + '_cute'].idle.img.naturalWidth && t + '_cute') || NSP[t] || t + '_new'; return typeof CH !== 'undefined' && CH[n] && CH[n].idle && CH[n].idle.img.complete && CH[n].idle.img.naturalWidth ? n : ''; };
   const shout = (z, t) => { if (z.survTier >= 3) say(z, t); };   // 小头目出招不喊话（用户定）

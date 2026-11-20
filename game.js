@@ -13,7 +13,7 @@ const LAZY = { chapter2: [], xiaochang: [], core: [], bossnew: [] }, LAZY_DONE =
 const LAZY_CHARS = { yellow_heavy: 'chapter2', yellow_shield: 'chapter2', yellow_spear: 'chapter2', yellow_catapult: 'chapter2', zhang_liang: 'chapter2', zhang_bao: 'chapter2', yellow_golem: 'chapter2', zhang_jiao: 'chapter2' };
 // 11/19 首领重做：新画风十个首领（原分辨率大图）开局后台再下，没下好前首领用旧图
 for (const b of ['deng_mao', 'bo_cai', 'he_yi', 'zhang_mancheng', 'guanhai', 'guanhai_horse', 'zhang_liang', 'zhang_bao', 'ma_yuanyi', 'zhang_jiao']) LAZY_CHARS[b + '_new'] = 'bossnew';
-LAZY_CHARS.zhang_jiao_cute = 'bossnew'; LAZY_CHARS.zhang_fei_px = 'bossnew';
+LAZY_CHARS.zhang_jiao_cute = 'bossnew'; LAZY_CHARS.cheng_new = 'bossnew'; LAZY_CHARS.zhang_fei_px = 'bossnew';
 function lazyLoad(group, k, src) { const i = new Image(); IMG[k] = i; LAZY[group].push([i, src]); return i; }
 function ensureAssets(group, { silent = false, label = '' } = {}) {
   const list = LAZY[group] || [];
