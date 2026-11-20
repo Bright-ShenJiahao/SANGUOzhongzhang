@@ -4206,6 +4206,54 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     else if (k === 'e_heal5') { heal(maxHp() * .05); done(); }
     else done();
   }
+  const skItem = k => ({ kind: 'skill', k, q: Math.min(3, SK[k].tier || 0), name: SK[k].name, icon: SK[k].icon, color: SK[k].color, desc: (SK[k].tier ? TIERN[SK[k].tier] + '阶 · ' : '') + SK[k].desc.split(/[；;]/)[0].replace(/[，,]?\s*LV\d.*$/, '') });
+  const gfItem = id => { const g = GF[id]; return { kind: 'gf', id, q: g.t, name: g.n, icon: g.qg ? '轻' : g.n[0], color: GTC[g.t], desc: GTN[g.t] + '阶 · ' + (g.qg ? '轻功 · ' : g.c >= 0 ? g.cn + ' · ' : '内功 · ') + gfText(g) }; };
+  const rpick = L => L.length ? L[(Math.random() * L.length) | 0] : null;
+  function giftCard(o, j, tag) {   // 赏赐 / 换招用的卡（和战利三选一同一套样式）
+    if (o.kind === 'bao') { const b = BAO[o.id]; return `<button data-j="${j}" class="q${b.q === 2 ? 3 : b.q}"><i style="font-style:normal;font-size:11px;opacity:.7">宝物</i><img src="${b.image || `art/ui/bao/${o.id}.webp`}" style="width:64px;height:64px;display:block;margin:4px auto"><span>${b.n}</span><small>${b.d}${b.c ? `<br><b style="color:#ff8a7a;font-weight:400">代价：${b.c}</b>` : ''}</small>${tag ? `<small style="color:#ffd27a;min-height:0">${tag}</small>` : ''}</button>`; }
+    return `<button data-j="${j}" class="q${o.q || 0}"><i style="font-style:normal;font-size:11px;opacity:.7">${o.kind === 'skill' ? '武艺 · 主动' : GF[o.id] && GF[o.id].qg ? '轻功' : '心法 · 被动'}</i><div class="pkb">${bookOf(o)}</div><span>${o.name}</span><small>${o.desc}</small>${tag ? `<small style="color:#ffd27a;min-height:0">${tag}</small>` : ''}</button>`;
+  }
+  function giftBox(title, sub, opts, onPick, skipTxt, onSkip) {
+    const old = document.getElementById('survPick'); if (old) old.remove(); W.pick = true;
+    const box = document.createElement('div'); box.id = 'survPick'; box.style.zIndex = 10040; box.style.overflow = 'auto';
+    box.innerHTML = `<div class="p" style="max-width:96vw"><h3>${title}</h3>${sub ? `<p style="text-align:center;color:#e8d4a8;margin:6px 8px 8px;line-height:1.6">${sub}</p>` : ''}<div class="row" style="flex-wrap:wrap;justify-content:center;gap:6px">${opts.map((o, j) => giftCard(o, j, o.tag)).join('')}</div>${skipTxt ? `<div style="text-align:center;margin-top:8px"><button class="skip">${skipTxt}</button></div>` : ''}</div>`;
+    box.querySelectorAll('button[data-j]').forEach(b => b.onclick = () => { box.remove(); onPick(opts[+b.dataset.j]); });
+    const sk = box.querySelector('.skip'); if (sk) sk.onclick = () => { box.remove(); onSkip(); };
+    document.body.appendChild(box);
+  }
+  function slotFull(k, cb) {   // 武艺栏满了：新学的那招先进了备用，问要不要换上
+    if (!S.owned.includes(k)) return cb();
+    giftBox('武艺栏满了', `<b style="color:${SK[k].color}">${SK[k].name}</b> 要换上哪一格？换下来的放进备用（「武学」页随时能换回来）`, S.slots.filter(Boolean).map(x => ({ ...skItem(x), tag: '换下这招' })), o => { const i = S.slots.indexOf(o.k); S.slots[i] = k; S.owned.splice(S.owned.indexOf(k), 1, o.k); cb(); }, '先放备用栏', cb);
+  }
+  function afterGift(R, done) {   // 11/21 用户：战后赏赐（前两场）、以旧换新（第一个首领后）
+    const fin = () => { W.pick = false; done(); };
+    const swap = () => {
+      if (!R.swapB) return fin();
+      S.swapDone = 1;
+      const owned = S.slots.filter(Boolean).concat(S.owned || []), nk = rpick(Object.keys(SK).filter(k => !SK[k].off && (SK[k].tier || 1) === 2 && wepOf(k) === heldW() && !owned.includes(k)));
+      const learned = owned.filter(k => SK[k]);
+      if (!nk || learned.length < 2) return fin();
+      giftBox('以 旧 换 新', `程远志败走，营中缴获一本本门玄阶秘籍：<b style="color:${SK[nk].color}">${SK[nk].name}</b>（${SK[nk].desc.split(/[；;]/)[0]}）<br>要学它，得先忘掉一招已学的武艺——<b style="color:#ff8a7a">熟练度一起清掉</b>。`, learned.map(k => ({ ...skItem(k), tag: '忘掉这招 · LV' + lvOf(k) })), o => {
+        const i = S.slots.indexOf(o.k); if (i >= 0) S.slots[i] = ''; else S.owned.splice(S.owned.indexOf(o.k), 1); delete S.mast[o.k];
+        learn(skItem(nk)); R.giftTxt = (R.giftTxt ? R.giftTxt + '<br>' : '') + `以旧换新：忘掉 ${SK[o.k].name}，学会 <b style="color:${SK[nk].color}">${SK[nk].name}</b>`; if (window.SFX) SFX.play('j_lvup'); slotFull(nk, fin);
+      }, '不换了', fin);
+    };
+    if (!R.giftT) return swap();
+    const tw = R.giftT, owned = S.slots.filter(Boolean).concat(S.owned || []), gfOwn = id => S.gf.includes(id) || S.qg === id || (S.owned || []).includes(id);
+    const sk = rpick(Object.keys(SK).filter(k => !SK[k].off && wepOk(k) && (SK[k].tier || 1) === tw && !owned.includes(k)));
+    const gf = rpick(Object.keys(GF).filter(id => !GF[id].off && !GF[id].qg && GF[id].t === tw - 1 && !gfOwn(id)));
+    const qg = rpick(Object.keys(GF).filter(id => !GF[id].off && GF[id].qg && GF[id].t <= tw - 1 && !gfOwn(id)));
+    const bk = baoOpts([0])[0];
+    const rest = [gf && gfItem(gf), qg && gfItem(qg), bk && { kind: 'bao', id: bk }].filter(Boolean).sort(() => Math.random() - .5).slice(0, 2);
+    const opts = (sk ? [skItem(sk)] : []).concat(rest).sort(() => Math.random() - .5);
+    if (!opts.length) return swap();
+    giftBox('战 后 赏 赐', `刘备：这一仗打得漂亮！军中有几样东西，你挑一样带上。`, opts, o => {
+      if (o.kind === 'bao') return gainBao(o.id, () => { R.giftTxt = `战后赏赐：宝物 <b style="color:${BQC[BAO[o.id].q]}">${BAO[o.id].n}</b>`; swap(); });
+      learn(o); if (window.SFX) SFX.play('j_lvup');
+      R.giftTxt = `战后赏赐：${o.kind === 'skill' ? '武艺' : GF[o.id].qg ? '轻功' : '心法'} <b style="color:${o.color}">${o.name}</b>，已经学会（「武学」页）`;
+      if (o.kind === 'skill') slotFull(o.k, swap); else swap();
+    });
+  }
   function nodeClear() { if (window.TITLE && TITLE.blocks && TITLE.blocks()) return;   // 11/18：已经回了主界面就不再弹整备屏   // 一个节点打完：敌人站定淡出 → 左下战报 → 整备屏（结算/拾取/修炼/行商/武艺）→ 回长卷
     const nd = RT.node; W.started = false; eshots.length = 0; TELE.length = 0;
     for (const z of zs) if (!z.dead) { z.endFade = .9; z.st = 'idle'; z.t = 0; z.enemySkill = null; z.air = false; z.stun = 0; z.daze = 0; }
@@ -4232,10 +4280,8 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
       else if (nd.rw === 'coin') { const b = Math.round((R.got + R.left) * .6); S.money += b; R.coinB = b; }
       else if (nd.rw === 'heal') { heal(maxHp() * .2); R.healB = 1; }
     }
-    if (S.fightN === 1 || S.fightN === 2) {   // 11/20 用户：第一场打完必送一本黄阶、第二场必送一本玄阶本门武艺（直接学会）
-      const tw = S.fightN, owned = S.slots.filter(Boolean).concat(S.owned || []), L = Object.keys(SK).filter(k => !SK[k].off && (SK[k].tier || 1) === tw && wepOf(k) === heldW() && !owned.includes(k)), k = L[(Math.random() * L.length) | 0];
-      if (k) { const it = itemFrom({ kind: 'skill', k, q: tw, name: SK[k].name, icon: SK[k].icon, color: SK[k].color, desc: TIERN[tw] + '阶 · ' + SK[k].desc.split(/[；;]/)[0].replace(/[，,]?\s*LV\d.*$/, '') }); S.loot = S.loot.filter(o => (o.k || o.id) !== k); learn(it); R.gift = k; }
-    }
+    R.giftT = S.fightN === 1 || S.fightN === 2 ? S.fightN : 0;   // 11/21 用户：前两场打完不再直接塞一本，改成「战后赏赐」三选一（见 afterGift）
+    R.swapB = nd.type === 'boss' && !nd.final && !S.swapDone ? 1 : 0;   // 11/21 用户：第一个首领打完——以旧换新（忘一招，换一本本门玄阶）
     S.shop = rollShop(nd); S.bought = []; S.srr = 0;
     if (HAS('wuzhu')) S.money += 15; if (HAS('yuxi')) heal(maxHp() * .15);
     if ((S.weakN || 0) > 0) S.weakN--; S.enemyHpK = 1;
@@ -4251,7 +4297,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     endRow(nd, R, false);
     report(R);
     W.pick = true;
-    setTimeout(() => prepOpen(nd), 1000);
+    setTimeout(() => afterGift(R, () => prepOpen(nd)), 1000);
   }
   function beginNode(nd) {
     if (window.CODEX) for (const k of S.slots.concat(S.owned || [])) if (k) CODEX.see('sk:' + k);
@@ -4880,7 +4926,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     if (prepTab === 'jie') {
       const tot = S.slots.filter(Boolean).reduce((t, k) => t + (S.dps[k] || 0), 0) || 1;
       const outs = S.slots.filter(Boolean).map(k => `<div class="pb"><em style="background-image:url('${IMGU[k] || ''}')"></em><div class="pbf"><u style="width:${(S.dps[k] || 0) / tot * 100}%"></u><b>${Math.round((S.dps[k] || 0) * 10)}</b><i>${((S.dps[k] || 0) / tot * 100).toFixed(1)}%</i></div></div>`).join('');
-      body = `<div class="pn"><h4>总结</h4><div class="sm"><span><em style="background-image:url('${A('kill')}')"></em>斩敌</span><b>${R.kills}</b><span><em style="background-image:url('${A('coin')}')"></em>铜钱</span><b>${R.got + R.left}</b><span>过关修为</span><b>+${R.xiu || 0}</b></div>${S.lv > (R.lv0 || S.lv) ? `<p class="nt">修为 LV.${R.lv0} → <b style="color:#ffd86e">LV.${S.lv}</b>，多了 ${S.lv - R.lv0} 次修炼机会（「修炼」页）</p>` : ''}${R.gift && SK[R.gift] ? `<p class="nt">送你一本${TIERN[SK[R.gift].tier || 1]}阶本门秘籍：<b style="color:${SK[R.gift].color}">${SK[R.gift].name}</b>，已经学会（「武学」页）</p>` : ''}${R.coinB ? `<p class="nt">这一仗侧重铜钱：额外 +${R.coinB}</p>` : ''}${R.healB ? '<p class="nt">这一仗侧重休整：回复 20% 气血</p>' : ''}${R.left ? `<p class="nt">地上没捡的钱袋，帮你收回了九成：+${R.left}</p>` : ''}
+      body = `<div class="pn"><h4>总结</h4><div class="sm"><span><em style="background-image:url('${A('kill')}')"></em>斩敌</span><b>${R.kills}</b><span><em style="background-image:url('${A('coin')}')"></em>铜钱</span><b>${R.got + R.left}</b><span>过关修为</span><b>+${R.xiu || 0}</b></div>${S.lv > (R.lv0 || S.lv) ? `<p class="nt">修为 LV.${R.lv0} → <b style="color:#ffd86e">LV.${S.lv}</b>，多了 ${S.lv - R.lv0} 次修炼机会（「修炼」页）</p>` : ''}${R.giftTxt ? `<p class="nt">${R.giftTxt}</p>` : ''}${R.coinB ? `<p class="nt">这一仗侧重铜钱：额外 +${R.coinB}</p>` : ''}${R.healB ? '<p class="nt">这一仗侧重休整：回复 20% 气血</p>' : ''}${R.left ? `<p class="nt">地上没捡的钱袋，帮你收回了九成：+${R.left}</p>` : ''}
           ${R.bao && BAO[R.bao] ? `<h4>战利宝物</h4><div class="bq"><img src="${BAO[R.bao].image || `art/ui/bao/${R.bao}.webp`}"><div><p><b style="color:${BQC[BAO[R.bao].q]}">${BAO[R.bao].n}</b><i style="color:${BQC[BAO[R.bao].q]};border-color:${BQC[BAO[R.bao].q]}">${BQN[BAO[R.bao].q]}</i></p><p>${BAO[R.bao].d}</p>${BAO[R.bao].c ? `<p class="c">代价：${BAO[R.bao].c}</p>` : ''}<p class="h">之后在地图右上「兵籍牒」和图鉴「宝物」里都能看</p></div></div>` : ''}
           <h4>输出统计</h4>${outs}
           <div class="tx"><h4>调息</h4><p class="ln">剩余 <em style="background-image:url('${A('zq')}')"></em> 真气 <b class="c1">${R.zqLeft || 0}</b> 点</p><p class="ln">转换为 <b class="c2">${R.tiao}</b> 点 <em style="background-image:url('${A('hp')}')"></em> 气血</p><p class="ln"><em style="background-image:url('${A('huti')}')"></em> 护体 总共免除了 <b>${Math.round((S.hutiSum || 0) * 10)}</b> 点伤害</p></div></div>
