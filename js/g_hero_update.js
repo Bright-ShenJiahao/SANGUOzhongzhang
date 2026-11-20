@@ -35,7 +35,7 @@ function heroUpdate(dt) {
   updateHalberdDash(h, dt);
   pressRoll = false;
   if (h.st === 'roll' && charging && atkHeldSince) atkHeldSince += dt * 1000;   // 藏势：翻滚时蓄力暂停
-  if (h.st === 'roll') { const rs = (window.Boss && Boss.wx && Boss.wx() === 'rain') ? 1.25 : 1; { const mr = window.MERIDIAN ? MERIDIAN.x('roll', 1) : 1; moveEnt(h, h.rx * 150 * rs * mr * dt, h.ry * 105 * rs * mr * dt); } if (h.t > .4) { set(h, 'idle'); if (window.ROGUE && ROGUE.onRollEnd) ROGUE.onRollEnd(); } pressAtk = false; return; }   // 回马：滚完自动向身后打一下
+  if (h.st === 'roll') { const rs = (window.Boss && Boss.wx && Boss.wx() === 'rain') ? 1.25 : 1; { const mr = (window.MERIDIAN ? MERIDIAN.x('roll', 1) : 1) * (window.SURV && SURV.rollDist ? SURV.rollDist() : 1); moveEnt(h, h.rx * 150 * rs * mr * dt, h.ry * 105 * rs * mr * dt); } if (h.t > .4) { set(h, 'idle'); if (window.ROGUE && ROGUE.onRollEnd) ROGUE.onRollEnd(); } pressAtk = false; return; }   // 回马：滚完自动向身后打一下
   h.comboWin = Math.max(0, (h.comboWin || 0) - dt);
   if (pressAtk && window.SUPPLY && SUPPLY.throwJar()) pressAtk = false;   // 拿着火油罐：攻击键先扔罐子
   if (pressAtk) { if (h.st === 'atk') h.q = 1; else startAtk(); pressAtk = false; }
