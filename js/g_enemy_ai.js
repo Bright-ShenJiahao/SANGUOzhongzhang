@@ -337,11 +337,11 @@ function zUpdate(z, dt) {
     }
     if (z.t > T.wind) {
       set(z, 'strike'); sfx(T.ranged === 'stone' ? 'sling' : T.ranged === 'fire' ? 'bow' : 'enemySwing', z.x); if (!T.ranged && window.SURV_BFX) SURV_BFX(z, { k: 'fan', x: z.x, y: z.y, a: z.f > 0 ? 0 : Math.PI, r: (T.reach || 24) + 16 });
-      if (T.ranged === 'stone') eshots.push({ source:z, k: 'stone', x: z.x + z.f * 16, y: z.y, z: 24, vx: z.f * 190, life: .95 * (T.__rs || 1) });   // 射程约 180，和玩家一致
+      if (T.ranged === 'stone') eshots.push({ source:z, k: 'stone', x: z.x + z.f * 16, y: z.y, z: 24, vx: z.f * 190 * (ch2Troops() ? 1 : window.SURV_PS || 1), life: .95 * (T.__rs || 1) / (ch2Troops() ? 1 : window.SURV_PS || 1) });   // 射程约 180，和玩家一致
       else if (T.ranged === 'fire') {
         const dx=hero.x-z.x,dy=hero.y-z.y;
         for(const angle of ch2Troops()&&z.type==='archer'?[-Math.PI/15,0,Math.PI/15]:[0]){
-          eshots.push({source:z,k:'fire',enemyVolley:ch2Troops(),x0:z.x+z.f*16,y0:z.y,tx:z.x+dx*Math.cos(angle)-dy*Math.sin(angle),ty:z.y+dx*Math.sin(angle)+dy*Math.cos(angle),t:0,T:.9});
+          eshots.push({source:z,k:'fire',enemyVolley:ch2Troops(),x0:z.x+z.f*16,y0:z.y,tx:z.x+dx*Math.cos(angle)-dy*Math.sin(angle),ty:z.y+dx*Math.sin(angle)+dy*Math.cos(angle),t:0,T:.9/(ch2Troops()?1:(window.SURV_PS||1))});
         }
       }
       else if (window.SURV && SURV.curNode && SURV.curNode() && !T.elite ? Math.hypot(hero.x - z.x, (hero.y - z.y) / .6) < T.reach + 8 : Math.abs(dx) < T.reach && Math.abs(hero.y - z.y) < 14 && Math.sign(dx) === z.f) dmgHero(T.dmg, z);   // 上下判定 9→14，和主角攻击范围对齐
@@ -359,7 +359,7 @@ function zUpdate(z, dt) {
     tx = Math.max(cam.x + 30, Math.min(tx, (lockR < Infinity ? lockR : cam.x + viewW()) - 30));
     if (z.siegeArcher && z.guard) { tx = z.guard.x; ty = z.guard.y; }   // 投石车弓手：站岗不动，远处也射（抛射）
     const ad = Math.abs(dx);
-    if (z.cd <= 0 && ad > T.range[0] * .7 && ad < (z.siegeArcher ? 340 : T.range[1] * 1.2) && Math.abs(dy) < (z.siegeArcher ? 120 : T.ranged === 'stone' ? 14 : 60)) { set(z, 'wind'); z.cd = ch2Troops()&&z.type==='archer'?4.5:T.cd; return; }
+    if (z.cd <= 0 && ad > T.range[0] * .7 && ad < (z.siegeArcher ? 340 : T.range[1] * 1.2) && Math.abs(dy) < (z.siegeArcher ? 120 : T.ranged === 'stone' ? 14 : 60)) { set(z, 'wind'); z.cd = ch2Troops()&&z.type==='archer'?4.5:T.cd*(ch2Troops()?1:(window.SURV_RCD||1)); return; }
   } else {          // 近战：最多 M.token 个同时贴身，其余在旁边游走
     const tokens = zs.filter(o => o.tok && !o.dead).length;
     if (!z.tok && (window.SURV && SURV.curNode && SURV.curNode())) z.tok = true;   // 11/14 用户：路线模式删掉「出手名额」，小兵一窝蜂直接围上来

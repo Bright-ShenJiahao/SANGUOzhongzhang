@@ -62,7 +62,7 @@ body.szz-pro #help{display:none}
 .x-back{min-height:34px!important}
 }
 #rot small{display:block;margin-top:10px;font-size:14px;font-weight:600;color:#c9b691;line-height:1.6}
-</style><link rel="preload" href="pack/fonts/result.woff2?v=713dc3a2ba" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=713dc3a2ba)format("woff2");font-display:swap}</style><style>@font-face{font-family:"WenKai";src:url(pack/fonts/kai.woff2?v=ee49c67eb2)format("woff2");font-display:swap}</style><link rel="preload" href="pack/fonts/pixel.woff2?v=d2aa62ab70" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"Pixel12";src:url(pack/fonts/pixel.woff2?v=d2aa62ab70)format("woff2");font-display:swap}@font-face{font-family:"Songti SC";src:url(pack/fonts/pixel.woff2?v=d2aa62ab70)format("woff2");font-display:swap}@font-face{font-family:"STSong";src:url(pack/fonts/pixel.woff2?v=d2aa62ab70)format("woff2");font-display:swap}@font-face{font-family:"Noto Serif SC";src:url(pack/fonts/pixel.woff2?v=d2aa62ab70)format("woff2");font-display:swap}@font-face{font-family:"SimSun";src:url(pack/fonts/pixel.woff2?v=d2aa62ab70)format("woff2");font-display:swap}@font-face{font-family:"PingFang SC";src:url(pack/fonts/pixel.woff2?v=d2aa62ab70)format("woff2");font-display:swap}@font-face{font-family:"Microsoft YaHei";src:url(pack/fonts/pixel.woff2?v=d2aa62ab70)format("woff2");font-display:swap}@font-face{font-family:"Noto Sans CJK SC";src:url(pack/fonts/pixel.woff2?v=d2aa62ab70)format("woff2");font-display:swap}@font-face{font-family:"STKaiti";src:url(pack/fonts/pixel.woff2?v=d2aa62ab70)format("woff2");font-display:swap}@font-face{font-family:"KaiTi";src:url(pack/fonts/pixel.woff2?v=d2aa62ab70)format("woff2");font-display:swap}*{font-synthesis:none}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
+</style><link rel="preload" href="pack/fonts/result.woff2?v=f13de49fa6" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"MaShanZheng";src:url(pack/fonts/result.woff2?v=f13de49fa6)format("woff2");font-display:swap}</style><style>@font-face{font-family:"WenKai";src:url(pack/fonts/kai.woff2?v=db8f3be1ee)format("woff2");font-display:swap}</style><link rel="preload" href="pack/fonts/pixel.woff2?v=9de6151ada" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"Pixel12";src:url(pack/fonts/pixel.woff2?v=9de6151ada)format("woff2");font-display:swap}@font-face{font-family:"Songti SC";src:url(pack/fonts/pixel.woff2?v=9de6151ada)format("woff2");font-display:swap}@font-face{font-family:"STSong";src:url(pack/fonts/pixel.woff2?v=9de6151ada)format("woff2");font-display:swap}@font-face{font-family:"Noto Serif SC";src:url(pack/fonts/pixel.woff2?v=9de6151ada)format("woff2");font-display:swap}@font-face{font-family:"SimSun";src:url(pack/fonts/pixel.woff2?v=9de6151ada)format("woff2");font-display:swap}@font-face{font-family:"PingFang SC";src:url(pack/fonts/pixel.woff2?v=9de6151ada)format("woff2");font-display:swap}@font-face{font-family:"Microsoft YaHei";src:url(pack/fonts/pixel.woff2?v=9de6151ada)format("woff2");font-display:swap}@font-face{font-family:"Noto Sans CJK SC";src:url(pack/fonts/pixel.woff2?v=9de6151ada)format("woff2");font-display:swap}@font-face{font-family:"STKaiti";src:url(pack/fonts/pixel.woff2?v=9de6151ada)format("woff2");font-display:swap}@font-face{font-family:"KaiTi";src:url(pack/fonts/pixel.woff2?v=9de6151ada)format("woff2");font-display:swap}*{font-synthesis:none}</style><link rel="preload" as="image" href="pack/title/ink_pc.webp?v=38462b4eba" media="(min-aspect-ratio: 9/10)"><link rel="preload" as="image" href="pack/title/ink_phone.webp?v=8a66a9820b" media="(max-aspect-ratio: 9/10)">
 <style>button{letter-spacing:.04em!important}</style></head><body>
 <style>
 #bootSplash{position:fixed;inset:0;z-index:99999;background:radial-gradient(ellipse at 50% 45%,#f3e4cf 0%,#ecd9c0 55%,#d9c09f 100%);transition:opacity .45s ease-out}
@@ -119,7 +119,7 @@ if(location.protocol==='https:'&&!/[?&]debug(?:=|&|$)/.test(location.search)&&'s
 })();
 // 自动更新：打开游戏、或从后台切回来时，查一下线上有没有新版本；有就在标题/整备页自动刷新（战斗中不打扰）
 (function(){
-var BUILD='1e02854cd226',busy=false;
+var BUILD='76aef4b260e8',busy=false;
 if(location.protocol!=='https:'||/[?&]debug(?:=|&|$)/.test(location.search))return;
 function check(){
   if(busy)return;
@@ -2080,11 +2080,11 @@ function zUpdate(z, dt) {
     }
     if (z.t > T.wind) {
       set(z, 'strike'); sfx(T.ranged === 'stone' ? 'sling' : T.ranged === 'fire' ? 'bow' : 'enemySwing', z.x); if (!T.ranged && window.SURV_BFX) SURV_BFX(z, { k: 'fan', x: z.x, y: z.y, a: z.f > 0 ? 0 : Math.PI, r: (T.reach || 24) + 16 });
-      if (T.ranged === 'stone') eshots.push({ source:z, k: 'stone', x: z.x + z.f * 16, y: z.y, z: 24, vx: z.f * 190, life: .95 * (T.__rs || 1) });   // 射程约 180，和玩家一致
+      if (T.ranged === 'stone') eshots.push({ source:z, k: 'stone', x: z.x + z.f * 16, y: z.y, z: 24, vx: z.f * 190 * (ch2Troops() ? 1 : window.SURV_PS || 1), life: .95 * (T.__rs || 1) / (ch2Troops() ? 1 : window.SURV_PS || 1) });   // 射程约 180，和玩家一致
       else if (T.ranged === 'fire') {
         const dx=hero.x-z.x,dy=hero.y-z.y;
         for(const angle of ch2Troops()&&z.type==='archer'?[-Math.PI/15,0,Math.PI/15]:[0]){
-          eshots.push({source:z,k:'fire',enemyVolley:ch2Troops(),x0:z.x+z.f*16,y0:z.y,tx:z.x+dx*Math.cos(angle)-dy*Math.sin(angle),ty:z.y+dx*Math.sin(angle)+dy*Math.cos(angle),t:0,T:.9});
+          eshots.push({source:z,k:'fire',enemyVolley:ch2Troops(),x0:z.x+z.f*16,y0:z.y,tx:z.x+dx*Math.cos(angle)-dy*Math.sin(angle),ty:z.y+dx*Math.sin(angle)+dy*Math.cos(angle),t:0,T:.9/(ch2Troops()?1:(window.SURV_PS||1))});
         }
       }
       else if (window.SURV && SURV.curNode && SURV.curNode() && !T.elite ? Math.hypot(hero.x - z.x, (hero.y - z.y) / .6) < T.reach + 8 : Math.abs(dx) < T.reach && Math.abs(hero.y - z.y) < 14 && Math.sign(dx) === z.f) dmgHero(T.dmg, z);   // 上下判定 9→14，和主角攻击范围对齐
@@ -2102,7 +2102,7 @@ function zUpdate(z, dt) {
     tx = Math.max(cam.x + 30, Math.min(tx, (lockR < Infinity ? lockR : cam.x + viewW()) - 30));
     if (z.siegeArcher && z.guard) { tx = z.guard.x; ty = z.guard.y; }   // 投石车弓手：站岗不动，远处也射（抛射）
     const ad = Math.abs(dx);
-    if (z.cd <= 0 && ad > T.range[0] * .7 && ad < (z.siegeArcher ? 340 : T.range[1] * 1.2) && Math.abs(dy) < (z.siegeArcher ? 120 : T.ranged === 'stone' ? 14 : 60)) { set(z, 'wind'); z.cd = ch2Troops()&&z.type==='archer'?4.5:T.cd; return; }
+    if (z.cd <= 0 && ad > T.range[0] * .7 && ad < (z.siegeArcher ? 340 : T.range[1] * 1.2) && Math.abs(dy) < (z.siegeArcher ? 120 : T.ranged === 'stone' ? 14 : 60)) { set(z, 'wind'); z.cd = ch2Troops()&&z.type==='archer'?4.5:T.cd*(ch2Troops()?1:(window.SURV_RCD||1)); return; }
   } else {          // 近战：最多 M.token 个同时贴身，其余在旁边游走
     const tokens = zs.filter(o => o.tok && !o.dead).length;
     if (!z.tok && (window.SURV && SURV.curNode && SURV.curNode())) z.tok = true;   // 11/14 用户：路线模式删掉「出手名额」，小兵一窝蜂直接围上来
@@ -5611,11 +5611,13 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   let c2ok = false;
   const unit = k => { const u = U[k]; return c2ok || !u[1] ? u[0] : u[1]; };
   const secOf = nd => Math.min(4, ((nd.layer - 1) / (window.ROUTE && ROUTE.segLen || 6)) | 0);
+  const RANGED = ['slinger', 'archer', 'crossbow', 'fire-jar', 'priest'];
+  window.SURV_PS = .75; window.SURV_RCD = 1.4;   // 11/20 用户：飞行物太快太密 → 敌方飞行物速度 ×0.75（射程不变）、远程出手间隔 ×1.4
   function pickType() {
     if (RT.on && RT.node) {
       const nd = RT.node, w = (POOL[secOf(nd)][nd.tag || 'melee']) || POOL[0].melee, ks = Object.keys(w);
       let sum = 0; for (const k of ks) sum += w[k]; let r = Math.random() * sum;
-      for (const k of ks) if ((r -= w[k]) <= 0) return unit(k);
+      for (const k of ks) if ((r -= w[k]) <= 0) { const u = unit(k); if (RANGED.includes(u) && alive().filter(z => RANGED.includes(z.type)).length >= Math.max(2, Math.floor(targetN() * .2))) return unit(w.b ? 'b' : 'g'); return u; }   // 11/20 用户：远程怪太多 → 场上远程最多占两成
       return 'grunt';
     }
     const pool = [];
@@ -6161,7 +6163,8 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     spawn(type, x, y);
     const z = zs[zs.length - 1]; z.f = -side; if (window.NEW_GRUNT && type === 'grunt' && typeof CH !== 'undefined' && CH.grunt_new) z.sprite = 'grunt_new'; if (type === 'grunt' && CUTE() && typeof CH !== 'undefined' && CH.grunt_cute) z.sprite = 'grunt_cute'; z.survMul = (1 + HP_SCALE * (W.n - 1)) * (HAS('yuxi') ? 1.15 : 1) * (S.enemyHpK || 1);
     z.survTier = 0;
-    if (!boss && (z.T.elite || ['yellow-heavy', 'yellow-shield', 'yellow-golem', 'cavalry'].includes(type))) { z.survTier = 1; z.hp = 7.5; z.maxHp = z.hp * z.survMul; }   // 四档：杂兵 ×1（3）、精英 ×2.5（7.5）
+    if (!boss) z.hp *= .7;   // 11/20 用户：士兵更容易被击杀（杂兵血 ×0.7）
+    if (!boss && (z.T.elite || ['yellow-heavy', 'yellow-shield', 'yellow-golem', 'cavalry'].includes(type))) { z.survTier = 1; z.hp = 6; z.maxHp = z.hp * z.survMul; }   // 四档：杂兵 ×1（3）、精英 ×2.5（7.5）
     z.hp *= z.survMul;
     if (!boss && RT.on && RT.node && RT.node.layer === 1 && RT.node.type === 'battle') { z.hp = Math.min(z.hp, .5); z.maxHp = z.hp; }   // 11/20 用户：第一关的兵一刀一个
     if (boss && boss !== true) { z.survTier = boss.tier || 2; const hb = boss.hp || 21; z.hp = hb * z.survMul; z.maxHp = z.hp; z.sc = (z.sc || 1) * (boss.sc || 1); z.survBoss = true; z.bossLabel = boss.name; if (boss.tier !== 1) z.sc *= 1.3;   /* 11/16 用户：首领太不起眼——放大 1.3 倍（判定不变） */ if (S.met && !S.met.includes(boss.name)) S.met.push(boss.name); floaters.push({ x: z.x, y: z.y - 60, t: 0, txt: boss.name + ' 出阵！', color: '#ff6a4a' }); }
@@ -9176,7 +9179,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   // ---------- 修为（11/11 用户定，照群侠幸存者）：杀敌和打完节点涨修为，满了升级攒一次「修炼」，节点打完后统一修炼（属性三选一），战斗中不打断 ----------
   const ATN = ['体魄', '短兵', '长兵', '身法', '运气', '悟性', '射艺', '术法', '内力', '拳腿'];
   const ADO = [0, 8, 1, 2, 6, 7, 9, 3, 4, 5];   // 面板显示顺序：体魄 内力 短兵 长兵 射艺 术法 拳腿 身法 运气 悟性
-  const XIU_NEED = lv => 40 + lv * 20 + Math.max(0, lv - 5) * 15;   // 11/14 用户：照群侠，第一场基本能升一级（LV2 要 60，之前 95）；LV6 起每级多要一些
+  const XIU_NEED = lv => Math.min(40 + lv * 20 + Math.max(0, lv - 5) * 15, 25 + lv * 15 + Math.max(0, lv - 4) * 25);   // 11/20 用户：前几级升得更快（LV2~5：40/55/70/85，原 60/80/100/120），LV8 起和原来一样   // 11/14 用户：照群侠，第一场基本能升一级（LV2 要 60，之前 95）；LV6 起每级多要一些
   const xiuMul = () => AFX.xp() * (OG().xiu || 1) * (HAS('sunzi') ? 1.2 : 1);
   function addXiu(n) {
     if (!RT.on || !S.atAdd) return;
@@ -9694,9 +9697,9 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     S.fightN = (S.fightN || 0) + 1;
     if (nd.type === 'boss') heal(maxHp() * .3);
     S.loot = rollLoot(nd);
-    if (S.fightN === 2) {   // 11/20 用户：第二场仗打完必送一本玄阶本门武艺（直接学会）
-      const owned = S.slots.filter(Boolean).concat(S.owned || []), L = Object.keys(SK).filter(k => !SK[k].off && (SK[k].tier || 1) === 2 && wepOf(k) === heldW() && !owned.includes(k)), k = L[(Math.random() * L.length) | 0];
-      if (k) { const it = itemFrom({ kind: 'skill', k, q: 2, name: SK[k].name, icon: SK[k].icon, color: SK[k].color, desc: TIERN[2] + '阶 · ' + SK[k].desc.split(/[；;]/)[0].replace(/[，,]?\s*LV\d.*$/, '') }); S.loot = S.loot.filter(o => (o.k || o.id) !== k); learn(it); R.gift = k; }
+    if (S.fightN === 1 || S.fightN === 2) {   // 11/20 用户：第一场打完必送一本黄阶、第二场必送一本玄阶本门武艺（直接学会）
+      const tw = S.fightN, owned = S.slots.filter(Boolean).concat(S.owned || []), L = Object.keys(SK).filter(k => !SK[k].off && (SK[k].tier || 1) === tw && wepOf(k) === heldW() && !owned.includes(k)), k = L[(Math.random() * L.length) | 0];
+      if (k) { const it = itemFrom({ kind: 'skill', k, q: tw, name: SK[k].name, icon: SK[k].icon, color: SK[k].color, desc: TIERN[tw] + '阶 · ' + SK[k].desc.split(/[；;]/)[0].replace(/[，,]?\s*LV\d.*$/, '') }); S.loot = S.loot.filter(o => (o.k || o.id) !== k); learn(it); R.gift = k; }
     }
     S.shop = rollShop(nd); S.bought = []; S.srr = 0;
     if (HAS('wuzhu')) S.money += 15; if (HAS('yuxi')) heal(maxHp() * .15);
@@ -9780,11 +9783,11 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     }
     const k = z.sk, C = k.C || { rs: 1, sp: 1 }, F = (r, f) => C[r] || f; k.t += dt / (C.sp || 1); z.moving = false; z.vx = 0;
     const fin = cd => { z.sk = null; z.cbFrame = null; z.skCd = R(cd, cd * 1.5); z.lastMv = 'atk'; return true; };
-    if (k.k === 'lob') { z.cbFrame = k.t < .5 ? F('a', 'lob') : k.t < 1 ? F('b', 'lob') : F('c', 'lob'); return k.t > 1.2 ? fin(6) : true; }
+    if (k.k === 'lob') { z.cbFrame = k.t < .5 ? F('a', 'lob') : k.t < 1 ? F('b', 'lob') : F('c', 'lob'); return k.t > 1.2 ? fin(9) : true; }
     if (k.k === 'spin') { z.cbFrame = k.t < .6 ? (k.t % .2 < .1 ? F('a', 'spin1') : F('b', 'spin2')) : F('c', 'rest'); return k.t > 1.6 ? fin(6) : true; }
     if (k.k === 'drag') { if (k.t < .7) z.cbFrame = F('a', 'wind'); else if (k.t < .95) { z.cbFrame = F('b', 'drag'); const q = (k.t - .7) / .25; z.x = z.cx = k.x0 + Math.cos(k.a) * 140 * C.rs * q; z.y = z.cy = clampY(k.y0 + Math.sin(k.a) * 140 * C.rs * q); } else z.cbFrame = F('c', 'rest'); return k.t > 1.9 ? fin(7) : true; }
     if (k.k === 'thrust') { z.cbFrame = k.t < .5 ? F('a', 'wind') : k.t > 1.3 ? F('c', 'thrust3') : C.b || ['strike', 'thrust2', 'thrust3'][Math.min(2, Math.floor((k.t - .5) / .28))]; return k.t > 1.5 ? fin(6) : true; }
-    if (k.k === 'bolt3') { z.cbFrame = k.t < .5 ? F('a', 'wind') : k.t > 1.2 ? F('c', 'rapid') : F('b', 'rapid'); if (k.n < 3 && k.t > .5 + k.n * .25) { const a = Math.atan2(dy * YS, dx); eshots.push({ source: z, k: 'arrow', x: z.x + Math.cos(a) * 16, y: z.y, z: 22, vx: Math.cos(a) * 300, vy: Math.sin(a) * 300, life: 1.1 * C.rs, dmg: 1.2 }); k.n++; if (window.SFX) SFX.play('bow', 0, .5); } return k.t > 1.4 ? fin(7) : true; }
+    if (k.k === 'bolt3') { z.cbFrame = k.t < .5 ? F('a', 'wind') : k.t > 1.2 ? F('c', 'rapid') : F('b', 'rapid'); if (k.n < 3 && k.t > .5 + k.n * .25) { const a = Math.atan2(dy * YS, dx); eshots.push({ source: z, k: 'arrow', x: z.x + Math.cos(a) * 16, y: z.y, z: 22, vx: Math.cos(a) * 300 * .75, vy: Math.sin(a) * 300 * .75, life: 1.1 * C.rs / .75, dmg: 1.2 }); k.n++; if (window.SFX) SFX.play('bow', 0, .5); } return k.t > 1.4 ? fin(10) : true; }
     if (k.k === 'wall') { z.cbFrame = k.t < .3 ? F('a', 'wall') : k.t > 1.8 ? F('c', 'wall') : F('b', 'wall'); z.f = dx < 0 ? -1 : 1; z.wallT = (2 - k.t) * C.sp; if (k.t > 2) { z.wallT = 0; return fin(7); } return true; }
     if (k.k === 'step') {
       if (k.t < .5) z.cbFrame = F('a', 'step');
@@ -9795,8 +9798,8 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     }
     // 连投：抡三下，每下甩一颗；三颗朝主角扇形散开
     z.cbFrame = k.t > 1.25 ? F('c', 'strike') : k.t % .3 < .18 ? F('a', 'rapid') : F('b', 'strike');
-    if (k.n < 3 && k.t > .35 + k.n * .3) { const a = Math.atan2(dy * YS, dx) + (k.n - 1) * .22; eshots.push({ source: z, k: 'stone', x: z.x + Math.cos(a) * 14, y: z.y, z: 24, vx: Math.cos(a) * 190, vy: Math.sin(a) * 190, life: .95 * C.rs }); k.n++; if (window.SFX) SFX.play('sling', 0, .5); }
-    if (k.t > 1.5) { z.sk = null; z.cbFrame = null; z.skCd = R(6, 9); z.lastMv = 'atk'; }
+    if (k.n < 3 && k.t > .35 + k.n * .3) { const a = Math.atan2(dy * YS, dx) + (k.n - 1) * .22; eshots.push({ source: z, k: 'stone', x: z.x + Math.cos(a) * 14, y: z.y, z: 24, vx: Math.cos(a) * 190 * .75, vy: Math.sin(a) * 190 * .75, life: .95 * C.rs / .75 }); k.n++; if (window.SFX) SFX.play('sling', 0, .5); }
+    if (k.t > 1.5) { z.sk = null; z.cbFrame = null; z.skCd = R(9, 13); z.lastMv = 'atk'; }
     return true;
   }
   function unitAI(z, dt) {
@@ -10320,7 +10323,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     if (prepTab === 'jie') {
       const tot = S.slots.filter(Boolean).reduce((t, k) => t + (S.dps[k] || 0), 0) || 1;
       const outs = S.slots.filter(Boolean).map(k => `<div class="pb"><em style="background-image:url('${IMGU[k] || ''}')"></em><div class="pbf"><u style="width:${(S.dps[k] || 0) / tot * 100}%"></u><b>${Math.round((S.dps[k] || 0) * 10)}</b><i>${((S.dps[k] || 0) / tot * 100).toFixed(1)}%</i></div></div>`).join('');
-      body = `<div class="pn"><h4>总结</h4><div class="sm"><span><em style="background-image:url('${A('kill')}')"></em>斩敌</span><b>${R.kills}</b><span><em style="background-image:url('${A('coin')}')"></em>铜钱</span><b>${R.got + R.left}</b><span>过关修为</span><b>+${R.xiu || 0}</b></div>${S.lv > (R.lv0 || S.lv) ? `<p class="nt">修为 LV.${R.lv0} → <b style="color:#ffd86e">LV.${S.lv}</b>，多了 ${S.lv - R.lv0} 次修炼机会（「修炼」页）</p>` : ''}${R.gift && SK[R.gift] ? `<p class="nt">送你一本玄阶本门秘籍：<b style="color:${SK[R.gift].color}">${SK[R.gift].name}</b>，已经学会（「武学」页）</p>` : ''}${R.left ? `<p class="nt">地上没捡的钱袋，帮你收回了九成：+${R.left}</p>` : ''}
+      body = `<div class="pn"><h4>总结</h4><div class="sm"><span><em style="background-image:url('${A('kill')}')"></em>斩敌</span><b>${R.kills}</b><span><em style="background-image:url('${A('coin')}')"></em>铜钱</span><b>${R.got + R.left}</b><span>过关修为</span><b>+${R.xiu || 0}</b></div>${S.lv > (R.lv0 || S.lv) ? `<p class="nt">修为 LV.${R.lv0} → <b style="color:#ffd86e">LV.${S.lv}</b>，多了 ${S.lv - R.lv0} 次修炼机会（「修炼」页）</p>` : ''}${R.gift && SK[R.gift] ? `<p class="nt">送你一本${TIERN[SK[R.gift].tier || 1]}阶本门秘籍：<b style="color:${SK[R.gift].color}">${SK[R.gift].name}</b>，已经学会（「武学」页）</p>` : ''}${R.left ? `<p class="nt">地上没捡的钱袋，帮你收回了九成：+${R.left}</p>` : ''}
           ${R.bao && BAO[R.bao] ? `<h4>战利宝物</h4><div class="bq"><img src="${BAO[R.bao].image || `art/ui/bao/${R.bao}.webp`}"><div><p><b style="color:${BQC[BAO[R.bao].q]}">${BAO[R.bao].n}</b><i style="color:${BQC[BAO[R.bao].q]};border-color:${BQC[BAO[R.bao].q]}">${BQN[BAO[R.bao].q]}</i></p><p>${BAO[R.bao].d}</p>${BAO[R.bao].c ? `<p class="c">代价：${BAO[R.bao].c}</p>` : ''}<p class="h">之后在地图右上「兵籍牒」和图鉴「宝物」里都能看</p></div></div>` : ''}
           <h4>输出统计</h4>${outs}
           <div class="tx"><h4>调息</h4><p class="ln">剩余 <em style="background-image:url('${A('zq')}')"></em> 真气 <b class="c1">${R.zqLeft || 0}</b> 点</p><p class="ln">转换为 <b class="c2">${R.tiao}</b> 点 <em style="background-image:url('${A('hp')}')"></em> 气血</p><p class="ln"><em style="background-image:url('${A('huti')}')"></em> 护体 总共免除了 <b>${Math.round((S.hutiSum || 0) * 10)}</b> 点伤害</p></div></div>
