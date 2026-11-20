@@ -177,7 +177,7 @@ function zUpdate(z, dt) {
     return;
   }
   if (z.T.mirror) { if (window.XINMO) XINMO.update(z, dt); return; }   // 心魔试炼
-  const T = z.T;
+  const T = window.SURV_ST ? SURV_ST(z) : z.T;   // 11/20 小兵普攻的范围、速度可在工具里调（没调过就是 z.T）
   if (T.siege) { updateChapter2Catapult(z, dt); return; }
   if (T.chapterBoss) { updateChapter2Boss(z, dt); return; }
   // 守车兵：主角离岗位远时回岗位站定，不追出去（投石车阵的盾兵、大刀兵）
@@ -337,7 +337,7 @@ function zUpdate(z, dt) {
     }
     if (z.t > T.wind) {
       set(z, 'strike'); sfx(T.ranged === 'stone' ? 'sling' : T.ranged === 'fire' ? 'bow' : 'enemySwing', z.x); if (!T.ranged && window.SURV_BFX) SURV_BFX(z, { k: 'fan', x: z.x, y: z.y, a: z.f > 0 ? 0 : Math.PI, r: (T.reach || 24) + 16 });
-      if (T.ranged === 'stone') eshots.push({ source:z, k: 'stone', x: z.x + z.f * 16, y: z.y, z: 24, vx: z.f * 190, life: .95 });   // 射程约 180，和玩家一致
+      if (T.ranged === 'stone') eshots.push({ source:z, k: 'stone', x: z.x + z.f * 16, y: z.y, z: 24, vx: z.f * 190, life: .95 * (T.__rs || 1) });   // 射程约 180，和玩家一致
       else if (T.ranged === 'fire') {
         const dx=hero.x-z.x,dy=hero.y-z.y;
         for(const angle of ch2Troops()&&z.type==='archer'?[-Math.PI/15,0,Math.PI/15]:[0]){
@@ -348,8 +348,8 @@ function zUpdate(z, dt) {
     }
     return;
   }
-  if (z.st === 'strike') { if (!T.ranged) moveEnt(z, z.f * 40 * dt, 0); if (z.t > .25) set(z, 'rec'); return; }
-  if (z.st === 'rec') { if (z.t > (T.ranged ? .4 : T.elite ? .7 : .5)) { z.tok = false; set(z, 'move'); } return; }
+  if (z.st === 'strike') { if (!T.ranged) moveEnt(z, z.f * 40 * dt, 0); if (z.t > .25 * (T.__sp || 1)) set(z, 'rec'); return; }
+  if (z.st === 'rec') { if (z.t > (T.ranged ? .4 : T.elite ? .7 : .5) * (T.__sp || 1)) { z.tok = false; set(z, 'move'); } return; }
   z.f = Math.sign(dx) || z.f;
   let tx, ty;
   if (T.ranged) {   // 远程：和主角保持距离，站到差不多同一条线上

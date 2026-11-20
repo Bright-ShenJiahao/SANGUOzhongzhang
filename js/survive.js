@@ -72,7 +72,7 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   // ===== 首领招式（11/11 用户定 1）：地上先亮红色预警（圈 / 直线），过一会儿才砸下来；翻滚无敌能躲 =====
   const TELE = [], BOOM = [], YS = .55;   // 俯视战场地面压扁系数：圆画成椭圆，判定也按压扁后的距离
   let BCX = null;   // 11/19 首领试炼调出来的「范围/速度/起手出手帧」，放招期间生效（预警、飞行物、later 都带着）
-  function teleAdd(o) { o.t = 0; if (o.mv) {} else if (BCX && BCX.mv) o.mv = BCX.mv; else if (o.src && o.src.lastMv) o.mv = o.src.lastMv; if (BCX) { const r = BCX.rs || 1; for (const k of ['len', 'r', 'r0', 'r1']) if (o[k]) o[k] *= r; o.T *= BCX.sp || 1; o.bc = BCX; } TELE.push(o); return o; }
+  function teleAdd(o) { o.t = 0; if (o.mv) {} else if (BCX && BCX.mv) o.mv = BCX.mv; else if ((o.src || o.fxSrc) && (o.src || o.fxSrc).lastMv) o.mv = (o.src || o.fxSrc).lastMv; if (BCX) { const r = BCX.rs || 1; for (const k of ['len', 'r', 'r0', 'r1']) if (o[k]) o[k] *= r; o.T *= BCX.sp || 1; o.bc = BCX; } TELE.push(o); return o; }
   /* 11/12 首领专属技能：预警颜色按属性分 0 暗红（兵器）1 白（雷）2 土黄（土）3 橙（符火）；ring = 圆环带缺口 */
   const TC = [['140,20,14', '235,60,40', '#a8180e', '#ff8a50'],   /* 11/16 用户：首领预警改暗红细描边，和黄巾小兵的黄色分开 */ ['230,230,255', '240,240,255', '#e8e8ff', '#f4f4ff'], ['170,120,50', '225,175,95', '#c89850', '#e8c888'], ['230,110,20', '255,160,60', '#ff8a2a', '#ffc070']];
   const angDiff = (a, b) => Math.abs((((a - b + Math.PI) % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI) - Math.PI);
@@ -4167,42 +4167,59 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
   // 窃贼（11/11 用户定）：跑去捡地上的铜钱，捡够了或没钱可捡就逃跑；打死会把偷的钱连本带利吐出来，跑掉了战报里记一笔
   // ================= 11/12 新兵种 AI =================
   // 11/19 小兵技能（用户定的设计）：刀手「垫步斩」——地上短线预警，往前跨一步横斩；投石手「连投」——连甩三颗扇形石子，太近时后退
+  // 11/20 用户：小兵每招的起手/出手/收手帧、范围、速度也能在工具里调（键 's:兵种'，存在 BCFG 里，和首领一套）
+  const SOLMV = { grunt: { atk: ['挥棍', ['wind', 'strike', 'strike']] }, blade: { atk: ['劈砍', ['wind', 'strike', 'strike']], step: ['垫步斩', ['step', 'slash', 'slash']] },
+    slinger: { atk: ['投石', ['wind', 'strike', 'idle']], rapid: ['连投', ['rapid', 'strike', 'strike']] }, archer: { atk: ['火箭', ['wind', 'strike', 'idle']], lob: ['仰射', ['lob', 'lob', 'lob']] },
+    elite: { atk: ['劈砍', ['wind', 'strike', 'strike']], spin: ['回旋斧', ['spin1', 'spin2', 'rest']] }, 'yellow-golem': { atk: ['重拳', ['wind', 'strike', 'strike']] },
+    'yellow-heavy': { atk: ['横劈', ['wind', 'strike', 'strike']], drag: ['拖刀冲', ['wind', 'drag', 'rest']] }, 'yellow-shield': { atk: ['盾撞', ['wind', 'strike', 'strike']], wall: ['盾墙', ['wall', 'wall', 'wall']] },
+    'yellow-spear': { atk: ['突刺', ['wind', 'strike', 'strike']], thrust: ['连刺', ['wind', 'strike', 'thrust3']] }, crossbow: { atk: ['穿透弩', ['wind', 'strike', 'strike']], bolt3: ['三连弩', ['wind', 'rapid', 'rapid']] },
+    'fire-jar': { atk: ['火油罐', ['wind', 'strike', 'strike']] }, drummer: { atk: ['擂鼓', ['wind', 'strike', 'strike']] }, cavalry: { atk: ['冲锋', ['wind', 'strike', 'strike']] },
+    priest: { atk: ['念咒', ['wind', 'strike', 'strike']] }, fanatic: { atk: ['扑击', ['wind', 'strike', 'strike']] } };
+  const scfg = (z, m) => bcfg('s:' + z.type, m);
+  // 普攻（g_enemy_ai 里的老逻辑）：起手时长、够多远按设置缩放
+  window.SURV_ST = z => { if (!SOLMV[z.type] || z.survBoss) return z.T; const C = scfg(z, 'atk'); if (C.rs === 1 && C.sp === 1) return z.T;
+    if (z.__stT !== z.T || z.__stR !== C.rs || z.__stS !== C.sp) { z.__stT = z.T; z.__stR = C.rs; z.__stS = C.sp; z.__stO = Object.assign({}, z.T, { wind: z.T.wind * C.sp, reach: (z.T.reach || 24) * C.rs, __sp: C.sp, __rs: C.rs }); } return z.__stO; };
+  // 起手/出手/收手（z.st = wind/strike/rec）的帧：设置里挑过就用挑的
+  const solFr = z => { const M = SOLMV[z.type]; if (!M || z.survBoss) return null; const m = M[z.lastMv] ? z.lastMv : 'atk', C = scfg(z, m), i = z.st === 'wind' ? 0 : z.st === 'strike' ? 1 : z.st === 'rec' ? 2 : -1; if (i < 0) return null; return C['abc'[i]] || null; };
+  const SKK = { blade: 'step', slinger: 'rapid', archer: 'lob', elite: 'spin', 'yellow-heavy': 'drag', 'yellow-spear': 'thrust', crossbow: 'bolt3', 'yellow-shield': 'wall' };
   function soldierSkill(z, dt) {
     const sp = { blade: 'blade_pxa', slinger: 'slinger_pxa', archer: 'archer_pxa', elite: 'elite_pxa', 'yellow-heavy': 'heavy_pxa', 'yellow-spear': 'spear_pxa', crossbow: 'xbow_pxa', 'yellow-shield': 'shield_pxa' }[z.type]; if (typeof CH === 'undefined' || !CH[sp] || !CH[sp].idle.img.naturalWidth) return false;
-    if (z.sk && (z.dead || z.stun > 0 || z.air || z.st !== 'move')) { z.sk = null; z.cbFrame = null; }
+    if (z.sk && (z.dead || z.stun > 0 || z.air || z.st !== 'move')) { z.sk = null; z.cbFrame = null; z.lastMv = 'atk'; }
     z.skCd = (z.skCd == null ? R(.8, 2) : z.skCd) - dt;
     const dx = hero.x - z.x, dy = (hero.y - z.y) / YS, d = Math.hypot(dx, dy) || 1;
     if (!z.sk) {
       if (z.st !== 'move' || z.stun > 0 || z.air || z.skCd > 0 || (S && S.over)) return false;
-      if (z.type === 'blade' && d > 32 && d < 115) { const a = Math.atan2(dy * YS, dx); z.sk = { k: 'step', t: 0, a, x0: z.x, y0: z.y }; z.f = dx < 0 ? -1 : 1; teleAdd({ k: 'line', x: z.x, y: z.y, a, len: 85, w: 26, T: .5, dmg: 1.5, src: z, snd: 'enemySwing' }); }
+      const mk = SKK[z.type], C = scfg(z, mk), SP = C.sp, RS = C.rs; z.lastMv = mk;
+      if (z.type === 'blade' && d > 32 && d < 115) { const a = Math.atan2(dy * YS, dx); z.sk = { k: 'step', t: 0, a, x0: z.x, y0: z.y }; z.f = dx < 0 ? -1 : 1; teleAdd({ k: 'line', x: z.x, y: z.y, a, len: 85 * RS, w: 26, T: .5 * SP, dmg: 1.5, src: z, snd: 'enemySwing' }); }
       else if (z.type === 'slinger' && d > 55 && d < 150) { z.sk = { k: 'rapid', t: 0, n: 0 }; z.f = dx < 0 ? -1 : 1; }
-      else if (z.type === 'archer' && d > 90 && d < 260) { z.sk = { k: 'lob', t: 0 }; z.f = dx < 0 ? -1 : 1; for (let i = 0; i < 3; i++) teleAdd({ k: 'circle', x: hero.x + (i ? R(-40, 40) : 0), y: clampY(hero.y + (i ? R(-22, 22) : 0)), r: 22, T: 1.1 + i * .12, dmg: 1.2, src: z, snd: i ? '' : 'land' }); }   // 仰射：脚下三个圈，1 秒后箭落
-      else if (z.type === 'elite' && d < 70) { z.sk = { k: 'spin', t: 0 }; teleAdd({ k: 'circle', x: z.x, y: z.y, r: 62, T: .6, dmg: 2.5, src: z, snd: 'enemySwing' }); }   // 回旋斧
-      else if (z.type === 'yellow-heavy' && d > 60 && d < 170) { const a = Math.atan2(dy * YS, dx); z.sk = { k: 'drag', t: 0, a, x0: z.x, y0: z.y }; z.f = dx < 0 ? -1 : 1; teleAdd({ k: 'line', x: z.x, y: z.y, a, len: 140, w: 34, T: .7, dmg: 2, src: z }); }   // 拖刀冲
-      else if (z.type === 'yellow-spear' && d > 30 && d < 95) { const a = Math.atan2(dy * YS, dx); z.sk = { k: 'thrust', t: 0 }; z.f = dx < 0 ? -1 : 1; for (let i = 0; i < 3; i++) teleAdd({ k: 'line', x: z.x, y: z.y, a: a + (i - 1) * .12, len: 95, w: 16, T: .55 + i * .28, dmg: 1.2, src: z, snd: 'enemySwing' }); }   // 连刺
+      else if (z.type === 'archer' && d > 90 && d < 260) { z.sk = { k: 'lob', t: 0 }; z.f = dx < 0 ? -1 : 1; for (let i = 0; i < 3; i++) teleAdd({ k: 'circle', x: hero.x + (i ? R(-40, 40) * RS : 0), y: clampY(hero.y + (i ? R(-22, 22) * RS : 0)), r: 22 * RS, T: (1.1 + i * .12) * SP, dmg: 1.2, src: z, snd: i ? '' : 'land' }); }   // 仰射：脚下三个圈，1 秒后箭落
+      else if (z.type === 'elite' && d < 70) { z.sk = { k: 'spin', t: 0 }; teleAdd({ k: 'circle', x: z.x, y: z.y, r: 62 * RS, T: .6 * SP, dmg: 2.5, src: z, snd: 'enemySwing' }); }   // 回旋斧
+      else if (z.type === 'yellow-heavy' && d > 60 && d < 170) { const a = Math.atan2(dy * YS, dx); z.sk = { k: 'drag', t: 0, a, x0: z.x, y0: z.y }; z.f = dx < 0 ? -1 : 1; teleAdd({ k: 'line', x: z.x, y: z.y, a, len: 140 * RS, w: 34, T: .7 * SP, dmg: 2, src: z }); }   // 拖刀冲
+      else if (z.type === 'yellow-spear' && d > 30 && d < 95) { const a = Math.atan2(dy * YS, dx); z.sk = { k: 'thrust', t: 0 }; z.f = dx < 0 ? -1 : 1; for (let i = 0; i < 3; i++) teleAdd({ k: 'line', x: z.x, y: z.y, a: a + (i - 1) * .12, len: 95 * RS, w: 16, T: (.55 + i * .28) * SP, dmg: 1.2, src: z, snd: 'enemySwing' }); }   // 连刺
       else if (z.type === 'crossbow' && d > 110 && d < 300) { z.sk = { k: 'bolt3', t: 0, n: 0 }; z.f = dx < 0 ? -1 : 1; }   // 三连弩
-      else if (z.type === 'yellow-shield' && d > 50 && d < 200) { z.sk = { k: 'wall', t: 0 }; z.wallT = 2; }   // 盾墙：2 秒正面远程全挡
-      else return false;
+      else if (z.type === 'yellow-shield' && d > 50 && d < 200) { z.sk = { k: 'wall', t: 0 }; z.wallT = 2 * SP; }   // 盾墙：2 秒正面远程全挡
+      else { z.lastMv = 'atk'; return false; }
+      z.sk.C = C;
     }
-    const k = z.sk; k.t += dt; z.moving = false; z.vx = 0;
-    const fin = cd => { z.sk = null; z.cbFrame = null; z.skCd = R(cd, cd * 1.5); return true; };
-    if (k.k === 'lob') { z.cbFrame = 'lob'; return k.t > 1.2 ? fin(6) : true; }
-    if (k.k === 'spin') { z.cbFrame = k.t < .6 ? (k.t % .2 < .1 ? 'spin1' : 'spin2') : 'rest'; return k.t > 1.6 ? fin(6) : true; }
-    if (k.k === 'drag') { if (k.t < .7) z.cbFrame = 'wind'; else if (k.t < .95) { z.cbFrame = 'drag'; const q = (k.t - .7) / .25; z.x = z.cx = k.x0 + Math.cos(k.a) * 140 * q; z.y = z.cy = clampY(k.y0 + Math.sin(k.a) * 140 * q); } else z.cbFrame = 'rest'; return k.t > 1.9 ? fin(7) : true; }
-    if (k.k === 'thrust') { z.cbFrame = k.t < .5 ? 'wind' : ['strike', 'thrust2', 'thrust3'][Math.min(2, Math.floor((k.t - .5) / .28))]; return k.t > 1.5 ? fin(6) : true; }
-    if (k.k === 'bolt3') { z.cbFrame = k.t < .5 ? 'wind' : 'rapid'; if (k.n < 3 && k.t > .5 + k.n * .25) { const a = Math.atan2(dy * YS, dx); eshots.push({ source: z, k: 'arrow', x: z.x + Math.cos(a) * 16, y: z.y, z: 22, vx: Math.cos(a) * 300, vy: Math.sin(a) * 300, life: 1.1, dmg: 1.2 }); k.n++; if (window.SFX) SFX.play('bow', 0, .5); } return k.t > 1.4 ? fin(7) : true; }
-    if (k.k === 'wall') { z.cbFrame = 'wall'; z.f = dx < 0 ? -1 : 1; z.wallT = 2 - k.t; if (k.t > 2) { z.wallT = 0; return fin(7); } return true; }
+    const k = z.sk, C = k.C || { rs: 1, sp: 1 }, F = (r, f) => C[r] || f; k.t += dt / (C.sp || 1); z.moving = false; z.vx = 0;
+    const fin = cd => { z.sk = null; z.cbFrame = null; z.skCd = R(cd, cd * 1.5); z.lastMv = 'atk'; return true; };
+    if (k.k === 'lob') { z.cbFrame = k.t < .5 ? F('a', 'lob') : k.t < 1 ? F('b', 'lob') : F('c', 'lob'); return k.t > 1.2 ? fin(6) : true; }
+    if (k.k === 'spin') { z.cbFrame = k.t < .6 ? (k.t % .2 < .1 ? F('a', 'spin1') : F('b', 'spin2')) : F('c', 'rest'); return k.t > 1.6 ? fin(6) : true; }
+    if (k.k === 'drag') { if (k.t < .7) z.cbFrame = F('a', 'wind'); else if (k.t < .95) { z.cbFrame = F('b', 'drag'); const q = (k.t - .7) / .25; z.x = z.cx = k.x0 + Math.cos(k.a) * 140 * C.rs * q; z.y = z.cy = clampY(k.y0 + Math.sin(k.a) * 140 * C.rs * q); } else z.cbFrame = F('c', 'rest'); return k.t > 1.9 ? fin(7) : true; }
+    if (k.k === 'thrust') { z.cbFrame = k.t < .5 ? F('a', 'wind') : k.t > 1.3 ? F('c', 'thrust3') : C.b || ['strike', 'thrust2', 'thrust3'][Math.min(2, Math.floor((k.t - .5) / .28))]; return k.t > 1.5 ? fin(6) : true; }
+    if (k.k === 'bolt3') { z.cbFrame = k.t < .5 ? F('a', 'wind') : k.t > 1.2 ? F('c', 'rapid') : F('b', 'rapid'); if (k.n < 3 && k.t > .5 + k.n * .25) { const a = Math.atan2(dy * YS, dx); eshots.push({ source: z, k: 'arrow', x: z.x + Math.cos(a) * 16, y: z.y, z: 22, vx: Math.cos(a) * 300, vy: Math.sin(a) * 300, life: 1.1 * C.rs, dmg: 1.2 }); k.n++; if (window.SFX) SFX.play('bow', 0, .5); } return k.t > 1.4 ? fin(7) : true; }
+    if (k.k === 'wall') { z.cbFrame = k.t < .3 ? F('a', 'wall') : k.t > 1.8 ? F('c', 'wall') : F('b', 'wall'); z.f = dx < 0 ? -1 : 1; z.wallT = (2 - k.t) * C.sp; if (k.t > 2) { z.wallT = 0; return fin(7); } return true; }
     if (k.k === 'step') {
-      if (k.t < .5) z.cbFrame = 'step';
-      else if (k.t < .62) { z.cbFrame = 'slash'; const q = (k.t - .5) / .12; z.x = z.cx = k.x0 + Math.cos(k.a) * 70 * q; z.y = z.cy = clampY(k.y0 + Math.sin(k.a) * 70 * q); }
-      else if (k.t < 1.1) z.cbFrame = 'slash';
-      else { z.sk = null; z.cbFrame = null; z.skCd = R(4, 6.5); }
+      if (k.t < .5) z.cbFrame = F('a', 'step');
+      else if (k.t < .62) { z.cbFrame = F('b', 'slash'); const q = (k.t - .5) / .12; z.x = z.cx = k.x0 + Math.cos(k.a) * 70 * C.rs * q; z.y = z.cy = clampY(k.y0 + Math.sin(k.a) * 70 * C.rs * q); }
+      else if (k.t < 1.1) z.cbFrame = F('c', 'slash');
+      else { z.sk = null; z.cbFrame = null; z.skCd = R(4, 6.5); z.lastMv = 'atk'; }
       return true;
     }
     // 连投：抡三下，每下甩一颗；三颗朝主角扇形散开
-    z.cbFrame = k.t % .3 < .18 ? 'rapid' : 'strike';
-    if (k.n < 3 && k.t > .35 + k.n * .3) { const a = Math.atan2(dy * YS, dx) + (k.n - 1) * .22; eshots.push({ source: z, k: 'stone', x: z.x + Math.cos(a) * 14, y: z.y, z: 24, vx: Math.cos(a) * 190, vy: Math.sin(a) * 190, life: .95 }); k.n++; if (window.SFX) SFX.play('sling', 0, .5); }
-    if (k.t > 1.5) { z.sk = null; z.cbFrame = null; z.skCd = R(6, 9); }
+    z.cbFrame = k.t > 1.25 ? F('c', 'strike') : k.t % .3 < .18 ? F('a', 'rapid') : F('b', 'strike');
+    if (k.n < 3 && k.t > .35 + k.n * .3) { const a = Math.atan2(dy * YS, dx) + (k.n - 1) * .22; eshots.push({ source: z, k: 'stone', x: z.x + Math.cos(a) * 14, y: z.y, z: 24, vx: Math.cos(a) * 190, vy: Math.sin(a) * 190, life: .95 * C.rs }); k.n++; if (window.SFX) SFX.play('sling', 0, .5); }
+    if (k.t > 1.5) { z.sk = null; z.cbFrame = null; z.skCd = R(6, 9); z.lastMv = 'atk'; }
     return true;
   }
   function unitAI(z, dt) {
@@ -4210,75 +4227,76 @@ const W = { n: 0, k: 0, N: 0, t: 0, retreat: 0, spawnT: 0, batchT: 0, bossDone: 
     if (z.stun > 0) { z.stun -= dt; moveEnt(z, z.vx * dt, 0); z.vx *= .85; z.moving = false; z.cdash = null; if (z.stun <= 0) set(z, 'move'); return; }
     if (z.st === 'hurt' || z.st === 'idle') set(z, 'move');
     const T = z.T, dx = hero.x - z.x, dy = hero.y - z.y, d = Math.hypot(dx, dy / YS) || 1, sp = T.spd * slowMove(z, .5) * dt;
+    const UC = scfg(z, 'atk'), SP = UC.sp, RS = UC.rs; if (z.st === 'move') z.lastMv = 'atk';   // 11/20 小兵主招的范围、速度（工具里调）
     z.ucd = (z.ucd == null ? R(1, 2.5) : z.ucd) - dt;
     const go = (tx, ty, k = 1) => { const ex = tx - z.x, ey = ty - z.y, e = Math.hypot(ex, ey) || 1; z.moving = true; z.f = Math.sign(ex) || z.f; moveEnt(z, ex / e * sp * k, ey / e * sp * k * .8); };
     const keep = (lo, hi) => { if (d < lo) go(z.x - dx, z.y - dy); else if (d > hi) go(hero.x, hero.y); else { z.moving = false; z.f = Math.sign(dx) || z.f; } };
     if (T.unit === 'fire') {   // 火罐手：保持 140~210 的距离，扔火油罐，落地留一片烧 3 秒的火
-      if (z.st === 'wind') { z.moving = false; if (z.t > .6) { set(z, 'strike'); const tx = hero.x + R(-14, 14), ty = hero.y + R(-8, 8);
-        teleAdd({ k: 'circle', x: tx, y: ty, r: 40, T: .75, dmg: 1.2, c: 3, snd: 'land', fxSrc: z, then: () => hzAdd({ kind: 'fire', x: tx, y: ty, r: 38, dmg: .8, T: 3 }) }); if (window.SFX) SFX.play('bow', 0, .6); } return; }
-      if (z.st === 'strike') { z.moving = false; if (z.t > .35) set(z, 'move'); return; }
+      if (z.st === 'wind') { z.moving = false; if (z.t > .6 * SP) { set(z, 'strike'); const tx = hero.x + R(-14, 14), ty = hero.y + R(-8, 8);
+        teleAdd({ k: 'circle', x: tx, y: ty, r: 40 * RS, T: .75 * SP, dmg: 1.2, c: 3, snd: 'land', fxSrc: z, then: () => hzAdd({ kind: 'fire', x: tx, y: ty, r: 38 * RS, dmg: .8, T: 3 }) }); if (window.SFX) SFX.play('bow', 0, .6); } return; }
+      if (z.st === 'strike') { z.moving = false; if (z.t > .35 * SP) set(z, 'move'); return; }
       keep(140, 210); if (z.ucd <= 0 && d < 260) { z.ucd = R(3.2, 4.2); z.f = Math.sign(dx) || z.f; set(z, 'wind'); }
       return;
     }
     if (T.unit === 'drum') {   // 鼓手：躲在后排敲鼓，130 范围内的黄巾 4 秒内动作快 30%
-      if (z.st === 'wind') { z.moving = false; if (z.t > .4) { set(z, 'strike'); for (const o of zs) if (o !== z && !o.dead && !o.survBoss && Math.hypot(o.x - z.x, (o.y - z.y) / YS) < 130) o.drumT = 4;
+      if (z.st === 'wind') { z.moving = false; if (z.t > .4 * SP) { set(z, 'strike'); for (const o of zs) if (o !== z && !o.dead && !o.survBoss && Math.hypot(o.x - z.x, (o.y - z.y) / YS) < 130 * RS) o.drumT = 4;
         hzAdd({ kind: 'drum', x: z.x, y: z.y, T: .6 }); floaters.push({ x: z.x, y: z.y - 50, t: 0, txt: '咚！咚！', color: '#ff7a5a' }); if (window.SFX) SFX.play('crack', 0, .5); } return; }
-      if (z.st === 'strike') { z.moving = false; if (z.t > .55) set(z, 'move'); return; }
+      if (z.st === 'strike') { z.moving = false; if (z.t > .55 * SP) set(z, 'move'); return; }
       keep(170, 240); if (z.ucd <= 0) { z.ucd = R(3.6, 4.6); set(z, 'wind'); }
       return;
     }
     if (T.unit === 'cav') {   // 骑兵：绕着主角兜圈，冷却好了就停下、出一条冲锋预警线，然后直线冲过去
       if (z.cdash) { const c = z.cdash; c.t += dt; const q = Math.min(1, c.t / .42); z.x = c.x0 + (c.x1 - c.x0) * q; z.y = Math.max(M.top + 6, Math.min(M.bot - 6, c.y0 + (c.y1 - c.y0) * q)); z.st = 'strike'; z.moving = true; if (q >= 1) { z.cdash = null;
-          if (!c.back && !z.air) { const a2 = ang(z, hero.x, hero.y), L2 = 280; z.f = Math.cos(a2) < 0 ? -1 : 1; set(z, 'wind');   // 11/20 用户：冲过头后掉头再冲一次（预警更短）
-            teleAdd({ k: 'line', x: z.x, y: z.y, a: a2, len: L2, w: 40, T: .5, dmg: 2, src: z, snd: '', then: () => { if (z.dead || z.air) return; z.cdash = { x0: z.x, y0: z.y, x1: z.x + Math.cos(a2) * L2, y1: z.y + Math.sin(a2) * L2 * YS, t: 0, back: 1 }; if (window.SFX) SFX.play('enemySwing', 0, .8); } });
+          if (!c.back && !z.air) { const a2 = ang(z, hero.x, hero.y), L2 = 280 * RS; z.f = Math.cos(a2) < 0 ? -1 : 1; set(z, 'wind');   // 11/20 用户：冲过头后掉头再冲一次（预警更短）
+            teleAdd({ k: 'line', x: z.x, y: z.y, a: a2, len: L2, w: 40, T: .5 * SP, dmg: 2, src: z, snd: '', then: () => { if (z.dead || z.air) return; z.cdash = { x0: z.x, y0: z.y, x1: z.x + Math.cos(a2) * L2, y1: z.y + Math.sin(a2) * L2 * YS, t: 0, back: 1 }; if (window.SFX) SFX.play('enemySwing', 0, .8); } });
           } else set(z, 'move'); } return; }
       if (z.st === 'wind') { z.moving = false; return; }
-      if (z.ucd <= 0 && d < 280) { z.ucd = R(3.5, 4.5); const a = ang(z, hero.x, hero.y), L = 330, x0 = z.x, y0 = z.y; z.f = Math.cos(a) < 0 ? -1 : 1; set(z, 'wind');
-        teleAdd({ k: 'line', x: x0, y: y0, a, len: L, w: 40, T: .7, dmg: 2, src: z, snd: '', then: () => { if (z.dead || z.air) return; z.cdash = { x0: z.x, y0: z.y, x1: z.x + Math.cos(a) * L, y1: z.y + Math.sin(a) * L * YS, t: 0 }; if (window.SFX) SFX.play('enemySwing', 0, .8); } }); return; }
+      if (z.ucd <= 0 && d < 280) { z.ucd = R(3.5, 4.5); const a = ang(z, hero.x, hero.y), L = 330 * RS, x0 = z.x, y0 = z.y; z.f = Math.cos(a) < 0 ? -1 : 1; set(z, 'wind');
+        teleAdd({ k: 'line', x: x0, y: y0, a, len: L, w: 40, T: .7 * SP, dmg: 2, src: z, snd: '', then: () => { if (z.dead || z.air) return; z.cdash = { x0: z.x, y0: z.y, x1: z.x + Math.cos(a) * L, y1: z.y + Math.sin(a) * L * YS, t: 0 }; if (window.SFX) SFX.play('enemySwing', 0, .8); } }); return; }
       const oa = Math.atan2((z.y - hero.y) / YS, z.x - hero.x) + .9 * dt * (z.orb || (z.orb = Math.random() < .5 ? -1 : 1));
       go(hero.x + Math.cos(oa) * 210, hero.y + Math.sin(oa) * 210 * YS, 1); return;
     }
     if (T.unit === 'xbow') {   // 弩手：保持远距离，半蹲瞄准（地上一条细红线）0.8 秒后平射一支穿透弩箭
       if (z.st === 'wind') { z.moving = false; return; }
-      if (z.st === 'strike') { z.moving = false; if (z.t > .35) set(z, 'move'); return; }
+      if (z.st === 'strike') { z.moving = false; if (z.t > .35 * SP) set(z, 'move'); return; }
       keep(180, 260);
       if (z.ucd <= 0 && d < 330) { z.ucd = R(3.8, 4.8); const a = ang(z, hero.x, hero.y); z.f = Math.cos(a) < 0 ? -1 : 1; set(z, 'wind');
-        teleAdd({ k: 'line', x: z.x, y: z.y, a, len: 440, w: 16, T: .8, dmg: 1.6, src: z, snd: '', then: () => { set(z, 'strike'); if (window.SFX) SFX.play('bow', 0, .9); } }); }
+        teleAdd({ k: 'line', x: z.x, y: z.y, a, len: 440 * RS, w: 16, T: .8 * SP, dmg: 1.6, src: z, snd: '', then: () => { set(z, 'strike'); if (window.SFX) SFX.play('bow', 0, .9); } }); }
       return;
     }
     // ===== 11/12 用户：老兵种重新设计（数量多 → 难度低：伤害小、冷却长、预警清楚）=====
-    const tele = (o, cd, then) => { z.ucd = cd; z.f = Math.sign(hero.x - z.x) || z.f; set(z, 'wind'); teleAdd(Object.assign({ src: z, snd: '' }, o, { then: () => { if (!z.dead) set(z, 'strike'); if (then) then(); } })); };
+    const tele = (o, cd, then) => { z.ucd = cd; z.f = Math.sign(hero.x - z.x) || z.f; set(z, 'wind'); teleAdd(Object.assign({ src: z, snd: '' }, o, { T: o.T * SP, len: o.len, then: () => { if (!z.dead) set(z, 'strike'); if (then) then(); } })); };
     const OLD = T.unit === 'heavy' || T.unit === 'shield' || T.unit === 'spear';
     if (OLD && z.cdash) { const c = z.cdash; c.t += dt; const q = Math.min(1, c.t / .24); z.x = c.x0 + (c.x1 - c.x0) * q; z.y = Math.max(M.top + 6, Math.min(M.bot - 6, c.y0 + (c.y1 - c.y0) * q)); z.moving = true; if (q >= 1) z.cdash = null; return; }
     if (OLD && z.st === 'wind') { z.moving = false; return; }
-    if ((OLD || T.unit === 'priest') && z.st === 'strike') { z.moving = false; if (z.t > .4) set(z, 'move'); return; }
+    if ((OLD || T.unit === 'priest') && z.st === 'strike') { z.moving = false; if (z.t > .4 * SP) set(z, 'move'); return; }
     if (T.unit === 'heavy') {   // 大刀兵：走近后蓄力 0.9 秒，朝你横劈一片（短而宽），劈完喘口气
-      if (d < 70 && z.ucd <= 0) { tele({ k: 'line', x: z.x, y: z.y, a: ang(z, hero.x, hero.y), len: 78, w: 74, T: .9, dmg: 1.4 }, R(4.5, 5.5), () => { z.stun = Math.max(z.stun || 0, .5); }); return; }
+      if (d < 70 && z.ucd <= 0) { tele({ k: 'line', x: z.x, y: z.y, a: ang(z, hero.x, hero.y), len: 78 * RS, w: 74, T: .9, dmg: 1.4 }, R(4.5, 5.5), () => { z.stun = Math.max(z.stun || 0, .5); }); return; }
       go(hero.x, hero.y, d < 60 ? 0 : 1); return;
     }
     if (T.unit === 'shield') {   // 盾兵：远程打他只吃七成（rangedResist）；靠近后举盾往前一撞，把你推开
-      if (d < 120 && d > 30 && z.ucd <= 0) { const a = ang(z, hero.x, hero.y), L = 100, x0 = z.x, y0 = z.y;
+      if (d < 120 && d > 30 && z.ucd <= 0) { const a = ang(z, hero.x, hero.y), L = 100 * RS, x0 = z.x, y0 = z.y;
         tele({ k: 'line', x: x0, y: y0, a, len: L, w: 36, T: .7, dmg: 1 }, R(5.5, 6.5), () => { z.cdash = { x0: z.x, y0: z.y, x1: z.x + Math.cos(a) * L * .8, y1: z.y + Math.sin(a) * L * .8 * YS, t: 0 }; }); return; }
       go(hero.x, hero.y, d < 40 ? 0 : 1); return;
     }
     if (T.unit === 'spear') {   // 枪兵：中距离停下，地上一条细长预警线，0.7 秒后往前突刺一段
-      if (d < 170 && d > 50 && z.ucd <= 0) { const a = ang(z, hero.x, hero.y), L = 150;
+      if (d < 170 && d > 50 && z.ucd <= 0) { const a = ang(z, hero.x, hero.y), L = 150 * RS;
         tele({ k: 'line', x: z.x, y: z.y, a, len: L, w: 22, T: .75, dmg: 1.2 }, R(4.5, 5.5), () => { z.cdash = { x0: z.x, y0: z.y, x1: z.x + Math.cos(a) * L * .7, y1: z.y + Math.sin(a) * L * .7 * YS, t: 0 }; }); return; }
       keep(90, 150); return;
     }
     if (T.unit === 'priest') {   // 方士：躲在后排念咒；附近有受伤的同伴就回血，没有就朝你丢一团符火（落地小火 2 秒）
-      if (z.st === 'wind') { z.moving = false; if (z.t > .9) { set(z, 'strike');
-          const hurt = zs.filter(o => o !== z && !o.dead && !o.survBoss && o.hp < (o.maxHp || o.hp) && Math.hypot(o.x - z.x, (o.y - z.y) / YS) < 130);
+      if (z.st === 'wind') { z.moving = false; if (z.t > .9 * SP) { set(z, 'strike');
+          const hurt = zs.filter(o => o !== z && !o.dead && !o.survBoss && o.hp < (o.maxHp || o.hp) && Math.hypot(o.x - z.x, (o.y - z.y) / YS) < 130 * RS);
           if (hurt.length) { for (const o of hurt) o.hp = Math.min(o.maxHp || o.hp, o.hp + 1.5); hzAdd({ kind: 'heal', x: z.x, y: z.y, T: .7 }); floaters.push({ x: z.x, y: z.y - 50, t: 0, txt: '回春！', color: '#8fe08a' }); }
-          else { const tx = hero.x, ty = hero.y; teleAdd({ k: 'circle', x: tx, y: ty, r: 32, T: .9, dmg: .9, c: 3, snd: 'land', src: z, then: () => hzAdd({ kind: 'fire', x: tx, y: ty, r: 28, dmg: .5, T: 2 }) }); }
+          else { const tx = hero.x, ty = hero.y; teleAdd({ k: 'circle', x: tx, y: ty, r: 32 * RS, T: .9 * SP, dmg: .9, c: 3, snd: 'land', src: z, then: () => hzAdd({ kind: 'fire', x: tx, y: ty, r: 28 * RS, dmg: .5, T: 2 }) }); }
         } return; }
       keep(160, 230); if (z.ucd <= 0 && d < 300) { z.ucd = R(5.5, 6.5); set(z, 'wind'); }
       return;
     }
     if (T.unit === 'fan') {   // 狂信徒：直冲主角，贴身扑一下；死的时候炸一小圈（dropCoins 里）
-      if (z.st === 'wind') { z.moving = false; if (z.t > .3) { set(z, 'strike'); window.SURV_BFX(z, { k: 'fan', x: z.x, y: z.y, a: z.f > 0 ? 0 : Math.PI, r: 40 }); if (Math.hypot(hero.x - z.x, (hero.y - z.y) / YS) < 34 && typeof dmgHero === 'function') dmgHero(T.dmg, z); } return; }
-      if (z.st === 'strike') { if (z.t > .35) set(z, 'move'); return; }
-      if (d < 28 && z.ucd <= 0) { z.ucd = 1.1; set(z, 'wind'); return; }
+      if (z.st === 'wind') { z.moving = false; if (z.t > .3 * SP) { set(z, 'strike'); window.SURV_BFX(z, { k: 'fan', x: z.x, y: z.y, a: z.f > 0 ? 0 : Math.PI, r: 40 * RS }); if (Math.hypot(hero.x - z.x, (hero.y - z.y) / YS) < 34 * RS && typeof dmgHero === 'function') dmgHero(T.dmg, z); } return; }
+      if (z.st === 'strike') { if (z.t > .35 * SP) set(z, 'move'); return; }
+      if (d < 28 * RS && z.ucd <= 0) { z.ucd = 1.1; set(z, 'wind'); return; }
       go(hero.x, hero.y); return;
     }
   }
@@ -5774,7 +5792,7 @@ body.prep-open #survTut:not(.big){bottom:calc(80px*var(--k));width:min(560px,44v
     ctx.fillStyle = wd; ctx.beginPath(); ctx.arc(x, y - 40, 5, 0, 7); ctx.fill(); ctx.fillStyle = '#b8402a'; ctx.fillRect(x - 5, y - 41, 10, 2);
     ctx.restore();
   }
-  const TRIAL = { bfxGet, bfxSet(k, o) { BFXS[k] = Object.assign(bfxGet(k), o); for (const q in BFXS[k]) if (BFXS[k][q] === '' || BFXS[k][q] == null) delete BFXS[k][q]; try { localStorage.setItem('szz-bfxs', JSON.stringify(BFXS)); } catch (e) {} }, bfxReset(k) { for (const q of Object.keys(BFXS)) if (q === k || q.startsWith(k + ':')) delete BFXS[q]; try { localStorage.setItem('szz-bfxs', JSON.stringify(BFXS)); } catch (e) {} }, bfxCopy: () => JSON.stringify(Object.assign({}, BFXS0, BFXS)), bfxImport(txt) { let o = JSON.parse(txt); if (o && o.fx) { const c = o.cfg || {}; for (const t in c) BCFG[t] = Object.assign(BCFG[t] || {}, c[t]); try { localStorage.setItem('szz-boss-cfg', JSON.stringify(BCFG)); } catch (e) {} o = o.fx; } for (const k in o) BFXS[k] = o[k]; try { localStorage.setItem('szz-bfxs', JSON.stringify(BFXS)); } catch (e) {} }, bfxCol: k => BFXC[k] || '255,225,160', FX2N, bdef, SOLFX, fxSk: k => fxSk(k), fxBaseOf: k => fxBase(k), fxBhOf: k => fxBh(k), setFxSk(k, o) { FXSK[k] = Object.assign(fxSk(k), o); try { localStorage.setItem('szz-fxsk', JSON.stringify(FXSK)); } catch (e) {} }, fxSkCopy: () => JSON.stringify(FXSK), hasDg: k => !!DGM[k], dgAdj: k => dga(k), setDgAdj(k, o) { DGA[k] = Object.assign(dga(k), o); try { localStorage.setItem('szz-dga', JSON.stringify(DGA)); } catch (e) {} }, dgCopy: () => JSON.stringify(Object.fromEntries(Object.keys(DGM).map(k => [k, dga(k)]).filter(([, o]) => o.s !== 1 || o.dx || o.dy || o.r))), pilot: on => pilotOn(on), pilotCast: m => pilotCast(m), pilotTick, bossTr(on, mv) { BOSSTR.on = !!on; BOSSTR.move = mv || ''; const C = bcfg('cheng_yuanzhi', 'atk'); for (const z of zs) if (z.sprite === 'cheng_new') { z.seq = []; z.skCd = .6; z.T = Object.assign({}, TYPES.cheng_yuanzhi, z.T, { wind: (TYPES.cheng_yuanzhi.wind || .6) * C.sp }); } }, bossCfg: (m, t = 'cheng_yuanzhi') => bcfg(t, m), frameNames: t => { const n = newSp(t), C = n && CH[n]; return C ? Object.keys(C).filter(k => !['portrait', 'weapon', 'ringitem', 'flagitem', 'getup', 'chant'].includes(k) && C[k] === C[k] && !(k.startsWith('walk') && t === 'guanhai_m')) : []; }, setBossCfg(m, o, t = 'cheng_yuanzhi') { BCFG[t] = BCFG[t] || {}; BCFG[t][m] = Object.assign(bcfg(t, m), o); try { localStorage.setItem('szz-boss-cfg', JSON.stringify(BCFG)); } catch (e) {} }, bossCopy: () => JSON.stringify(Object.assign({ cheng_yuanzhi: { atk: bcfg('cheng_yuanzhi', 'atk'), boomerang: bcfg('cheng_yuanzhi', 'boomerang'), sweep: bcfg('cheng_yuanzhi', 'sweep'), chase: bcfg('cheng_yuanzhi', 'chase') } }, Object.fromEntries(Object.keys(BCFG).filter(t => t !== 'cheng_yuanzhi').map(t => [t, Object.fromEntries(Object.keys(BCFG[t]).map(m => [m, bcfg(t, m)]))])))), pilotAs(t) { PIL.t = t; if (PIL.z) { const i = zs.indexOf(PIL.z); if (i >= 0) zs.splice(i, 1); PIL.z = null; } const go = () => pilotOn(true); if (t !== 'cheng_yuanzhi' && typeof ensureAssets === 'function') ensureAssets('bossnew', { silent: true }).then(go); else go(); }, pilotMoves: () => pMoves(), pilotType: () => PIL.t || 'cheng_yuanzhi', nmoves: () => NMOVES, newBossOk: t => !!newSp(t), spawnNew(t) {   // 11/19 首领试炼：叫出一个新画风首领来打（AI 自己出招）
+  const TRIAL = { bfxGet, bfxSet(k, o) { BFXS[k] = Object.assign(bfxGet(k), o); for (const q in BFXS[k]) if (BFXS[k][q] === '' || BFXS[k][q] == null) delete BFXS[k][q]; try { localStorage.setItem('szz-bfxs', JSON.stringify(BFXS)); } catch (e) {} }, bfxReset(k) { for (const q of Object.keys(BFXS)) if (q === k || q.startsWith(k + ':')) delete BFXS[q]; try { localStorage.setItem('szz-bfxs', JSON.stringify(BFXS)); } catch (e) {} }, bfxCopy: () => JSON.stringify(Object.assign({}, BFXS0, BFXS)), bfxImport(txt) { let o = JSON.parse(txt); if (o && o.fx) { const c = o.cfg || {}; for (const t in c) BCFG[t] = Object.assign(BCFG[t] || {}, c[t]); try { localStorage.setItem('szz-boss-cfg', JSON.stringify(BCFG)); } catch (e) {} o = o.fx; } for (const k in o) BFXS[k] = o[k]; try { localStorage.setItem('szz-bfxs', JSON.stringify(BFXS)); } catch (e) {} }, bfxCol: k => BFXC[k] || '255,225,160', FX2N, bdef, SOLMV, solFr, SOLFX, fxSk: k => fxSk(k), fxBaseOf: k => fxBase(k), fxBhOf: k => fxBh(k), setFxSk(k, o) { FXSK[k] = Object.assign(fxSk(k), o); try { localStorage.setItem('szz-fxsk', JSON.stringify(FXSK)); } catch (e) {} }, fxSkCopy: () => JSON.stringify(FXSK), hasDg: k => !!DGM[k], dgAdj: k => dga(k), setDgAdj(k, o) { DGA[k] = Object.assign(dga(k), o); try { localStorage.setItem('szz-dga', JSON.stringify(DGA)); } catch (e) {} }, dgCopy: () => JSON.stringify(Object.fromEntries(Object.keys(DGM).map(k => [k, dga(k)]).filter(([, o]) => o.s !== 1 || o.dx || o.dy || o.r))), pilot: on => pilotOn(on), pilotCast: m => pilotCast(m), pilotTick, bossTr(on, mv) { BOSSTR.on = !!on; BOSSTR.move = mv || ''; const C = bcfg('cheng_yuanzhi', 'atk'); for (const z of zs) if (z.sprite === 'cheng_new') { z.seq = []; z.skCd = .6; z.T = Object.assign({}, TYPES.cheng_yuanzhi, z.T, { wind: (TYPES.cheng_yuanzhi.wind || .6) * C.sp }); } }, bossCfg: (m, t = 'cheng_yuanzhi') => bcfg(t, m), frameNames: t => { const n = newSp(t), C = n && CH[n]; return C ? Object.keys(C).filter(k => !['portrait', 'weapon', 'ringitem', 'flagitem', 'getup', 'chant'].includes(k) && C[k] === C[k] && !(k.startsWith('walk') && t === 'guanhai_m')) : []; }, setBossCfg(m, o, t = 'cheng_yuanzhi') { BCFG[t] = BCFG[t] || {}; BCFG[t][m] = Object.assign(bcfg(t, m), o); try { localStorage.setItem('szz-boss-cfg', JSON.stringify(BCFG)); } catch (e) {} }, bossCopy: () => JSON.stringify(Object.assign({ cheng_yuanzhi: { atk: bcfg('cheng_yuanzhi', 'atk'), boomerang: bcfg('cheng_yuanzhi', 'boomerang'), sweep: bcfg('cheng_yuanzhi', 'sweep'), chase: bcfg('cheng_yuanzhi', 'chase') } }, Object.fromEntries(Object.keys(BCFG).filter(t => t !== 'cheng_yuanzhi').map(t => [t, Object.fromEntries(Object.keys(BCFG[t]).map(m => [m, bcfg(t, m)]))])))), pilotAs(t) { PIL.t = t; if (PIL.z) { const i = zs.indexOf(PIL.z); if (i >= 0) zs.splice(i, 1); PIL.z = null; } const go = () => pilotOn(true); if (t !== 'cheng_yuanzhi' && typeof ensureAssets === 'function') ensureAssets('bossnew', { silent: true }).then(go); else go(); }, pilotMoves: () => pMoves(), pilotType: () => PIL.t || 'cheng_yuanzhi', nmoves: () => NMOVES, newBossOk: t => !!newSp(t), spawnNew(t) {   // 11/19 首领试炼：叫出一个新画风首领来打（AI 自己出招）
       const go = () => { pilotOn(false); for (let i = zs.length - 1; i >= 0; i--) if (zs[i].survBoss && !zs[i].dummy) zs.splice(i, 1);
         const big = ['bo_cai', 'guanhai_m', 'guanhai_b', 'zhang_liang', 'zhang_bao', 'zhang_jiao'].includes(t), z = edgeSpawn(t, { name: (TYPES[t].name || '').split('·').pop(), hp: big ? 130 : 40, sc: 1, tier: big ? 3 : 2 });
         if (!z) return; bossBuff(z, big ? 1.6 : 1.3); const n = newSp(t); if (n) z.sprite = n; z.x = Math.min(lockR - 20, hero.x + 170); z.y = hero.y; z.skCd = 1.2; };

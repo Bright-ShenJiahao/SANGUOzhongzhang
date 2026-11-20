@@ -172,10 +172,11 @@
   function fxRender() {
     const t = T(); if (!fxBox || !t) return;
     const boss = fxT.slice(0, 2) !== 's:', nm = boss ? ((FXB.find(x => x[0] === fxT) || [0, fxT])[1]) : SOLN[fxT.slice(2)] || fxT;
-    let mvs = boss ? (fxT === 'cheng_yuanzhi' ? ['atk', 'boomerang', 'sweep', 'chase'] : ['atk'].concat(t.nmoves()[fxT] || [], fxT === 'zhang_jiao' ? ['zj_ht'] : [])) : ['atk', 'any', 'shot', 'boom'];
+    let mvs = boss ? (fxT === 'cheng_yuanzhi' ? ['atk', 'boomerang', 'sweep', 'chase'] : ['atk'].concat(t.nmoves()[fxT] || [], fxT === 'zhang_jiao' ? ['zj_ht'] : [])) : Object.keys((t.SOLMV || {})[fxT.slice(2)] || { atk: 1 }).concat(['slinger', 'archer', 'crossbow'].includes(fxT.slice(2)) ? ['shot'] : [], fxT === 's:fanatic' ? ['boom'] : []);
     { const EX = { zhang_bao: ['zb_wall_end'], guanhai_b: ['gb_throw_stuck'], cheng_yuanzhi: ['chase_stuck'] }; if (boss && EX[fxT]) mvs.push(...EX[fxT]); }
     const MN2 = { atk: '普攻', any: '技能', shot: '飞行物', boom: '自爆', boomerang: '大刀回旋', sweep: '横扫千军', chase: '拖刀追身', zb_wall: '土墙·升起', zb_wall_end: '土墙·倒塌', gb_throw_stuck: '掷戟·插地', boomerang_stuck: '大刀回旋·插地', chase_stuck: '拖刀·插地' };
-    const L = mvs.map(m => [m, MN2[m] || NMN[m] || m]); if (!L.find(x => x[0] === fxM)) fxM = L[0][0];
+    const SM = boss ? null : (t.SOLMV || {})[fxT.slice(2)];
+    const L = mvs.map(m => [m, (SM && SM[m] && SM[m][0]) || MN2[m] || NMN[m] || m]); if (!L.find(x => x[0] === fxM)) fxM = L[0][0];
     const B = t.bfxGet(fxT), M0 = t.bfxGet(fxT + ':' + fxM), M = Object.assign({ beam: M0.beam }, M0.l1 || {}), col = B.col || t.bfxCol(fxT), sol = !boss;
     const sl = (lab, key, o, min, max, step, def, fmt) => { const v = o[key] != null ? o[key] : def; return `<div class="row"><span>${lab}</span><input type="range" min="${min}" max="${max}" step="${step}" value="${v}" data-${o === B ? 'b' : 'm'}="${key}"><b>${fmt(v)}</b></div>`; };
     fxBox.innerHTML = `<div class="hd"><span>特效调试 · ${nm}</span><button class="fxx">关闭</button></div>
@@ -185,6 +186,9 @@
       <div class="row"><span>开关</span><button class="fxo ${B.off ? '' : 'on'}">${B.off ? '已关' : '开'}</button><span style="width:auto">颜色</span><input type="color" class="fxc" value="${hex(col)}"></div>
       ${sl('大小', 'k', B, .2, 2.5, .05, sol ? .6 : 1, v => '×' + (+v).toFixed(2))}${sl('亮度', 'al', B, .1, 1, .05, sol ? .7 : 1, v => (+v).toFixed(2))}
       <div class="sec">单招</div><div>${L.map(([k, n]) => `<button data-fm="${k}" class="${k === fxM ? 'on' : ''}">${n}</button>`).join('')}</div>
+      ${(() => { if (!SM || !SM[fxM]) return ''; const st = fxT.slice(2), PX = { grunt: 'grunt_pxa', blade: 'blade_pxa', slinger: 'slinger_pxa', archer: 'archer_pxa', elite: 'elite_pxa', priest: 'priest_pxa', 'yellow-heavy': 'heavy_pxa', 'yellow-shield': 'shield_pxa', 'yellow-spear': 'spear_pxa', 'yellow-golem': 'golem_pxa', 'fire-jar': 'firejar_pxa', drummer: 'drum_pxa', cavalry: 'cav_pxa', fanatic: 'fanatic_pxa', crossbow: 'xbow_pxa' }, ch = typeof CH !== 'undefined' && CH[PX[st]], frs = ch ? Object.keys(ch).filter(k => !['portrait', 'weapon', 'horse'].includes(k)) : [], C = t.bossCfg(fxM, fxT), D = SM[fxM][1];
+        const sel = (r, i, lab) => `<div class="row"><span>${lab}</span><select data-scf="${r}"><option value="">默认（${D[i]}）</option>${frs.map(f => `<option value="${f}"${C[r] === f ? ' selected' : ''}>${f}</option>`).join('')}</select></div>`;
+        return `<div class="sec">动作</div>${sel('a', 0, '起手')}${sel('b', 1, '出手')}${sel('c', 2, '收手')}<div class="row"><span>范围</span><input type="range" min=".4" max="2.5" step=".05" value="${C.rs}" data-scr="rs"><b>×${(+C.rs).toFixed(2)}</b></div><div class="row"><span>速度</span><input type="range" min=".4" max="2.5" step=".05" value="${C.sp}" data-scr="sp"><b>×${(+C.sp).toFixed(2)}</b></div><div class="ds">范围＝够多远、预警线/圈多大；速度越大越慢（起手、动作都变久）。</div><div class="sec">特效</div>`; })()}
       <div class="row"><span>特效图</span><select class="fxi">${FXIMG.concat(Object.entries(t.FX2N || {})).map(([k, n]) => `<option value="${k}"${(M.on === 0 ? 'none' : M.img || 'auto') === k ? ' selected' : ''}>${n}</option>`).join('')}</select></div>
       ${sl('大小', 'k', M, .2, 3, .05, 1, v => '×' + (+v).toFixed(2))}${sl('前后', 'x', M, -120, 120, 2, 0, v => v)}${sl('上下', 'y', M, -120, 120, 2, 0, v => v)}${sl('角度', 'r', M, -180, 180, 5, 0, v => v + '°')}${sl('时长', 'T', M, .3, 3, .05, 1, v => '×' + (+v).toFixed(2))}${sl('亮度', 'al', M, .1, 1, .05, 1, v => (+v).toFixed(2))}
       ${(() => { const n = M.img || ((t.bdef && t.bdef(fxT, fxM, 'l1')) || {}).n || '', raw = M.raw != null ? M.raw : n.startsWith('bc_'); return `<div class="row"><span>颜色</span><button class="fxraw ${raw ? 'on' : ''}">${raw ? '保留原色' : '按主色上色'}</button><span class="ds" style="width:auto">火、雷、符默认保留原色</span></div>`; })()}
@@ -200,11 +204,13 @@
     fxBox.querySelectorAll('[data-b]').forEach(e => e.oninput = () => { const v = +e.value; set(fxT, { [e.dataset.b]: v }); e.nextElementSibling.textContent = e.dataset.b === 'k' ? '×' + v.toFixed(2) : v.toFixed(2); });
     fxBox.querySelectorAll('[data-m]').forEach(e => e.oninput = () => { const v = +e.value, k = e.dataset.m; set(fxT + ':' + fxM, k === 'T' ? { T: v } : { l1: Object.assign({}, M0.l1 || {}, { [k]: v }) }); e.nextElementSibling.textContent = k === 'k' || k === 'T' ? '×' + v.toFixed(2) : k === 'al' ? v.toFixed(2) : k === 'r' ? v + '°' : v; });
     fxBox.querySelector('.fxi').onchange = e => { const v = e.target.value, l1 = Object.assign({}, M0.l1 || {}); if (v === 'auto') delete l1.img; else if (v === 'none') { l1.on = 0; } else { l1.img = v; l1.on = 1; } set(fxT + ':' + fxM, { l1 }); };
+    fxBox.querySelectorAll('[data-scf]').forEach(e => e.onchange = () => t.setBossCfg(fxM, { [e.dataset.scf]: e.value }, fxT));
+    fxBox.querySelectorAll('[data-scr]').forEach(e => e.oninput = () => { const v = Math.round(+e.value * 100) / 100; t.setBossCfg(fxM, { [e.dataset.scr]: v }, fxT); e.nextElementSibling.textContent = '×' + v.toFixed(2); });
     fxBox.querySelector('.fxraw').onclick = () => { const n = M.img || ((t.bdef && t.bdef(fxT, fxM, 'l1')) || {}).n || '', raw = M.raw != null ? M.raw : n.startsWith('bc_'); set(fxT + ':' + fxM, { l1: Object.assign({}, M0.l1 || {}, { raw: raw ? 0 : 1 }) }); fxRender(); };
     fxBox.querySelector('.fxbm').onclick = () => { set(fxT + ':' + fxM, { beam: M0.beam === 0 ? '' : 0 }); fxRender(); };
     fxBox.querySelector('.fxin').onclick = () => { const v = prompt('把「首领特效对齐工具」复制出来的设置粘贴到这里：'); if (!v) return; try { t.bfxImport(v.replace(/^[^{]*/, '')); fxRender(); } catch (e) { alert('格式不对：' + e.message); } };
     fxBox.querySelector('.fxr').onclick = () => { t.bfxReset(fxT); fxRender(); };
-    fxBox.querySelector('.fxcp').onclick = () => { const txt = '特效设置：' + t.bfxCopy(); try { navigator.clipboard.writeText(txt); } catch (e) {} fxBox.querySelector('.fxcp').textContent = '已复制'; };
+    fxBox.querySelector('.fxcp').onclick = () => { let cfg = {}; try { cfg = JSON.parse(localStorage.getItem('szz-boss-cfg') || '{}') || {}; } catch (e) {} const txt = '首领设置：' + JSON.stringify({ fx: JSON.parse(t.bfxCopy()), cfg }); /* 11/20：和场外工具一样，连动作设置一起复制 */ try { navigator.clipboard.writeText(txt); } catch (e) {} fxBox.querySelector('.fxcp').textContent = '已复制'; };
     fxBox.querySelector('.fxp').onclick = () => { try {
       if (!boss) { t.unitStyle(fxT.slice(2), 2); return; }
       const has = () => zs.find(z => z.survBoss && !z.dead && (fxT === 'zhang_fei' ? z.zf : z.type === fxT) && /_(new|px)$/.test(z.sprite || ''));
