@@ -1,9 +1,10 @@
 // 设置（11/11 用户要）：音乐音量、音效音量、震屏开关。存在 localStorage，主界面右上角 ⚙ 和暂停菜单都能打开。
 (() => {
   const KEY = 'szz-set';
-  const DEF = { bgm: .8, sfx: .8, shake: true };
+  const DEF = { bgm: .8, sfx: .8, shake: false };   // 11/20 用户：震屏不要（默认关，设置里还能打开）
   let v = Object.assign({}, DEF);
   try { Object.assign(v, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) {}
+  if (!v.sk20) { v.shake = false; v.sk20 = 1; try { localStorage.setItem(KEY, JSON.stringify(v)); } catch (e) {} }
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch (e) {} };
 
   const st = document.createElement('style');
