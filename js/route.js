@@ -347,7 +347,13 @@
       ['刘备', 'art/ui/npc/liubei_face.webp', '舍得舍得，有舍才有得。留下最趁手的，其余的放下也罢。']);
     if (campBox) campBox.classList.add('sgc');
   }
-  function chest(n) { if (window.SFX) SFX.play('j_event'); const q = () => Math.random() < .3 ? 1 : 0; SURV.baoPick([q(), q(), q()], () => done(n, true), '宝 箱 · 选一件宝物'); }
+  function chest(n) {   // 11/21 用户：宝物给得太容易 → 宝箱改成二选一：一件宝物（前 6 层只有凡品，之后三成良品，不出传说） / 一次修炼
+    if (window.SFX) SFX.play('j_event');
+    popup('宝 箱', '', '箱子里有一件宝物，旁边还压着一本练功心得。只能拿一样。', [['宝物', (n.layer || 1) < 6 ? '随机一件凡品宝物' : '随机一件宝物（三成良品）', 'bao'], ['修炼', '任选一招武艺，熟练直接升一级', 'train']], k => {
+      if (k === 'train') return train(n, '修 炼');
+      SURV.baoPick([(n.layer || 1) >= 6 && Math.random() < .3 ? 1 : 0], () => done(n, true), '宝 箱 · 得到一件宝物');
+    });
+  }
   function bless() {   // 11/14 用户定：出征前·桃园三赠（刘备、关羽免费，张飞有代价），三选一
     run.blessed = true; const L = SURV.blessOpts();
     const FACE = { 刘备: 'liubei', 关羽: 'guanyu', 张飞: 'zhangfei' };
