@@ -155,7 +155,7 @@
   }
   // 11/20 用户：首领、小兵的出手特效也要能调（像主角那样）——选人、选招，调图/颜色/大小/位置/角度/时长，点「放这招」马上看；复制发 Claude 写死
   const FXIMG = [['auto', '默认'], ['none', '不要特效'], ['dg1', '月牙①'], ['dg2', '月牙·扁'], ['dg3', '月牙·竖'], ['dg4', '大月牙'], ['dg5', 'S形刀光'], ['dg6', '细刀光'], ['dh2', '刀光·横'], ['dd_xuehe', '血河刀光'], ['dd_feilun', '飞轮'], ['dd_liedi', '裂地'], ['dt_tianbeng', '天崩'], ['dt_wanren', '旋涡'], ['fx_lun', '旋风'], ['fx_ring', '光环'], ['fx_he', '光带']];
-  const SOLN = { grunt: '棍兵', blade: '刀手', slinger: '投石手', archer: '弓手', elite: '老卒', priest: '方士', 'yellow-heavy': '大刀兵', 'yellow-shield': '盾兵', 'yellow-spear': '枪兵', 'yellow-golem': '力士', 'fire-jar': '火罐手', cavalry: '骑兵', fanatic: '狂信徒', crossbow: '弩手' };
+  const SOLN = { grunt: '棍兵', blade: '刀手', slinger: '投石手', archer: '弓手', elite: '老卒', priest: '方士', 'yellow-heavy': '大刀兵', 'yellow-shield': '盾兵', 'yellow-spear': '枪兵', 'yellow-golem': '力士', 'fire-jar': '火罐手', cavalry: '骑兵', fanatic: '狂信徒', crossbow: '弩手', drummer: '鼓手' };
   const FXB = [['cheng_yuanzhi', '程远志'], ['zhang_fei', '张飞']].concat(NBS);
   let fxT = '', fxM = 'any', fxBox = null;
   const hex = rgb => '#' + rgb.split(',').map(v => (+v).toString(16).padStart(2, '0')).join('');

@@ -574,6 +574,7 @@
   const MAP_OF = l => l <= SEGLEN ? 'field' : l <= SEGLEN * 2 ? 'town' : l <= SEGLEN * 3 ? 'forest' : l <= SEGLEN * 4 + 1 ? 'camp' : 'altar';   // 第 1~4 层打谷场，5~8 县城，9~12 林间空地，13~17 营寨腹地，18 张角祭坛
   window.ROUTE = {
     hide() { pending = false; close(); },
+    _go: i => { if (run && run.cur.next[i || 0]) choose(run.cur.next[i || 0], 1); },   // 调试/自动测试用：直接走下一层第 i 个节点
     sgTest: () => sangong(run && run.cur ? run.cur : { layer: 3 }),
     mapOf: n => { const seg = MAP_OF(n.layer); if (!window.ARENA || !ARENA.pick) return seg; let k = ARENA.pick(seg, n.id * 7 + n.layer); const prev = (n.prev || []).find(i => i && typeof i === 'object'); if (prev && ARENA.pick(MAP_OF(prev.layer), prev.id * 7 + prev.layer) === k) k = ARENA.pick(seg, n.id * 7 + n.layer + 1); return k; },   // 11/16 用户：每段 3 张图，按节点挑，跟上一场不重复
     segOf: n => MAP_OF(n.layer), segLen: SEGLEN,
