@@ -35,17 +35,43 @@
     ['yellow-golem', '黄巾力士', 'yellow_golem', '第 3 段起', '喝了符水、力大无穷的巨汉。', ['重拳：一拳能把人打飞，血非常厚。', '精英：打倒掉 5 枚铜钱。']],
     ['yellow-catapult', '投石车', 'yellow_catapult', '投石车节点', '黄巾从官府抢来的守城器械。', ['砸石：远程抛大石，落点有预警圈。', '拆掉掉 5 枚铜钱。']],
   ];
+  // [键, 名字, 贴图, 出现, 一句简介, 技能（11/20 按重做后的招式重写）, 生平（11/20 用户：每个人都要有故事，按史书和演义写）]
   const BOSSES = [
-    ['deng_mao', '邓茂', 'deng_mao', '第 1 段副将', '程远志的副将，性情暴躁，使一口九环大刀。', ['九环震地：三道裂地波扇形冲出，劈完刀卡在地里 1 秒。', '开山劈：朝你劈出一道长条。']],
-    ['cheng_yuanzhi', '程远志', 'cheng_yuanzhi', '第 1 段首领', '黄巾渠帅，率五万之众进犯涿郡。', ['大刀回旋：长柄大刀脱手飞出再飞回，去回都伤人；刀没回来前他空手站着。', '横扫千军：以自己为圆心大范围横扫。']],
-    ['he_yi', '何仪', 'he_yi', '第 2 段副将', '汝南黄巾头领，双戟在手，身法迅捷。', ['双戟连突：三段冲刺，每段重新瞄准，第三段后喘口气。', '开山劈。']],
-    ['bo_cai', '波才', 'bo_cai', '第 2 段首领', '颍川黄巾大帅，背插令旗，号令千军。', ['令旗点兵：插下令旗，旗边不停冒兵；站到旗边 0.8 秒就能拔掉。', '旋斩：开山大斧抡圆一圈。']],
-    ['zhang_mancheng', '张曼成', 'zhang_mancheng', '第 3 段副将', '南阳黄巾首领，自称「神上使」。', ['符火阵：在你周围画一圈火，1.4 秒后烧起，只留一个缺口。', '符火落雨：你周围依次落下火球。']],
-    ['guanhai', '管亥', 'guanhai_m', '第 3 段首领', '北海黄巾猛将，马上使一杆长戟。', ['骑马：冲锋、马踏飞燕（跃起砸在你的位置）。', '半血被打下马，改用掷戟：长戟插在地上，他空手发愣后冲过去捡；还有旋斩。']],
-    ['ma_yuanyi', '马元义', 'ma_yuanyi', '最终副将', '潜入洛阳的黄巾大方首领，斗笠黑衣。', ['流星锤：甩出去再拉回来，去回都伤人，收锤后硬直。', '旋斩。']],
-    ['zhang_bao', '张宝', 'zhang_bao_q', '第 4 段首领', '地公将军，张角二弟，擅长妖术。', ['地裂：一道裂缝一段段朝你冲过来。', '土墙：在你身后升墙堵路，留一个缺口，5 秒后倒塌。', '半血召出两个半透明分身。']],
-    ['zhang_liang', '张梁', 'zhang_liang_q', '第 4 段首领', '人公将军，张角三弟，以勇猛著称。', ['双刀旋风：边转边追 2.2 秒，转完头晕。', '冲锋。', '半血狂怒：更快，出招几乎不停。']],
-    ['zhang_jiao', '张角', 'zhang_jiao_q', '最终首领', '天公将军，太平道大贤良师，以《太平要术》号令天下黄巾。', ['雷符：三张符追着你飘，随后在你脚下落雷。', '天雷滚滚：全场随机落雷，其中一道必定劈在你脚下。']],
+    ['deng_mao', '邓茂', 'deng_mao', '第 1 段副将', '程远志的副将，性情暴躁，使一口九环大刀。', ['九环冲斩：地上先出一条直线，随后拖刀猛冲过去，冲到头再往上一撩。', '掷环：三枚铁环沿三条细线扇形飞出，站到线外就躲得开。', '震地三刀：连劈三刀，三道地缝一道比一道远。'],
+      '《三国演义》开篇的人物。他随渠帅程远志引五万黄巾进犯涿郡，在大兴山下与刘备的乡勇对阵。两军阵前他挺身出马，被张飞挺丈八蛇矛一矛刺中心窝，翻身落马——这是演义里张飞斩的第一员将。正史不见其名。'],
+    ['cheng_yuanzhi', '程远志', 'cheng_yuanzhi', '第 1 段首领', '黄巾渠帅，率五万之众进犯涿郡。', ['大刀回旋：长柄大刀脱手飞出再飞回，去回都伤人；刀没回来前他空手站着。', '横扫千军：以自己为圆心大范围横扫。'],
+      '演义里的黄巾渠帅。他率五万之众进犯涿郡，幽州太守刘焉急忙招募义兵，刘备由此领关羽、张飞出战。程远志见副将邓茂被张飞刺死，拍马舞刀直取张飞，被关羽迎上，一刀挥为两段，黄巾大溃。刘关张三兄弟的第一仗就打在他身上。正史无此人。'],
+    ['he_yi', '何仪', 'he_yi', '第 2 段副将', '汝南黄巾头领，双戟在手，身法迅捷。', ['三连闪突：连冲三段，每段前地上先出一条线、并重新对准你；冲完喘口气。', '飞戟：把戟甩出去再飞回来，去回都伤人。', '旋身双戟：原地抡两圈双戟，贴身最危险。'],
+      '汝南、颍川一带的黄巾头领，与刘辟、黄邵、何曼等人各拥部众数万。张角兵败后，他们仍在豫州活动了十多年，先响应袁术，后又依附孙坚。建安元年（196 年）曹操进兵讨伐，斩了刘辟、黄邵，何仪率部众投降。'],
+    ['bo_cai', '波才', 'bo_cai', '第 2 段首领', '颍川黄巾大帅，背插令旗，号令千军。', ['旋斧突进：抡开山大斧原地起转，边转边追你；转完站不稳，晃两下。', '令旗箭雨：挥动令旗，你周围落下一片箭，落点先出红圈。', '火烧草营：举火把在身边烧起一圈火，烧完地上留一圈火，3 秒多才灭。', '半血暴怒：动作更快，箭雨更密。'],
+      '颍川黄巾大帅。中平元年（184 年）他大败朱儁，把皇甫嵩围在长社。黄巾依草扎营，偏逢大风，皇甫嵩让士卒各束火把，派精兵潜出城外纵火呐喊，城上举火响应，趁乱杀出。恰逢曹操领兵赶到，汉军合力大破波才。他退到阳翟，又被追上击破。游戏里他学乖了——这回点火的是他。'],
+    ['zhang_mancheng', '张曼成', 'zhang_mancheng', '第 3 段副将', '南阳黄巾首领，自称「神上使」。', ['神行符：化作黄烟顺着地上的线高速滑过来，身后留下残影。', '火符：一次甩出三张火符，落地烧起一小片火。', '符阵火环：插符起阵，在身边烧起一圈火环，只留一个缺口；起完阵喘口气。'],
+      '南阳黄巾首领，自称「神上使」，聚众数万。中平元年三月，他攻杀南阳太守褚贡，屯兵宛城一百多天。六月，新任太守秦颉率军进击，把他斩杀。余部又推赵弘为帅，继续据守宛城。'],
+    ['guanhai', '管亥', 'guanhai_m', '第 3 段首领', '北海黄巾猛将，马上使一杆长戟。', ['骑马：纵马冲阵（顺着地上的粗线冲过来）、马上掷戟、人立马踏（马前蹄扬起砸地，身边一圈）。', '半血被打下马，摔倒僵直一会儿，改成步战。', '步战：跃斩（跳起砸在你脚下）、掷戟（戟插进地里，他空手发愣，再跑过去拔）、旋戟。'],
+      '北海黄巾头领。孔融任北海相时，管亥率众把他围在都昌。孔融派太史慈单骑突围，去向平原相刘备求救。刘备又惊又喜：「孔北海知世间有刘备邪！」当即派精兵三千随太史慈赶去，黄巾闻讯解围散走。演义把这一段写成关羽阵前斩管亥。'],
+    ['ma_yuanyi', '马元义', 'ma_yuanyi', '最终副将', '潜入洛阳的黄巾大方首领，斗笠黑衣。', ['飞爪：朝你甩出飞爪钩住地面，把自己拉过去，落地横扫一圈。', '流星直击：流星锤甩出去再拉回来，去回都伤人，收锤后停一下。', '旋锤：原地抡三圈流星锤。'],
+      '太平道「大方」首领。他先在荆州、扬州聚起数万人，约定在邺城会合；又多次往来京城洛阳，买通中常侍封谞、徐奉做内应，定下三月五日内外同时起事。还没动手，张角的弟子唐周就上书告密。马元义在洛阳被车裂，宫中和百姓里信奉太平道的被杀了一千多人，张角只得提前起兵。'],
+    ['zhang_bao', '张宝', 'zhang_bao_q', '第 4 段首领', '地公将军，张角二弟，擅长妖术。', ['地遁：钻进地里，在你脚边破土而出，出土前地上先出圈。', '火雨：你周围依次砸下火球，落点先出圈。', '土墙：在你身后升起一排土墙堵退路，只留一个缺口，过一会儿倒塌。', '半血：召出两个分身，血少、伤害低，打掉就散。'],
+      '张角二弟，号「地公将军」。演义里他会妖术，作起法来风雷大作，半空里杀出无数人马；刘备照朱儁的计策，在山头埋伏下猪羊狗血，一泼之下妖法尽破。正史里，中平元年十一月，皇甫嵩与巨鹿太守郭典在下曲阳攻破张宝，将他斩首，斩获十余万人。'],
+    ['zhang_liang', '张梁', 'zhang_liang_q', '第 4 段首领', '人公将军，张角三弟，以勇猛著称。', ['双刀旋风：双刀抡开边转边追你两秒多，转完头晕——正是反击的时候。', '十字刀气：朝你劈出一道十字刀气，顺着地上的线飞过来。', '人公冲锋：地上出一条粗线，随后直线撞过来。', '半血狂怒：更快，出招几乎不停。'],
+      '张角三弟，号「人公将军」。张角病死后，他统领黄巾主力据守广宗。他的部众精悍勇猛，皇甫嵩头一天攻不下，便闭营休兵、等黄巾松懈，再趁夜整军，鸡鸣时突袭，一直打到傍晚。张梁战死，黄巾被斩三万，投河而死的有五万多人。'],
+    ['zhang_jiao', '张角', 'zhang_jiao_q', '最终首领', '天公将军，太平道大贤良师，以《太平要术》号令天下黄巾。', ['符遁：化符消失，过一会儿在你附近另一处现身。', '雷符：三张符追着你飘，随后在你脚下落雷；半血后多落两道。', '天雷：举杖召雷，全场随机落雷，其中一道必定劈在你脚下。', '黄天当立（半血）：浮空高呼「苍天已死，黄天当立」，身边召出八名黄巾，周围连落十道雷。'],
+      '巨鹿人，自称「大贤良师」，奉事黄老之道，用符水咒语给人治病。十余年间信徒数十万，遍及青、徐、幽、冀、荆、扬、兖、豫八州。他把信徒编成三十六方，大方一万多人、小方六七千人，各立渠帅，传言「苍天已死，黄天当立，岁在甲子，天下大吉」。中平元年因马元义事泄而提前起事，自称天公将军。同年他病死在广宗，汉军破城后开棺戮尸，把首级送往京师。'],
+  ];
+  // 11/20 用户：图鉴加「人物」页——主角和刘关张（不用解锁）：[键, 名字, 格子图, 立绘, 身份, 一句简介, 生平, 在游戏里]
+  const PEOPLE = [
+    ['hero', '你', 'art/ui/npc/hero_lihui.webp', 'art/ui/npc/hero_lihui.webp', '穿越者', '深夜还开着一局三国游戏，眼前一黑，再睁眼已是中平元年的涿郡。',
+      '穿越前是干什么的，开局由你来选：种过地、当过兵、打过猎、读过史，或者练过几年武。你没有名将的天赋，靠的是一招一式打出来的熟练，和一路捡来的秘籍、宝物。跟着刘关张，从涿郡一路杀到张角的祭坛——这段历史，也许能由你改写。',
+      ['开局选的兵器是本门，伤害 +10%；其他兵器也能学，只是外门伤害 −15%。', '武艺按装备顺序自动出招，你只管走位和翻滚。']],
+    ['liubei', '刘备', 'art/ui/npc/liubei_face.webp', 'art/ui/npc/liubei_lihui.webp', '大哥', '中山靖王之后，织席贩履的涿郡人。',
+      '字玄德，涿郡涿县人，汉景帝之子中山靖王刘胜的后代。他少年丧父，和母亲靠卖鞋、织席过活。平日话不多，喜怒不形于色，最爱结交豪杰。黄巾起事那年，他在涿郡聚众起兵讨贼，关羽、张飞都追随他左右。后来一路从安喜县尉做到蜀汉昭烈帝。',
+      ['出征前「桃园三赠」：送盘缠、宽厚（气血上限 +10%）或织席草鞋。', '每段首领出场前，他会先喊一句。']],
+    ['guanyu', '关羽', 'art/ui/npc/guanyu_face.webp', 'art/ui/npc/guanyu_lihui.webp', '二哥', '红脸长髯，手提青龙偃月刀。',
+      '字云长，本字长生，河东解县人。他因事亡命，逃到涿郡，结识了刘备。他和张飞一起护卫刘备，三人睡同一张床，情同兄弟。据说他好读《左氏春秋》，能大段背诵。演义里他使八十二斤青龙偃月刀，第一仗就把黄巾渠帅程远志一刀挥为两段。',
+      ['出征前「桃园三赠」：指点刀法（起手的武艺直接 LV3）、赠书（学一门心法）或夜读春秋（修为 +60）。']],
+    ['zhangfei', '张飞', 'art/ui/npc/zhangfei_face.webp', 'art/ui/npc/zhangfei_lihui.webp', '三弟', '豹头环眼，声若巨雷，丈八蛇矛。',
+      '字益德（演义作翼德），涿郡人。他年少时就和关羽一同追随刘备；关羽比他大几岁，他便以兄长相待。演义里他是涿郡卖酒屠猪的庄户，使一杆丈八蛇矛，第一仗就一矛刺死邓茂。后来长坂兵败，他据水断桥，横矛大喝「身是张益德也，可来共决死！」，曹军竟无人敢上前。',
+      ['出征前「桃园三赠」里他的礼最重，也最要命：痛饮、欠酒钱、拼命，都得拿东西去换。']],
   ];
   // 11/20 用户定：小兵用着甲新画风站立图；首领格子用新头像，点开看立绘
   const PXA = { grunt: 'grunt_pxa', blade: 'blade_pxa', slinger: 'slinger_pxa', archer: 'archer_pxa', elite: 'elite_pxa', priest: 'priest_pxa', yellow_heavy: 'heavy_pxa', yellow_shield: 'shield_pxa', yellow_spear: 'spear_pxa', yellow_golem: 'golem_pxa', fire_jar: 'firejar_pxa', drummer: 'drum_pxa', cavalry: 'cav_pxa', fanatic: 'fanatic_pxa', crossbow: 'xbow_pxa', thief: 'thief_pxa' };
@@ -94,10 +120,10 @@
 #szzCodex .dt h4{margin:0 0 6px;font-size:13px;color:#c9a560;letter-spacing:.2em}
 #szzCodex .dt ul{margin:0;padding-left:18px;font-size:13px;line-height:1.7;color:#ddd0b4}
 #szzCodex .dt .no{color:#8a7a62;font-size:14px;line-height:1.7}
-@media (max-aspect-ratio:1/1){#szzCodex .bd{flex-direction:column}#szzCodex .dt{width:auto;max-height:45%;border-left:0;border-top:1px solid rgba(184,149,90,.3)}#szzCodex .dt .pic{height:120px}#szzCodex .dt .pic.lh{height:200px}}
+#szzCodex .tbs{display:flex;gap:10px;min-width:0;overflow-x:auto;scrollbar-width:none}#szzCodex .tbs::-webkit-scrollbar{display:none}#szzCodex .tb{flex:none}#szzCodex .x{flex:none}#szzCodex .bk{display:none}#szzCodex .dt p,#szzCodex .dt li{text-wrap:pretty}#szzCodex .cd img.pf{width:84px;height:82px;object-fit:cover;object-position:50% 12%;image-rendering:auto}@media (max-width:760px){#szzCodex .hd{flex-wrap:wrap;row-gap:8px}#szzCodex .tbs{order:5;flex:1 0 100%}#szzCodex .tbs .tb{padding:4px 12px!important}}@media (max-aspect-ratio:1/1){#szzCodex .cx{width:100vw;height:100%}#szzCodex .bd{position:relative}#szzCodex .dt{display:none;position:absolute;inset:0;width:auto;max-height:none;border-left:0!important;background:#0d0b09;padding:10px 14px 18px;z-index:2}#szzCodex .bd.sd .dt{display:block}#szzCodex .dt .bk{display:block;position:sticky;top:-10px;z-index:3;width:auto!important;height:auto!important;min-height:0!important;margin:-10px -14px 8px!important;padding:8px 14px!important;border:0!important;border-bottom:1px solid #4a3c25!important;background:#0d0b09!important;box-shadow:none!important;color:#f0d89a!important;font:400 16px Pixel12,sans-serif!important;text-align:left;cursor:pointer;border-image:none!important}#szzCodex .dt .bk:before,#szzCodex .dt .bk:after{display:none!important;content:none!important}#szzCodex .dt .pic{height:150px}#szzCodex .dt .pic.lh{height:min(46vh,360px)}#szzCodex .dt p{font-size:15px}#szzCodex .dt ul{font-size:14px}}
 @media (max-height:500px){#szzCodex .cx{height:96vh}#szzCodex .cd{height:96px}#szzCodex .cd img{max-height:62px}#szzCodex .dt .pic{height:120px}#szzCodex .hd{padding:6px 12px}#szzCodex .gr{grid-template-columns:repeat(auto-fill,minmax(80px,1fr))}}`;
   const box = document.createElement('div'); box.id = 'szzCodex'; box.hidden = true;
-  box.innerHTML = '<div class="cx"><div class="hd"><h2>图鉴</h2><button type="button" class="tb" data-t="u">小兵</button><button type="button" class="tb" data-t="b">首领</button><button type="button" class="tb" data-t="w">武学</button><button type="button" class="tb" data-t="q">宝物</button><button type="button" class="tb" data-t="t">术语</button><span class="ct"></span><button type="button" class="x" aria-label="关闭">✕</button></div><div class="bd"><div class="gw"><div class="wf"></div><div class="gr"></div></div><div class="dt"></div></div></div>';
+  box.innerHTML = '<div class="cx"><div class="hd"><h2>图鉴</h2><div class="tbs"><button type="button" class="tb" data-t="u">小兵</button><button type="button" class="tb" data-t="b">首领</button><button type="button" class="tb" data-t="p">人物</button><button type="button" class="tb" data-t="w">武学</button><button type="button" class="tb" data-t="q">宝物</button><button type="button" class="tb" data-t="t">术语</button></div><span class="ct"></span><button type="button" class="x" aria-label="关闭">✕</button></div><div class="bd"><div class="gw"><div class="wf"></div><div class="gr"></div></div><div class="dt"><button type="button" class="bk">‹ 返回</button><div class="dc"></div></div></div></div>';
   let tab = 'u', sel = null, wf = -1;
   // 11/14 用户定：图鉴加「术语」页，游戏里出现的说法都能在这查（不用解锁）
   const TERMS = [
@@ -140,26 +166,31 @@
   const sIco = e => { const u = T().IMGU[e.k]; return u ? `<div class="si" style="background-image:url('${u}')"></div>` : `<div class="si" style="color:${e.o.color}">${e.o.icon}</div>`; };
   const tierTx = e => (e.o.tier ? T().TIERN[e.o.tier] + '阶' : '基础');
   function wDetail(e) {
-    const dt = box.querySelector('.dt'); if (!e) { dt.innerHTML = '<p class="no">点左边的武艺看详情。</p>'; return; }
+    const dt = box.querySelector('.dc'); if (!e) { dt.innerHTML = '<p class="no">点左边的武艺看详情。</p>'; return; }
     const t = T(), wn = t.WEPN[e.w];
     if (!has(e.id)) { dt.innerHTML = `<div class="pic lk">${sIco(e)}</div><h3>？？？</h3><span class="tg">${wn} · ${tierTx(e)}</span><p class="no">尚未学会。拾取或在行商买下秘籍学会后解锁。</p>`; return; }
     dt.innerHTML = `<div class="pic">${sIco(e)}</div><h3>${e.o.name}</h3><span class="tg">武艺 · ${wn} · <b class="tr" style="color:${TCOL[e.o.tier || 0]}">${tierTx(e)}</b></span>${(() => { const p = SURV.wuParts ? SURV.wuParts(e.k) : null; if (!p) return `<h4>效 果</h4><p>${e.o.desc}</p>`; return `<h4>出招方式</h4><p>${p.shape}</p><h4>特殊效果</h4><p>${p.state}</p><h4>修炼效果</h4><ul class="lvl">${p.lv.filter(x => x.l === 1 || x.sp).map(x => `<li><b>LV${x.l}</b>　${x.sp || x.up}</li>`).join('')}</ul>`; })()}<h4>出 手</h4><p>${t.spdTxt(e.o)}</p>`;
   }
   function detail(e) {
-    const dt = box.querySelector('.dt'); if (!e) { dt.innerHTML = '<p class="no">点左边的头像看详情。</p>'; return; }
+    const dt = box.querySelector('.dc'); if (!e) { dt.innerHTML = '<p class="no">点左边的头像看详情。</p>'; return; }
     if (!has(e[0])) { dt.innerHTML = `<div class="pic lk"><img src="${img(e)}" alt="" style="filter:brightness(0) opacity(.55)"></div><h3>？？？</h3><span class="tg">${e[3]}</span><p class="no">尚未遇到。在战斗中第一次遇到后解锁。</p>`; return; }
-    dt.innerHTML = `<div class="pic${LH[e[0]] ? ' lh' : ''}"><img src="${LH[e[0]] || img(e)}" alt=""></div><h3>${no(e)}　${e[1]}</h3><span class="tg">${e[3]}</span><p>${e[4]}</p><h4>技 能</h4><ul>${e[5].map(t => `<li>${t}</li>`).join('')}</ul>`;
+    dt.innerHTML = `<div class="pic${LH[e[0]] ? ' lh' : ''}"><img src="${LH[e[0]] || img(e)}" alt=""></div><h3>${no(e)}　${e[1]}</h3><span class="tg">${e[3]}</span><p>${e[4]}</p><h4>技 能</h4><ul>${e[5].map(t => `<li>${t}</li>`).join('')}</ul>${e[6] ? `<h4>生 平</h4><p>${e[6]}</p>` : ''}`;
   }
   // 11/15 用户：图鉴加「宝物」页——兵器宝物按兵器分，其余算通用；拿到过才解锁
   const BQ = () => { const S2 = window.SURV; if (!S2 || !S2.BAO) return []; return Object.keys(S2.BAO).map(k => ({ k, id: 'bao:' + k, o: S2.BAO[k], w: S2.BAO[k].w != null ? S2.BAO[k].w : -2 })).sort((a, b) => (a.w === -2) - (b.w === -2) || a.w - b.w || a.o.q - b.o.q); };
   const bIco = e => `<div class="si" style="background-image:url('${e.o.image || `art/ui/bao/${e.k}.webp`}')"></div>`;
   function qDetail(e) {
-    const dt = box.querySelector('.dt'); if (!e) { dt.innerHTML = '<p class="no">点左边的宝物看详情。</p>'; return; }
+    const dt = box.querySelector('.dc'); if (!e) { dt.innerHTML = '<p class="no">点左边的宝物看详情。</p>'; return; }
     const S2 = SURV, qn = S2.BQN[e.o.q], qc = S2.BQC[e.o.q], wn = e.w >= 0 ? T().WEPN[e.w] + '的兵器宝物' : '通用宝物';
     if (!has(e.id)) { dt.innerHTML = `<div class="pic lk">${bIco(e)}</div><h3>？？？</h3><span class="tg">${wn} · ${qn}</span><p class="no">尚未获得。打精锐、首领、开宝箱或在奇遇中获得后解锁。${e.w >= 0 ? '学过这种兵器的武艺才会刷出来。' : ''}</p>`; return; }
     dt.innerHTML = `<div class="pic">${bIco(e)}</div><h3>${e.o.n}</h3><span class="tg">${wn} · <b class="tr" style="color:${qc}">${qn}</b></span><h4>效 果</h4><p>${e.o.d}</p>${e.o.c ? `<h4>代 价</h4><p style="color:#ff8a7a">${e.o.c}</p>` : ''}`;
   }
+  function pDetail(e) {
+    const dt = box.querySelector('.dc'); if (!e) { dt.innerHTML = '<p class="no">点左边的头像看详情。</p>'; return; }
+    dt.innerHTML = `<div class="pic lh"><img src="${e[3]}" alt=""></div><h3>${e[1]}</h3><span class="tg">${e[4]}</span><p>${e[5]}</p><h4>生 平</h4><p>${e[6]}</p><h4>在游戏里</h4><ul>${e[7].map(t => `<li>${t}</li>`).join('')}</ul>`;
+  }
   function render() {
+    box.querySelector('.bd').classList.toggle('sd', sel != null); if (sel !== render.ls) { render.ls = sel; box.querySelector('.dt').scrollTop = 0; }
     box.querySelectorAll('.tb').forEach(b => b.classList.toggle('on', b.dataset.t === tab));
     const wfb = box.querySelector('.wf'); wfb.classList.toggle('on', tab === 'w' || tab === 'q');
     if (tab === 'q') {
@@ -174,6 +205,16 @@
       }
       qDetail(L.find(e => e.k === sel) || null); return;
     }
+    if (tab === 'p') {
+      box.querySelector('.ct').textContent = `共 ${PEOPLE.length} 人`;
+      const gr = box.querySelector('.gr'); gr.innerHTML = '';
+      for (const e of PEOPLE) {
+        const c = document.createElement('div'); c.className = 'cd' + (sel === e[0] ? ' sel' : '');
+        c.innerHTML = `<img class="pf" src="${e[2]}" alt=""><span>${e[1]}</span>`;
+        c.addEventListener('click', () => { sel = e[0]; render(); }); gr.appendChild(c);
+      }
+      pDetail(PEOPLE.find(e => e[0] === sel) || null); return;
+    }
     if (tab === 't') {
       box.querySelector('.ct').textContent = `共 ${TERMS.length} 条`;
       const gr = box.querySelector('.gr'); gr.innerHTML = '';
@@ -181,7 +222,7 @@
         const c = document.createElement('div'); c.className = 'cd tm' + (sel === n ? ' sel' : '');
         c.innerHTML = `<i>${g}</i><b>${n}</b>`; c.addEventListener('click', () => { sel = n; render(); }); gr.appendChild(c);
       }
-      const e = TERMS.find(e => e[1] === sel), dt = box.querySelector('.dt');
+      const e = TERMS.find(e => e[1] === sel), dt = box.querySelector('.dc');
       dt.innerHTML = e ? `<h3>${e[1]}</h3><span class="tg">术语 · ${e[0]}</span><p>${e[2]}</p>` : '<p class="no">点左边的词看解释。</p>';
       return;
     }
@@ -213,6 +254,7 @@
     if (e.target === box || e.target.closest('.x')) close();
     const t = e.target.closest('.tb'); if (t) { tab = t.dataset.t; sel = null; wf = -1; render(); }
     const w = e.target.closest('.wf button'); if (w) { wf = +w.dataset.w; sel = null; render(); }
+    if (e.target.closest('.bk')) { sel = null; render(); }
   });
   function open() { const hp = document.getElementById('tHelpPanel'); if (hp) hp.style.display = 'none'; const st = document.getElementById('szzSet'); if (st) st.hidden = true; sel = null; render(); box.hidden = false; }
   function close() { box.hidden = true; }
