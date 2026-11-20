@@ -123,6 +123,7 @@
       const opt = k <= 2 ? ['melee', 'raid'] : ['range', 'shield'];
       bat.forEach((n, i) => { n.tag = opt[(i + (rnd() < .5 ? 1 : 0)) % 2]; if (bat.length >= 2 && i > 0 && n.tag === bat[i - 1].tag) n.tag = opt.find(x => x !== n.tag); });
       for (const n of lay) { if (n.type === 'elite') { n.tag = 'patrol'; } }
+      { const RW = ['skill', 'perk', 'coin', 'heal'].sort(() => rnd() - .5); bat.forEach((n, i) => { n.rw = RW[i % 4]; }); }   // 11/20 用户：同层节点拉开差别——每个普通战一个奖励侧重，互不相同
       for (const n of lay) if (sg >= 1 && (n.type === 'elite' || n.tag === 'range' || n.tag === 'shield') && rnd() < .55) n.cat = sg >= 3 ? 2 : 1;   // 第二段起：部分远程/盾阵/精锐节点带投石车
     }
     {   // 11/14 用户：每段从入口到首领，任何一条路都至少 3 场战斗（普通或精锐）；不够就把路上的奇遇/宝箱改成普通战斗（营地不动）
@@ -479,8 +480,8 @@
     g.restore();
   }
   function tag(p, R, n, full) {
-    const RWS = { skill: '新武艺', perk: '心法', heal: '回血', both: '武艺+心法' }, sh = false;   // 没悬停时一行写完（相邻节点挤不下两行）
-    const l1 = n.type === 'start' ? '涿郡' : nlabel(n) + (sh ? ' · ' + RWS[n.rw] : ''), l2 = sh || !full ? '' : n.type === 'start' ? '' : n.type === 'event' ? '奇遇：做个选择' : n.type === 'elite' ? '精锐 · 敌人更强，掉落更好' : n.type === 'camp' ? '营地 · 休整或修炼' : n.type === 'chest' ? '宝箱 · 开一件好东西' : full ? MAPN[MAP_OF(n.layer)] : '';
+    const RWS = { skill: '多一本武艺', perk: '多一本心法', heal: '打完回血 20%', coin: '铜钱 +60%', both: '武艺+心法' }, sh = false;   // 没悬停时一行写完（相邻节点挤不下两行）
+    const l1 = n.type === 'start' ? '涿郡' : nlabel(n) + (sh ? ' · ' + RWS[n.rw] : ''), l2 = sh || !full ? '' : n.type === 'start' ? '' : n.type === 'event' ? '奇遇：做个选择' : n.type === 'elite' ? '精锐 · 敌人更强，掉落更好' : n.type === 'camp' ? '营地 · 休整或修炼' : n.type === 'chest' ? '宝箱 · 开一件好东西' : full ? (n.type === 'battle' && RWS[n.rw] ? '奖励：' + RWS[n.rw] : MAPN[MAP_OF(n.layer)]) : '';
     const k = KS(), f1 = `bold ${Math.round(18 * k)}px ${FONT}`, f2 = `600 ${Math.round(13 * k)}px ${UI}`;
     g.save(); g.font = f1; const w1 = g.measureText(l1).width; g.font = f2; const w2 = l2 ? g.measureText(l2).width : 0;
     const bw = Math.max(w1, w2) + 20 * k, bh = (l2 ? 44 : 28) * k; let x = p.x - bw / 2, y = p.y + R + 10;

@@ -110,7 +110,7 @@
     #kaiju .bot .back{width:auto;flex:none;padding:0 14px!important;letter-spacing:2px}#kaiju .bot .go{flex:1;width:auto}#kaiju .tile{width:46px;height:46px}#kaiju .tile.on .ico{width:38px;height:38px}}`;
   // 11/13 用户：「名号」改成「势力」，初始没有势力（白衣乡勇），8 套皮肤就是 8 个势力；怎么解锁之后再定，先只开白衣（?debug 全开看效果）
   const FAC = [['baiyi', '穿越者 · 乡勇'], ['guanjun', '皇甫嵩 · 官军'], ['huangjin', '张角 · 黄巾'], ['baima', '公孙瓒 · 白马义从'], ['caojun', '曹操 · 虎豹骑'], ['baier', '刘备 · 白毦兵'], ['wujun', '孙权 · 解烦卫'], ['xiliang', '董卓 · 飞熊军'], ['xianzhen', '吕布 · 陷阵营'], ['xiandeng', '袁绍 · 先登营'], ['danyang', '陶谦 · 丹阳兵'], ['qingzhou', '曹操 · 青州兵'], ['wudang', '诸葛亮 · 无当飞军'], ['jinfan', '甘宁 · 锦帆军'], ['tengjia', '孟获 · 藤甲兵']];   // 11/13 用户核对历史后定名
-  const facOpen = f => f === 'baiyi' || /[?&]debug/.test(location.search);
+  const facOpen = f => f === 'baiyi' || (window.SURV && SURV.facOk ? SURV.facOk(f) : /[?&]debug/.test(location.search));   // 11/20 用户定：势力按成就解锁
   const lsOn = k => { try { return localStorage.getItem(k) === '1'; } catch (e) { return false; } };
   function render() {
     const curF = window.HERO_SKIN ? HERO_SKIN.cur() : 'baiyi', facOk = facOpen(curF);   // 11/14 用户：没解锁的势力也能点开预览，只是不能出发
@@ -132,7 +132,7 @@
         <div class="pan">
           <h4><i style="background-image:url('${K2('h_yin')}')"></i>势力</h4>
           <div class="fac">${FAC.map(f => { const lk = !facOpen(f[0]); return `<button data-f="${f[0]}" class="${f[0] === curF ? 'on' : ''} ${lk ? 'lock' : ''}" title="${f[1]}${lk ? '（未解锁）' : ''}" style="background-image:url('art/sprites/hero_skins/${f[0]}/dao/idle.png')">${lk ? '<i>🔒</i>' : ''}</button>`; }).join('')}</div>
-          <div class="eff">${(FAC.find(f => f[0] === curF) || FAC[0])[1]}　<span style="color:#8f826c">${curF === 'baiyi' ? '初始无势力，加入势力后换装' : (facOk ? '势力加成待定' : '🔒 尚未加入，可先预览')}</span></div>
+          <div class="eff">${(FAC.find(f => f[0] === curF) || FAC[0])[1]}　${(() => { const I = window.SURV && SURV.facInfo ? SURV.facInfo(curF) : null; if (curF === 'baiyi' || !I) return '<span style="color:#8f826c">初始无势力，达成条件解锁别的势力</span>'; return `<br><span style="color:#9fd08a">长：${I.g}</span>　<span style="color:#e0907e">短：${I.b}</span>${facOk ? '' : `<br><span style="color:#8f826c">🔒 解锁：${I.u}（可先预览）</span>`}`; })()}</div>
           <div class="sec"><h4><i style="background-image:url('${K2('h_jian')}')"></i>出身</h4>
           <div class="tiles og">${Object.keys(O).map(k => `<button data-o="${k}" class="tile ${k === cur ? 'on' : ''} ${O[k].locked ? 'lock' : ''}" title="${O[k].name}"><div class="ico" ${ic(OGI[k] || '')}></div><span><b>${O[k].name}</b><small>${O[k].locked ? '暂未开放' : O[k].short || (O[k].desc || '').split('。')[0]}</small></span></button>`).join('')}</div>
           <div class="eff">${(o.desc || '').split('。').slice(1).join('。') || o.desc}</div></div>
